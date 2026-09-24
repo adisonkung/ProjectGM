@@ -1,3 +1,4 @@
+import { LANES, SIDE_DEPTH } from '../../battle/engine/grid';
 import { HERO_BY_ID } from '../data/heroes';
 import { OwnedHero } from '../models/hero';
 import { TeamSlot } from '../models/game-state';
@@ -5,8 +6,8 @@ import { UnitSpec } from '../models/unit';
 import { heroStats } from './stats';
 
 export const TEAM_SIZE = 5;
-export const SIDE_ROWS = 4;
-export const SIDE_COLS = 7;
+/** ความลึกของฝั่งเรา (r ใน TeamSlot: 0 = หน้าสุด) และจำนวนเลน (c) */
+export { LANES, SIDE_DEPTH };
 
 /** จัดทีมอัตโนมัติ: แทงก์/นักสู้แถวหน้า, สายระยะไกลแถวหลัง */
 export function autoPlace(heroes: OwnedHero[]): TeamSlot[] {
@@ -18,7 +19,7 @@ export function autoPlace(heroes: OwnedHero[]): TeamSlot[] {
   for (const h of heroes.slice(0, TEAM_SIZE)) {
     const cls = HERO_BY_ID[h.templateId].cls;
     if (cls === 'tank' || cls === 'fighter') slots.push({ uid: h.uid, r: 0, c: front[fi++] });
-    else slots.push({ uid: h.uid, r: 3, c: back[bi++] });
+    else slots.push({ uid: h.uid, r: SIDE_DEPTH - 1, c: back[bi++] });
   }
   return slots;
 }

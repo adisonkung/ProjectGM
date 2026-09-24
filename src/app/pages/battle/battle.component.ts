@@ -46,6 +46,8 @@ export class BattleComponent implements OnDestroy {
   private engine!: BattleEngine;
   private timer?: ReturnType<typeof setInterval>;
   private floatId = 0;
+  /** ทิศที่แต่ละตัวหันอยู่ (true = ซ้าย) คงไว้เมื่อเป้าอยู่คอลัมน์เดียวกัน */
+  private facing = new Map<number, boolean>();
   private animKey = 0;
 
   constructor() {
@@ -84,6 +86,7 @@ export class BattleComponent implements OnDestroy {
       enemyTemplates: ENEMIES,
     });
     this.time.set(0);
+    this.facing.clear();
     this.snapshot();
   }
 
@@ -124,6 +127,12 @@ export class BattleComponent implements OnDestroy {
   }
 
   private snapshot(): void {
+    const byId = new Map(this.engine.units.map(u => [u.id, u]));
+    for (const u of this.engine.units) {
+      const t = u.targetId != null ? byId.get(u.targetId) : undefined;
+      if (t && t.pos.c !== u.pos.c) this.facing.set(u.id, t.pos.c < u.pos.c);
+      else if (!this.facing.has(u.id)) this.facing.set(u.id, u.side === 'enemy');
+    }
     this.views.set(
       this.engine.units.map(u => ({
         id: u.id,
@@ -141,6 +150,7 @@ export class BattleComponent implements OnDestroy {
         level: u.level,
         sprite: u.sprite,
         boss: u.boss,
+        flip: this.facing.get(u.id),
       })),
     );
   }
@@ -170,7 +180,8 @@ export class BattleComponent implements OnDestroy {
           if (name && FX[name]) {
             const q = FX[name].at === 'target' && e.dst != null ? posOf(e.dst) : p;
             const angle = q === p ? 0 : (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI;
-            fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle });
+            const flip = q === p && !!this.facing.get(e.src);
+            fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip });
           }
           break;
         }

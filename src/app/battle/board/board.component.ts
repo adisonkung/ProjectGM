@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
-import { BOARD_COLS, BOARD_ROWS } from '../engine/grid';
+import { BOARD_COLS, BOARD_ROWS, sideOf } from '../engine/grid';
 import { FxSpriteComponent } from '../fx-sprite/fx-sprite.component';
 import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 
@@ -23,6 +23,8 @@ export interface UnitView {
   level?: number;
   sprite?: string;
   boss?: boolean;
+  /** หันซ้าย */
+  flip?: boolean;
 }
 
 export interface FloatText {
@@ -40,6 +42,7 @@ export interface FxView {
   c: number;
   name: string;
   angle: number;
+  flip?: boolean;
 }
 
 export interface AnimState {
@@ -62,10 +65,10 @@ export class BoardComponent {
 
   readonly rows = BOARD_ROWS;
   readonly cols = BOARD_COLS;
-  readonly cells = Array.from({ length: BOARD_ROWS * BOARD_COLS }, (_, i) => ({
-    r: Math.floor(i / BOARD_COLS),
-    c: i % BOARD_COLS,
-  }));
+  readonly cells = Array.from({ length: BOARD_ROWS * BOARD_COLS }, (_, i) => {
+    const cell = { r: Math.floor(i / BOARD_COLS), c: i % BOARD_COLS };
+    return { ...cell, enemy: sideOf(cell) === 'enemy' };
+  });
 
   pos(r: number, c: number): string {
     return `translate(${c * 100}%, ${r * 100}%)`;

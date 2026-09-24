@@ -37,6 +37,8 @@ export class UnitSpriteComponent {
   /** เปลี่ยนค่านี้เพื่อสั่งเล่นท่าเดิมซ้ำ */
   readonly animKey = input(0);
   readonly speed = input(1);
+  /** หันซ้าย (แผ่น sprite วาดหันขวา) */
+  readonly flip = input(false);
 
   readonly sheet = viewChild<ElementRef<HTMLElement>>('sheet');
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);

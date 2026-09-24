@@ -13,7 +13,7 @@ export interface UnitSpec {
   name: string;
   cls: HeroClass;
   stats: Stats;
-  /** ตำแหน่งในครึ่งกระดานของตัวเอง: r=0 คือแถวหน้าสุด (ติดกลางสนาม) */
+  /** ตำแหน่งในฝั่งตัวเอง: r = ความลึก (0 = หน้าสุด ติดเส้นกลาง), c = เลน 0-6 */
   pos: Cell;
   star?: number;
   level?: number;

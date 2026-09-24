@@ -4,7 +4,7 @@ import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec } from '../../core/models/unit';
 import { enemyStats } from '../../core/rules/stats';
-import { distance, Grid, SIDE_ROWS, toBoard } from './grid';
+import { distance, Grid, LANES, SIDE_DEPTH, toBoard } from './grid';
 import { greedyStep, nextStep } from './pathfinding';
 import { createRng } from './rng';
 
@@ -197,7 +197,7 @@ export class BattleEngine {
   private spawnEnemy(enemyId: string, local?: Cell): BattleUnit | null {
     const t = this.templates[enemyId];
     if (!t) throw new Error(`Unknown enemy: ${enemyId}`);
-    const pos = local ?? { r: SIDE_ROWS - 1, c: Math.floor(this.rng() * 7) };
+    const pos = local ?? { r: SIDE_DEPTH - 1, c: Math.floor(this.rng() * LANES) };
     return this.addUnit('enemy', {
       name: t.name,
       cls: t.cls,
@@ -218,7 +218,8 @@ export class BattleEngine {
 
   /** หาช่องว่างในครึ่งกระดานของฝั่งนั้น แถวหน้าก่อนสำหรับสายประชิด แถวหลังก่อนสำหรับสายระยะไกล */
   private freeCellOnSide(side: Side, cls: HeroClass): Cell | null {
-    const rows = cls === 'tank' || cls === 'fighter' ? [0, 1, 2, 3] : [3, 2, 1, 0];
+    const depth = Array.from({ length: SIDE_DEPTH }, (_, i) => i);
+    const rows = cls === 'tank' || cls === 'fighter' ? depth : depth.reverse();
     const cols = [3, 2, 4, 1, 5, 0, 6];
     for (const r of rows) {
       for (const c of cols) {

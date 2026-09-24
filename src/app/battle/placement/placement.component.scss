@@ -1,4 +1,4 @@
-:host { display: block; --cell: min(68px, calc((100vw - 32px) / 7)); }
+:host { display: block; --cell: min(60px, calc((100vw - 32px) / 10)); }
 .wrap { display: grid; gap: 10px; }
 
 .board {
@@ -16,8 +16,8 @@
   &.cdk-drop-list-dragging { box-shadow: inset 0 0 0 1px #5ec8e044; }
 }
 .midline {
-  position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.5;
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--gold), transparent); opacity: 0.5;
 }
 
 .unit {

@@ -6,9 +6,11 @@ describe('Grid', () => {
   });
 
   it('maps each side to its own half of the board', () => {
-    expect(toBoard('ally', { r: 0, c: 3 })).toEqual({ r: 4, c: 3 });
-    expect(toBoard('enemy', { r: 0, c: 3 })).toEqual({ r: 3, c: 3 });
-    expect(toBoard('enemy', { r: 3, c: 0 })).toEqual({ r: 0, c: 0 });
+    // แนวนอน: ฝั่งเราซ้าย (คอลัมน์ 0-4) ศัตรูขวา (5-9), r ในฝั่ง = ความลึก, c = เลน
+    expect(toBoard('ally', { r: 0, c: 3 })).toEqual({ r: 3, c: 4 });
+    expect(toBoard('ally', { r: 4, c: 0 })).toEqual({ r: 0, c: 0 });
+    expect(toBoard('enemy', { r: 0, c: 3 })).toEqual({ r: 3, c: 5 });
+    expect(toBoard('enemy', { r: 4, c: 6 })).toEqual({ r: 6, c: 9 });
   });
 
   it('tracks occupied cells', () => {

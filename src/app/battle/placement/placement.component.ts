@@ -4,22 +4,31 @@ import { CLASS_NAME } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { HeroClass, OwnedHero } from '../../core/models/hero';
 import { StageDef } from '../../core/models/stage';
-import { SIDE_COLS, SIDE_ROWS, TEAM_SIZE } from '../../core/rules/team';
+import { LANES, SIDE_DEPTH, TEAM_SIZE } from '../../core/rules/team';
 import { RosterService } from '../../core/services/roster.service';
 import { TeamService } from '../../core/services/team.service';
-import { BOARD_ROWS } from '../engine/grid';
+import { BOARD_COLS, BOARD_ROWS, toBoard } from '../engine/grid';
 import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 
-/** ช่องในครึ่งกระดานของเรา (r=0 แถวหน้า ติดกลางสนาม) */
+/** ช่องในฝั่งเรา (r = ความลึก 0 หน้าสุด ติดเส้นกลาง, c = เลน) พร้อมตำแหน่งบนกระดาน */
 interface AllyCell {
   r: number;
   c: number;
+  row: number;
+  col: number;
 }
 
 interface EnemyCell {
-  c: number;
+  row: number;
+  col: number;
   enemy?: { name: string; cls: HeroClass; boss: boolean };
 }
+
+/** ตำแหน่ง grid (เริ่มที่ 1) ของช่องในฝั่งนั้น */
+const place = (side: 'ally' | 'enemy', r: number, c: number) => {
+  const b = toBoard(side, { r, c });
+  return { row: b.r + 1, col: b.c + 1 };
+};
 
 interface HeroView {
   uid: number;
@@ -35,8 +44,8 @@ interface HeroView {
 }
 
 /**
- * กระดานจัดตำแหน่งก่อนต่อสู้: ครึ่งบนแสดงศัตรูของชั้นที่เลือก (ดูอย่างเดียว)
- * ครึ่งล่าง 4x7 ลากฮีโร่จากม้านั่งมาวาง / ลากสลับ / ลากกลับม้านั่งเพื่อถอดออก
+ * กระดานจัดตำแหน่งก่อนต่อสู้ (แนวนอน): ฝั่งขวาแสดงศัตรูของชั้นที่เลือก (ดูอย่างเดียว)
+ * ฝั่งซ้าย (ลึก 5 x 7 เลน) ลากฮีโร่จากม้านั่งมาวาง / ลากสลับ / ลากกลับม้านั่งเพื่อถอดออก
  * หรือแตะเลือกฮีโร่แล้วแตะช่อง (ใช้ได้ทั้งมือถือและคีย์บอร์ด)
  */
 @Component({
@@ -53,15 +62,16 @@ export class PlacementComponent {
   readonly stage = input<StageDef | null>(null);
 
   readonly teamSize = TEAM_SIZE;
-  readonly cols = SIDE_COLS;
+  readonly cols = BOARD_COLS;
   readonly rows = BOARD_ROWS;
   readonly selected = signal<number | null>(null);
   readonly message = signal<string | null>(null);
 
-  readonly allyCells: AllyCell[] = Array.from({ length: SIDE_ROWS * SIDE_COLS }, (_, i) => ({
-    r: Math.floor(i / SIDE_COLS),
-    c: i % SIDE_COLS,
-  }));
+  readonly allyCells: AllyCell[] = Array.from({ length: SIDE_DEPTH * LANES }, (_, i) => {
+    const r = Math.floor(i / LANES);
+    const c = i % LANES;
+    return { r, c, ...place('ally', r, c) };
+  });
 
   private readonly heroes = computed(() => {
     const map = new Map<number, HeroView>();
@@ -74,7 +84,7 @@ export class PlacementComponent {
     const map = new Map<number, HeroView>();
     for (const s of this.team.slots()) {
       const h = this.heroes().get(s.uid);
-      if (h) map.set(s.r * SIDE_COLS + s.c, h);
+      if (h) map.set(s.r * LANES + s.c, h);
     }
     return map;
   });
@@ -94,23 +104,23 @@ export class PlacementComponent {
   });
   readonly selectedInTeam = computed(() => this.team.slots().some(s => s.uid === this.selected()));
 
-  /** แถวของศัตรูเรียงจากบนลงล่าง (แถวหลังสุดของศัตรูอยู่บนสุด) */
-  readonly enemyRows = computed<EnemyCell[][]>(() => {
-    const rows: EnemyCell[][] = Array.from({ length: SIDE_ROWS }, () =>
-      Array.from({ length: SIDE_COLS }, (_, c) => ({ c })),
+  /** ช่องฝั่งศัตรูทั้งหมด พร้อมศัตรูของชั้นที่เลือก */
+  readonly enemyCells = computed<EnemyCell[]>(() => {
+    const cells: EnemyCell[] = Array.from({ length: SIDE_DEPTH * LANES }, (_, i) =>
+      place('enemy', Math.floor(i / LANES), i % LANES),
     );
     for (const p of this.stage()?.enemies ?? []) {
       const t = ENEMIES[p.enemy];
-      if (t) rows[SIDE_ROWS - 1 - p.r][p.c].enemy = { name: t.name, cls: t.cls, boss: !!t.boss };
+      if (t) cells[p.r * LANES + p.c].enemy = { name: t.name, cls: t.cls, boss: !!t.boss };
     }
-    return rows;
+    return cells;
   });
 
   private lastDrag = 0;
   private msgTimer?: ReturnType<typeof setTimeout>;
 
   at(cell: AllyCell): HeroView | undefined {
-    return this.occupied().get(cell.r * SIDE_COLS + cell.c);
+    return this.occupied().get(cell.r * LANES + cell.c);
   }
 
   // ------------------------------------------------------------ ลากวาง
@@ -185,7 +195,7 @@ export class PlacementComponent {
 
   cellLabel(cell: AllyCell): string {
     const h = this.at(cell);
-    const where = `แถว ${cell.r + 1} ช่อง ${cell.c + 1}`;
+    const where = `เลน ${cell.c + 1} ลึก ${cell.r + 1}`;
     return h ? `${where}: ${h.name} ${h.clsName}` : `${where}: ว่าง`;
   }
 

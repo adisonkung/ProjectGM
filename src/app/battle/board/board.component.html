@@ -1,6 +1,6 @@
-<div class="board" [style.--spd]="speed()" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="กระดานต่อสู้ 8 แถว 7 คอลัมน์">
+<div class="board" [style.--spd]="speed()" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="กระดานต่อสู้ 7 แถว 10 คอลัมน์ ฝั่งเราอยู่ซ้าย ศัตรูอยู่ขวา">
   @for (cell of cells; track $index) {
-    <div class="cell" [class.enemy-half]="cell.r < rows / 2" [class.odd]="(cell.r + cell.c) % 2 === 1"></div>
+    <div class="cell" [class.enemy-half]="cell.enemy" [class.odd]="(cell.r + cell.c) % 2 === 1"></div>
   }
   <div class="midline"></div>
 
@@ -8,7 +8,7 @@
     <div class="unit" [class.dead]="!u.alive" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
          [class.taunt]="u.taunt" [style.transform]="pos(u.r, u.c)" [style.z-index]="u.r + 2">
       <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss"
-                       [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
+                       [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
       @if (u.alive) {
         <div class="bars">
           <div class="bar hp"><i [style.width.%]="u.hpPct"></i>@if (u.shieldPct > 0) {<b [style.left.%]="u.hpPct" [style.width.%]="u.shieldPct"></b>}</div>
@@ -21,7 +21,7 @@
 
   @for (f of fx(); track f.id) {
     <div class="fx-wrap" [style.transform]="pos(f.r, f.c)">
-      <app-fx-sprite [name]="f.name" [angle]="f.angle" [speed]="speed()" />
+      <app-fx-sprite [name]="f.name" [angle]="f.angle" [flip]="!!f.flip" [speed]="speed()" />
     </div>
   }
 
