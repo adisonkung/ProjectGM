@@ -50,14 +50,14 @@ export const STAGES: StageDef[] = [
     { enemy: 'goblin', r: 0, c: 0 }, { enemy: 'goblin', r: 0, c: 2 },
     { enemy: 'archer', r: 4, c: 0 }, { enemy: 'archer', r: 4, c: 2 }, { enemy: 'mage', r: 5, c: 1 },
   ] },
-  { floor: 9, mode: 'eliminate', timeLimit: 100, enemies: [
+  { floor: 9, background: 'misty-1', mode: 'eliminate', timeLimit: 100, enemies: [
     { enemy: 'goblin', r: 0, c: 0 }, { enemy: 'goblin', r: 0, c: 2 },
   ], rounds: [
     [{ enemy: 'slime', r: 0, c: 1 }, { enemy: 'archer', r: 4, c: 0 }, { enemy: 'archer', r: 4, c: 2 }],
     [{ enemy: 'slime', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }, { enemy: 'goblin', r: 1, c: 2 },
       { enemy: 'archer', r: 4, c: 1 }, { enemy: 'mage', r: 5, c: 0 }, { enemy: 'mage', r: 5, c: 2 }],
   ] },
-  { floor: 10, mode: 'eliminate', timeLimit: 130, enemies: [
+  { floor: 10, background: 'misty-1', mode: 'eliminate', timeLimit: 130, enemies: [
     { enemy: 'goblin', r: 0, c: 1 }, { enemy: 'mage', r: 4, c: 1 },
   ], rounds: [
     [{ enemy: 'slime', r: 0, c: 0 }, { enemy: 'slime', r: 0, c: 2 }, { enemy: 'archer', r: 4, c: 1 }],

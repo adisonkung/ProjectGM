@@ -19,4 +19,6 @@ export const BACKGROUNDS: Record<string, BackgroundDef> = {
   'forest-1': { file: 'backgrounds/forest-1.webp', w: 1894, h: 809, cut: 0.569, zoom: 1.19 },
   /** ป่าสนธยา พระจันทร์ เห็ดเรืองแสง ตะเกียง (ชั้น 6-8) — ขอบหญ้าอยู่ 48% อยู่แล้ว ไม่ต้องขยาย */
   'twilight-1': { file: 'backgrounds/twilight-1.webp', w: 1894, h: 809, cut: 0.483, zoom: 1 },
+  /** ป่ามืดหมอกลง ต้นไม้ตาย วิญญาณสีเขียว (ชั้น 9-10 บอสลิช) — ขอบหญ้าอยู่ 44% ไม่ต้องขยาย */
+  'misty-1': { file: 'backgrounds/misty-1.webp', w: 1894, h: 809, cut: 0.447, zoom: 1 },
 };
