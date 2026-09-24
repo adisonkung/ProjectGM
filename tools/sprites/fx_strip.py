@@ -16,6 +16,7 @@ from PIL import Image
 from scipy import ndimage
 
 CORE = 90
+MIN_BLOB = 1  # raise for sheets with scattered noise specks
 REACH = 24
 PAD = 6
 
@@ -33,7 +34,10 @@ def build(src, y0, y1, centres, keep, scale, out, alpha_min=20, x_min=0, clear=N
     lab[~core] = 0
     coms = ndimage.center_of_mass(core, lab, range(1, n + 1))
     owner_of = np.full(n + 1, -1)
+    sizes = ndimage.sum(core, lab, range(1, n + 1))
     for j, (_, cx) in enumerate(coms):
+        if sizes[j] < MIN_BLOB:
+            continue
         owner_of[j + 1] = int(np.argmin([abs(cx - c) for c in centres]))
     core_owner = owner_of[lab]  # -1 where not core
     # nearest core pixel for every pixel

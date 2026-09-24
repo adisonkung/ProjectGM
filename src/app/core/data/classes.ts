@@ -11,22 +11,26 @@ export const CLASS_NAME: Record<HeroClass, string> = {
 
 export const SKILL_NAME: Record<HeroClass, string> = {
   tank: 'ยั่วยุ',
-  fighter: 'ฟันหนัก',
+  fighter: 'ดาบหมุนวน',
   assassin: 'จู่โจมเงา',
-  archer: 'ยิงสามดอก',
+  archer: 'ยิงรัว',
   mage: 'ระเบิดเวท',
-  healer: 'แสงฟื้นฟู',
+  healer: 'บทสวดภาวนา',
 };
 
 /** สกิลที่ 2 (ใช้สลับกับสกิลแรก) และท่าไม้ตาย ของสายที่มี */
 export const SKILL2_NAME: Partial<Record<HeroClass, string>> = {
   tank: 'พุ่งชนโล่',
-  fighter: 'พุ่งทะลวง',
+  fighter: 'แทงทะลวง',
+  archer: 'ห่าธนู',
+  healer: 'พรศักดิ์สิทธิ์',
   assassin: 'ควันพิษ',
 };
 export const ULT_NAME: Partial<Record<HeroClass, string>> = {
   tank: 'ป้อมปราการศักดิ์สิทธิ์',
-  fighter: 'ดาบเทพสายฟ้า',
+  fighter: 'ดาบมังกรประหาร',
+  archer: 'ฝนธนูสวรรค์',
+  healer: 'คืนชีพศักดิ์สิทธิ์',
   assassin: 'ประหารเงามายา',
 };
 

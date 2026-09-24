@@ -1,6 +1,6 @@
 /**
  * ข้อมูลแผ่น sprite และเอฟเฟกต์สกิล
- * ทุกแผ่นใช้ช่องขนาด 132x100 px, เท้าอยู่ที่ y=86, ตัวละครอยู่กลาง x=66 และหันขวา
+ * ทุกแผ่นใช้ช่องกว้าง 132 px สูง 100 px (หรือ cellH), เท้าอยู่ 14 px เหนือขอบล่างช่อง, ตัวละครอยู่กลาง x=66 และหันขวา
  * เอฟเฟกต์ใช้สเกลพิกเซลเดียวกับตัวละคร (1 px ต้นฉบับ = 1.25% ของความกว้างช่องกระดาน)
  */
 
@@ -29,6 +29,12 @@ export interface SheetDef {
   fx?: Partial<Record<SkillKind, string>>;
   /** เอฟเฟกต์ที่ตัวเพื่อนตอนได้โล่จากตัวนี้ */
   shieldFx?: string;
+  /** เอฟเฟกต์ที่ตัวเพื่อนตอนได้รับฮีลจากตัวนี้ */
+  healFx?: string;
+  /** กระสุน (คีย์ของ FX) ของการยิงแต่ละแบบ */
+  projectile?: Partial<Record<'attack' | SkillKind, string>>;
+  /** ความสูงช่อง (ค่าเริ่มต้น 100) — แผ่นที่มีท่ายกอาวุธสูงใช้ 120 */
+  cellH?: number;
 }
 
 export interface FxDef {
@@ -49,6 +55,10 @@ export interface FxDef {
   orient?: 'rotate' | 'flip';
   /** เริ่มเล่นตอนเริ่มท่า (cast) หรือตอนดาเมจเข้า (impact, ค่าเริ่มต้น) */
   on?: 'cast' | 'impact';
+  /** กระสุน: ทิศที่ภาพวาดชี้อยู่ (องศา, 0 = ขวา, 90 = ลง) — เฟรมสุดท้ายคือตอนกระทบ */
+  angle0?: number;
+  /** กระสุน: เอฟเฟกต์ที่เล่นเพิ่มตรงเป้าเมื่อกระทบ */
+  hitFx?: string;
 }
 
 /** เวลาต่อเฟรมปกติ และของท่ายืน (ช้ากว่า ไม่เร่งตามความเร็วการต่อสู้) */
@@ -59,22 +69,6 @@ export const IDLE_FRAME_MS = 150;
 export const PX_TO_CELL = 165 / 132;
 
 export const SHEETS: Record<string, SheetDef> = {
-  'hero-draken.png': {
-    // v2: แถว 2-4 (run, jump, fall) ยังไม่ได้ใช้
-    cols: 11,
-    rows: 11,
-    anims: {
-      idle: { row: 0, frames: 8, seq: [0, 4, 3, 5, 6, 7] },
-      walk: { row: 1, frames: 9 },
-      hurt: { row: 5, frames: 7 },
-      die: { row: 6, frames: 9 },
-      attack: { row: 7, frames: 9, hit: 1 },
-      skill: { row: 8, frames: 7, hit: 1 },
-      skill2: { row: 9, frames: 6, hit: 2 },
-      ult: { row: 10, frames: 11, hit: 8 },
-    },
-    fx: { skill: 'draken-slash', skill2: 'draken-dash', ult: 'draken-ult' },
-  },
   'hero-aurel.png': {
     cols: 8,
     rows: 8,
@@ -106,20 +100,92 @@ export const SHEETS: Record<string, SheetDef> = {
     },
     fx: { skill: 'shade-teleport', skill2: 'shade-smoke', ult: 'shade-phantom' },
   },
+  'hero-jin.png': {
+    cols: 8,
+    rows: 8,
+    cellH: 120,
+    anims: {
+      idle: { row: 0, frames: 8, seq: [0, 1, 7, 5, 3, 4] },
+      walk: { row: 1, frames: 8 },
+      hurt: { row: 2, frames: 8 },
+      die: { row: 3, frames: 7 },
+      attack: { row: 4, frames: 8, hit: 5 },
+      skill: { row: 5, frames: 8, hit: 4 },
+      skill2: { row: 6, frames: 8, hit: 4 },
+      ult: { row: 7, frames: 8, hit: 6 },
+    },
+    fx: { skill: 'jin-spin', skill2: 'jin-thrust', ult: 'jin-dragon' },
+  },
+  'hero-sylvie.png': {
+    cols: 8,
+    rows: 8,
+    cellH: 120,
+    anims: {
+      idle: { row: 0, frames: 8, seq: [0, 2, 5, 7, 1, 6] },
+      walk: { row: 1, frames: 8 },
+      hurt: { row: 2, frames: 8 },
+      die: { row: 3, frames: 8 },
+      attack: { row: 4, frames: 8, hit: 5 },
+      skill: { row: 5, frames: 8, hit: 3 },
+      skill2: { row: 6, frames: 8, hit: 4 },
+      ult: { row: 7, frames: 8, hit: 5 },
+    },
+    fx: { skill: 'sylvie-rapid', skill2: 'sylvie-volley' },
+    projectile: { attack: 'arrow-normal', skill: 'arrow-rapid', skill2: 'arrow-volley', ult: 'arrow-celestial' },
+  },
+  'hero-lumina.png': {
+    cols: 8,
+    rows: 7,
+    cellH: 120,
+    anims: {
+      idle: { row: 0, frames: 8, seq: [0, 1, 5, 3, 7, 2, 4, 6] },
+      walk: { row: 1, frames: 8 },
+      hurt: { row: 2, frames: 8 },
+      // ไม่มีแถวท่าตาย: ใช้ท่าโดนตี (หลับตาทรุด) ค้างไว้
+      die: { row: 2, frames: 8 },
+      attack: { row: 3, frames: 7, hit: 2 },
+      skill: { row: 4, frames: 8, hit: 4 },
+      skill2: { row: 5, frames: 8, hit: 4 },
+      ult: { row: 6, frames: 8, hit: 5 },
+    },
+    fx: { skill: 'lumina-prayer', skill2: 'lumina-bless', ult: 'lumina-rez' },
+    healFx: 'lumina-heal',
+    projectile: { attack: 'lumina-orb' },
+  },
 };
 
 export const FX: Record<string, FxDef> = {
+  'jin-spin': { file: 'fx-jin-spin.png', frames: 5, w: 107, h: 81, frameMs: 70, at: 'self', dy: -10, scale: 1.25 },
+  'jin-thrust': { file: 'fx-jin-thrust.png', frames: 3, w: 96, h: 84, frameMs: 90, at: 'target', orient: 'flip', dx: -30, dy: -10, scale: 1.1 },
+  'jin-dragon': { file: 'fx-jin-dragon.png', frames: 3, w: 132, h: 89, frameMs: 130, at: 'target', orient: 'flip', dy: -14, scale: 1.4 },
+  'sylvie-rapid': { file: 'fx-sylvie-rapid.png', frames: 8, w: 57, h: 62, frameMs: 55, at: 'self', dx: 30, dy: -14, on: 'cast' },
+  'sylvie-volley': { file: 'fx-sylvie-volley.png', frames: 6, w: 75, h: 59, frameMs: 90, at: 'target', orient: 'flip', dy: -6, scale: 1.2, on: 'cast' },
+  'sylvie-celestial': { file: 'fx-sylvie-celestial.png', frames: 5, w: 98, h: 68, frameMs: 90, at: 'target', dy: -6, scale: 1.1 },
+  'arrow-normal': { file: 'fx-arrow-normal.png', frames: 6, w: 92, h: 52, frameMs: 60, at: 'target', angle0: 0, scale: 0.9 },
+  'arrow-rapid': { file: 'fx-arrow-rapid.png', frames: 6, w: 84, h: 45, frameMs: 50, at: 'target', angle0: 0, scale: 0.9 },
+  'arrow-volley': { file: 'fx-arrow-volley.png', frames: 6, w: 86, h: 73, frameMs: 60, at: 'target', angle0: 40 },
+  'arrow-celestial': { file: 'fx-arrow-celestial.png', frames: 6, w: 83, h: 102, frameMs: 60, at: 'target', angle0: 90, hitFx: 'sylvie-celestial' },
+  'lumina-prayer': { file: 'fx-lumina-prayer.png', frames: 8, w: 87, h: 98, frameMs: 80, at: 'self', dy: -12, scale: 1.1, on: 'cast' },
+  'lumina-bless': { file: 'fx-lumina-bless.png', frames: 8, w: 91, h: 86, frameMs: 80, at: 'target', dy: -10 },
+  'lumina-rez': { file: 'fx-lumina-rez.png', frames: 8, w: 84, h: 98, frameMs: 100, at: 'target', dy: -14, scale: 1.3 },
+  // ฮีลที่เพื่อนได้รับจากลูมิน่า: แผ่นบทสวด ย่อลง
+  'lumina-heal': { file: 'fx-lumina-prayer.png', frames: 8, w: 87, h: 98, frameMs: 60, at: 'self', dy: -12, scale: 0.6 },
+  'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
   'aurel-defense': { file: 'fx-aurel-defense.png', frames: 7, w: 57, h: 85, frameMs: 75, at: 'self', dx: 22, dy: -12 },
   'aurel-charge': { file: 'fx-aurel-charge.png', frames: 5, w: 84, h: 76, frameMs: 80, at: 'target' },
-  'draken-slash': { file: 'fx-draken-slash.png', frames: 4, w: 178, h: 96, frameMs: 80, at: 'target', orient: 'flip', dy: -10, scale: 0.9 },
-  'draken-dash': { file: 'fx-draken-dash.png', frames: 4, w: 178, h: 96, frameMs: 80, at: 'target', orient: 'flip', dy: -8, scale: 0.9 },
-  'draken-ult': { file: 'fx-draken-ult.png', frames: 4, w: 200, h: 96, frameMs: 120, at: 'target', orient: 'flip', dy: -20 },
   'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 140, h: 131, frameMs: 80, at: 'target', orient: 'flip', dy: -14, on: 'cast' },
   'shade-smoke': { file: 'fx-shade-smoke.png', frames: 8, w: 131, h: 84, frameMs: 90, at: 'target', orient: 'flip', dy: -8 },
   'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 134, h: 132, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },
   // โล่ที่เพื่อนได้จากท่าไม้ตายออเรล: ใช้แผ่นเดียวกัน ย่อลง
   'aurel-ward': { file: 'fx-aurel-ult.png', frames: 5, w: 94, h: 92, frameMs: 120, at: 'self', dy: -14, scale: 0.85 },
   'aurel-ult': { file: 'fx-aurel-ult.png', frames: 5, w: 94, h: 92, frameMs: 140, at: 'self', dy: -14, scale: 1.4 },
+};
+
+/** กระสุนของสายระยะไกลที่ไม่มีแผ่น sprite (ศัตรู/ฮีโร่โทเคน) */
+export const CLASS_PROJECTILE: Partial<Record<string, string>> = {
+  archer: 'arrow-normal',
+  mage: 'lumina-orb',
+  healer: 'lumina-orb',
 };
 
 /** ท่าที่แผ่นไม่มี ให้ใช้ท่าไหนแทน (null = ข้ามไปเลย) */

@@ -76,14 +76,11 @@
   }
   &.mana { height: 3px; i { background: var(--cyan); } }
   &.hp { position: relative; }
-  b {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    max-width: 100%;
-    background: #fffc;
-    box-shadow: 0 0 4px var(--gold);
+  // โล่ (เกราะบัฟ): หลอดขาวเรืองทองเหนือหลอดเลือด
+  &.armor {
+    height: 3px;
+    background: #fff3;
+    i { background: #fff; box-shadow: 0 0 5px var(--gold); }
   }
 }
 
@@ -126,6 +123,7 @@
   animation: rise 0.9s forwards;
   &.crit { color: var(--gold); font-size: 17px; }
   &.heal { color: var(--hp); }
+  &.revive { color: #fff6d0; font-size: 13px; text-shadow: 0 0 8px var(--gold), 0 1px 3px #000; }
   &.shield { color: #fff6d0; font-size: 12px; text-shadow: 0 0 6px var(--gold), 0 1px 3px #000; }
   &.poison { color: #7ee05a; font-size: 12px; }
   &.skill { color: var(--gold); font-size: 11px; top: -4%; }

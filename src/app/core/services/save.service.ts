@@ -27,8 +27,8 @@ export class SaveService {
     try {
       const raw = localStorage.getItem(KEY);
       const s = raw ? (JSON.parse(raw) as GameState) : null;
-      // เปลี่ยนเวอร์ชันแล้วเริ่มเกมใหม่ (v2: ออเรลแทนกอร์แรน, v3: เชดแทนทิม)
-      if (s?.version !== 3) return null;
+      // เปลี่ยนเวอร์ชันแล้วเริ่มเกมใหม่ (v2: ออเรลแทนกอร์แรน, v3: เชดแทนทิม, v4: จิน/ซิลวี/ลูมิน่า — เอาดราเคนออก)
+      if (s?.version !== 4) return null;
       // กระดานเปลี่ยนขนาด (3 เลน x ลึก 6): ตำแหน่งเก่าที่หลุดขอบ ให้จัดทีมใหม่อัตโนมัติ
       if (s.team.some(t => !validLocal(t))) {
         const inTeam = new Set(s.team.map(t => t.uid));

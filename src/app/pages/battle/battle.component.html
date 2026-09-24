@@ -24,7 +24,7 @@
   @if (placing()) {
     <app-placement [stage]="stage()" />
   } @else {
-    <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [anims]="anims()" [speed]="speed()" />
+    <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()" />
   }
 
   @if (result(); as r) {

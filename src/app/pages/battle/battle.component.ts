@@ -4,10 +4,12 @@ import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
 import { power } from '../../core/rules/stats';
 import { TeamService } from '../../core/services/team.service';
-import { AnimState, BoardComponent, FloatText, FxView, UnitView } from '../../battle/board/board.component';
+import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView } from '../../battle/board/board.component';
+import { projectileLife } from '../../battle/projectile/projectile.component';
+import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
-import { FX, SHEETS, SkillKind } from '../../core/data/sprites';
+import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult } from '../../battle/engine/battle-engine';
 
 const TICK = 0.05;
@@ -34,6 +36,7 @@ export class BattleComponent implements OnDestroy {
   readonly views = signal<UnitView[]>([]);
   readonly floats = signal<FloatText[]>([]);
   readonly fx = signal<FxView[]>([]);
+  readonly projectiles = signal<ProjectileView[]>([]);
   readonly anims = signal<Record<number, AnimState>>({});
   readonly simReport = signal<string | null>(null);
 
@@ -81,6 +84,7 @@ export class BattleComponent implements OnDestroy {
     this.simReport.set(null);
     this.floats.set([]);
     this.fx.set([]);
+    this.projectiles.set([]);
     this.anims.set({});
     this.engine = new BattleEngine({
       allies: this.team.units(),
@@ -218,9 +222,41 @@ export class BattleComponent implements OnDestroy {
           if (e.src !== e.dst && ward && FX[ward]) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name: ward, angle: 0 });
           break;
         }
+        case 'projectile': {
+          const src = unitOf(e.src);
+          const name = SHEETS[src.sprite ?? '']?.projectile?.[e.kind] ?? CLASS_PROJECTILE[src.cls];
+          if (!name || !FX[name]) break;
+          const p = src.pos, q = posOf(e.dst);
+          const to = { x: q.c, y: q.r + SCENERY_ROWS };
+          // ตกจากฟ้า: เริ่มเหนือเป้า 3 ช่อง เยื้องมาทางฝั่งผู้ยิง
+          const dir = src.side === 'ally' ? -1 : 1;
+          const from = e.sky ? { x: to.x + dir * 1.2, y: to.y - 3.2 } : { x: p.c, y: p.r + SCENERY_ROWS };
+          const pv: ProjectileView = { id: ++this.floatId, name, from, to, flight: e.flight * 1000 };
+          const sp = this.speed();
+          this.projectiles.update(l => [...l, pv]);
+          setTimeout(() => this.projectiles.update(l => l.filter(x => x.id !== pv.id)), projectileLife(pv.flight, sp));
+          const hit = FX[name].hitFx;
+          if (hit && FX[hit]) {
+            setTimeout(() => {
+              const f: FxView = { id: ++this.floatId, r: q.r, c: q.c, name: hit, angle: 0 };
+              this.fx.update(l => [...l, f]);
+              setTimeout(() => this.fx.update(l => l.filter(x => x.id !== f.id)), fxDuration(hit, sp) + 50);
+            }, pv.flight / sp);
+          }
+          break;
+        }
+        case 'revive': {
+          set(e.dst, 'idle');
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `คืนชีพ! +${e.amount}`, kind: 'revive' });
+          break;
+        }
         case 'heal': {
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `+${e.amount}`, kind: 'heal' });
+          // เอฟเฟกต์ฮีลของผู้รักษา (ถ้าแผ่นกำหนดไว้)
+          const hf = e.src != null ? SHEETS[unitOf(e.src).sprite ?? '']?.healFx : undefined;
+          if (hf && FX[hf]) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name: hf, angle: 0 });
           break;
         }
         case 'death':

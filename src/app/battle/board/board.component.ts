@@ -4,6 +4,7 @@ import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
 import { FieldComponent } from '../field/field.component';
 import { FxSpriteComponent } from '../fx-sprite/fx-sprite.component';
+import { ProjectileComponent } from '../projectile/projectile.component';
 import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
@@ -35,7 +36,7 @@ export interface FloatText {
   r: number;
   c: number;
   text: string;
-  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield';
+  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield' | 'revive';
 }
 
 /** เอฟเฟกต์สกิลที่กำลังเล่นบนกระดาน */
@@ -48,6 +49,16 @@ export interface FxView {
   flip?: boolean;
 }
 
+/** กระสุนที่กำลังบิน: ตำแหน่งเป็นจำนวนช่องบนจอ (รวมแถวฉากแล้ว) */
+export interface ProjectileView {
+  id: number;
+  name: string;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  /** ms ที่ความเร็ว x1 */
+  flight: number;
+}
+
 export interface AnimState {
   anim: SpriteAnim;
   key: number;
@@ -55,7 +66,7 @@ export interface AnimState {
 
 @Component({
   selector: 'app-board',
-  imports: [UnitSpriteComponent, FxSpriteComponent, FieldComponent],
+  imports: [UnitSpriteComponent, FxSpriteComponent, FieldComponent, ProjectileComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
@@ -63,6 +74,7 @@ export class BoardComponent {
   readonly units = input<UnitView[]>([]);
   readonly floats = input<FloatText[]>([]);
   readonly fx = input<FxView[]>([]);
+  readonly projectiles = input<ProjectileView[]>([]);
   readonly anims = input<Partial<Record<number, AnimState>>>({});
   readonly speed = input(1);
 

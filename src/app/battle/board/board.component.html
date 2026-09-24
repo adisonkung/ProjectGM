@@ -8,7 +8,11 @@
                        [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
       @if (u.alive) {
         <div class="bars">
-          <div class="bar hp"><i [style.width.%]="u.hpPct"></i>@if (u.shieldPct > 0) {<b [style.left.%]="u.hpPct" [style.width.%]="u.shieldPct"></b>}</div>
+          @if (u.shieldPct > 0) {
+            <!-- หลอดขาวเหนือเลือด = โล่ (เกราะบัฟ) ยาวตามสัดส่วนโล่ต่อเลือดสูงสุด -->
+            <div class="bar armor" title="โล่"><i [style.width.%]="u.shieldPct > 100 ? 100 : u.shieldPct"></i></div>
+          }
+          <div class="bar hp"><i [style.width.%]="u.hpPct"></i></div>
           <div class="bar mana"><i [style.width.%]="u.manaPct"></i></div>
         </div>
         @if (u.level) { <span class="lv">{{ u.level }}</span> }
@@ -20,6 +24,10 @@
     <div class="fx-wrap" [style.transform]="pos(f.r, f.c)">
       <app-fx-sprite [name]="f.name" [angle]="f.angle" [flip]="!!f.flip" [speed]="speed()" />
     </div>
+  }
+
+  @for (p of projectiles(); track p.id) {
+    <app-projectile [name]="p.name" [from]="p.from" [to]="p.to" [flight]="p.flight" [speed]="speed()" />
   }
 
   @for (f of floats(); track f.id) {

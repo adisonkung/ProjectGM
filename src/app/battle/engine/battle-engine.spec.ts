@@ -156,4 +156,51 @@ describe('BattleEngine', () => {
     }
     expect(seq.slice(0, 3)).toEqual(['cast', 'blink', 'impact']);
   });
+
+  it('archer arrows land after they fly, and the 3rd cast rains on every foe once', () => {
+    const team: UnitSpec[] = [
+      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 5000 }, pos: { r: 0, c: 1 } },
+      { name: 'A', cls: 'archer', stats: { ...CLASS_BASE.archer, hp: 3000 }, pos: { r: 4, c: 1 } },
+    ];
+    const e = new BattleEngine({ allies: team, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 6 });
+    const kinds: string[] = [];
+    let arrows = 0;
+    let sky = 0;
+    while (!e.result && e.time < 60) {
+      e.step(0.05);
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'cast' && ev.src === 2) kinds.push(ev.kind);
+        if (ev.type === 'projectile' && ev.src === 2) {
+          arrows++;
+          if (ev.sky) sky++;
+          expect(ev.flight).toBeGreaterThan(0);
+        }
+      }
+    }
+    expect(arrows).toBeGreaterThan(3);
+    expect(sky).toBeGreaterThan(0);
+    expect(kinds.slice(0, 3)).toEqual(['skill', 'skill2', 'ult']);
+    expect(kinds.filter(k => k === 'ult').length).toBe(1);
+  });
+
+  it('healer revives a fallen ally once', () => {
+    const team: UnitSpec[] = [
+      { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 60 }, pos: { r: 0, c: 1 } },
+      { name: 'H', cls: 'healer', stats: { ...CLASS_BASE.healer, hp: 4000 }, pos: { r: 3, c: 1 } },
+    ];
+    const e = new BattleEngine({ allies: team, stage: STAGES[2], enemyTemplates: ENEMIES, seed: 1 });
+    let revives = 0;
+    let revivedAlive = false;
+    while (!e.result && e.time < 40) {
+      e.step(0.05);
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'revive') {
+          revives++;
+          revivedAlive = e.units.find(u => u.id === ev.dst)!.alive;
+        }
+      }
+    }
+    expect(revives).toBe(1);
+    expect(revivedAlive).toBeTrue();
+  });
 });

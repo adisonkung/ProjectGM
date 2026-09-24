@@ -4,7 +4,7 @@ import { autoPlace } from '../rules/team';
 
 /** สถานะเริ่มเกมใหม่ */
 export function newGameState(): GameState {
-  const ids = ['aurel', 'draken', 'shade', 'lila', 'mira'];
+  const ids = ['aurel', 'jin', 'shade', 'sylvie', 'lumina'];
   const heroes: OwnedHero[] = ids.map((templateId, i) => ({
     uid: i + 1,
     templateId,
@@ -13,7 +13,7 @@ export function newGameState(): GameState {
     injury: 0,
   }));
   return {
-    version: 3,
+    version: 4,
     gems: 1500,
     gold: 600,
     pity: 0,

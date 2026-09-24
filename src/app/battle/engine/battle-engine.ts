@@ -19,7 +19,11 @@ export type BattleEvent =
   /** ย้ายตัวแบบวาร์ป (ไม่ต้องเลื่อนตัวบนจอ) */
   | { type: 'blink'; src: number }
   | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number; poison?: boolean }
-  | { type: 'heal'; dst: number; amount: number }
+  | { type: 'heal'; dst: number; amount: number; src?: number }
+  /** ลูกธนู/ลูกแสงที่บินไปหาเป้า (sky = ตกจากฟ้า) ดาเมจเข้าเมื่อถึง */
+  | { type: 'projectile'; src: number; dst: number; kind: 'attack' | SkillKind; flight: number; sky?: boolean }
+  /** ฟื้นคืนชีพ */
+  | { type: 'revive'; src: number; dst: number; amount: number }
   /** ได้โล่ (src = ผู้ให้) */
   | { type: 'shield'; src: number; dst: number; amount: number }
   | { type: 'death'; dst: number }
@@ -107,6 +111,26 @@ const PIERCE_BEHIND_MUL = 1.2;
 const BLADE_ULT_CAST = 2;
 const BLADE_ULT_MUL = 3;
 const BLADE_ULT_SPLASH = 1.5;
+/** นักสู้ สกิล 1 ดาบหมุนวน: 180% เป้าหมาย + 100% ศัตรูรอบตัว 1 ช่อง */
+const SPIN_MUL = 1.8;
+const SPIN_SPLASH = 1;
+/** ลูกธนู/ลูกแสง: เวลาบิน = ค่าตั้งต้น + ต่อช่อง, ตกจากฟ้าใช้เวลาคงที่ */
+const PROJ_BASE = 0.1;
+const PROJ_PER_CELL = 0.06;
+const PROJ_SKY = 0.35;
+/** นักธนู สกิล 1 ยิงรัว: 4 ดอกห่างกัน 0.1 วิ ดอกละ 80% · สกิล 2 ห่าธนู: 130% เป้า + ศัตรูรอบเป้า 1 ช่อง */
+const RAPID_SHOTS = 4;
+const RAPID_GAP = 0.1;
+const RAPID_MUL = 0.8;
+const VOLLEY_MUL = 1.3;
+/** นักธนู ท่าไม้ตาย ฝนธนูสวรรค์: สกิลครั้งที่ 3 (ครั้งเดียว) ศัตรูทุกตัว 150% */
+const RAIN_CAST = 2;
+const RAIN_MUL = 1.5;
+/** ฮีลเลอร์ สกิล 2 พรศักดิ์สิทธิ์: ฮีลเพื่อนที่เลือด % ต่ำสุด atk×2.2 + 10% เลือดสูงสุด */
+const BLESS_ATK = 2.2;
+const BLESS_PCT = 0.1;
+/** ฮีลเลอร์ ท่าไม้ตาย คืนชีพศักดิ์สิทธิ์: ครั้งเดียว เมื่อมีเพื่อนล้ม → ฟื้นด้วยเลือด 50% */
+const REVIVE_HP = 0.5;
 
 /**
  * เอนจินต่อสู้อัตโนมัติบนกระดาน 8x7 (TypeScript ล้วน ไม่ผูกกับ Angular)
@@ -335,6 +359,15 @@ export class BattleEngine {
       }
     }
 
+    // ฮีลเลอร์: ท่าไม้ตายคืนชีพเพื่อนที่ล้ม (ครั้งเดียว)
+    if (u.cls === 'healer' && !u.ultUsed) {
+      const fallen = this.units.find(a => a.side === u.side && !a.alive && a !== u);
+      if (fallen) {
+        this.resurrect(u, fallen);
+        return;
+      }
+    }
+
     // ฮีลเลอร์: ถ้ามีเพื่อนเลือดน้อยในระยะ ให้ฮีลแทนการตี
     if (u.cls === 'healer' && u.atkCd <= 0 && u.mana < u.maxMana) {
       const hurt = this.alive(u.side)
@@ -346,7 +379,7 @@ export class BattleEngine {
         u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
         this.events.push({ type: 'attack', src: u.id, dst: hurt.id });
         this.later(tm.hit, u, () => {
-          this.heal(hurt, u.atk * 1.3);
+          this.heal(hurt, u.atk * 1.3, u);
           u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
         });
         return;
@@ -409,9 +442,18 @@ export class BattleEngine {
     this.later(tm.hit, u, () => {
       const tt = this.liveTarget(u, t);
       if (!tt) return;
-      this.damage(u, tt, 1);
       u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
+      // สายระยะไกล: ปล่อยลูกธนู/ลูกแสงตรงเฟรม hit ดาเมจเข้าเมื่อถึงเป้า
+      if (u.range > 1) this.shoot(u, tt, 1, 'attack');
+      else this.damage(u, tt, 1);
     });
+  }
+
+  /** ยิงกระสุนไปหาเป้า: ดาเมจเข้าเมื่อบินถึง (ยังเข้าแม้ผู้ยิงล้มระหว่างทาง) */
+  private shoot(u: BattleUnit, t: BattleUnit, mul: number, kind: 'attack' | SkillKind, sky = false, crit = false): void {
+    const flight = sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
+    this.events.push({ type: 'projectile', src: u.id, dst: t.id, kind, flight, ...(sky ? { sky } : {}) });
+    this.pending.push({ at: this.time + flight, fn: () => this.damage(u, t, mul, crit) });
   }
 
   /** เริ่มท่าสกิล: ล็อกตัวจนท่าจบ (ไม่ให้ท่าตีธรรมดามาตัดกลางท่า) */
@@ -428,6 +470,12 @@ export class BattleEngine {
     if (u.cls === 'fighter' && !u.ultUsed && u.casts === BLADE_ULT_CAST) {
       u.casts++;
       this.bladeUlt(u, t);
+      return;
+    }
+    // นักธนู: สกิลครั้งที่ 3 กลายเป็นท่าไม้ตาย ฝนธนูสวรรค์
+    if (u.cls === 'archer' && !u.ultUsed && u.casts === RAIN_CAST) {
+      u.casts++;
+      this.arrowRain(u, t);
       return;
     }
     const kind: SkillKind = u.casts++ % 2 ? 'skill2' : 'skill';
@@ -453,7 +501,7 @@ export class BattleEngine {
   /** ผลของสกิล ณ เฟรมที่โดน (t = null เมื่อเป้าหายไปหมดแล้ว) */
   private resolveSkill(u: BattleUnit, t: BattleUnit | null, kind: SkillKind): void {
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
-    if (!t && u.cls !== 'healer' && u.cls !== 'archer') return;
+    if (!t && u.cls !== 'healer') return;
     switch (u.cls) {
       case 'tank':
         if (kind === 'skill2') {
@@ -471,7 +519,10 @@ export class BattleEngine {
           this.damage(u, tt, PIERCE_MUL);
           if (next) this.damage(u, next, PIERCE_BEHIND_MUL);
         } else {
-          this.damage(u, t!, 2.5);
+          // ดาบหมุนวน: ฟันเป้าหมายแรง + โดนศัตรูรอบตัวทุกตัว
+          const around = foes.filter(f => f !== t && distance(f.pos, u.pos) <= 1);
+          this.damage(u, t!, SPIN_MUL);
+          for (const f of around) this.damage(u, f, SPIN_SPLASH);
         }
         break;
       case 'assassin':
@@ -487,16 +538,33 @@ export class BattleEngine {
         }
         break;
       case 'archer': {
-        const picks = [...foes].sort(() => this.rng() - 0.5).slice(0, 3);
-        for (const f of picks) this.damage(u, f, 1.2);
+        const tt = t!;
+        if (kind === 'skill') {
+          // ยิงรัว: หลายดอกติดกัน ดอกแรกออกตรงเฟรม hit
+          for (let i = 0; i < RAPID_SHOTS; i++) {
+            this.later(i * RAPID_GAP, u, () => {
+              const x = this.liveTarget(u, tt);
+              if (x) this.shoot(u, x, RAPID_MUL, 'skill');
+            });
+          }
+        } else {
+          // ห่าธนู: ลูกธนูตกจากฟ้าใส่เป้าและศัตรูรอบ ๆ
+          for (const f of foes.filter(f => distance(f.pos, tt.pos) <= 1)) this.shoot(u, f, VOLLEY_MUL, 'skill2', true);
+        }
         break;
       }
       case 'mage':
         for (const f of foes.filter(f => distance(f.pos, t!.pos) <= 1)) this.damage(u, f, 1.6);
         break;
       case 'healer':
-        for (const a of this.alive(u.side).filter(a => distance(a.pos, u.pos) <= 3)) {
-          this.heal(a, u.atk + a.maxHp * 0.08);
+        if (kind === 'skill2') {
+          // พรศักดิ์สิทธิ์: ฮีลก้อนใหญ่ให้เพื่อนที่เลือด % ต่ำสุด
+          const low = this.alive(u.side).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+          if (low) this.heal(low, u.atk * BLESS_ATK + low.maxHp * BLESS_PCT, u);
+        } else {
+          for (const a of this.alive(u.side).filter(a => distance(a.pos, u.pos) <= 3)) {
+            this.heal(a, u.atk + a.maxHp * 0.08, u);
+          }
         }
         break;
     }
@@ -548,6 +616,37 @@ export class BattleEngine {
     u.pos = cell;
     u.targetId = t.id;
     this.events.push({ type: 'blink', src: u.id });
+  }
+
+  /** นักธนู ท่าไม้ตาย: ลูกธนูสวรรค์ตกใส่ศัตรูทุกตัว */
+  private arrowRain(u: BattleUnit, t: BattleUnit): void {
+    u.ultUsed = true;
+    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
+    const tm = this.beginSkill(u, 'ult');
+    this.later(tm.hit, u, () => {
+      this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
+      const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+      foes.forEach((f, i) => this.later(i * 0.06, u, () => f.alive && this.shoot(u, f, RAIN_MUL, 'ult', true)));
+    });
+  }
+
+  /** ฮีลเลอร์ ท่าไม้ตาย: ชุบชีวิตเพื่อนที่ล้ม */
+  private resurrect(u: BattleUnit, d: BattleUnit): void {
+    u.ultUsed = true;
+    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: d.id });
+    const tm = this.beginSkill(u, 'ult');
+    this.later(tm.hit, u, () => {
+      if (d.alive || this.result) return;
+      d.alive = true;
+      d.hp = Math.round(d.maxHp * REVIVE_HP);
+      d.mana = 0;
+      d.castLock = 0.5;
+      d.targetId = null;
+      d.poisonTime = 0;
+      this.grid.place(d.id, d.pos);
+      this.events.push({ type: 'impact', src: u.id, dst: d.id, kind: 'ult' });
+      this.events.push({ type: 'revive', src: u.id, dst: d.id, amount: d.hp });
+    });
   }
 
   /** นักสู้ ท่าไม้ตาย: ฟาดดาบสายฟ้าลงที่เป้าหมาย กระเด็นโดนศัตรูรอบ ๆ */
@@ -608,12 +707,12 @@ export class BattleEngine {
     }
   }
 
-  private heal(dst: BattleUnit, amount: number): void {
+  private heal(dst: BattleUnit, amount: number, src?: BattleUnit): void {
     if (!dst.alive) return;
     const a = Math.round(Math.min(amount, dst.maxHp - dst.hp));
     if (a <= 0) return;
     dst.hp += a;
-    this.events.push({ type: 'heal', dst: dst.id, amount: a });
+    this.events.push({ type: 'heal', dst: dst.id, amount: a, ...(src ? { src: src.id } : {}) });
   }
 
   private checkEnd(): boolean {
