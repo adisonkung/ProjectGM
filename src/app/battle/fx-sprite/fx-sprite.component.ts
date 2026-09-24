@@ -33,7 +33,9 @@ export class FxSpriteComponent {
           { backgroundPosition: '0% 0%', opacity: 1 },
           { backgroundPosition: '100% 0%', opacity: 1 },
         ],
-        { duration: fxDuration(this.name(), this.speed()), easing: `steps(${d.frames - 1}, jump-none)`, fill: 'none' },
+        // steps(n, jump-none) = n ค่า 0% … 100% ตรงกับ n เฟรมพอดี
+        // (ถ้าใช้ n-1 ตำแหน่งจะคร่อมระหว่างเฟรม เห็นครึ่งเฟรมข้าง ๆ เป็นรอยตัดแนวตั้ง)
+        { duration: fxDuration(this.name(), this.speed()), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
       );
     });
   }

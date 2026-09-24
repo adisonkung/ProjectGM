@@ -16,8 +16,6 @@
   background-repeat: no-repeat;
   background-position: 0% 0%;
   &.flip { transform: translateX(-50%) scaleX(-1); }
-  /** ชั้นเฟดของท่ายืน (มองไม่เห็นเมื่อไม่ได้เล่นท่ายืน) */
-  &.blend { opacity: 0; }
 }
 
 .token {

@@ -18,6 +18,7 @@ A = np.array(Image.open(CHAR_SRC).convert('RGBA'))
 ROWS = [(20, 134), (145, 262), (272, 392), (401, 516), (529, 649), (663, 778), (786, 891), (897, 1015)]
 C0, SP, NC = 237, 152.3, 9
 LABEL_X = 184  # everything left of this is the row label
+DEATH_RUNS = [(184, 311), (342, 449), (484, 607), (633, 758), (783, 933), (954, 1112), (1137, 1306), (1339, 1507)]
 
 
 def keep_near(crop, cx, reach):
@@ -46,10 +47,11 @@ sheet = Image.new('RGBA', (CELL_W * NC, CELL_H * len(ROWS)), (0, 0, 0, 0))
 for r, (ry0, ry1) in enumerate(ROWS):
     y0 = (ROWS[r - 1][1] + ry0) // 2 + 1 if r else ry0 - 6
     y1 = (ry1 + ROWS[r + 1][0]) // 2 if r < len(ROWS) - 1 else min(A.shape[0], ry1 + 6)
-    for c in range(NC):
-        ax = C0 + SP * c
-        half = 100 if r == 3 else 80  # death row: lying body is wide
-        x0, x1 = max(LABEL_X, int(ax - half)), int(ax + half)
+    # death row has only 8 frames and the body slides forward as it falls: use measured frames
+    cols_here = DEATH_RUNS if r == 3 else [(C0 + SP * c - 80, C0 + SP * c + 80) for c in range(NC)]
+    for c, (wx0, wx1) in enumerate(cols_here):
+        ax = (wx0 + wx1) / 2
+        x0, x1 = max(LABEL_X, int(wx0) - 6), int(wx1) + 6
         crop = A[y0:y1, x0:x1].copy()
         crop[crop[..., 3] < 50] = 0
         crop = keep_near(crop, ax - x0, 55 if r != 3 else 0)

@@ -17,6 +17,8 @@ export interface AnimDef {
   hit?: number;
   /** เฟรมที่ตัวละครย้ายตำแหน่ง (วาร์ป) */
   move?: number;
+  /** ลำดับเฟรมที่เล่นจริง (ใช้กับท่ายืน: ตัดเฟรมที่กระตุกออกและเรียงให้ต่อเนื่อง) */
+  seq?: number[];
 }
 
 export interface SheetDef {
@@ -47,9 +49,9 @@ export interface FxDef {
   on?: 'cast' | 'impact';
 }
 
-/** เวลาต่อเฟรมปกติ และของท่ายืน (ช้ากว่า + เฟดระหว่างเฟรมให้ดูหายใจนุ่ม ๆ) */
+/** เวลาต่อเฟรมปกติ และของท่ายืน (ช้ากว่า ไม่เร่งตามความเร็วการต่อสู้) */
 export const FRAME_MS = 85;
-export const IDLE_FRAME_MS = 170;
+export const IDLE_FRAME_MS = 150;
 
 /** สเกลแสดงผล: ความกว้าง 1 px ต้นฉบับ เทียบกับความกว้างช่องกระดาน (%) */
 export const PX_TO_CELL = 165 / 132;
@@ -60,7 +62,7 @@ export const SHEETS: Record<string, SheetDef> = {
     cols: 11,
     rows: 11,
     anims: {
-      idle: { row: 0, frames: 8 },
+      idle: { row: 0, frames: 8, seq: [0, 4, 3, 5, 6, 7] },
       walk: { row: 1, frames: 9 },
       hurt: { row: 5, frames: 7 },
       die: { row: 6, frames: 9 },
@@ -75,7 +77,7 @@ export const SHEETS: Record<string, SheetDef> = {
     cols: 8,
     rows: 8,
     anims: {
-      idle: { row: 0, frames: 8 },
+      idle: { row: 0, frames: 8, seq: [1, 2, 5, 6, 7, 4] },
       walk: { row: 1, frames: 8 },
       hurt: { row: 2, frames: 8 },
       attack: { row: 3, frames: 8, hit: 4 },
@@ -90,10 +92,10 @@ export const SHEETS: Record<string, SheetDef> = {
     cols: 9,
     rows: 8,
     anims: {
-      idle: { row: 0, frames: 9 },
+      idle: { row: 0, frames: 9, seq: [0, 2, 6, 4, 5, 7] },
       walk: { row: 1, frames: 9 },
       hurt: { row: 2, frames: 9 },
-      die: { row: 3, frames: 9 },
+      die: { row: 3, frames: 8 },
       attack: { row: 4, frames: 9, hit: 4 },
       skill: { row: 5, frames: 9, move: 2, hit: 4 },
       skill2: { row: 6, frames: 9, hit: 4 },
@@ -104,15 +106,15 @@ export const SHEETS: Record<string, SheetDef> = {
 };
 
 export const FX: Record<string, FxDef> = {
-  'aurel-defense': { file: 'fx-aurel-defense.png', frames: 7, w: 48, h: 76, frameMs: 75, at: 'self', dx: 22, dy: -12 },
-  'aurel-charge': { file: 'fx-aurel-charge.png', frames: 5, w: 74, h: 68, frameMs: 80, at: 'target' },
-  'draken-slash': { file: 'fx-draken-slash.png', frames: 4, w: 97, h: 78, frameMs: 80, at: 'target', orient: 'flip', dy: -10, scale: 0.9 },
-  'draken-dash': { file: 'fx-draken-dash.png', frames: 4, w: 110, h: 78, frameMs: 80, at: 'target', orient: 'flip', dy: -8, scale: 0.9 },
-  'draken-ult': { file: 'fx-draken-ult.png', frames: 4, w: 183, h: 81, frameMs: 120, at: 'target', orient: 'flip', dy: -20 },
-  'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 150, h: 121, frameMs: 80, at: 'target', orient: 'flip', dy: -14, on: 'cast' },
-  'shade-smoke': { file: 'fx-shade-smoke.png', frames: 8, w: 150, h: 74, frameMs: 90, at: 'target', orient: 'flip', dy: -8 },
-  'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 150, h: 122, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },
-  'aurel-ult': { file: 'fx-aurel-ult.png', frames: 5, w: 85, h: 76, frameMs: 140, at: 'self', dy: -14, scale: 1.4 },
+  'aurel-defense': { file: 'fx-aurel-defense.png', frames: 7, w: 57, h: 85, frameMs: 75, at: 'self', dx: 22, dy: -12 },
+  'aurel-charge': { file: 'fx-aurel-charge.png', frames: 5, w: 84, h: 76, frameMs: 80, at: 'target' },
+  'draken-slash': { file: 'fx-draken-slash.png', frames: 4, w: 178, h: 96, frameMs: 80, at: 'target', orient: 'flip', dy: -10, scale: 0.9 },
+  'draken-dash': { file: 'fx-draken-dash.png', frames: 4, w: 178, h: 96, frameMs: 80, at: 'target', orient: 'flip', dy: -8, scale: 0.9 },
+  'draken-ult': { file: 'fx-draken-ult.png', frames: 4, w: 200, h: 96, frameMs: 120, at: 'target', orient: 'flip', dy: -20 },
+  'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 140, h: 131, frameMs: 80, at: 'target', orient: 'flip', dy: -14, on: 'cast' },
+  'shade-smoke': { file: 'fx-shade-smoke.png', frames: 8, w: 131, h: 84, frameMs: 90, at: 'target', orient: 'flip', dy: -8 },
+  'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 134, h: 132, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },
+  'aurel-ult': { file: 'fx-aurel-ult.png', frames: 5, w: 94, h: 92, frameMs: 140, at: 'self', dy: -14, scale: 1.4 },
 };
 
 /** ท่าที่แผ่นไม่มี ให้ใช้ท่าไหนแทน (null = ข้ามไปเลย) */

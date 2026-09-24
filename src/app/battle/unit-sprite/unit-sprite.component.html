@@ -1,6 +1,5 @@
 @if (sprite() && def()) {
   <div #sheet class="sheet" [class.flip]="flip()" [style.background-image]="'url(sprites/' + sprite() + ')'" [style.background-size]="bgSize()"></div>
-  <div #blend class="sheet blend" [class.flip]="flip()" [style.background-image]="'url(sprites/' + sprite() + ')'" [style.background-size]="bgSize()"></div>
 } @else {
   <div class="token" [class.enemy]="side() === 'enemy'" [class.boss]="boss()" [style.--rc]="side() === 'enemy' ? null : rarity()">
     <svg viewBox="0 0 24 24" aria-hidden="true">

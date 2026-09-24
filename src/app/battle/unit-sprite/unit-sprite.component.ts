@@ -40,8 +40,6 @@ export class UnitSpriteComponent {
   readonly flip = input(false);
 
   readonly sheet = viewChild<ElementRef<HTMLElement>>('sheet');
-  /** ชั้นที่สองสำหรับท่ายืน: แสดงเฟรมถัดไปแล้วค่อย ๆ เฟดเข้า ให้การหายใจลื่นขึ้น */
-  readonly blend = viewChild<ElementRef<HTMLElement>>('blend');
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);
   readonly def = computed<SheetDef | undefined>(() => SHEETS[this.sprite() ?? '']);
   readonly bgSize = computed(() => {
@@ -51,7 +49,6 @@ export class UnitSpriteComponent {
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private current?: Animation;
-  private blendAnims: Animation[] = [];
   /** เริ่มท่ายืนคนละจังหวะ ทุกตัวจะได้ไม่หายใจพร้อมกัน */
   private readonly phase = Math.random();
   private motion?: Animation;
@@ -98,10 +95,9 @@ export class UnitSpriteComponent {
     const frames = hold ? a.frames - 1 : a.frames;
 
     this.current?.cancel();
-    this.stopBlend();
     this.currentName = name;
     if (loop) {
-      this.playIdle(el, a.frames, a.ms ?? IDLE_FRAME_MS, x, y);
+      this.playIdle(el, a.seq ?? Array.from({ length: a.frames }, (_, i) => i), a.ms ?? IDLE_FRAME_MS, x, y);
       return;
     }
     this.current = el.animate(
@@ -117,33 +113,16 @@ export class UnitSpriteComponent {
   }
 
   /**
-   * ท่ายืน: ช้ากว่าท่าอื่น (ไม่เร่งตามความเร็วการต่อสู้) และเฟดเฟรมถัดไปทับทีละน้อย
-   * ชั้นล่างโชว์เฟรม i, ชั้นบนโชว์เฟรม i+1 แล้วค่อย ๆ ชัดขึ้นจนถึงเวลาเปลี่ยนเฟรม
+   * ท่ายืน: ช้ากว่าท่าอื่น ไม่เร่งตามความเร็วการต่อสู้ และเล่นตามลำดับ `seq`
+   * (เฟรมยืนจากแผ่น AI ไม่ต่อเนื่องกันทุกเฟรม — ตัดเฟรมที่กระตุกออก เรียงให้ต่างกันน้อยที่สุด)
+   * ไม่เฟดซ้อนเฟรม เพราะจะเห็นเป็นภาพซ้อน
    */
-  private playIdle(el: HTMLElement, n: number, ms: number, x: (i: number) => number, y: number): void {
+  private playIdle(el: HTMLElement, order: number[], ms: number, x: (i: number) => number, y: number): void {
+    const n = order.length;
     const duration = n * ms;
-    const steps = (shift: number): Keyframe[] => {
-      const k: Keyframe[] = [];
-      for (let i = 0; i < n; i++) {
-        k.push({ offset: i / n, easing: 'steps(1, end)', backgroundPosition: `${x((i + shift) % n)}% ${y}%` });
-      }
-      k.push({ offset: 1, backgroundPosition: `${x((n - 1 + shift) % n)}% ${y}%` });
-      return k;
-    };
-    const start = this.phase * duration;
-    this.current = el.animate(steps(0), { duration, iterations: Infinity });
-    this.current.currentTime = start;
-    const blend = this.blend()?.nativeElement;
-    if (!blend || n < 2) return;
-    const pos = blend.animate(steps(1), { duration, iterations: Infinity });
-    const fade = blend.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms, iterations: Infinity, easing: 'ease-in-out' });
-    pos.currentTime = start;
-    fade.currentTime = start;
-    this.blendAnims = [pos, fade];
-  }
-
-  private stopBlend(): void {
-    for (const a of this.blendAnims) a.cancel();
-    this.blendAnims = [];
+    const k: Keyframe[] = order.map((f, i) => ({ offset: i / n, easing: 'steps(1, end)', backgroundPosition: `${x(f)}% ${y}%` }));
+    k.push({ offset: 1, backgroundPosition: `${x(order[n - 1])}% ${y}%` });
+    this.current = el.animate(k, { duration, iterations: Infinity });
+    this.current.currentTime = this.phase * duration;
   }
 }
