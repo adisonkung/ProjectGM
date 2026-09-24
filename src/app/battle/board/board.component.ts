@@ -26,6 +26,8 @@ export interface UnitView {
   boss?: boolean;
   /** หันซ้าย */
   flip?: boolean;
+  /** ศัตรูเวฟถัดไป: วิ่งเข้าจากขอบขวาตอนเกิด */
+  enter?: boolean;
 }
 
 export interface FloatText {
@@ -63,6 +65,12 @@ export class BoardComponent {
   readonly fx = input<FxView[]>([]);
   readonly anims = input<Partial<Record<number, AnimState>>>({});
   readonly speed = input(1);
+  /** ระยะที่ฉากเลื่อนไปแล้ว (1 = 1 จอ) */
+  readonly scroll = input(0);
+  /** กำลังเดินไปเวฟถัดไป: เวลาเดิน (ms) — 0 = ไม่ได้เดิน */
+  readonly marchMs = input(0);
+  /** เวลาเลื่อนฉากล่าสุด คงไว้หลังเดินเสร็จ เพื่อไม่ให้ transition ถูกตัดกลางทาง */
+  readonly fieldMs = computed(() => this.marchMs() || 2400 / this.speed());
 
   readonly rows = BOARD_ROWS + SCENERY_ROWS;
   readonly cols = BOARD_COLS;

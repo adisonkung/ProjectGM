@@ -16,15 +16,20 @@
 
   <div class="status">
     <span class="chip" [class.surv]="stage().mode === 'survive'">
-      {{ stage().mode === 'eliminate' ? 'กำจัดศัตรูทั้งหมด' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ
+      {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + totalRounds() + ' เวฟ' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ
     </span>
+    @if (totalRounds() > 1) { <span class="rounds">เวฟ <b>{{ round() + 1 }}</b>/{{ totalRounds() }}</span> }
     <span class="timer">{{ timeLeft() }}<small>วิ</small></span>
   </div>
 
   @if (placing()) {
     <app-placement [stage]="stage()" />
   } @else {
-    <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [anims]="anims()" [speed]="speed()" />
+    <div class="stage-wrap">
+      <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [anims]="anims()" [speed]="speed()"
+                 [scroll]="scroll()" [marchMs]="marchMs()" />
+      @if (banner(); as b) { <div class="banner" aria-live="polite">{{ b }}</div> }
+    </div>
   }
 
   @if (result(); as r) {

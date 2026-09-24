@@ -17,7 +17,11 @@ export type BattleEvent =
   | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number; poison?: boolean }
   | { type: 'heal'; dst: number; amount: number }
   | { type: 'death'; dst: number }
-  | { type: 'spawn'; dst: number };
+  | { type: 'spawn'; dst: number }
+  /** เคลียร์เวฟแล้ว ทีมเริ่มเดินไปจุดถัดไป (round = เวฟที่กำลังจะเริ่ม เริ่มนับ 0) */
+  | { type: 'advance'; round: number; duration: number }
+  /** ถึงจุดถัดไป ศัตรูเวฟใหม่บุกเข้ามา */
+  | { type: 'round'; round: number };
 
 export interface BattleUnit {
   id: number;
@@ -30,6 +34,10 @@ export interface BattleUnit {
   boss?: boolean;
   heroUid?: number;
   pos: Cell;
+  /** ตำแหน่งตั้งต้น (ทีมกลับมาจัดแถวตรงนี้ตอนเดินไปเวฟถัดไป) */
+  home: Cell;
+  /** ศัตรู: มาจากเวฟไหน (เริ่มนับ 0) */
+  round: number;
   maxHp: number;
   hp: number;
   atk: number;
@@ -100,15 +108,26 @@ const PIERCE_BEHIND_MUL = 1.2;
 const BLADE_ULT_CAST = 2;
 const BLADE_ULT_MUL = 3;
 const BLADE_ULT_SPLASH = 1.5;
+/** เวลาเดินไปเวฟถัดไป (วินาที) — ระหว่างนี้ไม่มีใครต่อสู้ และไม่นับเวลาจำกัด */
+export const ADVANCE_TIME = 2.4;
 
 /**
- * เอนจินต่อสู้อัตโนมัติบนกระดาน 8x7 (TypeScript ล้วน ไม่ผูกกับ Angular)
+ * เอนจินต่อสู้อัตโนมัติบนสนาม 3 เลน x 12 (TypeScript ล้วน ไม่ผูกกับ Angular)
+ * ด่านกำจัดมีหลายเวฟได้ (stage.rounds): เคลียร์แล้วทีมเดินไปจุดถัดไป ADVANCE_TIME วินาที แล้วศัตรูเวฟใหม่เกิด
  * เรียก step(dt) ซ้ำ ๆ จนกว่า result จะไม่เป็น null
  */
 export class BattleEngine {
   readonly units: BattleUnit[] = [];
   readonly grid = new Grid(STACK_CAP);
+  /** เวลารวม (รวมช่วงเดินไปเวฟถัดไป) */
   time = 0;
+  /** เวลาที่ต่อสู้จริง (ใช้กับเวลาจำกัดของด่าน) */
+  fightTime = 0;
+  /** เวฟปัจจุบัน (เริ่มนับ 0) และจำนวนเวฟทั้งหมด */
+  round = 0;
+  readonly totalRounds: number;
+  /** เวลาที่ยังเหลือของช่วงเดินไปเวฟถัดไป (> 0 = กำลังเดิน) */
+  advancing = 0;
   result: BattleResult | null = null;
 
   private readonly rng: () => number;
@@ -126,6 +145,7 @@ export class BattleEngine {
     this.templates = cfg.enemyTemplates;
     this.nextWaveAt = cfg.stage.waveEvery ?? Infinity;
     this.enemyCap = cfg.stage.enemies.length;
+    this.totalRounds = cfg.stage.mode === 'eliminate' ? 1 + (cfg.stage.rounds?.length ?? 0) : 1;
 
     for (const spec of cfg.allies) this.addUnit('ally', spec);
     for (const p of cfg.stage.enemies) this.spawnEnemy(p.enemy, p);
@@ -151,13 +171,20 @@ export class BattleEngine {
     if (this.result) return;
     this.time += dt;
 
+    if (this.advancing > 0) {
+      this.advancing -= dt;
+      if (this.advancing <= 0) this.startRound();
+      return;
+    }
+    this.fightTime += dt;
+
     for (const u of this.units) {
       if (!u.alive) continue;
       this.updateUnit(u, dt);
       if (this.checkEnd()) return;
     }
 
-    if (this.stage.mode === 'survive' && this.time >= this.nextWaveAt) {
+    if (this.stage.mode === 'survive' && this.fightTime >= this.nextWaveAt) {
       this.nextWaveAt += this.stage.waveEvery!;
       this.spawnWave();
     }
@@ -191,6 +218,8 @@ export class BattleEngine {
       boss: spec.boss,
       heroUid: spec.heroUid,
       pos,
+      home: pos,
+      round: this.round,
       maxHp: s.hp,
       hp: s.hp,
       atk: s.atk,
@@ -230,6 +259,28 @@ export class BattleEngine {
       stats: enemyStats(t, this.stage),
       pos,
     });
+  }
+
+  /** เคลียร์เวฟแล้ว: ทีมที่รอดกลับไปจัดแถวที่ตำแหน่งตั้งต้น แล้วเดินหน้า */
+  private beginAdvance(): void {
+    this.round++;
+    this.advancing = ADVANCE_TIME;
+    for (const u of this.alive('ally')) {
+      this.grid.move(u.id, u.pos, u.home);
+      u.pos = u.home;
+      u.targetId = null;
+      u.castLock = 0;
+    }
+    this.events.push({ type: 'advance', round: this.round, duration: ADVANCE_TIME });
+  }
+
+  private startRound(): void {
+    this.advancing = 0;
+    for (const p of this.stage.rounds?.[this.round - 1] ?? []) {
+      const u = this.spawnEnemy(p.enemy, p);
+      if (u) this.events.push({ type: 'spawn', dst: u.id });
+    }
+    this.events.push({ type: 'round', round: this.round });
   }
 
   private spawnWave(): void {
@@ -525,9 +576,11 @@ export class BattleEngine {
   private checkEnd(): boolean {
     if (this.result) return true;
     if (!this.alive('ally').length) this.result = 'lose';
-    else if (this.stage.mode === 'eliminate' && !this.alive('enemy').length) this.result = 'win';
-    else if (this.stage.mode === 'survive' && this.time >= this.stage.timeLimit) this.result = 'win';
-    else if (this.stage.mode === 'eliminate' && this.time >= this.stage.timeLimit) this.result = 'timeout';
-    return this.result !== null;
+    else if (this.stage.mode === 'eliminate' && !this.alive('enemy').length) {
+      if (this.round + 1 < this.totalRounds) this.beginAdvance();
+      else this.result = 'win';
+    } else if (this.stage.mode === 'survive' && this.fightTime >= this.stage.timeLimit) this.result = 'win';
+    else if (this.stage.mode === 'eliminate' && this.fightTime >= this.stage.timeLimit) this.result = 'timeout';
+    return this.result !== null || this.advancing > 0;
   }
 }

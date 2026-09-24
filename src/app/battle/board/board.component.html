@@ -1,8 +1,8 @@
-<div class="board" [style.--spd]="speed()" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 12 คอลัมน์ ฝั่งเราอยู่ซ้าย ศัตรูอยู่ขวา">
-  <app-field />
+<div class="board" [class.marching]="marchMs() > 0" [style.--march]="marchMs() + 'ms'" [style.--spd]="speed()" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 12 คอลัมน์ ฝั่งเราอยู่ซ้าย ศัตรูอยู่ขวา">
+  <app-field [scroll]="scroll()" [duration]="fieldMs()" />
 
   @for (u of units(); track u.id) {
-    <div class="unit" [class.dead]="!u.alive" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
+    <div class="unit" [class.enter]="!!u.enter" [class.dead]="!u.alive" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
          [class.taunt]="u.taunt" [style.transform]="unitPos(u)" [style.z-index]="unitZ(u)">
       <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss"
                        [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
