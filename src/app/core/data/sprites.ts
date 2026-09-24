@@ -27,6 +27,8 @@ export interface SheetDef {
   anims: Partial<Record<SpriteAnim, AnimDef>>;
   /** เอฟเฟกต์ที่เล่นตอนใช้สกิลแต่ละแบบ (คีย์ของ FX) */
   fx?: Partial<Record<SkillKind, string>>;
+  /** เอฟเฟกต์ที่ตัวเพื่อนตอนได้โล่จากตัวนี้ */
+  shieldFx?: string;
 }
 
 export interface FxDef {
@@ -87,6 +89,7 @@ export const SHEETS: Record<string, SheetDef> = {
       die: { row: 7, frames: 8 },
     },
     fx: { skill: 'aurel-defense', skill2: 'aurel-charge', ult: 'aurel-ult' },
+    shieldFx: 'aurel-ward',
   },
   'hero-shade.png': {
     cols: 9,
@@ -114,6 +117,8 @@ export const FX: Record<string, FxDef> = {
   'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 140, h: 131, frameMs: 80, at: 'target', orient: 'flip', dy: -14, on: 'cast' },
   'shade-smoke': { file: 'fx-shade-smoke.png', frames: 8, w: 131, h: 84, frameMs: 90, at: 'target', orient: 'flip', dy: -8 },
   'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 134, h: 132, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },
+  // โล่ที่เพื่อนได้จากท่าไม้ตายออเรล: ใช้แผ่นเดียวกัน ย่อลง
+  'aurel-ward': { file: 'fx-aurel-ult.png', frames: 5, w: 94, h: 92, frameMs: 120, at: 'self', dy: -14, scale: 0.85 },
   'aurel-ult': { file: 'fx-aurel-ult.png', frames: 5, w: 94, h: 92, frameMs: 140, at: 'self', dy: -14, scale: 1.4 },
 };
 

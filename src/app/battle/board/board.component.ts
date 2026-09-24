@@ -35,7 +35,7 @@ export interface FloatText {
   r: number;
   c: number;
   text: string;
-  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison';
+  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield';
 }
 
 /** เอฟเฟกต์สกิลที่กำลังเล่นบนกระดาน */

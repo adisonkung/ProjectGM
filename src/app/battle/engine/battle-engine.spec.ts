@@ -66,10 +66,11 @@ describe('BattleEngine', () => {
     expect(stacked).toBeTrue();
   });
 
-  it('tank ultimate fires once below 40% hp and shields nearby allies', () => {
+  it('tank ultimate fires once on first contact and shields the whole team', () => {
     const weakTank: UnitSpec[] = [
       { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 300 }, pos: { r: 0, c: 1 } },
       { name: 'F', cls: 'fighter', stats: CLASS_BASE.fighter, pos: { r: 1, c: 1 } },
+      { name: 'A', cls: 'archer', stats: CLASS_BASE.archer, pos: { r: 5, c: 0 } },
     ];
     const e = new BattleEngine({ allies: weakTank, stage: STAGES[9], enemyTemplates: ENEMIES, seed: 2 });
     const ults: BattleEvent[] = [];

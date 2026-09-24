@@ -210,6 +210,14 @@ export class BattleComponent implements OnDestroy {
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: e.poison ? 'poison' : e.crit ? 'crit' : 'dmg' });
           break;
         }
+        case 'shield': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `+โล่ ${e.amount}`, kind: 'shield' });
+          // ตัวผู้ให้มีเอฟเฟกต์ท่าไม้ตายอยู่แล้ว ส่วนเพื่อนได้โดมโล่เล็ก
+          const ward = SHEETS[unitOf(e.src).sprite ?? '']?.shieldFx;
+          if (e.src !== e.dst && ward && FX[ward]) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name: ward, angle: 0 });
+          break;
+        }
         case 'heal': {
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `+${e.amount}`, kind: 'heal' });

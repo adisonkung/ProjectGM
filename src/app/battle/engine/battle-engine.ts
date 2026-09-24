@@ -20,6 +20,8 @@ export type BattleEvent =
   | { type: 'blink'; src: number }
   | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number; poison?: boolean }
   | { type: 'heal'; dst: number; amount: number }
+  /** ได้โล่ (src = ผู้ให้) */
+  | { type: 'shield'; src: number; dst: number; amount: number }
   | { type: 'death'; dst: number }
   | { type: 'spawn'; dst: number };
 
@@ -79,9 +81,10 @@ const CRIT_MUL = 1.5;
 /** แทงก์ สกิล 2 พุ่งชนโล่: ดาเมจ 160% ผลักถอย 1 ช่อง มึน 1 วิ */
 const CHARGE_MUL = 1.6;
 const CHARGE_STUN = 1;
-/** แทงก์ ท่าไม้ตาย: เลือดต่ำกว่า 40% ครั้งแรก → โล่ตัวเอง 30% / เพื่อนรอบตัว 2 ช่อง 15% ของเลือดสูงสุดแทงก์ + ยั่วยุ */
-const ULT_HP = 0.4;
-const ULT_RADIUS = 2;
+/**
+ * แทงก์ ท่าไม้ตาย: ใช้ทันทีครั้งแรกที่ศัตรูเข้ามาในระยะยั่วยุ (ครั้งเดียวต่อการต่อสู้)
+ * → โล่ตัวเอง 30% / เพื่อนทุกคนในทีม 15% ของเลือดสูงสุดแทงก์ อยู่ 6 วิ + ยั่วยุ
+ */
 const ULT_SELF_SHIELD = 0.3;
 const ULT_ALLY_SHIELD = 0.15;
 const ULT_LOCK = 0.6;
@@ -312,6 +315,15 @@ export class BattleEngine {
       return;
     }
 
+    // แทงก์: ท่าไม้ตายทันทีเมื่อศัตรูเข้าระยะยั่วยุครั้งแรก (ไม่ต้องรอเลือดลด)
+    if (u.cls === 'tank' && !u.ultUsed) {
+      const near = this.alive(u.side === 'ally' ? 'enemy' : 'ally').some(f => distance(f.pos, u.pos) <= TAUNT_RADIUS);
+      if (near) {
+        this.ultimate(u);
+        return;
+      }
+    }
+
     // นักฆ่า: ท่าไม้ตายทันทีเมื่อเห็นศัตรูใกล้ตาย
     if (u.cls === 'assassin' && !u.ultUsed) {
       const prey = this.alive(u.side === 'ally' ? 'enemy' : 'ally')
@@ -502,7 +514,7 @@ export class BattleEngine {
     }
   }
 
-  /** แทงก์ ท่าไม้ตาย: กางโดมโล่ให้ตัวเองและเพื่อนรอบตัว แล้วยั่วยุ */
+  /** แทงก์ ท่าไม้ตาย: กางโล่ให้ตัวเองและเพื่อนทุกคน แล้วยั่วยุ */
   private ultimate(u: BattleUnit): void {
     u.ultUsed = true;
     u.taunt = Math.max(u.taunt, TAUNT_TIME);
@@ -511,10 +523,12 @@ export class BattleEngine {
     u.castLock = Math.max(u.castLock, tm.total, ULT_LOCK);
     this.later(tm.hit, u, () => {
       this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
+      u.taunt = Math.max(u.taunt, TAUNT_TIME);
       for (const a of this.alive(u.side)) {
-        if (distance(a.pos, u.pos) > ULT_RADIUS) continue;
-        a.shield += Math.round(u.maxHp * (a === u ? ULT_SELF_SHIELD : ULT_ALLY_SHIELD));
+        const amount = Math.round(u.maxHp * (a === u ? ULT_SELF_SHIELD : ULT_ALLY_SHIELD));
+        a.shield += amount;
         a.shieldTime = SHIELD_TIME;
+        this.events.push({ type: 'shield', src: u.id, dst: a.id, amount });
       }
     });
   }
@@ -591,8 +605,6 @@ export class BattleEngine {
       dst.poisonTime = 0;
       this.grid.remove(dst.id, dst.pos);
       this.events.push({ type: 'death', dst: dst.id });
-    } else if (dst.cls === 'tank' && !dst.ultUsed && dst.hp < dst.maxHp * ULT_HP) {
-      this.ultimate(dst);
     }
   }
 
