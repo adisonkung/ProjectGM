@@ -1,7 +1,8 @@
 <div class="wrap" cdkDropListGroup>
   <div class="board" [style.--cols]="cols" [style.--rows]="rows">
+    <app-field />
     @for (cell of enemyCells(); track $index) {
-      <div class="cell enemy-half" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row">
+      <div class="cell enemy-half" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row + 1">
         @if (cell.enemy; as e) {
           <div class="unit foe" [title]="e.name">
             <app-unit-sprite [cls]="e.cls" side="enemy" [boss]="e.boss" [flip]="true" />
@@ -11,7 +12,7 @@
     }
 
     @for (cell of allyCells; track $index) {
-      <div class="cell ally" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row" [class.target]="selected() !== null"
+      <div class="cell ally" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row + 1" [class.target]="selected() !== null"
            cdkDropList [cdkDropListData]="cell" cdkDropListSortingDisabled [cdkDropListEnterPredicate]="canEnterCell"
            (cdkDropListDropped)="dropOnCell($event)" (click)="tapCell(cell)"
            (keydown.enter)="tapCell(cell)" (keydown.space)="$event.preventDefault(); tapCell(cell)"
@@ -26,7 +27,6 @@
         }
       </div>
     }
-    <div class="midline"></div>
   </div>
 
   <div class="bar">

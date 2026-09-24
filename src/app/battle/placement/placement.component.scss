@@ -1,4 +1,4 @@
-:host { display: block; --cell: min(60px, calc((100vw - 32px) / 10)); }
+:host { display: block; --cell: min(56px, calc((100vw - 32px) / 12)); }
 .wrap { display: grid; gap: 10px; }
 
 .board {
@@ -7,17 +7,10 @@
   border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--board);
 }
 .cell {
-  position: relative; background: var(--board-ally);
-  &.odd { background: var(--board-ally-2); }
-  &.enemy-half { background: var(--board-enemy); }
-  &.enemy-half.odd { background: var(--board-enemy-2); }
-  &.ally { cursor: pointer; box-shadow: inset 0 0 0 1px #ffffff08; }
+  position: relative;
+  &.ally { cursor: pointer; }
   &.ally.target:hover, &.ally.cdk-drop-list-receiving:hover { box-shadow: inset 0 0 0 2px var(--cyan); }
-  &.cdk-drop-list-dragging { box-shadow: inset 0 0 0 1px #5ec8e044; }
-}
-.midline {
-  position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; pointer-events: none;
-  background: linear-gradient(180deg, transparent, var(--gold), transparent); opacity: 0.5;
+  &.ally.cdk-drop-list-dragging { box-shadow: inset 0 0 0 1px #5ec8e055; }
 }
 
 .unit {
@@ -65,3 +58,4 @@
 .empty { margin: auto; font-size: 13px; color: var(--muted); }
 
 @media (prefers-reduced-motion: reduce) { .cdk-drag-animating { transition: none; } }
+@media (max-width: 480px) { .tag, .lv { display: none; } }

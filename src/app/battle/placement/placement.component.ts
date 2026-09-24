@@ -7,7 +7,8 @@ import { StageDef } from '../../core/models/stage';
 import { LANES, SIDE_DEPTH, TEAM_SIZE } from '../../core/rules/team';
 import { RosterService } from '../../core/services/roster.service';
 import { TeamService } from '../../core/services/team.service';
-import { BOARD_COLS, BOARD_ROWS, toBoard } from '../engine/grid';
+import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS, toBoard } from '../engine/grid';
+import { FieldComponent } from '../field/field.component';
 import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 
 /** ช่องในฝั่งเรา (r = ความลึก 0 หน้าสุด ติดเส้นกลาง, c = เลน) พร้อมตำแหน่งบนกระดาน */
@@ -27,7 +28,7 @@ interface EnemyCell {
 /** ตำแหน่ง grid (เริ่มที่ 1) ของช่องในฝั่งนั้น */
 const place = (side: 'ally' | 'enemy', r: number, c: number) => {
   const b = toBoard(side, { r, c });
-  return { row: b.r + 1, col: b.c + 1 };
+  return { row: b.r + SCENERY_ROWS + 1, col: b.c + 1 };
 };
 
 interface HeroView {
@@ -45,12 +46,12 @@ interface HeroView {
 
 /**
  * กระดานจัดตำแหน่งก่อนต่อสู้ (แนวนอน): ฝั่งขวาแสดงศัตรูของชั้นที่เลือก (ดูอย่างเดียว)
- * ฝั่งซ้าย (ลึก 5 x 7 เลน) ลากฮีโร่จากม้านั่งมาวาง / ลากสลับ / ลากกลับม้านั่งเพื่อถอดออก
+ * ฝั่งซ้าย (ลึก 6 x 3 เลน, 2 แถวบนเป็นฉาก) ลากฮีโร่จากม้านั่งมาวาง / ลากสลับ / ลากกลับม้านั่งเพื่อถอดออก
  * หรือแตะเลือกฮีโร่แล้วแตะช่อง (ใช้ได้ทั้งมือถือและคีย์บอร์ด)
  */
 @Component({
   selector: 'app-placement',
-  imports: [CdkDropListGroup, CdkDropList, CdkDrag, UnitSpriteComponent],
+  imports: [CdkDropListGroup, CdkDropList, CdkDrag, UnitSpriteComponent, FieldComponent],
   templateUrl: './placement.component.html',
   styleUrl: './placement.component.scss',
 })
@@ -63,7 +64,7 @@ export class PlacementComponent {
 
   readonly teamSize = TEAM_SIZE;
   readonly cols = BOARD_COLS;
-  readonly rows = BOARD_ROWS;
+  readonly rows = BOARD_ROWS + SCENERY_ROWS;
   readonly selected = signal<number | null>(null);
   readonly message = signal<string | null>(null);
 

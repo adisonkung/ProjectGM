@@ -9,17 +9,28 @@ export const TEAM_SIZE = 5;
 /** ความลึกของฝั่งเรา (r ใน TeamSlot: 0 = หน้าสุด) และจำนวนเลน (c) */
 export { LANES, SIDE_DEPTH };
 
-/** จัดทีมอัตโนมัติ: แทงก์/นักสู้แถวหน้า, สายระยะไกลแถวหลัง */
+const LANE_ORDER = [1, 0, 2];
+/** ความลึกที่ใช้วางสายระยะไกลตอนจัดอัตโนมัติ (ไม่ต้องหลังสุด จะได้ยิงถึงเร็ว) */
+const BACK_DEPTH = 3;
+
+/** จัดทีมอัตโนมัติ: แทงก์/นักสู้คอลัมน์หน้า, สายระยะไกลคอลัมน์หลัง (เลนละตัว ล้นแล้วถอยไปอีกคอลัมน์) */
 export function autoPlace(heroes: OwnedHero[]): TeamSlot[] {
-  const front = [3, 2, 4, 1, 5, 0, 6];
-  const back = [3, 1, 5, 2, 4, 0, 6];
   const slots: TeamSlot[] = [];
-  let fi = 0;
-  let bi = 0;
+  const taken = new Set<string>();
+  const put = (uid: number, depth: number, dir: 1 | -1) => {
+    for (let r = depth; r >= 0 && r < SIDE_DEPTH; r += dir) {
+      const c = LANE_ORDER.find(l => !taken.has(`${r},${l}`));
+      if (c != null) {
+        taken.add(`${r},${c}`);
+        slots.push({ uid, r, c });
+        return;
+      }
+    }
+  };
   for (const h of heroes.slice(0, TEAM_SIZE)) {
     const cls = HERO_BY_ID[h.templateId].cls;
-    if (cls === 'tank' || cls === 'fighter') slots.push({ uid: h.uid, r: 0, c: front[fi++] });
-    else slots.push({ uid: h.uid, r: SIDE_DEPTH - 1, c: back[bi++] });
+    if (cls === 'tank' || cls === 'fighter') put(h.uid, 0, 1);
+    else put(h.uid, BACK_DEPTH, 1);
   }
   return slots;
 }

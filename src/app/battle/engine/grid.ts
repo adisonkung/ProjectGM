@@ -1,22 +1,27 @@
 import { Cell, Side } from '../../core/models/unit';
 
 /**
- * กระดานแนวนอน 7 แถว x 10 คอลัมน์: ฝั่งเราอยู่ซ้าย (คอลัมน์ 0-4) ศัตรูอยู่ขวา (คอลัมน์ 5-9)
+ * สนามรบแนวนอน 3 เลน x 12 คอลัมน์: ฝั่งเราอยู่ซ้าย (คอลัมน์ 0-5) ศัตรูอยู่ขวา (คอลัมน์ 6-11)
+ * (หน้าจอวาดฉากเพิ่มด้านบนอีก SCENERY_ROWS แถวเพื่อความสูง แต่เอนจินไม่รู้จักแถวเหล่านั้น)
  * ตัวละครเป็นภาพด้านข้าง ฝั่งเราหันขวา ศัตรูหันซ้าย
  */
-export const BOARD_ROWS = 7;
-export const BOARD_COLS = 10;
+export const BOARD_ROWS = 3;
+export const BOARD_COLS = 12;
 /** ความลึกของแต่ละฝั่ง (จำนวนคอลัมน์ นับจากเส้นกลาง) */
-export const SIDE_DEPTH = 5;
-/** จำนวนเลน (แถว) ของแต่ละฝั่ง */
-export const LANES = 7;
+export const SIDE_DEPTH = 6;
+/** จำนวนเลน (แถว) ที่ยืนได้ */
+export const LANES = BOARD_ROWS;
+/** แถวฉากด้านบน (แสดงผลอย่างเดียว วางตัวไม่ได้) */
+export const SCENERY_ROWS = 2;
+/** ระหว่างสู้ ยืนซ้อนกันในช่องเดียวได้กี่ตัว (ตอนเริ่มยังช่องละ 1 ตัว) */
+export const STACK_CAP = Infinity;
 
 /** ระยะแบบ 8 ทิศ (แนวทแยงนับเป็น 1 ช่อง) */
 export const distance = (a: Cell, b: Cell) => Math.max(Math.abs(a.r - b.r), Math.abs(a.c - b.c));
 
 /**
- * แปลงพิกัดในฝั่งตัวเอง เป็นพิกัดจริงบนกระดาน
- * พิกัดในฝั่ง: r = ความลึก (0 = คอลัมน์หน้าสุด ติดเส้นกลาง, 4 = หลังสุด), c = เลน 0-6 (บนลงล่าง)
+ * แปลงพิกัดในฝั่งตัวเอง เป็นพิกัดจริงบนสนาม
+ * พิกัดในฝั่ง: r = ความลึก (0 = คอลัมน์หน้าสุด ติดเส้นกลาง, 5 = หลังสุด), c = เลน 0-2 (บนลงล่าง)
  */
 export function toBoard(side: Side, local: Cell): Cell {
   return side === 'ally'
@@ -24,12 +29,18 @@ export function toBoard(side: Side, local: Cell): Cell {
     : { r: local.c, c: SIDE_DEPTH + local.r };
 }
 
-/** ช่องนี้อยู่ฝั่งไหนของกระดาน */
+/** ช่องนี้อยู่ฝั่งไหนของสนาม */
 export const sideOf = (cell: Cell): Side => (cell.c < SIDE_DEPTH ? 'ally' : 'enemy');
 
-/** เก็บว่าช่องไหนมียูนิตยืนอยู่ */
+/** พิกัดในฝั่งอยู่ในขอบเขตไหม */
+export const validLocal = (p: Cell) => p.r >= 0 && p.r < SIDE_DEPTH && p.c >= 0 && p.c < LANES;
+
+/** เก็บว่าช่องไหนมียูนิตยืนอยู่ (ยืนซ้อนกันได้ไม่เกิน cap ตัว) */
 export class Grid {
-  private readonly occ = new Map<number, number>();
+  private readonly occ = new Map<number, number[]>();
+
+  /** cap = จำนวนตัวที่เดินเข้าช่องเดียวกันได้ (ค่าเริ่ม 1 = ห้ามซ้อน) */
+  constructor(private readonly cap = 1) {}
 
   static key(c: Cell): number {
     return c.r * BOARD_COLS + c.c;
@@ -51,25 +62,39 @@ export class Grid {
     return out;
   }
 
+  /** ช่องว่างจริง ๆ (ใช้ตอนวางตัวเริ่มต้น/เกิดใหม่) */
   isFree(c: Cell): boolean {
-    return Grid.inBounds(c) && !this.occ.has(Grid.key(c));
+    return Grid.inBounds(c) && !this.occ.get(Grid.key(c))?.length;
+  }
+
+  /** เดินเข้าได้ไหม (ยังไม่เต็มตามจำนวนที่ซ้อนได้) */
+  canEnter(c: Cell): boolean {
+    return Grid.inBounds(c) && (this.occ.get(Grid.key(c))?.length ?? 0) < this.cap;
   }
 
   occupant(c: Cell): number | undefined {
-    return this.occ.get(Grid.key(c));
+    return this.occ.get(Grid.key(c))?.[0];
+  }
+
+  occupants(c: Cell): readonly number[] {
+    return this.occ.get(Grid.key(c)) ?? [];
   }
 
   place(id: number, c: Cell): void {
-    if (!this.isFree(c)) throw new Error(`Cell ${c.r},${c.c} is occupied`);
-    this.occ.set(Grid.key(c), id);
+    if (!this.canEnter(c)) throw new Error(`Cell ${c.r},${c.c} is full`);
+    const k = Grid.key(c);
+    this.occ.set(k, [...(this.occ.get(k) ?? []), id]);
   }
 
   move(id: number, from: Cell, to: Cell): void {
-    this.occ.delete(Grid.key(from));
+    this.remove(id, from);
     this.place(id, to);
   }
 
-  remove(c: Cell): void {
-    this.occ.delete(Grid.key(c));
+  remove(id: number, c: Cell): void {
+    const k = Grid.key(c);
+    const list = (this.occ.get(k) ?? []).filter(x => x !== id);
+    if (list.length) this.occ.set(k, list);
+    else this.occ.delete(k);
   }
 }

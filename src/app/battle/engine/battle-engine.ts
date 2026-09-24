@@ -4,7 +4,7 @@ import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec } from '../../core/models/unit';
 import { enemyStats } from '../../core/rules/stats';
-import { distance, Grid, LANES, SIDE_DEPTH, toBoard } from './grid';
+import { distance, Grid, LANES, SIDE_DEPTH, STACK_CAP, toBoard } from './grid';
 import { greedyStep, nextStep } from './pathfinding';
 import { createRng } from './rng';
 
@@ -85,7 +85,7 @@ const SHIELD_TIME = 6;
  */
 export class BattleEngine {
   readonly units: BattleUnit[] = [];
-  readonly grid = new Grid();
+  readonly grid = new Grid(STACK_CAP);
   time = 0;
   result: BattleResult | null = null;
 
@@ -220,7 +220,7 @@ export class BattleEngine {
   private freeCellOnSide(side: Side, cls: HeroClass): Cell | null {
     const depth = Array.from({ length: SIDE_DEPTH }, (_, i) => i);
     const rows = cls === 'tank' || cls === 'fighter' ? depth : depth.reverse();
-    const cols = [3, 2, 4, 1, 5, 0, 6];
+    const cols = [1, 0, 2];
     for (const r of rows) {
       for (const c of cols) {
         const cell = toBoard(side, { r, c });
@@ -352,7 +352,7 @@ export class BattleEngine {
     if (!t.alive) return;
     t.castLock = Math.max(t.castLock, CHARGE_STUN);
     const back = { r: t.pos.r + Math.sign(t.pos.r - u.pos.r), c: t.pos.c + Math.sign(t.pos.c - u.pos.c) };
-    if (this.grid.isFree(back)) {
+    if (this.grid.canEnter(back)) {
       this.grid.move(t.id, t.pos, back);
       t.pos = back;
     }
@@ -388,7 +388,7 @@ export class BattleEngine {
       dst.hp = 0;
       dst.alive = false;
       dst.shield = 0;
-      this.grid.remove(dst.pos);
+      this.grid.remove(dst.id, dst.pos);
       this.events.push({ type: 'death', dst: dst.id });
     } else if (ULT_NAME[dst.cls] && !dst.ultUsed && dst.hp < dst.maxHp * ULT_HP) {
       this.ultimate(dst);

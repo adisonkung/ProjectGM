@@ -5,8 +5,8 @@ import { UnitSpec } from '../../core/models/unit';
 import { BattleEngine, BattleEvent } from './battle-engine';
 
 const strongTeam: UnitSpec[] = [
-  { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 2000, atk: 80 }, pos: { r: 0, c: 3 } },
-  { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 1500, atk: 120 }, pos: { r: 0, c: 2 } },
+  { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 2000, atk: 80 }, pos: { r: 0, c: 1 } },
+  { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 1500, atk: 120 }, pos: { r: 0, c: 0 } },
   { name: 'A', cls: 'archer', stats: { ...CLASS_BASE.archer, hp: 900, atk: 110 }, pos: { r: 3, c: 1 } },
 ];
 
@@ -31,12 +31,13 @@ describe('BattleEngine', () => {
     expect(e.time).toBeGreaterThanOrEqual(STAGES[2].timeLimit - 0.05);
   });
 
-  it('never puts two living units on one cell', () => {
+  it('starts every unit on its own cell and keeps the grid in sync with positions', () => {
     const e = new BattleEngine({ allies: strongTeam, stage: STAGES[8], enemyTemplates: ENEMIES, seed: 7 });
+    const start = e.units.map(u => `${u.pos.r},${u.pos.c}`);
+    expect(new Set(start).size).toBe(start.length);
     while (!e.result) {
       e.step(0.05);
-      const cells = e.units.filter(u => u.alive).map(u => `${u.pos.r},${u.pos.c}`);
-      expect(new Set(cells).size).toBe(cells.length);
+      for (const u of e.units.filter(x => x.alive)) expect(e.grid.occupants(u.pos)).toContain(u.id);
     }
   });
 
@@ -51,10 +52,24 @@ describe('BattleEngine', () => {
     kinds.forEach((k, i) => expect(k).toBe(i % 2 ? 'skill2' : 'skill'));
   });
 
+  it('lets several melee units stack on the same cell while fighting', () => {
+    const mob: UnitSpec[] = Array.from({ length: 5 }, (_, i) => ({
+      name: `F${i}`, cls: 'fighter' as const, stats: { ...CLASS_BASE.fighter, hp: 3000 }, pos: { r: i % 3, c: i % 3 },
+    }));
+    const e = new BattleEngine({ allies: mob, stage: STAGES[0], enemyTemplates: ENEMIES, seed: 5 });
+    let stacked = false;
+    while (!e.result && e.time < 30 && !stacked) {
+      e.step(0.05);
+      const cells = e.units.filter(u => u.alive).map(u => `${u.pos.r},${u.pos.c}`);
+      stacked = new Set(cells).size < cells.length;
+    }
+    expect(stacked).toBeTrue();
+  });
+
   it('tank ultimate fires once below 40% hp and shields nearby allies', () => {
     const weakTank: UnitSpec[] = [
-      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 300 }, pos: { r: 0, c: 3 } },
-      { name: 'F', cls: 'fighter', stats: CLASS_BASE.fighter, pos: { r: 1, c: 3 } },
+      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 300 }, pos: { r: 0, c: 1 } },
+      { name: 'F', cls: 'fighter', stats: CLASS_BASE.fighter, pos: { r: 1, c: 1 } },
     ];
     const e = new BattleEngine({ allies: weakTank, stage: STAGES[9], enemyTemplates: ENEMIES, seed: 2 });
     const ults: BattleEvent[] = [];
