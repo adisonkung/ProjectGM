@@ -15,7 +15,7 @@
     }
   </div>
   <p class="mode" [class.surv]="stage().mode === 'survive'">
-    {{ stage().mode === 'eliminate' ? 'กำจัดศัตรูทั้งหมด' : 'เอาตัวรอด (มีศัตรูเสริมเป็นระลอก)' }} · {{ stage().timeLimit }} วิ
+    {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + (1 + (stage().rounds?.length ?? 0)) + ' เวฟ (ภาพนี้คือเวฟแรก)' : 'เอาตัวรอด (มีศัตรูเสริมเป็นระลอก)' }} · {{ stage().timeLimit }} วิ
   </p>
 
   <app-placement [stage]="stage()" />

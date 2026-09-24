@@ -1,3 +1,4 @@
+import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { CLASS_NAME } from '../../core/data/classes';
@@ -61,6 +62,7 @@ export class PlacementComponent {
 
   /** ด่านที่ใช้แสดงตำแหน่งศัตรู (ไม่ใส่ = ครึ่งบนว่าง) */
   readonly stage = input<StageDef | null>(null);
+  readonly background = computed(() => BACKGROUNDS[this.stage()?.background ?? ''] ?? null);
 
   readonly teamSize = TEAM_SIZE;
   readonly cols = BOARD_COLS;

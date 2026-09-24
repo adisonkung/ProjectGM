@@ -1,3 +1,4 @@
+import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { Component, computed, effect, inject, OnDestroy, signal, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ENEMIES } from '../../core/data/enemies';
@@ -39,8 +40,17 @@ export class BattleComponent implements OnDestroy {
   readonly projectiles = signal<ProjectileView[]>([]);
   readonly anims = signal<Record<number, AnimState>>({});
   readonly simReport = signal<string | null>(null);
+  /** เวฟปัจจุบัน (เริ่ม 0) / ทั้งหมด */
+  readonly round = signal(0);
+  readonly totalRounds = signal(1);
+  /** ระยะที่ฉากเลื่อนไปแล้ว (1 = 1 จอ) และเวลาเลื่อน (ms, 0 = ไม่ได้เดินอยู่) */
+  readonly scroll = signal(0);
+  readonly marchMs = signal(0);
+  /** ป้ายกลางจอ เช่น "เวฟ 2/3" */
+  readonly banner = signal<string | null>(null);
 
   readonly stage = computed(() => STAGES[this.floor() - 1]);
+  readonly background = computed(() => BACKGROUNDS[this.stage().background ?? ''] ?? null);
   /** ก่อนกดเริ่ม: แสดงกระดานจัดตำแหน่ง */
   readonly placing = computed(() => !this.running() && !this.result());
   readonly teamPower = computed(() => this.team.units().reduce((a, u) => a + power(u.stats), 0));
@@ -54,6 +64,8 @@ export class BattleComponent implements OnDestroy {
   /** ตัวที่เพิ่งวาร์ป: ปิดการเลื่อนตัวบนจอชั่วครู่ (เวลาเอนจินที่หมดผล) */
   private blinkUntil = new Map<number, number>();
   private animKey = 0;
+  private walkTick = 0;
+  private bannerTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
     const q = Number(inject(ActivatedRoute).snapshot.queryParamMap.get('floor'));
@@ -92,6 +104,11 @@ export class BattleComponent implements OnDestroy {
       enemyTemplates: ENEMIES,
     });
     this.time.set(0);
+    this.round.set(0);
+    this.totalRounds.set(this.engine.totalRounds);
+    this.scroll.set(0);
+    this.marchMs.set(0);
+    this.banner.set(null);
     this.facing.clear();
     this.blinkUntil.clear();
     this.snapshot();
@@ -124,7 +141,9 @@ export class BattleComponent implements OnDestroy {
   private tick(): void {
     for (let i = 0; i < this.speed() && !this.engine.result; i++) this.engine.step(TICK);
     this.handleEvents(this.engine.drainEvents());
-    this.time.set(this.engine.time);
+    this.time.set(this.engine.fightTime);
+    // ระหว่างเดินไปเวฟถัดไป: เล่นท่าเดินต่อเนื่อง
+    if (this.engine.advancing > 0 && ++this.walkTick % 8 === 0) this.marchAnim();
     this.snapshot();
     if (this.engine.result) {
       clearInterval(this.timer);
@@ -134,14 +153,17 @@ export class BattleComponent implements OnDestroy {
   }
 
   private snapshot(): void {
-    const byId = new Map(this.engine.units.map(u => [u.id, u]));
-    for (const u of this.engine.units) {
+    const e = this.engine;
+    const byId = new Map(e.units.map(u => [u.id, u]));
+    for (const u of e.units) {
       const t = u.targetId != null ? byId.get(u.targetId) : undefined;
-      if (t && t.pos.c !== u.pos.c) this.facing.set(u.id, t.pos.c < u.pos.c);
+      if (e.advancing > 0 && u.side === 'ally') this.facing.set(u.id, false);
+      else if (t && t.pos.c !== u.pos.c) this.facing.set(u.id, t.pos.c < u.pos.c);
       else if (!this.facing.has(u.id)) this.facing.set(u.id, u.side === 'enemy');
     }
     this.views.set(
-      this.engine.units.map(u => ({
+      // ศัตรูที่ล้มในเวฟก่อน ๆ ถูกทิ้งไว้ข้างหลังแล้ว ไม่ต้องแสดง
+      e.units.filter(u => u.alive || u.side === 'ally' || u.round === e.round).map(u => ({
         id: u.id,
         side: u.side,
         name: u.name,
@@ -159,8 +181,21 @@ export class BattleComponent implements OnDestroy {
         boss: u.boss,
         flip: this.facing.get(u.id),
         blink: (this.blinkUntil.get(u.id) ?? 0) > this.engine.time,
+        enter: u.side === 'enemy' && u.round > 0,
       })),
     );
+  }
+
+  private marchAnim(): void {
+    const anims = { ...this.anims() };
+    for (const u of this.engine.alive('ally')) anims[u.id] = { anim: 'walk', key: ++this.animKey };
+    this.anims.set(anims);
+  }
+
+  private showBanner(text: string, ms: number): void {
+    clearTimeout(this.bannerTimer);
+    this.banner.set(text);
+    this.bannerTimer = setTimeout(() => this.banner.set(null), ms / this.speed());
   }
 
   private handleEvents(events: BattleEvent[]): void {
@@ -187,6 +222,20 @@ export class BattleComponent implements OnDestroy {
 
     for (const e of events) {
       switch (e.type) {
+        case 'advance':
+          this.round.set(e.round);
+          this.marchMs.set((e.duration * 1000) / this.speed());
+          this.scroll.update(s => s + 1);
+          this.fx.set([]);
+          this.floats.set([]);
+          this.projectiles.set([]);
+          this.showBanner(`เคลียร์! เดินหน้าไปเวฟ ${e.round + 1}/${this.totalRounds()}`, e.duration * 1000);
+          for (const u of this.engine.alive('ally')) set(u.id, 'walk');
+          break;
+        case 'round':
+          this.marchMs.set(0);
+          this.showBanner(`เวฟ ${e.round + 1}/${this.totalRounds()} ศัตรูบุก!`, 1200);
+          break;
         case 'attack':
           set(e.src, 'attack');
           break;

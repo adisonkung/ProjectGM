@@ -23,7 +23,7 @@ describe('TeamBuilderComponent', () => {
 
   it('shows enemies of the selected floor', () => {
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelectorAll('.unit.foe').length).toBe(3);
+    expect(el.querySelectorAll('.unit.foe').length).toBe(2); // ชั้น 1 เวฟแรก
   });
 
   it('tap a hero then tap an empty cell to move it', () => {

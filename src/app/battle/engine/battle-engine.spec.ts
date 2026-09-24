@@ -203,4 +203,31 @@ describe('BattleEngine', () => {
     expect(revives).toBe(1);
     expect(revivedAlive).toBeTrue();
   });
+
+  it('eliminate floors run 3 waves: advance, regroup at home, then the next wave spawns', () => {
+    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[0], enemyTemplates: ENEMIES, seed: 11 });
+    expect(e.totalRounds).toBe(3);
+    const seen: BattleEvent[] = [];
+    let regrouped = true;
+    while (!e.result && e.time < 200) {
+      e.step(0.05);
+      const evs = e.drainEvents();
+      seen.push(...evs);
+      if (evs.some(ev => ev.type === 'advance')) {
+        regrouped &&= e.alive('ally').every(u => u.pos.r === u.home.r && u.pos.c === u.home.c);
+      }
+    }
+    expect(e.result).toBe('win');
+    expect(seen.filter(ev => ev.type === 'advance').map(ev => (ev as { round: number }).round)).toEqual([1, 2]);
+    expect(seen.filter(ev => ev.type === 'round').length).toBe(2);
+    expect(regrouped).toBeTrue();
+    expect(e.units.filter(u => u.side === 'enemy').map(u => u.round)).toContain(2);
+    // เวลาเดินไม่ถูกนับเป็นเวลาต่อสู้
+    expect(e.time - e.fightTime).toBeGreaterThanOrEqual(2 * 2.3);
+  });
+
+  it('survive floors stay a single area', () => {
+    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[2], enemyTemplates: ENEMIES, seed: 3 });
+    expect(e.totalRounds).toBe(1);
+  });
 });

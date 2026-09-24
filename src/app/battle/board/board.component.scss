@@ -137,3 +137,9 @@
   .unit { transition: none; }
   .float { animation-duration: 0.01ms; }
 }
+
+// เดินไปเวฟถัดไป: ทีมค่อย ๆ กลับเข้าแถวพร้อมฉากเลื่อน
+.marching .unit { transition: transform var(--march) cubic-bezier(0.45, 0, 0.3, 1); }
+// ศัตรูเวฟใหม่วิ่งเข้าจากขอบขวา
+.unit.enter { animation: charge calc(0.9s / var(--spd, 1)) cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+@keyframes charge { from { translate: 600% 0; } }
