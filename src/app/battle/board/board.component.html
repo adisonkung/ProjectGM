@@ -1,1 +1,27 @@
-<p>board works!</p>
+<div class="board" [style.--spd]="speed()" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="กระดานต่อสู้ 8 แถว 7 คอลัมน์">
+  @for (cell of cells; track $index) {
+    <div class="cell" [class.enemy-half]="cell.r < rows / 2" [class.odd]="(cell.r + cell.c) % 2 === 1"></div>
+  }
+  <div class="midline"></div>
+
+  @for (u of units(); track u.id) {
+    <div class="unit" [class.dead]="!u.alive" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
+         [class.taunt]="u.taunt" [style.transform]="pos(u.r, u.c)" [style.z-index]="u.r + 2">
+      <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss"
+                       [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
+      @if (u.alive) {
+        <div class="bars">
+          <div class="bar hp"><i [style.width.%]="u.hpPct"></i></div>
+          <div class="bar mana"><i [style.width.%]="u.manaPct"></i></div>
+        </div>
+        @if (u.level) { <span class="lv">{{ u.level }}</span> }
+      }
+    </div>
+  }
+
+  @for (f of floats(); track f.id) {
+    <div class="float-wrap" [style.transform]="pos(f.r, f.c)">
+      <span [class]="'float ' + f.kind">{{ f.text }}</span>
+    </div>
+  }
+</div>

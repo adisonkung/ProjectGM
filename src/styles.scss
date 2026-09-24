@@ -1,1 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  color-scheme: dark;
+  --ground: #0d1220;
+  --panel: #151c2d;
+  --panel2: #1c2540;
+  --line: #2a355a;
+  --text: #e6e9f3;
+  --muted: #8e97b5;
+  --gold: #f0b54a;
+  --cyan: #5ec8e0;
+  --hp: #56c07a;
+  --danger: #e3625a;
+  --r1: #8b93a7;
+  --r2: #5fbf7f;
+  --r3: #4f9be8;
+  --r4: #b07cf0;
+  --r5: #f0b54a;
+  --board: #0a0f1c;
+  --board-ally: #121a30;
+  --board-ally-2: #0f1628;
+  --board-enemy: #1c1420;
+  --board-enemy-2: #18111b;
+  --disp: 'Chakra Petch', 'IBM Plex Sans Thai', system-ui, sans-serif;
+  --body: 'IBM Plex Sans Thai', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--ground); color: var(--text); }
+body { font-family: var(--body); font-size: 15px; line-height: 1.55; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+.placeholder { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px; color: var(--muted); }
+.placeholder h1 { font: 700 20px var(--disp); color: var(--text); margin: 0 0 6px; }
+.placeholder p { margin: 0; }

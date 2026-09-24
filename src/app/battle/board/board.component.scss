@@ -1,0 +1,125 @@
+:host {
+  display: block;
+  --cell: min(68px, calc((100vw - 32px) / 7));
+}
+
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--cell));
+  grid-template-rows: repeat(var(--rows), var(--cell));
+  width: max-content;
+  margin-inline: auto;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--board);
+}
+
+.cell {
+  background: var(--board-ally);
+  &.odd { background: var(--board-ally-2); }
+  &.enemy-half { background: var(--board-enemy); }
+  &.enemy-half.odd { background: var(--board-enemy-2); }
+}
+
+.midline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.5;
+}
+
+.unit,
+.float-wrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--cell);
+  height: var(--cell);
+  transition: transform calc(0.45s / var(--spd, 1)) linear;
+}
+
+.unit.dead {
+  opacity: 0;
+  transition: transform calc(0.45s / var(--spd, 1)) linear, opacity 0.6s ease 0.2s;
+  &.has-sprite { opacity: 0.55; }
+}
+
+.unit.taunt::before {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+}
+
+.bars {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 4%;
+  display: grid;
+  gap: 2px;
+  z-index: 2;
+}
+
+.bar {
+  height: 4px;
+  border-radius: 2px;
+  background: #0009;
+  overflow: hidden;
+  i {
+    display: block;
+    height: 100%;
+    background: var(--hp);
+    transition: width 0.12s linear;
+  }
+  &.mana { height: 3px; i { background: var(--cyan); } }
+}
+
+.enemy .bar.hp i { background: var(--danger); }
+
+.lv {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font: 600 10px var(--disp);
+  color: var(--muted);
+  z-index: 2;
+}
+
+.float-wrap {
+  pointer-events: none;
+  z-index: 20;
+  transition: none;
+}
+
+.float {
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  transform: translateX(-50%);
+  font: 700 14px var(--disp);
+  color: #fff;
+  text-shadow: 0 1px 3px #000;
+  white-space: nowrap;
+  animation: rise 0.9s forwards;
+  &.crit { color: var(--gold); font-size: 17px; }
+  &.heal { color: var(--hp); }
+  &.skill { color: var(--gold); font-size: 11px; top: -4%; }
+}
+
+@keyframes rise {
+  to { transform: translate(-50%, -28px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unit { transition: none; }
+  .float { animation-duration: 0.01ms; }
+}

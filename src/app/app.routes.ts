@@ -1,3 +1,16 @@
 import { Routes } from '@angular/router';
+import { BattleComponent } from './pages/battle/battle.component';
+import { GachaComponent } from './pages/gacha/gacha.component';
+import { LobbyComponent } from './pages/lobby/lobby.component';
+import { TeamBuilderComponent } from './pages/team-builder/team-builder.component';
+import { TowerComponent } from './pages/tower/tower.component';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'lab' },
+  { path: 'lobby', component: LobbyComponent, title: 'ฐาน · ProjectGM' },
+  { path: 'team', component: TeamBuilderComponent, title: 'จัดทีม · ProjectGM' },
+  { path: 'tower', component: TowerComponent, title: 'หอคอย · ProjectGM' },
+  { path: 'gacha', component: GachaComponent, title: 'สุ่ม · ProjectGM' },
+  { path: 'lab', component: BattleComponent, title: 'ห้องทดลองต่อสู้ · ProjectGM' },
+  { path: '**', redirectTo: 'lab' },
+];

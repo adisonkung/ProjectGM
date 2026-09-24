@@ -1,2 +1,30 @@
-export interface Stage {
+import { HeroClass } from './hero';
+import { Cell } from './unit';
+
+export type WinCondition = 'eliminate' | 'survive';
+
+export interface EnemyTemplate {
+  id: string;
+  name: string;
+  cls: HeroClass;
+  hp: number;
+  atk: number;
+  def: number;
+  boss?: boolean;
+}
+
+export interface EnemyPlacement extends Cell {
+  enemy: string;
+}
+
+export interface StageDef {
+  floor: number;
+  mode: WinCondition;
+  /** วินาที: ด่านกำจัดคือเวลาจำกัด, ด่านเอาตัวรอดคือเวลาที่ต้องรอด */
+  timeLimit: number;
+  enemies: EnemyPlacement[];
+  /** เฉพาะโหมดเอาตัวรอด: เรียกศัตรูเสริมทุก ๆ กี่วินาที */
+  waveEvery?: number;
+  /** รายชื่อศัตรูที่จะวนเกิดในระลอกเสริม */
+  waves?: string[];
 }

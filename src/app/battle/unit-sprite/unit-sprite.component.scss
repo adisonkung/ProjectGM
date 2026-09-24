@@ -1,0 +1,48 @@
+:host {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.sheet {
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: 165%;
+  aspect-ratio: 132 / 100;
+  transform: translateX(-50%);
+  background-repeat: no-repeat;
+  background-size: 1000% 600%;
+  background-position: 0% 0%;
+}
+
+.token {
+  width: 72%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--rc);
+  background: color-mix(in srgb, var(--rc) 16%, var(--panel2));
+  border: 2px solid var(--rc);
+
+  &.enemy {
+    --rc: var(--danger);
+    border-radius: 28%;
+  }
+  &.boss {
+    width: 88%;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--danger) 60%, transparent);
+  }
+  svg {
+    width: 55%;
+    height: 55%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}

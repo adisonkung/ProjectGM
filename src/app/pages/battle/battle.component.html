@@ -1,1 +1,45 @@
-<p>battle works!</p>
+<section class="lab">
+  <header class="head">
+    <div>
+      <h1>ห้องทดลองต่อสู้</h1>
+      <p class="sub">ทดสอบทีมปัจจุบันบนกระดาน 8×7 · ไม่มีผลกับเซฟ</p>
+    </div>
+    <div class="power">พลังทีม <b>{{ teamPower() }}</b></div>
+  </header>
+
+  <div class="floors" role="group" aria-label="เลือกชั้น">
+    @for (s of stages; track s.floor) {
+      <button type="button" [attr.aria-pressed]="floor() === s.floor" [class.surv]="s.mode === 'survive'"
+              [disabled]="running()" (click)="selectFloor(s.floor)">{{ s.floor }}</button>
+    }
+  </div>
+
+  <div class="status">
+    <span class="chip" [class.surv]="stage().mode === 'survive'">
+      {{ stage().mode === 'eliminate' ? 'กำจัดศัตรูทั้งหมด' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ
+    </span>
+    <span class="timer">{{ timeLeft() }}<small>วิ</small></span>
+  </div>
+
+  <app-board [units]="views()" [floats]="floats()" [anims]="anims()" [speed]="speed()" />
+
+  @if (result(); as r) {
+    <div class="result" [class.win]="r === 'win'">
+      {{ r === 'win' ? 'ชนะ' : r === 'lose' ? 'แพ้' : 'หมดเวลา' }} · {{ time().toFixed(1) }} วินาที
+    </div>
+  }
+
+  <div class="controls">
+    <button type="button" class="primary" (click)="start()" [disabled]="running()">
+      {{ result() ? 'สู้อีกครั้ง' : 'เริ่มต่อสู้' }}
+    </button>
+    <div class="seg" role="group" aria-label="ความเร็ว">
+      @for (v of [1, 2, 4]; track v) {
+        <button type="button" [attr.aria-pressed]="speed() === v" (click)="setSpeed(v)">x{{ v }}</button>
+      }
+    </div>
+    <button type="button" (click)="prepare()">รีเซ็ต</button>
+    <button type="button" (click)="simulate()" [disabled]="running()">จำลอง 100 รอบ</button>
+  </div>
+  @if (simReport()) { <p class="sim">{{ simReport() }}</p> }
+</section>
