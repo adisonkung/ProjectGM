@@ -14,7 +14,7 @@ export type BattleEvent =
   | { type: 'attack'; src: number; dst: number }
   | { type: 'cast'; src: number; skill: string; kind: SkillKind; dst?: number }
   | { type: 'move'; src: number }
-  | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number }
+  | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number; poison?: boolean }
   | { type: 'heal'; dst: number; amount: number }
   | { type: 'death'; dst: number }
   | { type: 'spawn'; dst: number };
@@ -54,6 +54,10 @@ export interface BattleUnit {
   /** โล่ดูดซับดาเมจ และเวลาที่เหลือ */
   shield: number;
   shieldTime: number;
+  /** พิษ: ดาเมจต่อวินาที เวลาที่เหลือ และตัวนับรอบติดดาเมจ */
+  poison: number;
+  poisonTime: number;
+  poisonTick: number;
 }
 
 export interface BattleConfig {
@@ -78,6 +82,17 @@ const ULT_SELF_SHIELD = 0.3;
 const ULT_ALLY_SHIELD = 0.15;
 const ULT_LOCK = 0.6;
 const SHIELD_TIME = 6;
+/** นักฆ่า สกิล 1 จู่โจมเงา: วาร์ปไปหลังศัตรูที่เลือดเหลือน้อยที่สุด ฟัน 200% */
+const BLINK_MUL = 2;
+/** นักฆ่า สกิล 2 ควันพิษ: ฟัน 120% + พิษรอบเป้าหมาย 1 ช่อง 25% atk ต่อวินาที 4 วิ */
+const SMOKE_MUL = 1.2;
+const POISON_DPS = 0.25;
+const POISON_TIME = 4;
+const POISON_TICK = 0.5;
+/** นักฆ่า ท่าไม้ตาย ประหารเงามายา: ครั้งเดียว เมื่อมีศัตรูเลือด < 35% ในระยะ 4 ช่อง → วาร์ปไปฟัน 350% คริแน่นอน */
+const EXEC_HP = 0.35;
+const EXEC_REACH = 4;
+const EXEC_MUL = 3.5;
 
 /**
  * เอนจินต่อสู้อัตโนมัติบนกระดาน 8x7 (TypeScript ล้วน ไม่ผูกกับ Angular)
@@ -188,6 +203,9 @@ export class BattleEngine {
       ultUsed: false,
       shield: 0,
       shieldTime: 0,
+      poison: 0,
+      poisonTime: 0,
+      poisonTick: 0,
     };
     this.grid.place(u.id, pos);
     this.units.push(u);
@@ -219,7 +237,7 @@ export class BattleEngine {
   /** หาช่องว่างในครึ่งกระดานของฝั่งนั้น แถวหน้าก่อนสำหรับสายประชิด แถวหลังก่อนสำหรับสายระยะไกล */
   private freeCellOnSide(side: Side, cls: HeroClass): Cell | null {
     const depth = Array.from({ length: SIDE_DEPTH }, (_, i) => i);
-    const rows = cls === 'tank' || cls === 'fighter' ? depth : depth.reverse();
+    const rows = cls === 'tank' || cls === 'fighter' || cls === 'assassin' ? depth : depth.reverse();
     const cols = [3, 2, 4, 1, 5, 0, 6];
     for (const r of rows) {
       for (const c of cols) {
@@ -237,9 +255,29 @@ export class BattleEngine {
     u.moveCd -= dt;
     if (u.taunt > 0) u.taunt -= dt;
     if (u.shieldTime > 0 && (u.shieldTime -= dt) <= 0) u.shield = 0;
+    if (u.poisonTime > 0) {
+      u.poisonTime -= dt;
+      u.poisonTick += dt;
+      if (u.poisonTick >= POISON_TICK || u.poisonTime <= 0) {
+        this.applyDamage(u, Math.max(1, Math.round(u.poison * u.poisonTick)), false, true);
+        u.poisonTick = 0;
+        if (!u.alive) return;
+      }
+    }
     if (u.castLock > 0) {
       u.castLock -= dt;
       return;
+    }
+
+    // นักฆ่า: ท่าไม้ตายทันทีเมื่อเห็นศัตรูใกล้ตาย
+    if (u.cls === 'assassin' && !u.ultUsed) {
+      const prey = this.alive(u.side === 'ally' ? 'enemy' : 'ally')
+        .filter(f => f.hp < f.maxHp * EXEC_HP && distance(f.pos, u.pos) <= EXEC_REACH)
+        .sort((a, b) => a.hp - b.hp)[0];
+      if (prey) {
+        this.execute(u, prey);
+        return;
+      }
     }
 
     // ฮีลเลอร์: ถ้ามีเพื่อนเลือดน้อยในระยะ ให้ฮีลแทนการตี
@@ -316,8 +354,15 @@ export class BattleEngine {
     // สลับสกิล 1 / 2 ทุกครั้งที่ร่าย (สายที่ยังไม่มีสกิล 2 ใช้ผลเดิม แค่เปลี่ยนท่า)
     const kind: SkillKind = u.casts++ % 2 ? 'skill2' : 'skill';
     const skill = (kind === 'skill2' && SKILL2_NAME[u.cls]) || SKILL_NAME[u.cls];
-    this.events.push({ type: 'cast', src: u.id, skill, kind, dst: t.id });
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    // นักฆ่า สกิล 1 เลือกเป้าใหม่: ศัตรูที่เลือดเหลือน้อยที่สุด (มักเป็นแถวหลัง) ที่มีช่องว่างข้าง ๆ
+    if (u.cls === 'assassin' && kind === 'skill') {
+      const prey = foes
+        .filter(f => this.freeCellNear(f.pos, u.pos))
+        .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp || distance(b.pos, u.pos) - distance(a.pos, u.pos))[0];
+      if (prey) t = prey;
+    }
+    this.events.push({ type: 'cast', src: u.id, skill, kind, dst: t.id });
     switch (u.cls) {
       case 'tank':
         if (kind === 'skill2') {
@@ -329,6 +374,18 @@ export class BattleEngine {
         break;
       case 'fighter':
         this.damage(u, t, 2.5);
+        break;
+      case 'assassin':
+        if (kind === 'skill') {
+          this.blink(u, t);
+          this.damage(u, t, BLINK_MUL);
+        } else {
+          this.damage(u, t, SMOKE_MUL);
+          for (const f of foes.filter(f => f.alive && distance(f.pos, t.pos) <= 1)) {
+            f.poison = Math.max(f.poison, u.atk * POISON_DPS);
+            f.poisonTime = POISON_TIME;
+          }
+        }
         break;
       case 'archer': {
         const picks = [...foes].sort(() => this.rng() - 0.5).slice(0, 3);
@@ -371,26 +428,58 @@ export class BattleEngine {
     }
   }
 
-  private damage(src: BattleUnit, dst: BattleUnit, mul: number): void {
+  /** ช่องว่างรอบ ๆ ตำแหน่ง ที่อยู่ไกลจาก `from` ที่สุด (= ด้านหลังเป้าหมาย) */
+  private freeCellNear(at: Cell, from: Cell): Cell | null {
+    const free = Grid.neighbors(at).filter(c => this.grid.isFree(c));
+    free.sort((a, b) => distance(b, from) - distance(a, from) || Math.abs(a.r - at.r) - Math.abs(b.r - at.r));
+    return free[0] ?? null;
+  }
+
+  /** วาร์ปไปยืนข้างเป้าหมาย (ฝั่งตรงข้ามกับที่ยืนอยู่) */
+  private blink(u: BattleUnit, t: BattleUnit): void {
+    const cell = this.freeCellNear(t.pos, u.pos);
+    if (!cell) return;
+    this.grid.move(u.id, u.pos, cell);
+    u.pos = cell;
+    u.targetId = t.id;
+  }
+
+  /** นักฆ่า ท่าไม้ตาย: วาร์ปไปประหารศัตรูที่ใกล้ตาย */
+  private execute(u: BattleUnit, t: BattleUnit): void {
+    u.ultUsed = true;
+    u.castLock = ULT_LOCK;
+    u.atkCd = Math.max(u.atkCd, 0.3);
+    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
+    if (distance(u.pos, t.pos) > 1) this.blink(u, t);
+    this.damage(u, t, EXEC_MUL, true);
+  }
+
+  private damage(src: BattleUnit, dst: BattleUnit, mul: number, forceCrit = false): void {
     if (!dst.alive) return;
     let raw = src.atk * mul * (0.9 + this.rng() * 0.2);
-    const crit = this.rng() < CRIT_CHANCE;
+    const crit = forceCrit || this.rng() < CRIT_CHANCE;
     if (crit) raw *= CRIT_MUL;
     if (dst.taunt > 0) raw *= 0.5;
-    const total = Math.max(1, Math.round((raw * 100) / (100 + dst.def)));
+    this.applyDamage(dst, Math.max(1, Math.round((raw * 100) / (100 + dst.def))), crit);
+  }
+
+  /** หักโล่ก่อนแล้วค่อยหักเลือด (ดาเมจพิษไม่เพิ่มมานา) */
+  private applyDamage(dst: BattleUnit, total: number, crit: boolean, poison = false): void {
+    if (!dst.alive) return;
     const blocked = Math.min(dst.shield, total);
     const amount = total - blocked;
     dst.shield -= blocked;
     dst.hp -= amount;
-    dst.mana = Math.min(dst.maxMana, dst.mana + MANA_PER_HIT);
-    this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked });
+    if (!poison) dst.mana = Math.min(dst.maxMana, dst.mana + MANA_PER_HIT);
+    this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked, ...(poison ? { poison } : {}) });
     if (dst.hp <= 0) {
       dst.hp = 0;
       dst.alive = false;
       dst.shield = 0;
+      dst.poisonTime = 0;
       this.grid.remove(dst.pos);
       this.events.push({ type: 'death', dst: dst.id });
-    } else if (ULT_NAME[dst.cls] && !dst.ultUsed && dst.hp < dst.maxHp * ULT_HP) {
+    } else if (dst.cls === 'tank' && !dst.ultUsed && dst.hp < dst.maxHp * ULT_HP) {
       this.ultimate(dst);
     }
   }

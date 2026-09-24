@@ -132,6 +132,7 @@
   animation: rise 0.9s forwards;
   &.crit { color: var(--gold); font-size: 17px; }
   &.heal { color: var(--hp); }
+  &.poison { color: #7ee05a; font-size: 12px; }
   &.skill { color: var(--gold); font-size: 11px; top: -4%; }
 }
 

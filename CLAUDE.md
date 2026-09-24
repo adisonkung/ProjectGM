@@ -21,6 +21,8 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
 - `public/sprites` แผ่น sprite ช่องละ 132×100 (เท้า y=86, กลาง x=66, หันขวา) — จำนวนแถว/คอลัมน์และท่าของแต่ละแผ่นกำหนดใน `core/data/sprites.ts` (SHEETS) พร้อมเอฟเฟกต์สกิล (FX)
   - `hero-draken.png` 10×6: idle, hurt, die, attack, skill, skill2
   - `hero-aurel.png` 8×8: idle, walk, hurt, attack, skill, skill2, ult, die + `fx-aurel-{defense,charge,ult}.png` (สร้างด้วย `tools/sprites/extract-aurel.py`)
+  - `hero-shade.png` 9×8: idle, walk, hurt, die, attack, skill, skill2, ult + `fx-shade-{teleport,smoke,phantom}.png` (`tools/sprites/extract-shade.py`) · FX ที่ `orient: 'flip'` ไม่หมุน แค่กลับซ้าย/ขวา
+- นักฆ่า (assassin, เชด): สกิลสลับ จู่โจมเงา (วาร์ปไปข้างหลังศัตรูที่เลือด % ต่ำสุด ฟัน 200%) ↔ ควันพิษ (120% + พิษรอบเป้า 1 ช่อง 25% atk/วิ 4 วิ) · ท่าไม้ตายครั้งเดียวเมื่อมีศัตรูเลือด < 35% ในระยะ 4 ช่อง (วาร์ปไปฟัน 350% คริแน่นอน)
 - แทงก์: สกิลสลับ ยั่วยุ ↔ พุ่งชนโล่ (160% ผลักถอย มึน 1 วิ) · ท่าไม้ตายครั้งเดียวเมื่อเลือด < 40% (โล่ตัวเอง 30% / เพื่อนในระยะ 2 ช่อง 15% ของเลือดสูงสุดแทงก์ 6 วิ + ยั่วยุ)
 
 ## คำสั่ง

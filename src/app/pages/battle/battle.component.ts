@@ -179,17 +179,19 @@ export class BattleComponent implements OnDestroy {
           const name = SHEETS[unitOf(e.src).sprite ?? '']?.fx?.[e.kind];
           if (name && FX[name]) {
             const q = FX[name].at === 'target' && e.dst != null ? posOf(e.dst) : p;
-            const angle = q === p ? 0 : (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI;
-            const flip = q === p && !!this.facing.get(e.src);
+            const rotate = q !== p && FX[name].orient !== 'flip';
+            const angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
+            // หันตามผู้ใช้ (หรือตามทิศไปหาเป้าหมาย ถ้าเป้าไม่ได้อยู่คอลัมน์เดียวกัน)
+            const flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(e.src);
             fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip });
           }
           break;
         }
         case 'damage': {
-          if (anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
+          if (!e.poison && anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
           const p = posOf(e.dst);
           const text = e.amount > 0 ? `-${e.amount}` : 'บล็อก';
-          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: e.crit ? 'crit' : 'dmg' });
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: e.poison ? 'poison' : e.crit ? 'crit' : 'dmg' });
           break;
         }
         case 'heal': {

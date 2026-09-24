@@ -29,6 +29,8 @@ export interface FxDef {
   dy?: number;
   /** ขยายเพิ่มจากสเกลปกติ */
   scale?: number;
+  /** เอฟเฟกต์ที่เป้าหมาย: หมุนตามทิศ (ค่าเริ่มต้น) หรือแค่กลับซ้าย/ขวาตามทิศผู้ใช้ */
+  orient?: 'rotate' | 'flip';
 }
 
 /** สเกลแสดงผล: ความกว้าง 1 px ต้นฉบับ เทียบกับความกว้างช่องกระดาน (%) */
@@ -62,11 +64,29 @@ export const SHEETS: Record<string, SheetDef> = {
     },
     fx: { skill: 'aurel-defense', skill2: 'aurel-charge', ult: 'aurel-ult' },
   },
+  'hero-shade.png': {
+    cols: 9,
+    rows: 8,
+    anims: {
+      idle: { row: 0, frames: 9 },
+      walk: { row: 1, frames: 9 },
+      hurt: { row: 2, frames: 9 },
+      die: { row: 3, frames: 9 },
+      attack: { row: 4, frames: 9 },
+      skill: { row: 5, frames: 9 },
+      skill2: { row: 6, frames: 9 },
+      ult: { row: 7, frames: 9 },
+    },
+    fx: { skill: 'shade-teleport', skill2: 'shade-smoke', ult: 'shade-phantom' },
+  },
 };
 
 export const FX: Record<string, FxDef> = {
   'aurel-defense': { file: 'fx-aurel-defense.png', frames: 7, w: 48, h: 76, frameMs: 75, at: 'self', dx: 22, dy: -12 },
   'aurel-charge': { file: 'fx-aurel-charge.png', frames: 5, w: 74, h: 68, frameMs: 80, at: 'target' },
+  'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 150, h: 121, frameMs: 80, at: 'target', orient: 'flip', dy: -14 },
+  'shade-smoke': { file: 'fx-shade-smoke.png', frames: 8, w: 150, h: 74, frameMs: 90, at: 'target', orient: 'flip', dy: -8 },
+  'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 150, h: 122, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },
   'aurel-ult': { file: 'fx-aurel-ult.png', frames: 5, w: 85, h: 76, frameMs: 140, at: 'self', dy: -14, scale: 1.4 },
 };
 

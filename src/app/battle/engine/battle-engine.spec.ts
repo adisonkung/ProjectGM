@@ -68,4 +68,25 @@ describe('BattleEngine', () => {
     expect(ults.length).toBe(1);
     expect(shielded).toBeTrue();
   });
+
+  it('assassin blinks to the weakest foe, poisons, and executes once', () => {
+    const team: UnitSpec[] = [
+      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 3000 }, pos: { r: 0, c: 3 } },
+      { name: 'S', cls: 'assassin', stats: { ...CLASS_BASE.assassin, hp: 2000 }, pos: { r: 0, c: 2 } },
+    ];
+    const e = new BattleEngine({ allies: team, stage: STAGES[6], enemyTemplates: ENEMIES, seed: 4 });
+    const kinds: string[] = [];
+    let poisoned = false;
+    while (!e.result && e.time < 60) {
+      e.step(0.05);
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'cast' && ev.src === 2) kinds.push(ev.kind);
+        if (ev.type === 'damage' && ev.poison) poisoned = true;
+      }
+    }
+    expect(kinds.filter(k => k === 'ult').length).toBe(1);
+    expect(kinds).toContain('skill');
+    expect(kinds).toContain('skill2');
+    expect(poisoned).toBeTrue();
+  });
 });

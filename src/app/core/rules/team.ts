@@ -9,7 +9,7 @@ export const TEAM_SIZE = 5;
 /** ความลึกของฝั่งเรา (r ใน TeamSlot: 0 = หน้าสุด) และจำนวนเลน (c) */
 export { LANES, SIDE_DEPTH };
 
-/** จัดทีมอัตโนมัติ: แทงก์/นักสู้แถวหน้า, สายระยะไกลแถวหลัง */
+/** จัดทีมอัตโนมัติ: สายประชิด (แทงก์/นักสู้/นักฆ่า) แถวหน้า, สายระยะไกลแถวหลัง */
 export function autoPlace(heroes: OwnedHero[]): TeamSlot[] {
   const front = [3, 2, 4, 1, 5, 0, 6];
   const back = [3, 1, 5, 2, 4, 0, 6];
@@ -18,7 +18,7 @@ export function autoPlace(heroes: OwnedHero[]): TeamSlot[] {
   let bi = 0;
   for (const h of heroes.slice(0, TEAM_SIZE)) {
     const cls = HERO_BY_ID[h.templateId].cls;
-    if (cls === 'tank' || cls === 'fighter') slots.push({ uid: h.uid, r: 0, c: front[fi++] });
+    if (cls === 'tank' || cls === 'fighter' || cls === 'assassin') slots.push({ uid: h.uid, r: 0, c: front[fi++] });
     else slots.push({ uid: h.uid, r: SIDE_DEPTH - 1, c: back[bi++] });
   }
   return slots;

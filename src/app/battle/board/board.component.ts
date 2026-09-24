@@ -32,7 +32,7 @@ export interface FloatText {
   r: number;
   c: number;
   text: string;
-  kind: 'dmg' | 'crit' | 'heal' | 'skill';
+  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison';
 }
 
 /** เอฟเฟกต์สกิลที่กำลังเล่นบนกระดาน */

@@ -1,5 +1,5 @@
 /** สายอาชีพของฮีโร่/ศัตรู */
-export type HeroClass = 'tank' | 'fighter' | 'archer' | 'mage' | 'healer';
+export type HeroClass = 'tank' | 'fighter' | 'assassin' | 'archer' | 'mage' | 'healer';
 export type Potential = 'C' | 'B' | 'A' | 'S';
 export type Star = 1 | 2 | 3 | 4 | 5;
 
