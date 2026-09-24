@@ -89,4 +89,18 @@ describe('BattleEngine', () => {
     expect(kinds).toContain('skill2');
     expect(poisoned).toBeTrue();
   });
+
+  it('fighter casts skill, skill2, then its ultimate once', () => {
+    const team: UnitSpec[] = [
+      { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 4000 }, pos: { r: 0, c: 3 } },
+    ];
+    const e = new BattleEngine({ allies: team, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 3 });
+    const kinds: string[] = [];
+    while (!e.result && e.time < 60) {
+      e.step(0.05);
+      for (const ev of e.drainEvents()) if (ev.type === 'cast' && ev.src === 1) kinds.push(ev.kind);
+    }
+    expect(kinds.slice(0, 3)).toEqual(['skill', 'skill2', 'ult']);
+    expect(kinds.filter(k => k === 'ult').length).toBe(1);
+  });
 });

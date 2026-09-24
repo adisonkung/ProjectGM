@@ -19,9 +19,10 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
   - `.unit` ที่เป็น cdkDrag ห้ามใช้ `inset`/`right`/`bottom` (CDK ซ่อนตัวต้นฉบับด้วย left:-999em → กลายเป็นแผ่นบังจอ ทำให้วางไม่ลง)
 - `src/app/pages/*` หน้าจอ (ใช้งานได้: `/team` จัดทีม, `/lab?floor=N` ห้องทดลองต่อสู้ — ก่อนกดเริ่มจะแสดงกระดานจัดตำแหน่ง)
 - `public/sprites` แผ่น sprite ช่องละ 132×100 (เท้า y=86, กลาง x=66, หันขวา) — จำนวนแถว/คอลัมน์และท่าของแต่ละแผ่นกำหนดใน `core/data/sprites.ts` (SHEETS) พร้อมเอฟเฟกต์สกิล (FX)
-  - `hero-draken.png` 10×6: idle, hurt, die, attack, skill, skill2
+  - `hero-draken.png` 11×11 (v2): idle, walk, run, jump, fall, hurt, die, attack, skill, skill2, ult (run/jump/fall ยังไม่ใช้) + `fx-draken-{slash,dash,ult}.png` (`tools/sprites/extract-draken.py`)
   - `hero-aurel.png` 8×8: idle, walk, hurt, attack, skill, skill2, ult, die + `fx-aurel-{defense,charge,ult}.png` (สร้างด้วย `tools/sprites/extract-aurel.py`)
   - `hero-shade.png` 9×8: idle, walk, hurt, die, attack, skill, skill2, ult + `fx-shade-{teleport,smoke,phantom}.png` (`tools/sprites/extract-shade.py`) · FX ที่ `orient: 'flip'` ไม่หมุน แค่กลับซ้าย/ขวา
+- นักสู้ (fighter, ดราเคน): สกิลสลับ ฟันหนัก (250%) ↔ พุ่งทะลวง (180% + 120% ศัตรูที่ยืนถัดไปข้างหลัง) · สกิลครั้งที่ 3 เป็นท่าไม้ตาย ดาบเทพสายฟ้า ครั้งเดียว (300% + 150% รอบเป้า 1 ช่อง)
 - นักฆ่า (assassin, เชด): สกิลสลับ จู่โจมเงา (วาร์ปไปข้างหลังศัตรูที่เลือด % ต่ำสุด ฟัน 200%) ↔ ควันพิษ (120% + พิษรอบเป้า 1 ช่อง 25% atk/วิ 4 วิ) · ท่าไม้ตายครั้งเดียวเมื่อมีศัตรูเลือด < 35% ในระยะ 4 ช่อง (วาร์ปไปฟัน 350% คริแน่นอน)
 - แทงก์: สกิลสลับ ยั่วยุ ↔ พุ่งชนโล่ (160% ผลักถอย มึน 1 วิ) · ท่าไม้ตายครั้งเดียวเมื่อเลือด < 40% (โล่ตัวเอง 30% / เพื่อนในระยะ 2 ช่อง 15% ของเลือดสูงสุดแทงก์ 6 วิ + ยั่วยุ)
 

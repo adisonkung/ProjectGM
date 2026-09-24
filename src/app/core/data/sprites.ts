@@ -38,16 +38,20 @@ export const PX_TO_CELL = 165 / 132;
 
 export const SHEETS: Record<string, SheetDef> = {
   'hero-draken.png': {
-    cols: 10,
-    rows: 6,
+    // v2: แถว 2-4 (run, jump, fall) ยังไม่ได้ใช้
+    cols: 11,
+    rows: 11,
     anims: {
-      idle: { row: 0, frames: 10 },
-      hurt: { row: 1, frames: 6 },
-      die: { row: 2, frames: 6 },
-      attack: { row: 3, frames: 7 },
-      skill: { row: 4, frames: 7 },
-      skill2: { row: 5, frames: 5 },
+      idle: { row: 0, frames: 8 },
+      walk: { row: 1, frames: 9 },
+      hurt: { row: 5, frames: 7 },
+      die: { row: 6, frames: 9 },
+      attack: { row: 7, frames: 9 },
+      skill: { row: 8, frames: 7 },
+      skill2: { row: 9, frames: 6 },
+      ult: { row: 10, frames: 11 },
     },
+    fx: { skill: 'draken-slash', skill2: 'draken-dash', ult: 'draken-ult' },
   },
   'hero-aurel.png': {
     cols: 8,
@@ -84,6 +88,9 @@ export const SHEETS: Record<string, SheetDef> = {
 export const FX: Record<string, FxDef> = {
   'aurel-defense': { file: 'fx-aurel-defense.png', frames: 7, w: 48, h: 76, frameMs: 75, at: 'self', dx: 22, dy: -12 },
   'aurel-charge': { file: 'fx-aurel-charge.png', frames: 5, w: 74, h: 68, frameMs: 80, at: 'target' },
+  'draken-slash': { file: 'fx-draken-slash.png', frames: 4, w: 97, h: 78, frameMs: 80, at: 'target', orient: 'flip', dy: -10, scale: 0.9 },
+  'draken-dash': { file: 'fx-draken-dash.png', frames: 4, w: 110, h: 78, frameMs: 80, at: 'target', orient: 'flip', dy: -8, scale: 0.9 },
+  'draken-ult': { file: 'fx-draken-ult.png', frames: 4, w: 183, h: 81, frameMs: 120, at: 'target', orient: 'flip', dy: -20 },
   'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 150, h: 121, frameMs: 80, at: 'target', orient: 'flip', dy: -14 },
   'shade-smoke': { file: 'fx-shade-smoke.png', frames: 8, w: 150, h: 74, frameMs: 90, at: 'target', orient: 'flip', dy: -8 },
   'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 150, h: 122, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },

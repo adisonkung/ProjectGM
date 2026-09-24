@@ -21,10 +21,12 @@ export const SKILL_NAME: Record<HeroClass, string> = {
 /** สกิลที่ 2 (ใช้สลับกับสกิลแรก) และท่าไม้ตาย ของสายที่มี */
 export const SKILL2_NAME: Partial<Record<HeroClass, string>> = {
   tank: 'พุ่งชนโล่',
+  fighter: 'พุ่งทะลวง',
   assassin: 'ควันพิษ',
 };
 export const ULT_NAME: Partial<Record<HeroClass, string>> = {
   tank: 'ป้อมปราการศักดิ์สิทธิ์',
+  fighter: 'ดาบเทพสายฟ้า',
   assassin: 'ประหารเงามายา',
 };
 

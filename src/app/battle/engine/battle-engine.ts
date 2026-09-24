@@ -93,6 +93,13 @@ const POISON_TICK = 0.5;
 const EXEC_HP = 0.35;
 const EXEC_REACH = 4;
 const EXEC_MUL = 3.5;
+/** นักสู้ สกิล 2 พุ่งทะลวง: 180% เป้าหมาย + 120% ศัตรูที่ยืนถัดไปข้างหลัง */
+const PIERCE_MUL = 1.8;
+const PIERCE_BEHIND_MUL = 1.2;
+/** นักสู้ ท่าไม้ตาย ดาบเทพสายฟ้า: สกิลครั้งที่ 3 (ครั้งเดียว) 300% เป้าหมาย + 150% ศัตรูรอบเป้า 1 ช่อง */
+const BLADE_ULT_CAST = 2;
+const BLADE_ULT_MUL = 3;
+const BLADE_ULT_SPLASH = 1.5;
 
 /**
  * เอนจินต่อสู้อัตโนมัติบนกระดาน 8x7 (TypeScript ล้วน ไม่ผูกกับ Angular)
@@ -352,6 +359,12 @@ export class BattleEngine {
     u.mana = 0;
     u.castLock = CAST_LOCK;
     // สลับสกิล 1 / 2 ทุกครั้งที่ร่าย (สายที่ยังไม่มีสกิล 2 ใช้ผลเดิม แค่เปลี่ยนท่า)
+    // นักสู้: สกิลครั้งที่ 3 กลายเป็นท่าไม้ตาย (ครั้งเดียวต่อการต่อสู้)
+    if (u.cls === 'fighter' && !u.ultUsed && u.casts === BLADE_ULT_CAST) {
+      u.casts++;
+      this.bladeUlt(u, t);
+      return;
+    }
     const kind: SkillKind = u.casts++ % 2 ? 'skill2' : 'skill';
     const skill = (kind === 'skill2' && SKILL2_NAME[u.cls]) || SKILL_NAME[u.cls];
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
@@ -373,7 +386,14 @@ export class BattleEngine {
         }
         break;
       case 'fighter':
-        this.damage(u, t, 2.5);
+        if (kind === 'skill2') {
+          const behind = this.grid.occupant({ r: t.pos.r + Math.sign(t.pos.r - u.pos.r), c: t.pos.c + Math.sign(t.pos.c - u.pos.c) });
+          const next = foes.find(f => f.id === behind);
+          this.damage(u, t, PIERCE_MUL);
+          if (next) this.damage(u, next, PIERCE_BEHIND_MUL);
+        } else {
+          this.damage(u, t, 2.5);
+        }
         break;
       case 'assassin':
         if (kind === 'skill') {
@@ -442,6 +462,16 @@ export class BattleEngine {
     this.grid.move(u.id, u.pos, cell);
     u.pos = cell;
     u.targetId = t.id;
+  }
+
+  /** นักสู้ ท่าไม้ตาย: ฟาดดาบสายฟ้าลงที่เป้าหมาย กระเด็นโดนศัตรูรอบ ๆ */
+  private bladeUlt(u: BattleUnit, t: BattleUnit): void {
+    u.ultUsed = true;
+    u.castLock = ULT_LOCK;
+    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
+    const splash = this.alive(t.side).filter(f => f !== t && distance(f.pos, t.pos) <= 1);
+    this.damage(u, t, BLADE_ULT_MUL);
+    for (const f of splash) this.damage(u, f, BLADE_ULT_SPLASH);
   }
 
   /** นักฆ่า ท่าไม้ตาย: วาร์ปไปประหารศัตรูที่ใกล้ตาย */
