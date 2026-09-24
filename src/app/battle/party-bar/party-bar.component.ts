@@ -13,12 +13,13 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
     <div class="bar" role="group" aria-label="ทีมของเรา แตะรูปเมื่อเกจเต็มเพื่อใช้ท่าไม้ตาย">
       @for (u of units(); track u.id; let i = $index) {
         @let ready = u.alive && u.manaPct >= 100;
-        <button type="button" class="card" [class.ready]="ready" [class.queued]="!!u.queued" [class.dead]="!u.alive"
+        <button type="button" class="card" [class.ready]="ready" [class.cut]="ready && alert() && !!u.interrupter" [class.queued]="!!u.queued" [class.dead]="!u.alive"
                 [disabled]="!ready" (click)="ult.emit(u.id)"
                 [attr.aria-label]="u.name + (ready ? ' ท่าไม้ตายพร้อม กดเพื่อใช้' : ' เกจ ' + pct(u.manaPct) + '%')">
           <span class="frame" [style.--rc]="'var(--r' + (u.star ?? 1) + ')'">
             <span class="face" [class.token]="!u.sprite"><app-unit-sprite [cls]="u.cls" [sprite]="u.sprite" [star]="u.star" /></span>
             <span class="key">{{ i + 1 }}</span>
+            @if (u.interrupter) { <span class="int" title="ท่าไม้ตายตัดการร่ายของศัตรูได้">⚡ตัด</span> }
             @if (ready) { <span class="ult">{{ u.queued ? 'รอร่าย' : 'ULT' }}</span> }
           </span>
           <span class="hp"><i [style.width.%]="u.hpPct"></i></span>
@@ -48,6 +49,13 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
     }
     .face.token { transform: none; }
     .key { position: absolute; top: 3px; left: 5px; z-index: 3; font: 700 11px var(--disp); color: var(--muted); }
+    .int {
+      position: absolute; top: 3px; right: 4px; z-index: 3; padding: 0 4px; border-radius: 4px;
+      background: #000b; font: 700 9px var(--disp); color: var(--gold);
+    }
+    // มีศัตรูร่ายสกิลที่ตัดได้ + ฮีโร่ตัวนี้ตัดได้และเกจเต็ม → เร่งให้กด
+    .cut .frame { box-shadow: 0 0 14px var(--gold), 0 0 26px #f0b54aaa; }
+    .cut .ult { color: var(--gold); }
     .ult {
       position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); z-index: 3; padding: 0 6px;
       border-radius: 999px; background: #000b; font: 700 11px var(--disp); color: var(--cyan); letter-spacing: 0.08em;
@@ -80,6 +88,8 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 export class PartyBarComponent {
   readonly units = input<UnitView[]>([]);
   readonly ult = output<number>();
+  /** มีศัตรูกำลังร่ายสกิลที่ตัดได้ */
+  readonly alert = input(false);
 
   pct(v: number): number {
     return Math.floor(v);

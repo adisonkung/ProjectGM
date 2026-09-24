@@ -127,6 +127,8 @@
   &.shield { color: #fff6d0; font-size: 12px; text-shadow: 0 0 6px var(--gold), 0 1px 3px #000; }
   &.poison { color: #7ee05a; font-size: 12px; }
   &.skill { color: var(--gold); font-size: 11px; top: -4%; }
+  &.interrupt { color: #fff; font-size: 15px; top: -20%; text-shadow: 0 0 8px var(--cyan), 0 1px 3px #000; }
+  &.immune { color: var(--danger); font-size: 12px; top: -20%; }
 }
 
 @keyframes rise {

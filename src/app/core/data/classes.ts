@@ -41,9 +41,9 @@ export const CLASS_BASE: Record<HeroClass, Stats> = {
   tank:    { hp: 320, atk: 22, def: 40, atkSpeed: 0.85, moveSpeed: 1.5, range: 1, maxMana: 100 },
   fighter: { hp: 220, atk: 38, def: 22, atkSpeed: 1.1,  moveSpeed: 1.8, range: 1, maxMana: 100 },
   assassin: { hp: 190, atk: 40, def: 15, atkSpeed: 1.3, moveSpeed: 2.0, range: 1, maxMana: 100 },
-  archer:  { hp: 160, atk: 34, def: 12, atkSpeed: 1.15, moveSpeed: 1.6, range: 4, maxMana: 100 },
-  mage:    { hp: 150, atk: 46, def: 10, atkSpeed: 0.9,  moveSpeed: 1.5, range: 3, maxMana: 100 },
-  healer:  { hp: 170, atk: 24, def: 14, atkSpeed: 0.95, moveSpeed: 1.5, range: 3, maxMana: 100 },
+  archer:  { hp: 160, atk: 34, def: 12, atkSpeed: 1.15, moveSpeed: 1.6, range: 6, maxMana: 100 },
+  mage:    { hp: 150, atk: 46, def: 10, atkSpeed: 0.9,  moveSpeed: 1.5, range: 5, maxMana: 100 },
+  healer:  { hp: 170, atk: 24, def: 14, atkSpeed: 0.95, moveSpeed: 1.5, range: 4, maxMana: 100 },
 };
 
 /**
@@ -63,3 +63,15 @@ export const SKILL_CD: Record<HeroClass, [number, number]> = {
   healer: [8, 15],
 };
 export const START_CD = 0.5;
+
+/**
+ * สกิลที่ตัดการร่ายของศัตรูได้ (STEP 7) — ตีธรรมดา/สกิลอื่นตัดไม่ได้ ฮีโร่ที่มีจึงมีค่าทางแทคติก
+ * แทงก์: สกิล 2 พุ่งชนโล่ (โดนเป้า) + ท่าไม้ตาย (คลื่นยั่วยุ ตัดทุกตัวที่ร่ายอยู่ในระยะ 3 ช่อง)
+ * นักธนู: ท่าไม้ตาย ฝนธนูสวรรค์ (ตกใส่ศัตรูทุกตัว ตัดได้ทุกตัว ไม่สนระยะ)
+ */
+export const INTERRUPT: Partial<Record<HeroClass, ('skill' | 'skill2' | 'ult')[]>> = {
+  tank: ['skill2', 'ult'],
+  archer: ['ult'],
+};
+export const canInterrupt = (cls: HeroClass, kind: 'attack' | 'skill' | 'skill2' | 'ult') =>
+  kind !== 'attack' && !!INTERRUPT[cls]?.includes(kind);

@@ -29,9 +29,19 @@
       <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
                  [scroll]="scroll()" [marchMs]="marchMs()" [background]="background()" />
       @if (banner(); as b) { <div class="banner" aria-live="polite">{{ b }}</div> }
+      @if (casts().length) {
+        <div class="alerts" aria-live="assertive">
+          @for (c of casts(); track c.id) {
+            <span class="alert" [class.hard]="!c.cast!.interruptible">
+              ⚠ {{ c.cast!.label }} · {{ c.cast!.left.toFixed(1) }}s
+              <em>{{ c.cast!.interruptible ? 'ตัดได้ ⚡' : 'ตัดไม่ได้ — ตั้งรับ/ฮีล' }}</em>
+            </span>
+          }
+        </div>
+      }
     </div>
     <div class="party">
-      <app-party-bar [units]="party()" (ult)="useUlt($event)" />
+      <app-party-bar [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" />
       <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()"
               title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
     </div>

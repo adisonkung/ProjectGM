@@ -16,6 +16,14 @@ export const SCENERY_ROWS = 2;
 /** ระหว่างสู้ ยืนซ้อนกันในช่องเดียวได้กี่ตัว (ตอนเริ่มยังช่องละ 1 ตัว) */
 export const STACK_CAP = Infinity;
 
+/**
+ * แนวรบ (STEP 8 Formation): ความลึก 0–2 = แถวหน้า (FRONT), 3–5 = แถวหลัง (BACK) ของแต่ละฝั่ง
+ * ใช้เลือกเป้า (สายประชิดตีแถวหน้าก่อน, นักฆ่าพุ่งหาแถวหลัง) — ไม่ได้ล็อกสาย วางตัวไหนแถวไหนก็ได้
+ */
+export const FRONT_DEPTH = 3;
+export type Line = 'front' | 'back';
+export const lineOf = (depth: number): Line => (depth < FRONT_DEPTH ? 'front' : 'back');
+
 /** ระยะแบบ 8 ทิศ (แนวทแยงนับเป็น 1 ช่อง) */
 export const distance = (a: Cell, b: Cell) => Math.max(Math.abs(a.r - b.r), Math.abs(a.c - b.c));
 

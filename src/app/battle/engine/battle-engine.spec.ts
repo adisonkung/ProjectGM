@@ -3,6 +3,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
 import { UnitSpec } from '../../core/models/unit';
 import { BattleEngine, BattleEvent } from './battle-engine';
+import { EnemyTemplate, StageDef } from '../../core/models/stage';
 
 const strongTeam: UnitSpec[] = [
   { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 2000, atk: 80 }, pos: { r: 0, c: 1 } },
@@ -262,5 +263,98 @@ describe('BattleEngine', () => {
   it('survive floors stay a single area', () => {
     const e = new BattleEngine({ allies: strongTeam, stage: STAGES[2], enemyTemplates: ENEMIES, seed: 3 });
     expect(e.totalRounds).toBe(1);
+  });
+
+  // ------------------------------------------------------------ STEP 7 interrupt + STEP 8 formation
+
+  const castStage = (enemies: { enemy: string; r: number; c: number }[]): StageDef => ({ floor: 1, mode: 'eliminate', timeLimit: 120, enemies });
+  const TEMPLATES: Record<string, EnemyTemplate> = {
+    wall: { id: 'wall', name: 'กำแพง', cls: 'fighter', hp: 99999, atk: 0, def: 0 },
+    caster: { id: 'caster', name: 'หมอผี', cls: 'mage', hp: 99999, atk: 5, def: 0, castSkills: ['meteor'] },
+    rager: { id: 'rager', name: 'คลั่ง', cls: 'fighter', hp: 99999, atk: 5, def: 0, castSkills: ['berserk'] },
+    rogue: ENEMIES['rogue'],
+  };
+  const interruptTeam: UnitSpec[] = [
+    { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 99999 }, pos: { r: 0, c: 0 } },
+    { name: 'A', cls: 'archer', stats: { ...CLASS_BASE.archer, hp: 99999 }, pos: { r: 4, c: 1 } },
+  ];
+
+  /** รอจนศัตรูเริ่มร่าย แล้วให้ฮีโร่ `who` กดท่าไม้ตาย (เกจเต็ม) · คืนเหตุการณ์หลังจากนั้นจนร่ายจบหรือถูกตัด */
+  function castScenario(enemy: string, who: number): { events: BattleEvent[]; e: BattleEngine } {
+    const e = new BattleEngine({
+      allies: interruptTeam,
+      stage: castStage([{ enemy: 'wall', r: 0, c: 0 }, { enemy, r: enemy === 'caster' ? 3 : 0, c: 1 }]),
+      enemyTemplates: TEMPLATES,
+      seed: 1,
+    });
+    const boss = e.units.find(u => u.side === 'enemy' && u.castSkills.length)!;
+    boss.castSkills[0].cd = 0;
+    const out: BattleEvent[] = [];
+    let started = false;
+    while (e.time < 30) {
+      e.step(0.05);
+      const evs = e.drainEvents();
+      if (!started && evs.some(ev => ev.type === 'castStart')) {
+        started = true;
+        const hero = e.units[who];
+        hero.mana = hero.maxMana;
+        expect(e.requestUlt(hero.id)).toBeTrue();
+        continue;
+      }
+      if (started) {
+        out.push(...evs);
+        if (evs.some(ev => ev.type === 'castDone' || ev.type === 'interrupt')) break;
+      }
+    }
+    expect(started).toBeTrue();
+    return { events: out, e };
+  }
+
+  it('enemy casting shows a timed CASTING state and the unit stands still', () => {
+    const e = new BattleEngine({ allies: interruptTeam, stage: castStage([{ enemy: 'caster', r: 3, c: 1 }]), enemyTemplates: TEMPLATES, seed: 1 });
+    const boss = e.units.find(u => u.side === 'enemy')!;
+    boss.castSkills[0].cd = 0;
+    while (!boss.casting && e.time < 20) e.step(0.05);
+    expect(boss.casting).not.toBeNull();
+    const pos = { ...boss.pos };
+    e.step(1);
+    expect(boss.casting!.left).toBeLessThan(3);
+    expect(boss.pos).toEqual(pos);
+  });
+
+  it('archer ultimate (sky rain) interrupts a far-away meteor and puts it on full cooldown', () => {
+    const { events, e } = castScenario('caster', 1);
+    const boss = e.units.find(u => u.side === 'enemy' && u.castSkills.length)!;
+    expect(events.some(ev => ev.type === 'interrupt' && ev.dst === boss.id && ev.src === e.units[1].id)).toBeTrue();
+    expect(events.some(ev => ev.type === 'castDone')).toBeFalse();
+    expect(boss.casting).toBeNull();
+    expect(boss.castSkills[0].cd).toBeGreaterThan(13);
+  });
+
+  it('tank ultimate only interrupts casters within 3 cells — a backline meteor still lands', () => {
+    const { events } = castScenario('caster', 0);
+    expect(events.some(ev => ev.type === 'cast' && ev.src === 1 && ev.kind === 'ult')).toBeTrue();
+    expect(events.some(ev => ev.type === 'interrupt')).toBeFalse();
+    expect(events.some(ev => ev.type === 'castDone')).toBeTrue();
+  });
+
+  it('uninterruptible skills ignore interrupts (BERSERK)', () => {
+    const { events, e } = castScenario('rager', 1);
+    expect(events.some(ev => ev.type === 'immune')).toBeTrue();
+    expect(events.some(ev => ev.type === 'castDone')).toBeTrue();
+    expect(e.units.find(u => u.side === 'enemy' && u.castSkills.length)!.rage).toBeGreaterThan(0);
+  });
+
+  it('formation: backline heroes get line = back; enemy assassins go for the backline healer', () => {
+    const team: UnitSpec[] = [
+      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 5000 }, pos: { r: 0, c: 1 } },
+      { name: 'H', cls: 'healer', stats: { ...CLASS_BASE.healer, hp: 5000 }, pos: { r: 5, c: 1 } },
+    ];
+    const e = new BattleEngine({ allies: team, stage: castStage([{ enemy: 'rogue', r: 0, c: 1 }]), enemyTemplates: TEMPLATES, seed: 1 });
+    expect(e.units[0].line).toBe('front');
+    expect(e.units[1].line).toBe('back');
+    e.step(0.05);
+    const rogue = e.units.find(u => u.side === 'enemy')!;
+    expect(rogue.targetId).toBe(e.units[1].id);
   });
 });

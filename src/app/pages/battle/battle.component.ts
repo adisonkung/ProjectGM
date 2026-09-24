@@ -9,6 +9,7 @@ import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView 
 import { projectileLife } from '../../battle/projectile/projectile.component';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { PartyBarComponent } from '../../battle/party-bar/party-bar.component';
+import { canInterrupt } from '../../core/data/classes';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
@@ -53,6 +54,10 @@ export class BattleComponent implements OnDestroy {
   readonly autoUlt = signal(false);
   /** ฮีโร่ของเรา เรียงตามทีม (ซ้าย→ขวาในแถบด้านล่าง) */
   readonly party = computed(() => this.views().filter(v => v.side === 'ally'));
+  /** ศัตรูที่กำลังร่ายสกิล (แสดงแถบเตือนเหนือสนาม) */
+  readonly casts = computed(() => this.views().filter(v => v.alive && v.cast));
+  /** มีสกิลร่ายที่ตัดได้อยู่ตอนนี้ → ไฮไลต์ฮีโร่ที่ท่าไม้ตายตัดได้ */
+  readonly cuttable = computed(() => this.casts().some(v => v.cast!.interruptible));
 
   readonly stage = computed(() => STAGES[this.floor() - 1]);
   readonly background = computed(() => BACKGROUNDS[this.stage().background ?? ''] ?? null);
@@ -207,6 +212,17 @@ export class BattleComponent implements OnDestroy {
         blink: (this.blinkUntil.get(u.id) ?? 0) > this.engine.time,
         enter: u.side === 'enemy' && u.round > 0,
         queued: u.ultQueued,
+        line: u.line,
+        interrupter: u.side === 'ally' && canInterrupt(u.cls, 'ult'),
+        cast: u.casting
+          ? {
+              label: u.casting.def.label,
+              name: u.casting.def.name,
+              pct: (1 - u.casting.left / u.casting.def.castTime) * 100,
+              left: Math.max(0, u.casting.left),
+              interruptible: u.casting.def.interruptible,
+            }
+          : undefined,
       })),
     );
   }
@@ -331,6 +347,22 @@ export class BattleComponent implements OnDestroy {
           // เอฟเฟกต์ฮีลของผู้รักษา (ถ้าแผ่นกำหนดไว้)
           const hf = e.src != null ? SHEETS[unitOf(e.src).sprite ?? '']?.healFx : undefined;
           if (hf && FX[hf]) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name: hf, angle: 0 });
+          break;
+        }
+        case 'castStart': {
+          const p = posOf(e.src);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
+          break;
+        }
+        case 'interrupt': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'INTERRUPTED!', kind: 'interrupt' });
+          set(e.dst, 'hurt');
+          break;
+        }
+        case 'immune': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'UNINTERRUPTIBLE', kind: 'immune' });
           break;
         }
         case 'death':

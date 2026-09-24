@@ -11,6 +11,10 @@ export interface EnemyTemplate {
   atk: number;
   def: number;
   boss?: boolean;
+  /** สกิลร่าย (คีย์ใน ENEMY_SKILLS) */
+  castSkills?: string[];
+  /** เตรียมไว้สำหรับบอส (Break Gauge ในอนาคต) — ตอนนี้ยังไม่ใช้ */
+  interruptResistance?: number;
 }
 
 export interface EnemyPlacement extends Cell {

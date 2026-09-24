@@ -1,10 +1,11 @@
-import { MANA_PER_ATTACK, MANA_PER_HIT, SKILL2_NAME, SKILL_CD, SKILL_NAME, START_CD, ULT_NAME } from '../../core/data/classes';
+import { canInterrupt, MANA_PER_ATTACK, MANA_PER_HIT, SKILL2_NAME, SKILL_CD, SKILL_NAME, START_CD, ULT_NAME } from '../../core/data/classes';
+import { ENEMY_SKILL_START_CD, ENEMY_SKILLS, EnemySkillDef } from '../../core/data/enemy-skills';
 import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec } from '../../core/models/unit';
 import { enemyStats } from '../../core/rules/stats';
-import { distance, Grid, LANES, SIDE_DEPTH, STACK_CAP, toBoard } from './grid';
+import { distance, Grid, LANES, Line, lineOf, SIDE_DEPTH, STACK_CAP, toBoard } from './grid';
 import { greedyStep, nextStep } from './pathfinding';
 import { createRng } from './rng';
 
@@ -31,7 +32,15 @@ export type BattleEvent =
   /** เคลียร์เวฟแล้ว ทีมเริ่มเดินไปจุดถัดไป (round = เวฟที่กำลังจะเริ่ม เริ่มนับ 0) */
   | { type: 'advance'; round: number; duration: number }
   /** ถึงจุดถัดไป ศัตรูเวฟใหม่บุกเข้ามา */
-  | { type: 'round'; round: number };
+  | { type: 'round'; round: number }
+  /** ศัตรูเริ่มร่ายสกิล (มีแถบร่าย) */
+  | { type: 'castStart'; src: number; skill: string; label: string; castTime: number; interruptible: boolean; dst?: number }
+  /** ร่ายสำเร็จ สกิลออกผล */
+  | { type: 'castDone'; src: number; skill: string }
+  /** ตัดการร่ายสำเร็จ (src = ผู้ตัด) */
+  | { type: 'interrupt'; src: number; dst: number; skill: string }
+  /** พยายามตัดแต่สกิลนี้ตัดไม่ได้ */
+  | { type: 'immune'; src: number; dst: number; skill: string };
 
 export interface BattleUnit {
   id: number;
@@ -46,6 +55,8 @@ export interface BattleUnit {
   pos: Cell;
   /** ตำแหน่งตั้งต้น (ทีมกลับมาจัดแถวตรงนี้ตอนเดินไปเวฟถัดไป) */
   home: Cell;
+  /** แนวรบตามฟอร์เมชัน (แถวหน้า/หลัง) ใช้เลือกเป้า */
+  line: Line;
   /** ศัตรู: มาจากเวฟไหน (เริ่มนับ 0) */
   round: number;
   maxHp: number;
@@ -70,6 +81,15 @@ export interface BattleUnit {
   cd2: number;
   /** ผู้เล่นสั่งท่าไม้ตายแล้ว รอจังหวะร่าย */
   ultQueued: boolean;
+  /** ศัตรู: สกิลร่ายที่มี + คูลดาวน์ที่เหลือ */
+  castSkills: { def: EnemySkillDef; cd: number }[];
+  /** กำลังร่าย (state = CASTING): ยืนนิ่ง ทำอย่างอื่นไม่ได้ */
+  casting: { def: EnemySkillDef; left: number; target: number | null } | null;
+  /** คลั่ง: เวลาที่เหลือ และตัวคูณ atk/ความเร็วตี */
+  rage: number;
+  rageMul: number;
+  /** เตรียมไว้สำหรับบอสในอนาคต (Break Gauge) — ยังไม่ใช้ */
+  interruptResistance: number;
   /** โล่ดูดซับดาเมจ และเวลาที่เหลือ */
   shield: number;
   shieldTime: number;
@@ -312,6 +332,12 @@ export class BattleEngine {
       cd1: SKILL_CD[spec.cls][0] * START_CD,
       cd2: SKILL_CD[spec.cls][1] * START_CD,
       ultQueued: false,
+      castSkills: [],
+      casting: null,
+      rage: 0,
+      rageMul: 1,
+      interruptResistance: 0,
+      line: lineOf(spec.pos.r),
       shield: 0,
       shieldTime: 0,
       poison: 0,
@@ -327,13 +353,21 @@ export class BattleEngine {
     const t = this.templates[enemyId];
     if (!t) throw new Error(`Unknown enemy: ${enemyId}`);
     const pos = local ?? { r: SIDE_DEPTH - 1, c: Math.floor(this.rng() * LANES) };
-    return this.addUnit('enemy', {
+    const u = this.addUnit('enemy', {
       name: t.name,
       cls: t.cls,
       boss: t.boss,
       stats: enemyStats(t, this.stage),
       pos,
     });
+    if (u) {
+      u.interruptResistance = t.interruptResistance ?? 0;
+      u.castSkills = (t.castSkills ?? [])
+        .map(id => ENEMY_SKILLS[id])
+        .filter(Boolean)
+        .map(def => ({ def, cd: def.cooldown * ENEMY_SKILL_START_CD }));
+    }
+    return u;
   }
 
   /** เคลียร์เวฟแล้ว: ทีมที่รอดกลับไปจัดแถวที่ตำแหน่งตั้งต้น แล้วเดินหน้า */
@@ -390,6 +424,8 @@ export class BattleEngine {
     u.moveCd -= dt;
     if (u.cd1 > 0) u.cd1 -= dt;
     if (u.cd2 > 0) u.cd2 -= dt;
+    for (const cs of u.castSkills) if (cs.cd > 0) cs.cd -= dt;
+    if (u.rage > 0 && (u.rage -= dt) <= 0) u.rageMul = 1;
     if (u.taunt > 0) u.taunt -= dt;
     if (u.shieldTime > 0 && (u.shieldTime -= dt) <= 0) u.shield = 0;
     if (u.poisonTime > 0) {
@@ -401,10 +437,19 @@ export class BattleEngine {
         if (!u.alive) return;
       }
     }
+    // กำลังร่าย (CASTING): ยืนนิ่งจนร่ายเสร็จ หรือถูกตัด
+    if (u.casting) {
+      u.casting.left -= dt;
+      if (u.casting.left <= 0) this.finishCast(u);
+      return;
+    }
     if (u.castLock > 0) {
       u.castLock -= dt;
       return;
     }
+
+    // ศัตรูที่มีสกิลร่าย: เริ่มร่ายเมื่อสกิลพร้อมและมีเป้า
+    if (u.castSkills.length && this.tryStartCast(u)) return;
 
     // ท่าไม้ตาย: เกจมานาเต็ม + (ผู้เล่นกดสั่ง หรือออโต้ หรือเป็นศัตรู) → ร่ายทันทีถ้ามีเป้าที่ใช้ได้
     if (u.mana >= u.maxMana && (u.ultQueued || u.side === 'enemy' || this.autoUlt) && this.tryUltimate(u)) {
@@ -439,7 +484,10 @@ export class BattleEngine {
         if (u.cd2 <= 0) this.cast(u, target, 'skill2');
         else if (u.cd1 <= 0) this.cast(u, target, 'skill');
         else this.basicAttack(u, target);
-        u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
+        u.atkCd = Math.max(u.atkCd, 0) + 1 / (u.atkSpeed * u.rageMul);
+      } else if (u.range >= 3 && u.moveCd <= 0) {
+        // สายระยะไกล: รักษาระยะ — ศัตรูประชิดตัวระหว่างรอตีครั้งถัดไป ให้ถอยหนี 1 ก้าว (ถ้าเป้ายังอยู่ในระยะ)
+        this.kite(u, target);
       }
       return;
     }
@@ -457,6 +505,15 @@ export class BattleEngine {
     }
   }
 
+  /**
+   * เลือกเป้า (STEP 8 Formation + Target Priority)
+   * - ถูกยั่วยุ → ตีแทงก์ที่ยั่วยุ
+   * - เป้าเดิมยังอยู่ในระยะ (หรือไม่มีใครในระยะ) → ตีต่อ
+   * - สายประชิด: แถวหน้าก่อน (ใกล้สุด) แล้วค่อยแถวหลัง
+   * - แทงก์: ศัตรูที่กำลังตีแถวหลังของเรา → บอส → ใกล้สุด
+   * - สายระยะไกล: ในระยะยิง เลือกเลือด % ต่ำสุด (เสมอ: นักเวท > ฮีลเลอร์) · ไม่มีในระยะ → ใกล้สุด
+   * - นักฆ่า: แถวหลังก่อน (ฮีลเลอร์ > นักเวท > นักธนู) ไม่เหลือแถวหลังค่อยตีใกล้สุด
+   */
   private acquireTarget(u: BattleUnit): BattleUnit | null {
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
     if (!foes.length) return null;
@@ -470,14 +527,118 @@ export class BattleEngine {
       return taunter;
     }
 
+    const d = (f: BattleUnit) => distance(f.pos, u.pos);
     const current = foes.find(f => f.id === u.targetId);
-    const inRange = foes.filter(f => distance(f.pos, u.pos) <= u.range);
-    if (current && (distance(current.pos, u.pos) <= u.range || !inRange.length)) return current;
+    const inRange = foes.filter(f => d(f) <= u.range);
+    if (current && (d(current) <= u.range || !inRange.length)) return current;
 
-    const pool = inRange.length ? inRange : foes;
-    const best = pool.sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0];
+    const front = (f: BattleUnit) => (f.line === 'front' ? 0 : 1);
+    let best: BattleUnit;
+    if (u.cls === 'assassin') {
+      const order: Partial<Record<HeroClass, number>> = { healer: 0, mage: 1, archer: 2 };
+      const backs = foes.filter(f => f.line === 'back');
+      const pool = backs.length ? backs : foes;
+      best = [...pool].sort((a, b) => (order[a.cls] ?? 3) - (order[b.cls] ?? 3) || d(a) - d(b) || a.id - b.id)[0];
+    } else if (u.range >= 3) {
+      const order: Partial<Record<HeroClass, number>> = { mage: 0, healer: 1 };
+      best = inRange.length
+        ? [...inRange].sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp || (order[a.cls] ?? 2) - (order[b.cls] ?? 2) || d(a) - d(b))[0]
+        : [...foes].sort((a, b) => d(a) - d(b) || a.id - b.id)[0];
+    } else if (u.cls === 'tank') {
+      const mine = new Set(this.alive(u.side).filter(a => a.line === 'back').map(a => a.id));
+      const diving = (f: BattleUnit) => (f.targetId != null && mine.has(f.targetId) ? 0 : 1);
+      best = [...foes].sort((a, b) => diving(a) - diving(b) || Number(!!b.boss) - Number(!!a.boss) || d(a) - d(b) || a.id - b.id)[0];
+    } else {
+      const pool = inRange.length ? inRange : foes;
+      best = [...pool].sort((a, b) => front(a) - front(b) || d(a) - d(b) || a.id - b.id)[0];
+    }
     u.targetId = best.id;
     return best;
+  }
+
+  /** สายระยะไกลถอยหนีศัตรูที่ประชิดตัว 1 ก้าว ไปทางฝั่งตัวเอง (ต้องยังยิงเป้าถึง) */
+  private kite(u: BattleUnit, target: BattleUnit): void {
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    const nearest = (c: Cell) => Math.min(...foes.map(f => distance(f.pos, c)));
+    if (nearest(u.pos) > 1) return;
+    const back = u.side === 'ally' ? -1 : 1;
+    const step = Grid.neighbors(u.pos)
+      .filter(c => this.grid.canEnter(c) && Math.sign(c.c - u.pos.c) !== -back && distance(c, target.pos) <= u.range)
+      .sort((a, b) => nearest(b) - nearest(a) || Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r))[0];
+    if (!step || nearest(step) <= nearest(u.pos)) return;
+    this.grid.move(u.id, u.pos, step);
+    u.pos = step;
+    u.moveCd = 1 / u.moveSpeed;
+    this.events.push({ type: 'move', src: u.id });
+  }
+
+  // ---------------------------------------------------------------- casting / interrupt (STEP 7)
+
+  /** เริ่มร่ายสกิลที่พร้อมตัวแรกที่มีเป้า */
+  private tryStartCast(u: BattleUnit): boolean {
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    if (!foes.length) return false;
+    const near = Math.min(...foes.map(f => distance(f.pos, u.pos)));
+    for (const cs of u.castSkills) {
+      if (cs.cd > 0) continue;
+      let target: BattleUnit | null = null;
+      if (cs.def.effect === 'meteor') {
+        const inRange = foes.filter(f => distance(f.pos, u.pos) <= u.range);
+        if (!inRange.length) continue;
+        target = [...inRange].sort((a, b) => Number(a.line !== 'back') - Number(b.line !== 'back') || a.hp / a.maxHp - b.hp / b.maxHp)[0];
+      } else if (cs.def.effect === 'berserk') {
+        if (near > 2) continue;
+      } else if (near > Math.max(u.range, 3)) {
+        continue; // แผ่นดินไหว/คลื่นมรณะ: ร่ายเมื่อเข้าปะทะแล้ว
+      }
+      cs.cd = cs.def.cooldown;
+      u.casting = { def: cs.def, left: cs.def.castTime, target: target?.id ?? null };
+      this.events.push({
+        type: 'castStart', src: u.id, skill: cs.def.name, label: cs.def.label,
+        castTime: cs.def.castTime, interruptible: cs.def.interruptible, ...(target ? { dst: target.id } : {}),
+      });
+      return true;
+    }
+    return false;
+  }
+
+  private finishCast(u: BattleUnit): void {
+    const c = u.casting!;
+    u.casting = null;
+    u.castLock = CAST_LOCK;
+    this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
+    this.events.push({ type: 'cast', src: u.id, skill: c.def.name, kind: 'ult', ...(c.target != null ? { dst: c.target } : {}) });
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    switch (c.def.effect) {
+      case 'quake':
+        for (const f of foes) this.applyDamage(f, Math.max(1, Math.round(f.maxHp * c.def.power)), false);
+        break;
+      case 'meteor': {
+        const t = foes.find(f => f.id === c.target) ?? foes[0];
+        if (!t) break;
+        for (const f of foes.filter(f => distance(f.pos, t.pos) <= 1)) this.damage(u, f, f === t ? c.def.power : c.def.power * 0.6);
+        break;
+      }
+      case 'berserk':
+        u.rage = c.def.duration ?? 8;
+        u.rageMul = 1 + c.def.power;
+        break;
+    }
+  }
+
+  /** สกิลที่ตัดได้โดนตัวที่กำลังร่าย → ยกเลิกการร่าย สกิลนั้นเข้าคูลดาวน์เต็ม */
+  private tryInterrupt(src: BattleUnit, dst: BattleUnit): void {
+    const c = dst.casting;
+    if (!c || !dst.alive) return;
+    if (!c.def.interruptible) {
+      this.events.push({ type: 'immune', src: src.id, dst: dst.id, skill: c.def.name });
+      return;
+    }
+    dst.casting = null;
+    dst.castLock = CAST_LOCK;
+    const cs = dst.castSkills.find(x => x.def === c.def);
+    if (cs) cs.cd = c.def.cooldown;
+    this.events.push({ type: 'interrupt', src: src.id, dst: dst.id, skill: c.def.name });
   }
 
   /** ตีธรรมดา: เริ่มท่าทันที ดาเมจเข้าตรงเฟรม hit (ยืนนิ่งระหว่างเงื้อ) */
@@ -499,7 +660,7 @@ export class BattleEngine {
   private shoot(u: BattleUnit, t: BattleUnit, mul: number, kind: 'attack' | SkillKind, sky = false, crit = false): void {
     const flight = sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
     this.events.push({ type: 'projectile', src: u.id, dst: t.id, kind, flight, ...(sky ? { sky } : {}) });
-    this.pending.push({ at: this.time + flight, fn: () => this.damage(u, t, mul, crit) });
+    this.pending.push({ at: this.time + flight, fn: () => this.damage(u, t, mul, crit, kind) });
   }
 
   /** เริ่มท่าสกิล: ล็อกตัวจนท่าจบ (ไม่ให้ท่าตีธรรมดามาตัดกลางท่า) */
@@ -664,7 +825,7 @@ export class BattleEngine {
 
   /** แทงก์ สกิล 2: กระแทกโล่ใส่เป้าหมาย ผลักถอย 1 ช่อง (ถ้าว่าง) และทำให้มึน */
   private shieldCharge(u: BattleUnit, t: BattleUnit): void {
-    this.damage(u, t, CHARGE_MUL);
+    this.damage(u, t, CHARGE_MUL, false, 'skill2');
     if (!t.alive) return;
     t.castLock = Math.max(t.castLock, CHARGE_STUN);
     const back = { r: t.pos.r + Math.sign(t.pos.r - u.pos.r), c: t.pos.c + Math.sign(t.pos.c - u.pos.c) };
@@ -683,6 +844,12 @@ export class BattleEngine {
     this.later(tm.hit, u, () => {
       this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
       u.taunt = Math.max(u.taunt, TAUNT_TIME);
+      // คลื่นยั่วยุ: ตัดการร่ายของศัตรูทุกตัวในระยะยั่วยุ (ไกลเกินก็ตัดไม่ถึง)
+      if (canInterrupt(u.cls, 'ult')) {
+        for (const f of this.alive(u.side === 'ally' ? 'enemy' : 'ally')) {
+          if (f.casting && distance(f.pos, u.pos) <= TAUNT_RADIUS) this.tryInterrupt(u, f);
+        }
+      }
       for (const a of this.alive(u.side)) {
         const amount = Math.round(u.maxHp * (a === u ? ULT_SELF_SHIELD : ULT_ALLY_SHIELD));
         a.shield += amount;
@@ -770,9 +937,11 @@ export class BattleEngine {
     });
   }
 
-  private damage(src: BattleUnit, dst: BattleUnit, mul: number, forceCrit = false): void {
+  private damage(src: BattleUnit, dst: BattleUnit, mul: number, forceCrit = false, kind?: 'attack' | SkillKind): void {
     if (!dst.alive) return;
-    let raw = src.atk * mul * (0.9 + this.rng() * 0.2);
+    // สกิลที่ตัดได้ (INTERRUPT) โดนตัวที่กำลังร่าย → ตัดก่อนคิดดาเมจ
+    if (kind && dst.casting && canInterrupt(src.cls, kind)) this.tryInterrupt(src, dst);
+    let raw = src.atk * src.rageMul * mul * (0.9 + this.rng() * 0.2);
     const crit = forceCrit || this.rng() < CRIT_CHANCE;
     if (crit) raw *= CRIT_MUL;
     if (dst.taunt > 0) raw *= 0.5;
@@ -791,6 +960,7 @@ export class BattleEngine {
     if (dst.hp <= 0) {
       dst.hp = 0;
       dst.alive = false;
+      dst.casting = null;
       dst.shield = 0;
       dst.poisonTime = 0;
       this.grid.remove(dst.id, dst.pos);

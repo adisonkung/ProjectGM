@@ -8,7 +8,7 @@ import { StageDef } from '../../core/models/stage';
 import { LANES, SIDE_DEPTH, TEAM_SIZE } from '../../core/rules/team';
 import { RosterService } from '../../core/services/roster.service';
 import { TeamService } from '../../core/services/team.service';
-import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS, toBoard } from '../engine/grid';
+import { BOARD_COLS, BOARD_ROWS, FRONT_DEPTH, SCENERY_ROWS, toBoard } from '../engine/grid';
 import { FieldComponent } from '../field/field.component';
 import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 
@@ -67,6 +67,8 @@ export class PlacementComponent {
   readonly teamSize = TEAM_SIZE;
   readonly cols = BOARD_COLS;
   readonly rows = BOARD_ROWS + SCENERY_ROWS;
+  readonly scenery = SCENERY_ROWS;
+  readonly frontDepth = FRONT_DEPTH;
   readonly selected = signal<number | null>(null);
   readonly message = signal<string | null>(null);
 

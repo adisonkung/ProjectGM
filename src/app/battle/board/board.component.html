@@ -6,6 +6,7 @@
          [class.taunt]="u.taunt" [class.blink]="!!u.blink" [style.transform]="unitPos(u)" [style.z-index]="unitZ(u)">
       <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss"
                        [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
+      @if (u.alive && u.cast) { <app-cast-bar [cast]="u.cast" /> }
       @if (u.alive) {
         <div class="bars">
           @if (u.shieldPct > 0) {

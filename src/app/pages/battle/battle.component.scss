@@ -53,3 +53,11 @@ h1 { font: 700 22px/1.2 var(--disp); margin: 0; }
   font: 700 12px var(--disp); color: var(--muted); letter-spacing: 0.08em;
   &[aria-pressed='true'] { color: #1c1406; background: var(--cyan); border-color: var(--cyan); }
 }
+
+.alerts { position: absolute; left: 50%; top: 6px; transform: translateX(-50%); z-index: 210; display: grid; gap: 4px; pointer-events: none; }
+.alert {
+  padding: 3px 12px; border-radius: 999px; background: #0d1220e6; border: 1px solid var(--gold); white-space: nowrap;
+  font: 700 13px var(--disp); color: var(--gold); text-align: center;
+  em { font-style: normal; font-weight: 600; font-size: 11px; color: var(--cyan); margin-left: 6px; }
+  &.hard { border-color: var(--danger); color: var(--danger); em { color: #f19a93; } }
+}

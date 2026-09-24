@@ -3,6 +3,7 @@ import { Component, computed, input } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
+import { CastBarComponent, CastView } from '../cast-bar/cast-bar.component';
 import { FieldComponent } from '../field/field.component';
 import { FxSpriteComponent } from '../fx-sprite/fx-sprite.component';
 import { ProjectileComponent } from '../projectile/projectile.component';
@@ -34,6 +35,12 @@ export interface UnitView {
   enter?: boolean;
   /** ผู้เล่นกดท่าไม้ตายแล้ว รอจังหวะร่าย */
   queued?: boolean;
+  /** ศัตรูกำลังร่ายสกิล (แถบร่าย) */
+  cast?: CastView;
+  /** ฮีโร่: ท่าไม้ตายตัดการร่ายได้ */
+  interrupter?: boolean;
+  /** แนวรบตามฟอร์เมชัน */
+  line?: 'front' | 'back';
 }
 
 export interface FloatText {
@@ -41,7 +48,7 @@ export interface FloatText {
   r: number;
   c: number;
   text: string;
-  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield' | 'revive';
+  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield' | 'revive' | 'interrupt' | 'immune';
 }
 
 /** เอฟเฟกต์สกิลที่กำลังเล่นบนกระดาน */
@@ -71,7 +78,7 @@ export interface AnimState {
 
 @Component({
   selector: 'app-board',
-  imports: [UnitSpriteComponent, FxSpriteComponent, FieldComponent, ProjectileComponent],
+  imports: [UnitSpriteComponent, FxSpriteComponent, FieldComponent, ProjectileComponent, CastBarComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
