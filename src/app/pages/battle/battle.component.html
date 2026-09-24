@@ -2,7 +2,7 @@
   <header class="head">
     <div>
       <h1>ห้องทดลองต่อสู้</h1>
-      <p class="sub">ทดสอบทีมปัจจุบันบนกระดาน 8×7 · ไม่มีผลกับเซฟ</p>
+      <p class="sub">จัดตำแหน่งแล้วดูทีมสู้บนกระดาน 8×7 · ผลแพ้ชนะไม่มีผลกับเซฟ</p>
     </div>
     <div class="power">พลังทีม <b>{{ teamPower() }}</b></div>
   </header>
@@ -21,7 +21,11 @@
     <span class="timer">{{ timeLeft() }}<small>วิ</small></span>
   </div>
 
-  <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [anims]="anims()" [speed]="speed()" />
+  @if (placing()) {
+    <app-placement [stage]="stage()" />
+  } @else {
+    <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [anims]="anims()" [speed]="speed()" />
+  }
 
   @if (result(); as r) {
     <div class="result" [class.win]="r === 'win'">
@@ -38,7 +42,7 @@
         <button type="button" [attr.aria-pressed]="speed() === v" (click)="setSpeed(v)">x{{ v }}</button>
       }
     </div>
-    <button type="button" (click)="prepare()">รีเซ็ต</button>
+    <button type="button" (click)="prepare()" [disabled]="placing()">จัดตำแหน่งใหม่</button>
     <button type="button" (click)="simulate()" [disabled]="running()">จำลอง 100 รอบ</button>
   </div>
   @if (simReport()) { <p class="sim">{{ simReport() }}</p> }

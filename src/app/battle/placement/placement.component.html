@@ -1,0 +1,77 @@
+<div class="wrap" cdkDropListGroup>
+  <div class="board" [style.--cols]="cols" [style.--rows]="rows">
+    @for (row of enemyRows(); track ri; let ri = $index) {
+      @for (cell of row; track cell.c) {
+        <div class="cell enemy-half" [class.odd]="(ri + cell.c) % 2 === 1">
+          @if (cell.enemy; as e) {
+            <div class="unit foe" [title]="e.name">
+              <app-unit-sprite [cls]="e.cls" side="enemy" [boss]="e.boss" />
+            </div>
+          }
+        </div>
+      }
+    }
+
+    @for (cell of allyCells; track $index) {
+      <div class="cell ally" [class.odd]="(cell.r + cell.c) % 2 === 1" [class.target]="selected() !== null"
+           cdkDropList [cdkDropListData]="cell" cdkDropListSortingDisabled [cdkDropListEnterPredicate]="canEnterCell"
+           (cdkDropListDropped)="dropOnCell($event)" (click)="tapCell(cell)"
+           (keydown.enter)="tapCell(cell)" (keydown.space)="$event.preventDefault(); tapCell(cell)"
+           role="button" tabindex="0" [attr.aria-label]="cellLabel(cell)">
+        @if (at(cell); as h) {
+          <div class="unit" cdkDrag [cdkDragData]="h.uid" (cdkDragStarted)="dragStarted(h.uid)"
+               [class.selected]="selected() === h.uid" [class.injured]="h.injury > 0">
+            <app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [star]="h.star" />
+            <span class="lv">{{ h.level }}</span>
+            <span class="tag">{{ h.name }}</span>
+          </div>
+        }
+      </div>
+    }
+    <div class="midline"></div>
+  </div>
+
+  <div class="bar">
+    <span class="count" [class.full]="count() >= teamSize">ทีม <b>{{ count() }}</b>/{{ teamSize }}</span>
+    <span class="pow">พลัง <b>{{ totalPower() }}</b></span>
+    <span class="spacer"></span>
+    @if (selectedInTeam()) {
+      <button type="button" (click)="removeSelected()">ถอดออก</button>
+    }
+    <button type="button" (click)="auto()">จัดอัตโนมัติ</button>
+    <button type="button" (click)="clear()" [disabled]="!count()">ล้าง</button>
+  </div>
+
+  <p class="hint" aria-live="polite">
+    @if (message(); as m) {
+      <span class="warn">{{ m }}</span>
+    } @else {
+      @if (selectedHero(); as h) {
+        <b>{{ h.name }}</b> · {{ h.clsName }} ★{{ h.star }} · Lv{{ h.level }} · ระยะ {{ h.range }} —
+        {{ selectedInTeam() ? 'แตะช่องอื่นเพื่อย้าย/สลับ หรือแตะม้านั่งเพื่อถอด' : 'แตะช่องบนกระดานเพื่อวาง' }}
+      } @else {
+        ลากฮีโร่ลงครึ่งล่างของกระดาน หรือแตะฮีโร่แล้วแตะช่อง
+      }
+    }
+  </p>
+
+  <div class="bench" cdkDropList cdkDropListOrientation="mixed" cdkDropListSortingDisabled
+       (cdkDropListDropped)="dropOnBench($event)" (click)="tapBench()" [class.drop-out]="selectedInTeam()">
+    @for (h of bench(); track h.uid) {
+      <button type="button" class="card" cdkDrag [cdkDragData]="h.uid" [cdkDragDisabled]="h.injury > 0"
+              (cdkDragStarted)="dragStarted(h.uid)" (click)="tapHero(h.uid, $event)"
+              [class.selected]="selected() === h.uid" [class.injured]="h.injury > 0"
+              [style.--rc]="'var(--r' + h.star + ')'" [attr.aria-pressed]="selected() === h.uid">
+        <span class="portrait"><app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [star]="h.star" /></span>
+        <span class="info">
+          <b>{{ h.name }}</b>
+          <small>{{ h.clsName }} · ★{{ h.star }} · Lv{{ h.level }}</small>
+          @if (h.injury > 0) { <small class="inj">บาดเจ็บ {{ h.injury }} รอบ</small> }
+          @else { <small>พลัง {{ h.power }}</small> }
+        </span>
+      </button>
+    } @empty {
+      <p class="empty">{{ selectedInTeam() ? 'แตะที่นี่เพื่อถอดออกจากทีม' : 'ฮีโร่ทุกตัวอยู่บนกระดานแล้ว · ลากมาไว้ตรงนี้เพื่อถอดออก' }}</p>
+    }
+  </div>
+</div>

@@ -1,9 +1,11 @@
-import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal, untracked } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
 import { power } from '../../core/rules/stats';
 import { TeamService } from '../../core/services/team.service';
 import { AnimState, BoardComponent, FloatText, FxView, UnitView } from '../../battle/board/board.component';
+import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { FX, SHEETS } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult } from '../../battle/engine/battle-engine';
@@ -11,12 +13,12 @@ import { BattleEngine, BattleEvent, BattleResult } from '../../battle/engine/bat
 const TICK = 0.05;
 
 /**
- * ห้องทดลองต่อสู้ (เฟส 1): เลือกชั้น แล้วดูทีมปัจจุบันสู้กับศัตรูบนกระดาน 8x7
- * ไม่มีผลกับเซฟ ใช้ทดสอบเอนจินและปรับสมดุล
+ * ห้องทดลองต่อสู้: เลือกชั้น จัดตำแหน่งบนกระดาน แล้วดูทีมปัจจุบันสู้กับศัตรูบนกระดาน 8x7
+ * ผลการต่อสู้ไม่มีผลกับเซฟ (แต่การจัดตำแหน่งบันทึกลงทีม) ใช้ทดสอบเอนจินและปรับสมดุล
  */
 @Component({
   selector: 'app-battle',
-  imports: [BoardComponent],
+  imports: [BoardComponent, PlacementComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -36,6 +38,8 @@ export class BattleComponent implements OnDestroy {
   readonly simReport = signal<string | null>(null);
 
   readonly stage = computed(() => STAGES[this.floor() - 1]);
+  /** ก่อนกดเริ่ม: แสดงกระดานจัดตำแหน่ง */
+  readonly placing = computed(() => !this.running() && !this.result());
   readonly teamPower = computed(() => this.team.units().reduce((a, u) => a + power(u.stats), 0));
   readonly timeLeft = computed(() => Math.max(0, Math.ceil(this.stage().timeLimit - this.time())));
 
@@ -45,7 +49,15 @@ export class BattleComponent implements OnDestroy {
   private animKey = 0;
 
   constructor() {
-    this.prepare();
+    const q = Number(inject(ActivatedRoute).snapshot.queryParamMap.get('floor'));
+    if (q >= 1 && q <= STAGES.length) this.floor.set(q);
+    // จัดทีมใหม่ระหว่างรอเริ่ม: สร้างการต่อสู้ใหม่ให้ตรงกับตำแหน่งล่าสุด
+    effect(() => {
+      this.team.units();
+      untracked(() => {
+        if (!this.running()) this.prepare();
+      });
+    });
   }
 
   ngOnDestroy(): void {

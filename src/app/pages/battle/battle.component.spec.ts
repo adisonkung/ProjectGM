@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { provideRouter } from '@angular/router';
 import { BattleComponent } from './battle.component';
 
 describe('BattleComponent', () => {
@@ -8,7 +9,8 @@ describe('BattleComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BattleComponent]
+      imports: [BattleComponent],
+      providers: [provideRouter([])],
     })
     .compileComponents();
 
@@ -17,7 +19,18 @@ describe('BattleComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('shows the placement board before the battle starts', () => {
     expect(component).toBeTruthy();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('app-placement')).not.toBeNull();
+    expect(el.querySelector('app-board')).toBeNull();
+  });
+
+  it('switches to the battle board after start', () => {
+    component.start();
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('app-board')).not.toBeNull();
+    component.ngOnDestroy();
   });
 });

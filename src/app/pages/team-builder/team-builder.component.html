@@ -1,4 +1,22 @@
-<section class="placeholder">
-  <h1>จัดทีม</h1>
-  <p>เฟส 2 — ลากวางฮีโร่ 5 ตัวลงครึ่งกระดาน 4×7</p>
+<section class="team">
+  <header class="head">
+    <div>
+      <h1>จัดทีม</h1>
+      <p class="sub">วางฮีโร่ได้ 5 ตัวในครึ่งล่าง 4×7 · แถวบนสุดของเราอยู่ติดศัตรู</p>
+    </div>
+    <a class="go" routerLink="/lab" [queryParams]="{ floor: floor() }">ทดลองสู้ชั้น {{ floor() }} →</a>
+  </header>
+
+  <div class="floors" role="group" aria-label="ดูศัตรูของชั้น">
+    <span>ศัตรูชั้น</span>
+    @for (s of stages; track s.floor) {
+      <button type="button" [attr.aria-pressed]="floor() === s.floor" [class.surv]="s.mode === 'survive'"
+              (click)="floor.set(s.floor)">{{ s.floor }}</button>
+    }
+  </div>
+  <p class="mode" [class.surv]="stage().mode === 'survive'">
+    {{ stage().mode === 'eliminate' ? 'กำจัดศัตรูทั้งหมด' : 'เอาตัวรอด (มีศัตรูเสริมเป็นระลอก)' }} · {{ stage().timeLimit }} วิ
+  </p>
+
+  <app-placement [stage]="stage()" />
 </section>

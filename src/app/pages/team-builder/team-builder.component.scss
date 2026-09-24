@@ -1,0 +1,14 @@
+.team { display: grid; gap: 12px; max-width: 560px; margin-inline: auto; }
+.head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+h1 { font: 700 22px/1.2 var(--disp); margin: 0; }
+.sub { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.go { text-decoration: none; padding: 8px 14px; border-radius: 10px; background: var(--gold); color: #1c1406; font-weight: 600; }
+
+.floors { display: flex; gap: 4px; flex-wrap: wrap; align-items: center;
+  span { font-size: 13px; color: var(--muted); margin-right: 4px; }
+  button { width: 32px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel);
+    font: 600 13px var(--disp); color: var(--muted);
+    &.surv { color: var(--cyan); }
+    &[aria-pressed='true'] { background: var(--gold); color: #1c1406; border-color: var(--gold); } }
+}
+.mode { margin: 0; font-size: 12px; font-weight: 600; color: #f19a93; &.surv { color: var(--cyan); } }
