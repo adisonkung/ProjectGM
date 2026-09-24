@@ -1,11 +1,10 @@
 import { Component, ElementRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
-import { ANIM_FALLBACK, SHEETS, SheetDef, SpriteAnim } from '../../core/data/sprites';
+import { ANIM_FALLBACK, FRAME_MS, IDLE_FRAME_MS, SHEETS, SheetDef, SpriteAnim } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 
 export type { SpriteAnim } from '../../core/data/sprites';
 
-const FRAME_MS = 85;
 /** ท่าที่ขัดท่าอื่นไม่ได้ (เดิน/โดนตี จะไม่แทรกท่าโจมตีหรือสกิล) */
 const LOW: SpriteAnim[] = ['idle', 'walk', 'hurt'];
 
@@ -41,6 +40,8 @@ export class UnitSpriteComponent {
   readonly flip = input(false);
 
   readonly sheet = viewChild<ElementRef<HTMLElement>>('sheet');
+  /** ชั้นที่สองสำหรับท่ายืน: แสดงเฟรมถัดไปแล้วค่อย ๆ เฟดเข้า ให้การหายใจลื่นขึ้น */
+  readonly blend = viewChild<ElementRef<HTMLElement>>('blend');
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);
   readonly def = computed<SheetDef | undefined>(() => SHEETS[this.sprite() ?? '']);
   readonly bgSize = computed(() => {
@@ -50,6 +51,9 @@ export class UnitSpriteComponent {
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private current?: Animation;
+  private blendAnims: Animation[] = [];
+  /** เริ่มท่ายืนคนละจังหวะ ทุกตัวจะได้ไม่หายใจพร้อมกัน */
+  private readonly phase = Math.random();
   private motion?: Animation;
   private currentName: SpriteAnim = 'idle';
 
@@ -94,16 +98,52 @@ export class UnitSpriteComponent {
     const frames = hold ? a.frames - 1 : a.frames;
 
     this.current?.cancel();
+    this.stopBlend();
     this.currentName = name;
+    if (loop) {
+      this.playIdle(el, a.frames, a.ms ?? IDLE_FRAME_MS, x, y);
+      return;
+    }
     this.current = el.animate(
       [{ backgroundPosition: `0% ${y}%` }, { backgroundPosition: `${x(frames)}% ${y}%` }],
       {
-        duration: (a.frames * FRAME_MS) / this.speed(),
+        duration: (a.frames * (a.ms ?? FRAME_MS)) / this.speed(),
         easing: `steps(${frames})`,
-        iterations: loop ? Infinity : 1,
+        iterations: 1,
         fill: hold ? 'forwards' : 'none',
       },
     );
-    if (!loop && !hold) this.current.onfinish = () => this.play(el, def, 'idle');
+    if (!hold) this.current.onfinish = () => this.play(el, def, 'idle');
+  }
+
+  /**
+   * ท่ายืน: ช้ากว่าท่าอื่น (ไม่เร่งตามความเร็วการต่อสู้) และเฟดเฟรมถัดไปทับทีละน้อย
+   * ชั้นล่างโชว์เฟรม i, ชั้นบนโชว์เฟรม i+1 แล้วค่อย ๆ ชัดขึ้นจนถึงเวลาเปลี่ยนเฟรม
+   */
+  private playIdle(el: HTMLElement, n: number, ms: number, x: (i: number) => number, y: number): void {
+    const duration = n * ms;
+    const steps = (shift: number): Keyframe[] => {
+      const k: Keyframe[] = [];
+      for (let i = 0; i < n; i++) {
+        k.push({ offset: i / n, easing: 'steps(1, end)', backgroundPosition: `${x((i + shift) % n)}% ${y}%` });
+      }
+      k.push({ offset: 1, backgroundPosition: `${x((n - 1 + shift) % n)}% ${y}%` });
+      return k;
+    };
+    const start = this.phase * duration;
+    this.current = el.animate(steps(0), { duration, iterations: Infinity });
+    this.current.currentTime = start;
+    const blend = this.blend()?.nativeElement;
+    if (!blend || n < 2) return;
+    const pos = blend.animate(steps(1), { duration, iterations: Infinity });
+    const fade = blend.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms, iterations: Infinity, easing: 'ease-in-out' });
+    pos.currentTime = start;
+    fade.currentTime = start;
+    this.blendAnims = [pos, fade];
+  }
+
+  private stopBlend(): void {
+    for (const a of this.blendAnims) a.cancel();
+    this.blendAnims = [];
   }
 }

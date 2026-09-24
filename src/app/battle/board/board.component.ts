@@ -26,6 +26,8 @@ export interface UnitView {
   boss?: boolean;
   /** หันซ้าย */
   flip?: boolean;
+  /** เพิ่งวาร์ป: ย้ายทันทีไม่ต้องเลื่อน แล้วค่อย ๆ ปรากฏ */
+  blink?: boolean;
 }
 
 export interface FloatText {

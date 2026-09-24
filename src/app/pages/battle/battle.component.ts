@@ -7,7 +7,7 @@ import { TeamService } from '../../core/services/team.service';
 import { AnimState, BoardComponent, FloatText, FxView, UnitView } from '../../battle/board/board.component';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
-import { FX, SHEETS } from '../../core/data/sprites';
+import { FX, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult } from '../../battle/engine/battle-engine';
 
 const TICK = 0.05;
@@ -48,6 +48,8 @@ export class BattleComponent implements OnDestroy {
   private floatId = 0;
   /** ทิศที่แต่ละตัวหันอยู่ (true = ซ้าย) คงไว้เมื่อเป้าอยู่คอลัมน์เดียวกัน */
   private facing = new Map<number, boolean>();
+  /** ตัวที่เพิ่งวาร์ป: ปิดการเลื่อนตัวบนจอชั่วครู่ (เวลาเอนจินที่หมดผล) */
+  private blinkUntil = new Map<number, number>();
   private animKey = 0;
 
   constructor() {
@@ -87,6 +89,7 @@ export class BattleComponent implements OnDestroy {
     });
     this.time.set(0);
     this.facing.clear();
+    this.blinkUntil.clear();
     this.snapshot();
   }
 
@@ -151,6 +154,7 @@ export class BattleComponent implements OnDestroy {
         sprite: u.sprite,
         boss: u.boss,
         flip: this.facing.get(u.id),
+        blink: (this.blinkUntil.get(u.id) ?? 0) > this.engine.time,
       })),
     );
   }
@@ -163,6 +167,19 @@ export class BattleComponent implements OnDestroy {
     const unitOf = (id: number) => this.engine.units.find(u => u.id === id)!;
     const posOf = (id: number) => unitOf(id).pos;
     const set = (id: number, anim: AnimState['anim']) => (anims[id] = { anim, key: ++this.animKey });
+    /** เอฟเฟกต์ของสกิลนี้ เล่นตอนเริ่มท่าหรือตอนโดน ตามที่ตั้งไว้ใน FX */
+    const addFx = (src: number, dst: number | undefined, kind: SkillKind, when: 'cast' | 'impact') => {
+      const name = SHEETS[unitOf(src).sprite ?? '']?.fx?.[kind];
+      const def = name ? FX[name] : undefined;
+      if (!name || !def || (def.on ?? 'impact') !== when) return;
+      const p = posOf(src);
+      const q = def.at === 'target' && dst != null ? posOf(dst) : p;
+      const rotate = q !== p && def.orient !== 'flip';
+      const angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
+      // หันตามผู้ใช้ (หรือตามทิศไปหาเป้าหมาย ถ้าเป้าไม่ได้อยู่คอลัมน์เดียวกัน)
+      const flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(src);
+      fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip });
+    };
 
     for (const e of events) {
       switch (e.type) {
@@ -176,17 +193,16 @@ export class BattleComponent implements OnDestroy {
           set(e.src, e.kind);
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
-          const name = SHEETS[unitOf(e.src).sprite ?? '']?.fx?.[e.kind];
-          if (name && FX[name]) {
-            const q = FX[name].at === 'target' && e.dst != null ? posOf(e.dst) : p;
-            const rotate = q !== p && FX[name].orient !== 'flip';
-            const angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
-            // หันตามผู้ใช้ (หรือตามทิศไปหาเป้าหมาย ถ้าเป้าไม่ได้อยู่คอลัมน์เดียวกัน)
-            const flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(e.src);
-            fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip });
-          }
+          addFx(e.src, e.dst, e.kind, 'cast');
           break;
         }
+        case 'impact':
+          addFx(e.src, e.dst, e.kind, 'impact');
+          break;
+        case 'blink':
+          // วาร์ป: ย้ายทันที + ค่อย ๆ ปรากฏ (ไม่ไถลข้ามสนาม)
+          this.blinkUntil.set(e.src, this.engine.time + 0.3);
+          break;
         case 'damage': {
           if (!e.poison && anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
           const p = posOf(e.dst);

@@ -1,5 +1,5 @@
 import { MANA_PER_ATTACK, MANA_PER_HIT, SKILL2_NAME, SKILL_NAME, ULT_NAME } from '../../core/data/classes';
-import { SkillKind } from '../../core/data/sprites';
+import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec } from '../../core/models/unit';
@@ -14,6 +14,10 @@ export type BattleEvent =
   | { type: 'attack'; src: number; dst: number }
   | { type: 'cast'; src: number; skill: string; kind: SkillKind; dst?: number }
   | { type: 'move'; src: number }
+  /** จังหวะที่สกิลโดนจริง (ตรงเฟรม hit ของท่า) — ใช้เล่นเอฟเฟกต์ที่เป้าหมาย */
+  | { type: 'impact'; src: number; dst?: number; kind: SkillKind }
+  /** ย้ายตัวแบบวาร์ป (ไม่ต้องเลื่อนตัวบนจอ) */
+  | { type: 'blink'; src: number }
   | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number; poison?: boolean }
   | { type: 'heal'; dst: number; amount: number }
   | { type: 'death'; dst: number }
@@ -115,6 +119,8 @@ export class BattleEngine {
   private readonly stage: StageDef;
   private readonly templates: Record<string, EnemyTemplate>;
   private events: BattleEvent[] = [];
+  /** การกระทำที่รอให้ท่าถึงเฟรม hit/move ก่อน (เรียงตามเวลาที่ใส่) */
+  private pending: { at: number; fn: () => void }[] = [];
   private nextId = 1;
   private nextWaveAt: number;
   private waveIndex = 0;
@@ -150,6 +156,8 @@ export class BattleEngine {
   step(dt: number): void {
     if (this.result) return;
     this.time += dt;
+    this.runPending();
+    if (this.checkEnd()) return;
 
     for (const u of this.units) {
       if (!u.alive) continue;
@@ -168,6 +176,34 @@ export class BattleEngine {
   run(dt = 0.05, maxTime = 300): BattleResult {
     while (!this.result && this.time < maxTime) this.step(dt);
     return this.result ?? 'timeout';
+  }
+
+  /** ทำสิ่งที่ถึงเวลาแล้ว (ดาเมจตรงเฟรม hit, วาร์ปตรงเฟรม move) */
+  private runPending(): void {
+    if (!this.pending.length) return;
+    const due = this.pending.filter(p => p.at <= this.time + 1e-9);
+    if (!due.length) return;
+    this.pending = this.pending.filter(p => p.at > this.time + 1e-9);
+    for (const p of due) p.fn();
+  }
+
+  /** รอ `delay` วินาทีแล้วค่อยทำ (ยกเลิกถ้าผู้ใช้ล้มไปก่อน) */
+  private later(delay: number, u: BattleUnit, fn: () => void): void {
+    const run = () => {
+      if (u.alive) fn();
+    };
+    if (delay <= 0) run();
+    else this.pending.push({ at: this.time + delay, fn: run });
+  }
+
+  /** เป้าเดิมถ้ายังอยู่ ไม่งั้นศัตรูที่ใกล้ที่สุดในระยะ (ท่าฟาดลงไปแล้วค่อยเปลี่ยนเป้า) */
+  private liveTarget(u: BattleUnit, t: BattleUnit): BattleUnit | null {
+    if (t.alive) return t;
+    return (
+      this.alive(u.side === 'ally' ? 'enemy' : 'ally')
+        .filter(f => distance(f.pos, u.pos) <= u.range + 1)
+        .sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0] ?? null
+    );
   }
 
   // ---------------------------------------------------------------- setup
@@ -293,10 +329,14 @@ export class BattleEngine {
         .filter(a => a.hp / a.maxHp < 0.6 && distance(a.pos, u.pos) <= u.range)
         .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
       if (hurt) {
-        this.heal(hurt, u.atk * 1.3);
-        u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
+        const tm = animTiming(u.sprite, 'attack');
+        u.castLock = Math.max(u.castLock, tm.hit);
         u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
         this.events.push({ type: 'attack', src: u.id, dst: hurt.id });
+        this.later(tm.hit, u, () => {
+          this.heal(hurt, u.atk * 1.3);
+          u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
+        });
         return;
       }
     }
@@ -349,15 +389,28 @@ export class BattleEngine {
     return best;
   }
 
+  /** ตีธรรมดา: เริ่มท่าทันที ดาเมจเข้าตรงเฟรม hit (ยืนนิ่งระหว่างเงื้อ) */
   private basicAttack(u: BattleUnit, t: BattleUnit): void {
     this.events.push({ type: 'attack', src: u.id, dst: t.id });
-    this.damage(u, t, 1);
-    u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
+    const tm = animTiming(u.sprite, 'attack');
+    u.castLock = Math.max(u.castLock, tm.hit);
+    this.later(tm.hit, u, () => {
+      const tt = this.liveTarget(u, t);
+      if (!tt) return;
+      this.damage(u, tt, 1);
+      u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
+    });
+  }
+
+  /** เริ่มท่าสกิล: ล็อกตัวจนท่าจบ (ไม่ให้ท่าตีธรรมดามาตัดกลางท่า) */
+  private beginSkill(u: BattleUnit, kind: SkillKind): { total: number; hit: number; move: number } {
+    const tm = animTiming(u.sprite, kind);
+    u.castLock = Math.max(u.castLock, tm.total, CAST_LOCK);
+    return tm;
   }
 
   private cast(u: BattleUnit, t: BattleUnit): void {
     u.mana = 0;
-    u.castLock = CAST_LOCK;
     // สลับสกิล 1 / 2 ทุกครั้งที่ร่าย (สายที่ยังไม่มีสกิล 2 ใช้ผลเดิม แค่เปลี่ยนท่า)
     // นักสู้: สกิลครั้งที่ 3 กลายเป็นท่าไม้ตาย (ครั้งเดียวต่อการต่อสู้)
     if (u.cls === 'fighter' && !u.ultUsed && u.casts === BLADE_ULT_CAST) {
@@ -376,32 +429,46 @@ export class BattleEngine {
       if (prey) t = prey;
     }
     this.events.push({ type: 'cast', src: u.id, skill, kind, dst: t.id });
+    const tm = this.beginSkill(u, kind);
+    if (u.cls === 'assassin' && kind === 'skill') this.later(tm.move, u, () => t.alive && this.blink(u, t));
+    this.later(tm.hit, u, () => {
+      const tt = this.liveTarget(u, t);
+      this.events.push({ type: 'impact', src: u.id, dst: tt?.id, kind });
+      this.resolveSkill(u, tt, kind);
+    });
+  }
+
+  /** ผลของสกิล ณ เฟรมที่โดน (t = null เมื่อเป้าหายไปหมดแล้ว) */
+  private resolveSkill(u: BattleUnit, t: BattleUnit | null, kind: SkillKind): void {
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    if (!t && u.cls !== 'healer' && u.cls !== 'archer') return;
     switch (u.cls) {
       case 'tank':
         if (kind === 'skill2') {
-          this.shieldCharge(u, t);
+          this.shieldCharge(u, t!);
         } else {
           u.taunt = TAUNT_TIME;
-          this.damage(u, t, 1);
+          this.damage(u, t!, 1);
         }
         break;
       case 'fighter':
         if (kind === 'skill2') {
-          const behind = this.grid.occupant({ r: t.pos.r + Math.sign(t.pos.r - u.pos.r), c: t.pos.c + Math.sign(t.pos.c - u.pos.c) });
-          const next = foes.find(f => f.id === behind);
-          this.damage(u, t, PIERCE_MUL);
+          const tt = t!;
+          const behind = this.grid.occupant({ r: tt.pos.r + Math.sign(tt.pos.r - u.pos.r), c: tt.pos.c + Math.sign(tt.pos.c - u.pos.c) });
+          const next = foes.find(f => f.id === behind && f !== tt);
+          this.damage(u, tt, PIERCE_MUL);
           if (next) this.damage(u, next, PIERCE_BEHIND_MUL);
         } else {
-          this.damage(u, t, 2.5);
+          this.damage(u, t!, 2.5);
         }
         break;
       case 'assassin':
         if (kind === 'skill') {
-          this.blink(u, t);
-          this.damage(u, t, BLINK_MUL);
+          this.damage(u, t!, BLINK_MUL);
         } else {
-          this.damage(u, t, SMOKE_MUL);
-          for (const f of foes.filter(f => f.alive && distance(f.pos, t.pos) <= 1)) {
+          const at = t!.pos;
+          this.damage(u, t!, SMOKE_MUL);
+          for (const f of foes.filter(f => f.alive && distance(f.pos, at) <= 1)) {
             f.poison = Math.max(f.poison, u.atk * POISON_DPS);
             f.poisonTime = POISON_TIME;
           }
@@ -413,7 +480,7 @@ export class BattleEngine {
         break;
       }
       case 'mage':
-        for (const f of foes.filter(f => distance(f.pos, t.pos) <= 1)) this.damage(u, f, 1.6);
+        for (const f of foes.filter(f => distance(f.pos, t!.pos) <= 1)) this.damage(u, f, 1.6);
         break;
       case 'healer':
         for (const a of this.alive(u.side).filter(a => distance(a.pos, u.pos) <= 3)) {
@@ -438,14 +505,18 @@ export class BattleEngine {
   /** แทงก์ ท่าไม้ตาย: กางโดมโล่ให้ตัวเองและเพื่อนรอบตัว แล้วยั่วยุ */
   private ultimate(u: BattleUnit): void {
     u.ultUsed = true;
-    u.castLock = Math.max(u.castLock, ULT_LOCK);
     u.taunt = Math.max(u.taunt, TAUNT_TIME);
     this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult' });
-    for (const a of this.alive(u.side)) {
-      if (distance(a.pos, u.pos) > ULT_RADIUS) continue;
-      a.shield += Math.round(u.maxHp * (a === u ? ULT_SELF_SHIELD : ULT_ALLY_SHIELD));
-      a.shieldTime = SHIELD_TIME;
-    }
+    const tm = animTiming(u.sprite, 'ult');
+    u.castLock = Math.max(u.castLock, tm.total, ULT_LOCK);
+    this.later(tm.hit, u, () => {
+      this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
+      for (const a of this.alive(u.side)) {
+        if (distance(a.pos, u.pos) > ULT_RADIUS) continue;
+        a.shield += Math.round(u.maxHp * (a === u ? ULT_SELF_SHIELD : ULT_ALLY_SHIELD));
+        a.shieldTime = SHIELD_TIME;
+      }
+    });
   }
 
   /** ช่องว่างรอบ ๆ ตำแหน่ง ที่อยู่ไกลจาก `from` ที่สุด (= ด้านหลังเป้าหมาย) */
@@ -462,26 +533,37 @@ export class BattleEngine {
     this.grid.move(u.id, u.pos, cell);
     u.pos = cell;
     u.targetId = t.id;
+    this.events.push({ type: 'blink', src: u.id });
   }
 
   /** นักสู้ ท่าไม้ตาย: ฟาดดาบสายฟ้าลงที่เป้าหมาย กระเด็นโดนศัตรูรอบ ๆ */
   private bladeUlt(u: BattleUnit, t: BattleUnit): void {
     u.ultUsed = true;
-    u.castLock = ULT_LOCK;
     this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
-    const splash = this.alive(t.side).filter(f => f !== t && distance(f.pos, t.pos) <= 1);
-    this.damage(u, t, BLADE_ULT_MUL);
-    for (const f of splash) this.damage(u, f, BLADE_ULT_SPLASH);
+    const tm = this.beginSkill(u, 'ult');
+    this.later(tm.hit, u, () => {
+      const tt = this.liveTarget(u, t);
+      this.events.push({ type: 'impact', src: u.id, dst: tt?.id, kind: 'ult' });
+      if (!tt) return;
+      const splash = this.alive(tt.side).filter(f => f !== tt && distance(f.pos, tt.pos) <= 1);
+      this.damage(u, tt, BLADE_ULT_MUL);
+      for (const f of splash) this.damage(u, f, BLADE_ULT_SPLASH);
+    });
   }
 
   /** นักฆ่า ท่าไม้ตาย: วาร์ปไปประหารศัตรูที่ใกล้ตาย */
   private execute(u: BattleUnit, t: BattleUnit): void {
     u.ultUsed = true;
-    u.castLock = ULT_LOCK;
-    u.atkCd = Math.max(u.atkCd, 0.3);
     this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
-    if (distance(u.pos, t.pos) > 1) this.blink(u, t);
-    this.damage(u, t, EXEC_MUL, true);
+    const tm = this.beginSkill(u, 'ult');
+    u.atkCd = Math.max(u.atkCd, tm.total);
+    this.later(tm.move, u, () => {
+      if (t.alive && distance(u.pos, t.pos) > 1) this.blink(u, t);
+    });
+    this.later(tm.hit, u, () => {
+      this.events.push({ type: 'impact', src: u.id, dst: t.alive ? t.id : undefined, kind: 'ult' });
+      this.damage(u, t, EXEC_MUL, true);
+    });
   }
 
   private damage(src: BattleUnit, dst: BattleUnit, mul: number, forceCrit = false): void {

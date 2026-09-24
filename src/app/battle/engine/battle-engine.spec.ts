@@ -76,9 +76,12 @@ describe('BattleEngine', () => {
     let shielded = false;
     while (!e.result && e.time < 60) {
       e.step(0.05);
-      const evs = e.drainEvents().filter(ev => ev.type === 'cast' && ev.kind === 'ult');
-      if (evs.length) shielded = e.units.filter(u => u.side === 'ally' && u.alive).every(u => u.shield > 0);
-      ults.push(...evs);
+      const evs = e.drainEvents();
+      // โล่ขึ้นตอนท่าถึงเฟรม hit (impact) ไม่ใช่ตอนเริ่มท่า
+      if (evs.some(ev => ev.type === 'impact' && ev.src === 1 && ev.kind === 'ult')) {
+        shielded = e.units.filter(u => u.side === 'ally' && u.alive).every(u => u.shield > 0);
+      }
+      ults.push(...evs.filter(ev => ev.type === 'cast' && ev.src === 1 && ev.kind === 'ult'));
     }
     expect(ults.length).toBe(1);
     expect(shielded).toBeTrue();
@@ -117,5 +120,39 @@ describe('BattleEngine', () => {
     }
     expect(kinds.slice(0, 3)).toEqual(['skill', 'skill2', 'ult']);
     expect(kinds.filter(k => k === 'ult').length).toBe(1);
+  });
+
+  it('lands damage on the hit frame, after the swing starts', () => {
+    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[0], enemyTemplates: ENEMIES, seed: 1 });
+    const firstAttack = new Map<number, number>();
+    let checked = 0;
+    while (!e.result && e.time < 30) {
+      e.step(0.05);
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'attack' && !firstAttack.has(ev.dst)) firstAttack.set(ev.dst, e.time);
+        if (ev.type === 'damage' && firstAttack.has(ev.dst) && !ev.poison) {
+          expect(e.time).toBeGreaterThan(firstAttack.get(ev.dst)!);
+          checked++;
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+
+  it('assassin blinks before its teleport strike lands', () => {
+    const team: UnitSpec[] = [
+      { name: 'S', cls: 'assassin', sprite: 'hero-shade.png', stats: { ...CLASS_BASE.assassin, hp: 3000 }, pos: { r: 0, c: 1 } },
+    ];
+    const e = new BattleEngine({ allies: team, stage: STAGES[6], enemyTemplates: ENEMIES, seed: 2 });
+    const seq: string[] = [];
+    while (!e.result && e.time < 30 && seq.length < 3) {
+      e.step(0.05);
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'cast' && ev.src === 1 && ev.kind === 'skill') seq.push('cast');
+        if (seq.length && ev.type === 'blink' && ev.src === 1) seq.push('blink');
+        if (seq.length && ev.type === 'impact' && ev.src === 1 && ev.kind === 'skill') seq.push('impact');
+      }
+    }
+    expect(seq.slice(0, 3)).toEqual(['cast', 'blink', 'impact']);
   });
 });

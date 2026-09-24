@@ -3,7 +3,7 @@
 
   @for (u of units(); track u.id) {
     <div class="unit" [class.dead]="!u.alive" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
-         [class.taunt]="u.taunt" [style.transform]="unitPos(u)" [style.z-index]="unitZ(u)">
+         [class.taunt]="u.taunt" [class.blink]="!!u.blink" [style.transform]="unitPos(u)" [style.z-index]="unitZ(u)">
       <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss"
                        [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
       @if (u.alive) {
