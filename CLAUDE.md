@@ -14,7 +14,10 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
 - `src/app/battle/engine` เอนจินต่อสู้ TypeScript ล้วน ห้าม import Angular — ใช้ได้ทั้งในเกมและ `npm run sim`
 - `src/app/battle/board`, `unit-sprite` แสดงผลกระดานและแอนิเมชัน
 - `src/app/pages/*` หน้าจอ (ตอนนี้ใช้งานได้: `/lab` ห้องทดลองต่อสู้)
-- `public/sprites` แผ่น sprite 1320×600, 10 คอลัมน์ × 6 แถว, ช่อง 132×100 (idle, hurt, die, attack, skill, skill2)
+- `public/sprites` แผ่น sprite ช่องละ 132×100 (เท้า y=86, กลาง x=66, หันขวา) — จำนวนแถว/คอลัมน์และท่าของแต่ละแผ่นกำหนดใน `core/data/sprites.ts` (SHEETS) พร้อมเอฟเฟกต์สกิล (FX)
+  - `hero-draken.png` 10×6: idle, hurt, die, attack, skill, skill2
+  - `hero-aurel.png` 8×8: idle, walk, hurt, attack, skill, skill2, ult, die + `fx-aurel-{defense,charge,ult}.png` (สร้างด้วย `tools/sprites/extract-aurel.py`)
+- แทงก์: สกิลสลับ ยั่วยุ ↔ พุ่งชนโล่ (160% ผลักถอย มึน 1 วิ) · ท่าไม้ตายครั้งเดียวเมื่อเลือด < 40% (โล่ตัวเอง 30% / เพื่อนในระยะ 2 ช่อง 15% ของเลือดสูงสุดแทงก์ 6 วิ + ยั่วยุ)
 
 ## คำสั่ง
 - `npm start` รันเกมที่ http://localhost:4200

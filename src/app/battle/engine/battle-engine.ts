@@ -1,4 +1,5 @@
-import { MANA_PER_ATTACK, MANA_PER_HIT, SKILL_NAME } from '../../core/data/classes';
+import { MANA_PER_ATTACK, MANA_PER_HIT, SKILL2_NAME, SKILL_NAME, ULT_NAME } from '../../core/data/classes';
+import { SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec } from '../../core/models/unit';
@@ -11,8 +12,9 @@ export type BattleResult = 'win' | 'lose' | 'timeout';
 
 export type BattleEvent =
   | { type: 'attack'; src: number; dst: number }
-  | { type: 'cast'; src: number; skill: string }
-  | { type: 'damage'; dst: number; amount: number; crit: boolean }
+  | { type: 'cast'; src: number; skill: string; kind: SkillKind; dst?: number }
+  | { type: 'move'; src: number }
+  | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number }
   | { type: 'heal'; dst: number; amount: number }
   | { type: 'death'; dst: number }
   | { type: 'spawn'; dst: number };
@@ -45,6 +47,13 @@ export interface BattleUnit {
   castLock: number;
   /** เวลาที่ยังยั่วยุอยู่ (ลดดาเมจที่ได้รับ 50%) */
   taunt: number;
+  /** จำนวนครั้งที่ร่ายสกิลแล้ว (ใช้สลับสกิล 1/2) */
+  casts: number;
+  /** ใช้ท่าไม้ตายไปแล้วหรือยัง (1 ครั้งต่อการต่อสู้) */
+  ultUsed: boolean;
+  /** โล่ดูดซับดาเมจ และเวลาที่เหลือ */
+  shield: number;
+  shieldTime: number;
 }
 
 export interface BattleConfig {
@@ -59,6 +68,16 @@ const TAUNT_TIME = 3;
 const TAUNT_RADIUS = 3;
 const CRIT_CHANCE = 0.1;
 const CRIT_MUL = 1.5;
+/** แทงก์ สกิล 2 พุ่งชนโล่: ดาเมจ 160% ผลักถอย 1 ช่อง มึน 1 วิ */
+const CHARGE_MUL = 1.6;
+const CHARGE_STUN = 1;
+/** แทงก์ ท่าไม้ตาย: เลือดต่ำกว่า 40% ครั้งแรก → โล่ตัวเอง 30% / เพื่อนรอบตัว 2 ช่อง 15% ของเลือดสูงสุดแทงก์ + ยั่วยุ */
+const ULT_HP = 0.4;
+const ULT_RADIUS = 2;
+const ULT_SELF_SHIELD = 0.3;
+const ULT_ALLY_SHIELD = 0.15;
+const ULT_LOCK = 0.6;
+const SHIELD_TIME = 6;
 
 /**
  * เอนจินต่อสู้อัตโนมัติบนกระดาน 8x7 (TypeScript ล้วน ไม่ผูกกับ Angular)
@@ -165,6 +184,10 @@ export class BattleEngine {
       moveCd: 0,
       castLock: 0,
       taunt: 0,
+      casts: 0,
+      ultUsed: false,
+      shield: 0,
+      shieldTime: 0,
     };
     this.grid.place(u.id, pos);
     this.units.push(u);
@@ -212,6 +235,7 @@ export class BattleEngine {
     u.atkCd -= dt;
     u.moveCd -= dt;
     if (u.taunt > 0) u.taunt -= dt;
+    if (u.shieldTime > 0 && (u.shieldTime -= dt) <= 0) u.shield = 0;
     if (u.castLock > 0) {
       u.castLock -= dt;
       return;
@@ -250,6 +274,7 @@ export class BattleEngine {
       if (step) {
         this.grid.move(u.id, u.pos, step);
         u.pos = step;
+        this.events.push({ type: 'move', src: u.id });
       }
       u.moveCd = 1 / u.moveSpeed;
     }
@@ -287,12 +312,19 @@ export class BattleEngine {
   private cast(u: BattleUnit, t: BattleUnit): void {
     u.mana = 0;
     u.castLock = CAST_LOCK;
-    this.events.push({ type: 'cast', src: u.id, skill: SKILL_NAME[u.cls] });
+    // สลับสกิล 1 / 2 ทุกครั้งที่ร่าย (สายที่ยังไม่มีสกิล 2 ใช้ผลเดิม แค่เปลี่ยนท่า)
+    const kind: SkillKind = u.casts++ % 2 ? 'skill2' : 'skill';
+    const skill = (kind === 'skill2' && SKILL2_NAME[u.cls]) || SKILL_NAME[u.cls];
+    this.events.push({ type: 'cast', src: u.id, skill, kind, dst: t.id });
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
     switch (u.cls) {
       case 'tank':
-        u.taunt = TAUNT_TIME;
-        this.damage(u, t, 1);
+        if (kind === 'skill2') {
+          this.shieldCharge(u, t);
+        } else {
+          u.taunt = TAUNT_TIME;
+          this.damage(u, t, 1);
+        }
         break;
       case 'fighter':
         this.damage(u, t, 2.5);
@@ -313,21 +345,52 @@ export class BattleEngine {
     }
   }
 
+  /** แทงก์ สกิล 2: กระแทกโล่ใส่เป้าหมาย ผลักถอย 1 ช่อง (ถ้าว่าง) และทำให้มึน */
+  private shieldCharge(u: BattleUnit, t: BattleUnit): void {
+    this.damage(u, t, CHARGE_MUL);
+    if (!t.alive) return;
+    t.castLock = Math.max(t.castLock, CHARGE_STUN);
+    const back = { r: t.pos.r + Math.sign(t.pos.r - u.pos.r), c: t.pos.c + Math.sign(t.pos.c - u.pos.c) };
+    if (this.grid.isFree(back)) {
+      this.grid.move(t.id, t.pos, back);
+      t.pos = back;
+    }
+  }
+
+  /** แทงก์ ท่าไม้ตาย: กางโดมโล่ให้ตัวเองและเพื่อนรอบตัว แล้วยั่วยุ */
+  private ultimate(u: BattleUnit): void {
+    u.ultUsed = true;
+    u.castLock = Math.max(u.castLock, ULT_LOCK);
+    u.taunt = Math.max(u.taunt, TAUNT_TIME);
+    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult' });
+    for (const a of this.alive(u.side)) {
+      if (distance(a.pos, u.pos) > ULT_RADIUS) continue;
+      a.shield += Math.round(u.maxHp * (a === u ? ULT_SELF_SHIELD : ULT_ALLY_SHIELD));
+      a.shieldTime = SHIELD_TIME;
+    }
+  }
+
   private damage(src: BattleUnit, dst: BattleUnit, mul: number): void {
     if (!dst.alive) return;
     let raw = src.atk * mul * (0.9 + this.rng() * 0.2);
     const crit = this.rng() < CRIT_CHANCE;
     if (crit) raw *= CRIT_MUL;
     if (dst.taunt > 0) raw *= 0.5;
-    const amount = Math.max(1, Math.round((raw * 100) / (100 + dst.def)));
+    const total = Math.max(1, Math.round((raw * 100) / (100 + dst.def)));
+    const blocked = Math.min(dst.shield, total);
+    const amount = total - blocked;
+    dst.shield -= blocked;
     dst.hp -= amount;
     dst.mana = Math.min(dst.maxMana, dst.mana + MANA_PER_HIT);
-    this.events.push({ type: 'damage', dst: dst.id, amount, crit });
+    this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked });
     if (dst.hp <= 0) {
       dst.hp = 0;
       dst.alive = false;
+      dst.shield = 0;
       this.grid.remove(dst.pos);
       this.events.push({ type: 'death', dst: dst.id });
+    } else if (ULT_NAME[dst.cls] && !dst.ultUsed && dst.hp < dst.maxHp * ULT_HP) {
+      this.ultimate(dst);
     }
   }
 

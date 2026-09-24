@@ -3,7 +3,9 @@ import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
 import { power } from '../../core/rules/stats';
 import { TeamService } from '../../core/services/team.service';
-import { AnimState, BoardComponent, FloatText, UnitView } from '../../battle/board/board.component';
+import { AnimState, BoardComponent, FloatText, FxView, UnitView } from '../../battle/board/board.component';
+import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
+import { FX, SHEETS } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult } from '../../battle/engine/battle-engine';
 
 const TICK = 0.05;
@@ -29,6 +31,7 @@ export class BattleComponent implements OnDestroy {
   readonly time = signal(0);
   readonly views = signal<UnitView[]>([]);
   readonly floats = signal<FloatText[]>([]);
+  readonly fx = signal<FxView[]>([]);
   readonly anims = signal<Record<number, AnimState>>({});
   readonly simReport = signal<string | null>(null);
 
@@ -61,6 +64,7 @@ export class BattleComponent implements OnDestroy {
     this.result.set(null);
     this.simReport.set(null);
     this.floats.set([]);
+    this.fx.set([]);
     this.anims.set({});
     this.engine = new BattleEngine({
       allies: this.team.units(),
@@ -118,6 +122,7 @@ export class BattleComponent implements OnDestroy {
         c: u.pos.c,
         hpPct: (u.hp / u.maxHp) * 100,
         manaPct: (u.mana / u.maxMana) * 100,
+        shieldPct: (u.shield / u.maxHp) * 100,
         alive: u.alive,
         taunt: u.taunt > 0,
         star: u.star,
@@ -132,7 +137,9 @@ export class BattleComponent implements OnDestroy {
     if (!events.length) return;
     const anims = { ...this.anims() };
     const floats: FloatText[] = [];
-    const posOf = (id: number) => this.engine.units.find(u => u.id === id)!.pos;
+    const fx: FxView[] = [];
+    const unitOf = (id: number) => this.engine.units.find(u => u.id === id)!;
+    const posOf = (id: number) => unitOf(id).pos;
     const set = (id: number, anim: AnimState['anim']) => (anims[id] = { anim, key: ++this.animKey });
 
     for (const e of events) {
@@ -140,16 +147,26 @@ export class BattleComponent implements OnDestroy {
         case 'attack':
           set(e.src, 'attack');
           break;
+        case 'move':
+          if (anims[e.src]?.anim !== 'die') set(e.src, 'walk');
+          break;
         case 'cast': {
-          set(e.src, this.animKey % 2 ? 'skill' : 'skill2');
+          set(e.src, e.kind);
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
+          const name = SHEETS[unitOf(e.src).sprite ?? '']?.fx?.[e.kind];
+          if (name && FX[name]) {
+            const q = FX[name].at === 'target' && e.dst != null ? posOf(e.dst) : p;
+            const angle = q === p ? 0 : (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI;
+            fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle });
+          }
           break;
         }
         case 'damage': {
           if (anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
           const p = posOf(e.dst);
-          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `-${e.amount}`, kind: e.crit ? 'crit' : 'dmg' });
+          const text = e.amount > 0 ? `-${e.amount}` : 'บล็อก';
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: e.crit ? 'crit' : 'dmg' });
           break;
         }
         case 'heal': {
@@ -163,6 +180,10 @@ export class BattleComponent implements OnDestroy {
       }
     }
     this.anims.set(anims);
+    for (const f of fx) {
+      this.fx.update(list => [...list, f]);
+      setTimeout(() => this.fx.update(list => list.filter(x => x.id !== f.id)), fxDuration(f.name, this.speed()) + 50);
+    }
     if (floats.length) {
       this.floats.update(f => [...f, ...floats].slice(-40));
       const ids = new Set(floats.map(f => f.id));

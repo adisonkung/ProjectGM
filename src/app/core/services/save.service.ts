@@ -25,7 +25,8 @@ export class SaveService {
     try {
       const raw = localStorage.getItem(KEY);
       const s = raw ? (JSON.parse(raw) as GameState) : null;
-      return s?.version === 1 ? s : null;
+      // เปลี่ยนเวอร์ชันแล้วเริ่มเกมใหม่ (v2: ทีมเริ่มต้นมีออเรลแทนกอร์แรน)
+      return s?.version === 2 ? s : null;
     } catch {
       return null;
     }

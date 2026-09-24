@@ -2,7 +2,7 @@ import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
 import { UnitSpec } from '../../core/models/unit';
-import { BattleEngine } from './battle-engine';
+import { BattleEngine, BattleEvent } from './battle-engine';
 
 const strongTeam: UnitSpec[] = [
   { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 2000, atk: 80 }, pos: { r: 0, c: 3 } },
@@ -38,5 +38,34 @@ describe('BattleEngine', () => {
       const cells = e.units.filter(u => u.alive).map(u => `${u.pos.r},${u.pos.c}`);
       expect(new Set(cells).size).toBe(cells.length);
     }
+  });
+
+  it('tank alternates defense stance and shield charge', () => {
+    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 5 });
+    const kinds: string[] = [];
+    while (!e.result && e.time < 60) {
+      e.step(0.05);
+      for (const ev of e.drainEvents()) if (ev.type === 'cast' && ev.src === 1 && ev.kind !== 'ult') kinds.push(ev.kind);
+    }
+    expect(kinds.length).toBeGreaterThan(1);
+    kinds.forEach((k, i) => expect(k).toBe(i % 2 ? 'skill2' : 'skill'));
+  });
+
+  it('tank ultimate fires once below 40% hp and shields nearby allies', () => {
+    const weakTank: UnitSpec[] = [
+      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 300 }, pos: { r: 0, c: 3 } },
+      { name: 'F', cls: 'fighter', stats: CLASS_BASE.fighter, pos: { r: 1, c: 3 } },
+    ];
+    const e = new BattleEngine({ allies: weakTank, stage: STAGES[9], enemyTemplates: ENEMIES, seed: 2 });
+    const ults: BattleEvent[] = [];
+    let shielded = false;
+    while (!e.result && e.time < 60) {
+      e.step(0.05);
+      const evs = e.drainEvents().filter(ev => ev.type === 'cast' && ev.kind === 'ult');
+      if (evs.length) shielded = e.units.filter(u => u.side === 'ally' && u.alive).every(u => u.shield > 0);
+      ults.push(...evs);
+    }
+    expect(ults.length).toBe(1);
+    expect(shielded).toBeTrue();
   });
 });

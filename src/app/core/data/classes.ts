@@ -16,6 +16,14 @@ export const SKILL_NAME: Record<HeroClass, string> = {
   healer: 'แสงฟื้นฟู',
 };
 
+/** สกิลที่ 2 (ใช้สลับกับสกิลแรก) และท่าไม้ตาย ของสายที่มี */
+export const SKILL2_NAME: Partial<Record<HeroClass, string>> = {
+  tank: 'พุ่งชนโล่',
+};
+export const ULT_NAME: Partial<Record<HeroClass, string>> = {
+  tank: 'ป้อมปราการศักดิ์สิทธิ์',
+};
+
 /** ค่าพื้นฐานของแต่ละสาย ที่ 1★ เลเวล 1 */
 export const CLASS_BASE: Record<HeroClass, Stats> = {
   tank:    { hp: 320, atk: 22, def: 40, atkSpeed: 0.55, moveSpeed: 1.5, range: 1, maxMana: 60 },

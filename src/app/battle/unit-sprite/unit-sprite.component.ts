@@ -1,21 +1,13 @@
 import { Component, ElementRef, computed, effect, input, untracked, viewChild } from '@angular/core';
+import { ANIM_FALLBACK, SHEETS, SheetDef, SpriteAnim } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 
-export type SpriteAnim = 'idle' | 'attack' | 'skill' | 'skill2' | 'hurt' | 'die';
+export type { SpriteAnim } from '../../core/data/sprites';
 
-/** แผ่น sprite: 10 คอลัมน์ x 6 แถว, ช่องละ 132x100 px */
-const SHEET_COLS = 10;
-const SHEET_ROWS = 6;
-const ANIMS: Record<SpriteAnim, { row: number; frames: number }> = {
-  idle: { row: 0, frames: 10 },
-  hurt: { row: 1, frames: 6 },
-  die: { row: 2, frames: 6 },
-  attack: { row: 3, frames: 7 },
-  skill: { row: 4, frames: 7 },
-  skill2: { row: 5, frames: 5 },
-};
 const FRAME_MS = 85;
+/** ท่าที่ขัดท่าอื่นไม่ได้ (เดิน/โดนตี จะไม่แทรกท่าโจมตีหรือสกิล) */
+const LOW: SpriteAnim[] = ['idle', 'walk', 'hurt'];
 
 @Component({
   selector: 'app-unit-sprite',
@@ -35,6 +27,11 @@ export class UnitSpriteComponent {
 
   readonly sheet = viewChild<ElementRef<HTMLElement>>('sheet');
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);
+  readonly def = computed<SheetDef | undefined>(() => SHEETS[this.sprite() ?? '']);
+  readonly bgSize = computed(() => {
+    const d = this.def();
+    return d ? `${d.cols * 100}% ${d.rows * 100}%` : null;
+  });
 
   private current?: Animation;
   private currentName: SpriteAnim = 'idle';
@@ -44,19 +41,25 @@ export class UnitSpriteComponent {
       const name = this.anim();
       this.animKey();
       const el = this.sheet()?.nativeElement;
-      if (el) untracked(() => this.play(el, name));
+      const def = this.def();
+      if (el && def) untracked(() => this.play(el, def, name));
     });
   }
 
-  private play(el: HTMLElement, name: SpriteAnim): void {
+  private play(el: HTMLElement, def: SheetDef, want: SpriteAnim): void {
+    // แผ่นไม่มีท่านี้: ใช้ท่าใกล้เคียงแทน
+    let name: SpriteAnim | null = want;
+    while (name && !def.anims[name]) name = ANIM_FALLBACK[name];
+    if (!name) return;
+
     const busy = this.current?.playState === 'running';
-    // ไม่ขัดท่าโจมตี/สกิลด้วยท่าโดนตี และไม่ขยับอีกหลังตาย
-    if (name === 'hurt' && busy && this.currentName !== 'idle' && this.currentName !== 'hurt') return;
+    if (LOW.includes(name) && name !== 'idle' && busy && !LOW.includes(this.currentName)) return;
+    // ไม่ขยับอีกหลังตาย (ยกเว้นรีเซ็ตกลับท่ายืน)
     if (this.currentName === 'die' && name !== 'die' && name !== 'idle') return;
 
-    const a = ANIMS[name];
-    const y = (a.row / (SHEET_ROWS - 1)) * 100;
-    const x = (i: number) => (i / (SHEET_COLS - 1)) * 100;
+    const a = def.anims[name]!;
+    const y = def.rows > 1 ? (a.row / (def.rows - 1)) * 100 : 0;
+    const x = (i: number) => (i / (def.cols - 1)) * 100;
     const hold = name === 'die';
     const loop = name === 'idle';
     const frames = hold ? a.frames - 1 : a.frames;
@@ -72,6 +75,6 @@ export class UnitSpriteComponent {
         fill: hold ? 'forwards' : 'none',
       },
     );
-    if (!loop && !hold) this.current.onfinish = () => this.play(el, 'idle');
+    if (!loop && !hold) this.current.onfinish = () => this.play(el, def, 'idle');
   }
 }

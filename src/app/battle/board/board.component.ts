@@ -2,6 +2,7 @@ import { Component, input } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS } from '../engine/grid';
+import { FxSpriteComponent } from '../fx-sprite/fx-sprite.component';
 import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
@@ -14,6 +15,8 @@ export interface UnitView {
   c: number;
   hpPct: number;
   manaPct: number;
+  /** โล่เทียบกับเลือดสูงสุด (%) */
+  shieldPct: number;
   alive: boolean;
   taunt: boolean;
   star?: number;
@@ -30,6 +33,15 @@ export interface FloatText {
   kind: 'dmg' | 'crit' | 'heal' | 'skill';
 }
 
+/** เอฟเฟกต์สกิลที่กำลังเล่นบนกระดาน */
+export interface FxView {
+  id: number;
+  r: number;
+  c: number;
+  name: string;
+  angle: number;
+}
+
 export interface AnimState {
   anim: SpriteAnim;
   key: number;
@@ -37,13 +49,14 @@ export interface AnimState {
 
 @Component({
   selector: 'app-board',
-  imports: [UnitSpriteComponent],
+  imports: [UnitSpriteComponent, FxSpriteComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
 export class BoardComponent {
   readonly units = input<UnitView[]>([]);
   readonly floats = input<FloatText[]>([]);
+  readonly fx = input<FxView[]>([]);
   readonly anims = input<Partial<Record<number, AnimState>>>({});
   readonly speed = input(1);
 

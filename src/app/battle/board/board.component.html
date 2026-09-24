@@ -11,11 +11,17 @@
                        [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
       @if (u.alive) {
         <div class="bars">
-          <div class="bar hp"><i [style.width.%]="u.hpPct"></i></div>
+          <div class="bar hp"><i [style.width.%]="u.hpPct"></i>@if (u.shieldPct > 0) {<b [style.left.%]="u.hpPct" [style.width.%]="u.shieldPct"></b>}</div>
           <div class="bar mana"><i [style.width.%]="u.manaPct"></i></div>
         </div>
         @if (u.level) { <span class="lv">{{ u.level }}</span> }
       }
+    </div>
+  }
+
+  @for (f of fx(); track f.id) {
+    <div class="fx-wrap" [style.transform]="pos(f.r, f.c)">
+      <app-fx-sprite [name]="f.name" [angle]="f.angle" [speed]="speed()" />
     </div>
   }
 

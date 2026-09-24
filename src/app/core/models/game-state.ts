@@ -8,7 +8,7 @@ export interface TeamSlot {
 }
 
 export interface GameState {
-  version: 1;
+  version: 2;
   gems: number;
   gold: number;
   pity: number;
