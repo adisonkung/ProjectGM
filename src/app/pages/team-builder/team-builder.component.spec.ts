@@ -15,9 +15,9 @@ describe('TeamBuilderComponent', () => {
     fixture.detectChanges();
   });
 
-  it('renders the 5x7 ally side and the starter team', () => {
+  it('renders the 6x3 ally side and the starter team', () => {
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelectorAll('.cell.ally').length).toBe(35);
+    expect(el.querySelectorAll('.cell.ally').length).toBe(18);
     expect(el.querySelectorAll('.cell.ally .unit').length).toBe(5);
   });
 

@@ -22,10 +22,9 @@ describe('UnitSpriteComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('bobs the whole unit when the sheet has no walk row', () => {
+  it('bobs the whole unit when it has no walk row (token without a sheet)', () => {
     const host: HTMLElement = fixture.nativeElement;
     const spy = spyOn(host, 'animate').and.callThrough();
-    fixture.componentRef.setInput('sprite', 'hero-draken.png');
     fixture.componentRef.setInput('anim', 'walk');
     fixture.detectChanges();
     expect(spy).toHaveBeenCalled();

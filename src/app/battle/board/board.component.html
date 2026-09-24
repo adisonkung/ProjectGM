@@ -1,12 +1,9 @@
-<div class="board" [style.--spd]="speed()" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="กระดานต่อสู้ 7 แถว 10 คอลัมน์ ฝั่งเราอยู่ซ้าย ศัตรูอยู่ขวา">
-  @for (cell of cells; track $index) {
-    <div class="cell" [class.enemy-half]="cell.enemy" [class.odd]="(cell.r + cell.c) % 2 === 1"></div>
-  }
-  <div class="midline"></div>
+<div class="board" [style.--spd]="speed()" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 12 คอลัมน์ ฝั่งเราอยู่ซ้าย ศัตรูอยู่ขวา">
+  <app-field />
 
   @for (u of units(); track u.id) {
     <div class="unit" [class.dead]="!u.alive" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
-         [class.taunt]="u.taunt" [style.transform]="pos(u.r, u.c)" [style.z-index]="u.r + 2">
+         [class.taunt]="u.taunt" [style.transform]="unitPos(u)" [style.z-index]="unitZ(u)">
       <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss"
                        [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
       @if (u.alive) {
