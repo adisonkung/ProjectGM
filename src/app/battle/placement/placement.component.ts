@@ -3,6 +3,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cd
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { CLASS_NAME } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
+import { heroArt } from '../../core/data/hero-art';
 import { HeroClass, OwnedHero } from '../../core/models/hero';
 import { StageDef } from '../../core/models/stage';
 import { LANES, SIDE_DEPTH, TEAM_SIZE } from '../../core/rules/team';
@@ -43,6 +44,7 @@ interface HeroView {
   range: number;
   sprite?: string;
   injury: number;
+  portrait?: string;
 }
 
 /**
@@ -244,6 +246,7 @@ export class PlacementComponent {
       range: s.range,
       sprite: t.sprite,
       injury: h.injury,
+      portrait: heroArt(t.id)?.portrait,
     };
   }
 }

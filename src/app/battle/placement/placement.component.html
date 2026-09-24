@@ -67,7 +67,7 @@
               (cdkDragStarted)="dragStarted(h.uid)" (click)="tapHero(h.uid, $event)"
               [class.selected]="selected() === h.uid" [class.injured]="h.injury > 0"
               [style.--rc]="'var(--r' + h.star + ')'" [attr.aria-pressed]="selected() === h.uid">
-        <span class="portrait"><app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [star]="h.star" /></span>
+        <span class="portrait">@if (h.portrait) { <img [src]="h.portrait" alt="" draggable="false" /> } @else { <app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [star]="h.star" /> }</span>
         <span class="info">
           <b>{{ h.name }}</b>
           <small>{{ h.clsName }} · ★{{ h.star }} · Lv{{ h.level }}</small>

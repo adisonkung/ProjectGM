@@ -48,6 +48,12 @@ export interface UnitView {
   intent?: string;
   /** ฮีโร่: กำลังตีเป้าโฟกัสอยู่ */
   onFocus?: boolean;
+  /** ฮีโร่: id ต้นแบบ (ภาพ) + คูลดาวน์ที่เหลือ/เต็ม ของสกิล 1 และ 2 (วิ) */
+  heroId?: string;
+  cd1?: number;
+  cd2?: number;
+  cd1Max?: number;
+  cd2Max?: number;
 }
 
 export interface FloatText {

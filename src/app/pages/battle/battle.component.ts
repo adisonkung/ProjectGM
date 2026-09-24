@@ -9,7 +9,7 @@ import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView 
 import { projectileLife } from '../../battle/projectile/projectile.component';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { PartyBarComponent } from '../../battle/party-bar/party-bar.component';
-import { canInterrupt } from '../../core/data/classes';
+import { canInterrupt, SKILL_CD } from '../../core/data/classes';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
@@ -256,6 +256,11 @@ export class BattleComponent implements OnDestroy {
         focused: u.id === e.focusTargetId,
         selected: u.id === this.selectedId(),
         intent: u.side === 'ally' ? u.intent : undefined,
+        heroId: u.heroId,
+        cd1: Math.max(0, u.cd1),
+        cd2: Math.max(0, u.cd2),
+        cd1Max: SKILL_CD[u.cls][0],
+        cd2Max: SKILL_CD[u.cls][1],
         onFocus: u.side === 'ally' && e.focusTargetId != null && u.targetId === e.focusTargetId,
         line: u.line,
         interrupter: u.side === 'ally' && canInterrupt(u.cls, 'ult'),

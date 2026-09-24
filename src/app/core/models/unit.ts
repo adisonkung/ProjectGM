@@ -20,4 +20,6 @@ export interface UnitSpec {
   sprite?: string;
   boss?: boolean;
   heroUid?: number;
+  /** id ต้นแบบฮีโร่ (ใช้หาภาพโปรไฟล์/ไอคอนสกิล) */
+  heroId?: string;
 }

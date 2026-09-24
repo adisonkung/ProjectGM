@@ -57,6 +57,7 @@ export interface BattleUnit {
   sprite?: string;
   boss?: boolean;
   heroUid?: number;
+  heroId?: string;
   pos: Cell;
   /** ตำแหน่งตั้งต้น (ทีมกลับมาจัดแถวตรงนี้ตอนเดินไปเวฟถัดไป) */
   home: Cell;
@@ -332,6 +333,7 @@ export class BattleEngine {
       sprite: spec.sprite,
       boss: spec.boss,
       heroUid: spec.heroUid,
+      heroId: spec.heroId,
       pos,
       home: pos,
       round: this.round,

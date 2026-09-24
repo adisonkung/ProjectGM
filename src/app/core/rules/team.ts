@@ -49,6 +49,7 @@ export function teamToUnits(team: TeamSlot[], heroes: OwnedHero[]): UnitSpec[] {
       level: h.level,
       sprite: t.sprite,
       heroUid: h.uid,
+      heroId: t.id,
       stats: heroStats(t, h),
       pos: { r: slot.r, c: slot.c },
     });
