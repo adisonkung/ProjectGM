@@ -1,11 +1,11 @@
 import { Component, ElementRef, afterNextRender, computed, input, viewChild } from '@angular/core';
-import { FX, PX_TO_CELL } from '../../core/data/sprites';
+import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 
 /** เล่นเอฟเฟกต์สกิลหนึ่งรอบแล้วหายไป (ผู้เรียกลบออกจากรายการเองตาม fxDuration) */
 @Component({
   selector: 'app-fx-sprite',
   template: `<div #el class="fx" [style.background-image]="'url(sprites/' + def().file + ')'"
-    [style.background-size]="def().frames * 100 + '% 100%'" [style.width.%]="def().w * pxToCell * (def().scale ?? 1)"
+    [style.background-size]="def().frames * 100 + '% 100%'" [style.width.%]="def().w * pxToCell * (def().scale ?? 1) * fxScale"
     [style.aspect-ratio]="def().w + ' / ' + def().h" [style.left]="'calc(50% + ' + (def().dx ?? 0) * (flip() ? -1 : 1) + '%)'"
     [style.top]="'calc(50% + ' + (def().dy ?? 0) + '%)'" [style.transform]="'translate(-50%, -50%) rotate(' + angle() + 'deg)' + (flip() ? ' scaleX(-1)' : '')"></div>`,
   styles: `
@@ -24,6 +24,7 @@ export class FxSpriteComponent {
   readonly el = viewChild.required<ElementRef<HTMLElement>>('el');
   readonly def = computed(() => FX[this.name()]);
   readonly pxToCell = PX_TO_CELL;
+  readonly fxScale = FX_SCALE;
 
   constructor() {
     afterNextRender(() => {

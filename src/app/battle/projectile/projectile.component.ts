@@ -1,5 +1,5 @@
 import { Component, ElementRef, afterNextRender, computed, inject, input, viewChild } from '@angular/core';
-import { FX, PX_TO_CELL } from '../../core/data/sprites';
+import { FX, PROJECTILE_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 
 /**
  * กระสุนที่บินจากผู้ยิงไปหาเป้า (ลูกธนู/ลูกแสง)
@@ -11,10 +11,10 @@ import { FX, PX_TO_CELL } from '../../core/data/sprites';
 @Component({
   selector: 'app-projectile',
   template: `<div #el class="p" [style.background-image]="'url(sprites/' + def().file + ')'"
-    [style.background-size]="def().frames * 100 + '% 100%'" [style.width.%]="def().w * pxToCell * (def().scale ?? 1)"
+    [style.background-size]="def().frames * 100 + '% 100%'" [style.width.%]="def().w * pxToCell * (def().scale ?? 1) * projScale"
     [style.aspect-ratio]="def().w + ' / ' + def().h" [style.transform]="'translate(-50%, -50%) rotate(' + rot() + 'deg)'"></div>`,
   styles: `
-    :host { position: absolute; left: 0; top: 0; width: var(--cell); height: var(--cell); pointer-events: none; z-index: 16; }
+    :host { position: absolute; left: 0; top: 0; width: var(--cell); height: var(--cell); pointer-events: none; z-index: 105; }
     .p { position: absolute; left: 50%; top: 42%; background-repeat: no-repeat; }
   `,
 })
@@ -30,6 +30,7 @@ export class ProjectileComponent {
   readonly el = viewChild.required<ElementRef<HTMLElement>>('el');
   readonly def = computed(() => FX[this.name()]);
   readonly pxToCell = PX_TO_CELL;
+  readonly projScale = PROJECTILE_SCALE;
   readonly rot = computed(() => {
     const a = this.from(), b = this.to();
     return (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI - (this.def().angle0 ?? 0);

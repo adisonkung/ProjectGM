@@ -1,4 +1,4 @@
-import { MANA_PER_ATTACK, MANA_PER_HIT, SKILL2_NAME, SKILL_NAME, ULT_NAME } from '../../core/data/classes';
+import { MANA_PER_ATTACK, MANA_PER_HIT, SKILL2_NAME, SKILL_CD, SKILL_NAME, START_CD, ULT_NAME } from '../../core/data/classes';
 import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
@@ -65,10 +65,11 @@ export interface BattleUnit {
   castLock: number;
   /** เวลาที่ยังยั่วยุอยู่ (ลดดาเมจที่ได้รับ 50%) */
   taunt: number;
-  /** จำนวนครั้งที่ร่ายสกิลแล้ว (ใช้สลับสกิล 1/2) */
-  casts: number;
-  /** ใช้ท่าไม้ตายไปแล้วหรือยัง (1 ครั้งต่อการต่อสู้) */
-  ultUsed: boolean;
+  /** คูลดาวน์ที่เหลือของสกิล 1 / สกิล 2 (วิ) */
+  cd1: number;
+  cd2: number;
+  /** ผู้เล่นสั่งท่าไม้ตายแล้ว รอจังหวะร่าย */
+  ultQueued: boolean;
   /** โล่ดูดซับดาเมจ และเวลาที่เหลือ */
   shield: number;
   shieldTime: number;
@@ -83,6 +84,8 @@ export interface BattleConfig {
   stage: StageDef;
   enemyTemplates: Record<string, EnemyTemplate>;
   seed?: number;
+  /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม (จำลอง/โหมดออโต้) · ศัตรูร่ายเองเสมอ */
+  autoUlt?: boolean;
 }
 
 const CAST_LOCK = 0.4;
@@ -94,7 +97,8 @@ const CRIT_MUL = 1.5;
 const CHARGE_MUL = 1.6;
 const CHARGE_STUN = 1;
 /**
- * แทงก์ ท่าไม้ตาย: ใช้ทันทีครั้งแรกที่ศัตรูเข้ามาในระยะยั่วยุ (ครั้งเดียวต่อการต่อสู้)
+ * ท่าไม้ตายทุกสายใช้เกจมานาเต็ม (ผู้เล่นกดที่รูปตัวละคร / ศัตรูและโหมดออโต้ร่ายเอง) — ไม่จำกัดจำนวนครั้ง
+ * แทงก์ ท่าไม้ตาย: ร่ายเมื่อมีศัตรูในระยะยั่วยุ
  * → โล่ตัวเอง 30% / เพื่อนทุกคนในทีม 15% ของเลือดสูงสุดแทงก์ อยู่ 6 วิ + ยั่วยุ
  */
 const ULT_SELF_SHIELD = 0.3;
@@ -108,15 +112,13 @@ const SMOKE_MUL = 1.2;
 const POISON_DPS = 0.25;
 const POISON_TIME = 4;
 const POISON_TICK = 0.5;
-/** นักฆ่า ท่าไม้ตาย ประหารเงามายา: ครั้งเดียว เมื่อมีศัตรูเลือด < 35% ในระยะ 4 ช่อง → วาร์ปไปฟัน 350% คริแน่นอน */
-const EXEC_HP = 0.35;
+/** นักฆ่า ท่าไม้ตาย ประหารเงามายา: วาร์ปไปหาศัตรูที่เลือด % ต่ำสุดในระยะ 4 ช่อง ฟัน 350% คริแน่นอน */
 const EXEC_REACH = 4;
 const EXEC_MUL = 3.5;
 /** นักสู้ สกิล 2 พุ่งทะลวง: 180% เป้าหมาย + 120% ศัตรูที่ยืนถัดไปข้างหลัง */
 const PIERCE_MUL = 1.8;
 const PIERCE_BEHIND_MUL = 1.2;
-/** นักสู้ ท่าไม้ตาย ดาบเทพสายฟ้า: สกิลครั้งที่ 3 (ครั้งเดียว) 300% เป้าหมาย + 150% ศัตรูรอบเป้า 1 ช่อง */
-const BLADE_ULT_CAST = 2;
+/** นักสู้ ท่าไม้ตาย: 300% เป้าหมาย + 150% ศัตรูรอบเป้า 1 ช่อง */
 const BLADE_ULT_MUL = 3;
 const BLADE_ULT_SPLASH = 1.5;
 /** นักสู้ สกิล 1 ดาบหมุนวน: 180% เป้าหมาย + 100% ศัตรูรอบตัว 1 ช่อง */
@@ -131,16 +133,20 @@ const RAPID_SHOTS = 4;
 const RAPID_GAP = 0.1;
 const RAPID_MUL = 0.8;
 const VOLLEY_MUL = 1.3;
-/** นักธนู ท่าไม้ตาย ฝนธนูสวรรค์: สกิลครั้งที่ 3 (ครั้งเดียว) ศัตรูทุกตัว 150% */
-const RAIN_CAST = 2;
+/** นักธนู ท่าไม้ตาย ฝนธนูสวรรค์: ศัตรูทุกตัว 150% */
 const RAIN_MUL = 1.5;
 /** ฮีลเลอร์ สกิล 2 พรศักดิ์สิทธิ์: ฮีลเพื่อนที่เลือด % ต่ำสุด atk×2.2 + 10% เลือดสูงสุด */
 const BLESS_ATK = 2.2;
 const BLESS_PCT = 0.1;
-/** ฮีลเลอร์ ท่าไม้ตาย คืนชีพศักดิ์สิทธิ์: ครั้งเดียว เมื่อมีเพื่อนล้ม → ฟื้นด้วยเลือด 50% */
+/** ฮีลเลอร์ ท่าไม้ตาย คืนชีพศักดิ์สิทธิ์: เพื่อนที่ล้มฟื้นด้วยเลือด 50% */
 const REVIVE_HP = 0.5;
 /** เวลาเดินไปเวฟถัดไป (วินาที) — ระหว่างนี้ไม่มีใครต่อสู้ และไม่นับเวลาจำกัด */
 export const ADVANCE_TIME = 2.4;
+/** นักเวท ท่าไม้ตาย: 250% เป้า + 150% รอบเป้า 1 ช่อง · ฮีลเลอร์ ท่าไม้ตาย: ฮีลทั้งทีม (+ชุบเพื่อนที่ล้ม 1 คน) */
+const METEOR_MUL = 2.5;
+const METEOR_SPLASH = 1.5;
+const ULT_HEAL_ATK = 1.5;
+const ULT_HEAL_PCT = 0.15;
 
 /**
  * เอนจินต่อสู้อัตโนมัติบนสนาม 3 เลน x 12 (TypeScript ล้วน ไม่ผูกกับ Angular)
@@ -171,11 +177,14 @@ export class BattleEngine {
   private nextWaveAt: number;
   private waveIndex = 0;
   private readonly enemyCap: number;
+  /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม (สลับได้ระหว่างสู้) */
+  autoUlt: boolean;
 
   constructor(cfg: BattleConfig) {
     this.rng = createRng(cfg.seed ?? Date.now());
     this.stage = cfg.stage;
     this.templates = cfg.enemyTemplates;
+    this.autoUlt = cfg.autoUlt ?? false;
     this.nextWaveAt = cfg.stage.waveEvery ?? Infinity;
     this.enemyCap = cfg.stage.enemies.length;
     this.totalRounds = cfg.stage.mode === 'eliminate' ? 1 + (cfg.stage.rounds?.length ?? 0) : 1;
@@ -300,8 +309,9 @@ export class BattleEngine {
       moveCd: 0,
       castLock: 0,
       taunt: 0,
-      casts: 0,
-      ultUsed: false,
+      cd1: SKILL_CD[spec.cls][0] * START_CD,
+      cd2: SKILL_CD[spec.cls][1] * START_CD,
+      ultQueued: false,
       shield: 0,
       shieldTime: 0,
       poison: 0,
@@ -378,6 +388,8 @@ export class BattleEngine {
   private updateUnit(u: BattleUnit, dt: number): void {
     u.atkCd -= dt;
     u.moveCd -= dt;
+    if (u.cd1 > 0) u.cd1 -= dt;
+    if (u.cd2 > 0) u.cd2 -= dt;
     if (u.taunt > 0) u.taunt -= dt;
     if (u.shieldTime > 0 && (u.shieldTime -= dt) <= 0) u.shield = 0;
     if (u.poisonTime > 0) {
@@ -394,37 +406,14 @@ export class BattleEngine {
       return;
     }
 
-    // แทงก์: ท่าไม้ตายทันทีเมื่อศัตรูเข้าระยะยั่วยุครั้งแรก (ไม่ต้องรอเลือดลด)
-    if (u.cls === 'tank' && !u.ultUsed) {
-      const near = this.alive(u.side === 'ally' ? 'enemy' : 'ally').some(f => distance(f.pos, u.pos) <= TAUNT_RADIUS);
-      if (near) {
-        this.ultimate(u);
-        return;
-      }
-    }
-
-    // นักฆ่า: ท่าไม้ตายทันทีเมื่อเห็นศัตรูใกล้ตาย
-    if (u.cls === 'assassin' && !u.ultUsed) {
-      const prey = this.alive(u.side === 'ally' ? 'enemy' : 'ally')
-        .filter(f => f.hp < f.maxHp * EXEC_HP && distance(f.pos, u.pos) <= EXEC_REACH)
-        .sort((a, b) => a.hp - b.hp)[0];
-      if (prey) {
-        this.execute(u, prey);
-        return;
-      }
-    }
-
-    // ฮีลเลอร์: ท่าไม้ตายคืนชีพเพื่อนที่ล้ม (ครั้งเดียว)
-    if (u.cls === 'healer' && !u.ultUsed) {
-      const fallen = this.units.find(a => a.side === u.side && !a.alive && a !== u);
-      if (fallen) {
-        this.resurrect(u, fallen);
-        return;
-      }
+    // ท่าไม้ตาย: เกจมานาเต็ม + (ผู้เล่นกดสั่ง หรือออโต้ หรือเป็นศัตรู) → ร่ายทันทีถ้ามีเป้าที่ใช้ได้
+    if (u.mana >= u.maxMana && (u.ultQueued || u.side === 'enemy' || this.autoUlt) && this.tryUltimate(u)) {
+      u.ultQueued = false;
+      return;
     }
 
     // ฮีลเลอร์: ถ้ามีเพื่อนเลือดน้อยในระยะ ให้ฮีลแทนการตี
-    if (u.cls === 'healer' && u.atkCd <= 0 && u.mana < u.maxMana) {
+    if (u.cls === 'healer' && u.atkCd <= 0 && u.cd1 > 0 && u.cd2 > 0) {
       const hurt = this.alive(u.side)
         .filter(a => a.hp / a.maxHp < 0.6 && distance(a.pos, u.pos) <= u.range)
         .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
@@ -446,7 +435,9 @@ export class BattleEngine {
 
     if (distance(u.pos, target.pos) <= u.range) {
       if (u.atkCd <= 0) {
-        if (u.mana >= u.maxMana) this.cast(u, target);
+        // สกิล 2 (สำคัญ) ก่อน แล้วสกิล 1 · ไม่พร้อมทั้งคู่ = ตีธรรมดา (สร้างเกจ)
+        if (u.cd2 <= 0) this.cast(u, target, 'skill2');
+        else if (u.cd1 <= 0) this.cast(u, target, 'skill');
         else this.basicAttack(u, target);
         u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
       }
@@ -518,22 +509,10 @@ export class BattleEngine {
     return tm;
   }
 
-  private cast(u: BattleUnit, t: BattleUnit): void {
-    u.mana = 0;
-    // สลับสกิล 1 / 2 ทุกครั้งที่ร่าย (สายที่ยังไม่มีสกิล 2 ใช้ผลเดิม แค่เปลี่ยนท่า)
-    // นักสู้: สกิลครั้งที่ 3 กลายเป็นท่าไม้ตาย (ครั้งเดียวต่อการต่อสู้)
-    if (u.cls === 'fighter' && !u.ultUsed && u.casts === BLADE_ULT_CAST) {
-      u.casts++;
-      this.bladeUlt(u, t);
-      return;
-    }
-    // นักธนู: สกิลครั้งที่ 3 กลายเป็นท่าไม้ตาย ฝนธนูสวรรค์
-    if (u.cls === 'archer' && !u.ultUsed && u.casts === RAIN_CAST) {
-      u.casts++;
-      this.arrowRain(u, t);
-      return;
-    }
-    const kind: SkillKind = u.casts++ % 2 ? 'skill2' : 'skill';
+  private cast(u: BattleUnit, t: BattleUnit, kind: SkillKind): void {
+    const [cd1, cd2] = SKILL_CD[u.cls];
+    if (kind === 'skill2') u.cd2 = cd2;
+    else u.cd1 = cd1;
     const skill = (kind === 'skill2' && SKILL2_NAME[u.cls]) || SKILL_NAME[u.cls];
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
     // นักฆ่า สกิล 1 เลือกเป้าใหม่: ศัตรูที่เลือดเหลือน้อยที่สุด (มักเป็นแถวหลัง) ที่มีช่องว่างข้าง ๆ
@@ -625,6 +604,64 @@ export class BattleEngine {
     }
   }
 
+  /** ผู้เล่นกดใช้ท่าไม้ตาย (คืน false ถ้ายังใช้ไม่ได้) */
+  requestUlt(id: number): boolean {
+    const u = this.units.find(x => x.id === id);
+    if (!u || !u.alive || u.side !== 'ally' || u.mana < u.maxMana || this.result) return false;
+    u.ultQueued = true;
+    return true;
+  }
+
+  /** ร่ายท่าไม้ตายตามสาย (คืน false ถ้ายังไม่มีเป้าที่เหมาะ จะรอจนมี) */
+  private tryUltimate(u: BattleUnit): boolean {
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    if (!foes.length) return false;
+    const nearest = [...foes].sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos))[0];
+    let ok = true;
+    switch (u.cls) {
+      case 'tank':
+        ok = distance(nearest.pos, u.pos) <= TAUNT_RADIUS;
+        if (ok) this.ultimate(u);
+        break;
+      case 'assassin': {
+        // ประหาร: ศัตรูที่เลือด % ต่ำสุดในระยะวาร์ป
+        const prey = foes.filter(f => distance(f.pos, u.pos) <= EXEC_REACH).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+        ok = !!prey;
+        if (prey) this.execute(u, prey);
+        break;
+      }
+      case 'healer': {
+        const fallen = this.units.find(a => a.side === u.side && !a.alive && a !== u && a.round === u.round);
+        this.resurrect(u, fallen ?? null);
+        break;
+      }
+      case 'fighter':
+        ok = distance(nearest.pos, u.pos) <= Math.max(u.range, 2);
+        if (ok) this.bladeUlt(u, nearest);
+        break;
+      case 'archer':
+        this.arrowRain(u, nearest);
+        break;
+      case 'mage':
+        ok = distance(nearest.pos, u.pos) <= u.range + 1;
+        if (ok) this.meteor(u, nearest);
+        break;
+    }
+    if (ok) u.mana = 0;
+    return ok;
+  }
+
+  /** นักเวท ท่าไม้ตาย: อุกกาบาตใส่เป้าและรอบ ๆ */
+  private meteor(u: BattleUnit, t: BattleUnit): void {
+    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
+    const tm = this.beginSkill(u, 'ult');
+    this.later(tm.hit, u, () => {
+      this.events.push({ type: 'impact', src: u.id, dst: t.alive ? t.id : undefined, kind: 'ult' });
+      const at = t.pos;
+      for (const f of this.alive(t.side).filter(f => distance(f.pos, at) <= 1)) this.damage(u, f, f === t ? METEOR_MUL : METEOR_SPLASH);
+    });
+  }
+
   /** แทงก์ สกิล 2: กระแทกโล่ใส่เป้าหมาย ผลักถอย 1 ช่อง (ถ้าว่าง) และทำให้มึน */
   private shieldCharge(u: BattleUnit, t: BattleUnit): void {
     this.damage(u, t, CHARGE_MUL);
@@ -639,7 +676,6 @@ export class BattleEngine {
 
   /** แทงก์ ท่าไม้ตาย: กางโล่ให้ตัวเองและเพื่อนทุกคน แล้วยั่วยุ */
   private ultimate(u: BattleUnit): void {
-    u.ultUsed = true;
     u.taunt = Math.max(u.taunt, TAUNT_TIME);
     this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult' });
     const tm = animTiming(u.sprite, 'ult');
@@ -675,7 +711,6 @@ export class BattleEngine {
 
   /** นักธนู ท่าไม้ตาย: ลูกธนูสวรรค์ตกใส่ศัตรูทุกตัว */
   private arrowRain(u: BattleUnit, t: BattleUnit): void {
-    u.ultUsed = true;
     this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
     const tm = this.beginSkill(u, 'ult');
     this.later(tm.hit, u, () => {
@@ -685,16 +720,19 @@ export class BattleEngine {
     });
   }
 
-  /** ฮีลเลอร์ ท่าไม้ตาย: ชุบชีวิตเพื่อนที่ล้ม */
-  private resurrect(u: BattleUnit, d: BattleUnit): void {
-    u.ultUsed = true;
-    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: d.id });
+  /** ฮีลเลอร์ ท่าไม้ตาย: ฮีลทั้งทีม และชุบชีวิตเพื่อนที่ล้ม 1 คน (ถ้ามี) */
+  private resurrect(u: BattleUnit, d: BattleUnit | null): void {
+    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: d?.id });
     const tm = this.beginSkill(u, 'ult');
     this.later(tm.hit, u, () => {
-      if (d.alive || this.result) return;
+      if (this.result) return;
+      for (const a of this.alive(u.side)) this.heal(a, u.atk * ULT_HEAL_ATK + a.maxHp * ULT_HEAL_PCT, u);
+      if (!d || d.alive) {
+        this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
+        return;
+      }
       d.alive = true;
       d.hp = Math.round(d.maxHp * REVIVE_HP);
-      d.mana = 0;
       d.castLock = 0.5;
       d.targetId = null;
       d.poisonTime = 0;
@@ -706,7 +744,6 @@ export class BattleEngine {
 
   /** นักสู้ ท่าไม้ตาย: ฟาดดาบสายฟ้าลงที่เป้าหมาย กระเด็นโดนศัตรูรอบ ๆ */
   private bladeUlt(u: BattleUnit, t: BattleUnit): void {
-    u.ultUsed = true;
     this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
     const tm = this.beginSkill(u, 'ult');
     this.later(tm.hit, u, () => {
@@ -721,7 +758,6 @@ export class BattleEngine {
 
   /** นักฆ่า ท่าไม้ตาย: วาร์ปไปประหารศัตรูที่ใกล้ตาย */
   private execute(u: BattleUnit, t: BattleUnit): void {
-    u.ultUsed = true;
     this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
     const tm = this.beginSkill(u, 'ult');
     u.atkCd = Math.max(u.atkCd, tm.total);

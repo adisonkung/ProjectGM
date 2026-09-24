@@ -46,3 +46,10 @@ h1 { font: 700 22px/1.2 var(--disp); margin: 0; }
   font: 700 15px var(--disp); color: var(--gold); white-space: nowrap; animation: pop 0.3s ease-out;
 }
 @keyframes pop { from { transform: translateX(-50%) scale(0.8); opacity: 0; } }
+
+.party { display: flex; align-items: flex-start; gap: 10px; justify-content: center; }
+.auto {
+  align-self: center; padding: 6px 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel);
+  font: 700 12px var(--disp); color: var(--muted); letter-spacing: 0.08em;
+  &[aria-pressed='true'] { color: #1c1406; background: var(--cyan); border-color: var(--cyan); }
+}

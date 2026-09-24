@@ -66,61 +66,93 @@ describe('BattleEngine', () => {
     expect(stacked).toBeTrue();
   });
 
-  it('tank ultimate fires once on first contact and shields the whole team', () => {
-    const weakTank: UnitSpec[] = [
-      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 300 }, pos: { r: 0, c: 1 } },
-      { name: 'F', cls: 'fighter', stats: CLASS_BASE.fighter, pos: { r: 1, c: 1 } },
-      { name: 'A', cls: 'archer', stats: CLASS_BASE.archer, pos: { r: 5, c: 0 } },
+  it('ultimate waits for a full gauge and the player tap, then the tank shields the whole team', () => {
+    const team: UnitSpec[] = [
+      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 3000 }, pos: { r: 0, c: 1 } },
+      { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 3000 }, pos: { r: 1, c: 1 } },
+      { name: 'A', cls: 'archer', stats: { ...CLASS_BASE.archer, hp: 3000 }, pos: { r: 5, c: 0 } },
     ];
-    const e = new BattleEngine({ allies: weakTank, stage: STAGES[9], enemyTemplates: ENEMIES, seed: 2 });
-    const ults: BattleEvent[] = [];
+    const e = new BattleEngine({ allies: team, stage: STAGES[9], enemyTemplates: ENEMIES, seed: 2 });
+    const tank = e.units[0];
+    expect(e.requestUlt(tank.id)).toBeFalse(); // เกจยังไม่เต็ม
+    let ults = 0;
     let shielded = false;
-    while (!e.result && e.time < 60) {
+    let tappedAt = -1;
+    while (!e.result && e.time < 60 && !shielded) {
       e.step(0.05);
-      const evs = e.drainEvents();
-      // โล่ขึ้นตอนท่าถึงเฟรม hit (impact) ไม่ใช่ตอนเริ่มท่า
-      if (evs.some(ev => ev.type === 'impact' && ev.src === 1 && ev.kind === 'ult')) {
-        shielded = e.units.filter(u => u.side === 'ally' && u.alive).every(u => u.shield > 0);
+      if (tank.mana >= tank.maxMana && tappedAt < 0) {
+        // เต็มแล้วแต่ยังไม่กด: ต้องไม่ร่ายเอง
+        e.step(0.5);
+        expect(e.drainEvents().some(ev => ev.type === 'cast' && ev.src === tank.id && ev.kind === 'ult')).toBeFalse();
+        expect(e.requestUlt(tank.id)).toBeTrue();
+        tappedAt = e.time;
       }
-      ults.push(...evs.filter(ev => ev.type === 'cast' && ev.src === 1 && ev.kind === 'ult'));
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'cast' && ev.src === tank.id && ev.kind === 'ult') ults++;
+        if (ev.type === 'impact' && ev.src === tank.id && ev.kind === 'ult') {
+          shielded = e.units.filter(u => u.side === 'ally' && u.alive).every(u => u.shield > 0);
+        }
+      }
     }
-    expect(ults.length).toBe(1);
+    expect(tappedAt).toBeGreaterThan(0);
+    expect(ults).toBe(1);
+    expect(tank.mana).toBeLessThan(tank.maxMana);
     expect(shielded).toBeTrue();
   });
 
-  it('assassin blinks to the weakest foe, poisons, and executes once', () => {
+  it('assassin blinks, poisons on cooldown, and executes with a full gauge (auto)', () => {
     const team: UnitSpec[] = [
-      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 3000 }, pos: { r: 0, c: 3 } },
-      { name: 'S', cls: 'assassin', stats: { ...CLASS_BASE.assassin, hp: 2000 }, pos: { r: 0, c: 2 } },
+      { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 3000 }, pos: { r: 0, c: 1 } },
+      { name: 'S', cls: 'assassin', stats: { ...CLASS_BASE.assassin, hp: 2000 }, pos: { r: 0, c: 0 } },
     ];
-    const e = new BattleEngine({ allies: team, stage: STAGES[6], enemyTemplates: ENEMIES, seed: 4 });
+    const e = new BattleEngine({ allies: team, stage: STAGES[6], enemyTemplates: ENEMIES, seed: 4, autoUlt: true });
     const kinds: string[] = [];
     let poisoned = false;
-    while (!e.result && e.time < 60) {
+    while (!e.result && e.time < 90) {
       e.step(0.05);
       for (const ev of e.drainEvents()) {
         if (ev.type === 'cast' && ev.src === 2) kinds.push(ev.kind);
         if (ev.type === 'damage' && ev.poison) poisoned = true;
       }
     }
-    expect(kinds.filter(k => k === 'ult').length).toBe(1);
+    expect(kinds).toContain('ult');
     expect(kinds).toContain('skill');
     expect(kinds).toContain('skill2');
     expect(poisoned).toBeTrue();
   });
 
-  it('fighter casts skill, skill2, then its ultimate once', () => {
+  it('skills run on cooldowns (skill 1 every 5-8 s, skill 2 every 10-16 s) and never ult without a tap', () => {
     const team: UnitSpec[] = [
-      { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 4000 }, pos: { r: 0, c: 3 } },
+      { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 6000 }, pos: { r: 0, c: 1 } },
     ];
     const e = new BattleEngine({ allies: team, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 3 });
-    const kinds: string[] = [];
+    const casts: { kind: string; t: number }[] = [];
     while (!e.result && e.time < 60) {
       e.step(0.05);
-      for (const ev of e.drainEvents()) if (ev.type === 'cast' && ev.src === 1) kinds.push(ev.kind);
+      for (const ev of e.drainEvents()) if (ev.type === 'cast' && ev.src === 1) casts.push({ kind: ev.kind, t: e.fightTime });
     }
-    expect(kinds.slice(0, 3)).toEqual(['skill', 'skill2', 'ult']);
-    expect(kinds.filter(k => k === 'ult').length).toBe(1);
+    const s1 = casts.filter(c => c.kind === 'skill').map(c => c.t);
+    const s2 = casts.filter(c => c.kind === 'skill2').map(c => c.t);
+    expect(s1.length).toBeGreaterThan(1);
+    expect(s2.length).toBeGreaterThan(0);
+    for (let i = 1; i < s1.length; i++) expect(s1[i] - s1[i - 1]).toBeGreaterThanOrEqual(5 - 0.06);
+    for (let i = 1; i < s2.length; i++) expect(s2[i] - s2[i - 1]).toBeGreaterThanOrEqual(10 - 0.06);
+    expect(casts.some(c => c.kind === 'ult')).toBeFalse();
+  });
+
+  it('the ultimate gauge carries over to the next wave', () => {
+    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[0], enemyTemplates: ENEMIES, seed: 11 });
+    let before = -1;
+    let after = -1;
+    while (!e.result && e.time < 200 && after < 0) {
+      e.step(0.05);
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'advance') before = e.units[0].mana;
+        if (ev.type === 'round') after = e.units[0].mana;
+      }
+    }
+    expect(before).toBeGreaterThan(0);
+    expect(after).toBe(before);
   });
 
   it('lands damage on the hit frame, after the swing starts', () => {
@@ -157,16 +189,16 @@ describe('BattleEngine', () => {
     expect(seq.slice(0, 3)).toEqual(['cast', 'blink', 'impact']);
   });
 
-  it('archer arrows land after they fly, and the 3rd cast rains on every foe once', () => {
+  it('archer arrows fly, the volley falls from the sky, and the ultimate rains on every foe', () => {
     const team: UnitSpec[] = [
       { name: 'T', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 5000 }, pos: { r: 0, c: 1 } },
       { name: 'A', cls: 'archer', stats: { ...CLASS_BASE.archer, hp: 3000 }, pos: { r: 4, c: 1 } },
     ];
-    const e = new BattleEngine({ allies: team, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 6 });
+    const e = new BattleEngine({ allies: team, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 6, autoUlt: true });
     const kinds: string[] = [];
     let arrows = 0;
     let sky = 0;
-    while (!e.result && e.time < 60) {
+    while (!e.result && e.time < 90) {
       e.step(0.05);
       for (const ev of e.drainEvents()) {
         if (ev.type === 'cast' && ev.src === 2) kinds.push(ev.kind);
@@ -179,16 +211,17 @@ describe('BattleEngine', () => {
     }
     expect(arrows).toBeGreaterThan(3);
     expect(sky).toBeGreaterThan(0);
-    expect(kinds.slice(0, 3)).toEqual(['skill', 'skill2', 'ult']);
-    expect(kinds.filter(k => k === 'ult').length).toBe(1);
+    expect(kinds).toContain('skill');
+    expect(kinds).toContain('skill2');
+    expect(kinds).toContain('ult');
   });
 
-  it('healer revives a fallen ally once', () => {
+  it('healer ultimate heals the team and revives a fallen ally', () => {
     const team: UnitSpec[] = [
       { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 60 }, pos: { r: 0, c: 1 } },
       { name: 'H', cls: 'healer', stats: { ...CLASS_BASE.healer, hp: 4000 }, pos: { r: 3, c: 1 } },
     ];
-    const e = new BattleEngine({ allies: team, stage: STAGES[2], enemyTemplates: ENEMIES, seed: 1 });
+    const e = new BattleEngine({ allies: team, stage: STAGES[2], enemyTemplates: ENEMIES, seed: 1, autoUlt: true });
     let revives = 0;
     let revivedAlive = false;
     while (!e.result && e.time < 40) {
@@ -200,7 +233,7 @@ describe('BattleEngine', () => {
         }
       }
     }
-    expect(revives).toBe(1);
+    expect(revives).toBeGreaterThan(0);
     expect(revivedAlive).toBeTrue();
   });
 

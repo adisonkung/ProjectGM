@@ -1,5 +1,5 @@
 import { BACKGROUNDS } from '../../core/data/backgrounds';
-import { Component, computed, effect, inject, OnDestroy, signal, untracked } from '@angular/core';
+import { Component, computed, effect, HostListener, inject, OnDestroy, signal, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
@@ -8,6 +8,7 @@ import { TeamService } from '../../core/services/team.service';
 import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView } from '../../battle/board/board.component';
 import { projectileLife } from '../../battle/projectile/projectile.component';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
+import { PartyBarComponent } from '../../battle/party-bar/party-bar.component';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
@@ -21,7 +22,7 @@ const TICK = 0.05;
  */
 @Component({
   selector: 'app-battle',
-  imports: [BoardComponent, PlacementComponent],
+  imports: [BoardComponent, PlacementComponent, PartyBarComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -48,6 +49,10 @@ export class BattleComponent implements OnDestroy {
   readonly marchMs = signal(0);
   /** ป้ายกลางจอ เช่น "เวฟ 2/3" */
   readonly banner = signal<string | null>(null);
+  /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม */
+  readonly autoUlt = signal(false);
+  /** ฮีโร่ของเรา เรียงตามทีม (ซ้าย→ขวาในแถบด้านล่าง) */
+  readonly party = computed(() => this.views().filter(v => v.side === 'ally'));
 
   readonly stage = computed(() => STAGES[this.floor() - 1]);
   readonly background = computed(() => BACKGROUNDS[this.stage().background ?? ''] ?? null);
@@ -102,6 +107,7 @@ export class BattleComponent implements OnDestroy {
       allies: this.team.units(),
       stage: this.stage(),
       enemyTemplates: ENEMIES,
+      autoUlt: this.autoUlt(),
     });
     this.time.set(0);
     this.round.set(0);
@@ -122,6 +128,24 @@ export class BattleComponent implements OnDestroy {
     this.timer = setInterval(() => this.tick(), TICK * 1000);
   }
 
+  /** แตะรูปตัวละคร (หรือกดปุ่ม 1–5): ใช้ท่าไม้ตายเมื่อเกจเต็ม */
+  useUlt(id: number): void {
+    if (this.running() && this.engine.requestUlt(id)) this.snapshot();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKey(e: KeyboardEvent): void {
+    const n = Number(e.key);
+    if (!this.running() || !Number.isInteger(n) || n < 1) return;
+    const u = this.party()[n - 1];
+    if (u) this.useUlt(u.id);
+  }
+
+  toggleAuto(): void {
+    this.autoUlt.update(v => !v);
+    if (this.engine) this.engine.autoUlt = this.autoUlt();
+  }
+
   setSpeed(v: number): void {
     this.speed.set(v);
   }
@@ -131,7 +155,7 @@ export class BattleComponent implements OnDestroy {
     let wins = 0;
     let t = 0;
     for (let seed = 1; seed <= runs; seed++) {
-      const e = new BattleEngine({ allies: this.team.units(), stage: this.stage(), enemyTemplates: ENEMIES, seed });
+      const e = new BattleEngine({ allies: this.team.units(), stage: this.stage(), enemyTemplates: ENEMIES, seed, autoUlt: true });
       if (e.run() === 'win') wins++;
       t += e.time;
     }
@@ -182,6 +206,7 @@ export class BattleComponent implements OnDestroy {
         flip: this.facing.get(u.id),
         blink: (this.blinkUntil.get(u.id) ?? 0) > this.engine.time,
         enter: u.side === 'enemy' && u.round > 0,
+        queued: u.ultQueued,
       })),
     );
   }

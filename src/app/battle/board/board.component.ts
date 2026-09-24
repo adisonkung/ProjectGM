@@ -32,6 +32,8 @@ export interface UnitView {
   blink?: boolean;
   /** ศัตรูเวฟถัดไป: วิ่งเข้าจากขอบขวาตอนเกิด */
   enter?: boolean;
+  /** ผู้เล่นกดท่าไม้ตายแล้ว รอจังหวะร่าย */
+  queued?: boolean;
 }
 
 export interface FloatText {

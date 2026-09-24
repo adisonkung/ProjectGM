@@ -67,6 +67,9 @@ export const IDLE_FRAME_MS = 150;
 
 /** สเกลแสดงผล: ความกว้าง 1 px ต้นฉบับ เทียบกับความกว้างช่องกระดาน (%) */
 export const PX_TO_CELL = 165 / 132;
+/** ขยายเอฟเฟกต์สกิลทั้งหมด และกระสุน (ลูกธนู/ลูกแสง) ให้เห็นชัดบนสนาม */
+export const FX_SCALE = 1.5;
+export const PROJECTILE_SCALE = 1.3;
 
 export const SHEETS: Record<string, SheetDef> = {
   'hero-aurel.png': {

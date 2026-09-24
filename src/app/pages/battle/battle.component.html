@@ -30,6 +30,11 @@
                  [scroll]="scroll()" [marchMs]="marchMs()" [background]="background()" />
       @if (banner(); as b) { <div class="banner" aria-live="polite">{{ b }}</div> }
     </div>
+    <div class="party">
+      <app-party-bar [units]="party()" (ult)="useUlt($event)" />
+      <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()"
+              title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
+    </div>
   }
 
   @if (result(); as r) {

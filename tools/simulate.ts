@@ -20,7 +20,7 @@ for (const level of [1, 10, 20]) {
     let wins = 0;
     let time = 0;
     for (let s = 1; s <= runs; s++) {
-      const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: s });
+      const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: s, autoUlt: true });
       if (e.run() === 'win') wins++;
       time += e.time;
     }
