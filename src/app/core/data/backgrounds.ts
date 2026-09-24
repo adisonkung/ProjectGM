@@ -17,4 +17,6 @@ export interface BackgroundDef {
 export const BACKGROUNDS: Record<string, BackgroundDef> = {
   /** ป่าดอกซากุระกลางวัน (ชั้น 1-5) */
   'forest-1': { file: 'backgrounds/forest-1.webp', w: 1894, h: 809, cut: 0.569, zoom: 1.19 },
+  /** ป่าสนธยา พระจันทร์ เห็ดเรืองแสง ตะเกียง (ชั้น 6-8) — ขอบหญ้าอยู่ 48% อยู่แล้ว ไม่ต้องขยาย */
+  'twilight-1': { file: 'backgrounds/twilight-1.webp', w: 1894, h: 809, cut: 0.483, zoom: 1 },
 };

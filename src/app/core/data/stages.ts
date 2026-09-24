@@ -35,18 +35,18 @@ export const STAGES: StageDef[] = [
     [{ enemy: 'slime', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }, { enemy: 'mage', r: 4, c: 2 }],
     [{ enemy: 'orc', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }, { enemy: 'goblin', r: 1, c: 2 }, { enemy: 'archer', r: 4, c: 1 }],
   ] },
-  { floor: 6, mode: 'survive', timeLimit: 30, waveEvery: 7, waves: ['goblin', 'mage', 'slime', 'goblin'], enemies: [
+  { floor: 6, background: 'twilight-1', mode: 'survive', timeLimit: 30, waveEvery: 7, waves: ['goblin', 'mage', 'slime', 'goblin'], enemies: [
     { enemy: 'slime', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }, { enemy: 'goblin', r: 1, c: 2 },
     { enemy: 'mage', r: 4, c: 1 },
   ] },
-  { floor: 7, mode: 'eliminate', timeLimit: 100, enemies: [
+  { floor: 7, background: 'twilight-1', mode: 'eliminate', timeLimit: 100, enemies: [
     { enemy: 'goblin', r: 0, c: 1 }, { enemy: 'archer', r: 4, c: 0 },
   ], rounds: [
     [{ enemy: 'slime', r: 0, c: 1 }, { enemy: 'mage', r: 4, c: 2 }],
     [{ enemy: 'slime', r: 0, c: 0 }, { enemy: 'slime', r: 0, c: 2 }, { enemy: 'goblin', r: 1, c: 1 },
       { enemy: 'mage', r: 4, c: 0 }, { enemy: 'mage', r: 4, c: 2 }],
   ] },
-  { floor: 8, mode: 'survive', timeLimit: 30, waveEvery: 7, waves: ['goblin', 'archer', 'mage'], enemies: [
+  { floor: 8, background: 'twilight-1', mode: 'survive', timeLimit: 30, waveEvery: 7, waves: ['goblin', 'archer', 'mage'], enemies: [
     { enemy: 'goblin', r: 0, c: 0 }, { enemy: 'goblin', r: 0, c: 2 },
     { enemy: 'archer', r: 4, c: 0 }, { enemy: 'archer', r: 4, c: 2 }, { enemy: 'mage', r: 5, c: 1 },
   ] },
