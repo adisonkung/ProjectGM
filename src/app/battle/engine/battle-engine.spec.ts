@@ -357,4 +357,103 @@ describe('BattleEngine', () => {
     const rogue = e.units.find(u => u.side === 'enemy')!;
     expect(rogue.targetId).toBe(e.units[1].id);
   });
+
+  // ------------------------------------------------------------ STEP 9 focus target
+
+  describe('focus target (STEP 9 scenario)', () => {
+    const T: Record<string, EnemyTemplate> = {
+      orcTank: { id: 'orcTank', name: 'ออร์คโล่', cls: 'tank', hp: 99999, atk: 1, def: 0 },
+      orcWarrior: { id: 'orcWarrior', name: 'ออร์คนักรบ', cls: 'fighter', hp: 99999, atk: 1, def: 0 },
+      shaman: { id: 'shaman', name: 'ก็อบลินหมอผี', cls: 'healer', hp: 99999, atk: 1, def: 0, castSkills: ['massHeal'] },
+      mage: { id: 'mage', name: 'หมอผีมืด', cls: 'mage', hp: 99999, atk: 1, def: 0 },
+    };
+    const party: UnitSpec[] = [
+      { name: 'Tank', cls: 'tank', stats: { ...CLASS_BASE.tank, hp: 5000 }, pos: { r: 0, c: 1 } },
+      { name: 'Warrior', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 5000 }, pos: { r: 0, c: 0 } },
+      { name: 'Archer', cls: 'archer', stats: { ...CLASS_BASE.archer, hp: 5000 }, pos: { r: 3, c: 1 } },
+      { name: 'Mage', cls: 'mage', stats: { ...CLASS_BASE.mage, hp: 5000 }, pos: { r: 2, c: 2 } },
+      { name: 'Healer', cls: 'healer', stats: { ...CLASS_BASE.healer, hp: 5000 }, pos: { r: 3, c: 0 } },
+    ];
+    const stage = castStage([
+      { enemy: 'orcTank', r: 0, c: 1 }, { enemy: 'orcWarrior', r: 0, c: 0 },
+      { enemy: 'shaman', r: 2, c: 1 }, { enemy: 'mage', r: 4, c: 2 },
+    ]);
+    const setup = () => {
+      const e = new BattleEngine({ allies: party, stage, enemyTemplates: T, seed: 3 });
+      const [tank, warrior, archer, mage, healer] = e.units.filter(u => u.side === 'ally');
+      const shaman = e.units.find(u => u.name === 'ก็อบลินหมอผี')!;
+      // ไม่ให้สกิลรบกวนตอนเช็กเป้า (ยกเว้นที่เทสต์ตั้งใจ)
+      for (const u of e.units) { u.cd1 = 99; u.cd2 = 99; for (const cs of u.castSkills) cs.cd = 99; }
+      for (let i = 0; i < 20; i++) e.step(0.05);
+      return { e, tank, warrior, archer, mage, healer, shaman };
+    };
+
+    it('ranged heroes switch to the focus; the tank holds the frontline; the warrior cannot reach behind the orcs', () => {
+      const { e, tank, warrior, archer, mage, shaman } = setup();
+      e.setFocus(shaman.id);
+      expect(e.focusTargetId).toBe(shaman.id);
+      for (let i = 0; i < 10; i++) e.step(0.05);
+      expect(archer.targetId).toBe(shaman.id);
+      expect(archer.intent).toBe('focus');
+      expect(mage.targetId).toBe(shaman.id);
+      expect(tank.targetId).not.toBe(shaman.id);
+      expect(tank.intent).toBe('hold');
+      expect(warrior.targetId).not.toBe(shaman.id);
+      expect(warrior.intent).toBe('blocked');
+    });
+
+    it('the healer keeps emergency-healing instead of chasing the focus', () => {
+      const { e, tank, healer, shaman } = setup();
+      e.setFocus(shaman.id);
+      tank.hp = Math.round(tank.maxHp * 0.2);
+      let healed = false;
+      for (let i = 0; i < 40 && !healed; i++) {
+        e.step(0.05);
+        healed = e.drainEvents().some(ev => ev.type === 'heal' && ev.dst === tank.id && ev.src === healer.id);
+      }
+      expect(healed).toBeTrue();
+      expect(healer.intent).toBe('heal');
+    });
+
+    it('the archer spots the focused shaman casting MASS HEAL and stun-volleys it', () => {
+      const { e, archer, shaman } = setup();
+      e.setFocus(shaman.id);
+      e.units.filter(u => u.side === 'enemy').forEach(u => (u.hp = Math.round(u.maxHp * 0.5)));
+      shaman.castSkills[0].cd = 0;
+      archer.cd2 = 0;
+      const evs: BattleEvent[] = [];
+      for (let i = 0; i < 80; i++) {
+        e.step(0.05);
+        evs.push(...e.drainEvents());
+        if (evs.some(ev => ev.type === 'interrupt')) break;
+      }
+      expect(evs.some(ev => ev.type === 'castStart' && ev.src === shaman.id)).toBeTrue();
+      expect(evs.some(ev => ev.type === 'interrupt' && ev.src === archer.id && ev.dst === shaman.id)).toBeTrue();
+      expect(evs.some(ev => ev.type === 'castDone' && ev.src === shaman.id)).toBeFalse();
+    });
+
+    it('focus clears itself when the target dies, tapping it again cancels, and nobody flickers', () => {
+      const { e, archer, shaman } = setup();
+      expect(e.setFocus(shaman.id)).toBe(shaman.id);
+      expect(e.setFocus(shaman.id)).toBeNull(); // แตะซ้ำ = ยกเลิก
+      e.setFocus(shaman.id);
+      // กันกระพริบ: ติดตามเป้าของนักธนูทุกเฟรม ต้องไม่สลับไปมา
+      let switches = 0;
+      let last = archer.targetId;
+      for (let i = 0; i < 60; i++) {
+        e.step(0.05);
+        if (archer.targetId !== last) switches++;
+        last = archer.targetId;
+      }
+      expect(switches).toBeLessThanOrEqual(1);
+      shaman.hp = 1;
+      const evs: BattleEvent[] = [];
+      for (let i = 0; i < 60 && e.focusTargetId != null; i++) {
+        e.step(0.05);
+        evs.push(...e.drainEvents());
+      }
+      expect(e.focusTargetId).toBeNull();
+      expect(evs.some(ev => ev.type === 'focus' && ev.dst === null && ev.reason === 'dead')).toBeTrue();
+    });
+  });
 });

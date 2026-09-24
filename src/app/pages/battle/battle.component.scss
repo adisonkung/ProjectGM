@@ -61,3 +61,14 @@ h1 { font: 700 22px/1.2 var(--disp); margin: 0; }
   em { font-style: normal; font-weight: 600; font-size: 11px; color: var(--cyan); margin-left: 6px; }
   &.hard { border-color: var(--danger); color: var(--danger); em { color: #f19a93; } }
 }
+
+.focus-card {
+  position: absolute; left: 8px; top: 8px; z-index: 220; display: grid; gap: 3px; min-width: 150px; padding: 6px 8px;
+  border-radius: 10px; background: #0d1220e8; border: 1px solid #fff4; font-size: 12px;
+  &.on { border-color: #ff5a4e; box-shadow: 0 0 12px #ff5a4e66; }
+  .fc-name { font: 700 13px var(--disp); }
+  .fc-hp { height: 5px; border-radius: 3px; background: #0009; overflow: hidden; i { display: block; height: 100%; background: var(--danger); } }
+  small { color: var(--muted); }
+  button { margin-top: 2px; padding: 4px 8px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel2); font: 700 12px var(--disp);
+    &.go { background: #ff5a4e; border-color: #ff5a4e; color: #fff; } }
+}

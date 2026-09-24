@@ -27,7 +27,19 @@
   } @else {
     <div class="stage-wrap">
       <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
-                 [scroll]="scroll()" [marchMs]="marchMs()" [background]="background()" />
+                 [scroll]="scroll()" [marchMs]="marchMs()" [background]="background()" (pick)="pickEnemy($event)" />
+      @if (focusCard(); as f) {
+        <div class="focus-card" [class.on]="f.isFocus" role="group" aria-label="เป้าหมาย">
+          <span class="fc-name">{{ f.isFocus ? '🎯 FOCUS · ' : '' }}{{ f.name }}</span>
+          <span class="fc-hp"><i [style.width.%]="f.hpPct"></i></span>
+          <small>HP {{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · ตีอยู่ {{ focusCount().on }}/{{ focusCount().total }} }</small>
+          @if (f.isFocus) {
+            <button type="button" (click)="cancelFocus()">✕ ยกเลิกโฟกัส</button>
+          } @else {
+            <button type="button" class="go" (click)="setFocus(f.id)">🎯 FOCUS</button>
+          }
+        </div>
+      }
       @if (banner(); as b) { <div class="banner" aria-live="polite">{{ b }}</div> }
       @if (casts().length) {
         <div class="alerts" aria-live="assertive">

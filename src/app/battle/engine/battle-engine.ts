@@ -40,7 +40,12 @@ export type BattleEvent =
   /** ตัดการร่ายสำเร็จ (src = ผู้ตัด) */
   | { type: 'interrupt'; src: number; dst: number; skill: string }
   /** พยายามตัดแต่สกิลนี้ตัดไม่ได้ */
-  | { type: 'immune'; src: number; dst: number; skill: string };
+  | { type: 'immune'; src: number; dst: number; skill: string }
+  /** เปลี่ยนเป้าโฟกัส (null = ยกเลิก; reason บอกว่ายกเลิกเพราะอะไร) */
+  | { type: 'focus'; dst: number | null; reason?: 'player' | 'dead' | 'advance' | 'end' };
+
+/** เหตุผลที่ฮีโร่เลือกเป้าตอนนี้ (แสดงใต้รูปในแถบตัวละคร) */
+export type Intent = 'normal' | 'focus' | 'hold' | 'blocked' | 'heal' | 'interrupt' | 'taunted';
 
 export interface BattleUnit {
   id: number;
@@ -83,6 +88,11 @@ export interface BattleUnit {
   ultQueued: boolean;
   /** ศัตรู: สกิลร่ายที่มี + คูลดาวน์ที่เหลือ */
   castSkills: { def: EnemySkillDef; cd: number }[];
+  /** ล็อกเป้าถึงเวลานี้ (กันเปลี่ยนเป้าทุกเฟรม) และรอบคิดของ AI (ทุก THINK วิ) */
+  lockUntil: number;
+  thinkCd: number;
+  /** เหตุผลของการเลือกเป้าล่าสุด */
+  intent: Intent;
   /** กำลังร่าย (state = CASTING): ยืนนิ่ง ทำอย่างอื่นไม่ได้ */
   casting: { def: EnemySkillDef; left: number; target: number | null } | null;
   /** คลั่ง: เวลาที่เหลือ และตัวคูณ atk/ความเร็วตี */
@@ -162,6 +172,15 @@ const BLESS_PCT = 0.1;
 const REVIVE_HP = 0.5;
 /** เวลาเดินไปเวฟถัดไป (วินาที) — ระหว่างนี้ไม่มีใครต่อสู้ และไม่นับเวลาจำกัด */
 export const ADVANCE_TIME = 2.4;
+/** STEP 9: AI คิดเลือกเป้าทุก 0.25 วิ · เปลี่ยนเป้าแล้วล็อกอย่างน้อย 0.6 วิ (ยกเว้นเป้าตาย/โฟกัสเปลี่ยน) */
+const THINK = 0.25;
+const TARGET_LOCK = 0.6;
+/** ฮีลฉุกเฉิน: เพื่อนเลือดต่ำกว่านี้ ฮีลเลอร์ทิ้งทุกอย่าง (รวมโฟกัส) มาฮีลก่อน */
+const EMERGENCY_HP = 0.35;
+/** สกิลวงกว้างรอให้โดน ≥ 2 ตัว — แต่ถ้ารอเกินกี่วิแล้วก็ใช้ไปเลย */
+const AOE_OVERDUE = 4;
+/** สายระยะไกลยอมขยับเข้าหาเป้าโฟกัสได้ไม่เกินกี่ช่อง */
+const FOCUS_STEP_IN = 2;
 /** นักเวท ท่าไม้ตาย: 250% เป้า + 150% รอบเป้า 1 ช่อง · ฮีลเลอร์ ท่าไม้ตาย: ฮีลทั้งทีม (+ชุบเพื่อนที่ล้ม 1 คน) */
 const METEOR_MUL = 2.5;
 const METEOR_SPLASH = 1.5;
@@ -197,6 +216,8 @@ export class BattleEngine {
   private nextWaveAt: number;
   private waveIndex = 0;
   private readonly enemyCap: number;
+  /** STEP 9: เป้าโฟกัสที่ผู้เล่นเลือก (ศัตรู) — เป็นการเพิ่มลำดับความสำคัญ ไม่ใช่คำสั่งบังคับ */
+  focusTargetId: number | null = null;
   /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม (สลับได้ระหว่างสู้) */
   autoUlt: boolean;
 
@@ -333,6 +354,9 @@ export class BattleEngine {
       cd2: SKILL_CD[spec.cls][1] * START_CD,
       ultQueued: false,
       castSkills: [],
+      lockUntil: 0,
+      thinkCd: 0,
+      intent: 'normal',
       casting: null,
       rage: 0,
       rageMul: 1,
@@ -372,6 +396,7 @@ export class BattleEngine {
 
   /** เคลียร์เวฟแล้ว: ทีมที่รอดกลับไปจัดแถวที่ตำแหน่งตั้งต้น แล้วเดินหน้า */
   private beginAdvance(): void {
+    this.clearFocus('advance');
     this.round++;
     this.advancing = ADVANCE_TIME;
     // ดาเมจ/กระสุนที่ยังค้างอยู่ของเวฟที่แล้ว ทิ้งไป (ศัตรูตายหมดแล้ว)
@@ -422,8 +447,10 @@ export class BattleEngine {
   private updateUnit(u: BattleUnit, dt: number): void {
     u.atkCd -= dt;
     u.moveCd -= dt;
-    if (u.cd1 > 0) u.cd1 -= dt;
-    if (u.cd2 > 0) u.cd2 -= dt;
+    // คูลดาวน์ติดลบได้ = สกิลพร้อมมานานแค่ไหนแล้ว (ใช้ตัดสินว่ารอ AoE นานเกินไปหรือยัง)
+    u.cd1 = Math.max(-10, u.cd1 - dt);
+    u.cd2 = Math.max(-10, u.cd2 - dt);
+    if (u.thinkCd > 0) u.thinkCd -= dt;
     for (const cs of u.castSkills) if (cs.cd > 0) cs.cd -= dt;
     if (u.rage > 0 && (u.rage -= dt) <= 0) u.rageMul = 1;
     if (u.taunt > 0) u.taunt -= dt;
@@ -452,9 +479,31 @@ export class BattleEngine {
     if (u.castSkills.length && this.tryStartCast(u)) return;
 
     // ท่าไม้ตาย: เกจมานาเต็ม + (ผู้เล่นกดสั่ง หรือออโต้ หรือเป็นศัตรู) → ร่ายทันทีถ้ามีเป้าที่ใช้ได้
-    if (u.mana >= u.maxMana && (u.ultQueued || u.side === 'enemy' || this.autoUlt) && this.tryUltimate(u)) {
+    if (u.mana >= u.maxMana && (u.ultQueued || u.side === 'enemy' || (this.autoUlt && !this.holdUltForInterrupt(u))) && this.tryUltimate(u)) {
       u.ultQueued = false;
       return;
+    }
+
+    // โอกาสตัดการร่าย: มีสกิลที่ตัดได้พร้อม + ศัตรูกำลังร่ายสกิลที่ตัดได้ในระยะ → ใช้ทันที (ไม่สนเป้าเดิม)
+    if (u.side === 'ally' && u.atkCd <= 0 && this.tryInterruptSkill(u)) return;
+
+    // ฮีลเลอร์: ฮีลฉุกเฉิน (สำคัญกว่าโฟกัส) — เพื่อนเลือด < 35% ในระยะ → พรศักดิ์สิทธิ์ถ้าพร้อม ไม่งั้นฮีลธรรมดา
+    if (u.cls === 'healer' && u.atkCd <= 0) {
+      const dying = this.alive(u.side)
+        .filter(a => a.hp / a.maxHp < EMERGENCY_HP && distance(a.pos, u.pos) <= u.range)
+        .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+      if (dying) {
+        u.intent = 'heal';
+        if (u.cd2 <= 0) {
+          this.cast(u, dying, 'skill2');
+          u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
+          return;
+        }
+        if (u.cd1 > 0) {
+          this.basicHeal(u, dying);
+          return;
+        }
+      }
     }
 
     // ฮีลเลอร์: ถ้ามีเพื่อนเลือดน้อยในระยะ ให้ฮีลแทนการตี
@@ -463,14 +512,8 @@ export class BattleEngine {
         .filter(a => a.hp / a.maxHp < 0.6 && distance(a.pos, u.pos) <= u.range)
         .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
       if (hurt) {
-        const tm = animTiming(u.sprite, 'attack');
-        u.castLock = Math.max(u.castLock, tm.hit);
-        u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
-        this.events.push({ type: 'attack', src: u.id, dst: hurt.id });
-        this.later(tm.hit, u, () => {
-          this.heal(hurt, u.atk * 1.3, u);
-          u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
-        });
+        u.intent = 'heal';
+        this.basicHeal(u, hurt);
         return;
       }
     }
@@ -481,8 +524,9 @@ export class BattleEngine {
     if (distance(u.pos, target.pos) <= u.range) {
       if (u.atkCd <= 0) {
         // สกิล 2 (สำคัญ) ก่อน แล้วสกิล 1 · ไม่พร้อมทั้งคู่ = ตีธรรมดา (สร้างเกจ)
-        if (u.cd2 <= 0) this.cast(u, target, 'skill2');
-        else if (u.cd1 <= 0) this.cast(u, target, 'skill');
+        // สกิลวงกว้างรอจังหวะที่โดนหลายตัว (โฟกัสไม่ได้แปลว่าต้องทิ้งสกิลใส่เป้าเดี่ยว)
+        if (u.cd2 <= 0 && this.worthCasting(u, 'skill2', target)) this.cast(u, target, 'skill2');
+        else if (u.cd1 <= 0 && this.worthCasting(u, 'skill', target)) this.cast(u, target, 'skill');
         else this.basicAttack(u, target);
         u.atkCd = Math.max(u.atkCd, 0) + 1 / (u.atkSpeed * u.rageMul);
       } else if (u.range >= 3 && u.moveCd <= 0) {
@@ -505,55 +549,211 @@ export class BattleEngine {
     }
   }
 
+  // ---------------------------------------------------------------- target resolver (STEP 8 + 9)
+
   /**
-   * เลือกเป้า (STEP 8 Formation + Target Priority)
-   * - ถูกยั่วยุ → ตีแทงก์ที่ยั่วยุ
-   * - เป้าเดิมยังอยู่ในระยะ (หรือไม่มีใครในระยะ) → ตีต่อ
-   * - สายประชิด: แถวหน้าก่อน (ใกล้สุด) แล้วค่อยแถวหลัง
-   * - แทงก์: ศัตรูที่กำลังตีแถวหลังของเรา → บอส → ใกล้สุด
-   * - สายระยะไกล: ในระยะยิง เลือกเลือด % ต่ำสุด (เสมอ: นักเวท > ฮีลเลอร์) · ไม่มีในระยะ → ใกล้สุด
-   * - นักฆ่า: แถวหลังก่อน (ฮีลเลอร์ > นักเวท > นักธนู) ไม่เหลือแถวหลังค่อยตีใกล้สุด
+   * เลือกเป้า — Target Resolver กลาง (คิดทุก THINK วิ ไม่ใช่ทุกเฟรม)
+   *   1. ถูกยั่วยุ → ต้องตีแทงก์ที่ยั่วยุ (บังคับ)
+   *   2. หน้าที่สำคัญของสาย (critical role): แทงก์ที่กำลังถือแนวหน้าไม่ทิ้งศัตรูที่ประชิดอยู่
+   *   3. โฟกัสของผู้เล่น — เฉพาะเมื่อ canEngage() (ยิงถึง / เดินถึงโดยไม่ต้องทะลุแนวหน้าศัตรู / นักฆ่าวาร์ปข้ามได้)
+   *   4. AI ปกติตามสาย (normalTarget)
+   * เปลี่ยนเป้าแล้วล็อก TARGET_LOCK วิ (กันกระพริบ) ยกเว้นเป้าเดิมตาย/หายไป หรือผู้เล่นเปลี่ยนโฟกัส
+   * (ฮีลฉุกเฉินของฮีลเลอร์ และโอกาสตัดการร่าย จัดการใน updateUnit ก่อนมาถึงตรงนี้)
    */
   private acquireTarget(u: BattleUnit): BattleUnit | null {
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
     if (!foes.length) return null;
 
-    // ถูกยั่วยุ: ต้องตีแทงก์ที่ยั่วยุอยู่ใกล้ ๆ
     const taunter = foes
       .filter(f => f.taunt > 0 && distance(f.pos, u.pos) <= TAUNT_RADIUS)
       .sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos))[0];
     if (taunter) {
       u.targetId = taunter.id;
+      u.intent = 'taunted';
       return taunter;
     }
 
-    const d = (f: BattleUnit) => distance(f.pos, u.pos);
-    const current = foes.find(f => f.id === u.targetId);
-    const inRange = foes.filter(f => d(f) <= u.range);
-    if (current && (d(current) <= u.range || !inRange.length)) return current;
+    const current = foes.find(f => f.id === u.targetId) ?? null;
+    if (current && u.thinkCd > 0) return current;
+    u.thinkCd = THINK;
 
+    const focus = u.side === 'ally' ? this.focusUnit() : null;
+    const hold = this.holdTarget(u, foes, current);
+    let pick: BattleUnit;
+    let intent: Intent = 'normal';
+    if (hold) {
+      pick = hold;
+      intent = focus && focus !== hold ? 'hold' : 'normal';
+    } else if (focus && this.canEngage(u, focus, foes)) {
+      pick = focus;
+      intent = 'focus';
+    } else {
+      pick = this.normalTarget(u, foes, current);
+      if (focus) intent = 'blocked';
+    }
+
+    // ล็อกเป้า: ยังไม่หมดเวลาล็อก + เป้าเดิมยังตีได้อยู่ → ไม่เปลี่ยน (โฟกัสใหม่รีเซ็ตล็อกให้แล้ว)
+    if (current && pick !== current && this.time < u.lockUntil && distance(current.pos, u.pos) <= u.range) {
+      return current;
+    }
+    if (pick !== current) u.lockUntil = this.time + TARGET_LOCK;
+    u.targetId = pick.id;
+    u.intent = intent;
+    return pick;
+  }
+
+  /** AI ปกติตามสาย (STEP 8) */
+  private normalTarget(u: BattleUnit, foes: BattleUnit[], current: BattleUnit | null): BattleUnit {
+    const d = (f: BattleUnit) => distance(f.pos, u.pos);
+    const inRange = foes.filter(f => d(f) <= u.range);
+    if (current && (d(current) <= u.range || !inRange.length) && u.cls !== 'assassin') return current;
     const front = (f: BattleUnit) => (f.line === 'front' ? 0 : 1);
-    let best: BattleUnit;
     if (u.cls === 'assassin') {
+      // นักฆ่า: แถวหลังก่อน ฮีลเลอร์ > นักเวท > นักธนู > เลือดน้อย
       const order: Partial<Record<HeroClass, number>> = { healer: 0, mage: 1, archer: 2 };
       const backs = foes.filter(f => f.line === 'back');
       const pool = backs.length ? backs : foes;
-      best = [...pool].sort((a, b) => (order[a.cls] ?? 3) - (order[b.cls] ?? 3) || d(a) - d(b) || a.id - b.id)[0];
-    } else if (u.range >= 3) {
-      const order: Partial<Record<HeroClass, number>> = { mage: 0, healer: 1 };
-      best = inRange.length
-        ? [...inRange].sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp || (order[a.cls] ?? 2) - (order[b.cls] ?? 2) || d(a) - d(b))[0]
+      if (current && pool.includes(current)) return current;
+      return [...pool].sort((a, b) => (order[a.cls] ?? 3) - (order[b.cls] ?? 3) || a.hp / a.maxHp - b.hp / b.maxHp || d(a) - d(b))[0];
+    }
+    if (u.range >= 3) {
+      // สายระยะไกล: ในระยะยิง นักเวท > นักธนู > เลือดน้อย > ใกล้ · ไม่มีในระยะ → ใกล้สุด
+      const order: Partial<Record<HeroClass, number>> = { mage: 0, archer: 1 };
+      return inRange.length
+        ? [...inRange].sort((a, b) => (order[a.cls] ?? 2) - (order[b.cls] ?? 2) || a.hp / a.maxHp - b.hp / b.maxHp || d(a) - d(b))[0]
         : [...foes].sort((a, b) => d(a) - d(b) || a.id - b.id)[0];
-    } else if (u.cls === 'tank') {
+    }
+    if (u.cls === 'tank') {
+      // แทงก์: ศัตรูที่กำลังตีแถวหลังของเรา → บอส/อีลิท → ใกล้สุด
       const mine = new Set(this.alive(u.side).filter(a => a.line === 'back').map(a => a.id));
       const diving = (f: BattleUnit) => (f.targetId != null && mine.has(f.targetId) ? 0 : 1);
-      best = [...foes].sort((a, b) => diving(a) - diving(b) || Number(!!b.boss) - Number(!!a.boss) || d(a) - d(b) || a.id - b.id)[0];
-    } else {
-      const pool = inRange.length ? inRange : foes;
-      best = [...pool].sort((a, b) => front(a) - front(b) || d(a) - d(b) || a.id - b.id)[0];
+      return [...foes].sort((a, b) => diving(a) - diving(b) || Number(!!b.boss) - Number(!!a.boss) || d(a) - d(b) || a.id - b.id)[0];
     }
-    u.targetId = best.id;
-    return best;
+    // สายประชิด: แถวหน้าก่อน (ในระยะถ้ามี) แล้วค่อยแถวหลัง
+    const pool = inRange.length ? inRange : foes;
+    return [...pool].sort((a, b) => front(a) - front(b) || d(a) - d(b) || a.id - b.id)[0];
+  }
+
+  /**
+   * หน้าที่สำคัญของแทงก์: กำลังถือแนวหน้า (มีศัตรูประชิดตัว) → ตีตัวที่ประชิดต่อ ไม่วิ่งไปหาโฟกัส
+   * (ศัตรูที่หลุดไปตีแถวหลังมาก่อน ถ้าอยู่ใกล้)
+   */
+  private holdTarget(u: BattleUnit, foes: BattleUnit[], current: BattleUnit | null): BattleUnit | null {
+    if (u.cls !== 'tank') return null;
+    const engaged = foes.filter(f => distance(f.pos, u.pos) <= 1);
+    if (!engaged.length) return null;
+    if (current && engaged.includes(current)) return current;
+    const mine = new Set(this.alive(u.side).filter(a => a.line === 'back').map(a => a.id));
+    return [...engaged].sort((a, b) => Number(!mine.has(a.targetId ?? -1)) - Number(!mine.has(b.targetId ?? -1)) || a.id - b.id)[0];
+  }
+
+  /**
+   * ไปตีเป้านี้ได้อย่างสมเหตุสมผลไหม (STEP 9 canEngage)
+   * - เป้าต้องยังอยู่ในสนามรอบนี้ และไม่ได้กำลังเดินไปเวฟถัดไป
+   * - สายระยะไกล: อยู่ในระยะยิง หรือขยับเข้าไม่เกิน FOCUS_STEP_IN ช่อง
+   * - นักฆ่า: วาร์ป/พุ่งข้ามแนวหน้าได้เสมอ
+   * - สายประชิด: ใกล้ (≤ 2 ช่อง) หรือไม่มีศัตรูยืนขวางระหว่างทาง (คอลัมน์ระหว่างเรากับเป้า เลนติดกัน)
+   */
+  canEngage(u: BattleUnit, t: BattleUnit, foes = this.alive(t.side)): boolean {
+    if (!t.alive || t.side === u.side || this.advancing > 0) return false;
+    if (t.side === 'enemy' && t.round !== this.round) return false;
+    const d = distance(u.pos, t.pos);
+    // สายระยะไกล: ยิงถึงอยู่แล้ว หรือขยับขึ้นไม่เกิน 2 ช่องก็ยิงถึง (ขยับเพื่อหาระยะยิง ไม่วิ่งลุยเข้าไป)
+    if (u.range >= 3) return d <= u.range + FOCUS_STEP_IN;
+    if (u.cls === 'assassin') return true;
+    if (d <= 2) return true;
+    const lo = Math.min(u.pos.c, t.pos.c);
+    const hi = Math.max(u.pos.c, t.pos.c);
+    return !foes.some(f => f !== t && f.pos.c > lo && f.pos.c < hi && Math.abs(f.pos.r - t.pos.r) <= 1);
+  }
+
+  // ---------------------------------------------------------------- focus (STEP 9)
+
+  /** ผู้เล่นเลือก/ยกเลิกเป้าโฟกัส (เลือกตัวเดิมซ้ำ = ยกเลิก) */
+  setFocus(id: number | null): number | null {
+    const t = id == null ? null : this.units.find(x => x.id === id && x.side === 'enemy' && x.alive) ?? null;
+    const next = !t || t.id === this.focusTargetId ? null : t.id;
+    if (next === this.focusTargetId) return next;
+    this.focusTargetId = next;
+    // โฟกัสเปลี่ยน = เหตุการณ์ที่ให้ทุกคนคิดใหม่ทันที (ไม่ต้องรอหมดล็อก)
+    for (const a of this.alive('ally')) {
+      a.thinkCd = 0;
+      a.lockUntil = 0;
+    }
+    this.events.push({ type: 'focus', dst: next, reason: 'player' });
+    return next;
+  }
+
+  /** เป้าโฟกัสที่ยังใช้ได้ (ตาย/หลุดสนาม = ยกเลิกอัตโนมัติ) */
+  private focusUnit(): BattleUnit | null {
+    if (this.focusTargetId == null) return null;
+    const t = this.units.find(x => x.id === this.focusTargetId);
+    if (t && t.alive && t.round === this.round) return t;
+    this.clearFocus(t && !t.alive ? 'dead' : 'advance');
+    return null;
+  }
+
+  private clearFocus(reason: 'dead' | 'advance' | 'end'): void {
+    if (this.focusTargetId == null) return;
+    this.focusTargetId = null;
+    for (const a of this.alive('ally')) {
+      a.thinkCd = 0;
+      a.lockUntil = 0;
+    }
+    this.events.push({ type: 'focus', dst: null, reason });
+  }
+
+  // ---------------------------------------------------------------- smart skills
+
+  /** มีสกิลตัดการร่ายพร้อม + ศัตรูร่ายสกิลที่ตัดได้อยู่ในระยะ → ใช้เลย (โฟกัสก่อนถ้ากำลังร่าย) */
+  private tryInterruptSkill(u: BattleUnit): boolean {
+    const kinds = (['skill2', 'skill'] as const).filter(k => canInterrupt(u.cls, k) && (k === 'skill2' ? u.cd2 : u.cd1) <= 0);
+    if (!kinds.length) return false;
+    const focus = this.focusUnit();
+    const casters = this.alive('enemy')
+      .filter(f => f.casting?.def.interruptible && distance(f.pos, u.pos) <= u.range)
+      .sort((a, b) => Number(b === focus) - Number(a === focus) || a.casting!.left - b.casting!.left);
+    const t = casters[0];
+    if (!t) return false;
+    u.targetId = t.id;
+    u.intent = 'interrupt';
+    u.lockUntil = this.time + TARGET_LOCK;
+    this.cast(u, t, kinds[0]);
+    u.atkCd = Math.max(u.atkCd, 0) + 1 / (u.atkSpeed * u.rageMul);
+    return true;
+  }
+
+  /** สกิลวงกว้างรอให้โดน ≥ 2 ตัว (หรือเหลือศัตรูตัวเดียว / รอนานเกิน AOE_OVERDUE วิ) */
+  private worthCasting(u: BattleUnit, kind: SkillKind, t: BattleUnit): boolean {
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    const cd = kind === 'skill2' ? u.cd2 : u.cd1;
+    if (foes.length <= 1 || cd <= -AOE_OVERDUE) return true;
+    const around = (c: Cell) => foes.filter(f => distance(f.pos, c) <= 1).length;
+    if (u.cls === 'fighter' && kind === 'skill') return around(u.pos) >= 2; // ดาบหมุนวนรอบตัว
+    if (u.cls === 'archer' && kind === 'skill2') return around(t.pos) >= 2; // ห่าธนูตกเป็นวง
+    if (u.cls === 'mage') return around(t.pos) >= 2;
+    return true;
+  }
+
+  /** โหมดออโต้: ฮีโร่ที่ท่าไม้ตายตัดได้ เก็บเกจไว้ถ้ามีศัตรูที่ร่ายสกิลอันตรายได้ (จนกว่าจะเริ่มร่าย) */
+  private holdUltForInterrupt(u: BattleUnit): boolean {
+    if (u.side !== 'ally' || !canInterrupt(u.cls, 'ult') || u.hp < u.maxHp * 0.3) return false;
+    const foes = this.alive('enemy');
+    const reach = (f: BattleUnit) => u.cls !== 'tank' || distance(f.pos, u.pos) <= TAUNT_RADIUS + 1;
+    const castingNow = foes.some(f => f.casting?.def.interruptible && reach(f));
+    if (castingNow) return false;
+    return foes.some(f => f.castSkills.some(cs => cs.def.interruptible) && reach(f));
+  }
+
+  private basicHeal(u: BattleUnit, ally: BattleUnit): void {
+    const tm = animTiming(u.sprite, 'attack');
+    u.castLock = Math.max(u.castLock, tm.hit);
+    u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
+    this.events.push({ type: 'attack', src: u.id, dst: ally.id });
+    this.later(tm.hit, u, () => {
+      this.heal(ally, u.atk * 1.3, u);
+      u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
+    });
   }
 
   /** สายระยะไกลถอยหนีศัตรูที่ประชิดตัว 1 ก้าว ไปทางฝั่งตัวเอง (ต้องยังยิงเป้าถึง) */
@@ -588,6 +788,8 @@ export class BattleEngine {
         target = [...inRange].sort((a, b) => Number(a.line !== 'back') - Number(b.line !== 'back') || a.hp / a.maxHp - b.hp / b.maxHp)[0];
       } else if (cs.def.effect === 'berserk') {
         if (near > 2) continue;
+      } else if (cs.def.effect === 'massHeal') {
+        if (!this.alive(u.side).some(a => a.hp < a.maxHp * 0.75)) continue;
       } else if (near > Math.max(u.range, 3)) {
         continue; // แผ่นดินไหว/คลื่นมรณะ: ร่ายเมื่อเข้าปะทะแล้ว
       }
@@ -619,6 +821,9 @@ export class BattleEngine {
         for (const f of foes.filter(f => distance(f.pos, t.pos) <= 1)) this.damage(u, f, f === t ? c.def.power : c.def.power * 0.6);
         break;
       }
+      case 'massHeal':
+        for (const a of this.alive(u.side)) this.heal(a, a.maxHp * c.def.power, u);
+        break;
       case 'berserk':
         u.rage = c.def.duration ?? 8;
         u.rageMul = 1 + c.def.power;
@@ -677,7 +882,10 @@ export class BattleEngine {
     const skill = (kind === 'skill2' && SKILL2_NAME[u.cls]) || SKILL_NAME[u.cls];
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
     // นักฆ่า สกิล 1 เลือกเป้าใหม่: ศัตรูที่เลือดเหลือน้อยที่สุด (มักเป็นแถวหลัง) ที่มีช่องว่างข้าง ๆ
-    if (u.cls === 'assassin' && kind === 'skill') {
+    const focus = u.side === 'ally' ? this.focusUnit() : null;
+    if (u.cls === 'assassin' && kind === 'skill' && focus && this.freeCellNear(focus.pos, u.pos)) {
+      t = focus; // โฟกัส: นักฆ่าวาร์ปข้ามแนวหน้าไปหาเป้าโฟกัส
+    } else if (u.cls === 'assassin' && kind === 'skill') {
       const prey = foes
         .filter(f => this.freeCellNear(f.pos, u.pos))
         .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp || distance(b.pos, u.pos) - distance(a.pos, u.pos))[0];
@@ -961,6 +1169,7 @@ export class BattleEngine {
       dst.hp = 0;
       dst.alive = false;
       dst.casting = null;
+      if (dst.id === this.focusTargetId) this.clearFocus('dead');
       dst.shield = 0;
       dst.poisonTime = 0;
       this.grid.remove(dst.id, dst.pos);
@@ -984,6 +1193,7 @@ export class BattleEngine {
       else this.result = 'win';
     } else if (this.stage.mode === 'survive' && this.fightTime >= this.stage.timeLimit) this.result = 'win';
     else if (this.stage.mode === 'eliminate' && this.fightTime >= this.stage.timeLimit) this.result = 'timeout';
+    if (this.result) this.clearFocus('end');
     return this.result !== null || this.advancing > 0;
   }
 }

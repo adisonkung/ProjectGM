@@ -8,7 +8,9 @@ export type EnemySkillEffect =
   /** ดาเมจ power × atk ใส่เป้า + รอบเป้า 1 ช่อง (เป้า = แถวหลังเลือด % ต่ำสุดในระยะ) */
   | 'meteor'
   /** คลั่ง: atk และความเร็วตี ×(1 + power) นาน duration วิ */
-  | 'berserk';
+  | 'berserk'
+  /** ฮีลพวกเดียวกันทุกตัว power × เลือดสูงสุด (ร่ายเมื่อมีพวกเลือดต่ำกว่า 75%) */
+  | 'massHeal';
 
 export interface EnemySkillDef {
   id: string;
@@ -36,6 +38,10 @@ export const ENEMY_SKILLS: Record<string, EnemySkillDef> = {
   deathNova: {
     id: 'deathNova', name: 'คลื่นมรณะ', label: 'DEATH NOVA',
     castTime: 3.5, cooldown: 16, interruptible: true, effect: 'quake', power: 0.45,
+  },
+  massHeal: {
+    id: 'massHeal', name: 'ฟื้นฟูหมู่', label: 'MASS HEAL',
+    castTime: 3, cooldown: 12, interruptible: true, effect: 'massHeal', power: 0.4,
   },
   berserk: {
     id: 'berserk', name: 'คลั่ง', label: 'BERSERK',

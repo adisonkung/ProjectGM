@@ -1,10 +1,11 @@
 import { BackgroundDef } from '../../core/data/backgrounds';
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
 import { CastBarComponent, CastView } from '../cast-bar/cast-bar.component';
 import { FieldComponent } from '../field/field.component';
+import { FocusMarkComponent } from '../focus-mark/focus-mark.component';
 import { FxSpriteComponent } from '../fx-sprite/fx-sprite.component';
 import { ProjectileComponent } from '../projectile/projectile.component';
 import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
@@ -41,6 +42,12 @@ export interface UnitView {
   interrupter?: boolean;
   /** แนวรบตามฟอร์เมชัน */
   line?: 'front' | 'back';
+  /** STEP 9: เป็นเป้าโฟกัส / ถูกเลือกอยู่ (ศัตรู) · เหตุผลการเลือกเป้า (ฮีโร่) */
+  focused?: boolean;
+  selected?: boolean;
+  intent?: string;
+  /** ฮีโร่: กำลังตีเป้าโฟกัสอยู่ */
+  onFocus?: boolean;
 }
 
 export interface FloatText {
@@ -78,7 +85,7 @@ export interface AnimState {
 
 @Component({
   selector: 'app-board',
-  imports: [UnitSpriteComponent, FxSpriteComponent, FieldComponent, ProjectileComponent, CastBarComponent],
+  imports: [UnitSpriteComponent, FxSpriteComponent, FieldComponent, ProjectileComponent, CastBarComponent, FocusMarkComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })
@@ -89,6 +96,8 @@ export class BoardComponent {
   readonly projectiles = input<ProjectileView[]>([]);
   readonly anims = input<Partial<Record<number, AnimState>>>({});
   readonly speed = input(1);
+  /** แตะศัตรู (เลือกเพื่อโฟกัส) */
+  readonly pick = output<number>();
   /** ระยะที่ฉากเลื่อนไปแล้ว (1 = 1 จอ) */
   readonly scroll = input(0);
   /** ภาพพื้นหลังของด่าน */

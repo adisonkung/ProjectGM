@@ -54,6 +54,20 @@ export class BattleComponent implements OnDestroy {
   readonly autoUlt = signal(false);
   /** ฮีโร่ของเรา เรียงตามทีม (ซ้าย→ขวาในแถบด้านล่าง) */
   readonly party = computed(() => this.views().filter(v => v.side === 'ally'));
+  /** STEP 9: ศัตรูที่แตะเลือกไว้ และเป้าโฟกัสของทีม */
+  readonly selectedId = signal<number | null>(null);
+  readonly focusId = signal<number | null>(null);
+  /** การ์ดข้อมูลศัตรู: เป้าโฟกัส หรือตัวที่เลือกอยู่ */
+  readonly focusCard = computed(() => {
+    const id = this.selectedId() ?? this.focusId();
+    const v = this.views().find(x => x.id === id && x.alive && x.side === 'enemy');
+    return v ? { ...v, isFocus: v.id === this.focusId() } : null;
+  });
+  /** ฮีโร่ที่ตีเป้าโฟกัสอยู่ / ทั้งหมด */
+  readonly focusCount = computed(() => {
+    const p = this.party().filter(v => v.alive);
+    return { on: p.filter(v => v.onFocus).length, total: p.length };
+  });
   /** ศัตรูที่กำลังร่ายสกิล (แสดงแถบเตือนเหนือสนาม) */
   readonly casts = computed(() => this.views().filter(v => v.alive && v.cast));
   /** มีสกิลร่ายที่ตัดได้อยู่ตอนนี้ → ไฮไลต์ฮีโร่ที่ท่าไม้ตายตัดได้ */
@@ -120,6 +134,8 @@ export class BattleComponent implements OnDestroy {
     this.scroll.set(0);
     this.marchMs.set(0);
     this.banner.set(null);
+    this.selectedId.set(null);
+    this.focusId.set(null);
     this.facing.clear();
     this.blinkUntil.clear();
     this.snapshot();
@@ -138,8 +154,33 @@ export class BattleComponent implements OnDestroy {
     if (this.running() && this.engine.requestUlt(id)) this.snapshot();
   }
 
+  /** แตะศัตรู: ครั้งแรก = เลือก (ขึ้นการ์ด) · แตะซ้ำ = 🎯 โฟกัส · แตะเป้าโฟกัส = ยกเลิก */
+  pickEnemy(id: number): void {
+    if (!this.running()) return;
+    if (id === this.focusId()) return this.cancelFocus();
+    if (id === this.selectedId()) return this.setFocus(id);
+    this.selectedId.set(id);
+  }
+
+  setFocus(id: number | null): void {
+    if (!this.engine || id == null) return this.cancelFocus();
+    if (id !== this.engine.focusTargetId) this.engine.setFocus(id);
+    this.selectedId.set(null);
+    this.focusId.set(this.engine.focusTargetId);
+    this.snapshot();
+  }
+
+  cancelFocus(): void {
+    if (this.engine?.focusTargetId != null) this.engine.setFocus(this.engine.focusTargetId);
+    this.selectedId.set(null);
+    this.focusId.set(null);
+    this.snapshot();
+  }
+
   @HostListener('document:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
+    if (e.key === 'Escape') return this.cancelFocus();
+    if ((e.key === 'f' || e.key === 'F') && this.selectedId() != null) return this.setFocus(this.selectedId());
     const n = Number(e.key);
     if (!this.running() || !Number.isInteger(n) || n < 1) return;
     const u = this.party()[n - 1];
@@ -212,6 +253,10 @@ export class BattleComponent implements OnDestroy {
         blink: (this.blinkUntil.get(u.id) ?? 0) > this.engine.time,
         enter: u.side === 'enemy' && u.round > 0,
         queued: u.ultQueued,
+        focused: u.id === e.focusTargetId,
+        selected: u.id === this.selectedId(),
+        intent: u.side === 'ally' ? u.intent : undefined,
+        onFocus: u.side === 'ally' && e.focusTargetId != null && u.targetId === e.focusTargetId,
         line: u.line,
         interrupter: u.side === 'ally' && canInterrupt(u.cls, 'ult'),
         cast: u.casting
@@ -349,6 +394,10 @@ export class BattleComponent implements OnDestroy {
           if (hf && FX[hf]) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name: hf, angle: 0 });
           break;
         }
+        case 'focus':
+          this.focusId.set(e.dst);
+          if (e.dst == null && e.reason === 'dead') this.showBanner('🎯 เป้าโฟกัสล้มแล้ว — ทีมกลับไปใช้ AI ปกติ', 1400);
+          break;
         case 'castStart': {
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });

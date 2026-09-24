@@ -67,11 +67,11 @@ export const START_CD = 0.5;
 /**
  * สกิลที่ตัดการร่ายของศัตรูได้ (STEP 7) — ตีธรรมดา/สกิลอื่นตัดไม่ได้ ฮีโร่ที่มีจึงมีค่าทางแทคติก
  * แทงก์: สกิล 2 พุ่งชนโล่ (โดนเป้า) + ท่าไม้ตาย (คลื่นยั่วยุ ตัดทุกตัวที่ร่ายอยู่ในระยะ 3 ช่อง)
- * นักธนู: ท่าไม้ตาย ฝนธนูสวรรค์ (ตกใส่ศัตรูทุกตัว ตัดได้ทุกตัว ไม่สนระยะ)
+ * นักธนู: สกิล 2 ห่าธนูสตัน (ในระยะยิง — AI ใช้เองเมื่อเห็นศัตรูร่าย) + ท่าไม้ตาย ฝนธนูสวรรค์ (ตกใส่ศัตรูทุกตัว ไม่สนระยะ)
  */
 export const INTERRUPT: Partial<Record<HeroClass, ('skill' | 'skill2' | 'ult')[]>> = {
   tank: ['skill2', 'ult'],
-  archer: ['ult'],
+  archer: ['skill2', 'ult'],
 };
 export const canInterrupt = (cls: HeroClass, kind: 'attack' | 'skill' | 'skill2' | 'ult') =>
   kind !== 'attack' && !!INTERRUPT[cls]?.includes(kind);
