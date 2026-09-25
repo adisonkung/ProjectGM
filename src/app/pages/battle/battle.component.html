@@ -2,7 +2,7 @@
   <header class="head">
     <div>
       <h1>ห้องทดลองต่อสู้</h1>
-      <p class="sub">จัดตำแหน่งแล้วดูทีมสู้บนสนาม 3 เลน × 12 · ผลแพ้ชนะไม่มีผลกับเซฟ</p>
+      <p class="sub">จัดตำแหน่งแล้วดูทีมสู้บนสนาม 3 เลน × 16 (เรา 6 · กลาง 4 · ศัตรู 6) · ผลแพ้ชนะไม่มีผลกับเซฟ</p>
     </div>
     <div class="power">พลังทีม <b>{{ teamPower() }}</b></div>
   </header>
@@ -16,11 +16,12 @@
 
   <div class="status">
     <span class="chip" [class.surv]="stage().mode === 'survive'">
-      {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + totalRounds() + ' เวฟ' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ
+      {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + totalWaves() + ' เวฟ' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ
     </span>
     @if (stage().name) { <span class="stage-name">{{ stage().name }}</span> }
     @if (debug()) { <span class="chip dbg">DEBUG</span> }
-    @if (totalRounds() > 1) { <span class="rounds">เวฟ <b>{{ round() + 1 }}</b>/{{ totalRounds() }}</span> }
+    @if (debug()) { <span class="chip dbg">{{ phase() }}</span> }
+    @if (totalWaves() > 1) { <span class="rounds">เวฟ <b>{{ wave() + 1 }}</b>/{{ totalWaves() }}</span> }
     <span class="timer">{{ timeLeft() }}<small>วิ</small></span>
   </div>
 
@@ -29,7 +30,7 @@
   } @else {
     <div class="stage-wrap">
       <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
-                 [scroll]="scroll()" [marchMs]="marchMs()" [background]="background()" [debug]="debug()" (pick)="pickEnemy($event)" />
+                 [scroll]="scroll()" [tickMs]="tickMs" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
       @if (focusCard(); as f) {
         <div class="focus-card" [class.on]="f.isFocus" role="group" aria-label="เป้าหมาย">
           <span class="fc-name">{{ f.isFocus ? '🎯 FOCUS · ' : '' }}{{ f.name }}</span>
@@ -54,6 +55,14 @@
         </div>
       }
     </div>
+    @if (stageDebug(); as d) {
+      <div class="stage-dbg" aria-hidden="true">
+        <b>{{ d.header }}</b>
+        @for (h of d.heroes; track h.id) {
+          <div>@for (l of h.lines; track $index) { <span>{{ l }}</span> }</div>
+        }
+      </div>
+    }
     <div class="party">
       <app-party-bar [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" />
       <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()"
@@ -64,6 +73,7 @@
   @if (result(); as r) {
     <div class="result" [class.win]="r === 'win'">
       {{ r === 'win' ? 'ชนะ' : r === 'lose' ? 'แพ้' : 'หมดเวลา' }} · {{ time().toFixed(1) }} วินาที
+      @if (summary(); as sm) { <small class="summary">{{ sm }}</small> }
     </div>
   }
 

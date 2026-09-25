@@ -5,11 +5,11 @@ import { CLASS_NAME } from '../../core/data/classes';
 import { enemyInfo } from '../../core/data/enemies';
 import { heroArt } from '../../core/data/hero-art';
 import { HeroClass, OwnedHero } from '../../core/models/hero';
-import { StageDef } from '../../core/models/stage';
+import { StageDef, wavesOf } from '../../core/models/stage';
 import { LANES, SIDE_DEPTH, TEAM_SIZE } from '../../core/rules/team';
 import { RosterService } from '../../core/services/roster.service';
 import { TeamService } from '../../core/services/team.service';
-import { BOARD_COLS, BOARD_ROWS, FRONT_DEPTH, SCENERY_ROWS, toBoard } from '../engine/grid';
+import { BOARD_COLS, BOARD_ROWS, FRONT_DEPTH, NEUTRAL_COLS, SCENERY_ROWS, toBoard } from '../engine/grid';
 import { FieldComponent } from '../field/field.component';
 import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 
@@ -71,6 +71,8 @@ export class PlacementComponent {
   readonly rows = BOARD_ROWS + SCENERY_ROWS;
   readonly scenery = SCENERY_ROWS;
   readonly frontDepth = FRONT_DEPTH;
+  readonly neutralStart = SIDE_DEPTH;
+  readonly neutralCols = NEUTRAL_COLS;
   readonly selected = signal<number | null>(null);
   readonly message = signal<string | null>(null);
 
@@ -116,9 +118,12 @@ export class PlacementComponent {
     const cells: EnemyCell[] = Array.from({ length: SIDE_DEPTH * LANES }, (_, i) =>
       place('enemy', Math.floor(i / LANES), i % LANES),
     );
-    for (const p of this.stage()?.enemies ?? []) {
-      const t = enemyInfo(p.enemy);
-      if (t) cells[p.r * LANES + p.c].enemy = { name: t.name, cls: t.cls, boss: t.boss || t.elite, sprite: t.sprite };
+    // wave 1 of the stage (later waves arrive during the battle)
+    const st = this.stage();
+    for (const sp of st ? wavesOf(st)[0]?.spawns ?? [] : []) {
+      const t = enemyInfo(sp.monsterId);
+      const { depth, lane } = sp.formationSlot;
+      if (t) cells[depth * LANES + lane].enemy = { name: t.name, cls: t.cls, boss: t.boss || t.elite, sprite: t.sprite };
     }
     return cells;
   });

@@ -9,6 +9,13 @@ import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../.
 import { AttackDefinition, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
 import { ActiveBuff, applyBuff, tickBuffs } from './buffs';
+import { FormationRuntime } from './stage/formation';
+import {
+  getActiveBattlefieldHeroes, getAliveHeroes, getAllPartyHeroes, getDeadHiddenHeroes, getDeadVisibleHeroes, PLAYER_TEAM,
+} from './stage/party';
+import { resolveRules, StageBattleRules } from './stage/rules';
+import { StageFlow, StageHost } from './stage/stage-flow';
+import { BattlePhase, CombatActivity, LifeState, ReviveHeroCommand, ReviveResult, StageEvent, StageResult } from './stage/types';
 import { DamageResolver, effectiveAttack } from './damage-resolver';
 import { BOARD_COLS, distance, Grid, LANES, Line, lineOf, SIDE_DEPTH, STACK_CAP, toBoard } from './grid';
 import { CombatContext, MonsterCombatState, MonsterController } from './monster-controller';
@@ -43,10 +50,6 @@ export type BattleEvent =
   | { type: 'shield'; src: number; dst: number; amount: number }
   | { type: 'death'; dst: number }
   | { type: 'spawn'; dst: number }
-  /** เคลียร์เวฟแล้ว ทีมเริ่มเดินไปจุดถัดไป (round = เวฟที่กำลังจะเริ่ม เริ่มนับ 0) */
-  | { type: 'advance'; round: number; duration: number }
-  /** ถึงจุดถัดไป ศัตรูเวฟใหม่บุกเข้ามา */
-  | { type: 'round'; round: number }
   /** ศัตรูเริ่มร่ายสกิล (มีแถบร่าย) */
   | { type: 'castStart'; src: number; skill: string; label: string; castTime: number; interruptible: boolean; dst?: number }
   /** CAST_PROGRESS: every 25% of the cast */
@@ -68,7 +71,9 @@ export type BattleEvent =
   /** พยายามตัดแต่สกิลนี้ตัดไม่ได้ */
   | { type: 'immune'; src: number; dst: number; skill: string }
   /** เปลี่ยนเป้าโฟกัส (null = ยกเลิก; reason บอกว่ายกเลิกเพราะอะไร) */
-  | { type: 'focus'; dst: number | null; reason?: 'player' | 'dead' | 'advance' | 'end' };
+  | { type: 'focus'; dst: number | null; reason?: 'player' | 'dead' | 'advance' | 'end' }
+  /** Stage / Wave / transition events (PHASE_CHANGED, WAVE_CLEARED, ADVANCE_STARTED, HERO_REVIVED …) */
+  | StageEvent;
 
 /** เหตุผลที่ฮีโร่เลือกเป้าตอนนี้ (แสดงใต้รูปในแถบตัวละคร) */
 export type Intent = 'normal' | 'focus' | 'hold' | 'blocked' | 'heal' | 'interrupt' | 'taunted';
@@ -105,13 +110,30 @@ export interface BattleUnit {
   boss?: boolean;
   heroUid?: number;
   heroId?: string;
+  /** logical combat cell on the current encounter grid (column 0–15 × lane 0–2) */
   pos: Cell;
-  /** ตำแหน่งตั้งต้น (ทีมกลับมาจัดแถวตรงนี้ตอนเดินไปเวฟถัดไป) */
-  home: Cell;
+  /**
+   * continuous world position (x = world column, y = lane) — what the battlefield renders.
+   * During COMBAT it glides toward the logical cell; during transitions it is driven directly (advance / regroup).
+   */
+  x: number;
+  y: number;
   /** แนวรบตามฟอร์เมชัน (แถวหน้า/หลัง) ใช้เลือกเป้า */
   line: Line;
-  /** ศัตรู: มาจากเวฟไหน (เริ่มนับ 0) */
-  round: number;
+  /** wave this unit belongs to (0-based); -1 = not wave-bound (the player team) */
+  wave: number;
+  /** counts toward "wave cleared" (false = disposable summons / scenery) */
+  required: boolean;
+  /** logical life state (source of truth) — `alive` mirrors life === 'ALIVE' */
+  life: LifeState;
+  /** what it is doing now (debug / UI) */
+  activity: CombatActivity;
+  /** battlefield visual presence (renderer / hitbox / selection) — separate from the logical state */
+  visible: boolean;
+  diedOnWave: number | null;
+  revivedCount: number;
+  /** REVIVING: seconds until ALIVE (untargetable while materialising) */
+  reviveTimer: number;
   maxHp: number;
   hp: number;
   atk: number;
@@ -157,7 +179,7 @@ export interface BattleUnit {
   poisonTick: number;
   /** runtime buffs (base stats are never modified) */
   buffs: ActiveBuff[];
-  /** false once dead (future: untargetable phases) */
+  /** false while dead / reviving (future: untargetable phases) */
   targetable: boolean;
   /** cells — projectile collision */
   collisionRadius: number;
@@ -175,6 +197,8 @@ export interface BattleConfig {
   autoUlt?: boolean;
   /** data-driven monsters (default MONSTERS) — stage enemy ids are looked up here first */
   monsters?: Record<string, MonsterDefinition>;
+  /** override the stage's battle rules (tests / special modes) */
+  rules?: Partial<StageBattleRules>;
 }
 
 /** CAST_PROGRESS granularity */
@@ -272,26 +296,24 @@ export class BattleEngine {
   readonly monsterAI: MonsterController;
   private readonly monsterDefs: Record<string, MonsterDefinition>;
   private seq = 1;
-  /** เวลารวม (รวมช่วงเดินไปเวฟถัดไป) */
+  /** เวลารวม (รวมช่วงเปลี่ยนเวฟ) */
   time = 0;
   /** เวลาที่ต่อสู้จริง (ใช้กับเวลาจำกัดของด่าน) */
   fightTime = 0;
-  /** เวฟปัจจุบัน (เริ่มนับ 0) และจำนวนเวฟทั้งหมด */
-  round = 0;
-  readonly totalRounds: number;
-  /** เวลาที่ยังเหลือของช่วงเดินไปเวฟถัดไป (> 0 = กำลังเดิน) */
-  advancing = 0;
-  result: BattleResult | null = null;
+  /** Stage / Wave / transition state machine of this battle session */
+  readonly flow: StageFlow;
+  readonly rules: StageBattleRules;
+  private listeners: ((e: BattleEvent) => void)[] = [];
 
   private readonly rng: () => number;
   private readonly stage: StageDef;
   private readonly templates: Record<string, EnemyTemplate>;
-  private events: BattleEvent[] = [];
+  private events = new EventQueue(e => this.listeners.forEach(l => l(e)));
   /** การกระทำที่รอให้ท่าถึงเฟรม hit/move ก่อน (เรียงตามเวลาที่ใส่) */
   private pending: { at: number; fn: () => void }[] = [];
   private nextId = 1;
   private nextWaveAt: number;
-  private waveIndex = 0;
+  private reinforcementIndex = 0;
   private readonly enemyCap: number;
   /** STEP 9: เป้าโฟกัสที่ผู้เล่นเลือก (ศัตรู) — เป็นการเพิ่มลำดับความสำคัญ ไม่ใช่คำสั่งบังคับ */
   focusTargetId: number | null = null;
@@ -307,55 +329,167 @@ export class BattleEngine {
     this.monsterAI = new MonsterController(this.combatContext(), this.monsterDefs, MONSTER_SKILLS);
     this.nextWaveAt = cfg.stage.waveEvery ?? Infinity;
     this.enemyCap = cfg.stage.enemies.length;
-    this.totalRounds = cfg.stage.mode === 'eliminate' ? 1 + (cfg.stage.rounds?.length ?? 0) : 1;
+    this.rules = { ...resolveRules(cfg.stage), ...(cfg.rules ?? {}) };
+    this.flow = new StageFlow(this.stageHost(), cfg.stage, this.rules);
 
-    for (const spec of cfg.allies) this.addUnit('ally', spec);
-    for (const p of cfg.stage.enemies) this.spawnEnemy(p.enemy, p);
+    for (const spec of cfg.allies) {
+      const u = this.addUnit('ally', spec);
+      if (u) this.flow.assignPlayer(u, spec.pos.r, spec.pos.c);
+    }
+    this.flow.spawnWave(0, false);
+  }
+
+  // ---------------------------------------------------------------- stage API
+
+  get phase(): BattlePhase {
+    return this.flow.phase;
+  }
+  /** current wave (0-based) / number of waves */
+  get waveIndex(): number {
+    return this.flow.waveIndex;
+  }
+  get totalWaves(): number {
+    return this.flow.totalWaves;
+  }
+  get formation(): FormationRuntime {
+    return this.flow.formation;
+  }
+  /** world x of the camera (left edge of the encounter window) */
+  get cameraX(): number {
+    return this.flow.cameraX;
+  }
+  get result(): BattleResult | null {
+    return this.flow.outcome;
+  }
+  get stageResult(): StageResult | null {
+    return this.flow.stageResult;
+  }
+  /** a wave transition is running (no combat) */
+  get inTransition(): boolean {
+    const p = this.flow.phase;
+    return p === BattlePhase.WAVE_CLEAR || p === BattlePhase.ADVANCING || p === BattlePhase.REGROUPING || p === BattlePhase.NEXT_WAVE_READY || p === BattlePhase.WAVE_START;
+  }
+
+  /** generic resurrection command (skills, items, shrines, events …) */
+  reviveHero(cmd: ReviveHeroCommand): ReviveResult {
+    return this.flow.revive(cmd);
+  }
+
+  getAllPartyHeroes(): BattleUnit[] {
+    return getAllPartyHeroes(this.units);
+  }
+  getAliveHeroes(): BattleUnit[] {
+    return getAliveHeroes(this.units);
+  }
+  getDeadVisibleHeroes(): BattleUnit[] {
+    return getDeadVisibleHeroes(this.units);
+  }
+  getDeadHiddenHeroes(): BattleUnit[] {
+    return getDeadHiddenHeroes(this.units);
+  }
+  getActiveBattlefieldHeroes(): BattleUnit[] {
+    return getActiveBattlefieldHeroes(this.units);
+  }
+
+  /** subscribe to every event as it happens (UI / audio / camera / quests / analytics); returns unsubscribe */
+  subscribe(listener: (e: BattleEvent) => void): () => void {
+    this.listeners.push(listener);
+    return () => (this.listeners = this.listeners.filter(l => l !== listener));
   }
 
   /** ดึงเหตุการณ์ที่เกิดขึ้นตั้งแต่ครั้งก่อน (ใช้ทำแอนิเมชัน) */
   drainEvents(): BattleEvent[] {
-    const e = this.events;
-    this.events = [];
-    return e;
+    return this.events.drain();
   }
 
   alive(side: Side): BattleUnit[] {
     return this.units.filter(u => u.alive && u.side === side);
   }
 
-  /** ฮีโร่ของเราที่ล้มในการต่อสู้นี้ */
+  /** ฮีโร่ของเราที่ล้มในการต่อสู้นี้ (ยังตายอยู่) */
   fallenHeroUids(): number[] {
-    return this.units.filter(u => u.side === 'ally' && !u.alive && u.heroUid != null).map(u => u.heroUid!);
+    return this.units.filter(u => u.side === PLAYER_TEAM && !u.alive && u.life !== 'REVIVING' && u.heroUid != null).map(u => u.heroUid!);
   }
 
   step(dt: number): void {
     if (this.result) return;
     this.time += dt;
+    this.flow.update(dt);
+    if (this.flow.stageResult) this.flow.stageResult.battleDuration = this.time;
+  }
 
-    // กำลังเดินไปเวฟถัดไป: ไม่มีการต่อสู้ แค่นับเวลาถอยหลัง
-    if (this.advancing > 0) {
-      this.advancing -= dt;
-      if (this.advancing <= 0) this.startRound();
-      return;
-    }
-
+  /** one COMBAT tick: pending hits, projectiles, every unit's timers + AI, reinforcements, glide */
+  private combatStep(dt: number): void {
     this.runPending();
     this.updateProjectiles(dt);
-    if (this.checkEnd()) return;
     this.fightTime += dt;
-
+    // all units act; wave clear / wipe is evaluated by the flow after the whole tick (no update-order effects)
     for (const u of this.units) {
       if (!u.alive) continue;
       this.updateUnit(u, dt);
-      if (this.checkEnd()) return;
     }
-
     if (this.stage.mode === 'survive' && this.fightTime >= this.nextWaveAt) {
       this.nextWaveAt += this.stage.waveEvery!;
-      this.spawnWave();
+      this.spawnReinforcements();
     }
-    this.checkEnd();
+    this.glide(dt);
+  }
+
+  /** visual positions follow the logical cells continuously (no cell-centre locking on screen) */
+  private glide(dt: number): void {
+    const origin = this.flow.formation.originPosition;
+    for (const u of this.units) {
+      // dead units stop where they fell (movement cancelled)
+      if (!u.visible || (u.life !== 'ALIVE' && u.life !== 'REVIVING')) continue;
+      const tx = origin + u.pos.c;
+      const ty = u.pos.r;
+      const d = Math.hypot(tx - u.x, ty - u.y);
+      if (d < 1e-4) continue;
+      const step = Math.min(d, Math.max(u.moveSpeed, 1.5) * 1.15 * dt);
+      u.x += ((tx - u.x) / d) * step;
+      u.y += ((ty - u.y) / d) * step;
+    }
+  }
+
+  /** the StageHost the flow drives (the flow never runs AI; the engine never decides phases) */
+  private stageHost(): StageHost {
+    const self = this;
+    return {
+      units: this.units,
+      grid: this.grid,
+      get fightTime() {
+        return self.fightTime;
+      },
+      emit: e => self.events.push(e),
+      spawnEnemy: (id, cell) => {
+        const u = self.spawnEnemy(id, cell);
+        if (u && self.flow && self.flow.phase !== BattlePhase.PREPARATION) self.events.push({ type: 'spawn', dst: u.id });
+        return u;
+      },
+      combatStep: dt => self.combatStep(dt),
+      tickTimers: (u, dt, cooldowns, statuses) => self.tickTimers(u, dt, cooldowns, statuses, true),
+      runPending: () => self.runPending(),
+      quiesce: reason => self.quiesce(reason),
+      heal: (u, amount) => self.heal(u, amount),
+    };
+  }
+
+  /** drop everything in flight: pending hits, projectiles, casts, focus */
+  private quiesce(reason: 'advance' | 'end'): void {
+    this.pending = [];
+    this.projectiles.length = 0;
+    for (const u of this.units) {
+      if (u.casting) this.cancelCast(u, 'end');
+      u.castLock = 0;
+    }
+    this.clearFocus(reason);
+  }
+
+  /** mana (ultimate gauge) only grows in COMBAT unless the stage rules say otherwise */
+  private gainMana(u: BattleUnit, amount: number): void {
+    if (u.maxMana <= 0) return;
+    if (this.flow.phase !== BattlePhase.COMBAT && !this.rules.ultimateGaugeGenerationDuringTransition) return;
+    u.mana = Math.min(u.maxMana, u.mana + amount);
   }
 
   /** รันจนจบโดยไม่แสดงผล (ใช้จำลอง/ปรับสมดุล) */
@@ -414,8 +548,16 @@ export class BattleEngine {
       heroUid: spec.heroUid,
       heroId: spec.heroId,
       pos,
-      home: pos,
-      round: this.round,
+      x: (this.flow?.formation.originPosition ?? 0) + pos.c,
+      y: pos.r,
+      wave: side === PLAYER_TEAM ? -1 : this.flow?.waveIndex ?? 0,
+      required: true,
+      life: 'ALIVE',
+      activity: 'IDLE',
+      visible: true,
+      diedOnWave: null,
+      revivedCount: 0,
+      reviveTimer: 0,
       maxHp: s.hp,
       hp: s.hp,
       atk: s.atk,
@@ -514,37 +656,12 @@ export class BattleEngine {
     return u;
   }
 
-  /** เคลียร์เวฟแล้ว: ทีมที่รอดกลับไปจัดแถวที่ตำแหน่งตั้งต้น แล้วเดินหน้า */
-  private beginAdvance(): void {
-    this.clearFocus('advance');
-    this.round++;
-    this.advancing = ADVANCE_TIME;
-    // ดาเมจ/กระสุนที่ยังค้างอยู่ของเวฟที่แล้ว ทิ้งไป (ศัตรูตายหมดแล้ว)
-    this.pending = [];
-    this.projectiles.length = 0;
-    for (const u of this.alive('ally')) {
-      this.grid.move(u.id, u.pos, u.home);
-      u.pos = u.home;
-      u.targetId = null;
-      u.castLock = 0;
-    }
-    this.events.push({ type: 'advance', round: this.round, duration: ADVANCE_TIME });
-  }
-
-  private startRound(): void {
-    this.advancing = 0;
-    for (const p of this.stage.rounds?.[this.round - 1] ?? []) {
-      const u = this.spawnEnemy(p.enemy, p);
-      if (u) this.events.push({ type: 'spawn', dst: u.id });
-    }
-    this.events.push({ type: 'round', round: this.round });
-  }
-
-  private spawnWave(): void {
+  /** survive mode: explicitly configured reinforcements (part of the current wave) */
+  private spawnReinforcements(): void {
     const pool = this.stage.waves ?? this.stage.enemies.map(e => e.enemy);
     let need = this.enemyCap - this.alive('enemy').length;
     while (need-- > 0) {
-      const u = this.spawnEnemy(pool[this.waveIndex++ % pool.length]);
+      const u = this.spawnEnemy(pool[this.reinforcementIndex++ % pool.length]);
       if (u) this.events.push({ type: 'spawn', dst: u.id });
     }
   }
@@ -565,27 +682,39 @@ export class BattleEngine {
 
   // ---------------------------------------------------------------- per-unit logic
 
-  private updateUnit(u: BattleUnit, dt: number): void {
-    u.atkCd -= dt;
-    u.moveCd -= dt;
-    // คูลดาวน์ติดลบได้ = สกิลพร้อมมานานแค่ไหนแล้ว (ใช้ตัดสินว่ารอ AoE นานเกินไปหรือยัง)
-    u.cd1 = Math.max(-10, u.cd1 - dt);
-    u.cd2 = Math.max(-10, u.cd2 - dt);
-    if (u.thinkCd > 0) u.thinkCd -= dt;
-    for (const cs of u.castSkills) if (cs.cd > 0) cs.cd -= dt;
+  /**
+   * Timers of one unit. `cooldowns` = skill / attack cooldowns, `statuses` = buffs, debuffs, shields, poison …
+   * During wave transitions the flow calls this with the stage rules' flags (battle time keeps running).
+   */
+  private tickTimers(u: BattleUnit, dt: number, cooldowns: boolean, statuses: boolean, transition = false): void {
+    if (cooldowns) {
+      u.atkCd -= dt;
+      u.moveCd -= dt;
+      // คูลดาวน์ติดลบได้ = สกิลพร้อมมานานแค่ไหนแล้ว (ใช้ตัดสินว่ารอ AoE นานเกินไปหรือยัง)
+      u.cd1 = Math.max(-10, u.cd1 - dt);
+      u.cd2 = Math.max(-10, u.cd2 - dt);
+      if (u.thinkCd > 0) u.thinkCd -= dt;
+      for (const cs of u.castSkills) if (cs.cd > 0) cs.cd -= dt;
+    }
+    if (transition && u.castLock > 0) u.castLock = Math.max(0, u.castLock - dt);
+    if (!statuses) return;
     if (u.rage > 0 && (u.rage -= dt) <= 0) u.rageMul = 1;
     if (u.taunt > 0) u.taunt -= dt;
     if (u.shieldTime > 0 && (u.shieldTime -= dt) <= 0) u.shield = 0;
-    for (const b of tickBuffs(u, dt)) this.events.push({ type: 'buffEnd', dst: u.id, buff: b.def.id });
+    for (const b of tickBuffs(u, dt, transition)) this.events.push({ type: 'buffEnd', dst: u.id, buff: b.def.id });
     if (u.poisonTime > 0) {
       u.poisonTime -= dt;
       u.poisonTick += dt;
       if (u.poisonTick >= POISON_TICK || u.poisonTime <= 0) {
         this.applyDamage(u, Math.max(1, Math.round(u.poison * u.poisonTick)), false, true);
         u.poisonTick = 0;
-        if (!u.alive) return;
       }
     }
+  }
+
+  private updateUnit(u: BattleUnit, dt: number): void {
+    this.tickTimers(u, dt, true, true);
+    if (!u.alive) return;
     // data-driven monsters: shared state machine (targeting / movement / attack / cast from their definition)
     if (u.monster) {
       this.monsterAI.update(u, dt);
@@ -788,8 +917,7 @@ export class BattleEngine {
    * - สายประชิด: ใกล้ (≤ 2 ช่อง) หรือไม่มีศัตรูยืนขวางระหว่างทาง (คอลัมน์ระหว่างเรากับเป้า เลนติดกัน)
    */
   canEngage(u: BattleUnit, t: BattleUnit, foes = this.alive(t.side)): boolean {
-    if (!t.alive || !t.targetable || t.side === u.side || this.advancing > 0) return false;
-    if (t.side === 'enemy' && t.round !== this.round) return false;
+    if (!this.isValidTarget(u, t)) return false;
     const d = distance(u.pos, t.pos);
     // สายระยะไกล: ยิงถึงอยู่แล้ว หรือขยับขึ้นไม่เกิน 2 ช่องก็ยิงถึง (ขยับเพื่อหาระยะยิง ไม่วิ่งลุยเข้าไป)
     if (u.range >= 3) return d <= u.range + FOCUS_STEP_IN;
@@ -821,7 +949,7 @@ export class BattleEngine {
   private focusUnit(): BattleUnit | null {
     if (this.focusTargetId == null) return null;
     const t = this.units.find(x => x.id === this.focusTargetId);
-    if (t && t.alive && t.round === this.round) return t;
+    if (t && t.alive && t.visible && (t.wave < 0 || t.wave === this.flow.waveIndex)) return t;
     this.clearFocus(t && !t.alive ? 'dead' : 'advance');
     return null;
   }
@@ -885,7 +1013,7 @@ export class BattleEngine {
     this.events.push({ type: 'attack', src: u.id, dst: ally.id });
     this.later(tm.hit, u, () => {
       this.heal(ally, u.atk * 1.3, u);
-      u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
+      this.gainMana(u, MANA_PER_ATTACK);
     });
   }
 
@@ -1057,7 +1185,7 @@ export class BattleEngine {
     this.later(tm.hit, u, () => {
       const tt = this.liveTarget(u, t);
       if (!tt) return;
-      u.mana = Math.min(u.maxMana, u.mana + MANA_PER_ATTACK);
+      this.gainMana(u, MANA_PER_ATTACK);
       // สายระยะไกล: ปล่อยลูกธนู/ลูกแสงตรงเฟรม hit ดาเมจเข้าเมื่อถึงเป้า
       if (u.range > 1) this.shoot(u, tt, 1, 'attack');
       else this.damage(u, tt, 1);
@@ -1240,7 +1368,9 @@ export class BattleEngine {
         break;
       }
       case 'healer': {
-        const fallen = this.units.find(a => a.side === u.side && !a.alive && a !== u && a.round === u.round);
+        // a corpse on this battlefield first, then a hero lost in an earlier wave (DEAD_HIDDEN)
+        const dead = this.units.filter(a => a.side === u.side && a !== u && (a.life === 'DEAD_VISIBLE' || a.life === 'DEAD_HIDDEN'));
+        const fallen = dead.find(a => a.life === 'DEAD_VISIBLE') ?? dead[0];
         this.resurrect(u, fallen ?? null);
         break;
       }
@@ -1328,6 +1458,8 @@ export class BattleEngine {
     if (!cell) return;
     this.grid.move(u.id, u.pos, cell);
     u.pos = cell;
+    u.x = this.flow.formation.originPosition + cell.c;
+    u.y = cell.r;
     u.targetId = t.id;
     this.events.push({ type: 'blink', src: u.id });
   }
@@ -1350,18 +1482,8 @@ export class BattleEngine {
     this.later(tm.hit, u, () => {
       if (this.result) return;
       for (const a of this.alive(u.side)) this.heal(a, u.atk * ULT_HEAL_ATK + a.maxHp * ULT_HEAL_PCT, u);
-      if (!d || d.alive) {
-        this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
-        return;
-      }
-      d.alive = true;
-      d.hp = Math.round(d.maxHp * REVIVE_HP);
-      d.castLock = 0.5;
-      d.targetId = null;
-      d.poisonTime = 0;
-      this.grid.place(d.id, d.pos);
-      this.events.push({ type: 'impact', src: u.id, dst: d.id, kind: 'ult' });
-      this.events.push({ type: 'revive', src: u.id, dst: d.id, amount: d.hp });
+      const res = d ? this.reviveHero({ unitId: d.id, reviveHpPercent: REVIVE_HP, sourceUnitId: u.id, sourceId: `ult:${u.heroId ?? u.cls}` }) : null;
+      this.events.push({ type: 'impact', src: u.id, dst: res?.ok ? d!.id : undefined, kind: 'ult' });
     });
   }
 
@@ -1413,21 +1535,23 @@ export class BattleEngine {
     const amount = total - blocked;
     dst.shield -= blocked;
     dst.hp -= amount;
-    if (!poison && dst.maxMana > 0) dst.mana = Math.min(dst.maxMana, dst.mana + MANA_PER_HIT);
+    if (!poison) this.gainMana(dst, MANA_PER_HIT);
+    if (dst.side === PLAYER_TEAM) this.flow.damageTaken += amount;
     // hit reaction: heroes always flinch visually; monsters go through their anti stun-lock rule
     const hurt = !poison && dst.hp > 0 && (dst.monster ? this.monsterAI.onHit(dst) : true);
     this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked, hurt, ...(poison ? { poison } : {}) });
     if (dst.hp <= 0) {
+      // death: no targeting / moving / attacking / casting; channel + ult cancelled; out of the targeting pools
       dst.hp = 0;
       dst.alive = false;
       dst.targetable = false;
       this.cancelCast(dst, 'death');
       if (dst.monster) this.monsterAI.markDead(dst);
       if (dst.id === this.focusTargetId) this.clearFocus('dead');
-      dst.shield = 0;
-      dst.poisonTime = 0;
+      for (const o of this.units) if (o.targetId === dst.id) o.targetId = null;
       this.grid.remove(dst.id, dst.pos);
       this.events.push({ type: 'death', dst: dst.id });
+      this.flow.onDeath(dst);
     }
   }
 
@@ -1501,11 +1625,15 @@ export class BattleEngine {
 
   // ---------------------------------------------------------------- monster combat context
 
-  /** alive + targetable + on the battlefield (current wave) + not marching */
+  /**
+   * Target Resolver validity: ALIVE + targetable + hostile + visible on the battlefield + part of the current wave,
+   * and only while COMBAT runs. DEAD_VISIBLE / DEAD_HIDDEN / REVIVING are never valid.
+   */
   isValidTarget(u: BattleUnit, t: BattleUnit): boolean {
     return (
-      t.alive && t.targetable && t.side !== u.side && this.advancing <= 0 && Grid.inBounds(t.pos) &&
-      (t.side !== 'enemy' || t.round === this.round)
+      t.life === 'ALIVE' && t.alive && t.targetable && t.visible && t.side !== u.side &&
+      this.flow.phase === BattlePhase.COMBAT && Grid.inBounds(t.pos) &&
+      (t.wave < 0 || t.wave === this.flow.waveIndex)
     );
   }
 
@@ -1517,7 +1645,7 @@ export class BattleEngine {
       },
       unit: id => self.units.find(x => x.id === id),
       opponentsOf: u => self.units.filter(t => self.isValidTarget(u, t)),
-      alliesOf: u => self.units.filter(a => a.alive && a.side === u.side && (a.side !== 'enemy' || a.round === self.round)),
+      alliesOf: u => self.units.filter(a => a.alive && a.side === u.side && (a.wave < 0 || a.wave === self.flow.waveIndex)),
       isValidTarget: (u, t) => self.isValidTarget(u, t),
       stepToward: (u, target, goal) => {
         const step = nextStep(self.grid, u.pos, goal) ?? greedyStep(self.grid, u.pos, target);
@@ -1549,22 +1677,6 @@ export class BattleEngine {
       emit: e => self.events.push(e),
     };
   }
-
-  private checkEnd(): boolean {
-    if (this.result) return true;
-    if (!this.alive('ally').length) this.result = 'lose';
-    else if (this.stage.mode === 'eliminate' && !this.alive('enemy').length) {
-      if (this.round + 1 < this.totalRounds) this.beginAdvance();
-      else this.result = 'win';
-    } else if (this.stage.mode === 'survive' && this.fightTime >= this.stage.timeLimit) this.result = 'win';
-    else if (this.stage.mode === 'eliminate' && this.fightTime >= this.stage.timeLimit) this.result = 'timeout';
-    if (this.result) {
-      this.clearFocus('end');
-      for (const u of this.units) if (u.casting) this.cancelCast(u, 'end');
-      this.projectiles.length = 0;
-    }
-    return this.result !== null || this.advancing > 0;
-  }
 }
 
 /** distance from point (px,py) to segment (x0,y0)-(x1,y1) */
@@ -1573,4 +1685,22 @@ function segDist(x0: number, y0: number, x1: number, y1: number, px: number, py:
   const len2 = dx * dx + dy * dy;
   const t = len2 ? Math.max(0, Math.min(1, ((px - x0) * dx + (py - y0) * dy) / len2)) : 0;
   return Math.hypot(x0 + t * dx - px, y0 + t * dy - py);
+}
+
+/** event list that also notifies subscribers as events happen */
+class EventQueue {
+  private list: BattleEvent[] = [];
+  constructor(private readonly notify: (e: BattleEvent) => void) {}
+  push(...events: BattleEvent[]): number {
+    for (const e of events) {
+      this.list.push(e);
+      this.notify(e);
+    }
+    return this.list.length;
+  }
+  drain(): BattleEvent[] {
+    const out = this.list;
+    this.list = [];
+    return out;
+  }
 }

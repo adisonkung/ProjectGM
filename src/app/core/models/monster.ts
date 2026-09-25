@@ -125,6 +125,10 @@ export interface BuffDefinition {
   duration: number;
   stackPolicy: StackPolicy;
   modifiers: BuffModifiers;
+  /** keep this effect through death / revive (persistent injuries, stage-long modifiers). Default false = removed on death */
+  persistThroughDeath?: boolean;
+  /** freeze the timer during wave transitions (WAVE_CLEAR / ADVANCING / REGROUPING). Default false */
+  pauseDuringWaveTransition?: boolean;
 }
 
 /** Who a skill affects */

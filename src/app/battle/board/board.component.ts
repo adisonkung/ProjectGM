@@ -16,6 +16,7 @@ export interface UnitView {
   side: Side;
   name: string;
   cls: HeroClass;
+  /** screen position in cells (continuous): r = lane, c = column inside the camera window */
   r: number;
   c: number;
   hpPct: number;
@@ -23,6 +24,8 @@ export interface UnitView {
   /** โล่เทียบกับเลือดสูงสุด (%) */
   shieldPct: number;
   alive: boolean;
+  /** resurrection materialising (visible, untargetable) */
+  reviving?: boolean;
   taunt: boolean;
   star?: number;
   level?: number;
@@ -32,8 +35,6 @@ export interface UnitView {
   flip?: boolean;
   /** เพิ่งวาร์ป: ย้ายทันทีไม่ต้องเลื่อน แล้วค่อย ๆ ปรากฏ */
   blink?: boolean;
-  /** ศัตรูเวฟถัดไป: วิ่งเข้าจากขอบขวาตอนเกิด */
-  enter?: boolean;
   /** ผู้เล่นกดท่าไม้ตายแล้ว รอจังหวะร่าย */
   queued?: boolean;
   /** ศัตรูกำลังร่ายสกิล (แถบร่าย) */
@@ -92,6 +93,14 @@ export interface ProjectileView {
   flight: number;
 }
 
+/** debug world overlay (dev builds): formation anchors, zones, advance target, regroup radius — screen cells */
+export interface WorldDebug {
+  anchors: { x: number; y: number; team: 'ally' | 'enemy'; label: string; empty: boolean }[];
+  neutral: { x0: number; x1: number };
+  advanceTarget: number | null;
+  regroupRadius: number;
+}
+
 export interface AnimState {
   anim: SpriteAnim;
   key: number;
@@ -116,14 +125,16 @@ export class BoardComponent {
   readonly speed = input(1);
   /** แตะศัตรู (เลือกเพื่อโฟกัส) */
   readonly pick = output<number>();
-  /** ระยะที่ฉากเลื่อนไปแล้ว (1 = 1 จอ) */
+  /** camera x in cells (background parallax follows it continuously) */
   readonly scroll = input(0);
   /** ภาพพื้นหลังของด่าน */
   readonly background = input<BackgroundDef | null | undefined>(null);
-  /** กำลังเดินไปเวฟถัดไป: เวลาเดิน (ms) — 0 = ไม่ได้เดิน */
-  readonly marchMs = input(0);
   /** combat debug overlay (states, targets) */
   readonly debug = input(false);
+  /** debug: formation anchors / zones / regroup radius */
+  readonly world = input<WorldDebug | null>(null);
+  /** real ms between two snapshots (positions tween linearly over it) */
+  readonly tickMs = input(50);
   /** debug: lines from each monster to its target (board cell coordinates incl. scenery rows) */
   readonly targetLines = computed(() => {
     if (!this.debug()) return [];
@@ -135,8 +146,6 @@ export class BoardComponent {
         return { id: u.id, x1: u.c + 0.5, y1: u.r + SCENERY_ROWS + 0.5, x2: t.c + 0.5, y2: t.r + SCENERY_ROWS + 0.5 };
       });
   });
-  /** เวลาเลื่อนฉากล่าสุด คงไว้หลังเดินเสร็จ เพื่อไม่ให้ transition ถูกตัดกลางทาง */
-  readonly fieldMs = computed(() => this.marchMs() || 2400 / this.speed());
 
   readonly rows = BOARD_ROWS + SCENERY_ROWS;
   readonly cols = BOARD_COLS;
@@ -149,7 +158,7 @@ export class BoardComponent {
     const groups = new Map<number, UnitView[]>();
     for (const u of this.units()) {
       if (!u.alive) continue;
-      const k = u.r * BOARD_COLS + u.c;
+      const k = Math.round(u.r) * 1000 + Math.round(u.c);
       groups.set(k, [...(groups.get(k) ?? []), u]);
     }
     const out = new Map<number, [number, number, number]>();

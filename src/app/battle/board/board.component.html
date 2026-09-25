@@ -1,8 +1,20 @@
-<div class="board" [class.marching]="marchMs() > 0" [style.--march]="marchMs() + 'ms'" [style.--spd]="speed()" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 12 คอลัมน์ ฝั่งเราอยู่ซ้าย ศัตรูอยู่ขวา">
-  <app-field [scroll]="scroll()" [duration]="fieldMs()" [bg]="background()" />
+<div class="board" [style.--spd]="speed()" [style.--tick]="tickMs() + 'ms'" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 16 คอลัมน์ ฝั่งเราซ้าย โซนกลาง 4 คอลัมน์ ศัตรูขวา">
+  <app-field [scroll]="scroll()" [duration]="tickMs()" [bg]="background()" />
+
+  @if (world(); as w) {
+    <div class="dbg-world" aria-hidden="true">
+      <div class="dbg-neutral" [style.left]="'calc(var(--cell) * ' + w.neutral.x0 + ')'" [style.width]="'calc(var(--cell) * ' + (w.neutral.x1 - w.neutral.x0) + ')'"><span>NEUTRAL</span></div>
+      @if (w.advanceTarget != null) { <div class="dbg-adv" [style.left]="'calc(var(--cell) * ' + w.advanceTarget + ')'"><span>ADVANCE ▶</span></div> }
+      @for (a of w.anchors; track $index) {
+        <div class="dbg-anchor" [class.foe]="a.team === 'enemy'" [class.empty]="a.empty" [style.transform]="pos(a.y, a.x)" [style.--rad]="w.regroupRadius">
+          <i></i><span>{{ a.label }}</span>
+        </div>
+      }
+    </div>
+  }
 
   @for (u of units(); track u.id) {
-    <div class="unit" [class.enter]="!!u.enter" [class.dead]="!u.alive" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
+    <div class="unit" [class.dead]="!u.alive && !u.reviving" [class.reviving]="!!u.reviving" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
          [class.taunt]="u.taunt" [class.blink]="!!u.blink" [class.elite]="!!u.elite" [class.buffed]="!!u.buffed && u.alive"
          [style.--step]="(u.moveSec ?? 0.6) + 's'" [style.transform]="unitPos(u)" [style.z-index]="unitZ(u)"
          [class.pickable]="u.side === 'enemy' && u.alive" [attr.title]="u.side === 'enemy' ? u.name + ' — แตะเพื่อเลือก, แตะซ้ำเพื่อโฟกัส' : u.name" [attr.data-name]="u.name" (click)="u.side === 'enemy' && u.alive && pick.emit(u.id)">

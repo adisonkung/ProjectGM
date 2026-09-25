@@ -1,4 +1,4 @@
-import { distance, Grid, toBoard } from './grid';
+import { BOARD_COLS, distance, Grid, toBoard, zoneOf } from './grid';
 
 describe('Grid', () => {
   it('measures 8-direction distance', () => {
@@ -6,11 +6,13 @@ describe('Grid', () => {
   });
 
   it('maps each side to its own half of the board', () => {
-    // แนวนอน 3 เลน x 12: ฝั่งเราซ้าย (คอลัมน์ 0-5) ศัตรูขวา (6-11), r ในฝั่ง = ความลึก, c = เลน
+    // แนวนอน 3 เลน x 16: ฝั่งเราซ้าย (0-5) โซนกลาง (6-9) ศัตรูขวา (10-15), r ในฝั่ง = ความลึก, c = เลน
+    expect(BOARD_COLS).toBe(16);
     expect(toBoard('ally', { r: 0, c: 1 })).toEqual({ r: 1, c: 5 });
     expect(toBoard('ally', { r: 5, c: 0 })).toEqual({ r: 0, c: 0 });
-    expect(toBoard('enemy', { r: 0, c: 1 })).toEqual({ r: 1, c: 6 });
-    expect(toBoard('enemy', { r: 5, c: 2 })).toEqual({ r: 2, c: 11 });
+    expect(toBoard('enemy', { r: 0, c: 1 })).toEqual({ r: 1, c: 10 });
+    expect(toBoard('enemy', { r: 5, c: 2 })).toEqual({ r: 2, c: 15 });
+    expect([0, 5, 6, 9, 10, 15].map(c => zoneOf({ r: 0, c }))).toEqual(['ally', 'ally', 'neutral', 'neutral', 'enemy', 'enemy']);
   });
 
   it('tracks occupied cells', () => {

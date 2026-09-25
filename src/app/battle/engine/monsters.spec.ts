@@ -99,7 +99,8 @@ describe('Stage 1–3 monsters', () => {
     b.freeze();
     const tank = b.hero('Tank');
     let hpAtStart = -1;
-    b.run(0.6, () => {
+    // (16-column board: the slime first crosses the 4-column neutral zone)
+    b.run(4, () => {
       if (hpAtStart < 0 && b.of('attack').length) hpAtStart = tank.hp;
     });
     const atk = b.of('attack')[0];
@@ -142,7 +143,7 @@ describe('Stage 1–3 monsters', () => {
     const b = battle([hero('Tank', 'tank', 0, 1), hero('Healer', 'healer', 4, 1)], [mon('goblin_fighter', 0, 1), mon('goblin_archer', 3, 1)]);
     b.freeze();
     b.hero('Healer').hp = b.hero('Healer').maxHp * 0.5;
-    b.run(3);
+    b.run(7);
     const a = b.monsters('goblin_archer')[0];
     expect(a.monster!.currentTargetId).toBe(b.hero('Healer').id);
     expect(b.of('projectileHit').some(h => h.dst === b.hero('Healer').id)).toBeTrue();
@@ -182,7 +183,7 @@ describe('Stage 1–3 monsters', () => {
     const h = b.hero('Healer');
     let hpAtSpawn = -1;
     let flying = 0;
-    b.run(2, () => {
+    b.run(6, () => {
       if (hpAtSpawn < 0 && b.of('animEvent').some(x => x.event === 'PROJECTILE_SPAWN')) {
         hpAtSpawn = h.hp;
         flying = b.e.projectiles.length;
@@ -203,7 +204,7 @@ describe('Stage 1–3 monsters', () => {
     b.hero('Healer').hp = 1000;
     let firstHitAt = -1;
     let leftAfterHit = -1;
-    b.run(1.5, () => {
+    b.run(6, () => {
       if (firstHitAt < 0 && b.of('projectileHit').length) {
         firstHitAt = b.e.time;
         leftAfterHit = b.e.projectiles.length;
@@ -228,7 +229,7 @@ describe('Stage 1–3 monsters', () => {
   it('11. Wolf Bite damages only on its DAMAGE event', () => {
     const b = battle([hero('Tank', 'tank', 0, 1)], [mon('forest_wolf', 0, 1)]);
     b.freeze();
-    b.run(0.6);
+    b.run(4);
     const atk = b.of('attack')[0];
     const bite = b.of('animEvent').find(x => x.name === 'BITE_DAMAGE')!;
     const dmg = b.of('damage')[0];
@@ -417,7 +418,7 @@ describe('Stage 1–3 monsters', () => {
     b.run(0.2);
     for (const s of b.monsters('forest_slime')) b.kill(s);
     expect(() => b.run(20)).not.toThrow();
-    expect(b.of('advance').length).toBe(1);
+    expect(b.of('ADVANCE_STARTED').length).toBe(1);
     expect(b.e.result).toBe('win');
   });
 

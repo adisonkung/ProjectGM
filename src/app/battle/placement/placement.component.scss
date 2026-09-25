@@ -1,4 +1,4 @@
-:host { display: block; --cell: min(56px, calc((100vw - 32px) / 12)); }
+:host { display: block; --cell: min(56px, calc((100vw - 32px) / 16)); }
 .wrap { display: grid; gap: 10px; }
 
 .board {
@@ -66,3 +66,9 @@
   &.foe { border-color: #e3625a66; } }
 .lbl { position: absolute; top: 2px; transform: translateX(-50%); font: 700 9px var(--disp); letter-spacing: 0.12em;
   color: #fff; padding: 0 5px; border-radius: 4px; background: #0008; }
+
+.neutral {
+  position: absolute; top: 0; bottom: 0; border-inline: 1px dashed #ffffff30;
+  background: repeating-linear-gradient(135deg, #ffffff08 0 6px, transparent 6px 12px);
+  b { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); font: 700 9px var(--disp); letter-spacing: 0.15em; color: #fff8; }
+}

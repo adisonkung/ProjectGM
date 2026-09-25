@@ -38,19 +38,24 @@ describe('BattleEngine', () => {
     expect(new Set(start).size).toBe(start.length);
     while (!e.result) {
       e.step(0.05);
-      for (const u of e.units.filter(x => x.alive)) expect(e.grid.occupants(u.pos)).toContain(u.id);
+      // units stand on the combat grid while a wave is on (transitions move them freely in world space)
+      if (e.flow.gridActive()) for (const u of e.units.filter(x => x.alive)) expect(e.grid.occupants(u.pos)).toContain(u.id);
     }
   });
 
   it('tank alternates defense stance and shield charge', () => {
     const e = new BattleEngine({ allies: strongTeam, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 5 });
-    const kinds: string[] = [];
+    // per wave: cooldowns keep running through transitions, so a wave may open with either skill — then they alternate
+    const waves: string[][] = [[]];
     while (!e.result && e.time < 60) {
       e.step(0.05);
-      for (const ev of e.drainEvents()) if (ev.type === 'cast' && ev.src === 1 && ev.kind !== 'ult') kinds.push(ev.kind);
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'WAVE_STARTED' && ev.wave > 0) waves.push([]);
+        if (ev.type === 'cast' && ev.src === 1 && ev.kind !== 'ult') waves[waves.length - 1].push(ev.kind);
+      }
     }
-    expect(kinds.length).toBeGreaterThan(1);
-    kinds.forEach((k, i) => expect(k).toBe(i % 2 ? 'skill2' : 'skill'));
+    expect(waves.flat().length).toBeGreaterThan(1);
+    for (const kinds of waves) kinds.forEach((k, i) => i > 0 && expect(k).not.toBe(kinds[i - 1]));
   });
 
   it('lets several melee units stack on the same cell while fighting', () => {
@@ -130,7 +135,8 @@ describe('BattleEngine', () => {
     const casts: { kind: string; t: number }[] = [];
     while (!e.result && e.time < 60) {
       e.step(0.05);
-      for (const ev of e.drainEvents()) if (ev.type === 'cast' && ev.src === 1) casts.push({ kind: ev.kind, t: e.fightTime });
+      // battle time (cooldowns keep running during wave transitions)
+      for (const ev of e.drainEvents()) if (ev.type === 'cast' && ev.src === 1) casts.push({ kind: ev.kind, t: e.time });
     }
     const s1 = casts.filter(c => c.kind === 'skill').map(c => c.t);
     const s2 = casts.filter(c => c.kind === 'skill2').map(c => c.t);
@@ -148,8 +154,8 @@ describe('BattleEngine', () => {
     while (!e.result && e.time < 200 && after < 0) {
       e.step(0.05);
       for (const ev of e.drainEvents()) {
-        if (ev.type === 'advance') before = e.units[0].mana;
-        if (ev.type === 'round') after = e.units[0].mana;
+        if (ev.type === 'WAVE_CLEARED') before = e.units[0].mana;
+        if (ev.type === 'WAVE_STARTED' && ev.wave > 0) after = e.units[0].mana;
       }
     }
     expect(before).toBeGreaterThan(0);
@@ -228,41 +234,36 @@ describe('BattleEngine', () => {
     while (!e.result && e.time < 40) {
       e.step(0.05);
       for (const ev of e.drainEvents()) {
-        if (ev.type === 'revive') {
-          revives++;
-          revivedAlive = e.units.find(u => u.id === ev.dst)!.alive;
-        }
+        if (ev.type === 'revive') revives++;
+        // REVIVING (materialising, untargetable) → ALIVE
+        if (ev.type === 'HERO_REVIVED') revivedAlive ||= e.units.find(u => u.id === ev.unit)!.alive;
       }
     }
     expect(revives).toBeGreaterThan(0);
     expect(revivedAlive).toBeTrue();
   });
 
-  it('eliminate floors run 3 waves: advance, regroup at home, then the next wave spawns', () => {
+  it('eliminate floors run 3 waves: clear, advance, regroup at the moved anchors, then the next wave spawns', () => {
     const e = new BattleEngine({ allies: strongTeam, stage: STAGES[0], enemyTemplates: ENEMIES, seed: 11 });
-    expect(e.totalRounds).toBe(3);
+    expect(e.totalWaves).toBe(3);
     const seen: BattleEvent[] = [];
-    let regrouped = true;
     while (!e.result && e.time < 200) {
       e.step(0.05);
-      const evs = e.drainEvents();
-      seen.push(...evs);
-      if (evs.some(ev => ev.type === 'advance')) {
-        regrouped &&= e.alive('ally').every(u => u.pos.r === u.home.r && u.pos.c === u.home.c);
-      }
+      seen.push(...e.drainEvents());
     }
     expect(e.result).toBe('win');
-    expect(seen.filter(ev => ev.type === 'advance').map(ev => (ev as { round: number }).round)).toEqual([1, 2]);
-    expect(seen.filter(ev => ev.type === 'round').length).toBe(2);
-    expect(regrouped).toBeTrue();
-    expect(e.units.filter(u => u.side === 'enemy').map(u => u.round)).toContain(2);
-    // เวลาเดินไม่ถูกนับเป็นเวลาต่อสู้
-    expect(e.time - e.fightTime).toBeGreaterThanOrEqual(2 * 2.3);
+    expect(seen.filter(ev => ev.type === 'ADVANCE_STARTED').length).toBe(2);
+    expect(seen.filter(ev => ev.type === 'WAVE_STARTED').map(ev => (ev as { wave: number }).wave)).toEqual([0, 1, 2]);
+    expect(seen.filter(ev => ev.type === 'REGROUP_COMPLETED').length).toBe(2);
+    expect(e.units.filter(u => u.side === 'enemy').map(u => u.wave)).toContain(2);
+    expect(e.formation.originPosition).toBe(8);
+    // transitions are not fighting time
+    expect(e.time - e.fightTime).toBeGreaterThanOrEqual(2 * 2);
   });
 
   it('survive floors stay a single area', () => {
     const e = new BattleEngine({ allies: strongTeam, stage: STAGES[5], enemyTemplates: ENEMIES, seed: 3 });
-    expect(e.totalRounds).toBe(1);
+    expect(e.totalWaves).toBe(1);
   });
 
   // ------------------------------------------------------------ STEP 7 interrupt + STEP 8 formation

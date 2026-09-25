@@ -6,7 +6,7 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
  * ฉากหลังของสนามแบบพาราแลกซ์ (ด้านข้าง)
  * - ท้องฟ้า + ดวงจันทร์: นิ่ง
  * - เนินเขาไกล / แนวต้นไม้ / พื้นหญ้า + ของตกแต่ง: เลื่อนซ้ายด้วยความเร็วต่างกัน เมื่อ `scroll` เพิ่มขึ้น
- *   (scroll 1 หน่วย = ทีมเดินไปข้างหน้า 1 จอ) ใช้ตอนเคลียร์เวฟแล้วเดินไปเวฟถัดไป
+ *   (scroll = ตำแหน่งกล้องในโลก หน่วยเป็นช่อง — Advance Phase เลื่อนกล้องตามจุดกำเนิดฟอร์เมชันอย่างต่อเนื่อง)
  * ถ้าด่านมีภาพพื้นหลัง (`bg`) จะใช้ภาพแทน โดยตัดเป็น 2 ชั้นที่เส้น cut: ชั้นบนเลื่อน 0.4× ชั้นพื้นเลื่อน 1×
  * วางเป็นชั้นล่างสุดของกระดาน (absolute เต็มพื้นที่) ต้องมี CSS var --cell จากกระดาน
  */
@@ -35,7 +35,7 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
   `,
   styles: `
     :host { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-    .layers { position: absolute; inset: 0; --screen: calc(var(--cell) * 12); }
+    .layers { position: absolute; inset: 0; --screen: var(--cell); }
     .layers > div { position: absolute; left: 0; right: 0; }
     .sky {
       top: 0;
@@ -45,7 +45,7 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
     }
     .hills, .trees, .ground, .deco {
       background-repeat: repeat-x;
-      transition: background-position var(--dur, 0ms) cubic-bezier(0.45, 0, 0.3, 1);
+      transition: background-position var(--dur, 0ms) linear;
     }
     .hills {
       top: 0;
@@ -90,7 +90,7 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
     }
     .img {
       top: 0; background-repeat: repeat-x; image-rendering: pixelated;
-      transition: background-position var(--dur, 0ms) cubic-bezier(0.45, 0, 0.3, 1);
+      transition: background-position var(--dur, 0ms) linear;
     }
     .mid.faint { opacity: 0.25; }
     .tint { bottom: 0; background: linear-gradient(90deg, #5ec8e00c 50%, #e3625a0e 50%); }
@@ -101,9 +101,9 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
   `,
 })
 export class FieldComponent {
-  /** ระยะที่ทีมเดินไปแล้ว (หน่วย = 1 จอ) เพิ่มทีละ 1 ต่อเวฟ */
+  /** camera x in world cells (the party's formation origin) */
   readonly scroll = input(0);
-  /** เวลาเลื่อนฉาก (ms) */
+  /** tween time between two scroll values (ms) — one engine snapshot */
   readonly duration = input(0);
   /** ภาพพื้นหลังของด่าน (ไม่มี = วาดฉากด้วย CSS) */
   readonly bg = input<BackgroundDef | null | undefined>(null);

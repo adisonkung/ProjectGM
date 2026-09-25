@@ -28,11 +28,15 @@ export function applyBuff(u: Buffable, def: BuffDefinition, sourceId: number): '
   return 'applied';
 }
 
-/** Count buffs down; returns the ones that expired this tick (already removed) */
-export function tickBuffs(u: Buffable, dt: number): ActiveBuff[] {
+/**
+ * Count buffs down; returns the ones that expired this tick (already removed).
+ * `transition` = a wave transition is running: effects with pauseDuringWaveTransition keep their time.
+ */
+export function tickBuffs(u: Buffable, dt: number, transition = false): ActiveBuff[] {
   if (!u.buffs.length) return [];
   const expired: ActiveBuff[] = [];
   for (const b of u.buffs) {
+    if (transition && b.def.pauseDuringWaveTransition) continue;
     b.remaining -= dt;
     if (b.remaining <= 1e-9) expired.push(b);
   }

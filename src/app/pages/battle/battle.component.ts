@@ -5,9 +5,10 @@ import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
 import { power } from '../../core/rules/stats';
 import { TeamService } from '../../core/services/team.service';
-import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView } from '../../battle/board/board.component';
+import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView, WorldDebug } from '../../battle/board/board.component';
 import { projectileLife } from '../../battle/projectile/projectile.component';
-import { SCENERY_ROWS } from '../../battle/engine/grid';
+import { ENEMY_ZONE_START, SCENERY_ROWS, SIDE_DEPTH } from '../../battle/engine/grid';
+import { BattlePhase } from '../../battle/engine/stage/types';
 import { PartyBarComponent } from '../../battle/party-bar/party-bar.component';
 import { canInterrupt, SKILL_CD } from '../../core/data/classes';
 import { PlacementComponent } from '../../battle/placement/placement.component';
@@ -44,12 +45,18 @@ export class BattleComponent implements OnDestroy {
   readonly projectiles = signal<ProjectileView[]>([]);
   readonly anims = signal<Record<number, AnimState>>({});
   readonly simReport = signal<string | null>(null);
-  /** เวฟปัจจุบัน (เริ่ม 0) / ทั้งหมด */
-  readonly round = signal(0);
-  readonly totalRounds = signal(1);
-  /** ระยะที่ฉากเลื่อนไปแล้ว (1 = 1 จอ) และเวลาเลื่อน (ms, 0 = ไม่ได้เดินอยู่) */
+  /** เวฟปัจจุบัน (เริ่ม 0) / ทั้งหมด · ช่วงของการต่อสู้ (BattlePhase) */
+  readonly wave = signal(0);
+  readonly totalWaves = signal(1);
+  readonly phase = signal<BattlePhase>(BattlePhase.PREPARATION);
+  /** ตำแหน่งกล้องในโลก (ช่อง) — ฉากเลื่อนตามอย่างต่อเนื่องตอน Advance */
   readonly scroll = signal(0);
-  readonly marchMs = signal(0);
+  readonly tickMs = TICK * 1000;
+  /** debug: stage header + every hero (incl. DEAD_HIDDEN ones that aren't on the board) */
+  readonly stageDebug = signal<{ header: string; heroes: { id: number; lines: string[] }[] } | null>(null);
+  readonly worldDebug = signal<WorldDebug | null>(null);
+  /** สรุปผลด่าน (ฮีโร่ที่รอด/ล้ม/ถูกชุบ) */
+  readonly summary = signal<string | null>(null);
   /** ป้ายกลางจอ เช่น "เวฟ 2/3" */
   readonly banner = signal<string | null>(null);
   /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม */
@@ -137,11 +144,13 @@ export class BattleComponent implements OnDestroy {
       autoUlt: this.autoUlt(),
     });
     this.time.set(0);
-    this.round.set(0);
-    this.totalRounds.set(this.engine.totalRounds);
-    this.scroll.set(0);
-    this.marchMs.set(0);
+    this.wave.set(0);
+    this.totalWaves.set(this.engine.totalWaves);
+    this.phase.set(this.engine.phase);
+    this.scroll.set(this.engine.cameraX);
+    this.summary.set(null);
     this.banner.set(null);
+    this.lastX.clear();
     this.selectedId.set(null);
     this.focusId.set(null);
     this.facing.clear();
@@ -224,38 +233,59 @@ export class BattleComponent implements OnDestroy {
     for (let i = 0; i < this.speed() && !this.engine.result; i++) this.engine.step(TICK);
     this.handleEvents(this.engine.drainEvents());
     this.time.set(this.engine.fightTime);
-    // ระหว่างเดินไปเวฟถัดไป: เล่นท่าเดินต่อเนื่อง
-    if (this.engine.advancing > 0 && ++this.walkTick % 8 === 0) this.marchAnim();
+    this.phase.set(this.engine.phase);
+    this.scroll.set(this.engine.cameraX);
+    // outside combat (advance / regroup / enemies walking in): play the walk cycle for whoever is moving
+    if (this.engine.phase !== BattlePhase.COMBAT && ++this.walkTick % 8 === 0) this.marchAnim();
     this.snapshot();
     if (this.engine.result) {
       clearInterval(this.timer);
       this.running.set(false);
       this.result.set(this.engine.result);
+      const r = this.engine.stageResult;
+      if (r) {
+        const names = (ids: number[]) => this.engine.units.filter(u => u.side === 'ally' && ids.includes(u.heroUid ?? u.id)).map(u => u.name).join(', ') || '-';
+        this.summary.set(`เคลียร์ ${r.wavesCleared}/${r.totalWaves} เวฟ · รอด: ${names(r.survivingHeroIds)} · ล้ม: ${names(r.deadHeroIds)}${r.revivedHeroIds.length ? ' · ถูกชุบ: ' + names(r.revivedHeroIds) : ''} · ดาเมจที่รับ ${r.damageTaken}`);
+      }
     }
+  }
+
+  /** screen position (cells) of a unit: continuous world position minus the camera */
+  private screenOf(u: BattleUnit): { r: number; c: number } {
+    return { r: u.y, c: u.x - this.engine.cameraX };
   }
 
   private snapshot(): void {
     const e = this.engine;
     const byId = new Map(e.units.map(u => [u.id, u]));
+    const combat = e.phase === BattlePhase.COMBAT;
     for (const u of e.units) {
       const t = u.targetId != null ? byId.get(u.targetId) : undefined;
-      if (e.advancing > 0 && u.side === 'ally') this.facing.set(u.id, false);
+      const dx = u.x - (this.lastFacingX.get(u.id) ?? u.x);
+      this.lastFacingX.set(u.id, u.x);
+      // transitions: face where you walk (heroes default forward) · combat: face the target
+      if (!combat && Math.abs(dx) > 1e-3) this.facing.set(u.id, dx < 0);
+      else if (!combat && u.side === 'ally' && u.life === 'ALIVE' && e.phase !== BattlePhase.REGROUPING) this.facing.set(u.id, false);
       else if (t && t.pos.c !== u.pos.c) this.facing.set(u.id, t.pos.c < u.pos.c);
       else if (!this.facing.has(u.id)) this.facing.set(u.id, u.side === 'enemy');
     }
+    const dbg = this.debug() ? e.flow.debugInfo() : null;
+    this.stageDebug.set(dbg);
+    this.worldDebug.set(this.debug() ? this.buildWorldDebug() : null);
+    const heroDbg = new Map(dbg?.heroes.map(h => [h.id, h.lines]) ?? []);
     this.views.set(
-      // ศัตรูที่ล้มในเวฟก่อน ๆ ถูกทิ้งไว้ข้างหลังแล้ว ไม่ต้องแสดง
-      e.units.filter(u => u.alive || u.side === 'ally' || u.round === e.round).map(u => ({
+      // only what is physically on the battlefield: DEAD_HIDDEN heroes and old waves' corpses are not rendered
+      e.units.filter(u => u.visible).map(u => ({
         id: u.id,
         side: u.side,
         name: u.name,
         cls: u.cls,
-        r: u.pos.r,
-        c: u.pos.c,
+        ...this.screenOf(u),
         hpPct: (u.hp / u.maxHp) * 100,
         manaPct: u.maxMana > 0 ? (u.mana / u.maxMana) * 100 : 0,
         shieldPct: (u.shield / u.maxHp) * 100,
         alive: u.alive,
+        reviving: u.life === 'REVIVING',
         taunt: u.taunt > 0,
         star: u.star,
         level: u.level,
@@ -263,7 +293,6 @@ export class BattleComponent implements OnDestroy {
         boss: u.boss,
         flip: this.facing.get(u.id),
         blink: (this.blinkUntil.get(u.id) ?? 0) > this.engine.time,
-        enter: u.side === 'enemy' && u.round > 0,
         queued: u.ultQueued,
         focused: u.id === e.focusTargetId,
         selected: u.id === this.selectedId(),
@@ -278,7 +307,7 @@ export class BattleComponent implements OnDestroy {
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
         buffed: u.buffs.length > 0,
         icon: u.monster ? MONSTERS[u.monster.definitionId]?.animation.tokenIcon : undefined,
-        debug: this.debug() && u.monster ? this.debugLines(u, byId) : undefined,
+        debug: this.debug() ? (u.monster ? this.debugLines(u, byId) : heroDbg.get(u.id)) : undefined,
         targetId: u.targetId,
         line: u.line,
         interrupter: u.side === 'ally' && canInterrupt(u.cls, 'ult'),
@@ -316,10 +345,44 @@ export class BattleComponent implements OnDestroy {
   /** units whose last cast was interrupted (debug label) */
   private interrupted = new Set<number>();
 
+  /** last world x seen by the walk animation / facing (movement detection outside combat) */
+  private lastX = new Map<number, number>();
+  private lastFacingX = new Map<number, number>();
+
   private marchAnim(): void {
     const anims = { ...this.anims() };
-    for (const u of this.engine.alive('ally')) anims[u.id] = { anim: 'walk', key: ++this.animKey };
+    for (const u of this.engine.units) {
+      const moved = Math.abs(u.x - (this.lastX.get(u.id) ?? u.x)) > 0.02;
+      this.lastX.set(u.id, u.x);
+      if (u.alive && u.visible && moved) anims[u.id] = { anim: 'walk', key: ++this.animKey };
+    }
     this.anims.set(anims);
+  }
+
+  /** debug overlay in screen cells: anchors (both formations), neutral zone, advance target, regroup radius */
+  private buildWorldDebug(): WorldDebug {
+    const e = this.engine;
+    const cam = e.cameraX;
+    const f = e.flow;
+    const anchors: WorldDebug['anchors'] = [];
+    for (const [form, team] of [[f.formation, 'ally'], [f.enemyFormation, 'enemy']] as const) {
+      for (const s of form.slots) {
+        anchors.push({
+          x: form.originPosition + s.localOffset.x - cam,
+          y: s.localOffset.y,
+          team,
+          label: s.slotId.replace(/_\d+_\d+$/, '') + (s.activeOccupant == null ? ' ∅' : ''),
+          empty: s.activeOccupant == null,
+        });
+      }
+    }
+    const origin = f.formation.originPosition;
+    return {
+      anchors,
+      neutral: { x0: origin + SIDE_DEPTH - cam, x1: origin + ENEMY_ZONE_START - cam },
+      advanceTarget: e.phase === BattlePhase.ADVANCING ? origin + SIDE_DEPTH - cam : null,
+      regroupRadius: e.rules.regroupTolerance,
+    };
   }
 
   private showBanner(text: string, ms: number): void {
@@ -334,7 +397,7 @@ export class BattleComponent implements OnDestroy {
     const floats: FloatText[] = [];
     const fx: FxView[] = [];
     const unitOf = (id: number) => this.engine.units.find(u => u.id === id)!;
-    const posOf = (id: number) => unitOf(id).pos;
+    const posOf = (id: number) => this.screenOf(unitOf(id));
     const set = (id: number, anim: AnimState['anim'], extra: Partial<AnimState> = {}) => (anims[id] = { anim, key: ++this.animKey, ...extra });
     /** เอฟเฟกต์ของสกิลนี้ เล่นตอนเริ่มท่าหรือตอนโดน ตามที่ตั้งไว้ใน FX */
     const addFx = (src: number, dst: number | undefined, kind: SkillKind, when: 'cast' | 'impact') => {
@@ -352,19 +415,28 @@ export class BattleComponent implements OnDestroy {
 
     for (const e of events) {
       switch (e.type) {
-        case 'advance':
-          this.round.set(e.round);
-          this.marchMs.set((e.duration * 1000) / this.speed());
-          this.scroll.update(s => s + 1);
+        case 'WAVE_STARTED':
+          this.wave.set(e.wave);
+          if (e.wave > 0) this.showBanner(`เวฟ ${e.wave + 1}/${e.totalWaves} ศัตรูบุก!`, 1200);
+          break;
+        case 'WAVE_CLEARED':
+          if (!e.final) this.showBanner(`เคลียร์เวฟ ${e.wave + 1}/${e.totalWaves}!`, 900);
+          break;
+        case 'ADVANCE_STARTED':
           this.fx.set([]);
           this.floats.set([]);
           this.projectiles.set([]);
-          this.showBanner(`เคลียร์! เดินหน้าไปเวฟ ${e.round + 1}/${this.totalRounds()}`, e.duration * 1000);
-          for (const u of this.engine.alive('ally')) set(u.id, 'walk');
+          this.showBanner(`เดินหน้า… ไปเวฟ ${this.wave() + 2}/${this.totalWaves()}`, e.duration * 1000);
           break;
-        case 'round':
-          this.marchMs.set(0);
-          this.showBanner(`เวฟ ${e.round + 1}/${this.totalRounds()} ศัตรูบุก!`, 1200);
+        case 'REGROUP_STARTED':
+          this.fx.set([]);
+          this.projectiles.set([]);
+          break;
+        case 'HERO_HIDDEN_AFTER_DEATH':
+          this.castFx.delete(e.unit);
+          break;
+        case 'HERO_REVIVED':
+          set(e.unit, 'idle');
           break;
         case 'attack':
           set(e.src, 'attack');
@@ -405,7 +477,7 @@ export class BattleComponent implements OnDestroy {
           const src = unitOf(e.src);
           const name = SHEETS[src.sprite ?? '']?.projectile?.[e.kind] ?? CLASS_PROJECTILE[src.cls];
           if (!name || !FX[name]) break;
-          const p = src.pos, q = posOf(e.dst);
+          const p = posOf(e.src), q = posOf(e.dst);
           const to = { x: q.c, y: q.r + SCENERY_ROWS };
           // ตกจากฟ้า: เริ่มเหนือเป้า 3 ช่อง เยื้องมาทางฝั่งผู้ยิง
           const dir = src.side === 'ally' ? -1 : 1;

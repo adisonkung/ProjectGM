@@ -1,14 +1,20 @@
 import { Cell, Side } from '../../core/models/unit';
 
 /**
- * สนามรบแนวนอน 3 เลน x 12 คอลัมน์: ฝั่งเราอยู่ซ้าย (คอลัมน์ 0-5) ศัตรูอยู่ขวา (คอลัมน์ 6-11)
+ * สนามรบแนวนอน 3 เลน x 16 คอลัมน์ (พิกัดของ encounter ปัจจุบัน):
+ *   PLAYER FORMATION ZONE คอลัมน์ 0-5 · NEUTRAL / BATTLE ZONE คอลัมน์ 6-9 · ENEMY FORMATION ZONE คอลัมน์ 10-15
  * (หน้าจอวาดฉากเพิ่มด้านบนอีก SCENERY_ROWS แถวเพื่อความสูง แต่เอนจินไม่รู้จักแถวเหล่านั้น)
  * ตัวละครเป็นภาพด้านข้าง ฝั่งเราหันขวา ศัตรูหันซ้าย
+ * กริดใช้จัดฟอร์เมชัน/จุดเกิด/anchor และเป็นช่องตรรกะของการต่อสู้ ส่วนตำแหน่งที่แสดงผลเป็นพิกัดต่อเนื่อง (BattleUnit.x/y)
  */
 export const BOARD_ROWS = 3;
-export const BOARD_COLS = 12;
-/** ความลึกของแต่ละฝั่ง (จำนวนคอลัมน์ นับจากเส้นกลาง) */
+/** ความลึกของแต่ละฝั่ง (จำนวนคอลัมน์ของโซนฟอร์เมชัน) */
 export const SIDE_DEPTH = 6;
+/** โซนกลางระหว่างสองฝั่ง */
+export const NEUTRAL_COLS = 4;
+export const BOARD_COLS = SIDE_DEPTH * 2 + NEUTRAL_COLS;
+/** คอลัมน์แรกของโซนศัตรู */
+export const ENEMY_ZONE_START = SIDE_DEPTH + NEUTRAL_COLS;
 /** จำนวนเลน (แถว) ที่ยืนได้ */
 export const LANES = BOARD_ROWS;
 /** แถวฉากด้านบน (แสดงผลอย่างเดียว วางตัวไม่ได้) */
@@ -34,11 +40,14 @@ export const distance = (a: Cell, b: Cell) => Math.max(Math.abs(a.r - b.r), Math
 export function toBoard(side: Side, local: Cell): Cell {
   return side === 'ally'
     ? { r: local.c, c: SIDE_DEPTH - 1 - local.r }
-    : { r: local.c, c: SIDE_DEPTH + local.r };
+    : { r: local.c, c: ENEMY_ZONE_START + local.r };
 }
 
-/** ช่องนี้อยู่ฝั่งไหนของสนาม */
-export const sideOf = (cell: Cell): Side => (cell.c < SIDE_DEPTH ? 'ally' : 'enemy');
+export type Zone = 'ally' | 'neutral' | 'enemy';
+/** ช่องนี้อยู่โซนไหนของสนาม */
+export const zoneOf = (cell: Cell): Zone => (cell.c < SIDE_DEPTH ? 'ally' : cell.c < ENEMY_ZONE_START ? 'neutral' : 'enemy');
+/** ช่องนี้อยู่ครึ่งไหนของสนาม (โซนกลางแบ่งครึ่ง) */
+export const sideOf = (cell: Cell): Side => (cell.c < BOARD_COLS / 2 ? 'ally' : 'enemy');
 
 /** พิกัดในฝั่งอยู่ในขอบเขตไหม */
 export const validLocal = (p: Cell) => p.r >= 0 && p.r < SIDE_DEPTH && p.c >= 0 && p.c < LANES;

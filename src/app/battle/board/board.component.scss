@@ -1,6 +1,6 @@
 :host {
   display: block;
-  --cell: min(56px, calc((100vw - 32px) / 12));
+  --cell: min(56px, calc((100vw - 32px) / 16));
 }
 
 .board {
@@ -21,10 +21,10 @@
   top: 0;
   width: var(--cell);
   height: var(--cell);
-  // เดินต่อเนื่อง: ใช้เวลาใกล้ ๆ กับเวลาต่อก้าวของเอนจิน จะได้ไม่กระตุกหยุดทีละช่อง (--step = วิ/ก้าวของยูนิตนั้น)
-  transition: transform calc(var(--step, 0.6s) / var(--spd, 1)) linear;
+  // positions are continuous and come from the engine every tick → tween linearly over one tick
+  transition: transform var(--tick, 50ms) linear;
 }
-.float-wrap { --step: 0.6s; }
+.float-wrap { transition: none; }
 
 // elite: gold ground ring · howl-buffed: red pulsing aura
 .unit.elite::after {
@@ -57,8 +57,17 @@
 
 .unit.dead {
   opacity: 0;
-  transition: transform calc(0.6s / var(--spd, 1)) linear, opacity 0.6s ease 0.2s;
+  transition: transform var(--tick, 50ms) linear, opacity 0.6s ease 0.2s;
   &.has-sprite { opacity: 0.55; }
+}
+// resurrection: materialise (fade in + holy glow) while untargetable
+.unit.reviving {
+  animation: revive-in calc(0.75s / var(--spd, 1)) ease-out both;
+  filter: drop-shadow(0 0 8px #fff6d0) drop-shadow(0 0 3px var(--gold));
+}
+@keyframes revive-in {
+  0% { opacity: 0; filter: brightness(3) drop-shadow(0 0 14px #fff6d0); }
+  100% { opacity: 1; }
 }
 
 .unit.taunt::before {
@@ -162,9 +171,26 @@
   .float { animation-duration: 0.01ms; }
 }
 
-// เดินไปเวฟถัดไป: ทีมค่อย ๆ กลับเข้าแถวพร้อมฉากเลื่อน
-.marching .unit { transition: transform var(--march) cubic-bezier(0.45, 0, 0.3, 1); }
-// ศัตรูเวฟใหม่วิ่งเข้าจากขอบขวา
-.unit.enter { animation: charge calc(0.9s / var(--spd, 1)) cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-@keyframes charge { from { translate: 600% 0; } }
+// debug world overlay: formation anchors, neutral zone, advance target, regroup radius
+.dbg-world { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.dbg-neutral {
+  position: absolute; top: calc(var(--cell) * 2); bottom: 0; background: repeating-linear-gradient(135deg, #ffffff0a 0 6px, transparent 6px 12px);
+  border-inline: 1px dashed #ffffff40;
+  span { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); font: 700 8px var(--disp); letter-spacing: 0.15em; color: #fff9; }
+}
+.dbg-adv {
+  position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed var(--gold);
+  span { position: absolute; top: 4px; left: 4px; font: 700 9px var(--disp); color: var(--gold); white-space: nowrap; }
+}
+.dbg-anchor {
+  position: absolute; left: 0; top: 0; width: var(--cell); height: var(--cell); transition: transform var(--tick, 50ms) linear;
+  i {
+    position: absolute; left: 50%; top: 78%; width: calc(var(--cell) * var(--rad) * 2); height: calc(var(--cell) * var(--rad) * 0.9);
+    transform: translate(-50%, -50%); border-radius: 50%; border: 1.5px dashed #5ec8e0; background: #5ec8e014;
+  }
+  span { position: absolute; left: 50%; top: 88%; transform: translateX(-50%); font: 600 7px ui-monospace, monospace; color: #5ec8e0; white-space: nowrap; }
+  &.foe i { border-color: #ff7a6e; background: #ff7a6e10; }
+  &.foe span { color: #ff9a8e; }
+  &.empty i { border-style: dotted; opacity: 0.5; }
+}
 .unit.pickable { cursor: crosshair; }

@@ -1,4 +1,4 @@
-.lab { display: grid; gap: 14px; max-width: 720px; margin-inline: auto; }
+.lab { display: grid; gap: 14px; max-width: 900px; margin-inline: auto; }
 .head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
 h1 { font: 700 22px/1.2 var(--disp); margin: 0; }
 .sub { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
@@ -75,3 +75,12 @@ h1 { font: 700 22px/1.2 var(--disp); margin: 0; }
 
 .stage-name { font-size: 12px; color: var(--muted); }
 .chip.dbg { border-color: var(--cyan); color: var(--cyan); }
+
+.result .summary { display: block; margin-top: 4px; font: 500 12px var(--body, inherit); color: var(--muted); }
+// debug: stage phase + every hero's life state / slot / anchor distance (dev builds only)
+.stage-dbg {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px 10px; padding: 6px 8px; border-radius: 8px;
+  background: #000b; border: 1px solid #5ec8e055; font: 600 9px/1.3 ui-monospace, monospace; color: #cfe;
+  b { grid-column: 1 / -1; color: var(--gold); }
+  div { display: grid; }
+}
