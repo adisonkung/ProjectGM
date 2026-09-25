@@ -3,6 +3,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cd
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { CLASS_NAME } from '../../core/data/classes';
 import { enemyInfo } from '../../core/data/enemies';
+import { MockVisual, mockVisualOf } from '../../core/data/visuals';
 import { heroArt } from '../../core/data/hero-art';
 import { HeroClass, OwnedHero } from '../../core/models/hero';
 import { StageDef, wavesOf } from '../../core/models/stage';
@@ -24,7 +25,7 @@ interface AllyCell {
 interface EnemyCell {
   row: number;
   col: number;
-  enemy?: { name: string; cls: HeroClass; boss: boolean; sprite?: string };
+  enemy?: { name: string; cls: HeroClass; boss: boolean; sprite?: string; mock?: MockVisual };
 }
 
 /** ตำแหน่ง grid (เริ่มที่ 1) ของช่องในฝั่งนั้น */
@@ -123,7 +124,7 @@ export class PlacementComponent {
     for (const sp of st ? wavesOf(st)[0]?.spawns ?? [] : []) {
       const t = enemyInfo(sp.monsterId);
       const { depth, lane } = sp.formationSlot;
-      if (t) cells[depth * LANES + lane].enemy = { name: t.name, cls: t.cls, boss: t.boss || t.elite, sprite: t.sprite };
+      if (t) cells[depth * LANES + lane].enemy = { name: t.name, cls: t.cls, boss: t.boss || t.elite, sprite: t.sprite, mock: t.sprite ? undefined : mockVisualOf(t.visual) };
     }
     return cells;
   });

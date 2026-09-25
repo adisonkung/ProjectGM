@@ -1,3 +1,4 @@
+import { HeroClass } from '../../core/models/hero';
 import { TargetingConfig, TargetStrategy } from '../../core/models/monster';
 import { Cell } from '../../core/models/unit';
 import { distance, Line } from './grid';
@@ -9,6 +10,10 @@ export interface Targetable {
   hp: number;
   maxHp: number;
   line: Line;
+  /** DEF (LOWEST_EFFECTIVE_DEF) */
+  def?: number;
+  /** class (CLASS_PRIORITY) */
+  cls?: HeroClass;
 }
 
 const hpRatio = (t: Targetable) => (t.maxHp > 0 ? t.hp / t.maxHp : 0);
@@ -52,8 +57,11 @@ export const TARGET_STRATEGIES: Record<TargetStrategy, Strategy> = {
     return pick;
   },
 
-  LOWEST_HP_PCT: ({ from, candidates, attackRange, cfg, current }) => {
-    if (!candidates.length) return null;
+  LOWEST_HP_PCT: ({ from, candidates: all, attackRange, cfg, current }) => {
+    if (!all.length) return null;
+    // preferBackRow (Mist Wraith): the back row is the hunting ground while anyone stands there
+    const back = cfg.preferBackRow ? all.filter(t => t.line === 'back') : [];
+    const candidates = back.length ? back : all;
     const tol = cfg.similarHpTolerance ?? 0.05;
     const best = Math.min(...candidates.map(hpRatio));
     const similar = candidates.filter(t => hpRatio(t) <= best + tol + 1e-9);
@@ -63,6 +71,30 @@ export const TARGET_STRATEGIES: Record<TargetStrategy, Strategy> = {
     if (current && pool.includes(current)) return current;
     // everything in the pool is within `tol` of the lowest HP% → the nearest wins
     return [...pool].sort(byNearest(from))[0];
+  },
+
+  /** Forest Spirit: the softest armour (its defenseIgnore scales every DEF equally, so the order is plain DEF) → nearest */
+  LOWEST_EFFECTIVE_DEF: ({ from, candidates, current }) => {
+    if (!candidates.length) return null;
+    const def = (t: Targetable) => t.def ?? 0;
+    const low = Math.min(...candidates.map(def));
+    const pool = candidates.filter(t => def(t) <= low + 1e-9);
+    if (current && pool.includes(current)) return current;
+    return [...pool].sort(byNearest(from))[0];
+  },
+
+  /** divers (Shadow Panther): class order (healer > mage > archer …) → lowest HP% → nearest — ignores the frontline */
+  CLASS_PRIORITY: ({ from, candidates, cfg, current }) => {
+    if (!candidates.length) return null;
+    const order = cfg.classPriority ?? [];
+    const rank = (t: Targetable) => {
+      const i = t.cls ? order.indexOf(t.cls) : -1;
+      return i < 0 ? order.length : i;
+    };
+    const best = Math.min(...candidates.map(rank));
+    const pool = candidates.filter(t => rank(t) === best);
+    if (current && pool.includes(current)) return current;
+    return [...pool].sort((a, b) => hpRatio(a) - hpRatio(b) || byNearest(from)(a, b))[0];
   },
 };
 

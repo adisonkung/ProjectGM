@@ -8,6 +8,7 @@ import {
   SemanticEvent,
 } from '../models/monster';
 import { STATUS_EFFECTS } from './status-effects';
+import { STAGE4_10_MONSTERS, STAGE4_10_SKILLS } from './monsters-stage4-10';
 
 /**
  * Data-driven monsters — Normal Forest, Stage 1–3.
@@ -32,6 +33,10 @@ export const BUFFS: Record<string, BuffDefinition> = {
 // ------------------------------------------------------------------ projectiles
 
 export const PROJECTILES: Record<string, ProjectileDefinition> = {
+  spore_shot: { id: 'spore_shot', speed: 8, damageMultiplier: 1, damageType: 'MAGIC', collisionRadius: 0.25, maxLifetime: 2.5, hits: 'TARGET', fx: 'magic-bolt' },
+  spirit_bolt: { id: 'spirit_bolt', speed: 10, damageMultiplier: 1, damageType: 'MAGIC', collisionRadius: 0.25, maxLifetime: 2.5, hits: 'TARGET', fx: 'magic-bolt' },
+  hex_bolt: { id: 'hex_bolt', speed: 9, damageMultiplier: 1, damageType: 'MAGIC', collisionRadius: 0.25, maxLifetime: 2.5, hits: 'TARGET', fx: 'magic-bolt' },
+  dark_bolt: { id: 'dark_bolt', speed: 9, damageMultiplier: 1, damageType: 'MAGIC', collisionRadius: 0.25, maxLifetime: 2.5, hits: 'TARGET', fx: 'magic-bolt' },
   goblin_arrow: {
     id: 'goblin_arrow',
     speed: 10,
@@ -70,6 +75,7 @@ export const MONSTER_SKILLS: Record<string, MonsterSkillDefinition> = {
     recovery: 0.35,
     interruptRecovery: 0.6,
   },
+  ...STAGE4_10_SKILLS,
 };
 
 // ------------------------------------------------------------------ monsters
@@ -237,6 +243,9 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
       },
     },
   },
+
+  // ---- Stage 4–10 (mock visuals, data in monsters-stage4-10.ts)
+  ...STAGE4_10_MONSTERS,
 };
 
 // ------------------------------------------------------------------ helpers (pure)
@@ -269,7 +278,7 @@ export function attackEventName(def: MonsterDefinition): string {
  * - FX: starts early so that its activation frame is on screen exactly at castTime
  */
 export function castTimeline(skill: MonsterSkillDefinition, anim: AnimationConfig) {
-  const c = anim.clips[skill.clip];
+  const c = skill.clip ? anim.clips[skill.clip] : undefined;
   const startFrame = c?.events?.find(e => e.event === 'CAST_START')?.frame ?? 1;
   const activateFrame = c?.events?.find(e => e.event === 'SKILL_ACTIVATE')?.frame ?? c?.frames ?? 1;
   const perFrame = activateFrame > startFrame ? skill.castTime / (activateFrame - startFrame) : 0;

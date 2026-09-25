@@ -27,11 +27,11 @@ export interface SkillHost {
   /** arrival-based projectile: `onArrive` runs when it lands (even if the shooter died meanwhile) */
   shoot(u: BattleUnit, t: BattleUnit, slot: SkillSlot, sky: boolean, onArrive: () => void): void;
   /** one hit through DamageResolver (+ dodge); false = missed / target gone */
-  hit(src: BattleUnit, dst: BattleUnit, mul: number, o: { crit?: boolean; damageType?: DamageKind; sourceId: string }): boolean;
+  hit(src: BattleUnit, dst: BattleUnit, mul: number, o: { crit?: boolean; damageType?: DamageKind; sourceId: string; slot?: SkillSlot }): boolean;
   heal(dst: BattleUnit, amount: number, src: BattleUnit): void;
   applyStatus(dst: BattleUnit, statusId: string, src: BattleUnit, duration?: number): void;
-  /** dedicated interrupt: cancels an interruptible cast (emits CAST_INTERRUPTED / immune) */
-  interrupt(src: BattleUnit, dst: BattleUnit): void;
+  /** dedicated interrupt: cancels an interruptible cast (emits CAST_INTERRUPTED / immune); `breakPower` fills a Break Gauge */
+  interrupt(src: BattleUnit, dst: BattleUnit, breakPower?: number): void;
   knockback(src: BattleUnit, dst: BattleUnit, cells: number): void;
   shield(src: BattleUnit, dst: BattleUnit, amount: number, duration: number): void;
   revive(src: BattleUnit, dead: BattleUnit, hpPct: number): boolean;
@@ -45,6 +45,10 @@ export interface SkillHost {
 }
 
 const hpPct = (u: BattleUnit) => (u.maxHp > 0 ? u.hp / u.maxHp : 0);
+
+/** a cast that interrupt skills can stop: interruptible, or breakable through its Break Gauge (Forest Oblivion) */
+export const canStopCast = (d: { interruptible: boolean }): boolean =>
+  d.interruptible || ((d as { breakRequired?: number }).breakRequired ?? 0) > 0;
 const CRIT_CHANCE = 0.1;
 /** minimum skill lock so a skill never gets clipped by the next basic attack */
 const SKILL_LOCK = 0.4;
@@ -88,7 +92,7 @@ export class SkillSystem {
         const focus = this.h.focus(u);
         return (
           foes
-            .filter(f => f.casting?.def.interruptible && inRange(f))
+            .filter(f => f.casting && canStopCast(f.casting.def) && inRange(f))
             .sort((a, b) => Number(b === focus) - Number(a === focus) || a.casting!.left - b.casting!.left)[0] ?? null
         );
       }
@@ -212,7 +216,7 @@ export class SkillSystem {
   castThreat(u: BattleUnit, within: number): boolean {
     return (
       this.h.castersNextWave(u) ||
-      this.h.foes(u).some(f => f.casting?.def.interruptible || f.castSkills.some(cs => cs.def.interruptible && cs.cd <= within))
+      this.h.foes(u).some(f => (f.casting && canStopCast(f.casting.def)) || f.castSkills.some(cs => canStopCast(cs.def) && cs.cd <= within))
     );
   }
 
@@ -234,7 +238,7 @@ export class SkillSystem {
       if (s.ai?.tier !== 'INTERRUPT' || (slot === 'skill2' ? u.cd2 : u.cd1) > 0.5) continue;
       const range = this.rangeOf(u, s);
       const c = this.h.foes(u)
-        .filter(f => f.casting?.def.interruptible && distance(f.pos, u.pos) > range && distance(f.pos, u.pos) <= range + 3)
+        .filter(f => f.casting && canStopCast(f.casting.def) && distance(f.pos, u.pos) > range && distance(f.pos, u.pos) <= range + 3)
         .sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos))[0];
       if (c) return c;
     }
@@ -371,12 +375,12 @@ export class SkillSystem {
           const targets = e.area === 'ALL_ENEMIES' ? foes : resolveArea({ pattern: e.area, caster: u, primary: p, center: e.center, candidates: foes });
           hits = [];
           for (const f of targets) {
-            if (e.interrupt && f.casting) this.h.interrupt(u, f);
+            if (e.interrupt && f.casting) this.h.interrupt(u, f, e.breakPower);
             let mul = f === primary ? e.primary : (e.secondary ?? (e.area === 'SINGLE' ? 0 : e.primary));
             if (mul <= 0) continue;
             if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
             const crit = !!e.guaranteedCrit || this.h.rng() < CRIT_CHANCE;
-            if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id })) hits.push(f);
+            if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot })) hits.push(f);
           }
           if (slot === 'attack' && hits.length) this.h.basicGauge(u);
           break;
@@ -406,7 +410,7 @@ export class SkillSystem {
         case 'INTERRUPT': {
           const foes = this.h.foes(u);
           for (const f of resolveArea({ pattern: e.area, caster: u, primary: focusOf(primary), center: e.center, candidates: foes })) {
-            if (f.casting) this.h.interrupt(u, f);
+            if (f.casting) this.h.interrupt(u, f, e.breakPower);
           }
           break;
         }

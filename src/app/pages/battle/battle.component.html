@@ -29,7 +29,14 @@
     <app-placement [stage]="stage()" />
   } @else {
     <div class="stage-wrap">
-      <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
+      @if (bossBar(); as bb) {
+        <div class="boss-bar" [class.final]="bb.final" [class.enraged]="bb.enraged" role="status" aria-label="พลังชีวิตบอส">
+          <b>{{ bb.final ? '☠ ' : '' }}{{ bb.name }}</b>
+          <span class="bb-track"><i [style.width.%]="bb.hpPct"></i></span>
+          <small>{{ bb.hpPct.toFixed(0) }}%{{ bb.phase ? ' · ' + bb.phase : '' }}{{ bb.sealed ? ' · 🔒 ผนึก (ฆ่าวิญญาณหมอก)' : '' }}{{ bb.broken ? ' · 💥 BROKEN' : '' }}</small>
+        </div>
+      }
+      <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
                  [scroll]="scroll()" [tickMs]="tickMs" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
       @if (focusCard(); as f) {
         <div class="focus-card" [class.on]="f.isFocus" role="group" aria-label="เป้าหมาย">
@@ -49,7 +56,7 @@
           @for (c of casts(); track c.id) {
             <span class="alert" [class.hard]="!c.cast!.interruptible">
               ⚠ {{ c.cast!.label }} · {{ c.cast!.left.toFixed(1) }}s
-              <em>{{ c.cast!.interruptible ? 'ตัดได้ ⚡' : 'ตัดไม่ได้ — ตั้งรับ/ฮีล' }}</em>
+              <em>{{ c.cast!.interruptible ? 'ตัดได้ ⚡' : c.cast!.breakPct != null ? 'BREAK ได้ 💥 ' + c.cast!.breakPct!.toFixed(0) + '%' : 'ตัดไม่ได้ — ตั้งรับ/ฮีล' }}</em>
             </span>
           }
         </div>

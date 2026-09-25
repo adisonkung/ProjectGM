@@ -44,7 +44,7 @@ const tank: HeroKit = {
     target: 'CASTING_INTERRUPTIBLE', fallback: ['CURRENT'], movement: { type: 'CHARGE' },
     // interrupt → damage → knockback → stun
     effects: [
-      { type: 'DAMAGE', area: 'SINGLE', primary: 1.5, interrupt: true },
+      { type: 'DAMAGE', area: 'SINGLE', primary: 1.5, interrupt: true, breakPower: 60 },
       { type: 'KNOCKBACK', cells: 1 },
       { type: 'APPLY_STATUS', status: 'stun', to: 'PRIMARY', duration: 0.8 },
     ],
@@ -53,7 +53,7 @@ const tank: HeroKit = {
   ult: {
     id: 'holy_fortress', name: 'ป้อมปราการศักดิ์สิทธิ์', label: 'Holy Fortress', slot: 'ult', target: 'SELF',
     effects: [
-      { type: 'INTERRUPT', area: 'RADIUS_2', center: 'SELF' },
+      { type: 'INTERRUPT', area: 'RADIUS_2', center: 'SELF', breakPower: 70 },
       { type: 'SHIELD', selfPct: 0.3, allyPct: 0.15, duration: 6 },
       { type: 'APPLY_STATUS', status: 'taunted', to: 'AREA', area: 'RADIUS_2', center: 'SELF', team: 'ENEMY' },
       { type: 'APPLY_STATUS', status: 'taunt_guard', to: 'SELF' },
@@ -124,13 +124,13 @@ const archer: HeroKit = {
     // 1. interruptible caster in range · 2. a cluster (≥ 2 hit) · 3. current target
     id: 'arrow_rain', name: 'ห่าธนู', label: 'Arrow Rain', slot: 'skill2', cooldown: 11,
     target: 'CASTING_INTERRUPTIBLE', fallback: ['CLUSTER', 'CURRENT'], delivery: 'SKY',
-    effects: [{ type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 1.2, secondary: 1.2, interrupt: true }],
+    effects: [{ type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 1.2, secondary: 1.2, interrupt: true, breakPower: 40 }],
     ai: { tier: 'INTERRUPT', holdForInterrupt: 3 },
   },
   ult: {
     id: 'heavenly_arrow_rain', name: 'ฝนธนูสวรรค์', label: 'Heavenly Arrow Rain', slot: 'ult', range: Infinity,
     target: 'NEAREST_ENEMY', delivery: 'SKY',
-    effects: [{ type: 'DAMAGE', area: 'ALL_ENEMIES', primary: 1.3, secondary: 1.3, interrupt: true }],
+    effects: [{ type: 'DAMAGE', area: 'ALL_ENEMIES', primary: 1.3, secondary: 1.3, interrupt: true, breakPower: 60 }],
     ai: { tier: 'NORMAL' },
   },
 };

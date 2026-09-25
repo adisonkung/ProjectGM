@@ -1,8 +1,10 @@
 import { attackEventName, attackWindupOf, clipDuration, MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
-import { AttackDefinition, MonsterDefinition, MonsterSkillDefinition, SkillCondition } from '../../core/models/monster';
+import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SkillCondition } from '../../core/models/monster';
 import { Cell } from '../../core/models/unit';
 import type { BattleEvent, BattleUnit } from './battle-engine';
-import { buffRemaining, hasFlag, tauntSource } from './buffs';
+import { resolveArea } from './area';
+import { buffRemaining, hasFlag, hasStatus, tauntSource } from './buffs';
+import { effectiveAttack } from './damage-resolver';
 import { distance } from './grid';
 import { selectTarget } from './targeting';
 
@@ -42,6 +44,17 @@ export interface MonsterCombatState {
   /** RANGED_HOLD: currently closing in to preferredRange (hysteresis against jitter) */
   approaching: boolean;
   retreatSteps: number;
+  /** attack.onHitEveryN: consecutive successful hits on `targetId` */
+  hitStreak: { targetId: number | null; count: number };
+  /** boss phases: index of the next phase to enter (phases are entered in order, once each) */
+  phaseIndex: number;
+  /** boss phase modifiers of skill cooldowns (effective = override ?? base × scale) */
+  cooldownScale: number;
+  cooldownOverride: Record<string, number>;
+  /** active seal (Dark Mist Dominion): untargetable until these adds die; pulses meanwhile */
+  seal: { adds: number[]; pulseEvery: number; pulseAtkPct: number; pulseName: string; timer: number } | null;
+  /** SUMMON skills: ids of the units each skill summoned (maxActive counts the living ones) */
+  summons: Record<string, number[]>;
 }
 
 /** What the controller may ask of the battle (implemented by BattleEngine) */
@@ -61,13 +74,19 @@ export interface CombatContext {
   later(delay: number, u: BattleUnit, fn: () => void): void;
   meleeHit(u: BattleUnit, t: BattleUnit, attack: AttackDefinition): void;
   fireProjectile(u: BattleUnit, t: BattleUnit, attack: AttackDefinition): void;
-  /** generic cast system: CAST_STARTED … SKILL_ACTIVATED / CAST_INTERRUPTED */
-  startCast(u: BattleUnit, skill: MonsterSkillDefinition): void;
+  /** generic cast system: CAST_STARTED … SKILL_ACTIVATED / CAST_INTERRUPTED (`target` = aimed unit) */
+  startCast(u: BattleUnit, skill: MonsterSkillDefinition, target: BattleUnit | null): void;
   updateCast(u: BattleUnit, dt: number): void;
   emit(e: BattleEvent): void;
 }
 
 export const tagsOf = (u: BattleUnit): string[] => (u.monster ? (MONSTERS[u.monster.definitionId]?.tags ?? []) : []);
+
+/** boss / final boss / elite monster (or a legacy boss / elite token) */
+export const isBigMonster = (u: BattleUnit, defs: Record<string, MonsterDefinition> = MONSTERS): boolean => {
+  const r = u.monster ? defs[u.monster.definitionId]?.rank : undefined;
+  return r ? isBossRank(r) || r === 'ELITE' : !!u.boss || !!u.elite;
+};
 
 export class MonsterController {
   constructor(
@@ -99,6 +118,12 @@ export class MonsterController {
       animationState: 'idle',
       approaching: false,
       retreatSteps: 0,
+      hitStreak: { targetId: null, count: 0 },
+      phaseIndex: 0,
+      cooldownScale: 1,
+      cooldownOverride: {},
+      seal: null,
+      summons: {},
     };
   }
 
@@ -117,14 +142,16 @@ export class MonsterController {
     // skill cooldowns (u.castSkills) and u.moveCd are counted down by the engine's shared status tick
     s.thinkTimer -= dt;
 
-    // STUN (status) / external stagger (castLock): no actions; cancels a swing in progress.
-    // A stun does NOT cancel a cast — only a dedicated interrupt does.
+    // STUN / BROKEN (statuses) / external stagger (castLock): no actions; cancels a swing in progress.
+    // A stun does NOT cancel a cast — only a dedicated interrupt (or a Break) does.
     const stunned = hasFlag(u, 'stun');
-    if ((stunned || u.castLock > 0) && !u.casting) {
+    const broken = hasFlag(u, 'broken');
+    if ((stunned || broken || u.castLock > 0) && !u.casting) {
       if (u.castLock > 0) u.castLock -= dt;
       if (s.state === 'ATTACKING') s.attackToken++;
       if (s.state !== 'HURT') this.setState(s, 'HURT', 'hurt');
-      s.hurtTimer = Math.max(s.hurtTimer, u.castLock, stunned ? buffRemaining(u, 'stun') : 0, dt);
+      const held = u.buffs.filter(b => b.def.flags?.includes('stun') || b.def.flags?.includes('broken')).map(b => b.remaining);
+      s.hurtTimer = Math.max(s.hurtTimer, u.castLock, ...held, dt);
       return;
     }
 
@@ -298,41 +325,140 @@ export class MonsterController {
   // ------------------------------------------------------------------ skills
 
   private trySkill(u: BattleUnit, s: MonsterCombatState, def: MonsterDefinition): boolean {
-    for (const id of def.ai.skillPriority ?? def.skills) {
+    if (u.casting) return false;
+    // phase-unlocked skills (e.g. Forest Oblivion) are only in castSkills once their phase started
+    const order = def.ai.skillPriority ?? def.skills;
+    const ids = [...order, ...u.castSkills.map(c => c.def.id).filter(id => !order.includes(id))];
+    for (const id of ids) {
       const skill = this.skills[id];
       const cs = u.castSkills.find(c => c.def.id === id);
-      if (!skill || !cs || cs.cd > 0 || u.casting) continue;
+      if (!skill || !cs || cs.cd > 0) continue;
       if (!skill.conditions.every(c => this.conditionHolds(u, skill, c))) continue;
+      const aim = this.aimTarget(u, skill);
+      if (aim === null) continue;
       s.currentSkillId = id;
       s.castTimer = skill.castTime;
+      if (aim !== u && aim.pos.c !== u.pos.c) s.facingDirection = aim.pos.c < u.pos.c ? -1 : 1;
       this.setState(s, 'CASTING', 'cast');
-      this.ctx.startCast(u, skill);
+      this.ctx.startCast(u, skill, aim === u ? null : aim);
       return true;
     }
     return false;
   }
 
+  /** effective cooldown of a skill for this unit (boss phases may override / scale it) */
+  cooldownOf(u: BattleUnit, skill: { id: string; cooldown: number }): number {
+    const s = u.monster;
+    if (!s) return skill.cooldown;
+    return s.cooldownOverride[skill.id] ?? skill.cooldown * s.cooldownScale;
+  }
+
   private conditionHolds(u: BattleUnit, skill: MonsterSkillDefinition, c: SkillCondition): boolean {
+    const allies = () => this.ctx.alliesOf(u);
+    const pct = (a: BattleUnit) => (a.maxHp > 0 ? a.hp / a.maxHp : 0);
     switch (c.type) {
       case 'ALLY_TAG_ALIVE':
-        return this.ctx.alliesOf(u).filter(a => a !== u && tagsOf(a).includes(c.tag)).length >= c.min;
+        return allies().filter(a => a !== u && tagsOf(a).includes(c.tag)).length >= c.min;
       case 'ALLY_DEFINITION_ALIVE':
-        return this.ctx.alliesOf(u).filter(a => a !== u && a.monster?.definitionId === c.monsterId).length >= c.min;
+        return allies().filter(a => a !== u && a.monster?.definitionId === c.monsterId).length >= c.min;
       case 'TARGETS_NEED_BUFF':
         return this.skillTargets(u, skill).some(t => buffRemaining(t, c.buffId) < c.refreshBelow);
       case 'ENEMY_WITHIN':
         return this.ctx.opponentsOf(u).some(t => distance(t.pos, u.pos) <= c.range);
+      case 'ALLIES_BELOW':
+        return allies().filter(a => pct(a) < c.pct).length >= c.count;
+      case 'ELITE_ALLY_BELOW':
+        return allies().some(a => isBigMonster(a, this.defs) && pct(a) < c.pct);
+      case 'ANY_ALLY_BELOW':
+        return allies().some(a => pct(a) < c.pct);
+      case 'ANY_OF':
+        return c.of.some(x => this.conditionHolds(u, skill, x));
+      case 'SUMMON_SLOTS_FREE': {
+        const eff = skill.effects.find(e => e.type === 'SUMMON');
+        if (!eff || eff.type !== 'SUMMON') return false;
+        return this.liveSummons(u, skill.id).length < eff.maxActive;
+      }
+      case 'SELF_LACKS_STATUS':
+        return !hasStatus(u, c.status);
+      case 'HEROES_NEED_STATUS':
+        return this.ctx.opponentsOf(u).some(h => buffRemaining(h, c.status) <= c.refreshBelow);
     }
   }
 
-  /** Units a skill applies to (evaluated at activation, so wolves that died during the cast are skipped) */
-  skillTargets(u: BattleUnit, skill: MonsterSkillDefinition): BattleUnit[] {
+  /** living units summoned by `skillId` of this monster */
+  liveSummons(u: BattleUnit, skillId: string): BattleUnit[] {
+    const ids = u.monster?.summons[skillId] ?? [];
+    return ids.map(id => this.ctx.unit(id)).filter((x): x is BattleUnit => !!x && x.alive);
+  }
+
+  /**
+   * The unit a skill is aimed at when the cast starts: `u` itself for self / team-wide skills,
+   * null = no valid aim (the skill is skipped for now).
+   */
+  aimTarget(u: BattleUnit, skill: MonsterSkillDefinition): BattleUnit | null {
+    const sel = skill.target;
+    const range = skill.range ?? Infinity;
+    const heroes = this.ctx.opponentsOf(u).filter(h => distance(h.pos, u.pos) <= range);
+    const pct = (a: BattleUnit) => (a.maxHp > 0 ? a.hp / a.maxHp : 0);
+    const near = (a: BattleUnit, b: BattleUnit) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id;
+    const current = () => {
+      const t = u.monster?.currentTargetId != null ? this.ctx.unit(u.monster.currentTargetId) : undefined;
+      return t && this.ctx.isValidTarget(u, t) && distance(t.pos, u.pos) <= range ? t : null;
+    };
+    switch (sel.type) {
+      case 'SELF':
+      case 'ALLIES_WITH_TAG':
+      case 'ALL_ALLIES':
+      case 'ALL_HEROES':
+        return u;
+      case 'CURRENT_TARGET':
+        return current() ?? [...heroes].sort(near)[0] ?? null;
+      case 'LOWEST_HP_ALLY': {
+        const hurt = this.ctx.alliesOf(u).filter(a => a.hp < a.maxHp);
+        const big = sel.priorityBelow != null ? hurt.filter(a => isBigMonster(a, this.defs) && pct(a) < sel.priorityBelow!) : [];
+        const pool = big.length ? big : hurt;
+        return [...pool].sort((a, b) => pct(a) - pct(b) || a.id - b.id)[0] ?? null;
+      }
+      case 'ALLY_DEFINITION_HIGHEST_HP':
+        return this.ctx.alliesOf(u).filter(a => a !== u && a.monster?.definitionId === sel.monsterId).sort((a, b) => b.hp - a.hp || a.id - b.id)[0] ?? null;
+      case 'HERO_CLUSTER': {
+        const all = this.ctx.opponentsOf(u);
+        const score = (h: BattleUnit) => resolveArea({ pattern: sel.area, caster: u, primary: h, center: 'TARGET', candidates: all }).length;
+        const best = [...heroes].sort((a, b) => score(b) - score(a) || near(a, b))[0];
+        if (best && score(best) >= sel.min) return best;
+        return current() ?? best ?? null;
+      }
+      case 'HERO_PRIORITY': {
+        const rank = (h: BattleUnit) => {
+          const i = sel.classes.indexOf(h.cls);
+          return i < 0 ? sel.classes.length : i;
+        };
+        const back = heroes.filter(h => h.line === 'back');
+        const pool = back.length ? back : heroes; // backRowOnly: back row first, then anyone in range
+        return [...pool].sort((a, b) => rank(a) - rank(b) || pct(a) - pct(b) || near(a, b))[0] ?? null;
+      }
+      case 'HIGHEST_ATK_HERO':
+        return [...heroes].sort((a, b) => effectiveAttack(b) - effectiveAttack(a) || near(a, b))[0] ?? null;
+    }
+  }
+
+  /**
+   * Units a team-wide skill applies to (evaluated at activation, so units that died during the cast are skipped).
+   * Aimed skills return their aim (`aimed`, re-validated by the engine).
+   */
+  skillTargets(u: BattleUnit, skill: MonsterSkillDefinition, aimed: BattleUnit | null = null): BattleUnit[] {
     const sel = skill.target;
     switch (sel.type) {
       case 'SELF':
         return u.alive ? [u] : [];
       case 'ALLIES_WITH_TAG':
         return this.ctx.alliesOf(u).filter(a => tagsOf(a).includes(sel.tag) && (sel.includeSelf || a !== u));
+      case 'ALL_ALLIES':
+        return this.ctx.alliesOf(u);
+      case 'ALL_HEROES':
+        return this.ctx.opponentsOf(u);
+      default:
+        return aimed && aimed.alive ? [aimed] : [];
     }
   }
 

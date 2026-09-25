@@ -46,3 +46,23 @@
     stroke-linejoin: round;
   }
 }
+
+/* ---- mock visuals (monsters without art): CSS shapes, facing = eye side */
+.mock {
+  position: absolute; left: 50%; bottom: 8%; width: calc(60% * var(--ms, 1)); aspect-ratio: 1;
+  transform: translateX(-50%); display: grid; place-items: center;
+  filter: drop-shadow(0 3px 2px #0008);
+  .body { position: absolute; inset: 0; background: var(--mc); border: 2px solid var(--ma); }
+  b { position: relative; font: 700 calc(14px * var(--ms, 1)) var(--disp, sans-serif); color: var(--ma); text-shadow: 0 1px 2px #000; }
+  .eye { position: absolute; width: 14%; aspect-ratio: 1; border-radius: 50%; background: var(--ma); top: 30%; right: 18%; box-shadow: 0 0 6px var(--ma); }
+  &.flip .eye { right: auto; left: 18%; }
+  &.circle .body, &.wisp .body { border-radius: 50%; }
+  &.wisp .body { border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; box-shadow: 0 0 14px var(--mc); }
+  &.cap .body { border-radius: 50% 50% 12% 12% / 70% 70% 12% 12%; }
+  &.diamond .body { transform: rotate(45deg) scale(0.78); border-radius: 18%; }
+  &.square .body { border-radius: 14%; }
+  &.triangle .body { clip-path: polygon(50% 0, 100% 100%, 0 100%); border: 0; background: linear-gradient(var(--mc), var(--mc)) padding-box; }
+  &.triangle b { margin-top: 30%; }
+  &.hex .body { clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); border: 0; box-shadow: inset 0 0 0 3px var(--ma); }
+  &.ghost .body { opacity: 0.72; }
+}

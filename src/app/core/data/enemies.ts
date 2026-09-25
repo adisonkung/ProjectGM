@@ -1,4 +1,5 @@
 import { EnemyTemplate } from '../models/stage';
+import { isBossRank } from '../models/monster';
 import { MONSTERS } from './monsters';
 
 export const ENEMIES: Record<string, EnemyTemplate> = {
@@ -19,11 +20,14 @@ export interface EnemyInfo {
   boss: boolean;
   elite: boolean;
   sprite?: string;
+  /** mock visual id (core/data/visuals.ts) for monsters without art */
+  visual?: string;
+  rank?: string;
 }
 
 export function enemyInfo(id: string): EnemyInfo | undefined {
   const m = MONSTERS[id];
-  if (m) return { name: m.name, cls: m.displayClass, boss: m.rank === 'BOSS', elite: m.rank === 'ELITE', sprite: m.animation.sheet };
+  if (m) return { name: m.name, cls: m.displayClass, boss: isBossRank(m.rank), elite: m.rank === 'ELITE', sprite: m.animation.sheet, visual: m.visual, rank: m.rank };
   const t = ENEMIES[id];
   return t ? { name: t.name, cls: t.cls, boss: !!t.boss, elite: false, sprite: t.sprite } : undefined;
 }

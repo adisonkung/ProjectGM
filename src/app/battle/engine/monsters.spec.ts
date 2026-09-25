@@ -62,9 +62,10 @@ const targetSwitches = (seq: (number | null)[]) => seq.filter((v, i) => i > 0 &&
 
 describe('Forest monster data', () => {
   it('defines the Stage 1–3 roster with static, reusable definitions', () => {
-    expect(Object.keys(MONSTERS)).toEqual(['forest_slime', 'goblin_fighter', 'goblin_archer', 'forest_wolf', 'alpha_wolf']);
+    const stage13 = ['forest_slime', 'goblin_fighter', 'goblin_archer', 'forest_wolf', 'alpha_wolf'];
+    expect(Object.keys(MONSTERS).slice(0, 5)).toEqual(stage13);
     expect(MONSTERS['alpha_wolf'].rank).toBe('ELITE');
-    for (const m of Object.values(MONSTERS)) {
+    for (const m of stage13.map(id => MONSTERS[id])) {
       // stat windup must match the semantic animation event (single source of truth for timing)
       expect(attackWindupOf(m)).toBeCloseTo(m.stats.attackWindup, 5);
       expect(m.attack.damageType).toBe('PHYSICAL');

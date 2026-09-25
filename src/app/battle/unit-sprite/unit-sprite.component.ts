@@ -1,5 +1,6 @@
 import { Component, ElementRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { ANIM_FALLBACK, FRAME_MS, IDLE_FRAME_MS, SHEETS, SheetDef, SpriteAnim } from '../../core/data/sprites';
+import { MockVisual } from '../../core/data/visuals';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 
@@ -34,6 +35,8 @@ export class UnitSpriteComponent {
   readonly boss = input(false);
   /** token icon override (e.g. 'wolf'); default = class icon */
   readonly icon = input<string | undefined>(undefined);
+  /** placeholder shape for monsters without art (core/data/visuals.ts) */
+  readonly mock = input<MockVisual | undefined>(undefined);
   readonly anim = input<SpriteAnim>('idle');
   /** เปลี่ยนค่านี้เพื่อสั่งเล่นท่าเดิมซ้ำ */
   readonly animKey = input(0);

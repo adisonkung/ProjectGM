@@ -7,6 +7,8 @@ export interface CastView {
   pct: number;
   left: number;
   interruptible: boolean;
+  /** breakable cast: Break Gauge fill 0–100 */
+  breakPct?: number;
 }
 
 /** แถบร่ายสกิลของศัตรูเหนือหัว: ⚠ ชื่อ + แถบ + วินาทีที่เหลือ (ตัดไม่ได้ = กรอบแดง UNINTERRUPTIBLE) */
@@ -16,7 +18,12 @@ export interface CastView {
     <div class="cast" [class.hard]="!cast().interruptible" role="status">
       <b>⚠ {{ cast().label }}</b>
       <span class="track"><i [style.width.%]="cast().pct"></i></span>
-      <small>{{ cast().left.toFixed(1) }}s{{ cast().interruptible ? '' : ' · UNINTERRUPTIBLE' }}</small>
+      @if (cast().breakPct != null) {
+        <span class="track brk" title="Break Gauge"><i [style.width.%]="cast().breakPct"></i></span>
+        <small>{{ cast().left.toFixed(1) }}s · BREAK {{ cast().breakPct!.toFixed(0) }}%</small>
+      } @else {
+        <small>{{ cast().left.toFixed(1) }}s{{ cast().interruptible ? '' : ' · UNINTERRUPTIBLE' }}</small>
+      }
     </div>
   `,
   styles: `
@@ -30,6 +37,7 @@ export interface CastView {
     small { font: 600 9px var(--disp); color: var(--text); white-space: nowrap; }
     .track { display: block; width: 64px; height: 5px; border-radius: 3px; background: #0009; overflow: hidden; }
     i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), #fff3c4); }
+    .brk { width: 64px; i { background: linear-gradient(90deg, #ff8a2a, #ffe08a) !important; } }
     .hard { border-color: var(--danger); box-shadow: 0 0 10px #e3625a88; b { color: var(--danger); } i { background: var(--danger); } }
     @keyframes blink { to { box-shadow: 0 0 16px #f0b54a; } }
     @media (prefers-reduced-motion: reduce) { .cast { animation: none; } }

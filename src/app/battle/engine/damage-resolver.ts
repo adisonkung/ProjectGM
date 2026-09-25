@@ -5,6 +5,8 @@ import { attackModifier, Buffable, modifier } from './buffs';
 export interface DamageActor extends Buffable {
   id: number;
   atk: number;
+  /** fraction of the target's DEF ignored (Forest Spirit 0.2) */
+  defenseIgnore?: number;
 }
 
 export interface DamageTaker extends Buffable {
@@ -47,7 +49,7 @@ export const CRIT_MULTIPLIER = 1.5;
  * Centralized damage formula (every hit of every unit goes through here).
  *   raw = (baseDamage ?? effectiveAttack × multiplier) × outgoing damage mods (Blood Rage) × variance (±10%) × crit (×1.5)
  *         × incoming damage-taken mods (Taunt guard ×0.60)
- *   mitigation = 100 / (100 + defense)       (PHYSICAL: def · MAGIC: magicDefense ?? def · TRUE: none)
+ *   mitigation = 100 / (100 + defense × (1 − attacker.defenseIgnore))   (PHYSICAL: def · MAGIC: magicDefense ?? def · TRUE: none)
  *   final = max(1, round(raw × mitigation))
  */
 export const DamageResolver = {
@@ -59,7 +61,7 @@ export const DamageResolver = {
     raw *= modifier(req.target, 'damageTakenMultiplier');
     const defense =
       req.damageType === 'TRUE' ? 0 : req.damageType === 'MAGIC' ? (req.target.magicDefense ?? req.target.def) : req.target.def;
-    const mitigation = 100 / (100 + defense);
+    const mitigation = 100 / (100 + defense * (1 - (req.attacker.defenseIgnore ?? 0)));
     return { amount: Math.max(1, Math.round(raw * mitigation)), crit, damageType: req.damageType, sourceId: req.sourceId };
   },
 };

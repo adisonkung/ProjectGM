@@ -5,7 +5,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
 import { power } from '../../core/rules/stats';
 import { TeamService } from '../../core/services/team.service';
-import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView, WorldDebug } from '../../battle/board/board.component';
+import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView, WorldDebug, ZoneView } from '../../battle/board/board.component';
 import { projectileLife } from '../../battle/projectile/projectile.component';
 import { ENEMY_ZONE_START, SCENERY_ROWS, SIDE_DEPTH } from '../../battle/engine/grid';
 import { BattlePhase } from '../../battle/engine/stage/types';
@@ -17,7 +17,11 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { monsterSnapshot } from '../../battle/engine/monster-controller';
-import { MONSTERS } from '../../core/data/monsters';
+import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
+import { mockVisualOf, STATUS_ICONS } from '../../core/data/visuals';
+import { isBossRank, MonsterSkillDefinition } from '../../core/models/monster';
+import { AreaPattern } from '../../core/models/combat';
+import { hasFlag } from '../../battle/engine/buffs';
 
 const TICK = 0.05;
 
@@ -43,6 +47,14 @@ export class BattleComponent implements OnDestroy {
   readonly views = signal<UnitView[]>([]);
   readonly floats = signal<FloatText[]>([]);
   readonly fx = signal<FxView[]>([]);
+  /** mock FX: telegraphed cast areas / activation flashes */
+  readonly zones = signal<ZoneView[]>([]);
+  /** boss bar (BOSS / FINAL_BOSS on the field): name, HP%, phase label, state */
+  readonly bossBar = computed(() => {
+    const v = this.views().find(x => x.side === 'enemy' && x.alive && x.boss && x.bossRank);
+    return v ? { name: v.name, hpPct: v.hpPct, phase: this.bossPhase(), final: v.bossRank === 'FINAL_BOSS', sealed: !!v.untargetable, broken: !!v.broken, enraged: !!v.enraged } : null;
+  });
+  readonly bossPhase = signal<string | null>(null);
   readonly projectiles = signal<ProjectileView[]>([]);
   readonly anims = signal<Record<number, AnimState>>({});
   readonly simReport = signal<string | null>(null);
@@ -136,6 +148,8 @@ export class BattleComponent implements OnDestroy {
     this.simReport.set(null);
     this.floats.set([]);
     this.fx.set([]);
+    this.zones.set([]);
+    this.bossPhase.set(null);
     this.projectiles.set([]);
     this.anims.set({});
     this.engine = new BattleEngine({
@@ -308,17 +322,26 @@ export class BattleComponent implements OnDestroy {
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
         buffed: u.buffs.some(b => (b.def.modifiers.attackMultiplier ?? 1) > 1),
         icon: u.monster ? MONSTERS[u.monster.definitionId]?.animation.tokenIcon : undefined,
+        mock: u.sprite ? undefined : mockVisualOf(u.monster ? MONSTERS[u.monster.definitionId]?.visual : undefined),
+        bossRank: u.monster && isBossRank(MONSTERS[u.monster.definitionId]?.rank ?? 'COMMON') ? MONSTERS[u.monster.definitionId].rank : undefined,
+        statuses: u.buffs.filter(b => STATUS_ICONS[b.def.id]).map(b => ({ id: b.def.id, icon: STATUS_ICONS[b.def.id], left: b.remaining })),
+        untargetable: hasFlag(u, 'untargetable'),
+        broken: hasFlag(u, 'broken'),
+        enraged: u.buffs.some(b => b.def.id === 'guardian_enrage' || b.def.id === 'enraged_forest'),
         debug: this.debug() ? (u.monster ? this.debugLines(u, byId) : heroDbg.get(u.id)) : undefined,
         targetId: u.targetId,
         line: u.line,
         interrupter: u.side === 'ally' && kitInterrupts(kitOf(u.heroId, u.cls), 'ult'),
-        cast: u.casting
+        cast: u.casting && !(u.casting.def as MonsterSkillDefinition).untargetableWhileCasting
           ? {
               label: u.casting.def.label,
               name: u.casting.def.name,
               pct: (1 - u.casting.left / u.casting.def.castTime) * 100,
               left: Math.max(0, u.casting.left),
               interruptible: u.casting.def.interruptible,
+              breakPct: (u.casting.def as MonsterSkillDefinition).breakRequired
+                ? (u.casting.breakDamage / (u.casting.def as MonsterSkillDefinition).breakRequired!) * 100
+                : undefined,
             }
           : undefined,
       })),
@@ -390,6 +413,69 @@ export class BattleComponent implements OnDestroy {
     clearTimeout(this.bannerTimer);
     this.banner.set(text);
     this.bannerTimer = setTimeout(() => this.banner.set(null), ms / this.speed());
+  }
+
+  // ---------------------------------------------------------------- mock FX (independent of the skill data)
+
+  /** screen rectangle of a skill area around a unit (approximation for telegraphs) */
+  private areaRect(area: AreaPattern, center: BattleUnit, caster: BattleUnit): { r: number; c: number; w: number; h: number } {
+    const p = this.screenOf(center);
+    const k = area === 'ADJACENT_8' || area === 'CROSS_1' ? 1 : area === 'RADIUS_2' ? 2 : area === 'RADIUS_3' ? 3 : 0;
+    if (area === 'ALL_ENEMIES' || area === 'ALL_ALLIES') {
+      const team = this.engine.units.filter(u => u.alive && u.visible && u.side === center.side).map(u => this.screenOf(u));
+      if (!team.length) return { r: p.r, c: p.c, w: 1, h: 1 };
+      const c0 = Math.min(...team.map(q => q.c)), c1 = Math.max(...team.map(q => q.c));
+      return { r: 0, c: c0 - 0.2, w: c1 - c0 + 1.4, h: 3 };
+    }
+    if (area === 'FRONT_ARC') {
+      const q = this.screenOf(caster);
+      const dir = this.facing.get(caster.id) ? -1 : 1;
+      return { r: q.r - 1, c: dir > 0 ? q.c : q.c - 2, w: 3, h: 3 };
+    }
+    return { r: p.r - k, c: p.c - k, w: 2 * k + 1, h: 2 * k + 1 };
+  }
+
+  private skillByName(u: BattleUnit, name: string): MonsterSkillDefinition | undefined {
+    return Object.values(MONSTER_SKILLS).find(s => s.name === name || s.id === name) as MonsterSkillDefinition | undefined;
+  }
+
+  private zoneOwner = new Map<number, number[]>();
+
+  private telegraph(src: number, skillName: string, castTime: number, dst?: number): void {
+    const u = this.engine.units.find(x => x.id === src);
+    const sk = u ? this.skillByName(u, skillName) : undefined;
+    if (!u || !sk?.mockFx) return;
+    const center = dst != null ? this.engine.units.find(x => x.id === dst) ?? u : sk.target.type === 'ALL_HEROES' ? this.engine.alive('ally')[0] ?? u : u;
+    const z: ZoneView = { id: ++this.floatId, ...this.areaRect(sk.mockFx.area, center, u), color: sk.mockFx.color, kind: 'telegraph', sec: castTime / this.speed() };
+    this.zones.update(l => [...l, z]);
+    this.zoneOwner.set(src, [...(this.zoneOwner.get(src) ?? []), z.id]);
+  }
+
+  private dropZones(src: number): void {
+    const ids = new Set(this.zoneOwner.get(src) ?? []);
+    if (!ids.size) return;
+    this.zoneOwner.delete(src);
+    this.zones.update(l => l.filter(z => !ids.has(z.id)));
+  }
+
+  private flash(src: number, skillId: string): void {
+    const u = this.engine.units.find(x => x.id === src);
+    const sk = u ? this.skillByName(u, skillId) : undefined;
+    const rects = this.zoneOwner.get(src) ?? [];
+    const last = this.zones().find(z => z.id === rects[rects.length - 1]);
+    this.dropZones(src);
+    if (!sk?.mockFx || !last) return;
+    const z: ZoneView = { ...last, id: ++this.floatId, kind: 'flash' };
+    this.zones.update(l => [...l, z]);
+    setTimeout(() => this.zones.update(l => l.filter(x => x.id !== z.id)), 500);
+  }
+
+  private flashHeroes(color: string): void {
+    const hero = this.engine.alive('ally')[0];
+    if (!hero) return;
+    const z: ZoneView = { id: ++this.floatId, ...this.areaRect('ALL_ALLIES', hero, hero), color, kind: 'flash' };
+    this.zones.update(l => [...l, z]);
+    setTimeout(() => this.zones.update(l => l.filter(x => x.id !== z.id)), 500);
   }
 
   private handleEvents(events: BattleEvent[]): void {
@@ -515,7 +601,40 @@ export class BattleComponent implements OnDestroy {
           this.focusId.set(e.dst);
           if (e.dst == null && e.reason === 'dead') this.showBanner('🎯 เป้าโฟกัสล้มแล้ว — ทีมกลับไปใช้ AI ปกติ', 1400);
           break;
+        case 'breakGauge': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `BREAK ${e.value}/${e.max}`, kind: 'break' });
+          break;
+        }
+        case 'broken': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'BREAK!!', kind: 'break' });
+          this.dropZones(e.dst);
+          this.showBanner('💥 BREAK! บอสเสียหลัก 3 วิ — รับดาเมจ +25%', 1600);
+          set(e.dst, 'hurt', { force: true });
+          break;
+        }
+        case 'bossPhase':
+          this.bossPhase.set(e.label);
+          this.dropZones(e.src);
+          this.showBanner(`⚠ ${unitOf(e.src).name}: ${e.label}`, 1800);
+          break;
+        case 'sealBroken':
+          this.showBanner('🔓 ผนึกแตก! โจมตีบอสได้แล้ว', 1400);
+          break;
+        case 'pulse': {
+          const p = posOf(e.src);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.name, kind: 'skill' });
+          this.flashHeroes('#6b2bd6');
+          break;
+        }
+        case 'soulLink': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `🔗-${e.amount}`, kind: 'dmg' });
+          break;
+        }
         case 'castStart': {
+          this.telegraph(e.src, e.skill, e.castTime, e.dst);
           // monster cast clip (e.g. Alpha Howl): frames stretched over the cast time; sheets without one fall back
           if (SHEETS[unitOf(e.src).sprite ?? '']?.anims.cast) set(e.src, 'cast', { castTime: e.castTime });
           const p = posOf(e.src);
@@ -537,6 +656,7 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'skillActivated': {
+          this.flash(e.src, e.skill);
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.name + '!', kind: 'skill' });
           this.castFx.delete(e.src);
@@ -555,6 +675,7 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'interrupt': {
+          this.dropZones(e.dst);
           this.interrupted.add(e.dst);
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'INTERRUPTED!', kind: 'interrupt' });
@@ -563,10 +684,15 @@ export class BattleComponent implements OnDestroy {
         }
         case 'immune': {
           const p = posOf(e.dst);
-          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'UNINTERRUPTIBLE', kind: 'immune' });
+          const casting = unitOf(e.dst).casting?.def.name === e.skill;
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: casting ? 'UNINTERRUPTIBLE' : `IMMUNE ${e.skill}`, kind: 'immune' });
           break;
         }
+        case 'castCancel':
+          this.dropZones(e.src);
+          break;
         case 'death':
+          this.dropZones(e.dst);
           set(e.dst, 'die');
           break;
       }

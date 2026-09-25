@@ -1,3 +1,4 @@
+import { MockVisual } from '../../core/data/visuals';
 import { BackgroundDef } from '../../core/data/backgrounds';
 import { Component, computed, input, output } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
@@ -60,9 +61,35 @@ export interface UnitView {
   moveSec?: number;
   buffed?: boolean;
   icon?: string;
+  /** BOSS / FINAL_BOSS (boss bar) */
+  bossRank?: string;
+  /** placeholder art for monsters without a sheet (+ name / HP% label under it) */
+  mock?: MockVisual;
+  /** status icons over the head */
+  statuses?: { id: string; icon: string; left: number }[];
+  /** mist form / boss seal: can't be targeted (drawn faded) */
+  untargetable?: boolean;
+  /** BROKEN by a Break (boss) */
+  broken?: boolean;
+  /** enraged boss phase (red aura) */
+  enraged?: boolean;
   /** combat debug lines (dev builds only) + current target id for the target line */
   debug?: string[];
   targetId?: number | null;
+}
+
+/** mock FX: a telegraphed / flashing area on the board (screen cells) */
+export interface ZoneView {
+  id: number;
+  r: number;
+  c: number;
+  w: number;
+  h: number;
+  color: string;
+  /** telegraph = growing outline during the cast · flash = activation burst */
+  kind: 'telegraph' | 'flash';
+  /** telegraph length (game s) */
+  sec?: number;
 }
 
 export interface FloatText {
@@ -70,7 +97,7 @@ export interface FloatText {
   r: number;
   c: number;
   text: string;
-  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield' | 'revive' | 'interrupt' | 'immune' | 'buff' | 'miss';
+  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield' | 'revive' | 'interrupt' | 'immune' | 'buff' | 'miss' | 'break';
 }
 
 /** เอฟเฟกต์สกิลที่กำลังเล่นบนกระดาน */
@@ -120,6 +147,7 @@ export class BoardComponent {
   readonly units = input<UnitView[]>([]);
   readonly floats = input<FloatText[]>([]);
   readonly fx = input<FxView[]>([]);
+  readonly zones = input<ZoneView[]>([]);
   readonly projectiles = input<ProjectileView[]>([]);
   readonly anims = input<Partial<Record<number, AnimState>>>({});
   readonly speed = input(1);

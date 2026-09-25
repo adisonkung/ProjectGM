@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/simulate.js",
-    "trace": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/trace.js"
+    "trace": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/trace.js",
+    "balance": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/balance.js"
   },
   "private": true,
   "dependencies": {

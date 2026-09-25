@@ -194,3 +194,30 @@
   &.empty i { border-style: dotted; opacity: 0.5; }
 }
 .unit.pickable { cursor: crosshair; }
+
+/* ---- Stage 4–10 mock mode: statuses, labels, zones, states */
+.sts {
+  position: absolute; left: 50%; top: -34%; transform: translateX(-50%); display: flex; gap: 1px;
+  font-size: 10px; line-height: 1; pointer-events: none; filter: drop-shadow(0 1px 1px #000);
+}
+.mock-label {
+  position: absolute; left: 50%; bottom: -12%; transform: translateX(-50%); white-space: nowrap;
+  font: 600 8px var(--disp, sans-serif); color: #fff; background: #000a; padding: 0 3px; border-radius: 3px; pointer-events: none;
+}
+.unit.untargetable { opacity: 0.4; filter: grayscale(0.6) blur(0.4px); }
+.unit.broken app-unit-sprite { filter: brightness(0.6) sepia(0.6) hue-rotate(-20deg); animation: shake 0.2s linear infinite; }
+.unit.enraged app-unit-sprite { filter: drop-shadow(0 0 8px #ff2a2a) drop-shadow(0 0 3px #ff7a2a); }
+@keyframes shake { 50% { translate: 2px 0; } }
+.zone-wrap { position: absolute; left: 0; top: 0; width: var(--cell); height: var(--cell); pointer-events: none; z-index: 2; }
+.zone {
+  position: absolute; left: 0; top: 0;
+  border-radius: 8px; border: 2px dashed var(--zc); background: color-mix(in srgb, var(--zc) 18%, transparent);
+  &.telegraph { animation: tele var(--zs) linear forwards; }
+  &.flash { border-style: solid; background: color-mix(in srgb, var(--zc) 55%, transparent); animation: flash 0.45s ease-out forwards; }
+}
+@keyframes tele { from { opacity: 0.35; } to { opacity: 1; background: color-mix(in srgb, var(--zc) 38%, transparent); } }
+@keyframes flash { to { opacity: 0; transform: scale(1.05); } }
+.float.break { color: #ffb347; font-size: 1.1em; }
+@media (prefers-reduced-motion: reduce) {
+  .zone, .unit.broken app-unit-sprite { animation: none; }
+}

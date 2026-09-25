@@ -10,6 +10,7 @@
   },
   "files": [
     "tools/simulate.ts",
-    "tools/dev/trace.ts"
+    "tools/dev/trace.ts",
+    "tools/dev/balance.ts"
   ]
 }

@@ -399,14 +399,12 @@ export class StageFlow {
     this.beginWave();
   }
 
-  /** does the next wave contain an enemy with an interruptible cast skill? (AI saves interrupts for it) */
-  nextWaveHasCasters(
-    monsters: Record<string, { skills: string[] }>, templates: Record<string, { castSkills?: string[] }>,
-  ): boolean {
+  /** does the next wave contain an enemy with a cast that interrupts can stop? (AI saves interrupts for it) */
+  nextWaveHasCasters(isCaster: (enemyId: string) => boolean): boolean {
     const next = this.waves[this.waveIndex + 1];
     if (!next) return false;
     if (this.casterCache.has(this.waveIndex + 1)) return this.casterCache.get(this.waveIndex + 1)!;
-    const has = next.spawns.some(sp => (monsters[sp.monsterId]?.skills.length ?? 0) > 0 || (templates[sp.monsterId]?.castSkills?.length ?? 0) > 0);
+    const has = next.spawns.some(sp => isCaster(sp.monsterId));
     this.casterCache.set(this.waveIndex + 1, has);
     return has;
   }

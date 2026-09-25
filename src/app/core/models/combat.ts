@@ -28,10 +28,20 @@ export interface StatusModifiers {
   damageTakenMultiplier?: number;
   /** chance (0–1) to evade an incoming attack */
   dodgeChance?: number;
+  /** ranged units only (range > 1): basic-attack / skill damage multipliers (DARK_FOG 0.75 / 0.85) */
+  rangedAttackMultiplier?: number;
+  rangedSkillMultiplier?: number;
+  /** multiplies healing received (Forest Oblivion −50% = 0.5) */
+  healingReceivedMultiplier?: number;
 }
 
 /** Control flags: stun = no actions / no movement · root = no movement (attacks / casts allowed) · taunted = must target the source */
-export type StatusFlag = 'stun' | 'root' | 'taunted';
+export type StatusFlag =
+  | 'stun' | 'root' | 'taunted'
+  /** cannot be selected / hit (Mist Form, boss seal); Focus on it becomes temporarily invalid */
+  | 'untargetable'
+  /** BROKEN: cannot attack or cast (Break Gauge result) */
+  | 'broken';
 
 /** Periodic effect: every `interval` s deal / heal `perSecond × sourceAtk × interval` (snapshot at application) */
 export interface StatusTick {
@@ -58,6 +68,11 @@ export interface StatusEffectDefinition {
   persistThroughDeath?: boolean;
   /** freeze the timer during wave transitions. Default false */
   pauseDuringWaveTransition?: boolean;
+  /** SOUL LINK: this share of the carrier's final damage goes to the status source instead (no crit, no on-hit, no chain) */
+  damageTransfer?: number;
+  /** control statuses (stun / root / taunt) only land on bosses when true */
+  bossValid?: boolean;
+  /** DoT / HoT ticks can't crit; they ignore DEF (direct damage) — documented, always true for now */
 }
 
 // ------------------------------------------------------------------ areas
@@ -111,6 +126,8 @@ export type SkillEffect =
       executeBonus?: { hpBelow: number; mul: number };
       /** cancels interruptible casts of the units it hits (dedicated Interrupt — plain damage never interrupts) */
       interrupt?: boolean;
+      /** Break Gauge damage dealt to a breakable cast (e.g. Forest Oblivion) by this hit */
+      breakPower?: number;
     }
   /** heal allies: atk × sourceAtk + maxHpPct × recipient max HP */
   | { type: 'HEAL'; area: AreaPattern | 'PRIMARY'; center?: AreaCenter; atk: number; maxHpPct?: number }
@@ -123,7 +140,7 @@ export type SkillEffect =
       duration?: number;
     }
   /** interrupt every interruptible caster in the area (no damage) */
-  | { type: 'INTERRUPT'; area: AreaPattern; center?: AreaCenter }
+  | { type: 'INTERRUPT'; area: AreaPattern; center?: AreaCenter; breakPower?: number }
   /** push the primary target back (away from the caster) */
   | { type: 'KNOCKBACK'; cells: number }
   /** absorb shields: caster gets selfPct, every other living ally allyPct (of the CASTER's max HP) */

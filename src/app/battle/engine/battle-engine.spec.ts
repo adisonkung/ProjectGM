@@ -1,7 +1,7 @@
 import { hasStatus } from './buffs';
 import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
-import { STAGES } from '../../core/data/stages';
+import { LEGACY_STAGES as STAGES } from '../../core/data/legacy-stages';
 import { UnitSpec } from '../../core/models/unit';
 import { BattleEngine, BattleEvent } from './battle-engine';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
