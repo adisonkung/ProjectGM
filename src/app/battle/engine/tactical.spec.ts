@@ -161,8 +161,8 @@ describe('Tactical difficulty — positioning', () => {
     // the shaman steps into safe range → Sylvie takes the Focus by herself
     b.put(shaman, sy.pos.c + 5, sy.pos.r);
     sy.lockUntil = 0;
-    sy.cd1 = sy.cd2 = 99; // no skill cast lock in the way of the re-think
-    b.run(0.6);
+    sy.cd1 = sy.cd2 = 99; // no new skill cast lock in the way of the re-think
+    b.run(1.2); // a skill's cast lock (≤ 0.7 s) may still be running
     expect(sy.targetId).toBe(shaman.id);
     expect(sy.intent).toBe('focus');
   });

@@ -42,11 +42,14 @@ interface Agg {
   bossRuns: number; bossLife: number; bossKilled: number; sealBroken: number;
   skills: Record<string, { started: number; completed: number; interrupted: number; broken: number; cancelled: number }>;
   phaseReached: Record<string, number>; phaseTime: number[]; phaseTimeRuns: number[]; status: Record<string, number>;
+  deathRuns: number; reviveRuns: number; wipes: number; timeouts: number;
+  heroes: Record<string, { dealt: number; healed: number; skills: number; ults: number; deaths: number; revives: number }>;
 }
 const newAgg = (): Agg => ({
   wins: 0, time: 0, deaths: 0, revives: 0, wave: 0, dealt: 0, taken: 0, heal: 0, opp: 0, att: 0, succ: 0, crit: 0,
   resHit: 0, resMiss: 0, focusUp: 0, unsafe: 0, anchor: 0, threatDeaths: 0, phase: 0, brk: 0, brkFail: 0, fight: 0, ults: 0,
   bossRuns: 0, bossLife: 0, bossKilled: 0, sealBroken: 0, skills: {}, phaseReached: {}, phaseTime: [], phaseTimeRuns: [], status: {},
+  deathRuns: 0, reviveRuns: 0, wipes: 0, timeouts: 0, heroes: {},
 });
 
 const floors = STAGES.filter(s => (onlyFloor != null ? s.floor === onlyFloor : s.floor >= 4 || flag('--all-floors')));
@@ -68,7 +71,7 @@ for (let stage of floors) {
       const h = heroes.find(x => x.uid === u.heroUid)!;
       return { ...u, star, stats: heroStats({ ...HERO_BY_ID[h.templateId], star: star as 1 }, h) };
     });
-    heroSnapshot = allies.map(u => `${u.name} ${u.star ?? '?'}★ Lv${level} HP ${u.stats.hp} ATK ${u.stats.atk} DEF ${u.stats.def} AS ${u.stats.atkSpeed}`);
+    heroSnapshot = allies.map(u => `${u.name} (${u.cls}) ${u.star ?? '?'}★ Lv${level} HP ${u.stats.hp} ATK ${u.stats.atk} DEF ${u.stats.def} AS ${u.stats.atkSpeed} R ${u.stats.range}`);
     for (let s = 1; s <= runs; s++) {
       const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: s, autoUlt: true });
       const tactical = bot === 'TACTICAL'
@@ -83,6 +86,16 @@ for (let stage of floors) {
       }
       const m = e.metrics;
       if (e.result === 'win') a.wins++;
+      if (m.deaths > 0) a.deathRuns++;
+      if (m.revives > 0) a.reviveRuns++;
+      if (e.stageResult?.outcome === 'lose') a.wipes++;
+      if (e.stageResult?.outcome === 'timeout' || (!e.result && e.time >= 400)) a.timeouts++;
+      for (const u of e.units.filter(x => x.side === 'ally')) {
+        const st = m.byUnit[u.id];
+        if (!st) continue;
+        const h = (a.heroes[u.name] ??= { dealt: 0, healed: 0, skills: 0, ults: 0, deaths: 0, revives: 0 });
+        h.dealt += st.dealt; h.healed += st.healed; h.skills += st.skills; h.ults += st.ults; h.deaths += st.deaths; h.revives += st.revives;
+      }
       a.time += e.time;
       a.fight += e.fightTime;
       a.deaths += m.deaths;
@@ -133,9 +146,9 @@ for (let stage of floors) {
   if (review.length) console.log(`  ⚠ MECHANIC / COMPOSITION / HERO POWER REVIEW REQUIRED: ${review.join(', ')} (engine clamps to the limits)`);
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
     const a = aggs[bot];
-    console.log(`  ${bot.padEnd(8)} win ${pct(a.wins / n)} · time ${f1(a.time / n, 0)}s · deaths ${f1(a.deaths / n)} · waves ${f1(a.wave / n)}`);
+    console.log(`  ${bot.padEnd(8)} win ${pct(a.wins / n)} · time ${f1(a.time / n, 0)}s · deaths ${f1(a.deaths / n, 2)}/run · runs with a death ${pct(a.deathRuns / n)} · with a revive ${pct(a.reviveRuns / n)} · wipes ${pct(a.wipes / n)} · timeouts ${pct(a.timeouts / n)} · waves ${f1(a.wave / n)}`);
   }
-  summary.push(`F${String(stage.floor).padEnd(2)} Lv${level} | AUTO ${pct(A.wins / n)} | TACTICAL ${pct(T.wins / n)}` +
+  summary.push(`F${String(stage.floor).padEnd(2)} Lv${level} | AUTO ${pct(A.wins / n)} (deaths ${f1(A.deaths / n)}) | TACTICAL ${pct(T.wins / n)} (deaths ${f1(T.deaths / n)})` +
     (A.bossRuns + T.bossRuns ? ` | boss life ${f1(A.bossRuns ? A.bossLife / A.bossRuns : 0, 0)}s / ${f1(T.bossRuns ? T.bossLife / T.bossRuns : 0, 0)}s` : ''));
 
   if (flag('--exposure')) {
@@ -175,6 +188,8 @@ for (let stage of floors) {
     for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
       const a = aggs[bot];
       console.log(`     ${bot}: team DPS ${f1(a.dealt / a.fight, 0)} · HPS ${f1(a.heal / a.fight, 1)} · ult uses ${f1(a.ults / n)} per run`);
+      console.log('       ' + Object.entries(a.heroes).map(([name, h]) =>
+        `${name} DPS ${f1(h.dealt / a.fight, 0)} HPS ${f1(h.healed / a.fight, 1)} skills ${f1(h.skills / n)} ults ${f1(h.ults / n, 2)} deaths ${f1(h.deaths / n, 2)} revived ${f1(h.revives / n, 2)}`).join(' | '));
     }
     const t = stage.monsterTuning ?? {};
     const k = {

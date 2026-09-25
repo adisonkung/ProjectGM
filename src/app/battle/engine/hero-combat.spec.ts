@@ -1,4 +1,4 @@
-import { CLASS_BASE, HERO_5STAR_LV1, starMultiplier } from '../../core/data/classes';
+import { CLASS_BASE, HERO_5STAR_LV1, HERO_CLASS_BASE, starMultiplier } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { HERO_DEFINITIONS, kitOf } from '../../core/data/hero-skills';
@@ -15,6 +15,7 @@ import { resolveArea } from './area';
 import { BattleEngine, BattleEvent, BattleUnit } from './battle-engine';
 import { applyBuff, attackModifier, buffRemaining, hasFlag, hasStatus, modifier } from './buffs';
 import { distance } from './grid';
+import { DamageResolver } from './damage-resolver';
 
 // ------------------------------------------------------------------ harness
 
@@ -80,25 +81,52 @@ describe('Hero kits (data)', () => {
       const s = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 });
       return [s.hp, s.atk, s.def, +s.atkSpeed.toFixed(2), s.range];
     };
-    expect(row('aurel')).toEqual([678, 47, 85, 0.99, 1]);
-    expect(row('jin')).toEqual([466, 81, 47, 1.28, 1]);
-    expect(row('shade')).toEqual([403, 85, 32, 1.51, 1]);
-    expect(row('sylvie')).toEqual([339, 72, 25, 1.33, 6]);
-    expect(row('velma')).toEqual([318, 98, 21, 1.04, 5]);
-    expect(row('lumina')).toEqual([360, 51, 30, 1.1, 4]);
+    expect(row('aurel')).toEqual([393, 27, 49, 0.99, 1]);
+    expect(row('jin')).toEqual([270, 47, 27, 1.28, 1]);
+    expect(row('shade')).toEqual([234, 49, 19, 1.51, 1]);
+    expect(row('sylvie')).toEqual([197, 42, 15, 1.33, 6]);
+    expect(row('velma')).toEqual([184, 57, 12, 1.04, 5]);
+    expect(row('lumina')).toEqual([209, 30, 17, 1.1, 4]);
   });
 
-  it('star multiplier 1.00 / 1.05 / 1.10 / 1.15 / 1.20 on HP / ATK / DEF only — 5★ Lv1 = the authored table, no double scaling', () => {
+  it('(30) star multiplier 1.00–1.20 applied once: internal 1★ base = final 5★ ÷ 1.20 (tank HP ≈ 327.5 → 393, not 393 × 1.2)', () => {
     expect([1, 2, 3, 4, 5].map(starMultiplier)).toEqual([1, 1.05, 1.1, 1.15, 1.2]);
-    const at = (star: number) => heroStats({ ...HERO_BY_ID['aurel'], star: star as 1 }, { uid: 0, templateId: 'aurel', level: 1, potential: 'B', injury: 0 });
-    expect(at(5).hp).toBe(HERO_5STAR_LV1.tank.hp);
-    expect(at(1).hp).toBe(Math.round(678 / 1.2));
-    expect(at(5).hp / at(1).hp).toBeCloseTo(1.2, 2);
-    expect(at(3).atk).toBe(Math.round((47 / 1.2) * 1.1));
-    expect(at(1).atkSpeed).toBe(at(5).atkSpeed);
-    // level growth is linear on the base: Lv10 ATK = 122.5% of Lv1
-    const lv10 = heroStats({ ...HERO_BY_ID['jin'], star: 5 }, { uid: 0, templateId: 'jin', level: 10, potential: 'B', injury: 0 });
-    expect(lv10.atk).toBe(Math.round(81 * 1.225));
+    expect(HERO_CLASS_BASE.tank.hp).toBeCloseTo(327.5, 2);
+    expect(HERO_CLASS_BASE.tank.atk).toBeCloseTo(22.5, 2);
+    expect(HERO_CLASS_BASE.tank.def).toBeCloseTo(40.83, 2);
+    expect(HERO_CLASS_BASE.mage.atk).toBeCloseTo(47.5, 2);
+    const at = (id: string, star: number, level = 1) =>
+      heroStats({ ...HERO_BY_ID[id], star: star as 1 }, { uid: 0, templateId: id, level, potential: 'B', injury: 0 });
+    const t5 = at('aurel', 5);
+    expect([t5.hp, t5.atk, t5.def]).toEqual([393, 27, 49]);
+    expect(t5.hp).not.toBe(Math.round(393 * 1.2));
+    expect([at('aurel', 1).hp, at('aurel', 1).atk, at('aurel', 1).def]).toEqual([Math.round(327.5), Math.round(22.5), Math.round(40.833)]);
+    expect(at('aurel', 3).hp).toBe(Math.round(327.5 * 1.1));
+    expect(at('aurel', 1).atkSpeed).toBe(t5.atkSpeed);
+    // every class's final 5★ Lv1 = the table; the legacy 678 / 466 / 403 … table is gone
+    for (const cls of Object.keys(HERO_5STAR_LV1) as (keyof typeof HERO_5STAR_LV1)[]) {
+      const id = Object.values(HERO_BY_ID).find(h => h.cls === cls && h.star === 5)!.id;
+      const s5 = at(id, 5);
+      expect([s5.hp, s5.atk, s5.def]).toEqual([HERO_5STAR_LV1[cls].hp, HERO_5STAR_LV1[cls].atk, HERO_5STAR_LV1[cls].def]);
+    }
+    expect(Object.values(HERO_5STAR_LV1).map(x => x.hp)).not.toContain(678);
+    // linear level growth on the base: Lv10 = +27% HP, +22.5% ATK, +18% DEF
+    const l10 = at('jin', 5, 10);
+    expect([l10.hp, l10.atk, l10.def]).toEqual([Math.round(270 * 1.27), Math.round(47 * 1.225), Math.round(27 * 1.18)]);
+  });
+
+  it('(32) displayed stats (roster / heroStats) = runtime unit stats used in combat, every class', () => {
+    const ids = ['aurel', 'jin', 'shade', 'sylvie', 'velma', 'lumina'];
+    const b = battle(ids.map((id, i) => H(id, i < 3 ? 0 : 3, i % 3)), [mon('forest_slime', 5, 1)]);
+    for (const id of ids) {
+      const shown = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 });
+      const u = b.hero(id);
+      expect([u.maxHp, u.atk, u.def]).toEqual([shown.hp, shown.atk, shown.def]);
+      expect([u.maxHp, u.atk, u.def]).toEqual([HERO_5STAR_LV1[u.cls].hp, HERO_5STAR_LV1[u.cls].atk, HERO_5STAR_LV1[u.cls].def]);
+    }
+    // the team builder (lab / tower battles) produces the same runtime stats
+    const st = newGameState();
+    for (const u of teamToUnits(st.team, st.heroes)) expect(u.stats.hp).toBe(HERO_5STAR_LV1[u.cls].hp);
   });
 
   it('cooldowns per class and no two same-class heroes are mechanical copies (except Aurel/Morgan by design)', () => {
@@ -517,6 +545,60 @@ describe('Mage (Velma)', () => {
 });
 
 // ------------------------------------------------------------------ healers
+
+describe('(33–34) derived effects follow the new runtime stats', () => {
+  it('DamageResolver uses the runtime ATK / DEF', () => {
+    const b = battle([H('jin', 0, 1)], [mon('forest_slime', 0, 1)]);
+    const jin = b.hero('jin');
+    const slime = b.monsters('forest_slime')[0];
+    const r = DamageResolver.resolve({ attacker: jin, target: slime, multiplier: 1, damageType: 'PHYSICAL', sourceId: 't', variance: 0.5 });
+    expect(jin.atk).toBe(47);
+    expect(r.amount).toBe(Math.round(47 * 100 / (100 + slime.def)));
+  });
+
+  it('Holy Blessing heals ATK × 2.2 + 10% of the target max HP with the new values', () => {
+    const b = battle([H('lumina', 3, 1), H('aurel', 0, 1)], [mon('forest_slime', 5, 1)]);
+    const [lum, tank] = [b.hero('lumina'), b.hero('aurel')];
+    b.monsters('forest_slime').forEach(b.root);
+    b.freeze();
+    tank.hp = 1;
+    b.use(lum, 'skill2', tank);
+    b.run(1.5);
+    const h = b.of('heal').find(x => x.dst === tank.id && x.src === lum.id)!;
+    expect(lum.atk).toBe(30);
+    expect(h.amount).toBe(Math.round(30 * 2.2 + 393 * 0.1));
+  });
+
+  it('Holy Fortress shield = 30% of the new tank max HP', () => {
+    const b = battle([H('aurel', 0, 1)], [mon('forest_slime', 0, 1)]);
+    const tank = b.hero('aurel');
+    b.monsters('forest_slime').forEach(b.root);
+    b.freeze('all');
+    b.use(tank, 'ult', tank);
+    b.run(1);
+    expect(tank.maxHp).toBe(393);
+    expect(tank.shield).toBeCloseTo(393 * 0.3, 0);
+  });
+
+  it('resurrection restores 40% of the new max HP; Shade poison ticks from the new Shade ATK', () => {
+    const b = battle([H('lumina', 3, 1), H('jin', 0, 0), H('shade', 0, 1)], [mon('forest_slime', 0, 1)]);
+    const [lum, jin, shade] = [b.hero('lumina'), b.hero('jin'), b.hero('shade')];
+    const slime = b.monsters('forest_slime')[0];
+    slime.hp = slime.maxHp = 99999;
+    b.root(slime);
+    b.freeze();
+    b.kill(jin);
+    b.use(lum, 'ult', lum);
+    b.run(1.5);
+    expect(jin.hp).toBe(Math.round(270 * 0.4));
+    b.put(shade, slime.pos.c - 1, 1);
+    b.use(shade, 'skill2', slime);
+    b.run(1.5);
+    const poison = slime.buffs.find(x => x.def.id === 'poison' && x.sourceId === shade.id)!;
+    expect(shade.atk).toBe(49);
+    expect(poison.magnitude).toBe(49);
+  });
+});
 
 describe('Healers (Lumina / Corvin) and resurrection', () => {
   it('(17) Lumina: Holy Blessing is the top priority when an ally is below 35%', () => {

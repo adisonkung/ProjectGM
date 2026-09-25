@@ -19,6 +19,16 @@ export interface PhaseEntry {
   at: number;
 }
 
+/** per-hero power snapshot (damage / healing done, skills / ults used, deaths / revives) */
+export interface UnitStat {
+  dealt: number;
+  healed: number;
+  skills: number;
+  ults: number;
+  deaths: number;
+  revives: number;
+}
+
 export class BattleMetrics {
   damageDealt = 0;
   damageTaken = 0;
@@ -63,6 +73,13 @@ export class BattleMetrics {
   bossDiedAt: number | null = null;
   bossPhases: PhaseEntry[] = [];
   sealBrokenAt: number | null = null;
+
+  /** per ally unit id */
+  byUnit: Record<number, UnitStat> = {};
+
+  unit(id: number): UnitStat {
+    return (this.byUnit[id] ??= { dealt: 0, healed: 0, skills: 0, ults: 0, deaths: 0, revives: 0 });
+  }
 
   cast(id: string, what: keyof CastStat): void {
     const s = (this.skillStats[id] ??= { started: 0, completed: 0, interrupted: 0, broken: 0, cancelled: 0 });

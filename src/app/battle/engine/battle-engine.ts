@@ -380,7 +380,10 @@ export class BattleEngine {
   /** generic resurrection command (skills, items, shrines, events …) */
   reviveHero(cmd: ReviveHeroCommand): ReviveResult {
     const r = this.flow.revive(cmd);
-    if (r.ok) this.metrics.revives++;
+    if (r.ok) {
+      this.metrics.revives++;
+      this.metrics.unit(cmd.unitId).revives++;
+    }
     return r;
   }
 
@@ -1667,6 +1670,10 @@ export class BattleEngine {
         return u.cls !== 'tank' || !self.units.some(o => o.side !== u.side && self.isValidTarget(u, o) && distance(o.pos, u.pos) <= 1);
       },
       onSkillUse: (u, slot, s) => {
+        if (u.side === PLAYER_TEAM && slot !== 'attack') {
+          if (slot === 'ult') self.metrics.unit(u.id).ults++;
+          else self.metrics.unit(u.id).skills++;
+        }
         if (u.side !== PLAYER_TEAM || slot === 'attack' || self.skills.mode(u, slot) !== 'RESERVE') return;
         if (s.effects.some(e => (e.type === 'DAMAGE' && e.interrupt) || e.type === 'INTERRUPT') &&
           self.units.some(f => f.side !== u.side && f.alive && f.casting && canStopCast(f.casting.def))) self.metrics.reservedSkillHits++;
@@ -1747,7 +1754,10 @@ export class BattleEngine {
     if (dst.side === PLAYER_TEAM) {
       this.flow.damageTaken += amount;
       this.metrics.damageTaken += amount;
-    } else if (src?.side === PLAYER_TEAM) this.metrics.damageDealt += amount;
+    } else if (src?.side === PLAYER_TEAM) {
+      this.metrics.damageDealt += amount;
+      this.metrics.unit(src.id).dealt += amount;
+    }
     // hit reaction: heroes always flinch visually; monsters go through their anti stun-lock rule
     const hurt = !poison && dst.hp > 0 && (dst.monster ? this.monsterAI.onHit(dst) : true);
     this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked, hurt, ...(poison ? { poison } : {}) });
@@ -1762,6 +1772,7 @@ export class BattleEngine {
       for (const o of this.units) if (o.targetId === dst.id) o.targetId = null;
       if (dst.side === PLAYER_TEAM) {
         this.metrics.deaths++;
+        this.metrics.unit(dst.id).deaths++;
         if (isRanged(dst) && this.positioning.threatCount(dst.pos, this.positioning.threats(dst)) > 0) this.metrics.rangedDeathsInThreat++;
       }
       this.grid.remove(dst.id, dst.pos);
@@ -1785,7 +1796,10 @@ export class BattleEngine {
     const a = Math.round(Math.min(amount, dst.maxHp - dst.hp));
     if (a <= 0) return;
     dst.hp += a;
-    if (dst.side === PLAYER_TEAM) this.metrics.healing += a;
+    if (dst.side === PLAYER_TEAM) {
+      this.metrics.healing += a;
+      if (src?.side === PLAYER_TEAM) this.metrics.unit(src.id).healed += a;
+    }
     this.events.push({ type: 'heal', dst: dst.id, amount: a, ...(src ? { src: src.id } : {}) });
   }
 

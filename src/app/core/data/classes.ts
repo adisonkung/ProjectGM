@@ -17,16 +17,18 @@ export const STAR_STAT_MULTIPLIER: Record<number, number> = { 1: 1.0, 2: 1.05, 3
 export const starMultiplier = (star: number) => STAR_STAT_MULTIPLIER[star] ?? 1 + (star - 1) * 0.05;
 
 /**
- * Authored hero stats: **5★ Level 1** per class (the design reference). The 1★ base is derived from it
- * (`HERO_CLASS_BASE` = this ÷ the 5★ multiplier), so a 5★ hero ends at exactly these values — never scaled twice.
+ * Authored hero stats: FINAL **5★ Level 1** per class (the design reference, after the star multiplier).
+ * Vertical-slice baseline = 58% of the first table (tank 678 / 47 / 85 was ~1.7–2× too strong for the Stage 4–10
+ * monsters). The 1★ base is derived from it (`HERO_CLASS_BASE` = this ÷ 1.20), so a 5★ hero ends at exactly these
+ * values — never scaled twice. Attack speed / move speed / range are not star-scaled.
  */
 export const HERO_5STAR_LV1: Record<HeroClass, Stats> = {
-  tank:     { hp: 678, atk: 47, def: 85, atkSpeed: 0.99, moveSpeed: 1.5, range: 1, maxMana: 100 },
-  fighter:  { hp: 466, atk: 81, def: 47, atkSpeed: 1.28, moveSpeed: 1.8, range: 1, maxMana: 100 },
-  assassin: { hp: 403, atk: 85, def: 32, atkSpeed: 1.51, moveSpeed: 2.0, range: 1, maxMana: 100 },
-  archer:   { hp: 339, atk: 72, def: 25, atkSpeed: 1.33, moveSpeed: 1.6, range: 6, maxMana: 100 },
-  mage:     { hp: 318, atk: 98, def: 21, atkSpeed: 1.04, moveSpeed: 1.5, range: 5, maxMana: 100 },
-  healer:   { hp: 360, atk: 51, def: 30, atkSpeed: 1.1,  moveSpeed: 1.5, range: 4, maxMana: 100 },
+  tank:     { hp: 393, atk: 27, def: 49, atkSpeed: 0.99, moveSpeed: 1.5, range: 1, maxMana: 100 },
+  fighter:  { hp: 270, atk: 47, def: 27, atkSpeed: 1.28, moveSpeed: 1.8, range: 1, maxMana: 100 },
+  assassin: { hp: 234, atk: 49, def: 19, atkSpeed: 1.51, moveSpeed: 2.0, range: 1, maxMana: 100 },
+  archer:   { hp: 197, atk: 42, def: 15, atkSpeed: 1.33, moveSpeed: 1.6, range: 6, maxMana: 100 },
+  mage:     { hp: 184, atk: 57, def: 12, atkSpeed: 1.04, moveSpeed: 1.5, range: 5, maxMana: 100 },
+  healer:   { hp: 209, atk: 30, def: 17, atkSpeed: 1.1,  moveSpeed: 1.5, range: 4, maxMana: 100 },
 };
 
 /** hero 1★ Level 1 base (unrounded) = authored 5★ ÷ 1.20 — `heroStats` multiplies by the star table */
