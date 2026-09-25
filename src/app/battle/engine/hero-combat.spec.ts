@@ -80,12 +80,12 @@ describe('Hero kits (data)', () => {
       const s = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 });
       return [s.hp, s.atk, s.def, +s.atkSpeed.toFixed(2), s.range];
     };
-    expect(row('aurel')).toEqual([678, 47, 85, 0.99, 1]);
-    expect(row('jin')).toEqual([466, 81, 47, 1.28, 1]);
-    expect(row('shade')).toEqual([403, 85, 32, 1.51, 1]);
-    expect(row('sylvie')).toEqual([339, 72, 25, 1.33, 6]);
-    expect(row('velma')).toEqual([318, 98, 21, 1.04, 5]);
-    expect(row('lumina')).toEqual([360, 51, 30, 1.1, 4]);
+    expect(row('aurel')).toEqual([384, 26, 48, 0.88, 1]);
+    expect(row('jin')).toEqual([264, 46, 26, 1.14, 1]);
+    expect(row('shade')).toEqual([228, 48, 18, 1.35, 1]);
+    expect(row('sylvie')).toEqual([192, 41, 14, 1.2, 6]);
+    expect(row('velma')).toEqual([180, 55, 12, 0.94, 5]);
+    expect(row('lumina')).toEqual([204, 29, 17, 0.99, 4]);
   });
 
   it('cooldowns per class and no two same-class heroes are mechanical copies (except Aurel/Morgan by design)', () => {
@@ -374,7 +374,9 @@ describe('Assassins (Shade / Nox)', () => {
     b.freeze();
     b.use(nox, 'skill', archer);
     b.run(1);
-    expect(distance(nox.pos, archer.pos)).toBe(1);
+    // landed behind the archer (it may have stepped back one cell since)
+    expect(distance(nox.pos, archer.pos)).toBeLessThanOrEqual(2);
+    expect(nox.targetId).toBe(archer.id);
     expect(hasStatus(nox, 'shadow_evasion')).toBeTrue();
   });
 

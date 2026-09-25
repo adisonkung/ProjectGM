@@ -79,6 +79,25 @@ export class Positioning {
   }
 
   /**
+   * Formation anchor that moves with the fight: a ranged hero's anchor is shifted forward by as much as the allied
+   * frontline has advanced beyond its own anchors (the backline follows the frontline, never ahead of it).
+   */
+  anchorOf(u: BattleUnit): Cell | null {
+    const a = this.h.anchorOf(u);
+    if (!a || !isRanged(u)) return a;
+    const melee = this.h.units.filter(m => m.side === u.side && m.alive && m.visible && !isRanged(m));
+    if (!melee.length) return a;
+    const dir = u.side === 'ally' ? 1 : -1;
+    let shift = 0;
+    for (const m of melee) {
+      const ma = this.h.anchorOf(m);
+      if (ma) shift = Math.max(shift, (m.pos.c - ma.c) * dir);
+    }
+    if (shift <= 0) return a;
+    return { r: a.r, c: Math.max(0, Math.min(BOARD_COLS - 1, a.c + Math.floor(shift) * dir)) };
+  }
+
+  /**
    * DangerScore(position, unit): hostile melee zones, min safe range, distance from the anchor / beyond the leash,
    * ranged heroes ahead of the allied frontline, occupied cells. Lower = better.
    */
@@ -90,7 +109,7 @@ export class Positioning {
       if (dist <= z.radius + 1e-9) d += DANGER.threatZone;
       else if (role.minSafeRange != null && dist < role.minSafeRange) d += DANGER.minSafeRange;
     }
-    const anchor = this.h.anchorOf(u);
+    const anchor = this.anchorOf(u);
     if (anchor) {
       const a = distance(cell, anchor);
       d += a * (isRanged(u) ? DANGER.anchorRanged : DANGER.anchorMelee);
@@ -104,9 +123,13 @@ export class Positioning {
     return d;
   }
 
+  leashOf(u: BattleUnit): number {
+    return roleOf(u).leash;
+  }
+
   /** is `cell` within the hero's leash of its formation anchor? */
   withinLeash(u: BattleUnit, cell: Cell): boolean {
-    const a = this.h.anchorOf(u);
+    const a = this.anchorOf(u);
     return !a || distance(cell, a) <= roleOf(u).leash + 1e-9;
   }
 

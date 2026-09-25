@@ -13,7 +13,7 @@ import { ActiveBuff, applyBuff, dodgeChance, hasFlag, hasStatus, modifier, taunt
 import { breakRequiredOf, canStopCast, priorityOf, rankOf, SkillHost, SkillSystem } from './skill-system';
 import type { DamageKind, InterruptPriority, SkillSlot, SkillUseMode } from '../../core/models/combat';
 import { BattleMetrics } from './metrics';
-import { isRanged, Positioning } from './positioning';
+import { isRanged, Positioning, SAFE_DANGER } from './positioning';
 import { FormationRuntime } from './stage/formation';
 import {
   getActiveBattlefieldHeroes, getAliveHeroes, getAllPartyHeroes, getDeadHiddenHeroes, getDeadVisibleHeroes, PLAYER_TEAM,
@@ -805,9 +805,11 @@ export class BattleEngine {
       // skill AI tiers: emergency → interrupt → heal → high value → normal (SkillSystem), else the basic action
       const pick = this.skills.chooseSkill(u, current);
       if (pick) {
-        if (pick.tier === 'INTERRUPT') u.intent = 'interrupt';
+        // an interrupt skill spent on damage (AUTO fallback) is not an interrupt: no intent / target lock for it
+        const stopping = pick.tier === 'INTERRUPT' && pick.target.side !== u.side && !!pick.target.casting && canStopCast(pick.target.casting.def);
+        if (stopping) u.intent = 'interrupt';
         else if (pick.tier === 'EMERGENCY' || pick.tier === 'HEAL') u.intent = 'heal';
-        if (pick.tier === 'INTERRUPT' && pick.target.side !== u.side) u.lockUntil = this.time + TARGET_LOCK;
+        if (stopping) u.lockUntil = this.time + TARGET_LOCK;
         this.skills.use(u, pick.slot, pick.skill, pick.target);
         u.atkCd = Math.max(u.atkCd, 0) + 1 / aspd;
         return;
@@ -1026,15 +1028,17 @@ export class BattleEngine {
     const frontX = P.frontlineX(u);
     const here = P.danger(u, u.pos, zones, frontX);
     const blocked = this.bodyBlocked(u);
+    // voluntary moves never path through hostile melee threat zones (unless already standing in one)
+    const avoid = (c: { r: number; c: number }) => !!blocked?.(c) || (P.threatCount(c, zones) > 0 && here < SAFE_DANGER);
     const stepTo = (cell: { r: number; c: number }) => {
       if (cell.r === u.pos.r && cell.c === u.pos.c) return;
-      const step = nextStep(this.grid, u.pos, c => c.r === cell.r && c.c === cell.c, blocked) ?? greedyStep(this.grid, u.pos, cell, blocked);
+      const step = nextStep(this.grid, u.pos, c => c.r === cell.r && c.c === cell.c, avoid) ?? greedyStep(this.grid, u.pos, cell, avoid);
       if (!step) return;
       this.grid.move(u.id, u.pos, step);
       u.pos = step;
       u.moveCd = 1 / u.moveSpeed;
       this.events.push({ type: 'move', src: u.id });
-      if (u.intent === 'focus' && P.threatCount(step, zones) > 0) this.metrics.unsafeFocusChaseCount++;
+      if (u.intent === 'focus' && here < SAFE_DANGER && P.threatCount(step, zones) > 0) this.metrics.unsafeFocusChaseCount++;
     };
     if (goal && distance(u.pos, goal.pos) <= u.range) {
       // already firing: only step if a clearly safer cell still keeps the target in range
@@ -1054,8 +1058,8 @@ export class BattleEngine {
         (chase || (frontX != null && !ally()) ? null : P.firingCell(u, goal, { respectLeash: false }));
       if (spot) return stepTo(spot.cell);
     }
-    // nothing safe to shoot: drift back toward the formation anchor
-    const anchor = this.flow.formation.localAnchorOf(u.id);
+    // nothing safe to shoot: drift back toward the (fight-following) formation anchor
+    const anchor = P.anchorOf(u);
     if (anchor && distance(u.pos, anchor) > 0.5 && this.grid.canEnter(anchor)) stepTo(anchor);
   }
 
@@ -1417,6 +1421,17 @@ export class BattleEngine {
     if (u) u.interruptMinPriority = p;
   }
 
+  /** could hero `id`'s skill 1 / 2 reach `targetId` now (in range, or a short allowed chase)? — used by the tactical bot */
+  canReachWithSkill(id: number, slot: 'skill' | 'skill2', targetId: number): boolean {
+    const u = this.units.find(x => x.id === id);
+    const t = this.units.find(x => x.id === targetId);
+    if (!u || !t || !u.alive || !t.alive) return false;
+    const range = this.skills.rangeOf(u, this.skills.kit(u)[slot]);
+    const d = distance(u.pos, t.pos);
+    if (d <= range) return true;
+    return d <= range + 3 && (this.skillHost().chaseAllowed?.(u, t) ?? true);
+  }
+
   /** player orders skill 1 / 2 now (works for RESERVE / MANUAL skills too) — false = on cooldown / not possible */
   requestSkill(id: number, slot: 'skill' | 'skill2'): boolean {
     const u = this.units.find(x => x.id === id);
@@ -1619,6 +1634,15 @@ export class BattleEngine {
         return [...dead.filter(a => a.life === 'DEAD_VISIBLE'), ...dead.filter(a => a.life === 'DEAD_HIDDEN')];
       },
       focus: u => (u.side === PLAYER_TEAM ? self.focusUnit() : null),
+      chaseAllowed: (u, f) => {
+        if (u.side !== PLAYER_TEAM) return true;
+        const P = self.positioning;
+        if (isRanged(u)) return !!P.firingCell(u, f, { respectLeash: true, maxMove: 3, safeOnly: true });
+        const anchor = self.flow.formation.localAnchorOf(u.id);
+        if (anchor && distance(anchor, f.pos) > P.leashOf(u) + u.range + 1e-9) return false;
+        // the tank does not abandon a held frontline to chase a caster
+        return u.cls !== 'tank' || !self.units.some(o => o.side !== u.side && self.isValidTarget(u, o) && distance(o.pos, u.pos) <= 1);
+      },
       onSkillUse: (u, slot, s) => {
         if (u.side !== PLAYER_TEAM || slot === 'attack' || self.skills.mode(u, slot) !== 'RESERVE') return;
         if (s.effects.some(e => (e.type === 'DAMAGE' && e.interrupt) || e.type === 'INTERRUPT') &&

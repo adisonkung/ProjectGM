@@ -135,6 +135,7 @@ describe('Tactical difficulty — positioning', () => {
     // the shaman steps into safe range → Sylvie takes the Focus by herself
     b.put(shaman, sy.pos.c + 5, sy.pos.r);
     sy.lockUntil = 0;
+    sy.cd1 = sy.cd2 = 99; // no skill cast lock in the way of the re-think
     b.run(0.6);
     expect(sy.targetId).toBe(shaman.id);
     expect(sy.intent).toBe('focus');
@@ -156,7 +157,23 @@ describe('Tactical difficulty — positioning', () => {
     b.put(lum, anchor.c + 3, anchor.r);
     b.statue(b.monsters('goblin_guard')[0]);
     b.run(4);
-    expect(distance(lum.pos, anchor)).toBeLessThanOrEqual(ROLE_BEHAVIOR.healer.leash);
+    // the anchor follows the frontline (Aurel walked up to the guard): the healer returns behind it, never ahead
+    const moving = b.e.positioning.anchorOf(lum)!;
+    expect(distance(lum.pos, moving)).toBeLessThanOrEqual(ROLE_BEHAVIOR.healer.leash);
+    expect(lum.pos.c).toBeLessThan(b.hero('aurel').pos.c);
+  });
+
+  it('the backline anchor follows an advancing frontline (never past it)', () => {
+    const b = battle([H('sylvie', 3, 1, TOUGH), H('aurel', 0, 1, TOUGH)], [mon('goblin_guard', 5, 1)]);
+    const sy = b.hero('sylvie'), a = b.hero('aurel');
+    const home = b.e.flow.formation.localAnchorOf(sy.id)!;
+    const aHome = b.e.flow.formation.localAnchorOf(a.id)!;
+    expect(b.e.positioning.anchorOf(sy)!.r).toBe(home.r);
+    const before = b.e.positioning.anchorOf(sy)!;
+    b.put(a, a.pos.c + 4, aHome.r);
+    const after = b.e.positioning.anchorOf(sy)!;
+    expect(after.c).toBeGreaterThan(before.c);
+    expect(after.c).toBeLessThan(a.pos.c);
   });
 });
 

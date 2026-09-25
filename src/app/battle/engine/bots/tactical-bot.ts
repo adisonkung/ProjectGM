@@ -1,5 +1,6 @@
 import type { BattleEngine, BattleUnit } from '../battle-engine';
 import { MONSTER_SKILLS, MONSTERS } from '../../../core/data/monsters';
+import { MonsterSkillDefinition } from '../../../core/models/monster';
 import { INTERRUPT_PRIORITY_RANK, InterruptPriority } from '../../../core/models/combat';
 import { TeamSlot } from '../../../core/models/game-state';
 import { OwnedHero } from '../../../core/models/hero';
@@ -49,20 +50,95 @@ const maxCastPriority = (u: BattleUnit): number =>
 
 const RANKS: InterruptPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
+/**
+ * What the player has seen of a stoppable enemy cast: when it can come next. Built only from observable events
+ * (spawn, cast start, cast stopped early) + the published skill data (cooldown, first-cast delay) — no engine timers.
+ */
+interface SeenCast {
+  readyAt: number;
+  castTime: number;
+  rank: number;
+  castingToken: number | null;
+  castStartedAt: number;
+}
+
+/** parts of the TACTICAL play that can be switched off (balance experiments: which decision matters) */
+export interface TacticalOptions {
+  focus?: boolean;
+  reserveInterrupts?: boolean;
+  reserveHealerUlt?: boolean;
+  interruptPriority?: boolean;
+}
+
 export class TacticalBot {
-  private configured = false;
+  constructor(private readonly opt: TacticalOptions = {}) {}
+
+  private seen = new Map<string, SeenCast>();
+
+  private observe(e: BattleEngine, foes: BattleUnit[]): void {
+    for (const f of foes) {
+      for (const cs of f.castSkills) {
+        const def = cs.def as MonsterSkillDefinition;
+        if (!def.interruptible && !def.breakRequired) continue;
+        const key = `${f.id}:${def.id}`;
+        let s = this.seen.get(key);
+        if (!s) {
+          const first = (def.firstCastDelay ?? def.cooldown * 0.5) - (def.initialDelayRandom ?? 0);
+          s = { readyAt: e.time + Math.max(0, first), castTime: def.castTime, rank: INTERRUPT_PRIORITY_RANK[def.interruptPriority ?? 'MEDIUM'], castingToken: null, castStartedAt: 0 };
+          this.seen.set(key, s);
+        }
+        const c = f.casting && f.casting.def === cs.def ? f.casting : null;
+        if (c && s.castingToken !== c.token) {
+          s.castingToken = c.token;
+          s.castStartedAt = e.time;
+          s.readyAt = e.time + def.cooldown;
+        } else if (!c && s.castingToken != null) {
+          // the cast ended early → it was stopped: full cooldown from now
+          if (e.time - s.castStartedAt < def.castTime - 0.1) s.readyAt = e.time + (def.interruptedCooldown ?? def.cooldown);
+          s.castingToken = null;
+        }
+      }
+    }
+  }
+
+  /** ends of the cast windows of the HIGH+ stoppable casts this wave can produce, soonest first */
+  private importantCasts(foes: BattleUnit[]): { end: number; caster: BattleUnit }[] {
+    const out: { end: number; caster: BattleUnit }[] = [];
+    for (const f of foes) for (const cs of f.castSkills) {
+      const s = this.seen.get(`${f.id}:${cs.def.id}`);
+      if (s && s.rank >= INTERRUPT_PRIORITY_RANK.HIGH) out.push({ end: s.readyAt + s.castTime, caster: f });
+    }
+    return out.sort((a, b) => a.end - b.end);
+  }
 
   tick(e: BattleEngine): void {
     const heroes = e.units.filter(u => u.side === 'ally' && u.alive);
     const foes = e.units.filter(u => u.side === 'enemy' && u.alive && u.visible && u.wave === e.waveIndex);
-    if (!this.configured) {
-      this.configured = true;
-      for (const h of e.units.filter(u => u.side === 'ally')) {
-        const kit = kitOf(h.heroId, h.cls);
-        for (const slot of ['skill', 'skill2'] as const) if (kit[slot].ai?.tier === 'INTERRUPT') e.setSkillMode(h.id, slot, 'RESERVE');
-        if (h.cls === 'tank' || h.cls === 'archer' || h.cls === 'healer') e.setSkillMode(h.id, 'ult', 'RESERVE');
+    this.observe(e, foes);
+    // interrupt reservation: one ready interrupt skill that can reach the caster per important (HIGH+) stoppable cast that can come before that
+    // skill would be back; the other interrupt skills fire on cooldown like AUTO (holding them all only loses damage)
+    const upcoming = this.importantCasts(foes);
+    const pool: { h: BattleUnit; slot: 'skill' | 'skill2'; back: number; ready: boolean }[] = [];
+    for (const h of heroes) {
+      const kit = kitOf(h.heroId, h.cls);
+      for (const slot of ['skill', 'skill2'] as const) {
+        if (kit[slot].ai?.tier !== 'INTERRUPT') continue;
+        pool.push({ h, slot, back: e.time + (kit[slot].cooldown ?? 0), ready: (slot === 'skill' ? h.cd1 : h.cd2) <= 0 });
       }
+      if (this.opt.reserveHealerUlt !== false && h.cls === 'healer' && h.skillModes.ult !== 'RESERVE') e.setSkillMode(h.id, 'ult', 'RESERVE');
     }
+    const reserved = new Set<(typeof pool)[number]>();
+    for (const { end, caster } of upcoming) {
+      const pick = pool
+        .filter(p => p.ready && !reserved.has(p) && end < p.back && e.canReachWithSkill(p.h.id, p.slot, caster.id))
+        .sort((a, b) => a.back - b.back)[0];
+      if (pick) reserved.add(pick);
+    }
+    for (const p of pool) {
+      const want = reserved.has(p) && this.opt.reserveInterrupts !== false ? 'RESERVE' : 'AUTO';
+      if ((p.h.skillModes[p.slot] ?? 'AUTO') !== want) e.setSkillMode(p.h.id, p.slot, want);
+    }
+
     // interrupt reservation: spend interrupts only on the most important cast this wave can produce
     // (boss about to enrage → keep everything for the Break check)
     const boss = foes.find(f => f.boss);
@@ -73,13 +149,13 @@ export class TacticalBot {
       const unlocks = next?.enableSkills?.some(s => MONSTER_SKILLS[s.id]?.breakRequired);
       if (unlocks && boss.hp / boss.maxHp <= next.hpBelow + 0.12) min = INTERRUPT_PRIORITY_RANK.CRITICAL;
     }
-    for (const h of heroes) if (h.interruptMinPriority !== RANKS[min]) e.setInterruptMinPriority(h.id, RANKS[min]);
+    if (this.opt.interruptPriority !== false) for (const h of heroes) if (h.interruptMinPriority !== RANKS[min]) e.setInterruptMinPriority(h.id, RANKS[min]);
 
     // soft Focus on the most dangerous support / caster / phase add (the AI only goes for it when it is safe)
     const pick = foes
       .filter(f => f.monster && FOCUS[f.monster.definitionId] != null)
       .sort((a, b) => FOCUS[a.monster!.definitionId] - FOCUS[b.monster!.definitionId] || a.hp - b.hp)[0];
-    if (pick && pick.id !== e.focusTargetId) e.setFocus(pick.id);
+    if (this.opt.focus !== false && pick && pick.id !== e.focusTargetId) e.setFocus(pick.id);
   }
 }
 

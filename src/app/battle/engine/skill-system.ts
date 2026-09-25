@@ -42,6 +42,8 @@ export interface SkillHost {
   canLand(cell: Cell): boolean;
   /** +3 gauge for a basic action that landed */
   basicGauge(u: BattleUnit): void;
+  /** may `u` leave its position to get an interrupt into range of caster `f`? (leash, frontline duty, safety) */
+  chaseAllowed?(u: BattleUnit, f: BattleUnit): boolean;
   /** metrics hook: a skill / ultimate was used */
   onSkillUse?(u: BattleUnit, slot: SkillSlot, s: SkillDefinition, target: BattleUnit): void;
 }
@@ -305,7 +307,7 @@ export class SkillSystem {
       if (s.ai?.tier !== 'INTERRUPT' || (slot === 'skill2' ? u.cd2 : u.cd1) > 0.5) continue;
       const range = this.rangeOf(u, s);
       if (this.mode(u, slot) === 'MANUAL') continue;
-      const c = this.stoppableCasts(u, s, f => distance(f.pos, u.pos) > range && distance(f.pos, u.pos) <= range + 3)[0];
+      const c = this.stoppableCasts(u, s, f => distance(f.pos, u.pos) > range && distance(f.pos, u.pos) <= range + 3 && (this.h.chaseAllowed?.(u, f) ?? true))[0];
       if (c) return c;
     }
     return null;

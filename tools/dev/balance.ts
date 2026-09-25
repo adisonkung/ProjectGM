@@ -1,7 +1,7 @@
 /**
  * Balance sweep for Stage 4–10: AUTO bot vs TACTICAL bot (tools/dev/policy.ts), heroes at the stage's recommended
  * level (or a fixed one), with decision metrics — so a loss can be traced to strategy instead of raw stats.
- * npm run balance -- [runs] [level|rec] [floor|-] [--metrics] [--star=N (what-if: every hero at N★)]
+ * npm run balance -- [runs] [level|rec] [floor|-] [--metrics] [--star=N (what-if: every hero at N★)] [--tune=hp,atk,def (what-if monsterTuning)]
  */
 import { BattleEngine } from '../../src/app/battle/engine/battle-engine';
 import { ENEMIES } from '../../src/app/core/data/enemies';
@@ -20,18 +20,21 @@ const onlyFloor = args[2] && args[2] !== '-' ? Number(args[2]) : null;
 const showMetrics = args.includes('--metrics');
 const starArg = args.find(a => a.startsWith('--star='));
 const star = starArg ? Number(starArg.slice(7)) : null;
+const tuneArg = args.find(a => a.startsWith('--tune='));
+const tune = tuneArg ? tuneArg.slice(7).split(',').map(Number) : null;
 const state = newGameState();
 
 const pct = (n: number) => `${String(Math.round(n * 100)).padStart(3)}%`;
 
-for (const stage of STAGES) {
+for (let stage of STAGES) {
   if (onlyFloor != null ? stage.floor !== onlyFloor : stage.floor < 4) continue;
+  if (tune) stage = { ...stage, monsterTuning: { hp: tune[0], atk: tune[1], def: tune[2] } };
   const level = levelArg === 'rec' ? stage.recommendedLevel ?? 1 : Number(levelArg);
   const heroes = state.heroes.map(h => ({ ...h, level }));
   const out: string[] = [];
   const metricLines: string[] = [];
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
-    const team = bot === 'TACTICAL' ? tacticalFormation(heroes, state.team) : state.team;
+    const team = bot === 'TACTICAL' && !args.includes('--noform') ? tacticalFormation(heroes, state.team) : state.team;
     const allies = teamToUnits(team, heroes).map(u => {
       if (star == null) return u;
       const h = heroes.find(x => x.uid === u.heroUid)!;
@@ -43,7 +46,7 @@ for (const stage of STAGES) {
     };
     for (let s = 1; s <= runs; s++) {
       const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: s, autoUlt: true });
-      const tactical = bot === 'TACTICAL' ? new TacticalBot() : null;
+      const tactical = bot === 'TACTICAL' ? new TacticalBot({ focus: !args.includes('--nofocus'), reserveInterrupts: !args.includes('--noreserve'), reserveHealerUlt: !args.includes('--nohealult'), interruptPriority: !args.includes('--noprio') }) : null;
       while (!e.result && e.time < 400) {
         tactical?.tick(e);
         e.step(0.05);

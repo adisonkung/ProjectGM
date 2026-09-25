@@ -1,4 +1,4 @@
-/** Debug: print a battle's event log for one floor. npm run trace -- <floor> [seed] [level|rec] [tactical] */
+/** Debug: print a battle's event log for one floor. npm run trace -- <floor> [seed] [level|rec] [tactical] [--tune=hp,atk,def] */
 import { BattleEngine } from '../../src/app/battle/engine/battle-engine';
 import { ENEMIES } from '../../src/app/core/data/enemies';
 import { STAGES } from '../../src/app/core/data/stages';
@@ -9,7 +9,9 @@ import { TacticalBot, tacticalFormation } from './policy';
 declare const process: { argv: string[] };
 const floor = Number(process.argv[2] ?? 1);
 const seed = Number(process.argv[3] ?? 1);
-const stage = STAGES[floor - 1];
+const tuneArg = process.argv.find(a => a.startsWith('--tune='));
+const tune = tuneArg ? tuneArg.slice(7).split(',').map(Number) : null;
+const stage = tune ? { ...STAGES[floor - 1], monsterTuning: { hp: tune[0], atk: tune[1], def: tune[2] } } : STAGES[floor - 1];
 const level = !process.argv[4] || process.argv[4] === 'rec' ? stage.recommendedLevel ?? 1 : Number(process.argv[4]);
 const tactical = process.argv[5] === 'tactical';
 const state = newGameState();

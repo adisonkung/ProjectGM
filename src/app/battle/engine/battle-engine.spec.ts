@@ -398,10 +398,13 @@ describe('BattleEngine', () => {
       e.setFocus(shaman.id);
       expect(e.focusTargetId).toBe(shaman.id);
       for (let i = 0; i < 10; i++) e.step(0.05);
-      // out of safe range for the backline (leash / threat zones), blocked for the warrior, the tank holds the line
-      expect(archer.targetId).not.toBe(shaman.id);
-      expect(archer.intent).toBe('blocked');
-      expect(mage.targetId).not.toBe(shaman.id);
+      // the backline only shoots it from a safe cell (outside every hostile melee threat zone), never walks in for it;
+      // blocked for the warrior, the tank holds the line
+      for (const r of [archer, mage]) {
+        if (r.targetId === shaman.id) expect(e.positioning.threatCount(r.pos, e.positioning.threats(r))).toBe(0);
+        else expect(r.intent).toBe('blocked');
+      }
+      expect(e.metrics.unsafeFocusChaseCount).toBe(0);
       expect(tank.targetId).not.toBe(shaman.id);
       expect(tank.intent).toBe('hold');
       expect(warrior.targetId).not.toBe(shaman.id);
