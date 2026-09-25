@@ -1,6 +1,6 @@
 import { effect, Injectable, signal } from '@angular/core';
 import { validLocal } from '../../battle/engine/grid';
-import { newGameState } from '../data/starter';
+import { addMissingStarters, newGameState } from '../data/starter';
 import { autoPlace } from '../rules/team';
 import { GameState } from '../models/game-state';
 
@@ -34,7 +34,7 @@ export class SaveService {
         const inTeam = new Set(s.team.map(t => t.uid));
         s.team = autoPlace(s.heroes.filter(h => inTeam.has(h.uid) && h.injury === 0));
       }
-      return s;
+      return addMissingStarters(s);
     } catch {
       return null;
     }

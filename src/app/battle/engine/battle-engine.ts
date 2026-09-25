@@ -1,3 +1,4 @@
+import { kitName, kitVariant } from '../../core/data/hero-kits';
 import { canInterrupt, MANA_PER_ATTACK, MANA_PER_HIT, SKILL2_NAME, SKILL_CD, SKILL_NAME, START_CD, ULT_NAME } from '../../core/data/classes';
 import { ENEMY_SKILL_START_CD, ENEMY_SKILLS, EnemySkillDef } from '../../core/data/enemy-skills';
 import { animTiming, SkillKind } from '../../core/data/sprites';
@@ -138,6 +139,13 @@ const ULT_LOCK = 0.6;
 const SHIELD_TIME = 6;
 /** นักฆ่า สกิล 1 จู่โจมเงา: วาร์ปไปหลังศัตรูที่เลือดเหลือน้อยที่สุด ฟัน 200% */
 const BLINK_MUL = 2;
+/** สกิลเฉพาะตัว (hero-kits): โทสะเลือด / เมฆพิษ · นักเวท สกิล 2 มือกระดูก */
+const RAGE_HIT = 1.5;
+const RAGE_TIME = 6;
+const RAGE_MUL = 1.35;
+const MIASMA_MUL = 1.1;
+const BONE_MUL = 2;
+const BONE_STUN = 1.2;
 /** นักฆ่า สกิล 2 ควันพิษ: ฟัน 120% + พิษรอบเป้าหมาย 1 ช่อง 25% atk ต่อวินาที 4 วิ */
 const SMOKE_MUL = 1.2;
 const POISON_DPS = 0.25;
@@ -496,7 +504,13 @@ export class BattleEngine {
         .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
       if (dying) {
         u.intent = 'heal';
-        if (u.cd2 <= 0) {
+        const offensive2 = kitVariant(u.heroId, 'skill2') === 'miasma';
+        if (offensive2 && u.cd1 <= 0) {
+          this.cast(u, dying, 'skill');
+          u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
+          return;
+        }
+        if (!offensive2 && u.cd2 <= 0) {
           this.cast(u, dying, 'skill2');
           u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
           return;
@@ -733,7 +747,7 @@ export class BattleEngine {
     const around = (c: Cell) => foes.filter(f => distance(f.pos, c) <= 1).length;
     if (u.cls === 'fighter' && kind === 'skill') return around(u.pos) >= 2; // ดาบหมุนวนรอบตัว
     if (u.cls === 'archer' && kind === 'skill2') return around(t.pos) >= 2; // ห่าธนูตกเป็นวง
-    if (u.cls === 'mage') return around(t.pos) >= 2;
+    if (u.cls === 'mage' && kind === 'skill') return around(t.pos) >= 2;
     return true;
   }
 
@@ -881,7 +895,7 @@ export class BattleEngine {
     const [cd1, cd2] = SKILL_CD[u.cls];
     if (kind === 'skill2') u.cd2 = cd2;
     else u.cd1 = cd1;
-    const skill = (kind === 'skill2' && SKILL2_NAME[u.cls]) || SKILL_NAME[u.cls];
+    const skill = kitName(u.heroId, kind) ?? ((kind === 'skill2' && SKILL2_NAME[u.cls]) || SKILL_NAME[u.cls]);
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
     // นักฆ่า สกิล 1 เลือกเป้าใหม่: ศัตรูที่เลือดเหลือน้อยที่สุด (มักเป็นแถวหลัง) ที่มีช่องว่างข้าง ๆ
     const focus = u.side === 'ally' ? this.focusUnit() : null;
@@ -903,9 +917,40 @@ export class BattleEngine {
     });
   }
 
+  private ultName(u: BattleUnit): string {
+    return kitName(u.heroId, 'ult') ?? ULT_NAME[u.cls]!;
+  }
+
   /** ผลของสกิล ณ เฟรมที่โดน (t = null เมื่อเป้าหายไปหมดแล้ว) */
   private resolveSkill(u: BattleUnit, t: BattleUnit | null, kind: SkillKind): void {
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    // สกิลเฉพาะตัวของฮีโร่ (ดู core/data/hero-kits.ts)
+    switch (kitVariant(u.heroId, kind)) {
+      case 'rage':
+        if (t) this.damage(u, t, RAGE_HIT);
+        u.rage = RAGE_TIME;
+        u.rageMul = RAGE_MUL;
+        return;
+      case 'pierce': {
+        if (!t) return;
+        const behind = this.grid.occupant({ r: t.pos.r + Math.sign(t.pos.r - u.pos.r), c: t.pos.c + Math.sign(t.pos.c - u.pos.c) });
+        const next = foes.find(f => f.id === behind && f !== t);
+        this.damage(u, t, PIERCE_MUL);
+        if (next) this.damage(u, next, PIERCE_BEHIND_MUL);
+        return;
+      }
+      case 'miasma': {
+        const tt = t && t.side !== u.side ? t : [...foes].sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos))[0];
+        if (!tt) return;
+        const at = tt.pos;
+        this.damage(u, tt, MIASMA_MUL);
+        for (const f of foes.filter(f => f.alive && distance(f.pos, at) <= 1)) {
+          f.poison = Math.max(f.poison, u.atk * POISON_DPS);
+          f.poisonTime = POISON_TIME;
+        }
+        return;
+      }
+    }
     if (!t && u.cls !== 'healer') return;
     switch (u.cls) {
       case 'tank':
@@ -959,7 +1004,13 @@ export class BattleEngine {
         break;
       }
       case 'mage':
-        for (const f of foes.filter(f => distance(f.pos, t!.pos) <= 1)) this.damage(u, f, 1.6);
+        if (kind === 'skill2') {
+          // มือกระดูก: มือโผล่จากพื้นจับเป้า 200% + มึน
+          this.damage(u, t!, BONE_MUL);
+          if (t!.alive) t!.castLock = Math.max(t!.castLock, BONE_STUN);
+        } else {
+          for (const f of foes.filter(f => distance(f.pos, t!.pos) <= 1)) this.damage(u, f, 1.6);
+        }
         break;
       case 'healer':
         if (kind === 'skill2') {
@@ -1024,12 +1075,20 @@ export class BattleEngine {
 
   /** นักเวท ท่าไม้ตาย: อุกกาบาตใส่เป้าและรอบ ๆ */
   private meteor(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
+    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: t.id });
     const tm = this.beginSkill(u, 'ult');
     this.later(tm.hit, u, () => {
-      this.events.push({ type: 'impact', src: u.id, dst: t.alive ? t.id : undefined, kind: 'ult' });
-      const at = t.pos;
-      for (const f of this.alive(t.side).filter(f => distance(f.pos, at) <= 1)) this.damage(u, f, f === t ? METEOR_MUL : METEOR_SPLASH);
+      // ลำแสง/ลูกไฟบินไปหาเป้า แล้วระเบิดเป็นวงเมื่อถึง
+      const flight = PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
+      if (t.alive) this.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: 'ult', flight });
+      const at = { ...t.pos };
+      this.pending.push({
+        at: this.time + flight,
+        fn: () => {
+          this.events.push({ type: 'impact', src: u.id, dst: t.alive ? t.id : undefined, kind: 'ult' });
+          for (const f of this.alive(t.side).filter(f => distance(f.pos, at) <= 1)) this.damage(u, f, f === t ? METEOR_MUL : METEOR_SPLASH);
+        },
+      });
     });
   }
 
@@ -1048,7 +1107,7 @@ export class BattleEngine {
   /** แทงก์ ท่าไม้ตาย: กางโล่ให้ตัวเองและเพื่อนทุกคน แล้วยั่วยุ */
   private ultimate(u: BattleUnit): void {
     u.taunt = Math.max(u.taunt, TAUNT_TIME);
-    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult' });
+    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult' });
     const tm = animTiming(u.sprite, 'ult');
     u.castLock = Math.max(u.castLock, tm.total, ULT_LOCK);
     this.later(tm.hit, u, () => {
@@ -1088,7 +1147,7 @@ export class BattleEngine {
 
   /** นักธนู ท่าไม้ตาย: ลูกธนูสวรรค์ตกใส่ศัตรูทุกตัว */
   private arrowRain(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
+    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: t.id });
     const tm = this.beginSkill(u, 'ult');
     this.later(tm.hit, u, () => {
       this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
@@ -1099,7 +1158,7 @@ export class BattleEngine {
 
   /** ฮีลเลอร์ ท่าไม้ตาย: ฮีลทั้งทีม และชุบชีวิตเพื่อนที่ล้ม 1 คน (ถ้ามี) */
   private resurrect(u: BattleUnit, d: BattleUnit | null): void {
-    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: d?.id });
+    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: d?.id });
     const tm = this.beginSkill(u, 'ult');
     this.later(tm.hit, u, () => {
       if (this.result) return;
@@ -1121,7 +1180,7 @@ export class BattleEngine {
 
   /** นักสู้ ท่าไม้ตาย: ฟาดดาบสายฟ้าลงที่เป้าหมาย กระเด็นโดนศัตรูรอบ ๆ */
   private bladeUlt(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
+    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: t.id });
     const tm = this.beginSkill(u, 'ult');
     this.later(tm.hit, u, () => {
       const tt = this.liveTarget(u, t);
@@ -1135,7 +1194,7 @@ export class BattleEngine {
 
   /** นักฆ่า ท่าไม้ตาย: วาร์ปไปประหารศัตรูที่ใกล้ตาย */
   private execute(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'cast', src: u.id, skill: ULT_NAME[u.cls]!, kind: 'ult', dst: t.id });
+    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: t.id });
     const tm = this.beginSkill(u, 'ult');
     u.atkCd = Math.max(u.atkCd, tm.total);
     this.later(tm.move, u, () => {

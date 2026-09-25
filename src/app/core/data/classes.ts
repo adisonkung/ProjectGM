@@ -25,6 +25,7 @@ export const SKILL2_NAME: Partial<Record<HeroClass, string>> = {
   archer: 'ห่าธนู',
   healer: 'พรศักดิ์สิทธิ์',
   assassin: 'ควันพิษ',
+  mage: 'มือกระดูก',
 };
 export const ULT_NAME: Partial<Record<HeroClass, string>> = {
   tank: 'ป้อมปราการศักดิ์สิทธิ์',

@@ -23,6 +23,11 @@ export const HEROES: HeroTemplate[] = [
   { id: 'lumina',   name: 'ลูมิน่า',  cls: 'healer',  star: 5, sprite: 'hero-lumina.png' },
   { id: 'aria',     name: 'อาเรีย',   cls: 'mage',    star: 5 },
   { id: 'shade',    name: 'เชด',      cls: 'assassin', star: 5, sprite: 'hero-shade.png' },
+  { id: 'morgan',   name: 'โมร์แกน',  cls: 'tank',    star: 5, sprite: 'hero-morgan.png' },
+  { id: 'ragnar',   name: 'แร็กนาร์', cls: 'fighter', star: 5, sprite: 'hero-ragnar.png' },
+  { id: 'corvin',   name: 'คอร์วิน',  cls: 'healer',  star: 5, sprite: 'hero-corvin.png' },
+  { id: 'nox',      name: 'น็อกซ์',   cls: 'assassin', star: 5, sprite: 'hero-nox.png' },
+  { id: 'velma',    name: 'เวลมา',    cls: 'mage',    star: 5, sprite: 'hero-velma.png' },
   { id: 'aurel',    name: 'ออเรล',    cls: 'tank',    star: 5, sprite: 'hero-aurel.png' },
 ];
 

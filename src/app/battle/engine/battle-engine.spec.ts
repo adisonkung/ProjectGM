@@ -456,4 +456,28 @@ describe('BattleEngine', () => {
       expect(evs.some(ev => ev.type === 'focus' && ev.dst === null && ev.reason === 'dead')).toBeTrue();
     });
   });
+
+  it('hero kits: berserker rage, plague miasma and necro bone hand resolve', () => {
+    const team: UnitSpec[] = [
+      { name: 'R', cls: 'fighter', heroId: 'ragnar', stats: { ...CLASS_BASE.fighter, hp: 5000 }, pos: { r: 0, c: 1 } },
+      { name: 'C', cls: 'healer', heroId: 'corvin', stats: { ...CLASS_BASE.healer, hp: 5000 }, pos: { r: 3, c: 1 } },
+      { name: 'V', cls: 'mage', heroId: 'velma', stats: { ...CLASS_BASE.mage, hp: 5000 }, pos: { r: 4, c: 0 } },
+    ];
+    const e = new BattleEngine({ allies: team, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 3 });
+    const names = new Set<string>();
+    let raged = false;
+    let poisoned = false;
+    while (!e.result && e.time < 60) {
+      e.step(0.05);
+      if (e.units[0].rageMul > 1) raged = true;
+      for (const ev of e.drainEvents()) {
+        if (ev.type === 'cast' && ev.src <= 3) names.add(ev.skill);
+        if (ev.type === 'damage' && ev.poison) poisoned = true;
+      }
+    }
+    expect(names.has('โทสะเลือด')).toBeTrue();
+    expect(names.has('มือกระดูก')).toBeTrue();
+    expect(raged).toBeTrue();
+    expect(poisoned).toBeTrue();
+  });
 });

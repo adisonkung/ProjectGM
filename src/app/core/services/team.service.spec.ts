@@ -60,6 +60,7 @@ describe('TeamService', () => {
     save.update(() => ({ ...st, heroes: st.heroes.map((h, i) => (i === 0 ? { ...h, injury: 2 } : h)) }));
     service.auto();
     expect(slot(st.heroes[0].uid)).toBeUndefined();
-    expect(service.slots().length).toBe(4);
+    // ม้านั่งมีฮีโร่เหลือ: เติมจนครบ 5 ตัว
+    expect(service.slots().length).toBe(5);
   });
 });
