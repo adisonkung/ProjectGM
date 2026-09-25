@@ -8,7 +8,8 @@
          [class.pickable]="u.side === 'enemy' && u.alive" [attr.title]="u.side === 'enemy' ? u.name + ' — แตะเพื่อเลือก, แตะซ้ำเพื่อโฟกัส' : u.name" [attr.data-name]="u.name" (click)="u.side === 'enemy' && u.alive && pick.emit(u.id)">
       @if (u.alive && (u.focused || u.selected)) { <app-focus-mark [focused]="!!u.focused" /> }
       <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss || !!u.elite" [icon]="u.icon"
-                       [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
+                       [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()"
+                       [castTime]="anims()[u.id]?.castTime" [force]="!!anims()[u.id]?.force" />
       @if (u.alive && u.cast) { <app-cast-bar [cast]="u.cast" /> }
       @if (u.alive) {
         <div class="bars">

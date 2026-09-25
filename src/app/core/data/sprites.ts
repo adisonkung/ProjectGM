@@ -4,7 +4,11 @@
  * เอฟเฟกต์ใช้สเกลพิกเซลเดียวกับตัวละคร (1 px ต้นฉบับ = 1.25% ของความกว้างช่องกระดาน)
  */
 
-export type SpriteAnim = 'idle' | 'walk' | 'attack' | 'skill' | 'skill2' | 'ult' | 'hurt' | 'die';
+import { AnimationConfig } from '../models/monster';
+import { MONSTERS, PROJECTILES } from './monsters';
+
+/** `cast` = a monster's cast clip, driven by the cast time (see AnimDef.castStart / activate) */
+export type SpriteAnim = 'idle' | 'walk' | 'attack' | 'skill' | 'skill2' | 'ult' | 'hurt' | 'die' | 'cast';
 export type SkillKind = 'skill' | 'skill2' | 'ult';
 
 /** หนึ่งท่าในแผ่น */
@@ -19,6 +23,9 @@ export interface AnimDef {
   move?: number;
   /** ลำดับเฟรมที่เล่นจริง (ใช้กับท่ายืน: ตัดเฟรมที่กระตุกออกและเรียงให้ต่อเนื่อง) */
   seq?: number[];
+  /** ท่าร่าย (castDriven): เฟรม CAST_START / SKILL_ACTIVATE (0-based) — เฟรมระหว่างนั้นยืดให้พอดีเวลาร่าย */
+  castStart?: number;
+  activate?: number;
 }
 
 export interface SheetDef {
@@ -240,20 +247,46 @@ export const SHEETS: Record<string, SheetDef> = {
     fx: { skill: 'velma-s1', skill2: 'velma-s2', ult: 'velma-ult' },
     projectile: { ult: 'velma-beam' },
   },
-  // ---- ศัตรู (วาดหันขวา เกมกลับภาพเอง)
-  // สไลม์เกราะ: 6×5 (tools/sprites/slime.py) · ไม่มีแถวสกิล → สกิล/ท่าไม้ตายใช้ท่าพุ่งชน (attack)
-  'enemy-slime.png': {
-    cols: 6,
-    rows: 5,
-    anims: {
-      idle: { row: 0, frames: 4, seq: [0, 1, 2, 3] },
-      walk: { row: 1, frames: 6 },
-      hurt: { row: 2, frames: 3 },
-      die: { row: 3, frames: 6 },
-      attack: { row: 4, frames: 6, hit: 4 },
-    },
-  },
+  // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
 };
+
+/** ชื่อ clip ในข้อมูลมอนสเตอร์ → ท่าของ unit-sprite */
+const CLIP_ANIM: Record<string, SpriteAnim> = { idle: 'idle', move: 'walk', hurt: 'hurt', death: 'die', attack: 'attack' };
+
+/**
+ * แผ่น sprite ของมอนสเตอร์จาก AnimationConfig (แถว/เฟรมเลขบนแผ่นอาร์ต เริ่ม 1 → 0-based)
+ * attack.hit = เฟรมของ event ที่ตัดสินการโจมตี · clip ร่าย (castDriven) → ท่า `cast` พร้อม castStart/activate
+ */
+export function monsterSheet(anim: AnimationConfig, attackEvent?: string, projectile?: string): SheetDef {
+  const anims: SheetDef['anims'] = {};
+  let cols = 0, rows = 0;
+  for (const [name, c] of Object.entries(anim.clips)) {
+    cols = Math.max(cols, c.frames);
+    rows = Math.max(rows, c.row);
+    const ev = (e: string) => c.events?.find(m => m.event === e)?.frame;
+    if (c.castDriven) {
+      anims.cast = { row: c.row - 1, frames: c.frames, ms: c.frameMs, castStart: (ev('CAST_START') ?? 1) - 1, activate: (ev('SKILL_ACTIVATE') ?? c.frames) - 1 };
+      continue;
+    }
+    const key = CLIP_ANIM[name];
+    if (!key) continue;
+    const hitFrame = name === 'attack' && attackEvent ? ev(attackEvent) : undefined;
+    anims[key] = {
+      row: c.row - 1,
+      frames: c.frames,
+      ...(c.frameMs !== FRAME_MS && key !== 'idle' ? { ms: c.frameMs } : {}),
+      ...(hitFrame ? { hit: hitFrame - 1 } : {}),
+    };
+  }
+  return { cols, rows, anims, ...(anim.cellH ? { cellH: anim.cellH } : {}), ...(projectile ? { projectile: { attack: projectile } } : {}) };
+}
+
+for (const m of Object.values(MONSTERS)) {
+  const sheet = m.animation.sheet;
+  if (!sheet || SHEETS[sheet]) continue;
+  const proj = m.attack.projectileId ? PROJECTILES[m.attack.projectileId]?.fx : undefined;
+  SHEETS[sheet] = monsterSheet(m.animation, m.attack.event, proj);
+}
 
 export const FX: Record<string, FxDef> = {
   // ---- โมร์แกน / แร็กนาร์ / คอร์วิน / น็อกซ์ / เวลมา (tools/sprites/h5/fx.py)
@@ -298,8 +331,11 @@ export const FX: Record<string, FxDef> = {
   'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 134, h: 132, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },
   // โล่ที่เพื่อนได้จากท่าไม้ตายออเรล: ใช้แผ่นเดียวกัน ย่อลง
   'aurel-ward': { file: 'fx-aurel-ult.png', frames: 8, w: 123, h: 90, frameMs: 80, at: 'self', dy: -16, scale: 0.85 },
-  // Alpha Howl (tools/sprites/fx_alpha_howl.py): frame 5 = activation burst, started early by the engine's 'fx' event
-  'alpha-howl': { file: 'fx-alpha-howl.png', frames: 8, w: 128, h: 96, frameMs: 90, at: 'self', dy: -8, scale: 1.4 },
+  // Alpha Howl (tools/sprites/fx_alpha_howl.py จากแผ่น 8 เฟรมของผู้ใช้): frame 5 = FX PEAK = SKILL_ACTIVATE,
+  // started early by the engine's 'fx' event · wave origin sits at the wolf's raised mouth and travels forward
+  'alpha-howl': { file: 'fx-alpha-howl.png', frames: 8, w: 141, h: 158, frameMs: 90, at: 'self', dx: 109, dy: -52, scale: 0.65 },
+  // ลูกธนูก็อบลิน (ตัดจากเฟรมปล่อยสายในแผ่นก็อบลินพลธนู, tools/sprites/monster_sheet.py) · 1 เฟรม หัวชี้ขวา
+  'goblin-arrow': { file: 'fx-goblin-arrow.png', frames: 1, w: 39, h: 12, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
   'aurel-ult': { file: 'fx-aurel-ult.png', frames: 8, w: 123, h: 90, frameMs: 95, at: 'self', dy: -18, scale: 1.55 },
 };
 
@@ -320,6 +356,7 @@ export const ANIM_FALLBACK: Record<SpriteAnim, SpriteAnim | null> = {
   ult: 'skill',
   hurt: null,
   die: 'idle',
+  cast: 'skill',
 };
 
 /** ท่าที่ไม่มีแผ่น sprite (โทเคน): ความยาวท่า และจุดที่ดาเมจเข้า (วินาที) */

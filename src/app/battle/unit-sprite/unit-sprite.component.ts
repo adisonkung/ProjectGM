@@ -40,6 +40,10 @@ export class UnitSpriteComponent {
   readonly speed = input(1);
   /** หันซ้าย (แผ่น sprite วาดหันขวา) */
   readonly flip = input(false);
+  /** ท่า `cast`: เวลาร่าย (วินาทีเกม) — เฟรม CAST_START→SKILL_ACTIVATE ยืดให้พอดี */
+  readonly castTime = input<number | undefined>();
+  /** เล่นทับท่าที่กำลังเล่นอยู่ (เช่น ถูกตัดร่าย → ท่าโดนตีทันที) */
+  readonly force = input(false);
 
   readonly sheet = viewChild<ElementRef<HTMLElement>>('sheet');
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);
@@ -85,7 +89,7 @@ export class UnitSpriteComponent {
     if (!name) return;
 
     const busy = this.current?.playState === 'running';
-    if (LOW.includes(name) && name !== 'idle' && busy && !LOW.includes(this.currentName)) return;
+    if (!this.force() && LOW.includes(name) && name !== 'idle' && busy && !LOW.includes(this.currentName)) return;
     // ไม่ขยับอีกหลังตาย (ยกเว้นรีเซ็ตกลับท่ายืน)
     if (this.currentName === 'die' && name !== 'die' && name !== 'idle') return;
 
@@ -98,6 +102,10 @@ export class UnitSpriteComponent {
 
     this.current?.cancel();
     this.currentName = name;
+    if (name === 'cast' && a.castStart != null && a.activate != null) {
+      this.playCast(el, def, a, x, y);
+      return;
+    }
     if (loop) {
       this.playIdle(el, a.seq ?? Array.from({ length: a.frames }, (_, i) => i), a.ms ?? IDLE_FRAME_MS, x, y);
       return;
@@ -119,6 +127,28 @@ export class UnitSpriteComponent {
    * (เฟรมยืนจากแผ่น AI ไม่ต่อเนื่องกันทุกเฟรม — ตัดเฟรมที่กระตุกออก เรียงให้ต่างกันน้อยที่สุด)
    * ไม่เฟดซ้อนเฟรม เพราะจะเห็นเป็นภาพซ้อน
    */
+  /**
+   * ท่าร่ายของมอนสเตอร์ (castTimeline): เฟรม CAST_START ขึ้นทันที, เฟรมถึง SKILL_ACTIVATE ยืดให้ครบเวลาร่าย,
+   * แล้วเล่นเฟรมที่เหลือ (ฟื้นตัว) ตามจังหวะปกติ — จบแล้วกลับท่ายืน
+   */
+  private playCast(el: HTMLElement, def: SheetDef, a: NonNullable<SheetDef['anims']['cast']>, x: (i: number) => number, y: number): void {
+    const spd = this.speed();
+    const ms = a.ms ?? FRAME_MS;
+    const cast = (this.castTime() ?? ((a.activate! - a.castStart!) * ms) / 1000) * 1000;
+    const per = a.activate! > a.castStart! ? cast / (a.activate! - a.castStart!) : 0;
+    const steps: { f: number; t: number }[] = [];
+    let t = 0;
+    for (let f = a.castStart!; f < a.frames; f++) {
+      steps.push({ f, t });
+      t += f < a.activate! ? per : ms;
+    }
+    const total = t / spd;
+    const k: Keyframe[] = steps.map(s => ({ offset: s.t / t, easing: 'steps(1, end)', backgroundPosition: `${x(s.f)}% ${y}%` }));
+    k.push({ offset: 1, backgroundPosition: `${x(a.frames - 1)}% ${y}%` });
+    this.current = el.animate(k, { duration: total, iterations: 1 });
+    this.current.onfinish = () => this.play(el, def, 'idle');
+  }
+
   private playIdle(el: HTMLElement, order: number[], ms: number, x: (i: number) => number, y: number): void {
     const n = order.length;
     const duration = n * ms;

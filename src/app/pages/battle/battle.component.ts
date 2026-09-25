@@ -335,7 +335,7 @@ export class BattleComponent implements OnDestroy {
     const fx: FxView[] = [];
     const unitOf = (id: number) => this.engine.units.find(u => u.id === id)!;
     const posOf = (id: number) => unitOf(id).pos;
-    const set = (id: number, anim: AnimState['anim']) => (anims[id] = { anim, key: ++this.animKey });
+    const set = (id: number, anim: AnimState['anim'], extra: Partial<AnimState> = {}) => (anims[id] = { anim, key: ++this.animKey, ...extra });
     /** เอฟเฟกต์ของสกิลนี้ เล่นตอนเริ่มท่าหรือตอนโดน ตามที่ตั้งไว้ใน FX */
     const addFx = (src: number, dst: number | undefined, kind: SkillKind, when: 'cast' | 'impact') => {
       const name = SHEETS[unitOf(src).sprite ?? '']?.fx?.[kind];
@@ -443,6 +443,8 @@ export class BattleComponent implements OnDestroy {
           if (e.dst == null && e.reason === 'dead') this.showBanner('🎯 เป้าโฟกัสล้มแล้ว — ทีมกลับไปใช้ AI ปกติ', 1400);
           break;
         case 'castStart': {
+          // monster cast clip (e.g. Alpha Howl): frames stretched over the cast time; sheets without one fall back
+          if (SHEETS[unitOf(e.src).sprite ?? '']?.anims.cast) set(e.src, 'cast', { castTime: e.castTime });
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
           break;
@@ -482,7 +484,7 @@ export class BattleComponent implements OnDestroy {
           this.interrupted.add(e.dst);
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'INTERRUPTED!', kind: 'interrupt' });
-          set(e.dst, 'hurt');
+          set(e.dst, 'hurt', { force: true });
           break;
         }
         case 'immune': {

@@ -192,6 +192,8 @@ export interface AnimClip {
 export interface AnimationConfig {
   /** sprite sheet in public/sprites (undefined = token) */
   sheet?: string;
+  /** sheet cell height in px (cells are 132 wide; default 100 — tall poses like the Alpha's howl use 120) */
+  cellH?: number;
   /** token icon when there is no sheet (defaults to the display class icon) */
   tokenIcon?: 'wolf';
   clips: Record<string, AnimClip>;

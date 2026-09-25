@@ -44,7 +44,7 @@ export const PROJECTILES: Record<string, ProjectileDefinition> = {
     collisionRadius: 0.2,
     maxLifetime: 2.5,
     hits: 'TARGET',
-    fx: 'arrow-normal',
+    fx: 'goblin-arrow',
   },
 };
 
@@ -122,6 +122,7 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
     attack: { id: 'goblin_sword_slash', damageType: 'PHYSICAL', damageMultiplier: 1, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.25 },
     skills: [],
     animation: {
+      sheet: 'enemy-goblin-fighter.png',
       clips: {
         idle: clip(1, 4, [], 150),
         move: clip(2, 6),
@@ -156,12 +157,14 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
     },
     skills: [],
     animation: {
+      sheet: 'enemy-goblin-archer.png',
       clips: {
         idle: clip(1, 4, [], 150),
         move: clip(2, 6),
         hurt: clip(3, 3),
         death: death(4, 6),
-        attack: clip(5, 7, [{ frame: 5, event: 'PROJECTILE_SPAWN', name: 'PROJECTILE_SPAWN' }]),
+        // 6 frames on the sheet; frame 5 = RELEASE (the arrow is cut out of it and flies as the projectile)
+        attack: clip(5, 6, [{ frame: 5, event: 'PROJECTILE_SPAWN', name: 'PROJECTILE_SPAWN' }]),
       },
     },
   },
@@ -183,6 +186,7 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
     attack: { id: 'forest_wolf_bite', damageType: 'PHYSICAL', damageMultiplier: 1, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.4 },
     skills: [],
     animation: {
+      sheet: 'enemy-wolf.png',
       tokenIcon: 'wolf',
       clips: {
         idle: clip(1, 4, [], 150),
@@ -216,12 +220,14 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
     attack: { id: 'alpha_savage_bite', damageType: 'PHYSICAL', damageMultiplier: 1.15, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.4 },
     skills: ['alpha_howl'],
     animation: {
+      sheet: 'enemy-alpha-wolf.png',
+      cellH: 120,
       tokenIcon: 'wolf',
       clips: {
         idle: clip(1, 4, [], 150),
         move: clip(2, 6),
         hurt: clip(3, 3),
-        death: death(4, 6),
+        death: death(4, 7), // 7 frames on the sheet (… RESIST, FALL, COLLAPSE …)
         attack: clip(5, 6, [{ frame: 4, event: 'DAMAGE', name: 'SAVAGE_BITE_DAMAGE' }]),
         howl: {
           row: 6, frames: 8, frameMs: 90, castDriven: true,

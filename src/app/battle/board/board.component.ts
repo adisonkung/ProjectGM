@@ -95,6 +95,10 @@ export interface ProjectileView {
 export interface AnimState {
   anim: SpriteAnim;
   key: number;
+  /** anim 'cast': cast time in game seconds */
+  castTime?: number;
+  /** play over a running attack/cast (interrupt → hurt) */
+  force?: boolean;
 }
 
 @Component({

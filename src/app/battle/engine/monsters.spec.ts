@@ -1,7 +1,7 @@
 import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
-import { attackWindupOf, castTimeline, MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
-import { SHEETS } from '../../core/data/sprites';
+import { attackWindupOf, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
+import { FX, SHEETS } from '../../core/data/sprites';
 import { STAGES } from '../../core/data/stages';
 import { newGameState } from '../../core/data/starter';
 import { HeroClass } from '../../core/models/hero';
@@ -484,5 +484,43 @@ describe('Stage 1–3 monsters', () => {
     const reactions = b.of('damage').filter(d => d.dst === g.id && d.hurt).length;
     expect(reactions).toBeLessThanOrEqual(1);
     expect(MONSTERS['alpha_wolf'].stats.minHitReactionInterval).toBeGreaterThan(MONSTERS['goblin_fighter'].stats.minHitReactionInterval);
+  });
+});
+
+describe('Forest monster sprite sheets', () => {
+  const sheeted = ['forest_slime', 'goblin_fighter', 'goblin_archer', 'forest_wolf', 'alpha_wolf'];
+
+  it('every Stage 1–3 monster has a generated sheet whose rows/frames come from its clips', () => {
+    for (const id of sheeted) {
+      const m = MONSTERS[id];
+      const sheet = SHEETS[m.animation.sheet!];
+      expect(sheet).withContext(id).toBeDefined();
+      const c = m.animation.clips;
+      expect(sheet.anims.idle).withContext(id).toEqual(jasmine.objectContaining({ row: c['idle'].row - 1, frames: c['idle'].frames }));
+      expect(sheet.anims.walk?.frames).withContext(id).toBe(c['move'].frames);
+      expect(sheet.anims.die?.frames).withContext(id).toBe(c['death'].frames);
+      // the sprite's hit frame is the clip's resolving event (1-based on the art → 0-based)
+      const ev = c[m.attack.clip].events!.find(e => e.event === m.attack.event)!;
+      expect(sheet.anims.attack?.hit).withContext(id).toBe(ev.frame - 1);
+      for (const a of Object.values(sheet.anims)) expect(a!.frames).toBeLessThanOrEqual(sheet.cols);
+    }
+  });
+
+  it('frame counts match the art sheets (archer shot 6, alpha death 7, howl 8)', () => {
+    expect(MONSTERS['goblin_archer'].animation.clips['attack'].frames).toBe(6);
+    expect(MONSTERS['alpha_wolf'].animation.clips['death'].frames).toBe(7);
+    const cast = SHEETS['enemy-alpha-wolf.png'].anims.cast!;
+    expect(cast).toEqual(jasmine.objectContaining({ row: 5, frames: 8, castStart: 1, activate: 4 }));
+    expect(SHEETS['enemy-alpha-wolf.png'].cellH).toBe(120);
+  });
+
+  it('goblin arrow and Alpha Howl FX are registered and in sync with the skill data', () => {
+    const arrow = PROJECTILES['goblin_arrow'].fx;
+    expect(SHEETS['enemy-goblin-archer.png'].projectile?.attack).toBe(arrow);
+    expect(FX[arrow]).toBeDefined();
+    const howl = MONSTER_SKILLS['alpha_howl'].fx!;
+    expect(FX[howl.id].frames).toBe(8);
+    expect(FX[howl.id].frameMs).toBe(howl.frameMs);
+    expect(howl.activationFrame).toBe(5);
   });
 });
