@@ -26,7 +26,7 @@ export const HERO_ART: Record<string, HeroArt> = {
   corvin: art('corvin'),
   nox: art('nox'),
   velma: art('velma'),
-  // โมร์แกน: ยังไม่มีแผ่นไอคอน → ใช้ sprite ครอปแทน
+  morgan: art('morgan'),
 };
 
 export const heroArt = (heroId?: string): HeroArt | undefined => (heroId ? HERO_ART[heroId] : undefined);
