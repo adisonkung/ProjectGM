@@ -46,11 +46,18 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
 - นักฆ่า (assassin, เชด): สกิล 1 จู่โจมเงา (วาร์ปไปเป้าโฟกัส หรือศัตรูเลือด % ต่ำสุด ฟัน 200%) · สกิล 2 ควันพิษ · ท่าไม้ตาย วาร์ปไปฟันศัตรูเลือด % ต่ำสุดในระยะ 4 ช่อง 350% คริแน่นอน
 - แทงก์: สกิล 1 ยั่วยุ · สกิล 2 พุ่งชนโล่ (160% ผลักถอย มึน 1 วิ, ตัดร่ายได้) · ท่าไม้ตาย (ต้องมีศัตรูในระยะ 3) โล่ตัวเอง 30% / เพื่อนทุกคน 15% ของเลือดสูงสุดแทงก์ 6 วิ + ยั่วยุ + ตัดร่ายศัตรูในระยะ 3 ช่อง · เหตุการณ์ `shield` → `shieldFx` + `+โล่`
 - `public/portraits/{id}.webp` (288px) รูปโปรไฟล์ + `public/skills/{id}-{s1,s2,ult}.webp` (160px) ไอคอนสกิล — ตัดจากแผ่นไอคอนด้วย `tools/art/slice_icons.py <sheet> aurel shade jin sylvie lumina` · แมปใน `core/data/hero-art.ts` (`heroArt(heroId)`), `heroId` ส่งผ่าน UnitSpec → BattleUnit → UnitView · แถบทีมโชว์รูป + ไอคอน 3 ช่อง (คูลดาวน์ = ฉากดำ + วงหมุน + วินาทีที่เหลือ, ท่าไม้ตายมืดตามเกจ) · ม้านั่งจัดทีมใช้รูปโปรไฟล์
+- **มอนสเตอร์แบบ data-driven (Normal Forest ชั้น 1–3)**: นิยามคงที่ใน `core/data/monsters.ts` (`MONSTERS` forest_slime / goblin_fighter / goblin_archer / forest_wolf / alpha_wolf + `MONSTER_SKILLS`, `BUFFS`, `PROJECTILES`) ชนิดข้อมูลใน `core/models/monster.ts` (MonsterDefinition, MonsterStats, MonsterAIConfig, TargetingConfig, AttackDefinition, MonsterSkillDefinition, AnimationConfig, ProjectileDefinition, BuffDefinition) · ด่านอ้าง id ใน `StageDef.enemies/rounds` (ค้นใน MONSTERS ก่อน ENEMIES) · UI ใช้ `enemyInfo(id)`
+  - ระบบกลางใน `battle/engine`: `MonsterController` (state machine เดียว SPAWNING/IDLE/SEARCHING/MOVING/ATTACKING/CASTING/HURT/RECOVERING/DEAD, runtime = `BattleUnit.monster: MonsterCombatState`, คุยกับเอนจินผ่าน `CombatContext`) · `targeting.ts` (`NEAREST_REACHABLE_FRONT` ไม่ตีทะลุแนวหน้า / `LOWEST_HP_PCT` + ล็อกเป้า/ติดเป้าเดิม) · `damage-resolver.ts` (`DamageResolver.resolve` ใช้ทั้งฮีโร่และมอน: atk×buff×mul ×100/(100+def), ≥1) · `buffs.ts` (REFRESH_DURATION ไม่คูณซ้อน, `effectiveAttack`) · กระสุนชนจริง `engine.projectiles` (ดาเมจตอนชน ไม่ใช่ตอนยิง, โดนได้ตัวเดียว, `hits: 'TARGET'`)
+  - จังหวะท่า: เฟรมในข้อมูลเป็นเลขบนแผ่นอาร์ต (เริ่ม 1) → แปลงเป็น semantic event (DAMAGE / PROJECTILE_SPAWN / CAST_START / SKILL_ACTIVATE) · ดาเมจเข้าเฉพาะตอน event + ตรวจเป้าอีกรอบ (+hitTolerance) · hit reaction จำกัดด้วย `minHitReactionInterval` ไม่ขัดท่าตี/ร่าย
+  - ระบบร่ายกลาง (ใช้ร่วมกับสกิลร่ายเดิม): `castStart` → `castProgress` (ทุก 25%) → `skillActivated` → `castDone` · ถูกตัด `interrupt` (คูลดาวน์เต็ม, RECOVERING) · ตาย/จบ `castCancel` + `fxStop` · FX ร่ายเริ่มก่อนเพื่อให้เฟรม activation ตรงกับ SKILL_ACTIVATE (`castTimeline`, event `fx`) · Alpha Howl: ร่าย 2 วิ CD 12 ร่ายครั้งแรกหลังเกิด ≥ 2 วิ ต้องมีหมาป่าตัวอื่นรอด และมีเป้าที่บัฟเหลือ < 2 วิ → ATK +25% 10 วิ ให้หมาป่าทุกตัว (รวมตัวเอง) · `fx-alpha-howl.png` จาก `tools/sprites/fx_alpha_howl.py`
+  - เพิ่มมอนตัวใหม่ = เพิ่ม entry ใน MONSTERS (+ สกิล/บัฟ/กระสุนถ้ามี) ไม่ต้องแก้เอนจิน · ดีบัก: `/lab?floor=N&debug=1` หรือกด D (เฉพาะ dev build) โชว์ state/เป้า/HP/คูลดาวน์/ร่าย + เส้นเป้า · `npm run trace -- <floor> [seed]` พิมพ์ event log
+  - เทสต์: `battle/engine/monsters.spec.ts` (30 เคสตามสเปก + ข้อมูล/สูตร)
 
 ## คำสั่ง
 - `npm start` รันเกมที่ http://localhost:4200
 - `npm test` ยูนิตเทสต์ (เอนจินต่อสู้, TeamService, หน้าจัดทีม/ห้องทดลอง)
 - `npm run sim -- 200` จำลองการต่อสู้ทุกชั้นแบบไม่แสดงผล ดูอัตราชนะ
+- `npm run trace -- 3` พิมพ์ event log ของการต่อสู้ชั้นนั้น (ดีบัก AI)
 
 ## Roadmap
 0 ตั้งโปรเจกต์ ✅ · 1 เอนจินต่อสู้ ✅ · 2 กระดานลากวาง + ภาพ ✅ · 3 หอคอยและโหมด · 4 ฐาน/รายชื่อ · 5 กาชา · 6 ปรับสมดุล

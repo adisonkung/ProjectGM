@@ -3,10 +3,11 @@
 
   @for (u of units(); track u.id) {
     <div class="unit" [class.enter]="!!u.enter" [class.dead]="!u.alive" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
-         [class.taunt]="u.taunt" [class.blink]="!!u.blink" [style.transform]="unitPos(u)" [style.z-index]="unitZ(u)"
+         [class.taunt]="u.taunt" [class.blink]="!!u.blink" [class.elite]="!!u.elite" [class.buffed]="!!u.buffed && u.alive"
+         [style.--step]="(u.moveSec ?? 0.6) + 's'" [style.transform]="unitPos(u)" [style.z-index]="unitZ(u)"
          [class.pickable]="u.side === 'enemy' && u.alive" [attr.title]="u.side === 'enemy' ? u.name + ' — แตะเพื่อเลือก, แตะซ้ำเพื่อโฟกัส' : u.name" [attr.data-name]="u.name" (click)="u.side === 'enemy' && u.alive && pick.emit(u.id)">
       @if (u.alive && (u.focused || u.selected)) { <app-focus-mark [focused]="!!u.focused" /> }
-      <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss"
+      <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss || !!u.elite" [icon]="u.icon"
                        [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()" />
       @if (u.alive && u.cast) { <app-cast-bar [cast]="u.cast" /> }
       @if (u.alive) {
@@ -19,8 +20,19 @@
           <div class="bar mana"><i [style.width.%]="u.manaPct"></i></div>
         </div>
         @if (u.level) { <span class="lv">{{ u.level }}</span> }
+        @if (debug() && u.debug) {
+          <div class="dbg">@for (l of u.debug; track $index) { <span>{{ l }}</span> }</div>
+        }
       }
     </div>
+  }
+
+  @if (debug()) {
+    <svg class="dbg-lines" [attr.viewBox]="'0 0 ' + cols + ' ' + rows" preserveAspectRatio="none" aria-hidden="true">
+      @for (l of targetLines(); track l.id) {
+        <line [attr.x1]="l.x1" [attr.y1]="l.y1" [attr.x2]="l.x2" [attr.y2]="l.y2" />
+      }
+    </svg>
   }
 
   @for (f of fx(); track f.id) {

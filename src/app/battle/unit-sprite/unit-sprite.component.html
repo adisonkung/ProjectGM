@@ -3,7 +3,8 @@
 } @else {
   <div class="token" [class.enemy]="side() === 'enemy'" [class.boss]="boss()" [style.--rc]="side() === 'enemy' ? null : rarity()">
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      @switch (cls()) {
+      @switch (icon() ?? cls()) {
+        @case ('wolf') { <path d="M4 10l3-6 3 4h4l3-4 3 6-2 7-5 3-5-3z" /><path d="M9 12h.01M15 12h.01M11 16h2" /> }
         @case ('tank') { <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" /><path d="M12 7v10" /> }
         @case ('fighter') { <path d="M19 4l-9 9M19 4h-4M19 4v4M8 12l4 4M5 19l3-3" /> }
         @case ('assassin') { <path d="M4 20l7-7M11 13l2-6 4-4-1 5-5 5zM20 20l-7-7" /> }

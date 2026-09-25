@@ -25,6 +25,10 @@ export interface EnemyPlacement extends Cell {
 
 export interface StageDef {
   floor: number;
+  /** display name, e.g. "Normal Forest — Forest Entrance" */
+  name?: string;
+  /** multiplies data-driven monster HP/ATK (default 1 = the definition's values) */
+  monsterScale?: number;
   mode: WinCondition;
   /** วินาที: ด่านกำจัดคือเวลาจำกัด, ด่านเอาตัวรอดคือเวลาที่ต้องรอด */
   timeLimit: number;

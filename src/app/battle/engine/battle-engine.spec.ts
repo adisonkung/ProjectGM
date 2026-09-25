@@ -27,9 +27,9 @@ describe('BattleEngine', () => {
   });
 
   it('survive mode wins when the timer runs out', () => {
-    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[2], enemyTemplates: ENEMIES, seed: 3 });
+    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[5], enemyTemplates: ENEMIES, seed: 3 });
     expect(e.run()).toBe('win');
-    expect(e.time).toBeGreaterThanOrEqual(STAGES[2].timeLimit - 0.05);
+    expect(e.time).toBeGreaterThanOrEqual(STAGES[5].timeLimit - 0.05);
   });
 
   it('starts every unit on its own cell and keeps the grid in sync with positions', () => {
@@ -222,7 +222,7 @@ describe('BattleEngine', () => {
       { name: 'F', cls: 'fighter', stats: { ...CLASS_BASE.fighter, hp: 60 }, pos: { r: 0, c: 1 } },
       { name: 'H', cls: 'healer', stats: { ...CLASS_BASE.healer, hp: 4000 }, pos: { r: 3, c: 1 } },
     ];
-    const e = new BattleEngine({ allies: team, stage: STAGES[2], enemyTemplates: ENEMIES, seed: 1, autoUlt: true });
+    const e = new BattleEngine({ allies: team, stage: STAGES[5], enemyTemplates: ENEMIES, seed: 1, autoUlt: true });
     let revives = 0;
     let revivedAlive = false;
     while (!e.result && e.time < 40) {
@@ -261,7 +261,7 @@ describe('BattleEngine', () => {
   });
 
   it('survive floors stay a single area', () => {
-    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[2], enemyTemplates: ENEMIES, seed: 3 });
+    const e = new BattleEngine({ allies: strongTeam, stage: STAGES[5], enemyTemplates: ENEMIES, seed: 3 });
     expect(e.totalRounds).toBe(1);
   });
 

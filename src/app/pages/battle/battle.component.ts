@@ -1,5 +1,5 @@
 import { BACKGROUNDS } from '../../core/data/backgrounds';
-import { Component, computed, effect, HostListener, inject, OnDestroy, signal, untracked } from '@angular/core';
+import { Component, computed, effect, HostListener, inject, isDevMode, OnDestroy, signal, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
@@ -13,7 +13,9 @@ import { canInterrupt, SKILL_CD } from '../../core/data/classes';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
-import { BattleEngine, BattleEvent, BattleResult } from '../../battle/engine/battle-engine';
+import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
+import { monsterSnapshot } from '../../battle/engine/monster-controller';
+import { MONSTERS } from '../../core/data/monsters';
 
 const TICK = 0.05;
 
@@ -52,6 +54,10 @@ export class BattleComponent implements OnDestroy {
   readonly banner = signal<string | null>(null);
   /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม */
   readonly autoUlt = signal(false);
+  /** combat debug overlay (dev builds only): ?debug=1 or key D */
+  readonly debug = signal(false);
+  /** running cast FX per unit (removed on fxStop) */
+  private castFx = new Map<number, number>();
   /** ฮีโร่ของเรา เรียงตามทีม (ซ้าย→ขวาในแถบด้านล่าง) */
   readonly party = computed(() => this.views().filter(v => v.side === 'ally'));
   /** STEP 9: ศัตรูที่แตะเลือกไว้ และเป้าโฟกัสของทีม */
@@ -92,7 +98,9 @@ export class BattleComponent implements OnDestroy {
   private bannerTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
-    const q = Number(inject(ActivatedRoute).snapshot.queryParamMap.get('floor'));
+    const qp = inject(ActivatedRoute).snapshot.queryParamMap;
+    const q = Number(qp.get('floor'));
+    if (isDevMode() && qp.get('debug') === '1') this.debug.set(true);
     if (q >= 1 && q <= STAGES.length) this.floor.set(q);
     // จัดทีมใหม่ระหว่างรอเริ่ม: สร้างการต่อสู้ใหม่ให้ตรงกับตำแหน่งล่าสุด
     effect(() => {
@@ -180,6 +188,10 @@ export class BattleComponent implements OnDestroy {
   @HostListener('document:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
     if (e.key === 'Escape') return this.cancelFocus();
+    if ((e.key === 'd' || e.key === 'D') && isDevMode()) {
+      this.debug.update(v => !v);
+      return this.snapshot();
+    }
     if ((e.key === 'f' || e.key === 'F') && this.selectedId() != null) return this.setFocus(this.selectedId());
     const n = Number(e.key);
     if (!this.running() || !Number.isInteger(n) || n < 1) return;
@@ -241,7 +253,7 @@ export class BattleComponent implements OnDestroy {
         r: u.pos.r,
         c: u.pos.c,
         hpPct: (u.hp / u.maxHp) * 100,
-        manaPct: (u.mana / u.maxMana) * 100,
+        manaPct: u.maxMana > 0 ? (u.mana / u.maxMana) * 100 : 0,
         shieldPct: (u.shield / u.maxHp) * 100,
         alive: u.alive,
         taunt: u.taunt > 0,
@@ -262,6 +274,12 @@ export class BattleComponent implements OnDestroy {
         cd1Max: SKILL_CD[u.cls][0],
         cd2Max: SKILL_CD[u.cls][1],
         onFocus: u.side === 'ally' && e.focusTargetId != null && u.targetId === e.focusTargetId,
+        elite: u.elite,
+        moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
+        buffed: u.buffs.length > 0,
+        icon: u.monster ? MONSTERS[u.monster.definitionId]?.animation.tokenIcon : undefined,
+        debug: this.debug() && u.monster ? this.debugLines(u, byId) : undefined,
+        targetId: u.targetId,
         line: u.line,
         interrupter: u.side === 'ally' && canInterrupt(u.cls, 'ult'),
         cast: u.casting
@@ -276,6 +294,27 @@ export class BattleComponent implements OnDestroy {
       })),
     );
   }
+
+  /** debug overlay text for a monster: name, state, target, HP, cooldowns, skill / cast */
+  private debugLines(u: BattleUnit, byId: Map<number, BattleUnit>): string[] {
+    const m = monsterSnapshot(u)!;
+    const t = m.currentTargetId != null ? byId.get(m.currentTargetId) : undefined;
+    const lines = [
+      `${u.name} · ${m.state}`,
+      `→ ${t ? t.name : '-'} · HP ${Math.ceil(u.hp)}/${u.maxHp}`,
+      `atkCD ${m.attackCooldownRemaining.toFixed(1)}`,
+    ];
+    for (const [id, cd] of Object.entries(m.skillCooldowns)) {
+      const casting = u.casting?.def.id === id;
+      const tag = casting ? `CASTING ${m.castTimer.toFixed(1)}s` : m.state === 'RECOVERING' && cd > 0 && this.interrupted.has(u.id) ? `INTERRUPTED ${cd.toFixed(1)}` : cd > 0 ? `COOLDOWN ${cd.toFixed(1)}` : 'READY';
+      lines.push(`${id}: ${tag}`);
+    }
+    if (u.buffs.length) lines.push(u.buffs.map(b => `${b.def.id} ${b.remaining.toFixed(1)}s`).join(', '));
+    return lines;
+  }
+
+  /** units whose last cast was interrupted (debug label) */
+  private interrupted = new Set<number>();
 
   private marchAnim(): void {
     const anims = { ...this.anims() };
@@ -348,7 +387,7 @@ export class BattleComponent implements OnDestroy {
           this.blinkUntil.set(e.src, this.engine.time + 0.3);
           break;
         case 'damage': {
-          if (!e.poison && anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
+          if (!e.poison && e.hurt !== false && anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
           const p = posOf(e.dst);
           const text = e.amount > 0 ? `-${e.amount}` : 'บล็อก';
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: e.poison ? 'poison' : e.crit ? 'crit' : 'dmg' });
@@ -408,7 +447,39 @@ export class BattleComponent implements OnDestroy {
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
           break;
         }
+        case 'fx': {
+          // cast FX (e.g. Alpha Howl) — started by the engine so its activation frame lands on SKILL_ACTIVATE
+          const p = posOf(e.src);
+          const f: FxView = { id: ++this.floatId, r: p.r, c: p.c, name: e.name, angle: 0, flip: !!this.facing.get(e.src) };
+          this.castFx.set(e.src, f.id);
+          fx.push(f);
+          break;
+        }
+        case 'fxStop': {
+          const id = this.castFx.get(e.src);
+          if (id != null) this.fx.update(l => l.filter(x => x.id !== id));
+          this.castFx.delete(e.src);
+          break;
+        }
+        case 'skillActivated': {
+          const p = posOf(e.src);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.name + '!', kind: 'skill' });
+          this.castFx.delete(e.src);
+          this.interrupted.delete(e.src);
+          break;
+        }
+        case 'buff': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.refreshed ? 'ATK↑ ต่อเวลา' : 'ATK +25%', kind: 'buff' });
+          break;
+        }
+        case 'miss': {
+          const p = posOf(e.src);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'MISS', kind: 'miss' });
+          break;
+        }
         case 'interrupt': {
+          this.interrupted.add(e.dst);
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'INTERRUPTED!', kind: 'interrupt' });
           set(e.dst, 'hurt');

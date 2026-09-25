@@ -54,6 +54,14 @@ export interface UnitView {
   cd2?: number;
   cd1Max?: number;
   cd2Max?: number;
+  /** monster: elite rank / seconds per step (movement tween) / buffed / token icon */
+  elite?: boolean;
+  moveSec?: number;
+  buffed?: boolean;
+  icon?: string;
+  /** combat debug lines (dev builds only) + current target id for the target line */
+  debug?: string[];
+  targetId?: number | null;
 }
 
 export interface FloatText {
@@ -61,7 +69,7 @@ export interface FloatText {
   r: number;
   c: number;
   text: string;
-  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield' | 'revive' | 'interrupt' | 'immune';
+  kind: 'dmg' | 'crit' | 'heal' | 'skill' | 'poison' | 'shield' | 'revive' | 'interrupt' | 'immune' | 'buff' | 'miss';
 }
 
 /** เอฟเฟกต์สกิลที่กำลังเล่นบนกระดาน */
@@ -110,6 +118,19 @@ export class BoardComponent {
   readonly background = input<BackgroundDef | null | undefined>(null);
   /** กำลังเดินไปเวฟถัดไป: เวลาเดิน (ms) — 0 = ไม่ได้เดิน */
   readonly marchMs = input(0);
+  /** combat debug overlay (states, targets) */
+  readonly debug = input(false);
+  /** debug: lines from each monster to its target (board cell coordinates incl. scenery rows) */
+  readonly targetLines = computed(() => {
+    if (!this.debug()) return [];
+    const byId = new Map(this.units().map(u => [u.id, u]));
+    return this.units()
+      .filter(u => u.alive && u.debug && u.targetId != null && byId.get(u.targetId!)?.alive)
+      .map(u => {
+        const t = byId.get(u.targetId!)!;
+        return { id: u.id, x1: u.c + 0.5, y1: u.r + SCENERY_ROWS + 0.5, x2: t.c + 0.5, y2: t.r + SCENERY_ROWS + 0.5 };
+      });
+  });
   /** เวลาเลื่อนฉากล่าสุด คงไว้หลังเดินเสร็จ เพื่อไม่ให้ transition ถูกตัดกลางทาง */
   readonly fieldMs = computed(() => this.marchMs() || 2400 / this.speed());
 

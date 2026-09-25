@@ -7,20 +7,33 @@ import { StageDef } from '../models/stage';
  * เวลาจำกัดนับเฉพาะช่วงต่อสู้ (ไม่นับช่วงเดินไปเวฟถัดไป)
  */
 export const STAGES: StageDef[] = [
-  { floor: 1, background: 'forest-1', mode: 'eliminate', timeLimit: 90, enemies: [
-    { enemy: 'goblin', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 2 },
+  // ---- Normal Forest (data-driven monsters, core/data/monsters.ts) — encounter data lives here, not in the monsters
+  // Stage 1 teaches basic combat: targeting, movement, attack, damage, death, formation contact (no casts)
+  { floor: 1, name: 'Normal Forest — Forest Entrance', background: 'forest-1', mode: 'eliminate', timeLimit: 90, enemies: [
+    { enemy: 'forest_slime', r: 0, c: 0 }, { enemy: 'forest_slime', r: 0, c: 1 }, { enemy: 'forest_slime', r: 0, c: 2 },
   ], rounds: [
-    [{ enemy: 'slime', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }],
-    [{ enemy: 'slime', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }, { enemy: 'goblin', r: 1, c: 2 }],
+    [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 1 }, { enemy: 'goblin_fighter', r: 0, c: 2 }],
+    [{ enemy: 'forest_slime', r: 0, c: 0 }, { enemy: 'forest_slime', r: 0, c: 1 }, { enemy: 'forest_slime', r: 0, c: 2 },
+      { enemy: 'goblin_fighter', r: 1, c: 0 }, { enemy: 'goblin_fighter', r: 1, c: 2 }],
   ] },
-  { floor: 2, background: 'forest-1', mode: 'eliminate', timeLimit: 90, enemies: [
-    { enemy: 'goblin', r: 0, c: 0 }, { enemy: 'archer', r: 4, c: 2 },
+  // Stage 2 teaches frontline vs backline, projectiles, target priority (archers hunt the lowest HP%) → Focus Target
+  { floor: 2, name: "Normal Forest — Hunter's Path", background: 'forest-1', mode: 'eliminate', timeLimit: 100, enemies: [
+    { enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 2 }, { enemy: 'goblin_archer', r: 3, c: 1 },
   ], rounds: [
-    [{ enemy: 'slime', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }, { enemy: 'archer', r: 4, c: 1 }],
-    [{ enemy: 'slime', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }, { enemy: 'archer', r: 4, c: 0 }, { enemy: 'archer', r: 4, c: 2 }],
+    [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 2 },
+      { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
+    [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 1 }, { enemy: 'goblin_fighter', r: 0, c: 2 },
+      { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
   ] },
-  { floor: 3, background: 'forest-1', mode: 'survive', timeLimit: 30, waveEvery: 7, waves: ['goblin', 'archer', 'goblin'], enemies: [
-    { enemy: 'goblin', r: 0, c: 0 }, { enemy: 'goblin', r: 0, c: 2 }, { enemy: 'archer', r: 4, c: 1 },
+  // Stage 3 teaches fast melee pressure, the first elite, cast bars and Interrupt (Alpha Howl)
+  { floor: 3, name: 'Normal Forest — Wolf Territory', background: 'forest-1', mode: 'eliminate', timeLimit: 110, enemies: [
+    { enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 1 }, { enemy: 'forest_wolf', r: 0, c: 2 },
+  ], rounds: [
+    [{ enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 1 }, { enemy: 'forest_wolf', r: 0, c: 2 },
+      { enemy: 'forest_wolf', r: 1, c: 0 }, { enemy: 'forest_wolf', r: 1, c: 2 }],
+    // Alpha centred just behind the pack (first Howl no sooner than 2 s: MONSTER_SKILLS.alpha_howl.firstCastDelay)
+    [{ enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 2 }, { enemy: 'alpha_wolf', r: 1, c: 1 },
+      { enemy: 'forest_wolf', r: 1, c: 0 }, { enemy: 'forest_wolf', r: 1, c: 2 }],
   ] },
   { floor: 4, background: 'forest-1', mode: 'eliminate', timeLimit: 100, enemies: [
     { enemy: 'slime', r: 0, c: 1 }, { enemy: 'goblin', r: 1, c: 0 }, { enemy: 'goblin', r: 1, c: 2 },

@@ -8,5 +8,8 @@
     "isolatedModules": false,
     "types": []
   },
-  "files": ["tools/simulate.ts"]
+  "files": [
+    "tools/simulate.ts",
+    "tools/dev/trace.ts"
+  ]
 }

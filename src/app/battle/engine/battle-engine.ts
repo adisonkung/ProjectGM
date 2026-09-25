@@ -5,8 +5,13 @@ import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec } from '../../core/models/unit';
+import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
+import { AttackDefinition, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
-import { distance, Grid, LANES, Line, lineOf, SIDE_DEPTH, STACK_CAP, toBoard } from './grid';
+import { ActiveBuff, applyBuff, tickBuffs } from './buffs';
+import { DamageResolver, effectiveAttack } from './damage-resolver';
+import { BOARD_COLS, distance, Grid, LANES, Line, lineOf, SIDE_DEPTH, STACK_CAP, toBoard } from './grid';
+import { CombatContext, MonsterCombatState, MonsterController } from './monster-controller';
 import { greedyStep, nextStep } from './pathfinding';
 import { createRng } from './rng';
 
@@ -20,10 +25,18 @@ export type BattleEvent =
   | { type: 'impact'; src: number; dst?: number; kind: SkillKind }
   /** ย้ายตัวแบบวาร์ป (ไม่ต้องเลื่อนตัวบนจอ) */
   | { type: 'blink'; src: number }
-  | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number; poison?: boolean }
+  /** hurt = play the hit reaction (monsters: rate-limited, never while attacking/casting) */
+  | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number; poison?: boolean; hurt?: boolean }
   | { type: 'heal'; dst: number; amount: number; src?: number }
   /** ลูกธนู/ลูกแสงที่บินไปหาเป้า (sky = ตกจากฟ้า) ดาเมจเข้าเมื่อถึง */
-  | { type: 'projectile'; src: number; dst: number; kind: 'attack' | SkillKind; flight: number; sky?: boolean }
+  | { type: 'projectile'; src: number; dst: number; kind: 'attack' | SkillKind; flight: number; sky?: boolean; pid?: number }
+  /** a real (colliding) projectile hit a unit / ran out of lifetime */
+  | { type: 'projectileHit'; pid: number; dst: number }
+  | { type: 'projectileExpire'; pid: number }
+  /** semantic animation event reached (DAMAGE, PROJECTILE_SPAWN, SKILL_ACTIVATE …) */
+  | { type: 'animEvent'; src: number; event: SemanticEvent; name: string }
+  /** melee hit event fired but the target had moved out of reach */
+  | { type: 'miss'; src: number; dst: number }
   /** ฟื้นคืนชีพ */
   | { type: 'revive'; src: number; dst: number; amount: number }
   /** ได้โล่ (src = ผู้ให้) */
@@ -36,8 +49,20 @@ export type BattleEvent =
   | { type: 'round'; round: number }
   /** ศัตรูเริ่มร่ายสกิล (มีแถบร่าย) */
   | { type: 'castStart'; src: number; skill: string; label: string; castTime: number; interruptible: boolean; dst?: number }
-  /** ร่ายสำเร็จ สกิลออกผล */
+  /** CAST_PROGRESS: every 25% of the cast */
+  | { type: 'castProgress'; src: number; skill: string; pct: number }
+  /** SKILL_ACTIVATED: the cast reached its activation point (effects applied now) */
+  | { type: 'skillActivated'; src: number; skill: string; name: string; targets: number[] }
+  /** ร่ายสำเร็จ สกิลออกผล (CAST_COMPLETED) */
   | { type: 'castDone'; src: number; skill: string }
+  /** cast stopped without an interrupt (caster died / battle ended) — hide the cast bar */
+  | { type: 'castCancel'; src: number; skill: string; reason: 'death' | 'end' }
+  /** buff applied (refreshed = an existing instance got its duration reset) / expired */
+  | { type: 'buff'; src: number; dst: number; buff: string; name: string; refreshed: boolean }
+  | { type: 'buffEnd'; dst: number; buff: string }
+  /** play / stop a skill FX on a unit (cast FX synced to activation) */
+  | { type: 'fx'; src: number; name: string }
+  | { type: 'fxStop'; src: number; name: string }
   /** ตัดการร่ายสำเร็จ (src = ผู้ตัด) */
   | { type: 'interrupt'; src: number; dst: number; skill: string }
   /** พยายามตัดแต่สกิลนี้ตัดไม่ได้ */
@@ -47,6 +72,27 @@ export type BattleEvent =
 
 /** เหตุผลที่ฮีโร่เลือกเป้าตอนนี้ (แสดงใต้รูปในแถบตัวละคร) */
 export type Intent = 'normal' | 'focus' | 'hold' | 'blocked' | 'heal' | 'interrupt' | 'taunted';
+
+/** Anything the generic cast system can cast (legacy enemy skills and data-driven monster skills) */
+export type CastSkillDef = EnemySkillDef | MonsterSkillDefinition;
+export const isMonsterSkill = (d: CastSkillDef): d is MonsterSkillDefinition => 'effects' in d;
+
+/** A real projectile in flight (board cell coordinates, x = column, y = lane) */
+export interface RuntimeProjectile {
+  id: number;
+  defId: string;
+  attackerId: number;
+  side: Side;
+  targetId: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  age: number;
+  /** pre-mitigation damage snapshot at spawn */
+  damage: number;
+  sourceId: string;
+}
 
 export interface BattleUnit {
   id: number;
@@ -89,14 +135,14 @@ export interface BattleUnit {
   /** ผู้เล่นสั่งท่าไม้ตายแล้ว รอจังหวะร่าย */
   ultQueued: boolean;
   /** ศัตรู: สกิลร่ายที่มี + คูลดาวน์ที่เหลือ */
-  castSkills: { def: EnemySkillDef; cd: number }[];
+  castSkills: { def: CastSkillDef; cd: number }[];
   /** ล็อกเป้าถึงเวลานี้ (กันเปลี่ยนเป้าทุกเฟรม) และรอบคิดของ AI (ทุก THINK วิ) */
   lockUntil: number;
   thinkCd: number;
   /** เหตุผลของการเลือกเป้าล่าสุด */
   intent: Intent;
   /** กำลังร่าย (state = CASTING): ยืนนิ่ง ทำอย่างอื่นไม่ได้ */
-  casting: { def: EnemySkillDef; left: number; target: number | null } | null;
+  casting: { def: CastSkillDef; left: number; target: number | null; token: number; nextProgress: number } | null;
   /** คลั่ง: เวลาที่เหลือ และตัวคูณ atk/ความเร็วตี */
   rage: number;
   rageMul: number;
@@ -109,6 +155,15 @@ export interface BattleUnit {
   poison: number;
   poisonTime: number;
   poisonTick: number;
+  /** runtime buffs (base stats are never modified) */
+  buffs: ActiveBuff[];
+  /** false once dead (future: untargetable phases) */
+  targetable: boolean;
+  /** cells — projectile collision */
+  collisionRadius: number;
+  elite?: boolean;
+  /** data-driven monster: runtime state (definition in MONSTERS) */
+  monster?: MonsterCombatState;
 }
 
 export interface BattleConfig {
@@ -118,7 +173,14 @@ export interface BattleConfig {
   seed?: number;
   /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม (จำลอง/โหมดออโต้) · ศัตรูร่ายเองเสมอ */
   autoUlt?: boolean;
+  /** data-driven monsters (default MONSTERS) — stage enemy ids are looked up here first */
+  monsters?: Record<string, MonsterDefinition>;
 }
+
+/** CAST_PROGRESS granularity */
+const CAST_PROGRESS_STEP = 0.25;
+/** hero collision radius (cells) for projectiles */
+const HERO_RADIUS = 0.35;
 
 const CAST_LOCK = 0.4;
 const TAUNT_TIME = 3;
@@ -204,6 +266,12 @@ const ULT_HEAL_PCT = 0.15;
 export class BattleEngine {
   readonly units: BattleUnit[] = [];
   readonly grid = new Grid(STACK_CAP);
+  /** colliding projectiles currently flying */
+  readonly projectiles: RuntimeProjectile[] = [];
+  /** runs every data-driven monster (one shared state machine) */
+  readonly monsterAI: MonsterController;
+  private readonly monsterDefs: Record<string, MonsterDefinition>;
+  private seq = 1;
   /** เวลารวม (รวมช่วงเดินไปเวฟถัดไป) */
   time = 0;
   /** เวลาที่ต่อสู้จริง (ใช้กับเวลาจำกัดของด่าน) */
@@ -235,6 +303,8 @@ export class BattleEngine {
     this.stage = cfg.stage;
     this.templates = cfg.enemyTemplates;
     this.autoUlt = cfg.autoUlt ?? false;
+    this.monsterDefs = cfg.monsters ?? MONSTERS;
+    this.monsterAI = new MonsterController(this.combatContext(), this.monsterDefs, MONSTER_SKILLS);
     this.nextWaveAt = cfg.stage.waveEvery ?? Infinity;
     this.enemyCap = cfg.stage.enemies.length;
     this.totalRounds = cfg.stage.mode === 'eliminate' ? 1 + (cfg.stage.rounds?.length ?? 0) : 1;
@@ -271,6 +341,7 @@ export class BattleEngine {
     }
 
     this.runPending();
+    this.updateProjectiles(dt);
     if (this.checkEnd()) return;
     this.fightTime += dt;
 
@@ -303,7 +374,7 @@ export class BattleEngine {
   }
 
   /** รอ `delay` วินาทีแล้วค่อยทำ (ยกเลิกถ้าผู้ใช้ล้มไปก่อน) */
-  private later(delay: number, u: BattleUnit, fn: () => void): void {
+  later(delay: number, u: BattleUnit, fn: () => void): void {
     const run = () => {
       if (u.alive) fn();
     };
@@ -377,6 +448,9 @@ export class BattleEngine {
       poison: 0,
       poisonTime: 0,
       poisonTick: 0,
+      buffs: [],
+      targetable: true,
+      collisionRadius: HERO_RADIUS,
     };
     this.grid.place(u.id, pos);
     this.units.push(u);
@@ -384,6 +458,8 @@ export class BattleEngine {
   }
 
   private spawnEnemy(enemyId: string, local?: Cell): BattleUnit | null {
+    const m = this.monsterDefs[enemyId];
+    if (m) return this.spawnMonster(m, local);
     const t = this.templates[enemyId];
     if (!t) throw new Error(`Unknown enemy: ${enemyId}`);
     const pos = local ?? { r: SIDE_DEPTH - 1, c: Math.floor(this.rng() * LANES) };
@@ -405,6 +481,39 @@ export class BattleEngine {
     return u;
   }
 
+  /** Spawn a data-driven monster: stats/skills from its definition, runtime state separate */
+  private spawnMonster(def: MonsterDefinition, local?: Cell): BattleUnit | null {
+    const pos = local ?? { r: SIDE_DEPTH - 1, c: Math.floor(this.rng() * LANES) };
+    const k = this.stage.monsterScale ?? 1;
+    const st = def.stats;
+    const u = this.addUnit('enemy', {
+      name: def.name,
+      cls: def.displayClass,
+      boss: def.rank === 'BOSS',
+      sprite: def.animation.sheet,
+      stats: {
+        hp: Math.round(st.maxHp * k),
+        atk: Math.round(st.attack * k),
+        def: st.defense,
+        atkSpeed: 1 / st.attackCooldown,
+        moveSpeed: st.moveSpeed,
+        range: st.attackRange,
+        maxMana: 0,
+      },
+      pos,
+    });
+    if (!u) return null;
+    u.elite = def.rank === 'ELITE';
+    u.collisionRadius = st.collisionRadius;
+    u.moveCd = 0;
+    u.castSkills = def.skills
+      .map(id => MONSTER_SKILLS[id])
+      .filter(Boolean)
+      .map(sk => ({ def: sk, cd: sk.firstCastDelay ?? sk.cooldown * ENEMY_SKILL_START_CD }));
+    u.monster = MonsterController.createState(u.id, def);
+    return u;
+  }
+
   /** เคลียร์เวฟแล้ว: ทีมที่รอดกลับไปจัดแถวที่ตำแหน่งตั้งต้น แล้วเดินหน้า */
   private beginAdvance(): void {
     this.clearFocus('advance');
@@ -412,6 +521,7 @@ export class BattleEngine {
     this.advancing = ADVANCE_TIME;
     // ดาเมจ/กระสุนที่ยังค้างอยู่ของเวฟที่แล้ว ทิ้งไป (ศัตรูตายหมดแล้ว)
     this.pending = [];
+    this.projectiles.length = 0;
     for (const u of this.alive('ally')) {
       this.grid.move(u.id, u.pos, u.home);
       u.pos = u.home;
@@ -466,6 +576,7 @@ export class BattleEngine {
     if (u.rage > 0 && (u.rage -= dt) <= 0) u.rageMul = 1;
     if (u.taunt > 0) u.taunt -= dt;
     if (u.shieldTime > 0 && (u.shieldTime -= dt) <= 0) u.shield = 0;
+    for (const b of tickBuffs(u, dt)) this.events.push({ type: 'buffEnd', dst: u.id, buff: b.def.id });
     if (u.poisonTime > 0) {
       u.poisonTime -= dt;
       u.poisonTick += dt;
@@ -475,10 +586,14 @@ export class BattleEngine {
         if (!u.alive) return;
       }
     }
+    // data-driven monsters: shared state machine (targeting / movement / attack / cast from their definition)
+    if (u.monster) {
+      this.monsterAI.update(u, dt);
+      return;
+    }
     // กำลังร่าย (CASTING): ยืนนิ่งจนร่ายเสร็จ หรือถูกตัด
     if (u.casting) {
-      u.casting.left -= dt;
-      if (u.casting.left <= 0) this.finishCast(u);
+      this.updateCast(u, dt);
       return;
     }
     if (u.castLock > 0) {
@@ -578,7 +693,7 @@ export class BattleEngine {
    * (ฮีลฉุกเฉินของฮีลเลอร์ และโอกาสตัดการร่าย จัดการใน updateUnit ก่อนมาถึงตรงนี้)
    */
   private acquireTarget(u: BattleUnit): BattleUnit | null {
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally').filter(f => f.targetable);
     if (!foes.length) return null;
 
     const taunter = foes
@@ -644,7 +759,8 @@ export class BattleEngine {
       // แทงก์: ศัตรูที่กำลังตีแถวหลังของเรา → บอส/อีลิท → ใกล้สุด
       const mine = new Set(this.alive(u.side).filter(a => a.line === 'back').map(a => a.id));
       const diving = (f: BattleUnit) => (f.targetId != null && mine.has(f.targetId) ? 0 : 1);
-      return [...foes].sort((a, b) => diving(a) - diving(b) || Number(!!b.boss) - Number(!!a.boss) || d(a) - d(b) || a.id - b.id)[0];
+      const big = (f: BattleUnit) => Number(!!f.boss || !!f.elite);
+      return [...foes].sort((a, b) => diving(a) - diving(b) || big(b) - big(a) || d(a) - d(b) || a.id - b.id)[0];
     }
     // สายประชิด: แถวหน้าก่อน (ในระยะถ้ามี) แล้วค่อยแถวหลัง
     const pool = inRange.length ? inRange : foes;
@@ -672,7 +788,7 @@ export class BattleEngine {
    * - สายประชิด: ใกล้ (≤ 2 ช่อง) หรือไม่มีศัตรูยืนขวางระหว่างทาง (คอลัมน์ระหว่างเรากับเป้า เลนติดกัน)
    */
   canEngage(u: BattleUnit, t: BattleUnit, foes = this.alive(t.side)): boolean {
-    if (!t.alive || t.side === u.side || this.advancing > 0) return false;
+    if (!t.alive || !t.targetable || t.side === u.side || this.advancing > 0) return false;
     if (t.side === 'enemy' && t.round !== this.round) return false;
     const d = distance(u.pos, t.pos);
     // สายระยะไกล: ยิงถึงอยู่แล้ว หรือขยับขึ้นไม่เกิน 2 ช่องก็ยิงถึง (ขยับเพื่อหาระยะยิง ไม่วิ่งลุยเข้าไป)
@@ -797,33 +913,100 @@ export class BattleEngine {
     if (!foes.length) return false;
     const near = Math.min(...foes.map(f => distance(f.pos, u.pos)));
     for (const cs of u.castSkills) {
-      if (cs.cd > 0) continue;
+      if (cs.cd > 0 || isMonsterSkill(cs.def)) continue;
+      const def = cs.def;
       let target: BattleUnit | null = null;
-      if (cs.def.effect === 'meteor') {
+      if (def.effect === 'meteor') {
         const inRange = foes.filter(f => distance(f.pos, u.pos) <= u.range);
         if (!inRange.length) continue;
         target = [...inRange].sort((a, b) => Number(a.line !== 'back') - Number(b.line !== 'back') || a.hp / a.maxHp - b.hp / b.maxHp)[0];
-      } else if (cs.def.effect === 'berserk') {
+      } else if (def.effect === 'berserk') {
         if (near > 2) continue;
-      } else if (cs.def.effect === 'massHeal') {
+      } else if (def.effect === 'massHeal') {
         if (!this.alive(u.side).some(a => a.hp < a.maxHp * 0.75)) continue;
       } else if (near > Math.max(u.range, 3)) {
         continue; // แผ่นดินไหว/คลื่นมรณะ: ร่ายเมื่อเข้าปะทะแล้ว
       }
-      cs.cd = cs.def.cooldown;
-      u.casting = { def: cs.def, left: cs.def.castTime, target: target?.id ?? null };
-      this.events.push({
-        type: 'castStart', src: u.id, skill: cs.def.name, label: cs.def.label,
-        castTime: cs.def.castTime, interruptible: cs.def.interruptible, ...(target ? { dst: target.id } : {}),
-      });
+      this.beginCast(u, def, target);
       return true;
     }
     return false;
   }
 
+  // ---------------------------------------------------------------- generic cast system
+  // CAST_STARTED (castStart) → CAST_PROGRESS (castProgress) → SKILL_ACTIVATED (skillActivated) → CAST_COMPLETED (castDone)
+  // or → CAST_INTERRUPTED (interrupt) / castCancel (death, battle end). Damage never interrupts; only interrupt skills do.
+
+  private beginCast(u: BattleUnit, def: CastSkillDef, target: BattleUnit | null = null): void {
+    const cs = u.castSkills.find(c => c.def === def);
+    if (cs) cs.cd = def.cooldown;
+    const token = this.seq++;
+    u.casting = { def, left: def.castTime, target: target?.id ?? null, token, nextProgress: CAST_PROGRESS_STEP };
+    this.events.push({
+      type: 'castStart', src: u.id, skill: def.name, label: def.label,
+      castTime: def.castTime, interruptible: def.interruptible, ...(target ? { dst: target.id } : {}),
+    });
+    // cast FX starts early so its activation frame lands exactly on SKILL_ACTIVATE
+    const md = u.monster ? this.monsterDefs[u.monster.definitionId] : undefined;
+    if (isMonsterSkill(def) && def.fx && md) {
+      const fx = def.fx.id;
+      const at = castTimeline(def, md.animation).fxStart ?? 0;
+      this.later(Math.max(0, at), u, () => {
+        if (u.casting?.token === token) this.events.push({ type: 'fx', src: u.id, name: fx });
+      });
+    }
+  }
+
+  private updateCast(u: BattleUnit, dt: number): void {
+    const c = u.casting;
+    if (!c) return;
+    c.left -= dt;
+    const pct = 1 - Math.max(0, c.left) / c.def.castTime;
+    while (c.nextProgress < 1 - 1e-9 && pct >= c.nextProgress - 1e-9) {
+      this.events.push({ type: 'castProgress', src: u.id, skill: c.def.id, pct: c.nextProgress });
+      c.nextProgress += CAST_PROGRESS_STEP;
+    }
+    if (c.left <= 1e-9) this.finishCast(u);
+  }
+
+  /** Stop a cast without interrupt (caster died / battle over) */
+  private cancelCast(u: BattleUnit, reason: 'death' | 'end'): void {
+    const c = u.casting;
+    if (!c) return;
+    u.casting = null;
+    this.events.push({ type: 'castCancel', src: u.id, skill: c.def.id, reason });
+    if (isMonsterSkill(c.def) && c.def.fx) this.events.push({ type: 'fxStop', src: u.id, name: c.def.fx.id });
+    if (u.monster) this.monsterAI.onCastEnd(u, 'cancelled');
+  }
+
+  /** SKILL_ACTIVATE of a data-driven skill: apply its effects to the targets alive right now */
+  private activateMonsterSkill(u: BattleUnit, def: MonsterSkillDefinition): void {
+    const targets = this.monsterAI.skillTargets(u, def);
+    for (const eff of def.effects) {
+      if (eff.type === 'APPLY_BUFF') {
+        const b = BUFFS[eff.buffId];
+        if (!b) continue;
+        for (const t of targets) {
+          const r = applyBuff(t, b, u.id);
+          this.events.push({ type: 'buff', src: u.id, dst: t.id, buff: b.id, name: b.name, refreshed: r === 'refreshed' });
+        }
+      }
+    }
+    const md = this.monsterDefs[u.monster?.definitionId ?? ''];
+    const mark = md?.animation.clips[def.clip]?.events?.find(e => e.event === 'SKILL_ACTIVATE');
+    this.events.push({ type: 'animEvent', src: u.id, event: 'SKILL_ACTIVATE', name: mark?.name ?? def.id });
+    this.events.push({ type: 'skillActivated', src: u.id, skill: def.id, name: def.name, targets: targets.map(t => t.id) });
+  }
+
   private finishCast(u: BattleUnit): void {
     const c = u.casting!;
     u.casting = null;
+    if (isMonsterSkill(c.def)) {
+      this.activateMonsterSkill(u, c.def);
+      this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
+      if (u.monster) this.monsterAI.onCastEnd(u, 'completed');
+      return;
+    }
     u.castLock = CAST_LOCK;
     this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
     this.events.push({ type: 'cast', src: u.id, skill: c.def.name, kind: 'ult', ...(c.target != null ? { dst: c.target } : {}) });
@@ -857,10 +1040,13 @@ export class BattleEngine {
       return;
     }
     dst.casting = null;
-    dst.castLock = CAST_LOCK;
     const cs = dst.castSkills.find(x => x.def === c.def);
-    if (cs) cs.cd = c.def.cooldown;
+    // the skill still goes on (full) cooldown — a successful interrupt is a big win
+    if (cs) cs.cd = (isMonsterSkill(c.def) ? c.def.interruptedCooldown : undefined) ?? c.def.cooldown;
     this.events.push({ type: 'interrupt', src: src.id, dst: dst.id, skill: c.def.name });
+    if (isMonsterSkill(c.def) && c.def.fx) this.events.push({ type: 'fxStop', src: dst.id, name: c.def.fx.id });
+    if (dst.monster) this.monsterAI.onCastEnd(dst, 'interrupted');
+    else dst.castLock = CAST_LOCK;
   }
 
   /** ตีธรรมดา: เริ่มท่าทันที ดาเมจเข้าตรงเฟรม hit (ยืนนิ่งระหว่างเงื้อ) */
@@ -1211,11 +1397,13 @@ export class BattleEngine {
     if (!dst.alive) return;
     // สกิลที่ตัดได้ (INTERRUPT) โดนตัวที่กำลังร่าย → ตัดก่อนคิดดาเมจ
     if (kind && dst.casting && canInterrupt(src.cls, kind)) this.tryInterrupt(src, dst);
-    let raw = src.atk * src.rageMul * mul * (0.9 + this.rng() * 0.2);
+    const variance = this.rng();
     const crit = forceCrit || this.rng() < CRIT_CHANCE;
-    if (crit) raw *= CRIT_MUL;
-    if (dst.taunt > 0) raw *= 0.5;
-    this.applyDamage(dst, Math.max(1, Math.round((raw * 100) / (100 + dst.def))), crit);
+    const res = DamageResolver.resolve({
+      attacker: src, target: dst, multiplier: mul, damageType: 'PHYSICAL',
+      sourceId: kind ?? 'skill', variance, crit, critMultiplier: CRIT_MUL,
+    });
+    this.applyDamage(dst, res.amount, crit);
   }
 
   /** หักโล่ก่อนแล้วค่อยหักเลือด (ดาเมจพิษไม่เพิ่มมานา) */
@@ -1225,12 +1413,16 @@ export class BattleEngine {
     const amount = total - blocked;
     dst.shield -= blocked;
     dst.hp -= amount;
-    if (!poison) dst.mana = Math.min(dst.maxMana, dst.mana + MANA_PER_HIT);
-    this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked, ...(poison ? { poison } : {}) });
+    if (!poison && dst.maxMana > 0) dst.mana = Math.min(dst.maxMana, dst.mana + MANA_PER_HIT);
+    // hit reaction: heroes always flinch visually; monsters go through their anti stun-lock rule
+    const hurt = !poison && dst.hp > 0 && (dst.monster ? this.monsterAI.onHit(dst) : true);
+    this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked, hurt, ...(poison ? { poison } : {}) });
     if (dst.hp <= 0) {
       dst.hp = 0;
       dst.alive = false;
-      dst.casting = null;
+      dst.targetable = false;
+      this.cancelCast(dst, 'death');
+      if (dst.monster) this.monsterAI.markDead(dst);
       if (dst.id === this.focusTargetId) this.clearFocus('dead');
       dst.shield = 0;
       dst.poisonTime = 0;
@@ -1247,6 +1439,117 @@ export class BattleEngine {
     this.events.push({ type: 'heal', dst: dst.id, amount: a, ...(src ? { src: src.id } : {}) });
   }
 
+  // ---------------------------------------------------------------- projectiles (colliding)
+
+  private fireProjectile(u: BattleUnit, t: BattleUnit, attack: AttackDefinition): void {
+    const def = PROJECTILES[attack.projectileId ?? ''];
+    if (!def) return;
+    const dx = t.pos.c - u.pos.c;
+    const dy = t.pos.r - u.pos.r;
+    const len = Math.hypot(dx, dy) || 1;
+    const p: RuntimeProjectile = {
+      id: this.seq++,
+      defId: def.id,
+      attackerId: u.id,
+      side: u.side,
+      targetId: t.id,
+      x: u.pos.c,
+      y: u.pos.r,
+      vx: (dx / len) * def.speed,
+      vy: (dy / len) * def.speed,
+      age: 0,
+      damage: effectiveAttack(u) * attack.damageMultiplier * def.damageMultiplier,
+      sourceId: attack.id,
+    };
+    this.projectiles.push(p);
+    this.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: 'attack', flight: len / def.speed, pid: p.id });
+  }
+
+  /** Move projectiles; a hit damages exactly one unit and destroys the projectile */
+  private updateProjectiles(dt: number): void {
+    if (!this.projectiles.length) return;
+    for (const p of [...this.projectiles]) {
+      const def = PROJECTILES[p.defId];
+      const x0 = p.x, y0 = p.y;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.age += dt;
+      const candidates = this.units.filter(
+        v => v.alive && v.targetable && v.side !== p.side && (def.hits === 'ANY_ENEMY' || v.id === p.targetId),
+      );
+      // swept test: closest point of this tick's segment to the unit centre
+      const hit = candidates
+        .map(v => ({ v, d: segDist(x0, y0, p.x, p.y, v.pos.c, v.pos.r) }))
+        .filter(h => h.d <= def.collisionRadius + h.v.collisionRadius)
+        .sort((a, b) => a.d - b.d)[0]?.v;
+      if (hit) {
+        this.projectiles.splice(this.projectiles.indexOf(p), 1);
+        const res = DamageResolver.resolve({
+          attacker: this.units.find(v => v.id === p.attackerId)!, target: hit,
+          baseDamage: p.damage, damageType: def.damageType, sourceId: p.sourceId,
+        });
+        this.events.push({ type: 'projectileHit', pid: p.id, dst: hit.id });
+        this.applyDamage(hit, res.amount, false);
+        continue;
+      }
+      if (p.age >= def.maxLifetime || p.x < -1 || p.x > BOARD_COLS || p.y < -1 || p.y > LANES) {
+        this.projectiles.splice(this.projectiles.indexOf(p), 1);
+        this.events.push({ type: 'projectileExpire', pid: p.id });
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------- monster combat context
+
+  /** alive + targetable + on the battlefield (current wave) + not marching */
+  isValidTarget(u: BattleUnit, t: BattleUnit): boolean {
+    return (
+      t.alive && t.targetable && t.side !== u.side && this.advancing <= 0 && Grid.inBounds(t.pos) &&
+      (t.side !== 'enemy' || t.round === this.round)
+    );
+  }
+
+  private combatContext(): CombatContext {
+    const self = this;
+    return {
+      get time() {
+        return self.time;
+      },
+      unit: id => self.units.find(x => x.id === id),
+      opponentsOf: u => self.units.filter(t => self.isValidTarget(u, t)),
+      alliesOf: u => self.units.filter(a => a.alive && a.side === u.side && (a.side !== 'enemy' || a.round === self.round)),
+      isValidTarget: (u, t) => self.isValidTarget(u, t),
+      stepToward: (u, target, goal) => {
+        const step = nextStep(self.grid, u.pos, goal) ?? greedyStep(self.grid, u.pos, target);
+        if (!step) return false;
+        self.grid.move(u.id, u.pos, step);
+        u.pos = step;
+        self.events.push({ type: 'move', src: u.id });
+        return true;
+      },
+      stepAway: (u, threat, keep, range) => {
+        const back = u.side === 'ally' ? -1 : 1;
+        const step = Grid.neighbors(u.pos)
+          .filter(c => self.grid.canEnter(c) && Math.sign(c.c - u.pos.c) === back && distance(c, threat) > distance(u.pos, threat) && distance(c, keep) <= range)
+          .sort((a, b) => Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r))[0];
+        if (!step) return false;
+        self.grid.move(u.id, u.pos, step);
+        u.pos = step;
+        self.events.push({ type: 'move', src: u.id });
+        return true;
+      },
+      later: (delay, u, fn) => self.later(delay, u, fn),
+      meleeHit: (u, t, a) => {
+        const res = DamageResolver.resolve({ attacker: u, target: t, multiplier: a.damageMultiplier, damageType: a.damageType, sourceId: a.id });
+        self.applyDamage(t, res.amount, false);
+      },
+      fireProjectile: (u, t, a) => self.fireProjectile(u, t, a),
+      startCast: (u, skill) => self.beginCast(u, skill),
+      updateCast: (u, dt) => self.updateCast(u, dt),
+      emit: e => self.events.push(e),
+    };
+  }
+
   private checkEnd(): boolean {
     if (this.result) return true;
     if (!this.alive('ally').length) this.result = 'lose';
@@ -1255,7 +1558,19 @@ export class BattleEngine {
       else this.result = 'win';
     } else if (this.stage.mode === 'survive' && this.fightTime >= this.stage.timeLimit) this.result = 'win';
     else if (this.stage.mode === 'eliminate' && this.fightTime >= this.stage.timeLimit) this.result = 'timeout';
-    if (this.result) this.clearFocus('end');
+    if (this.result) {
+      this.clearFocus('end');
+      for (const u of this.units) if (u.casting) this.cancelCast(u, 'end');
+      this.projectiles.length = 0;
+    }
     return this.result !== null || this.advancing > 0;
   }
+}
+
+/** distance from point (px,py) to segment (x0,y0)-(x1,y1) */
+function segDist(x0: number, y0: number, x1: number, y1: number, px: number, py: number): number {
+  const dx = x1 - x0, dy = y1 - y0;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 ? Math.max(0, Math.min(1, ((px - x0) * dx + (py - y0) * dy) / len2)) : 0;
+  return Math.hypot(x0 + t * dx - px, y0 + t * dy - py);
 }

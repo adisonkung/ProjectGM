@@ -2,7 +2,7 @@ import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { CLASS_NAME } from '../../core/data/classes';
-import { ENEMIES } from '../../core/data/enemies';
+import { enemyInfo } from '../../core/data/enemies';
 import { heroArt } from '../../core/data/hero-art';
 import { HeroClass, OwnedHero } from '../../core/models/hero';
 import { StageDef } from '../../core/models/stage';
@@ -117,8 +117,8 @@ export class PlacementComponent {
       place('enemy', Math.floor(i / LANES), i % LANES),
     );
     for (const p of this.stage()?.enemies ?? []) {
-      const t = ENEMIES[p.enemy];
-      if (t) cells[p.r * LANES + p.c].enemy = { name: t.name, cls: t.cls, boss: !!t.boss, sprite: t.sprite };
+      const t = enemyInfo(p.enemy);
+      if (t) cells[p.r * LANES + p.c].enemy = { name: t.name, cls: t.cls, boss: t.boss || t.elite, sprite: t.sprite };
     }
     return cells;
   });

@@ -21,8 +21,28 @@
   top: 0;
   width: var(--cell);
   height: var(--cell);
-  // เดินต่อเนื่อง: ใช้เวลาใกล้ ๆ กับเวลาต่อก้าวของเอนจิน จะได้ไม่กระตุกหยุดทีละช่อง
-  transition: transform calc(0.6s / var(--spd, 1)) linear;
+  // เดินต่อเนื่อง: ใช้เวลาใกล้ ๆ กับเวลาต่อก้าวของเอนจิน จะได้ไม่กระตุกหยุดทีละช่อง (--step = วิ/ก้าวของยูนิตนั้น)
+  transition: transform calc(var(--step, 0.6s) / var(--spd, 1)) linear;
+}
+.float-wrap { --step: 0.6s; }
+
+// elite: gold ground ring · howl-buffed: red pulsing aura
+.unit.elite::after {
+  content: ''; position: absolute; left: 6%; right: 6%; bottom: -2%; height: 26%; border-radius: 50%;
+  border: 2px solid #f0b54a; box-shadow: 0 0 8px #f0b54aaa; pointer-events: none;
+}
+.unit.buffed { filter: drop-shadow(0 0 5px #ff5a3c) drop-shadow(0 0 2px #ff9a5a); animation: buff-pulse 0.9s ease-in-out infinite alternate; }
+@keyframes buff-pulse { to { filter: drop-shadow(0 0 9px #ff5a3c) drop-shadow(0 0 3px #ffc27a); } }
+
+// combat debug overlay (dev builds only)
+.dbg {
+  position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); z-index: 6; pointer-events: none;
+  display: grid; padding: 2px 4px; border-radius: 4px; background: #000c; border: 1px solid #5ec8e088;
+  font: 600 8px/1.25 ui-monospace, monospace; color: #cfe; white-space: nowrap;
+}
+.dbg-lines {
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none;
+  line { stroke: #ff5a4e; stroke-width: 0.04; stroke-dasharray: 0.15 0.1; opacity: 0.8; }
 }
 
 .unit.blink {
@@ -129,6 +149,8 @@
   &.skill { color: var(--gold); font-size: 11px; top: -4%; }
   &.interrupt { color: #fff; font-size: 15px; top: -20%; text-shadow: 0 0 8px var(--cyan), 0 1px 3px #000; }
   &.immune { color: var(--danger); font-size: 12px; top: -20%; }
+  &.buff { color: #ff9a5a; font-size: 11px; top: -24%; }
+  &.miss { color: var(--muted); font-size: 11px; }
 }
 
 @keyframes rise {

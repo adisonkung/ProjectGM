@@ -32,6 +32,8 @@ export class UnitSpriteComponent {
   readonly sprite = input<string | undefined>();
   readonly star = input<number | undefined>();
   readonly boss = input(false);
+  /** token icon override (e.g. 'wolf'); default = class icon */
+  readonly icon = input<string | undefined>(undefined);
   readonly anim = input<SpriteAnim>('idle');
   /** เปลี่ยนค่านี้เพื่อสั่งเล่นท่าเดิมซ้ำ */
   readonly animKey = input(0);

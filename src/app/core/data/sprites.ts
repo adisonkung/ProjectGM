@@ -298,6 +298,8 @@ export const FX: Record<string, FxDef> = {
   'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 134, h: 132, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },
   // โล่ที่เพื่อนได้จากท่าไม้ตายออเรล: ใช้แผ่นเดียวกัน ย่อลง
   'aurel-ward': { file: 'fx-aurel-ult.png', frames: 8, w: 123, h: 90, frameMs: 80, at: 'self', dy: -16, scale: 0.85 },
+  // Alpha Howl (tools/sprites/fx_alpha_howl.py): frame 5 = activation burst, started early by the engine's 'fx' event
+  'alpha-howl': { file: 'fx-alpha-howl.png', frames: 8, w: 128, h: 96, frameMs: 90, at: 'self', dy: -8, scale: 1.4 },
   'aurel-ult': { file: 'fx-aurel-ult.png', frames: 8, w: 123, h: 90, frameMs: 95, at: 'self', dy: -18, scale: 1.55 },
 };
 
