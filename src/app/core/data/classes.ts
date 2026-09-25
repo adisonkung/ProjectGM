@@ -10,10 +10,37 @@ export const CLASS_NAME: Record<HeroClass, string> = {
 };
 
 /**
- * ค่าพื้นฐานของแต่ละสาย ที่ 1★ เลเวล 1 — 5★ Lv1 = ×2.12 (HP/ATK/DEF) และ atkSpeed ×1.16 (heroStats):
- * แทงก์ 678/47/85/0.99 · นักสู้ 466/81/47/1.28 · นักฆ่า 403/85/32/1.51 · นักธนู 339/72/25/1.33 · นักเวท 318/98/21/1.04 · ฮีลเลอร์ 360/51/30/1.10
+ * Star (rarity) stat multiplier for HP / ATK / DEF — modest on purpose: rarity is potential / growth ceiling / skills,
+ * not raw power (the old 5★ ×2.12 erased every Stage 4–10 mechanic). Attack speed, move speed and range don't scale.
  */
-// atkSpeed = ตีธรรมดากี่ครั้ง/วิ (ช่วงห่าง 0.7–1.2 วิ) · maxMana = เกจท่าไม้ตาย (ทุกสาย 100)
+export const STAR_STAT_MULTIPLIER: Record<number, number> = { 1: 1.0, 2: 1.05, 3: 1.1, 4: 1.15, 5: 1.2 };
+export const starMultiplier = (star: number) => STAR_STAT_MULTIPLIER[star] ?? 1 + (star - 1) * 0.05;
+
+/**
+ * Authored hero stats: **5★ Level 1** per class (the design reference). The 1★ base is derived from it
+ * (`HERO_CLASS_BASE` = this ÷ the 5★ multiplier), so a 5★ hero ends at exactly these values — never scaled twice.
+ */
+export const HERO_5STAR_LV1: Record<HeroClass, Stats> = {
+  tank:     { hp: 678, atk: 47, def: 85, atkSpeed: 0.99, moveSpeed: 1.5, range: 1, maxMana: 100 },
+  fighter:  { hp: 466, atk: 81, def: 47, atkSpeed: 1.28, moveSpeed: 1.8, range: 1, maxMana: 100 },
+  assassin: { hp: 403, atk: 85, def: 32, atkSpeed: 1.51, moveSpeed: 2.0, range: 1, maxMana: 100 },
+  archer:   { hp: 339, atk: 72, def: 25, atkSpeed: 1.33, moveSpeed: 1.6, range: 6, maxMana: 100 },
+  mage:     { hp: 318, atk: 98, def: 21, atkSpeed: 1.04, moveSpeed: 1.5, range: 5, maxMana: 100 },
+  healer:   { hp: 360, atk: 51, def: 30, atkSpeed: 1.1,  moveSpeed: 1.5, range: 4, maxMana: 100 },
+};
+
+/** hero 1★ Level 1 base (unrounded) = authored 5★ ÷ 1.20 — `heroStats` multiplies by the star table */
+export const HERO_CLASS_BASE: Record<HeroClass, Stats> = Object.fromEntries(
+  Object.entries(HERO_5STAR_LV1).map(([cls, s]) => {
+    const k = starMultiplier(5);
+    return [cls, { ...s, hp: s.hp / k, atk: s.atk / k, def: s.def / k }];
+  }),
+) as Record<HeroClass, Stats>;
+
+/**
+ * Legacy class stats — only the old token enemies (floors 4–10 fixtures, `enemyStats`) and engine tests use these.
+ * Heroes use `HERO_CLASS_BASE`.
+ */
 export const CLASS_BASE: Record<HeroClass, Stats> = {
   tank:    { hp: 320, atk: 22, def: 40, atkSpeed: 0.85, moveSpeed: 1.5, range: 1, maxMana: 100 },
   fighter: { hp: 220, atk: 38, def: 22, atkSpeed: 1.1,  moveSpeed: 1.8, range: 1, maxMana: 100 },

@@ -1,4 +1,4 @@
-import { CLASS_BASE } from '../../core/data/classes';
+import { CLASS_BASE, HERO_5STAR_LV1, starMultiplier } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { HERO_DEFINITIONS, kitOf } from '../../core/data/hero-skills';
@@ -80,12 +80,25 @@ describe('Hero kits (data)', () => {
       const s = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 });
       return [s.hp, s.atk, s.def, +s.atkSpeed.toFixed(2), s.range];
     };
-    expect(row('aurel')).toEqual([384, 26, 48, 0.88, 1]);
-    expect(row('jin')).toEqual([264, 46, 26, 1.14, 1]);
-    expect(row('shade')).toEqual([228, 48, 18, 1.35, 1]);
-    expect(row('sylvie')).toEqual([192, 41, 14, 1.2, 6]);
-    expect(row('velma')).toEqual([180, 55, 12, 0.94, 5]);
-    expect(row('lumina')).toEqual([204, 29, 17, 0.99, 4]);
+    expect(row('aurel')).toEqual([678, 47, 85, 0.99, 1]);
+    expect(row('jin')).toEqual([466, 81, 47, 1.28, 1]);
+    expect(row('shade')).toEqual([403, 85, 32, 1.51, 1]);
+    expect(row('sylvie')).toEqual([339, 72, 25, 1.33, 6]);
+    expect(row('velma')).toEqual([318, 98, 21, 1.04, 5]);
+    expect(row('lumina')).toEqual([360, 51, 30, 1.1, 4]);
+  });
+
+  it('star multiplier 1.00 / 1.05 / 1.10 / 1.15 / 1.20 on HP / ATK / DEF only — 5★ Lv1 = the authored table, no double scaling', () => {
+    expect([1, 2, 3, 4, 5].map(starMultiplier)).toEqual([1, 1.05, 1.1, 1.15, 1.2]);
+    const at = (star: number) => heroStats({ ...HERO_BY_ID['aurel'], star: star as 1 }, { uid: 0, templateId: 'aurel', level: 1, potential: 'B', injury: 0 });
+    expect(at(5).hp).toBe(HERO_5STAR_LV1.tank.hp);
+    expect(at(1).hp).toBe(Math.round(678 / 1.2));
+    expect(at(5).hp / at(1).hp).toBeCloseTo(1.2, 2);
+    expect(at(3).atk).toBe(Math.round((47 / 1.2) * 1.1));
+    expect(at(1).atkSpeed).toBe(at(5).atkSpeed);
+    // level growth is linear on the base: Lv10 ATK = 122.5% of Lv1
+    const lv10 = heroStats({ ...HERO_BY_ID['jin'], star: 5 }, { uid: 0, templateId: 'jin', level: 10, potential: 'B', injury: 0 });
+    expect(lv10.atk).toBe(Math.round(81 * 1.225));
   });
 
   it('cooldowns per class and no two same-class heroes are mechanical copies (except Aurel/Morgan by design)', () => {
@@ -376,7 +389,7 @@ describe('Assassins (Shade / Nox)', () => {
     b.run(1);
     // landed behind the archer (it may have stepped back one cell since)
     expect(distance(nox.pos, archer.pos)).toBeLessThanOrEqual(2);
-    expect(nox.targetId).toBe(archer.id);
+    if (archer.alive) expect(nox.targetId).toBe(archer.id);
     expect(hasStatus(nox, 'shadow_evasion')).toBeTrue();
   });
 

@@ -2,6 +2,23 @@
  * Battle simulation metrics — tell whether a loss came from decisions (interrupts, focus, positioning, ult timing)
  * or from raw stats. Filled by the BattleEngine; read by `npm run balance` and tests.
  */
+/** one enemy skill's exposure: cast attempts and how they ended */
+export interface CastStat {
+  started: number;
+  completed: number;
+  interrupted: number;
+  broken: number;
+  /** cancelled by death / phase change / battle end */
+  cancelled: number;
+}
+
+/** a boss phase entered at `at` (battle time) */
+export interface PhaseEntry {
+  index: number;
+  id: string;
+  at: number;
+}
+
 export class BattleMetrics {
   damageDealt = 0;
   damageTaken = 0;
@@ -35,6 +52,35 @@ export class BattleMetrics {
   /** Forest Oblivion style breakable casts: broken / landed */
   breakSuccess = 0;
   breakFailure = 0;
+
+  // ------------------------------------------------ mechanic exposure (did the mechanics get the time to happen?)
+  /** enemy (data-driven monster) casts per skill id */
+  skillStats: Record<string, CastStat> = {};
+  /** statuses applied per status id (Ancient Protection, BROKEN, …) */
+  statusApplied: Record<string, number> = {};
+  /** first boss of the stage: spawn / death time, phases entered, end of its sealed (Mist Wraith) phase */
+  bossSpawnedAt: number | null = null;
+  bossDiedAt: number | null = null;
+  bossPhases: PhaseEntry[] = [];
+  sealBrokenAt: number | null = null;
+
+  cast(id: string, what: keyof CastStat): void {
+    const s = (this.skillStats[id] ??= { started: 0, completed: 0, interrupted: 0, broken: 0, cancelled: 0 });
+    s[what]++;
+  }
+
+  /** boss lifetime so far (`now` = battle time when the boss is still alive); null = no boss spawned */
+  bossLifetime(now: number): number | null {
+    return this.bossSpawnedAt == null ? null : (this.bossDiedAt ?? now) - this.bossSpawnedAt;
+  }
+
+  /** seconds spent in each boss phase: [phase 1 (before the first threshold), phase 2, …] */
+  phaseDurations(now: number): number[] {
+    if (this.bossSpawnedAt == null) return [];
+    const end = this.bossDiedAt ?? now;
+    const marks = [this.bossSpawnedAt, ...this.bossPhases.map(p => p.at), end];
+    return marks.slice(1).map((t, i) => Math.max(0, t - marks[i]));
+  }
 
   get focusUptime(): number {
     return this.focusHeroTime > 0 ? this.focusOnTargetHeroTime / this.focusHeroTime : 0;

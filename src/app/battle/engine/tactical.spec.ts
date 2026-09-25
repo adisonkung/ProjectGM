@@ -9,7 +9,7 @@ import { EnemyPlacement, StageDef, wavesOf } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
 import { heroStats, LEVEL_GROWTH } from '../../core/rules/stats';
 import { teamToUnits } from '../../core/rules/team';
-import { BattleEngine, BattleEvent, BattleUnit, MONSTER_TUNING_LIMITS } from './battle-engine';
+import { BattleEngine, BattleEvent, BattleUnit, MONSTER_TUNING_LIMITS, monsterTuningReview } from './battle-engine';
 import { applyBuff, hasStatus, modifier } from './buffs';
 import { distance } from './grid';
 import { TacticalBot } from './bots/tactical-bot';
@@ -86,6 +86,32 @@ describe('Tactical difficulty — stats', () => {
     expect(l10.atk / l1.atk).toBeCloseTo(1 + 9 * LEVEL_GROWTH.atk, 1);
     expect(l10.hp / l1.hp).toBeCloseTo(1.27, 1);
     expect(l10.def / l1.def).toBeCloseTo(1.18, 1);
+  });
+
+  it('tuning above the ceilings is flagged for review (never silently applied); stages stay within the limits', () => {
+    const st = STAGES[6];
+    expect(monsterTuningReview({ ...st, monsterTuning: { hp: 2 } })).toEqual(['HP ×2 > ×1.4']);
+    expect(monsterTuningReview({ ...st, monsterTuning: { hp: 1.4, atk: 1.25, def: 1.3 } })).toEqual([]);
+    for (const s of STAGES) expect(monsterTuningReview(s)).toEqual([]);
+  });
+
+  it('mechanic exposure metrics: per-skill casts, boss lifetime, phases', () => {
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const boss = b.monsters('elder_treant')[0];
+    b.statue(boss);
+    b.cast(boss, 'call_of_the_forest');
+    b.run(3.5);
+    const m = b.e.metrics;
+    expect(m.bossSpawnedAt).not.toBeNull();
+    expect(m.skillStats['call_of_the_forest'].started).toBe(1);
+    expect(m.skillStats['call_of_the_forest'].completed).toBe(1);
+    expect(m.statusApplied['ancient_protection']).toBe(1);
+    boss.hp = 1;
+    (b.e as any).applyDamage(boss, 99999, false);
+    b.run(0.2);
+    expect(m.bossDiedAt).not.toBeNull();
+    expect(m.bossLifetime(b.e.time)).toBeGreaterThan(3);
+    expect(m.phaseDurations(b.e.time).length).toBeGreaterThanOrEqual(1);
   });
 
   it('every stage has a recommended level (1 → 5)', () => {

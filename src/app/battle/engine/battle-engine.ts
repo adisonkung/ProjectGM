@@ -244,6 +244,20 @@ export interface BattleConfig {
 /** stage stat tuning may only nudge monsters: difficulty must come from mechanics (HP +40%, ATK +25%, DEF +30% max) */
 export const MONSTER_TUNING_LIMITS = { hp: 1.4, atk: 1.25, def: 1.3 };
 
+/**
+ * A stage asking for more than the tuning ceilings is flagged, never silently applied beyond them (the engine clamps):
+ * that stage needs a mechanic / composition / hero power review, not bigger numbers. [] = within limits.
+ */
+export function monsterTuningReview(stage: StageDef): string[] {
+  const t = stage.monsterTuning ?? {};
+  const out: string[] = [];
+  for (const k of ['hp', 'atk', 'def'] as const) {
+    const v = t[k];
+    if (v != null && v > MONSTER_TUNING_LIMITS[k] + 1e-9) out.push(`${k.toUpperCase()} ×${v} > ×${MONSTER_TUNING_LIMITS[k]}`);
+  }
+  return out;
+}
+
 /** CAST_PROGRESS granularity */
 const CAST_PROGRESS_STEP = 0.25;
 /** hero collision radius (cells) for projectiles */
@@ -677,6 +691,7 @@ export class BattleEngine {
         cd: Math.max(0, (sk.firstCastDelay ?? sk.cooldown * ENEMY_SKILL_START_CD) + (sk.initialDelayRandom ? (this.rng() * 2 - 1) * sk.initialDelayRandom : 0)),
       }));
     u.monster = MonsterController.createState(u.id, def);
+    if (u.boss && this.metrics.bossSpawnedAt == null) this.metrics.bossSpawnedAt = this.time;
     return u;
   }
 
@@ -1119,6 +1134,7 @@ export class BattleEngine {
     const token = this.seq++;
     u.casting = { def, left: def.castTime, target: target?.id ?? null, token, nextProgress: CAST_PROGRESS_STEP, breakDamage: 0 };
     if (u.side !== PLAYER_TEAM && canStopCast(def)) this.metrics.interruptOpportunities++;
+    if (u.monster) this.metrics.cast(def.id, 'started');
     // Mist Form: the caster turns to mist for the whole cast (no cast bar)
     const hidden = !!mdef?.untargetableWhileCasting;
     if (hidden) this.applyStatus(u, 'untargetable', u, def.castTime + 0.05);
@@ -1155,6 +1171,7 @@ export class BattleEngine {
     const c = u.casting;
     if (!c) return;
     u.casting = null;
+    if (u.monster) this.metrics.cast(c.def.id, 'cancelled');
     this.events.push({ type: 'castCancel', src: u.id, skill: c.def.id, reason });
     if (isMonsterSkill(c.def) && c.def.fx) this.events.push({ type: 'fxStop', src: u.id, name: c.def.fx.id });
     if (isMonsterSkill(c.def) && c.def.untargetableWhileCasting) this.removeStatus(u, 'untargetable');
@@ -1334,6 +1351,7 @@ export class BattleEngine {
       if (breakRequiredOf(c.def) > 0) this.metrics.breakFailure++;
     }
     if (isMonsterSkill(c.def)) {
+      if (u.monster) this.metrics.cast(c.def.id, 'completed');
       if (c.def.untargetableWhileCasting) this.removeStatus(u, 'untargetable');
       this.activateMonsterSkill(u, c.def, c.target);
       this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
@@ -1376,6 +1394,7 @@ export class BattleEngine {
     }
     dst.casting = null;
     this.metrics.interruptSuccesses++;
+    if (dst.monster) this.metrics.cast(c.def.id, 'interrupted');
     const cs = dst.castSkills.find(x => x.def === c.def);
     // the skill still goes on (full) cooldown — a successful interrupt is a big win
     if (cs && cs.cd !== Infinity) cs.cd = (isMonsterSkill(c.def) ? c.def.interruptedCooldown : undefined) ?? this.monsterAI.cooldownOf(dst, c.def);
@@ -1403,6 +1422,7 @@ export class BattleEngine {
     this.events.push({ type: 'broken', src: src.id, dst: dst.id, skill: def.id });
     this.metrics.interruptSuccesses++;
     this.metrics.breakSuccess++;
+    this.metrics.cast(def.id, 'broken');
     this.events.push({ type: 'CAST_INTERRUPTED', src: src.id, dst: dst.id, skill: def.id });
     if (def.fx) this.events.push({ type: 'fxStop', src: dst.id, name: def.fx.id });
     if (dst.monster) this.monsterAI.onCastEnd(dst, 'interrupted');
@@ -1500,6 +1520,7 @@ export class BattleEngine {
       return;
     }
     const r = applyBuff(dst, def, src.id, { magnitude: effectiveAttack(src), duration });
+    this.metrics.statusApplied[def.id] = (this.metrics.statusApplied[def.id] ?? 0) + 1;
     this.events.push({ type: 'buff', src: src.id, dst: dst.id, buff: def.id, name: def.name, refreshed: r !== 'applied' });
     if (def.flags?.includes('taunted')) {
       dst.targetId = src.id;
@@ -1538,6 +1559,7 @@ export class BattleEngine {
     const ph = def.phases![s.phaseIndex];
     s.phaseIndex++;
     this.metrics.bossPhaseReached = Math.max(this.metrics.bossPhaseReached, s.phaseIndex);
+    this.metrics.bossPhases.push({ index: s.phaseIndex, id: ph.id, at: this.time });
     this.events.push({ type: 'bossPhase', src: u.id, phase: ph.id, label: ph.label, index: s.phaseIndex });
     if (ph.interruptSelf) {
       // immediately clear any cast / idle delay (recovery, hit reaction, pending swing)
@@ -1582,6 +1604,7 @@ export class BattleEngine {
     const seal = s.seal!;
     if (seal.adds.every(id => !this.units.find(x => x.id === id)?.alive)) {
       s.seal = null;
+      this.metrics.sealBrokenAt ??= this.time;
       this.removeStatus(u, 'boss_seal');
       this.events.push({ type: 'sealBroken', src: u.id });
       return;
@@ -1742,6 +1765,7 @@ export class BattleEngine {
         if (isRanged(dst) && this.positioning.threatCount(dst.pos, this.positioning.threats(dst)) > 0) this.metrics.rangedDeathsInThreat++;
       }
       this.grid.remove(dst.id, dst.pos);
+      if (dst.boss && dst.side !== PLAYER_TEAM && this.metrics.bossDiedAt == null) this.metrics.bossDiedAt = this.time;
       this.events.push({ type: 'death', dst: dst.id });
       this.flow.onDeath(dst);
       if (dst.summonedBy != null) this.onSummonDied(dst);
