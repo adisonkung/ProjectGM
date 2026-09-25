@@ -57,7 +57,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
     id: 'healing_ritual', name: 'พิธีเยียวยา', label: 'HEALING RITUAL', type: 'SUPPORT',
     castTime: 3, cooldown: 11, interruptible: true, initialDelayRandom: 1,
     target: { type: 'ALL_ALLIES' },
-    effects: [{ type: 'HEAL_PCT', pct: 0.2, to: 'ALL_ALLIES' }],
+    effects: [{ type: 'HEAL_PCT', pct: 0.2, to: 'ALL_ALLIES', excludeSummons: true }],
     mockFx: { color: '#8cff9c', area: 'ALL_ALLIES' },
     conditions: [{ type: 'ANY_OF', of: [{ type: 'ALLIES_BELOW', count: 2, pct: 0.7 }, { type: 'ELITE_ALLY_BELOW', pct: 0.5 }] }],
     recovery: 0.3, interruptRecovery: 0.6,
@@ -139,7 +139,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   // Stage 9 — Mist Witch
   nightmare: {
     id: 'nightmare', name: 'ฝันร้าย', label: 'NIGHTMARE', type: 'ATTACK',
-    castTime: 2.5, cooldown: 10, interruptible: true, range: 8,
+    castTime: 2.5, cooldown: 10, interruptible: true,
     target: { type: 'HIGHEST_ATK_HERO' },
     effects: [
       { type: 'DAMAGE', mul: 1, area: 'SINGLE', center: 'TARGET', damageType: 'MAGIC' },
@@ -303,7 +303,7 @@ export const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = {
   },
   fallen_forest_guardian: {
     id: 'fallen_forest_guardian', name: 'ผู้พิทักษ์พงไพรที่ล่มสลาย', rank: 'FINAL_BOSS', role: 'CONTROL / SUMMONER / EXECUTION CHECK', tags: ['boss', 'forest'],
-    displayClass: 'tank', visual: 'mock_fallen_guardian', immune: ['KNOCKBACK', 'TAUNT', 'ROOT', 'STUN'],
+    displayClass: 'tank', visual: 'mock_fallen_guardian', immune: ['KNOCKBACK', 'TAUNT', 'ROOT'],
     stats: base({ maxHp: 4200, attack: 62, defense: 42, moveSpeed: 1.4, attackRange: 2, attackCooldown: 1.65, attackWindup: 0.45, hitReactionDuration: 0.1, minHitReactionInterval: 4, collisionRadius: 0.8 }),
     ai: {
       targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 3 }, movement: 'MELEE_CHASE',
@@ -320,7 +320,7 @@ export const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = {
       { id: 'sacrifice', label: 'พิธีบูชายัญ', hpBelow: 0.4, summon: [{ id: 'dark_shaman_ritual', count: 1 }] },
       {
         id: 'enrage', label: 'คลั่งสุดขีด', hpBelow: 0.15, interruptSelf: true,
-        statuses: ['guardian_enrage'], cooldownScale: 0.7, enableSkills: [{ id: 'forest_oblivion', firstDelay: 2 }],
+        statuses: ['guardian_enrage'], cooldownScale: 0.7, cooldownOverride: { forest_oblivion: 12 }, enableSkills: [{ id: 'forest_oblivion', firstDelay: 2 }],
       },
     ],
   },

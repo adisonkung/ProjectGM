@@ -1085,7 +1085,7 @@ export class BattleEngine {
           break;
         }
         case 'HEAL_PCT': {
-          const to = eff.to === 'TARGET' ? (aim && aim.side === u.side ? [aim] : []) : allies();
+          const to = eff.to === 'TARGET' ? (aim && aim.side === u.side ? [aim] : []) : allies().filter(a => !eff.excludeSummons || a.summonedBy == null);
           for (const a of to) this.heal(a, a.maxHp * eff.pct, u);
           break;
         }
@@ -1093,7 +1093,7 @@ export class BattleEngine {
           if (!aim) break;
           // never overlap: land on a free cell next to the target, on its far side from the caster
           const cell = this.freeCellNear(aim.pos, u.pos);
-          if (cell) this.relocate(u, cell, def.untargetableWhileCasting ? 'blink' : 'dash');
+          if (cell) this.relocate(u, cell, 'dash');
           if (u.monster) {
             u.monster.currentTargetId = aim.id;
             u.monster.targetLockUntil = this.time + 1.5;
@@ -1364,7 +1364,19 @@ export class BattleEngine {
     const ph = def.phases![s.phaseIndex];
     s.phaseIndex++;
     this.events.push({ type: 'bossPhase', src: u.id, phase: ph.id, label: ph.label, index: s.phaseIndex });
-    if (ph.interruptSelf && u.casting) this.cancelCast(u, 'phase');
+    if (ph.interruptSelf) {
+      // immediately clear any cast / idle delay (recovery, hit reaction, pending swing)
+      if (u.casting) this.cancelCast(u, 'phase');
+      s.recoverTimer = 0;
+      s.hurtTimer = 0;
+      s.attackToken++;
+      s.attackCooldownRemaining = 0;
+      if (s.state === 'RECOVERING' || s.state === 'HURT' || s.state === 'ATTACKING' || s.state === 'CASTING') {
+        s.state = 'SEARCHING';
+        s.stateTime = 0;
+        s.animationState = 'idle';
+      }
+    }
     for (const id of ph.statuses ?? []) this.applyStatus(u, id, u);
     if (ph.cooldownScale != null) {
       s.cooldownScale = ph.cooldownScale;

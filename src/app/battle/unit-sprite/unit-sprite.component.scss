@@ -57,6 +57,8 @@
   .eye { position: absolute; width: 14%; aspect-ratio: 1; border-radius: 50%; background: var(--ma); top: 30%; right: 18%; box-shadow: 0 0 6px var(--ma); }
   &.flip .eye { right: auto; left: 18%; }
   &.circle .body, &.wisp .body { border-radius: 50%; }
+  &.capsule { aspect-ratio: 0.72; }
+  &.capsule .body { border-radius: 999px; }
   &.wisp .body { border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; box-shadow: 0 0 14px var(--mc); }
   &.cap .body { border-radius: 50% 50% 12% 12% / 70% 70% 12% 12%; }
   &.diamond .body { transform: rotate(45deg) scale(0.78); border-radius: 18%; }

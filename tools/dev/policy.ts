@@ -7,9 +7,6 @@ const PRIORITY: Record<string, number> = {
   dark_shaman: 1,
   mist_witch: 2,
   magic_mushroom: 3,
-  forest_spirit: 4,
-  shadow_panther: 5,
-  mist_wraith: 6,
 };
 
 export function focusPriority(e: BattleEngine): number | null {
@@ -19,27 +16,15 @@ export function focusPriority(e: BattleEngine): number | null {
   const ranked = foes
     .map(u => ({ u, p: PRIORITY[u.monster!.definitionId] ?? 99 }))
     .filter(x => x.p < 99)
+    // only what the backline can already shoot (Focus would otherwise walk it into the enemy's range)
+    .filter(x => heroesCanReach(e, x.u))
     .sort((a, b) => a.p - b.p || a.u.hp - b.u.hp);
   return ranked[0]?.u.id ?? null;
 }
 
-/**
- * TACTICAL manual ultimates (autoUlt off): interrupt ults (tank / archer) are saved for a stoppable cast
- * (Forest Oblivion break, Sacrifice, Healing Ritual …); the healer ult waits for a crisis; damage ults fire when full.
- */
-export function tacticalUlts(e: BattleEngine): void {
-  const heroes = e.units.filter(u => u.side === 'ally' && u.alive);
-  const foes = e.units.filter(u => u.side === 'enemy' && u.alive && e.isValidTarget(heroes[0] ?? u, u));
-  if (!foes.length) return;
-  const stoppable = foes.some(f => f.casting && (f.casting.def.interruptible || (f.casting.def as { breakRequired?: number }).breakRequired));
-  const casterAround = foes.some(f => f.castSkills.some(cs => cs.def.interruptible || (cs.def as { breakRequired?: number }).breakRequired));
-  const crisis = heroes.some(h => h.hp < h.maxHp * 0.4) || e.getDeadVisibleHeroes().length + e.getDeadHiddenHeroes().length > 0;
-  for (const h of heroes) {
-    if (h.mana < h.maxMana || h.ultQueued) continue;
-    const fire =
-      h.cls === 'tank' || h.cls === 'archer' ? stoppable || (!casterAround && crisis) || !casterAround
-        : h.cls === 'healer' ? crisis
-          : true;
-    if (fire) e.requestUlt(h.id);
-  }
+/** focus only what no ranged hero would have to step forward for (Focus pulls the backline up to 2 cells) */
+function heroesCanReach(e: BattleEngine, t: import('../../src/app/battle/engine/battle-engine').BattleUnit): boolean {
+  const d = (a: { pos: { r: number; c: number } }) => Math.max(Math.abs(a.pos.r - t.pos.r), Math.abs(a.pos.c - t.pos.c));
+  const ranged = e.units.filter(h => h.side === 'ally' && h.alive && h.range >= 3);
+  return ranged.length > 0 && ranged.every(h => d(h) <= h.range);
 }

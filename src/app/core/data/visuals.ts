@@ -5,7 +5,7 @@
  *
  * MOCK = placeholder shape drawn in CSS: shape + body colour + accent (outline / eyes) + size (× cell).
  */
-export type MockShape = 'circle' | 'cap' | 'diamond' | 'square' | 'triangle' | 'hex' | 'wisp';
+export type MockShape = 'circle' | 'capsule' | 'square' | 'cap' | 'diamond' | 'triangle' | 'hex' | 'wisp';
 
 export interface MockVisual {
   kind: 'mock';
@@ -28,18 +28,19 @@ export interface SpriteVisual {
 export type VisualDefinition = MockVisual | SpriteVisual;
 
 export const VISUALS: Record<string, VisualDefinition> = {
-  mock_magic_mushroom: { kind: 'mock', shape: 'cap', color: '#b0453f', accent: '#f6e7c8', size: 0.85, glyph: '•' },
-  mock_forest_spirit: { kind: 'mock', shape: 'wisp', color: '#5ee0d0', accent: '#e8fffb', size: 0.8, ghost: true },
-  mock_shadow_panther: { kind: 'mock', shape: 'diamond', color: '#2a2140', accent: '#c68bff', size: 0.95 },
-  mock_goblin_guard: { kind: 'mock', shape: 'square', color: '#4f7a3a', accent: '#c9d6a3', size: 1, glyph: '▣' },
-  mock_goblin_shaman: { kind: 'mock', shape: 'triangle', color: '#5d8f3b', accent: '#8cff9c', size: 0.9, glyph: '✚' },
-  mock_elder_treant: { kind: 'mock', shape: 'hex', color: '#6b4a2b', accent: '#9fd36a', size: 1.6, glyph: '♣' },
-  mock_corrupted_wolf: { kind: 'mock', shape: 'diamond', color: '#5a1f2a', accent: '#ff5a5a', size: 0.95 },
-  mock_mist_wraith: { kind: 'mock', shape: 'wisp', color: '#9aa6b8', accent: '#e8eef8', size: 0.9, ghost: true },
-  mock_corrupted_treant: { kind: 'mock', shape: 'square', color: '#3d2f24', accent: '#8a5ab8', size: 1.25, glyph: '♣' },
-  mock_dark_shaman: { kind: 'mock', shape: 'triangle', color: '#3b2552', accent: '#c78cff', size: 0.95, glyph: '☽' },
-  mock_mist_witch: { kind: 'mock', shape: 'triangle', color: '#57477a', accent: '#d3c2ff', size: 0.95, glyph: '✦' },
-  mock_fallen_guardian: { kind: 'mock', shape: 'hex', color: '#1f1a1a', accent: '#ff3b3b', size: 1.9, glyph: '✹' },
+  // shapes / colours from the Stage 4–10 design spec (MOCK VISUAL REQUIREMENTS)
+  mock_magic_mushroom: { kind: 'mock', shape: 'circle', color: '#8e44c9', accent: '#e9d4ff', size: 0.85 },
+  mock_forest_spirit: { kind: 'mock', shape: 'circle', color: '#34d6e0', accent: '#e8fffe', size: 0.8 },
+  mock_shadow_panther: { kind: 'mock', shape: 'capsule', color: '#15121c', accent: '#b98bff', size: 0.95 },
+  mock_goblin_guard: { kind: 'mock', shape: 'square', color: '#7a5230', accent: '#e0c79a', size: 1 },
+  mock_goblin_shaman: { kind: 'mock', shape: 'circle', color: '#3f9a3a', accent: '#d8ffb0', size: 0.9, glyph: '⚚' },
+  mock_elder_treant: { kind: 'mock', shape: 'capsule', color: '#6b4726', accent: '#b6e07a', size: 1.6 },
+  mock_corrupted_wolf: { kind: 'mock', shape: 'circle', color: '#6e1620', accent: '#ff6a6a', size: 0.9 },
+  mock_mist_wraith: { kind: 'mock', shape: 'circle', color: '#5d8fe0', accent: '#e4efff', size: 0.9, ghost: true },
+  mock_corrupted_treant: { kind: 'mock', shape: 'square', color: '#1f4a2a', accent: '#8fd08a', size: 1.3 },
+  mock_dark_shaman: { kind: 'mock', shape: 'circle', color: '#5a2d78', accent: '#7fe07a', size: 0.95, glyph: '☽' },
+  mock_mist_witch: { kind: 'mock', shape: 'circle', color: '#8a5ad6', accent: '#f0e4ff', size: 0.95, glyph: '✦' },
+  mock_fallen_guardian: { kind: 'mock', shape: 'capsule', color: '#5a0f14', accent: '#ff4a3a', size: 2 },
 };
 
 export const visualOf = (id: string | undefined): VisualDefinition | undefined => (id ? VISUALS[id] : undefined);

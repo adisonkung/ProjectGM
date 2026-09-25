@@ -164,8 +164,8 @@ export type SkillEffect =
   | { type: 'DAMAGE'; mul: number; area: import('./combat').AreaPattern; center: 'TARGET' | 'SELF'; damageType?: DamageType }
   /** status on the units just hit / the aimed unit / every hero / self */
   | { type: 'APPLY_STATUS'; status: string; to: 'HIT' | 'TARGET' | 'ALL_HEROES' | 'SELF'; duration?: number }
-  /** heal: `pct` of each recipient's max HP */
-  | { type: 'HEAL_PCT'; pct: number; to: 'TARGET' | 'ALL_ALLIES' }
+  /** heal: `pct` of each recipient's max HP (`excludeSummons`: summoned / non-combat units are skipped) */
+  | { type: 'HEAL_PCT'; pct: number; to: 'TARGET' | 'ALL_ALLIES'; excludeSummons?: boolean }
   /** land on the nearest free cell behind the aimed hero (never overlapping a unit) */
   | { type: 'LEAP_BEHIND' }
   /** summon monsters next to the caster, never more than `maxActive` alive from this skill */

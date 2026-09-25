@@ -1,7 +1,7 @@
 /**
  * Balance sweep for Stage 4–10: win rate of the starter team with two player policies.
  *   AUTO     = blind auto (AUTO ult, no Focus)
- *   TACTICAL = Focus on the dangerous support / caster + manual ults (interrupt ults saved for cast bars / Break, healer ult for crises)
+ *   TACTICAL = AUTO ult + Focus on the dangerous support / caster the backline can already shoot (tools/dev/policy.ts)
  * npm run balance -- [runs] [level] [floor] [monsterScale]
  */
 import { BattleEngine } from '../../src/app/battle/engine/battle-engine';
@@ -9,7 +9,7 @@ import { ENEMIES } from '../../src/app/core/data/enemies';
 import { STAGES } from '../../src/app/core/data/stages';
 import { newGameState } from '../../src/app/core/data/starter';
 import { teamToUnits } from '../../src/app/core/rules/team';
-import { focusPriority, tacticalUlts } from './policy';
+import { focusPriority } from './policy';
 
 declare const process: { argv: string[] };
 const runs = Number(process.argv[2] ?? 40);
@@ -30,12 +30,11 @@ for (const base of STAGES) {
     let deaths = 0;
     let lastWave = 0;
     for (let s = 1; s <= runs; s++) {
-      const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: s, autoUlt: policy === 'AUTO' });
+      const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: s, autoUlt: true });
       while (!e.result && e.time < 400) {
         if (policy === 'TACTICAL') {
           const f = focusPriority(e);
           if (f != null && f !== e.focusTargetId) e.setFocus(f);
-          tacticalUlts(e);
         }
         e.step(0.05);
         e.drainEvents();

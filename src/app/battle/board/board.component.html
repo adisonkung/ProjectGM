@@ -43,7 +43,7 @@
         @if (u.statuses?.length) {
           <div class="sts">@for (st of u.statuses; track st.id) { <span [attr.title]="st.id + ' ' + st.left.toFixed(1) + 's'">{{ st.icon }}</span> }</div>
         }
-        @if (u.mock) { <span class="mock-label">{{ u.name }} · {{ u.hpPct.toFixed(0) }}%</span> }
+        @if (u.mock) { <span class="mock-label">[{{ u.name }}] HP {{ u.hpPct.toFixed(0) }}%@if (u.cast) { · CASTING {{ u.cast.label }} }@if (u.untargetable) { · UNTARGETABLE }@if (u.broken) { · BROKEN }</span> }
         @if (debug() && u.debug) {
           <div class="dbg">@for (l of u.debug; track $index) { <span>{{ l }}</span> }</div>
         }
