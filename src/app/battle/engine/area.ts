@@ -1,0 +1,91 @@
+import { AreaCenter, AreaPattern } from '../../core/models/combat';
+import { Cell } from '../../core/models/unit';
+import { distance } from './grid';
+
+/** What the resolver needs of a unit */
+export interface AreaUnit {
+  id: number;
+  pos: Cell;
+}
+
+export interface AreaQuery<T extends AreaUnit> {
+  pattern: AreaPattern;
+  caster: T;
+  /** primary target (SINGLE / LINE / TARGET-centred areas) */
+  primary: T | null;
+  center?: AreaCenter;
+  /** valid units of the affected team (already filtered: alive, targetable, on the battlefield) */
+  candidates: T[];
+}
+
+const sign = (v: number) => (v > 0 ? 1 : v < 0 ? -1 : 0);
+
+/**
+ * Attack direction from the caster to the target: column step (never 0 — units face the enemy side)
+ * and lane step (only when the target is on another lane and the column is the same).
+ */
+function direction(from: Cell, to: Cell, facing: 1 | -1): { dc: number; dr: number } {
+  const dc = sign(to.c - from.c) || facing;
+  const dr = to.c === from.c ? sign(to.r - from.r) : 0;
+  return { dc, dr };
+}
+
+/**
+ * AreaResolver — standardized AoE shapes on the logical grid (8-direction distance).
+ * The primary target (when inside the area) is always first; each unit appears once (no double hits).
+ */
+export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
+  const { pattern, caster, primary, candidates } = q;
+  const centerCell = (q.center ?? 'TARGET') === 'SELF' || !primary ? caster.pos : primary.pos;
+  const facing: 1 | -1 = candidates.some(c => c.pos.c > caster.pos.c) || !candidates.length ? 1 : -1;
+  let hit: T[];
+  switch (pattern) {
+    case 'SINGLE':
+      hit = primary && candidates.includes(primary) ? [primary] : [];
+      break;
+    case 'ADJACENT_8':
+      hit = candidates.filter(u => distance(u.pos, centerCell) <= 1);
+      break;
+    case 'CROSS_1':
+      hit = candidates.filter(u => Math.abs(u.pos.r - centerCell.r) + Math.abs(u.pos.c - centerCell.c) <= 1);
+      break;
+    case 'RADIUS_2':
+      hit = candidates.filter(u => distance(u.pos, centerCell) <= 2);
+      break;
+    case 'RADIUS_3':
+      hit = candidates.filter(u => distance(u.pos, centerCell) <= 3);
+      break;
+    case 'ALL_ALLIES':
+    case 'ALL_ENEMIES':
+      hit = [...candidates];
+      break;
+    case 'FRONT_ARC': {
+      // short cone in front of the caster: its own column (sides / stacked foes) up to 2 columns ahead, within ±1 lane
+      const dir = primary ? direction(caster.pos, primary.pos, facing).dc : facing;
+      hit = candidates.filter(u => {
+        const ahead = (u.pos.c - caster.pos.c) * dir;
+        return ahead >= 0 && ahead <= 2 && Math.abs(u.pos.r - caster.pos.r) <= 1;
+      });
+      break;
+    }
+    case 'LINE_2':
+    case 'LINE_3': {
+      if (!primary || !candidates.includes(primary)) {
+        hit = [];
+        break;
+      }
+      // primary + the next unit(s) straight behind it along the attack direction (one unit per cell)
+      const { dc, dr } = direction(caster.pos, primary.pos, facing);
+      const n = pattern === 'LINE_2' ? 1 : 2;
+      hit = [primary];
+      for (let k = 1; k <= n; k++) {
+        const cell = { r: primary.pos.r + dr * k, c: primary.pos.c + dc * k };
+        const next = candidates.filter(u => !hit.includes(u) && u.pos.r === cell.r && u.pos.c === cell.c).sort((a, b) => a.id - b.id)[0];
+        if (next) hit.push(next);
+      }
+      break;
+    }
+  }
+  if (primary && hit.includes(primary)) hit = [primary, ...hit.filter(u => u !== primary)];
+  return hit;
+}

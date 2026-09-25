@@ -1,5 +1,5 @@
-import { kitName, kitVariant } from '../../core/data/hero-kits';
-import { canInterrupt, MANA_PER_ATTACK, MANA_PER_HIT, SKILL2_NAME, SKILL_CD, SKILL_NAME, START_CD, ULT_NAME } from '../../core/data/classes';
+import { MANA_PER_ATTACK, MANA_PER_HIT, RECEIVE_GAUGE_ICD, START_CD } from '../../core/data/classes';
+import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { ENEMY_SKILL_START_CD, ENEMY_SKILLS, EnemySkillDef } from '../../core/data/enemy-skills';
 import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
@@ -8,7 +8,9 @@ import { Cell, Side, UnitSpec } from '../../core/models/unit';
 import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
 import { AttackDefinition, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
-import { ActiveBuff, applyBuff, tickBuffs } from './buffs';
+import { ActiveBuff, applyBuff, dodgeChance, hasFlag, modifier, tauntSource, tickStatuses } from './buffs';
+import { SkillHost, SkillSystem } from './skill-system';
+import type { DamageKind } from '../../core/models/combat';
 import { FormationRuntime } from './stage/formation';
 import {
   getActiveBattlefieldHeroes, getAliveHeroes, getAllPartyHeroes, getDeadHiddenHeroes, getDeadVisibleHeroes, PLAYER_TEAM,
@@ -16,7 +18,7 @@ import {
 import { resolveRules, StageBattleRules } from './stage/rules';
 import { StageFlow, StageHost } from './stage/stage-flow';
 import { BattlePhase, CombatActivity, LifeState, ReviveHeroCommand, ReviveResult, StageEvent, StageResult } from './stage/types';
-import { DamageResolver, effectiveAttack } from './damage-resolver';
+import { CRIT_CHANCE, DamageResolver, effectiveAttack } from './damage-resolver';
 import { BOARD_COLS, distance, Grid, LANES, Line, lineOf, SIDE_DEPTH, STACK_CAP, toBoard } from './grid';
 import { CombatContext, MonsterCombatState, MonsterController } from './monster-controller';
 import { greedyStep, nextStep } from './pathfinding';
@@ -68,6 +70,8 @@ export type BattleEvent =
   | { type: 'fxStop'; src: number; name: string }
   /** ตัดการร่ายสำเร็จ (src = ผู้ตัด) */
   | { type: 'interrupt'; src: number; dst: number; skill: string }
+  /** dedicated interrupt landed (InterruptSystem) — skill = the cancelled skill id */
+  | { type: 'CAST_INTERRUPTED'; src: number; dst: number; skill: string }
   /** พยายามตัดแต่สกิลนี้ตัดไม่ได้ */
   | { type: 'immune'; src: number; dst: number; skill: string }
   /** เปลี่ยนเป้าโฟกัส (null = ยกเลิก; reason บอกว่ายกเลิกเพราะอะไร) */
@@ -149,8 +153,6 @@ export interface BattleUnit {
   moveCd: number;
   /** เวลาที่ยังค้างท่าร่ายสกิล (ขยับ/ตีไม่ได้) */
   castLock: number;
-  /** เวลาที่ยังยั่วยุอยู่ (ลดดาเมจที่ได้รับ 50%) */
-  taunt: number;
   /** คูลดาวน์ที่เหลือของสกิล 1 / สกิล 2 (วิ) */
   cd1: number;
   cd2: number;
@@ -165,20 +167,17 @@ export interface BattleUnit {
   intent: Intent;
   /** กำลังร่าย (state = CASTING): ยืนนิ่ง ทำอย่างอื่นไม่ได้ */
   casting: { def: CastSkillDef; left: number; target: number | null; token: number; nextProgress: number } | null;
-  /** คลั่ง: เวลาที่เหลือ และตัวคูณ atk/ความเร็วตี */
-  rage: number;
-  rageMul: number;
   /** เตรียมไว้สำหรับบอสในอนาคต (Break Gauge) — ยังไม่ใช้ */
   interruptResistance: number;
   /** โล่ดูดซับดาเมจ และเวลาที่เหลือ */
   shield: number;
   shieldTime: number;
-  /** พิษ: ดาเมจต่อวินาที เวลาที่เหลือ และตัวนับรอบติดดาเมจ */
-  poison: number;
-  poisonTime: number;
-  poisonTick: number;
-  /** runtime buffs (base stats are never modified) */
+  /** runtime status effects: buffs, debuffs, DoT/HoT, stun/root/taunted (base stats are never modified) */
   buffs: ActiveBuff[];
+  /** battle time of the last receive-hit gauge gain (+2, internal cooldown RECEIVE_GAUGE_ICD) */
+  lastGaugeHitAt: number;
+  /** charge / dash / knock-back: the visual position slides fast until this time */
+  dashUntil: number;
   /** false while dead / reviving (future: untargetable phases) */
   targetable: boolean;
   /** cells — projectile collision */
@@ -207,80 +206,17 @@ const CAST_PROGRESS_STEP = 0.25;
 const HERO_RADIUS = 0.35;
 
 const CAST_LOCK = 0.4;
-const TAUNT_TIME = 3;
-const TAUNT_RADIUS = 3;
-const CRIT_CHANCE = 0.1;
-const CRIT_MUL = 1.5;
-/** แทงก์ สกิล 2 พุ่งชนโล่: ดาเมจ 160% ผลักถอย 1 ช่อง มึน 1 วิ */
-const CHARGE_MUL = 1.6;
-const CHARGE_STUN = 1;
-/**
- * ท่าไม้ตายทุกสายใช้เกจมานาเต็ม (ผู้เล่นกดที่รูปตัวละคร / ศัตรูและโหมดออโต้ร่ายเอง) — ไม่จำกัดจำนวนครั้ง
- * แทงก์ ท่าไม้ตาย: ร่ายเมื่อมีศัตรูในระยะยั่วยุ
- * → โล่ตัวเอง 30% / เพื่อนทุกคนในทีม 15% ของเลือดสูงสุดแทงก์ อยู่ 6 วิ + ยั่วยุ
- */
-const ULT_SELF_SHIELD = 0.3;
-const ULT_ALLY_SHIELD = 0.15;
-const ULT_LOCK = 0.6;
-const SHIELD_TIME = 6;
-/** นักฆ่า สกิล 1 จู่โจมเงา: วาร์ปไปหลังศัตรูที่เลือดเหลือน้อยที่สุด ฟัน 200% */
-const BLINK_MUL = 2;
-/** สกิลเฉพาะตัว (hero-kits): โทสะเลือด / เมฆพิษ · นักเวท สกิล 2 มือกระดูก */
-const RAGE_HIT = 1.5;
-const RAGE_TIME = 6;
-const RAGE_MUL = 1.35;
-const MIASMA_MUL = 1.1;
-const BONE_MUL = 2;
-const BONE_STUN = 1.2;
-/** นักฆ่า สกิล 2 ควันพิษ: ฟัน 120% + พิษรอบเป้าหมาย 1 ช่อง 25% atk ต่อวินาที 4 วิ */
-const SMOKE_MUL = 1.2;
-const POISON_DPS = 0.25;
-const POISON_TIME = 4;
-const POISON_TICK = 0.5;
-/** นักฆ่า ท่าไม้ตาย ประหารเงามายา: วาร์ปไปหาศัตรูที่เลือด % ต่ำสุดในระยะ 4 ช่อง ฟัน 350% คริแน่นอน */
-const EXEC_REACH = 4;
-const EXEC_MUL = 3.5;
-/** นักสู้ สกิล 2 พุ่งทะลวง: 180% เป้าหมาย + 120% ศัตรูที่ยืนถัดไปข้างหลัง */
-const PIERCE_MUL = 1.8;
-const PIERCE_BEHIND_MUL = 1.2;
-/** นักสู้ ท่าไม้ตาย: 300% เป้าหมาย + 150% ศัตรูรอบเป้า 1 ช่อง */
-const BLADE_ULT_MUL = 3;
-const BLADE_ULT_SPLASH = 1.5;
-/** นักสู้ สกิล 1 ดาบหมุนวน: 180% เป้าหมาย + 100% ศัตรูรอบตัว 1 ช่อง */
-const SPIN_MUL = 1.8;
-const SPIN_SPLASH = 1;
-/** ลูกธนู/ลูกแสง: เวลาบิน = ค่าตั้งต้น + ต่อช่อง, ตกจากฟ้าใช้เวลาคงที่ */
+/** hero projectiles: flight = base + per cell · sky volleys fall in a fixed time */
 const PROJ_BASE = 0.1;
 const PROJ_PER_CELL = 0.06;
 const PROJ_SKY = 0.35;
-/** นักธนู สกิล 1 ยิงรัว: 4 ดอกห่างกัน 0.1 วิ ดอกละ 80% · สกิล 2 ห่าธนู: 130% เป้า + ศัตรูรอบเป้า 1 ช่อง */
-const RAPID_SHOTS = 4;
-const RAPID_GAP = 0.1;
-const RAPID_MUL = 0.8;
-const VOLLEY_MUL = 1.3;
-/** นักธนู ท่าไม้ตาย ฝนธนูสวรรค์: ศัตรูทุกตัว 150% */
-const RAIN_MUL = 1.5;
-/** ฮีลเลอร์ สกิล 2 พรศักดิ์สิทธิ์: ฮีลเพื่อนที่เลือด % ต่ำสุด atk×2.2 + 10% เลือดสูงสุด */
-const BLESS_ATK = 2.2;
-const BLESS_PCT = 0.1;
-/** ฮีลเลอร์ ท่าไม้ตาย คืนชีพศักดิ์สิทธิ์: เพื่อนที่ล้มฟื้นด้วยเลือด 50% */
-const REVIVE_HP = 0.5;
-/** เวลาเดินไปเวฟถัดไป (วินาที) — ระหว่างนี้ไม่มีใครต่อสู้ และไม่นับเวลาจำกัด */
-export const ADVANCE_TIME = 2.4;
+/** fast visible slide for charges / dashes (cells per second) */
+const DASH_SPEED = 14;
 /** STEP 9: AI คิดเลือกเป้าทุก 0.25 วิ · เปลี่ยนเป้าแล้วล็อกอย่างน้อย 0.6 วิ (ยกเว้นเป้าตาย/โฟกัสเปลี่ยน) */
 const THINK = 0.25;
 const TARGET_LOCK = 0.6;
-/** ฮีลฉุกเฉิน: เพื่อนเลือดต่ำกว่านี้ ฮีลเลอร์ทิ้งทุกอย่าง (รวมโฟกัส) มาฮีลก่อน */
-const EMERGENCY_HP = 0.35;
-/** สกิลวงกว้างรอให้โดน ≥ 2 ตัว — แต่ถ้ารอเกินกี่วิแล้วก็ใช้ไปเลย */
-const AOE_OVERDUE = 4;
 /** สายระยะไกลยอมขยับเข้าหาเป้าโฟกัสได้ไม่เกินกี่ช่อง */
 const FOCUS_STEP_IN = 2;
-/** นักเวท ท่าไม้ตาย: 250% เป้า + 150% รอบเป้า 1 ช่อง · ฮีลเลอร์ ท่าไม้ตาย: ฮีลทั้งทีม (+ชุบเพื่อนที่ล้ม 1 คน) */
-const METEOR_MUL = 2.5;
-const METEOR_SPLASH = 1.5;
-const ULT_HEAL_ATK = 1.5;
-const ULT_HEAL_PCT = 0.15;
 
 /**
  * เอนจินต่อสู้อัตโนมัติบนสนาม 3 เลน x 12 (TypeScript ล้วน ไม่ผูกกับ Angular)
@@ -294,6 +230,8 @@ export class BattleEngine {
   readonly projectiles: RuntimeProjectile[] = [];
   /** runs every data-driven monster (one shared state machine) */
   readonly monsterAI: MonsterController;
+  /** hero skills: targeting, AI tiers, effects (data in core/data/hero-skills.ts) */
+  readonly skills: SkillSystem;
   private readonly monsterDefs: Record<string, MonsterDefinition>;
   private seq = 1;
   /** เวลารวม (รวมช่วงเปลี่ยนเวฟ) */
@@ -327,6 +265,7 @@ export class BattleEngine {
     this.autoUlt = cfg.autoUlt ?? false;
     this.monsterDefs = cfg.monsters ?? MONSTERS;
     this.monsterAI = new MonsterController(this.combatContext(), this.monsterDefs, MONSTER_SKILLS);
+    this.skills = new SkillSystem(this.skillHost());
     this.nextWaveAt = cfg.stage.waveEvery ?? Infinity;
     this.enemyCap = cfg.stage.enemies.length;
     this.rules = { ...resolveRules(cfg.stage), ...(cfg.rules ?? {}) };
@@ -516,7 +455,7 @@ export class BattleEngine {
     else this.pending.push({ at: this.time + delay, fn: run });
   }
 
-  /** เป้าเดิมถ้ายังอยู่ ไม่งั้นศัตรูที่ใกล้ที่สุดในระยะ (ท่าฟาดลงไปแล้วค่อยเปลี่ยนเป้า) */
+  /** (unused helper kept for reference) เป้าเดิมถ้ายังอยู่ ไม่งั้นศัตรูที่ใกล้ที่สุดในระยะ */
   private liveTarget(u: BattleUnit, t: BattleUnit): BattleUnit | null {
     if (t.alive) return t;
     return (
@@ -572,25 +511,22 @@ export class BattleEngine {
       atkCd: this.rng() * 0.3,
       moveCd: 0,
       castLock: 0,
-      taunt: 0,
-      cd1: SKILL_CD[spec.cls][0] * START_CD,
-      cd2: SKILL_CD[spec.cls][1] * START_CD,
+      // skills start at 50% of their cooldown
+      cd1: (kitOf(spec.heroId, spec.cls).skill.cooldown ?? 0) * START_CD,
+      cd2: (kitOf(spec.heroId, spec.cls).skill2.cooldown ?? 0) * START_CD,
       ultQueued: false,
       castSkills: [],
       lockUntil: 0,
       thinkCd: 0,
       intent: 'normal',
       casting: null,
-      rage: 0,
-      rageMul: 1,
       interruptResistance: 0,
       line: lineOf(spec.pos.r),
       shield: 0,
       shieldTime: 0,
-      poison: 0,
-      poisonTime: 0,
-      poisonTick: 0,
       buffs: [],
+      lastGaugeHitAt: -Infinity,
+      dashUntil: 0,
       targetable: true,
       collisionRadius: HERO_RADIUS,
     };
@@ -698,18 +634,15 @@ export class BattleEngine {
     }
     if (transition && u.castLock > 0) u.castLock = Math.max(0, u.castLock - dt);
     if (!statuses) return;
-    if (u.rage > 0 && (u.rage -= dt) <= 0) u.rageMul = 1;
-    if (u.taunt > 0) u.taunt -= dt;
     if (u.shieldTime > 0 && (u.shieldTime -= dt) <= 0) u.shield = 0;
-    for (const b of tickBuffs(u, dt, transition)) this.events.push({ type: 'buffEnd', dst: u.id, buff: b.def.id });
-    if (u.poisonTime > 0) {
-      u.poisonTime -= dt;
-      u.poisonTick += dt;
-      if (u.poisonTick >= POISON_TICK || u.poisonTime <= 0) {
-        this.applyDamage(u, Math.max(1, Math.round(u.poison * u.poisonTick)), false, true);
-        u.poisonTick = 0;
-      }
+    const st = tickStatuses(u, dt, transition);
+    for (const t of st.ticks) {
+      if (!u.alive) break;
+      // DoT (poison): direct damage from the source's ATK snapshot · HoT: heal
+      if (t.kind === 'DAMAGE') this.applyDamage(u, Math.max(1, Math.round(t.amount)), false, true);
+      else this.heal(u, t.amount, this.units.find(x => x.id === t.buff.sourceId));
     }
+    for (const b of st.expired) this.events.push({ type: 'buffEnd', dst: u.id, buff: b.def.id });
   }
 
   private updateUnit(u: BattleUnit, dt: number): void {
@@ -730,77 +663,65 @@ export class BattleEngine {
       return;
     }
 
-    // ศัตรูที่มีสกิลร่าย: เริ่มร่ายเมื่อสกิลพร้อมและมีเป้า
+    // stunned: no actions and no movement (timers keep running)
+    if (hasFlag(u, 'stun')) return;
+
+    // legacy token enemies with cast skills (floors 4–10): start a cast when ready
     if (u.castSkills.length && this.tryStartCast(u)) return;
 
-    // ท่าไม้ตาย: เกจมานาเต็ม + (ผู้เล่นกดสั่ง หรือออโต้ หรือเป็นศัตรู) → ร่ายทันทีถ้ามีเป้าที่ใช้ได้
-    if (u.mana >= u.maxMana && (u.ultQueued || u.side === 'enemy' || (this.autoUlt && !this.holdUltForInterrupt(u))) && this.tryUltimate(u)) {
+    const current = this.acquireTarget(u);
+    // healers show ✚ while someone needs healing (their basic action is a Heal Bolt then)
+    if (u.side === PLAYER_TEAM && this.skills.healBoltTarget(u)) u.intent = 'heal';
+
+    // ultimate: full gauge + (player tap / AUTO / enemy) → fires once a suitable target exists
+    const wantsUlt = u.ultQueued || u.side !== PLAYER_TEAM || (this.autoUlt && !this.holdUltForInterrupt(u));
+    if (u.mana >= u.maxMana && wantsUlt && this.tryUltimate(u, u.ultQueued)) {
       u.ultQueued = false;
       return;
     }
 
-    // โอกาสตัดการร่าย: มีสกิลที่ตัดได้พร้อม + ศัตรูกำลังร่ายสกิลที่ตัดได้ในระยะ → ใช้ทันที (ไม่สนเป้าเดิม)
-    if (u.side === 'ally' && u.atkCd <= 0 && this.tryInterruptSkill(u)) return;
-
-    // ฮีลเลอร์: ฮีลฉุกเฉิน (สำคัญกว่าโฟกัส) — เพื่อนเลือด < 35% ในระยะ → พรศักดิ์สิทธิ์ถ้าพร้อม ไม่งั้นฮีลธรรมดา
-    if (u.cls === 'healer' && u.atkCd <= 0) {
-      const dying = this.alive(u.side)
-        .filter(a => a.hp / a.maxHp < EMERGENCY_HP && distance(a.pos, u.pos) <= u.range)
-        .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-      if (dying) {
-        u.intent = 'heal';
-        const offensive2 = kitVariant(u.heroId, 'skill2') === 'miasma';
-        if (offensive2 && u.cd1 <= 0) {
-          this.cast(u, dying, 'skill');
-          u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
-          return;
-        }
-        if (!offensive2 && u.cd2 <= 0) {
-          this.cast(u, dying, 'skill2');
-          u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
-          return;
-        }
-        if (u.cd1 > 0) {
-          this.basicHeal(u, dying);
-          return;
-        }
-      }
+    const aspd = u.atkSpeed * modifier(u, 'attackSpeedMultiplier');
+    // interrupt opportunity: react right away (a cast bar won't wait for the attack timer)
+    const intr = this.skills.chooseInterrupt(u, current);
+    if (intr) {
+      u.intent = 'interrupt';
+      u.lockUntil = this.time + TARGET_LOCK;
+      this.skills.use(u, intr.slot, intr.skill, intr.target);
+      u.atkCd = Math.max(u.atkCd, 0) + 1 / aspd;
+      return;
     }
-
-    // ฮีลเลอร์: ถ้ามีเพื่อนเลือดน้อยในระยะ ให้ฮีลแทนการตี
-    if (u.cls === 'healer' && u.atkCd <= 0 && u.cd1 > 0 && u.cd2 > 0) {
-      const hurt = this.alive(u.side)
-        .filter(a => a.hp / a.maxHp < 0.6 && distance(a.pos, u.pos) <= u.range)
-        .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-      if (hurt) {
-        u.intent = 'heal';
-        this.basicHeal(u, hurt);
+    // an interruptible cast just out of reach of a ready interrupt: walk into range first
+    const chase = u.side === PLAYER_TEAM ? this.skills.interruptChase(u) : null;
+    if (chase) u.intent = 'interrupt';
+    if (u.atkCd <= 0 && !chase) {
+      // skill AI tiers: emergency → interrupt → heal → high value → normal (SkillSystem), else the basic action
+      const pick = this.skills.chooseSkill(u, current);
+      if (pick) {
+        if (pick.tier === 'INTERRUPT') u.intent = 'interrupt';
+        else if (pick.tier === 'EMERGENCY' || pick.tier === 'HEAL') u.intent = 'heal';
+        if (pick.tier === 'INTERRUPT' && pick.target.side !== u.side) u.lockUntil = this.time + TARGET_LOCK;
+        this.skills.use(u, pick.slot, pick.skill, pick.target);
+        u.atkCd = Math.max(u.atkCd, 0) + 1 / aspd;
+        return;
+      }
+      if (this.skills.basic(u, current)) {
+        u.atkCd = Math.max(u.atkCd, 0) + 1 / aspd;
         return;
       }
     }
-
-    const target = this.acquireTarget(u);
-    if (!target) return;
-
-    if (distance(u.pos, target.pos) <= u.range) {
-      if (u.atkCd <= 0) {
-        // สกิล 2 (สำคัญ) ก่อน แล้วสกิล 1 · ไม่พร้อมทั้งคู่ = ตีธรรมดา (สร้างเกจ)
-        // สกิลวงกว้างรอจังหวะที่โดนหลายตัว (โฟกัสไม่ได้แปลว่าต้องทิ้งสกิลใส่เป้าเดี่ยว)
-        if (u.cd2 <= 0 && this.worthCasting(u, 'skill2', target)) this.cast(u, target, 'skill2');
-        else if (u.cd1 <= 0 && this.worthCasting(u, 'skill', target)) this.cast(u, target, 'skill');
-        else this.basicAttack(u, target);
-        u.atkCd = Math.max(u.atkCd, 0) + 1 / (u.atkSpeed * u.rageMul);
-      } else if (u.range >= 3 && u.moveCd <= 0) {
-        // สายระยะไกล: รักษาระยะ — ศัตรูประชิดตัวระหว่างรอตีครั้งถัดไป ให้ถอยหนี 1 ก้าว (ถ้าเป้ายังอยู่ในระยะ)
-        this.kite(u, target);
-      }
+    const goal = chase ?? current;
+    if (!goal) return;
+    if (!chase && distance(u.pos, goal.pos) <= u.range) {
+      // ranged: keep distance while reloading — step back once when a foe is adjacent
+      if (u.range >= 3 && u.moveCd <= 0) this.kite(u, goal);
       return;
     }
 
-    if (u.moveCd <= 0) {
+    // ROOT: cannot move (may still attack / cast when a target is in range)
+    if (u.moveCd <= 0 && !hasFlag(u, 'root')) {
       const step =
-        nextStep(this.grid, u.pos, c => distance(c, target.pos) <= u.range) ??
-        greedyStep(this.grid, u.pos, target.pos);
+        nextStep(this.grid, u.pos, c => distance(c, goal.pos) <= (chase ? this.skills.interruptReach(u) : u.range)) ??
+        greedyStep(this.grid, u.pos, goal.pos);
       if (step) {
         this.grid.move(u.id, u.pos, step);
         u.pos = step;
@@ -825,9 +746,9 @@ export class BattleEngine {
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally').filter(f => f.targetable);
     if (!foes.length) return null;
 
-    const taunter = foes
-      .filter(f => f.taunt > 0 && distance(f.pos, u.pos) <= TAUNT_RADIUS)
-      .sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos))[0];
+    // taunted (status from a tank): must attack that tank while it is valid
+    const src = tauntSource(u);
+    const taunter = src != null ? foes.find(f => f.id === src) : undefined;
     if (taunter) {
       u.targetId = taunter.id;
       u.intent = 'taunted';
@@ -964,61 +885,20 @@ export class BattleEngine {
     this.events.push({ type: 'focus', dst: null, reason });
   }
 
-  // ---------------------------------------------------------------- smart skills
+  // ---------------------------------------------------------------- smart ultimates / kiting
 
-  /** มีสกิลตัดการร่ายพร้อม + ศัตรูร่ายสกิลที่ตัดได้อยู่ในระยะ → ใช้เลย (โฟกัสก่อนถ้ากำลังร่าย) */
-  private tryInterruptSkill(u: BattleUnit): boolean {
-    const kinds = (['skill2', 'skill'] as const).filter(k => canInterrupt(u.cls, k) && (k === 'skill2' ? u.cd2 : u.cd1) <= 0);
-    if (!kinds.length) return false;
-    const focus = this.focusUnit();
-    const casters = this.alive('enemy')
-      .filter(f => f.casting?.def.interruptible && distance(f.pos, u.pos) <= u.range)
-      .sort((a, b) => Number(b === focus) - Number(a === focus) || a.casting!.left - b.casting!.left);
-    const t = casters[0];
-    if (!t) return false;
-    u.targetId = t.id;
-    u.intent = 'interrupt';
-    u.lockUntil = this.time + TARGET_LOCK;
-    this.cast(u, t, kinds[0]);
-    u.atkCd = Math.max(u.atkCd, 0) + 1 / (u.atkSpeed * u.rageMul);
-    return true;
-  }
-
-  /** สกิลวงกว้างรอให้โดน ≥ 2 ตัว (หรือเหลือศัตรูตัวเดียว / รอนานเกิน AOE_OVERDUE วิ) */
-  private worthCasting(u: BattleUnit, kind: SkillKind, t: BattleUnit): boolean {
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
-    const cd = kind === 'skill2' ? u.cd2 : u.cd1;
-    if (foes.length <= 1 || cd <= -AOE_OVERDUE) return true;
-    const around = (c: Cell) => foes.filter(f => distance(f.pos, c) <= 1).length;
-    if (u.cls === 'fighter' && kind === 'skill') return around(u.pos) >= 2; // ดาบหมุนวนรอบตัว
-    if (u.cls === 'archer' && kind === 'skill2') return around(t.pos) >= 2; // ห่าธนูตกเป็นวง
-    if (u.cls === 'mage' && kind === 'skill') return around(t.pos) >= 2;
-    return true;
-  }
-
-  /** โหมดออโต้: ฮีโร่ที่ท่าไม้ตายตัดได้ เก็บเกจไว้ถ้ามีศัตรูที่ร่ายสกิลอันตรายได้ (จนกว่าจะเริ่มร่าย) */
+  /** AUTO: a hero whose ultimate interrupts keeps the gauge while an enemy that can cast is around (until it starts) */
   private holdUltForInterrupt(u: BattleUnit): boolean {
-    if (u.side !== 'ally' || !canInterrupt(u.cls, 'ult') || u.hp < u.maxHp * 0.3) return false;
-    const foes = this.alive('enemy');
-    const reach = (f: BattleUnit) => u.cls !== 'tank' || distance(f.pos, u.pos) <= TAUNT_RADIUS + 1;
-    const castingNow = foes.some(f => f.casting?.def.interruptible && reach(f));
-    if (castingNow) return false;
+    if (u.side !== PLAYER_TEAM || !kitInterrupts(this.skills.kit(u), 'ult') || u.hp < u.maxHp * 0.3) return false;
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    const reach = (f: BattleUnit) => this.skills.kit(u).ult.range === Infinity || distance(f.pos, u.pos) <= 3;
+    if (foes.some(f => f.casting?.def.interruptible && reach(f))) return false;
     return foes.some(f => f.castSkills.some(cs => cs.def.interruptible) && reach(f));
   }
 
-  private basicHeal(u: BattleUnit, ally: BattleUnit): void {
-    const tm = animTiming(u.sprite, 'attack');
-    u.castLock = Math.max(u.castLock, tm.hit);
-    u.atkCd = Math.max(u.atkCd, 0) + 1 / u.atkSpeed;
-    this.events.push({ type: 'attack', src: u.id, dst: ally.id });
-    this.later(tm.hit, u, () => {
-      this.heal(ally, u.atk * 1.3, u);
-      this.gainMana(u, MANA_PER_ATTACK);
-    });
-  }
-
-  /** สายระยะไกลถอยหนีศัตรูที่ประชิดตัว 1 ก้าว ไปทางฝั่งตัวเอง (ต้องยังยิงเป้าถึง) */
+  /** สายระยะไกลถอยหนีศัตรูที่ประชิดตัว 1 ก้าว ไปทางฝั่งตัวเอง (ต้องยังยิงเป้าถึง) — ROOT ห้ามขยับ */
   private kite(u: BattleUnit, target: BattleUnit): void {
+    if (hasFlag(u, 'root')) return;
     const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
     const nearest = (c: Cell) => Math.min(...foes.map(f => distance(f.pos, c)));
     if (nearest(u.pos) > 1) return;
@@ -1153,8 +1033,7 @@ export class BattleEngine {
         for (const a of this.alive(u.side)) this.heal(a, a.maxHp * c.def.power, u);
         break;
       case 'berserk':
-        u.rage = c.def.duration ?? 8;
-        u.rageMul = 1 + c.def.power;
+        this.applyStatus(u, 'berserk', u, c.def.duration ?? 8);
         break;
     }
   }
@@ -1172,173 +1051,10 @@ export class BattleEngine {
     // the skill still goes on (full) cooldown — a successful interrupt is a big win
     if (cs) cs.cd = (isMonsterSkill(c.def) ? c.def.interruptedCooldown : undefined) ?? c.def.cooldown;
     this.events.push({ type: 'interrupt', src: src.id, dst: dst.id, skill: c.def.name });
+    this.events.push({ type: 'CAST_INTERRUPTED', src: src.id, dst: dst.id, skill: c.def.id });
     if (isMonsterSkill(c.def) && c.def.fx) this.events.push({ type: 'fxStop', src: dst.id, name: c.def.fx.id });
     if (dst.monster) this.monsterAI.onCastEnd(dst, 'interrupted');
     else dst.castLock = CAST_LOCK;
-  }
-
-  /** ตีธรรมดา: เริ่มท่าทันที ดาเมจเข้าตรงเฟรม hit (ยืนนิ่งระหว่างเงื้อ) */
-  private basicAttack(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'attack', src: u.id, dst: t.id });
-    const tm = animTiming(u.sprite, 'attack');
-    u.castLock = Math.max(u.castLock, tm.hit);
-    this.later(tm.hit, u, () => {
-      const tt = this.liveTarget(u, t);
-      if (!tt) return;
-      this.gainMana(u, MANA_PER_ATTACK);
-      // สายระยะไกล: ปล่อยลูกธนู/ลูกแสงตรงเฟรม hit ดาเมจเข้าเมื่อถึงเป้า
-      if (u.range > 1) this.shoot(u, tt, 1, 'attack');
-      else this.damage(u, tt, 1);
-    });
-  }
-
-  /** ยิงกระสุนไปหาเป้า: ดาเมจเข้าเมื่อบินถึง (ยังเข้าแม้ผู้ยิงล้มระหว่างทาง) */
-  private shoot(u: BattleUnit, t: BattleUnit, mul: number, kind: 'attack' | SkillKind, sky = false, crit = false): void {
-    const flight = sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
-    this.events.push({ type: 'projectile', src: u.id, dst: t.id, kind, flight, ...(sky ? { sky } : {}) });
-    this.pending.push({ at: this.time + flight, fn: () => this.damage(u, t, mul, crit, kind) });
-  }
-
-  /** เริ่มท่าสกิล: ล็อกตัวจนท่าจบ (ไม่ให้ท่าตีธรรมดามาตัดกลางท่า) */
-  private beginSkill(u: BattleUnit, kind: SkillKind): { total: number; hit: number; move: number } {
-    const tm = animTiming(u.sprite, kind);
-    u.castLock = Math.max(u.castLock, tm.total, CAST_LOCK);
-    return tm;
-  }
-
-  private cast(u: BattleUnit, t: BattleUnit, kind: SkillKind): void {
-    const [cd1, cd2] = SKILL_CD[u.cls];
-    if (kind === 'skill2') u.cd2 = cd2;
-    else u.cd1 = cd1;
-    const skill = kitName(u.heroId, kind) ?? ((kind === 'skill2' && SKILL2_NAME[u.cls]) || SKILL_NAME[u.cls]);
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
-    // นักฆ่า สกิล 1 เลือกเป้าใหม่: ศัตรูที่เลือดเหลือน้อยที่สุด (มักเป็นแถวหลัง) ที่มีช่องว่างข้าง ๆ
-    const focus = u.side === 'ally' ? this.focusUnit() : null;
-    if (u.cls === 'assassin' && kind === 'skill' && focus && this.freeCellNear(focus.pos, u.pos)) {
-      t = focus; // โฟกัส: นักฆ่าวาร์ปข้ามแนวหน้าไปหาเป้าโฟกัส
-    } else if (u.cls === 'assassin' && kind === 'skill') {
-      const prey = foes
-        .filter(f => this.freeCellNear(f.pos, u.pos))
-        .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp || distance(b.pos, u.pos) - distance(a.pos, u.pos))[0];
-      if (prey) t = prey;
-    }
-    this.events.push({ type: 'cast', src: u.id, skill, kind, dst: t.id });
-    const tm = this.beginSkill(u, kind);
-    if (u.cls === 'assassin' && kind === 'skill') this.later(tm.move, u, () => t.alive && this.blink(u, t));
-    this.later(tm.hit, u, () => {
-      const tt = this.liveTarget(u, t);
-      this.events.push({ type: 'impact', src: u.id, dst: tt?.id, kind });
-      this.resolveSkill(u, tt, kind);
-    });
-  }
-
-  private ultName(u: BattleUnit): string {
-    return kitName(u.heroId, 'ult') ?? ULT_NAME[u.cls]!;
-  }
-
-  /** ผลของสกิล ณ เฟรมที่โดน (t = null เมื่อเป้าหายไปหมดแล้ว) */
-  private resolveSkill(u: BattleUnit, t: BattleUnit | null, kind: SkillKind): void {
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
-    // สกิลเฉพาะตัวของฮีโร่ (ดู core/data/hero-kits.ts)
-    switch (kitVariant(u.heroId, kind)) {
-      case 'rage':
-        if (t) this.damage(u, t, RAGE_HIT);
-        u.rage = RAGE_TIME;
-        u.rageMul = RAGE_MUL;
-        return;
-      case 'pierce': {
-        if (!t) return;
-        const behind = this.grid.occupant({ r: t.pos.r + Math.sign(t.pos.r - u.pos.r), c: t.pos.c + Math.sign(t.pos.c - u.pos.c) });
-        const next = foes.find(f => f.id === behind && f !== t);
-        this.damage(u, t, PIERCE_MUL);
-        if (next) this.damage(u, next, PIERCE_BEHIND_MUL);
-        return;
-      }
-      case 'miasma': {
-        const tt = t && t.side !== u.side ? t : [...foes].sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos))[0];
-        if (!tt) return;
-        const at = tt.pos;
-        this.damage(u, tt, MIASMA_MUL);
-        for (const f of foes.filter(f => f.alive && distance(f.pos, at) <= 1)) {
-          f.poison = Math.max(f.poison, u.atk * POISON_DPS);
-          f.poisonTime = POISON_TIME;
-        }
-        return;
-      }
-    }
-    if (!t && u.cls !== 'healer') return;
-    switch (u.cls) {
-      case 'tank':
-        if (kind === 'skill2') {
-          this.shieldCharge(u, t!);
-        } else {
-          u.taunt = TAUNT_TIME;
-          this.damage(u, t!, 1);
-        }
-        break;
-      case 'fighter':
-        if (kind === 'skill2') {
-          const tt = t!;
-          const behind = this.grid.occupant({ r: tt.pos.r + Math.sign(tt.pos.r - u.pos.r), c: tt.pos.c + Math.sign(tt.pos.c - u.pos.c) });
-          const next = foes.find(f => f.id === behind && f !== tt);
-          this.damage(u, tt, PIERCE_MUL);
-          if (next) this.damage(u, next, PIERCE_BEHIND_MUL);
-        } else {
-          // ดาบหมุนวน: ฟันเป้าหมายแรง + โดนศัตรูรอบตัวทุกตัว
-          const around = foes.filter(f => f !== t && distance(f.pos, u.pos) <= 1);
-          this.damage(u, t!, SPIN_MUL);
-          for (const f of around) this.damage(u, f, SPIN_SPLASH);
-        }
-        break;
-      case 'assassin':
-        if (kind === 'skill') {
-          this.damage(u, t!, BLINK_MUL);
-        } else {
-          const at = t!.pos;
-          this.damage(u, t!, SMOKE_MUL);
-          for (const f of foes.filter(f => f.alive && distance(f.pos, at) <= 1)) {
-            f.poison = Math.max(f.poison, u.atk * POISON_DPS);
-            f.poisonTime = POISON_TIME;
-          }
-        }
-        break;
-      case 'archer': {
-        const tt = t!;
-        if (kind === 'skill') {
-          // ยิงรัว: หลายดอกติดกัน ดอกแรกออกตรงเฟรม hit
-          for (let i = 0; i < RAPID_SHOTS; i++) {
-            this.later(i * RAPID_GAP, u, () => {
-              const x = this.liveTarget(u, tt);
-              if (x) this.shoot(u, x, RAPID_MUL, 'skill');
-            });
-          }
-        } else {
-          // ห่าธนู: ลูกธนูตกจากฟ้าใส่เป้าและศัตรูรอบ ๆ
-          for (const f of foes.filter(f => distance(f.pos, tt.pos) <= 1)) this.shoot(u, f, VOLLEY_MUL, 'skill2', true);
-        }
-        break;
-      }
-      case 'mage':
-        if (kind === 'skill2') {
-          // มือกระดูก: มือโผล่จากพื้นจับเป้า 200% + มึน
-          this.damage(u, t!, BONE_MUL);
-          if (t!.alive) t!.castLock = Math.max(t!.castLock, BONE_STUN);
-        } else {
-          for (const f of foes.filter(f => distance(f.pos, t!.pos) <= 1)) this.damage(u, f, 1.6);
-        }
-        break;
-      case 'healer':
-        if (kind === 'skill2') {
-          // พรศักดิ์สิทธิ์: ฮีลก้อนใหญ่ให้เพื่อนที่เลือด % ต่ำสุด
-          const low = this.alive(u.side).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-          if (low) this.heal(low, u.atk * BLESS_ATK + low.maxHp * BLESS_PCT, u);
-        } else {
-          for (const a of this.alive(u.side).filter(a => distance(a.pos, u.pos) <= 3)) {
-            this.heal(a, u.atk + a.maxHp * 0.08, u);
-          }
-        }
-        break;
-    }
   }
 
   /** ผู้เล่นกดใช้ท่าไม้ตาย (คืน false ถ้ายังใช้ไม่ได้) */
@@ -1349,100 +1065,52 @@ export class BattleEngine {
     return true;
   }
 
-  /** ร่ายท่าไม้ตายตามสาย (คืน false ถ้ายังไม่มีเป้าที่เหมาะ จะรอจนมี) */
-  private tryUltimate(u: BattleUnit): boolean {
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
-    if (!foes.length) return false;
-    const nearest = [...foes].sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos))[0];
-    let ok = true;
-    switch (u.cls) {
-      case 'tank':
-        ok = distance(nearest.pos, u.pos) <= TAUNT_RADIUS;
-        if (ok) this.ultimate(u);
-        break;
-      case 'assassin': {
-        // ประหาร: ศัตรูที่เลือด % ต่ำสุดในระยะวาร์ป
-        const prey = foes.filter(f => distance(f.pos, u.pos) <= EXEC_REACH).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-        ok = !!prey;
-        if (prey) this.execute(u, prey);
-        break;
-      }
-      case 'healer': {
-        // a corpse on this battlefield first, then a hero lost in an earlier wave (DEAD_HIDDEN)
-        const dead = this.units.filter(a => a.side === u.side && a !== u && (a.life === 'DEAD_VISIBLE' || a.life === 'DEAD_HIDDEN'));
-        const fallen = dead.find(a => a.life === 'DEAD_VISIBLE') ?? dead[0];
-        this.resurrect(u, fallen ?? null);
-        break;
-      }
-      case 'fighter':
-        ok = distance(nearest.pos, u.pos) <= Math.max(u.range, 2);
-        if (ok) this.bladeUlt(u, nearest);
-        break;
-      case 'archer':
-        this.arrowRain(u, nearest);
-        break;
-      case 'mage':
-        ok = distance(nearest.pos, u.pos) <= u.range + 1;
-        if (ok) this.meteor(u, nearest);
-        break;
-    }
-    if (ok) u.mana = 0;
-    return ok;
+  /** ท่าไม้ตาย: ใช้เกจเต็ม (ผู้เล่นสั่ง = ขอแค่มีเป้า · ออโต้/ศัตรู = ต้องผ่านเงื่อนไข AI ด้วย) · เกจ = 0 */
+  private tryUltimate(u: BattleUnit, manual: boolean): boolean {
+    const t = this.skills.chooseUltimate(u, this.units.find(x => x.id === u.targetId) ?? null, manual);
+    if (!t) return false;
+    u.mana = 0;
+    this.skills.use(u, 'ult', this.skills.kit(u).ult, t);
+    return true;
   }
 
-  /** นักเวท ท่าไม้ตาย: อุกกาบาตใส่เป้าและรอบ ๆ */
-  private meteor(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: t.id });
-    const tm = this.beginSkill(u, 'ult');
-    this.later(tm.hit, u, () => {
-      // ลำแสง/ลูกไฟบินไปหาเป้า แล้วระเบิดเป็นวงเมื่อถึง
-      const flight = PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
-      if (t.alive) this.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: 'ult', flight });
-      const at = { ...t.pos };
-      this.pending.push({
-        at: this.time + flight,
-        fn: () => {
-          this.events.push({ type: 'impact', src: u.id, dst: t.alive ? t.id : undefined, kind: 'ult' });
-          for (const f of this.alive(t.side).filter(f => distance(f.pos, at) <= 1)) this.damage(u, f, f === t ? METEOR_MUL : METEOR_SPLASH);
-        },
-      });
+  /**
+   * One hit through the DamageResolver (±10% variance, crit ×1.5, statuses) — false = dodged / target gone.
+   * Plain damage never interrupts: interrupts are a separate, explicit effect (SkillSystem → interrupt()).
+   */
+  private hit(src: BattleUnit, dst: BattleUnit, mul: number, o: { crit?: boolean; damageType?: DamageKind; sourceId: string }): boolean {
+    if (!dst.alive) return false;
+    if (this.dodged(src, dst)) return false;
+    const res = DamageResolver.resolve({
+      attacker: src, target: dst, multiplier: mul, damageType: o.damageType ?? 'PHYSICAL',
+      sourceId: o.sourceId, variance: this.rng(), crit: !!o.crit,
     });
+    this.applyDamage(dst, res.amount, res.crit);
+    return true;
   }
 
-  /** แทงก์ สกิล 2: กระแทกโล่ใส่เป้าหมาย ผลักถอย 1 ช่อง (ถ้าว่าง) และทำให้มึน */
-  private shieldCharge(u: BattleUnit, t: BattleUnit): void {
-    this.damage(u, t, CHARGE_MUL, false, 'skill2');
-    if (!t.alive) return;
-    t.castLock = Math.max(t.castLock, CHARGE_STUN);
-    const back = { r: t.pos.r + Math.sign(t.pos.r - u.pos.r), c: t.pos.c + Math.sign(t.pos.c - u.pos.c) };
-    if (this.grid.canEnter(back)) {
-      this.grid.move(t.id, t.pos, back);
-      t.pos = back;
+  /** evasion (e.g. Nox Shadow Evasion 30%): the attack misses entirely */
+  private dodged(src: BattleUnit, dst: BattleUnit): boolean {
+    const chance = dodgeChance(dst);
+    if (chance <= 0 || this.rng() >= chance) return false;
+    this.events.push({ type: 'miss', src: src.id, dst: dst.id });
+    return true;
+  }
+
+  /** legacy enemy cast skills (meteor) */
+  private damage(src: BattleUnit, dst: BattleUnit, mul: number): void {
+    this.hit(src, dst, mul, { crit: this.rng() < CRIT_CHANCE, sourceId: 'cast' });
+  }
+
+  private applyStatus(dst: BattleUnit, id: string, src: BattleUnit, duration?: number): void {
+    if (!dst.alive) return;
+    const def = SkillSystem.status(id);
+    const r = applyBuff(dst, def, src.id, { magnitude: effectiveAttack(src), duration });
+    this.events.push({ type: 'buff', src: src.id, dst: dst.id, buff: def.id, name: def.name, refreshed: r !== 'applied' });
+    if (def.flags?.includes('taunted')) {
+      dst.targetId = src.id;
+      if (dst.monster) dst.monster.currentTargetId = src.id;
     }
-  }
-
-  /** แทงก์ ท่าไม้ตาย: กางโล่ให้ตัวเองและเพื่อนทุกคน แล้วยั่วยุ */
-  private ultimate(u: BattleUnit): void {
-    u.taunt = Math.max(u.taunt, TAUNT_TIME);
-    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult' });
-    const tm = animTiming(u.sprite, 'ult');
-    u.castLock = Math.max(u.castLock, tm.total, ULT_LOCK);
-    this.later(tm.hit, u, () => {
-      this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
-      u.taunt = Math.max(u.taunt, TAUNT_TIME);
-      // คลื่นยั่วยุ: ตัดการร่ายของศัตรูทุกตัวในระยะยั่วยุ (ไกลเกินก็ตัดไม่ถึง)
-      if (canInterrupt(u.cls, 'ult')) {
-        for (const f of this.alive(u.side === 'ally' ? 'enemy' : 'ally')) {
-          if (f.casting && distance(f.pos, u.pos) <= TAUNT_RADIUS) this.tryInterrupt(u, f);
-        }
-      }
-      for (const a of this.alive(u.side)) {
-        const amount = Math.round(u.maxHp * (a === u ? ULT_SELF_SHIELD : ULT_ALLY_SHIELD));
-        a.shield += amount;
-        a.shieldTime = SHIELD_TIME;
-        this.events.push({ type: 'shield', src: u.id, dst: a.id, amount });
-      }
-    });
   }
 
   /** ช่องว่างรอบ ๆ ตำแหน่ง ที่อยู่ไกลจาก `from` ที่สุด (= ด้านหลังเป้าหมาย) */
@@ -1452,80 +1120,69 @@ export class BattleEngine {
     return free[0] ?? null;
   }
 
-  /** วาร์ปไปยืนข้างเป้าหมาย (ฝั่งตรงข้ามกับที่ยืนอยู่) */
-  private blink(u: BattleUnit, t: BattleUnit): void {
-    const cell = this.freeCellNear(t.pos, u.pos);
-    if (!cell) return;
+  /** move a unit on the combat grid: blink = instant (fade in), dash = fast visible slide */
+  private relocate(u: BattleUnit, cell: Cell, how: 'blink' | 'dash'): void {
     this.grid.move(u.id, u.pos, cell);
     u.pos = cell;
-    u.x = this.flow.formation.originPosition + cell.c;
-    u.y = cell.r;
-    u.targetId = t.id;
-    this.events.push({ type: 'blink', src: u.id });
+    if (how === 'blink') {
+      u.x = this.flow.formation.originPosition + cell.c;
+      u.y = cell.r;
+      this.events.push({ type: 'blink', src: u.id });
+    } else {
+      u.dashUntil = this.time + 0.4;
+      this.events.push({ type: 'move', src: u.id });
+    }
   }
 
-  /** นักธนู ท่าไม้ตาย: ลูกธนูสวรรค์ตกใส่ศัตรูทุกตัว */
-  private arrowRain(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: t.id });
-    const tm = this.beginSkill(u, 'ult');
-    this.later(tm.hit, u, () => {
-      this.events.push({ type: 'impact', src: u.id, kind: 'ult' });
-      const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
-      foes.forEach((f, i) => this.later(i * 0.06, u, () => f.alive && this.shoot(u, f, RAIN_MUL, 'ult', true)));
-    });
-  }
-
-  /** ฮีลเลอร์ ท่าไม้ตาย: ฮีลทั้งทีม และชุบชีวิตเพื่อนที่ล้ม 1 คน (ถ้ามี) */
-  private resurrect(u: BattleUnit, d: BattleUnit | null): void {
-    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: d?.id });
-    const tm = this.beginSkill(u, 'ult');
-    this.later(tm.hit, u, () => {
-      if (this.result) return;
-      for (const a of this.alive(u.side)) this.heal(a, u.atk * ULT_HEAL_ATK + a.maxHp * ULT_HEAL_PCT, u);
-      const res = d ? this.reviveHero({ unitId: d.id, reviveHpPercent: REVIVE_HP, sourceUnitId: u.id, sourceId: `ult:${u.heroId ?? u.cls}` }) : null;
-      this.events.push({ type: 'impact', src: u.id, dst: res?.ok ? d!.id : undefined, kind: 'ult' });
-    });
-  }
-
-  /** นักสู้ ท่าไม้ตาย: ฟาดดาบสายฟ้าลงที่เป้าหมาย กระเด็นโดนศัตรูรอบ ๆ */
-  private bladeUlt(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: t.id });
-    const tm = this.beginSkill(u, 'ult');
-    this.later(tm.hit, u, () => {
-      const tt = this.liveTarget(u, t);
-      this.events.push({ type: 'impact', src: u.id, dst: tt?.id, kind: 'ult' });
-      if (!tt) return;
-      const splash = this.alive(tt.side).filter(f => f !== tt && distance(f.pos, tt.pos) <= 1);
-      this.damage(u, tt, BLADE_ULT_MUL);
-      for (const f of splash) this.damage(u, f, BLADE_ULT_SPLASH);
-    });
-  }
-
-  /** นักฆ่า ท่าไม้ตาย: วาร์ปไปประหารศัตรูที่ใกล้ตาย */
-  private execute(u: BattleUnit, t: BattleUnit): void {
-    this.events.push({ type: 'cast', src: u.id, skill: this.ultName(u), kind: 'ult', dst: t.id });
-    const tm = this.beginSkill(u, 'ult');
-    u.atkCd = Math.max(u.atkCd, tm.total);
-    this.later(tm.move, u, () => {
-      if (t.alive && distance(u.pos, t.pos) > 1) this.blink(u, t);
-    });
-    this.later(tm.hit, u, () => {
-      this.events.push({ type: 'impact', src: u.id, dst: t.alive ? t.id : undefined, kind: 'ult' });
-      this.damage(u, t, EXEC_MUL, true);
-    });
-  }
-
-  private damage(src: BattleUnit, dst: BattleUnit, mul: number, forceCrit = false, kind?: 'attack' | SkillKind): void {
-    if (!dst.alive) return;
-    // สกิลที่ตัดได้ (INTERRUPT) โดนตัวที่กำลังร่าย → ตัดก่อนคิดดาเมจ
-    if (kind && dst.casting && canInterrupt(src.cls, kind)) this.tryInterrupt(src, dst);
-    const variance = this.rng();
-    const crit = forceCrit || this.rng() < CRIT_CHANCE;
-    const res = DamageResolver.resolve({
-      attacker: src, target: dst, multiplier: mul, damageType: 'PHYSICAL',
-      sourceId: kind ?? 'skill', variance, crit, critMultiplier: CRIT_MUL,
-    });
-    this.applyDamage(dst, res.amount, crit);
+  /** the SkillHost the SkillSystem drives */
+  private skillHost(): SkillHost {
+    const self = this;
+    const foesOf = (u: BattleUnit) => self.units.filter(t => self.isValidTarget(u, t));
+    return {
+      get time() {
+        return self.time;
+      },
+      rng: () => self.rng(),
+      emit: e => self.events.push(e),
+      foes: u => (self.flow.phase === BattlePhase.COMBAT || self.flow.phase === BattlePhase.WAVE_CLEAR ? foesOf(u) : []),
+      allies: u => self.units.filter(a => a.alive && a.side === u.side && a.visible && (a.wave < 0 || a.wave === self.flow.waveIndex)),
+      deadAllies: u => {
+        const dead = self.units.filter(a => a.side === u.side && a !== u && (a.life === 'DEAD_VISIBLE' || a.life === 'DEAD_HIDDEN') && a.wave < 0);
+        return [...dead.filter(a => a.life === 'DEAD_VISIBLE'), ...dead.filter(a => a.life === 'DEAD_HIDDEN')];
+      },
+      focus: u => (u.side === PLAYER_TEAM ? self.focusUnit() : null),
+      castersNextWave: u => u.side === PLAYER_TEAM && self.flow.nextWaveHasCasters(self.monsterDefs, self.templates),
+      later: (d, u, fn) => self.later(d, u, fn),
+      shoot: (u, t, slot, sky, onArrive) => {
+        const flight = sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
+        self.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: slot, flight, ...(sky ? { sky } : {}) });
+        self.pending.push({ at: self.time + flight, fn: onArrive });
+      },
+      hit: (src, dst, mul, o) => self.hit(src, dst, mul, o),
+      heal: (dst, amount, src) => self.heal(dst, amount, src),
+      applyStatus: (dst, id, src, duration) => self.applyStatus(dst, id, src, duration),
+      interrupt: (src, dst) => self.tryInterrupt(src, dst),
+      knockback: (src, dst, cells) => {
+        for (let i = 0; i < cells; i++) {
+          const back = { r: dst.pos.r, c: dst.pos.c + (Math.sign(dst.pos.c - src.pos.c) || (src.side === 'ally' ? 1 : -1)) };
+          if (!self.grid.canEnter(back)) break;
+          self.grid.move(dst.id, dst.pos, back);
+          dst.pos = back;
+          dst.dashUntil = self.time + 0.3;
+        }
+      },
+      shield: (src, dst, amount, duration) => {
+        dst.shield += amount;
+        dst.shieldTime = duration;
+        self.events.push({ type: 'shield', src: src.id, dst: dst.id, amount });
+      },
+      revive: (src, dead, hpPct) =>
+        self.reviveHero({ unitId: dead.id, reviveHpPercent: hpPct, sourceUnitId: src.id, sourceId: `ult:${src.heroId ?? src.cls}`, countsTowardLimit: true }).ok,
+      freeCellNear: (at, from) => self.freeCellNear(at, from),
+      relocate: (u, cell, how) => self.relocate(u, cell, how),
+      canLand: cell => Grid.inBounds(cell) && self.grid.isFree(cell),
+      basicGauge: u => self.gainMana(u, MANA_PER_ATTACK),
+    };
   }
 
   /** หักโล่ก่อนแล้วค่อยหักเลือด (ดาเมจพิษไม่เพิ่มมานา) */
@@ -1535,7 +1192,11 @@ export class BattleEngine {
     const amount = total - blocked;
     dst.shield -= blocked;
     dst.hp -= amount;
-    if (!poison) this.gainMana(dst, MANA_PER_HIT);
+    // receive-hit gauge: +2, at most once per RECEIVE_GAUGE_ICD s (multi-hits can't farm it); DoT gives none
+    if (!poison && amount + blocked > 0 && this.time - dst.lastGaugeHitAt >= RECEIVE_GAUGE_ICD - 1e-9 && dst.maxMana > 0) {
+      dst.lastGaugeHitAt = this.time;
+      this.gainMana(dst, MANA_PER_HIT);
+    }
     if (dst.side === PLAYER_TEAM) this.flow.damageTaken += amount;
     // hit reaction: heroes always flinch visually; monsters go through their anti stun-lock rule
     const hurt = !poison && dst.hp > 0 && (dst.monster ? this.monsterAI.onHit(dst) : true);
@@ -1608,6 +1269,7 @@ export class BattleEngine {
         .sort((a, b) => a.d - b.d)[0]?.v;
       if (hit) {
         this.projectiles.splice(this.projectiles.indexOf(p), 1);
+        if (this.dodged(this.units.find(v => v.id === p.attackerId)!, hit)) continue;
         const res = DamageResolver.resolve({
           attacker: this.units.find(v => v.id === p.attackerId)!, target: hit,
           baseDamage: p.damage, damageType: def.damageType, sourceId: p.sourceId,
@@ -1668,6 +1330,7 @@ export class BattleEngine {
       },
       later: (delay, u, fn) => self.later(delay, u, fn),
       meleeHit: (u, t, a) => {
+        if (self.dodged(u, t)) return;
         const res = DamageResolver.resolve({ attacker: u, target: t, multiplier: a.damageMultiplier, damageType: a.damageType, sourceId: a.id });
         self.applyDamage(t, res.amount, false);
       },

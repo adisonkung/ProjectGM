@@ -1,3 +1,4 @@
+import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { attackWindupOf, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
@@ -47,7 +48,11 @@ function battle(allies: UnitSpec[], enemies: EnemyPlacement[], rounds?: EnemyPla
   const monsters = (id: string) => e.units.filter(u => u.monster?.definitionId === id);
   const of = <T extends BattleEvent['type']>(type: T) => log.filter(x => x.type === type) as (Ev & Extract<BattleEvent, { type: T }>)[];
   const kill = (u: BattleUnit) => (e as any).applyDamage(u, u.hp + u.shield + 1, false);
-  const hit = (src: BattleUnit, dst: BattleUnit, kind: 'attack' | 'skill' | 'skill2' | 'ult') => (e as any).damage(src, dst, 0.01, false, kind);
+  /** a hero hit with `kind`: dedicated interrupt first when that skill carries one (plain damage never interrupts) */
+  const hit = (src: BattleUnit, dst: BattleUnit, kind: 'attack' | 'skill' | 'skill2' | 'ult') => {
+    if (kind !== 'attack' && kitInterrupts(kitOf(src.heroId, src.cls), kind) && dst.casting) (e as any).tryInterrupt(src, dst);
+    (e as any).damage(src, dst, 0.01);
+  };
   return { e, log, run, freeze, hero, monsters, of, kill, hit };
 }
 
@@ -74,9 +79,9 @@ describe('Forest monster data', () => {
   });
 
   it('DamageResolver: attack × 100/(100+def), min 1, rounded', () => {
-    const a = { id: 1, atk: 18, rageMul: 1, buffs: [] };
-    expect(DamageResolver.resolve({ attacker: a, target: { def: 5, taunt: 0 }, damageType: 'PHYSICAL', sourceId: 'x' }).amount).toBe(17);
-    expect(DamageResolver.resolve({ attacker: a, target: { def: 5000, taunt: 0 }, damageType: 'PHYSICAL', sourceId: 'x' }).amount).toBe(1);
+    const a = { id: 1, atk: 18, buffs: [] };
+    expect(DamageResolver.resolve({ attacker: a, target: { def: 5, buffs: [] }, damageType: 'PHYSICAL', sourceId: 'x' }).amount).toBe(17);
+    expect(DamageResolver.resolve({ attacker: a, target: { def: 5000, buffs: [] }, damageType: 'PHYSICAL', sourceId: 'x' }).amount).toBe(1);
   });
 });
 
@@ -301,8 +306,8 @@ describe('Stage 1–3 monsters', () => {
     expect(effectiveAttack(w)).toBeCloseTo(w.atk * 1.25, 6);
     expect(b.wolves[1].buffs.length).toBe(0);
     // resolved damage goes up by 25% too (def 0 target)
-    const base = DamageResolver.resolve({ attacker: { ...w, buffs: [] }, target: { def: 0, taunt: 0 }, damageType: 'PHYSICAL', sourceId: 'x' });
-    const buffed = DamageResolver.resolve({ attacker: w, target: { def: 0, taunt: 0 }, damageType: 'PHYSICAL', sourceId: 'x' });
+    const base = DamageResolver.resolve({ attacker: { ...w, buffs: [] }, target: { def: 0, buffs: [] }, damageType: 'PHYSICAL', sourceId: 'x' });
+    const buffed = DamageResolver.resolve({ attacker: w, target: { def: 0, buffs: [] }, damageType: 'PHYSICAL', sourceId: 'x' });
     expect(buffed.amount).toBe(Math.round(base.amount * 1.25));
   });
 

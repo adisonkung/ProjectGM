@@ -1,19 +1,15 @@
 import { DamageType } from '../../core/models/monster';
-import { attackModifier, Buffable } from './buffs';
+import { attackModifier, Buffable, modifier } from './buffs';
 
 /** The fields of a combatant the resolver needs (BattleUnit satisfies this) */
 export interface DamageActor extends Buffable {
   id: number;
   atk: number;
-  /** legacy rage multiplier (berserk / blood rage) */
-  rageMul: number;
 }
 
-export interface DamageTaker {
+export interface DamageTaker extends Buffable {
   def: number;
   magicDefense?: number;
-  /** > 0 = taunting: takes 50% damage */
-  taunt: number;
 }
 
 export interface DamageRequest {
@@ -39,22 +35,28 @@ export interface DamageResult {
   sourceId: string;
 }
 
-/** baseAttack × runtime modifiers (buffs, rage) — base attack is never modified */
-export const effectiveAttack = (a: DamageActor): number => a.atk * a.rageMul * attackModifier(a);
+/** baseAttack × runtime attack modifiers (e.g. Alpha Howl) — base attack is never modified */
+export const effectiveAttack = (a: DamageActor): number => a.atk * attackModifier(a);
+
+/** random variance of hero damage: ±10% */
+export const DAMAGE_VARIANCE = 0.1;
+export const CRIT_CHANCE = 0.1;
+export const CRIT_MULTIPLIER = 1.5;
 
 /**
- * Centralized damage formula.
- *   raw = (baseDamage ?? effectiveAttack × multiplier) × variance × crit × taunt
+ * Centralized damage formula (every hit of every unit goes through here).
+ *   raw = (baseDamage ?? effectiveAttack × multiplier) × outgoing damage mods (Blood Rage) × variance (±10%) × crit (×1.5)
+ *         × incoming damage-taken mods (Taunt guard ×0.60)
  *   mitigation = 100 / (100 + defense)       (PHYSICAL: def · MAGIC: magicDefense ?? def · TRUE: none)
  *   final = max(1, round(raw × mitigation))
  */
 export const DamageResolver = {
   resolve(req: DamageRequest): DamageResult {
-    let raw = req.baseDamage ?? effectiveAttack(req.attacker) * (req.multiplier ?? 1);
-    if (req.variance != null) raw *= 0.9 + req.variance * 0.2;
+    let raw = req.baseDamage ?? effectiveAttack(req.attacker) * (req.multiplier ?? 1) * modifier(req.attacker, 'damageMultiplier');
+    if (req.variance != null) raw *= 1 - DAMAGE_VARIANCE + req.variance * 2 * DAMAGE_VARIANCE;
     const crit = !!req.crit;
-    if (crit) raw *= req.critMultiplier ?? 1.5;
-    if (req.target.taunt > 0) raw *= 0.5;
+    if (crit) raw *= req.critMultiplier ?? CRIT_MULTIPLIER;
+    raw *= modifier(req.target, 'damageTakenMultiplier');
     const defense =
       req.damageType === 'TRUE' ? 0 : req.damageType === 'MAGIC' ? (req.target.magicDefense ?? req.target.def) : req.target.def;
     const mitigation = 100 / (100 + defense);

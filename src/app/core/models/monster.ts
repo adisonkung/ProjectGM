@@ -1,3 +1,4 @@
+import type { StatusEffectDefinition } from './combat';
 import { HeroClass } from './hero';
 
 /**
@@ -112,24 +113,9 @@ export interface ProjectileDefinition {
   fx: string;
 }
 
-export interface BuffModifiers {
-  /** multiplies effective attack while active */
-  attackMultiplier?: number;
-}
-
-export type StackPolicy = 'REFRESH_DURATION' | 'IGNORE';
-
-export interface BuffDefinition {
-  id: string;
-  name: string;
-  duration: number;
-  stackPolicy: StackPolicy;
-  modifiers: BuffModifiers;
-  /** keep this effect through death / revive (persistent injuries, stage-long modifiers). Default false = removed on death */
-  persistThroughDeath?: boolean;
-  /** freeze the timer during wave transitions (WAVE_CLEAR / ADVANCING / REGROUPING). Default false */
-  pauseDuringWaveTransition?: boolean;
-}
+/** Monster buffs are ordinary status effects (one system for heroes and monsters) */
+export type { StackPolicy, StatusModifiers as BuffModifiers } from './combat';
+export type BuffDefinition = StatusEffectDefinition;
 
 /** Who a skill affects */
 export type SkillTargetSelector =
@@ -143,6 +129,8 @@ export type SkillEffect = { type: 'APPLY_BUFF'; buffId: string };
 export type SkillCondition =
   /** at least `min` living allies with this tag (not counting self) */
   | { type: 'ALLY_TAG_ALIVE'; tag: string; min: number }
+  /** at least `min` living allies of this monster definition (not counting self) — e.g. normal Forest Wolves */
+  | { type: 'ALLY_DEFINITION_ALIVE'; monsterId: string; min: number }
   /** at least one target of the skill has less than `refreshBelow` s of this buff left */
   | { type: 'TARGETS_NEED_BUFF'; buffId: string; refreshBelow: number }
   /** an enemy (hero) is within this many cells */

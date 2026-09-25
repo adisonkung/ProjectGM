@@ -72,9 +72,11 @@ export interface ReviveHeroCommand {
   gaugePolicy?: ReviveGaugePolicy;
   /** SET_PERCENT: 0–1 of max gauge */
   gaugePercent?: number;
+  /** counts toward the party's per-stage revive limit (hero ultimate resurrections) */
+  countsTowardLimit?: boolean;
 }
 
-export type ReviveRejectReason = 'not-found' | 'not-dead' | 'revive-disabled' | 'stage-over';
+export type ReviveRejectReason = 'not-found' | 'not-dead' | 'revive-disabled' | 'stage-over' | 'limit-reached';
 export type ReviveResult = { ok: true; hidden: boolean } | { ok: false; reason: ReviveRejectReason };
 
 /** Stage resolution — the meta-game (injury / permadeath / recovery) decides what death means */

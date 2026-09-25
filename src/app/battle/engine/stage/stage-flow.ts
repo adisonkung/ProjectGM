@@ -69,6 +69,8 @@ export class StageFlow {
   private regroupReady = new Set<number>();
   private entering: { id: number; fromX: number; toX: number }[] = [];
   private revivedUnits = new Set<number>();
+  /** successful revives that count toward rules.partyReviveLimit this stage */
+  limitedRevives = 0;
 
   constructor(
     private readonly host: StageHost,
@@ -195,10 +197,13 @@ export class StageFlow {
     }
   }
 
-  /** cooldowns / statuses keep running during transitions (per rules); the ultimate gauge does not grow */
+  /**
+   * cooldowns / statuses keep running during transitions (per rules); the ultimate gauge does not grow.
+   * Only the player team: a newly spawned wave starts its own timers when its combat begins.
+   */
   private tickTransitionTimers(dt: number): void {
     for (const u of this.host.units) {
-      if (u.life !== 'ALIVE') continue;
+      if (u.life !== 'ALIVE' || u.side !== PLAYER_TEAM) continue;
       this.host.tickTimers(u, dt, this.rules.cooldownRunsDuringTransition, this.rules.buffTimersRunDuringTransition);
     }
   }
@@ -394,6 +399,19 @@ export class StageFlow {
     this.beginWave();
   }
 
+  /** does the next wave contain an enemy with an interruptible cast skill? (AI saves interrupts for it) */
+  nextWaveHasCasters(
+    monsters: Record<string, { skills: string[] }>, templates: Record<string, { castSkills?: string[] }>,
+  ): boolean {
+    const next = this.waves[this.waveIndex + 1];
+    if (!next) return false;
+    if (this.casterCache.has(this.waveIndex + 1)) return this.casterCache.get(this.waveIndex + 1)!;
+    const has = next.spawns.some(sp => (monsters[sp.monsterId]?.skills.length ?? 0) > 0 || (templates[sp.monsterId]?.castSkills?.length ?? 0) > 0);
+    this.casterCache.set(this.waveIndex + 1, has);
+    return has;
+  }
+  private casterCache = new Map<number, boolean>();
+
   // ------------------------------------------------------------------ death / revive
 
   /** HP reached 0: death lifecycle (engine already cancelled casts / removed it from the grid) */
@@ -431,6 +449,8 @@ export class StageFlow {
     if (this.outcome) return { ok: false, reason: 'stage-over' };
     if (!this.rules.allowRevive) return { ok: false, reason: 'revive-disabled' };
     if (!isDead(u)) return { ok: false, reason: 'not-dead' };
+    if (cmd.countsTowardLimit && this.limitedRevives >= this.rules.partyReviveLimit) return { ok: false, reason: 'limit-reached' };
+    if (cmd.countsTowardLimit) this.limitedRevives++;
 
     const fromHidden = u.life === 'DEAD_HIDDEN';
     const mode = cmd.spawnMode ?? 'AUTO';
@@ -582,13 +602,7 @@ export class StageFlow {
 
 /** On death: temporary combat buffs / debuffs go (persistent effects that declare persistThroughDeath stay) */
 export function clearTemporaryStatus(u: BattleUnit): void {
-  u.buffs = u.buffs.filter(b => b.def.persistThroughDeath === true);
+  u.buffs = u.buffs.filter(b => b.def.persistThroughDeath === true && b.def.removeOnDeath !== true);
   u.shield = 0;
   u.shieldTime = 0;
-  u.poison = 0;
-  u.poisonTime = 0;
-  u.poisonTick = 0;
-  u.taunt = 0;
-  u.rage = 0;
-  u.rageMul = 1;
 }

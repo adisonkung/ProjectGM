@@ -32,6 +32,8 @@ export interface StageBattleRules {
   ultimateGaugeGenerationDuringTransition: boolean;
   hideDeadHeroesBetweenWaves: boolean;
   allowRevive: boolean;
+  /** successful limited revives (hero ultimate resurrections) per stage — shared by the whole party */
+  partyReviveLimit: number;
   reviveHpDefaultPercent: number;
   /** REVIVING (visible, untargetable) before the unit is ALIVE again */
   reviveInvulnerabilityDuration: number;
@@ -58,6 +60,7 @@ export const STORY_RULES: StageBattleRules = {
   ultimateGaugeGenerationDuringTransition: false,
   hideDeadHeroesBetweenWaves: true,
   allowRevive: true,
+  partyReviveLimit: 1,
   reviveHpDefaultPercent: 0.3,
   reviveInvulnerabilityDuration: 0.75,
   reviveSearchRadius: 1,

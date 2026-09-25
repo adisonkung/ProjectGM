@@ -7,6 +7,7 @@ import {
   ProjectileDefinition,
   SemanticEvent,
 } from '../models/monster';
+import { STATUS_EFFECTS } from './status-effects';
 
 /**
  * Data-driven monsters — Normal Forest, Stage 1–3.
@@ -23,14 +24,9 @@ const death = (row: number, frames: number) => clip(row, frames, [{ frame: frame
 
 // ------------------------------------------------------------------ buffs
 
+/** monster buffs are entries of the shared status-effect table */
 export const BUFFS: Record<string, BuffDefinition> = {
-  alpha_howl_buff: {
-    id: 'alpha_howl_buff',
-    name: 'เสียงหอนจ่าฝูง',
-    duration: 10,
-    stackPolicy: 'REFRESH_DURATION',
-    modifiers: { attackMultiplier: 1.25 },
-  },
+  alpha_howl_buff: STATUS_EFFECTS['alpha_howl_buff'],
 };
 
 // ------------------------------------------------------------------ projectiles
@@ -60,13 +56,15 @@ export const MONSTER_SKILLS: Record<string, MonsterSkillDefinition> = {
     cooldown: 12,
     interruptedCooldown: 12,
     interruptible: true,
-    firstCastDelay: 2,
+    // counted from the start of combat of its wave (tutorial timing 2.25 s)
+    firstCastDelay: 2.25,
     clip: 'howl',
     fx: { id: 'alpha-howl', activationFrame: 5, frameMs: 90 },
     target: { type: 'ALLIES_WITH_TAG', tag: 'wolf', includeSelf: true },
     effects: [{ type: 'APPLY_BUFF', buffId: 'alpha_howl_buff' }],
+    // at least one NORMAL Forest Wolf alive (Alpha itself doesn't count) — kill the pack and the Howl stops
     conditions: [
-      { type: 'ALLY_TAG_ALIVE', tag: 'wolf', min: 1 },
+      { type: 'ALLY_DEFINITION_ALIVE', monsterId: 'forest_wolf', min: 1 },
       { type: 'TARGETS_NEED_BUFF', buffId: 'alpha_howl_buff', refreshBelow: 2 },
     ],
     recovery: 0.35,
@@ -217,7 +215,7 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
       movement: 'MELEE_CHASE',
       skillPriority: ['alpha_howl'],
     },
-    attack: { id: 'alpha_savage_bite', damageType: 'PHYSICAL', damageMultiplier: 1.15, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.4 },
+    attack: { id: 'alpha_savage_bite', damageType: 'PHYSICAL', damageMultiplier: 1.25, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.4 },
     skills: ['alpha_howl'],
     animation: {
       sheet: 'enemy-alpha-wolf.png',

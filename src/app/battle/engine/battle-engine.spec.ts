@@ -1,3 +1,4 @@
+import { hasStatus } from './buffs';
 import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
@@ -43,7 +44,7 @@ describe('BattleEngine', () => {
     }
   });
 
-  it('tank alternates defense stance and shield charge', () => {
+  it('tank uses both Taunt and Shield Charge', () => {
     const e = new BattleEngine({ allies: strongTeam, stage: STAGES[4], enemyTemplates: ENEMIES, seed: 5 });
     // per wave: cooldowns keep running through transitions, so a wave may open with either skill — then they alternate
     const waves: string[][] = [[]];
@@ -54,8 +55,9 @@ describe('BattleEngine', () => {
         if (ev.type === 'cast' && ev.src === 1 && ev.kind !== 'ult') waves[waves.length - 1].push(ev.kind);
       }
     }
-    expect(waves.flat().length).toBeGreaterThan(1);
-    for (const kinds of waves) kinds.forEach((k, i) => i > 0 && expect(k).not.toBe(kinds[i - 1]));
+    // Shield Charge is kept for interruptible casts (holdForInterrupt) — so no strict alternation any more
+    expect(waves.flat()).toContain('skill');
+    expect(waves.flat()).toContain('skill2');
   });
 
   it('lets several melee units stack on the same cell while fighting', () => {
@@ -81,6 +83,7 @@ describe('BattleEngine', () => {
     const e = new BattleEngine({ allies: team, stage: STAGES[9], enemyTemplates: ENEMIES, seed: 2 });
     const tank = e.units[0];
     expect(e.requestUlt(tank.id)).toBeFalse(); // เกจยังไม่เต็ม
+    tank.mana = tank.maxMana - 6; // (+3 per hit now: start close to full)
     let ults = 0;
     let shielded = false;
     let tappedAt = -1;
@@ -112,6 +115,7 @@ describe('BattleEngine', () => {
       { name: 'S', cls: 'assassin', stats: { ...CLASS_BASE.assassin, hp: 2000 }, pos: { r: 0, c: 0 } },
     ];
     const e = new BattleEngine({ allies: team, stage: STAGES[6], enemyTemplates: ENEMIES, seed: 4, autoUlt: true });
+    e.units[1].mana = 80; // gauge is +3 per hit now — start near full
     const kinds: string[] = [];
     let poisoned = false;
     while (!e.result && e.time < 90) {
@@ -343,7 +347,7 @@ describe('BattleEngine', () => {
     const { events, e } = castScenario('rager', 1);
     expect(events.some(ev => ev.type === 'immune')).toBeTrue();
     expect(events.some(ev => ev.type === 'castDone')).toBeTrue();
-    expect(e.units.find(u => u.side === 'enemy' && u.castSkills.length)!.rage).toBeGreaterThan(0);
+    expect(hasStatus(e.units.find(u => u.side === 'enemy' && u.castSkills.length)!, 'berserk')).toBeTrue();
   });
 
   it('formation: backline heroes get line = back; enemy assassins go for the backline healer', () => {
@@ -470,7 +474,7 @@ describe('BattleEngine', () => {
     let poisoned = false;
     while (!e.result && e.time < 60) {
       e.step(0.05);
-      if (e.units[0].rageMul > 1) raged = true;
+      if (hasStatus(e.units[0], 'blood_rage')) raged = true;
       for (const ev of e.drainEvents()) {
         if (ev.type === 'cast' && ev.src <= 3) names.add(ev.skill);
         if (ev.type === 'damage' && ev.poison) poisoned = true;

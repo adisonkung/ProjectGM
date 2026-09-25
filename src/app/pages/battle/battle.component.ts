@@ -10,7 +10,8 @@ import { projectileLife } from '../../battle/projectile/projectile.component';
 import { ENEMY_ZONE_START, SCENERY_ROWS, SIDE_DEPTH } from '../../battle/engine/grid';
 import { BattlePhase } from '../../battle/engine/stage/types';
 import { PartyBarComponent } from '../../battle/party-bar/party-bar.component';
-import { canInterrupt, SKILL_CD } from '../../core/data/classes';
+import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
+import { hasStatus } from '../../battle/engine/buffs';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
@@ -286,7 +287,7 @@ export class BattleComponent implements OnDestroy {
         shieldPct: (u.shield / u.maxHp) * 100,
         alive: u.alive,
         reviving: u.life === 'REVIVING',
-        taunt: u.taunt > 0,
+        taunt: hasStatus(u, 'taunt_guard'),
         star: u.star,
         level: u.level,
         sprite: u.sprite,
@@ -300,17 +301,17 @@ export class BattleComponent implements OnDestroy {
         heroId: u.heroId,
         cd1: Math.max(0, u.cd1),
         cd2: Math.max(0, u.cd2),
-        cd1Max: SKILL_CD[u.cls][0],
-        cd2Max: SKILL_CD[u.cls][1],
+        cd1Max: kitOf(u.heroId, u.cls).skill.cooldown ?? 1,
+        cd2Max: kitOf(u.heroId, u.cls).skill2.cooldown ?? 1,
         onFocus: u.side === 'ally' && e.focusTargetId != null && u.targetId === e.focusTargetId,
         elite: u.elite,
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
-        buffed: u.buffs.length > 0,
+        buffed: u.buffs.some(b => (b.def.modifiers.attackMultiplier ?? 1) > 1),
         icon: u.monster ? MONSTERS[u.monster.definitionId]?.animation.tokenIcon : undefined,
         debug: this.debug() ? (u.monster ? this.debugLines(u, byId) : heroDbg.get(u.id)) : undefined,
         targetId: u.targetId,
         line: u.line,
-        interrupter: u.side === 'ally' && canInterrupt(u.cls, 'ult'),
+        interrupter: u.side === 'ally' && kitInterrupts(kitOf(u.heroId, u.cls), 'ult'),
         cast: u.casting
           ? {
               label: u.casting.def.label,
@@ -544,7 +545,8 @@ export class BattleComponent implements OnDestroy {
         }
         case 'buff': {
           const p = posOf(e.dst);
-          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.refreshed ? 'ATK↑ ต่อเวลา' : 'ATK +25%', kind: 'buff' });
+          const text = e.buff === 'alpha_howl_buff' ? (e.refreshed ? 'ATK↑ ต่อเวลา' : 'ATK +25%') : e.refreshed ? '' : e.name;
+          if (text) floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: 'buff' });
           break;
         }
         case 'miss': {

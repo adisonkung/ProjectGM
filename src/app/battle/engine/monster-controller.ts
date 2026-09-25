@@ -2,7 +2,7 @@ import { attackEventName, attackWindupOf, clipDuration, MONSTER_SKILLS, MONSTERS
 import { AttackDefinition, MonsterDefinition, MonsterSkillDefinition, SkillCondition } from '../../core/models/monster';
 import { Cell } from '../../core/models/unit';
 import type { BattleEvent, BattleUnit } from './battle-engine';
-import { buffRemaining } from './buffs';
+import { buffRemaining, hasFlag, tauntSource } from './buffs';
 import { distance } from './grid';
 import { selectTarget } from './targeting';
 
@@ -117,12 +117,14 @@ export class MonsterController {
     // skill cooldowns (u.castSkills) and u.moveCd are counted down by the engine's shared status tick
     s.thinkTimer -= dt;
 
-    // external stagger (a hero's stun / knock-back sets castLock): cancels a swing in progress
-    if (u.castLock > 0 && !u.casting) {
-      u.castLock -= dt;
+    // STUN (status) / external stagger (castLock): no actions; cancels a swing in progress.
+    // A stun does NOT cancel a cast — only a dedicated interrupt does.
+    const stunned = hasFlag(u, 'stun');
+    if ((stunned || u.castLock > 0) && !u.casting) {
+      if (u.castLock > 0) u.castLock -= dt;
       if (s.state === 'ATTACKING') s.attackToken++;
       if (s.state !== 'HURT') this.setState(s, 'HURT', 'hurt');
-      s.hurtTimer = Math.max(s.hurtTimer, u.castLock);
+      s.hurtTimer = Math.max(s.hurtTimer, u.castLock, stunned ? buffRemaining(u, 'stun') : 0, dt);
       return;
     }
 
@@ -186,7 +188,7 @@ export class MonsterController {
       if (s.attackCooldownRemaining <= 0) return this.startAttack(u, s, def, t);
       // too close while reloading: at most `maxRetreatSteps` small steps back per target
       const min = st.minComfortableRange ?? 0;
-      if (d < min && s.retreatSteps < (def.ai.maxRetreatSteps ?? 0) && u.moveCd <= 0) {
+      if (d < min && s.retreatSteps < (def.ai.maxRetreatSteps ?? 0) && u.moveCd <= 0 && !hasFlag(u, 'root')) {
         if (this.ctx.stepAway(u, t.pos, t.pos, st.attackRange)) {
           s.retreatSteps++;
           u.moveCd = 1 / st.moveSpeed;
@@ -208,6 +210,8 @@ export class MonsterController {
   }
 
   private move(u: BattleUnit, s: MonsterCombatState, to: Cell, goal: (c: Cell) => boolean): void {
+    // ROOT: cannot move (attacks / casts still allowed)
+    if (hasFlag(u, 'root')) return this.setState(s, 'IDLE', 'idle');
     this.setState(s, 'MOVING', 'move');
     if (u.moveCd > 0) return;
     if (this.ctx.stepToward(u, to, goal)) u.moveCd = 1 / this.def(u).stats.moveSpeed;
@@ -223,6 +227,19 @@ export class MonsterController {
       s.currentTargetId = null;
       u.targetId = null;
       this.setState(s, 'SEARCHING', 'idle');
+    }
+    // TAUNTED: the taunting tank overrides every strategy while it stays a valid target
+    const taunter = tauntSource(u);
+    const forced = taunter != null ? this.ctx.unit(taunter) : undefined;
+    if (forced && this.ctx.isValidTarget(u, forced)) {
+      if (forced.id !== s.currentTargetId) {
+        s.currentTargetId = forced.id;
+        s.retreatSteps = 0;
+        s.approaching = false;
+      }
+      s.targetLockUntil = this.ctx.time;
+      u.targetId = forced.id;
+      return forced;
     }
     if (valid && (s.thinkTimer > 0 || this.ctx.time < s.targetLockUntil)) return cur;
     s.thinkTimer = def.stats.targetThinkInterval;
@@ -299,6 +316,8 @@ export class MonsterController {
     switch (c.type) {
       case 'ALLY_TAG_ALIVE':
         return this.ctx.alliesOf(u).filter(a => a !== u && tagsOf(a).includes(c.tag)).length >= c.min;
+      case 'ALLY_DEFINITION_ALIVE':
+        return this.ctx.alliesOf(u).filter(a => a !== u && a.monster?.definitionId === c.monsterId).length >= c.min;
       case 'TARGETS_NEED_BUFF':
         return this.skillTargets(u, skill).some(t => buffRemaining(t, c.buffId) < c.refreshBelow);
       case 'ENEMY_WITHIN':

@@ -9,34 +9,10 @@ export const CLASS_NAME: Record<HeroClass, string> = {
   healer: 'ฮีลเลอร์',
 };
 
-export const SKILL_NAME: Record<HeroClass, string> = {
-  tank: 'ยั่วยุ',
-  fighter: 'ดาบหมุนวน',
-  assassin: 'จู่โจมเงา',
-  archer: 'ยิงรัว',
-  mage: 'ระเบิดเวท',
-  healer: 'บทสวดภาวนา',
-};
-
-/** สกิลที่ 2 (ใช้สลับกับสกิลแรก) และท่าไม้ตาย ของสายที่มี */
-export const SKILL2_NAME: Partial<Record<HeroClass, string>> = {
-  tank: 'พุ่งชนโล่',
-  fighter: 'แทงทะลวง',
-  archer: 'ห่าธนู',
-  healer: 'พรศักดิ์สิทธิ์',
-  assassin: 'ควันพิษ',
-  mage: 'มือกระดูก',
-};
-export const ULT_NAME: Partial<Record<HeroClass, string>> = {
-  tank: 'ป้อมปราการศักดิ์สิทธิ์',
-  fighter: 'ดาบมังกรประหาร',
-  archer: 'ฝนธนูสวรรค์',
-  healer: 'คืนชีพศักดิ์สิทธิ์',
-  mage: 'อุกกาบาตเวท',
-  assassin: 'ประหารเงามายา',
-};
-
-/** ค่าพื้นฐานของแต่ละสาย ที่ 1★ เลเวล 1 */
+/**
+ * ค่าพื้นฐานของแต่ละสาย ที่ 1★ เลเวล 1 — 5★ Lv1 = ×2.12 (HP/ATK/DEF) และ atkSpeed ×1.16 (heroStats):
+ * แทงก์ 678/47/85/0.99 · นักสู้ 466/81/47/1.28 · นักฆ่า 403/85/32/1.51 · นักธนู 339/72/25/1.33 · นักเวท 318/98/21/1.04 · ฮีลเลอร์ 360/51/30/1.10
+ */
 // atkSpeed = ตีธรรมดากี่ครั้ง/วิ (ช่วงห่าง 0.7–1.2 วิ) · maxMana = เกจท่าไม้ตาย (ทุกสาย 100)
 export const CLASS_BASE: Record<HeroClass, Stats> = {
   tank:    { hp: 320, atk: 22, def: 40, atkSpeed: 0.85, moveSpeed: 1.5, range: 1, maxMana: 100 },
@@ -48,13 +24,18 @@ export const CLASS_BASE: Record<HeroClass, Stats> = {
 };
 
 /**
- * มานา = เกจท่าไม้ตายเท่านั้น: ได้จากการตีธรรมดาและการโดนตี (สกิลไม่ให้มานา)
- * เกจติดตัวข้ามเวฟในชั้นเดียวกัน (เก็บไว้ใช้เวฟ 2–3 ได้)
+ * Ultimate gauge (มานา = เกจท่าไม้ตายเท่านั้น, เต็ม 100):
+ * +3 เมื่อตีธรรมดาโดนจริง (กระสุน = ตอนถึงเป้า, ฮีลโบลต์ของฮีลเลอร์ก็นับ) · +2 เมื่อโดนดาเมจ แต่ไม่เกิน 1 ครั้งต่อ 0.5 วิ
+ * สกิลและท่าไม้ตายไม่ให้เกจ · เกจติดตัวข้ามเวฟ · ไม่เพิ่มช่วงเปลี่ยนเวฟ
  */
-export const MANA_PER_ATTACK = 8;
+export const MANA_PER_ATTACK = 3;
 export const MANA_PER_HIT = 2;
+export const RECEIVE_GAUGE_ICD = 0.5;
 
-/** คูลดาวน์ (วิ) ของสกิล 1 (ใช้บ่อย 5–8 วิ) และสกิล 2 (สำคัญ 10–16 วิ) · เริ่มการต่อสู้ด้วยคูลดาวน์ครึ่งหนึ่ง */
+/**
+ * คูลดาวน์ (วิ) ของสกิล 1 / สกิล 2 ตามสาย (ค่าจริงอยู่ในแต่ละ SkillDefinition ใน hero-skills.ts — ตารางนี้ไว้อ้างอิง/UI สำรอง)
+ * เริ่มการต่อสู้ด้วยคูลดาวน์ครึ่งหนึ่ง (START_CD) · นับต่อระหว่างเปลี่ยนเวฟ
+ */
 export const SKILL_CD: Record<HeroClass, [number, number]> = {
   tank: [6, 12],
   fighter: [5, 10],
@@ -64,15 +45,3 @@ export const SKILL_CD: Record<HeroClass, [number, number]> = {
   healer: [8, 15],
 };
 export const START_CD = 0.5;
-
-/**
- * สกิลที่ตัดการร่ายของศัตรูได้ (STEP 7) — ตีธรรมดา/สกิลอื่นตัดไม่ได้ ฮีโร่ที่มีจึงมีค่าทางแทคติก
- * แทงก์: สกิล 2 พุ่งชนโล่ (โดนเป้า) + ท่าไม้ตาย (คลื่นยั่วยุ ตัดทุกตัวที่ร่ายอยู่ในระยะ 3 ช่อง)
- * นักธนู: สกิล 2 ห่าธนูสตัน (ในระยะยิง — AI ใช้เองเมื่อเห็นศัตรูร่าย) + ท่าไม้ตาย ฝนธนูสวรรค์ (ตกใส่ศัตรูทุกตัว ไม่สนระยะ)
- */
-export const INTERRUPT: Partial<Record<HeroClass, ('skill' | 'skill2' | 'ult')[]>> = {
-  tank: ['skill2', 'ult'],
-  archer: ['skill2', 'ult'],
-};
-export const canInterrupt = (cls: HeroClass, kind: 'attack' | 'skill' | 'skill2' | 'ult') =>
-  kind !== 'attack' && !!INTERRUPT[cls]?.includes(kind);

@@ -556,8 +556,7 @@ describe('Stage / Wave / Transition flow', () => {
     s.clearWave();
     s.until(s.phaseIs(BattlePhase.ADVANCING));
     const w = s.h('Warrior');
-    w.poison = 1e6;
-    w.poisonTime = 1;
+    applyBuff(w, { ...BUFFS['alpha_howl_buff'], id: 'test_poison', modifiers: {}, tick: { kind: 'DAMAGE', perSecond: 1, interval: 0.5 } }, 999, { magnitude: 1e6 });
     s.run(0.6);
     expect(w.life).toBe('DEAD_HIDDEN');
     expect(w.visible).toBeFalse();
