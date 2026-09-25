@@ -134,6 +134,7 @@ export const SHEETS: Record<string, SheetDef> = {
       ult: { row: 7, frames: 8, hit: 5 },
     },
     fx: { skill: 'sylvie-rapid', skill2: 'sylvie-volley' },
+    // ท่าไม้ตาย: วงเวทสวรรค์ขึ้นที่ศัตรูทุกตัวผ่าน hitFx ของลูกธนูสวรรค์
     projectile: { attack: 'arrow-normal', skill: 'arrow-rapid', skill2: 'arrow-volley', ult: 'arrow-celestial' },
   },
   'hero-lumina.png': {
@@ -158,30 +159,30 @@ export const SHEETS: Record<string, SheetDef> = {
 };
 
 export const FX: Record<string, FxDef> = {
-  'jin-spin': { file: 'fx-jin-spin.png', frames: 5, w: 107, h: 81, frameMs: 70, at: 'self', dy: -10, scale: 1.25 },
-  'jin-thrust': { file: 'fx-jin-thrust.png', frames: 3, w: 96, h: 84, frameMs: 90, at: 'target', orient: 'flip', dx: -30, dy: -10, scale: 1.1 },
-  'jin-dragon': { file: 'fx-jin-dragon.png', frames: 3, w: 132, h: 89, frameMs: 130, at: 'target', orient: 'flip', dy: -14, scale: 1.4 },
-  'sylvie-rapid': { file: 'fx-sylvie-rapid.png', frames: 8, w: 57, h: 62, frameMs: 55, at: 'self', dx: 30, dy: -14, on: 'cast' },
-  'sylvie-volley': { file: 'fx-sylvie-volley.png', frames: 6, w: 75, h: 59, frameMs: 90, at: 'target', orient: 'flip', dy: -6, scale: 1.2, on: 'cast' },
-  'sylvie-celestial': { file: 'fx-sylvie-celestial.png', frames: 5, w: 98, h: 68, frameMs: 90, at: 'target', dy: -6, scale: 1.1 },
-  'arrow-normal': { file: 'fx-arrow-normal.png', frames: 6, w: 92, h: 52, frameMs: 60, at: 'target', angle0: 0, scale: 0.9 },
-  'arrow-rapid': { file: 'fx-arrow-rapid.png', frames: 6, w: 84, h: 45, frameMs: 50, at: 'target', angle0: 0, scale: 0.9 },
-  'arrow-volley': { file: 'fx-arrow-volley.png', frames: 6, w: 86, h: 73, frameMs: 60, at: 'target', angle0: 40 },
-  'arrow-celestial': { file: 'fx-arrow-celestial.png', frames: 6, w: 83, h: 102, frameMs: 60, at: 'target', angle0: 90, hitFx: 'sylvie-celestial' },
+  'jin-spin': { file: 'fx-jin-spin.png', frames: 8, w: 113, h: 92, frameMs: 60, at: 'self', dy: -14, scale: 1.55 },
+  'jin-thrust': { file: 'fx-jin-thrust.png', frames: 8, w: 137, h: 66, frameMs: 55, at: 'target', orient: 'flip', dx: -40, dy: -12, scale: 1.35 },
+  'jin-dragon': { file: 'fx-jin-dragon.png', frames: 8, w: 278, h: 88, frameMs: 75, at: 'target', orient: 'flip', dx: -35, dy: -16, scale: 1.05 },
+  'sylvie-rapid': { file: 'fx-sylvie-rapid.png', frames: 8, w: 132, h: 84, frameMs: 55, at: 'self', dx: 45, dy: -16, scale: 1.1, on: 'cast' },
+  'sylvie-volley': { file: 'fx-sylvie-volley.png', frames: 8, w: 124, h: 86, frameMs: 70, at: 'target', dy: -14, scale: 1.3, on: 'cast' },
+  'sylvie-celestial': { file: 'fx-sylvie-celestial.png', frames: 8, w: 125, h: 88, frameMs: 65, at: 'target', dy: -14, scale: 1.2 },
+  'arrow-normal': { file: 'fx-arrow-normal.png', frames: 6, w: 92, h: 52, frameMs: 60, at: 'target', angle0: 0, scale: 0.7 },
+  'arrow-rapid': { file: 'fx-arrow-rapid.png', frames: 6, w: 84, h: 45, frameMs: 50, at: 'target', angle0: 0, scale: 0.65 },
+  'arrow-volley': { file: 'fx-arrow-volley.png', frames: 6, w: 86, h: 73, frameMs: 60, at: 'target', angle0: 40, scale: 0.75 },
+  'arrow-celestial': { file: 'fx-arrow-celestial.png', frames: 6, w: 83, h: 102, frameMs: 60, at: 'target', angle0: 90, hitFx: 'sylvie-celestial', scale: 0.8 },
   'lumina-prayer': { file: 'fx-lumina-prayer.png', frames: 8, w: 87, h: 98, frameMs: 80, at: 'self', dy: -12, scale: 1.1, on: 'cast' },
   'lumina-bless': { file: 'fx-lumina-bless.png', frames: 8, w: 91, h: 86, frameMs: 80, at: 'target', dy: -10 },
   'lumina-rez': { file: 'fx-lumina-rez.png', frames: 8, w: 84, h: 98, frameMs: 100, at: 'target', dy: -14, scale: 1.3 },
   // ฮีลที่เพื่อนได้รับจากลูมิน่า: แผ่นบทสวด ย่อลง
   'lumina-heal': { file: 'fx-lumina-prayer.png', frames: 8, w: 87, h: 98, frameMs: 60, at: 'self', dy: -12, scale: 0.6 },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
-  'aurel-defense': { file: 'fx-aurel-defense.png', frames: 7, w: 57, h: 85, frameMs: 75, at: 'self', dx: 22, dy: -12 },
-  'aurel-charge': { file: 'fx-aurel-charge.png', frames: 5, w: 84, h: 76, frameMs: 80, at: 'target' },
+  'aurel-defense': { file: 'fx-aurel-defense.png', frames: 8, w: 112, h: 90, frameMs: 70, at: 'self', dx: 18, dy: -14, scale: 1.25 },
+  'aurel-charge': { file: 'fx-aurel-charge.png', frames: 8, w: 131, h: 78, frameMs: 60, at: 'target', orient: 'flip', dx: -20, dy: -8, scale: 1.2 },
   'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 140, h: 131, frameMs: 80, at: 'target', orient: 'flip', dy: -14, on: 'cast' },
   'shade-smoke': { file: 'fx-shade-smoke.png', frames: 8, w: 131, h: 84, frameMs: 90, at: 'target', orient: 'flip', dy: -8 },
   'shade-phantom': { file: 'fx-shade-phantom.png', frames: 8, w: 134, h: 132, frameMs: 95, at: 'target', orient: 'flip', dy: -16, scale: 1.15 },
   // โล่ที่เพื่อนได้จากท่าไม้ตายออเรล: ใช้แผ่นเดียวกัน ย่อลง
-  'aurel-ward': { file: 'fx-aurel-ult.png', frames: 5, w: 94, h: 92, frameMs: 120, at: 'self', dy: -14, scale: 0.85 },
-  'aurel-ult': { file: 'fx-aurel-ult.png', frames: 5, w: 94, h: 92, frameMs: 140, at: 'self', dy: -14, scale: 1.4 },
+  'aurel-ward': { file: 'fx-aurel-ult.png', frames: 8, w: 123, h: 90, frameMs: 80, at: 'self', dy: -16, scale: 0.85 },
+  'aurel-ult': { file: 'fx-aurel-ult.png', frames: 8, w: 123, h: 90, frameMs: 95, at: 'self', dy: -18, scale: 1.55 },
 };
 
 /** กระสุนของสายระยะไกลที่ไม่มีแผ่น sprite (ศัตรู/ฮีโร่โทเคน) */
