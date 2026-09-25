@@ -60,7 +60,7 @@ export const MONSTER_SKILLS: Record<string, MonsterSkillDefinition> = {
     castTime: 2,
     cooldown: 12,
     interruptedCooldown: 12,
-    interruptible: true,
+    interruptible: true, interruptPriority: 'HIGH',
     // counted from the start of combat of its wave (tutorial timing 2.25 s)
     firstCastDelay: 2.25,
     clip: 'howl',

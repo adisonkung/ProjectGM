@@ -48,7 +48,7 @@ const tank: HeroKit = {
       { type: 'KNOCKBACK', cells: 1 },
       { type: 'APPLY_STATUS', status: 'stun', to: 'PRIMARY', duration: 0.8 },
     ],
-    ai: { tier: 'INTERRUPT', holdForInterrupt: 3 },
+    ai: { tier: 'INTERRUPT' },
   },
   ult: {
     id: 'holy_fortress', name: 'ป้อมปราการศักดิ์สิทธิ์', label: 'Holy Fortress', slot: 'ult', target: 'SELF',
@@ -125,7 +125,7 @@ const archer: HeroKit = {
     id: 'arrow_rain', name: 'ห่าธนู', label: 'Arrow Rain', slot: 'skill2', cooldown: 11,
     target: 'CASTING_INTERRUPTIBLE', fallback: ['CLUSTER', 'CURRENT'], delivery: 'SKY',
     effects: [{ type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 1.2, secondary: 1.2, interrupt: true, breakPower: 40 }],
-    ai: { tier: 'INTERRUPT', holdForInterrupt: 3 },
+    ai: { tier: 'INTERRUPT' },
   },
   ult: {
     id: 'heavenly_arrow_rain', name: 'ฝนธนูสวรรค์', label: 'Heavenly Arrow Rain', slot: 'ult', range: Infinity,

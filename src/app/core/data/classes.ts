@@ -45,3 +45,29 @@ export const SKILL_CD: Record<HeroClass, [number, number]> = {
   healer: [8, 15],
 };
 export const START_CD = 0.5;
+
+/**
+ * Role positioning rules (hero AI, not hard walls):
+ * - leash: preferred max distance (cells) from the hero's formation anchor (skills such as dives may exceed it)
+ * - maxFocusChase: how far the hero will move to engage the player's Focus Target (farther = keep Focus, fight normally)
+ * - minSafeRange: ranged heroes avoid voluntarily standing closer than this to hostile melee units
+ * - preferredRange: ranged heroes like to shoot from this band instead of walking to max range
+ */
+export interface RoleBehavior {
+  leash: number;
+  maxFocusChase: number;
+  minSafeRange?: number;
+  preferredRange?: [number, number];
+}
+
+export const ROLE_BEHAVIOR: Record<HeroClass, RoleBehavior> = {
+  tank: { leash: 5, maxFocusChase: 2.5 },
+  fighter: { leash: 4, maxFocusChase: 3 },
+  assassin: { leash: 8, maxFocusChase: 99 },
+  archer: { leash: 2.5, maxFocusChase: 2, minSafeRange: 3, preferredRange: [5, 6] },
+  mage: { leash: 2, maxFocusChase: 1.5, minSafeRange: 2.5, preferredRange: [4, 5] },
+  healer: { leash: 1.5, maxFocusChase: 0.5, minSafeRange: 2.5, preferredRange: [3, 4] },
+};
+
+/** hostile melee threat zone = attack range + this padding (cells) */
+export const THREAT_PADDING = 0.5;

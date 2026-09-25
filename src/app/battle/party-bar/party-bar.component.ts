@@ -33,17 +33,26 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
             @for (k of slots; track k) {
               @let cd = k === 's1' ? (u.cd1 ?? 0) : (u.cd2 ?? 0);
               @let max = k === 's1' ? (u.cd1Max ?? 1) : (u.cd2Max ?? 1);
-              <span class="sk" [class.cooling]="u.alive && cd > 0" [style.--p]="sweep(cd, max)"
-                    [attr.title]="(k === 's1' ? 'สกิล 1' : 'สกิล 2') + (cd > 0 ? ' คูลดาวน์ ' + secs(cd) + ' วิ' : ' พร้อม')">
+              @let mode = modeOf(u, k === 's1' ? 'skill' : 'skill2');
+              <button type="button" class="sk" [class.cooling]="u.alive && cd > 0" [style.--p]="sweep(cd, max)" [disabled]="!u.alive || cd > 0"
+                      (click)="skill.emit({ id: u.id, slot: k === 's1' ? 'skill' : 'skill2' })"
+                      [attr.title]="(k === 's1' ? 'สกิล 1' : 'สกิล 2') + ' (' + modeName(mode) + ')' + (cd > 0 ? ' คูลดาวน์ ' + secs(cd) + ' วิ' : ' พร้อม — แตะเพื่อใช้ทันที')">
                 @if (art) { <img [src]="art[k]" alt="" draggable="false" /> } @else { <b>{{ k === 's1' ? 'S1' : 'S2' }}</b> }
                 @if (u.alive && cd > 0) { <span class="cd">{{ secs(cd) }}</span> }
-              </span>
+              </button>
             }
             <button type="button" class="sk ultk" [class.on]="ready" [disabled]="!ready" (click)="ult.emit(u.id)"
                     [style.--g]="u.alive ? u.manaPct : 0" [attr.title]="ready ? 'ท่าไม้ตายพร้อม' : 'เกจ ' + pct(u.manaPct) + '%'">
               @if (art) { <img [src]="art.ult" alt="" draggable="false" /> } @else { <b>ULT</b> }
               @if (!ready) { <span class="fill"></span> }
             </button>
+          </span>
+          <span class="modes">
+            @for (m of modeSlots; track m.slot) {
+              @let mode = modeOf(u, m.slot);
+              <button type="button" class="mode" [class]="'mode ' + mode" (click)="modeChange.emit({ id: u.id, slot: m.slot })"
+                      [attr.title]="m.label + ': ' + modeName(mode) + ' — แตะเพื่อเปลี่ยน (AUTO → เก็บไว้ → กดเอง)'">{{ m.short }}{{ modeTag(mode) }}</button>
+            }
           </span>
           <span class="name">{{ u.name }}</span>
           @if (u.alive && tag(u); as t) { <span class="intent" [class]="'intent ' + u.intent">{{ t }}</span> }
@@ -130,6 +139,14 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
       &.heal { background: #56c07a33; color: var(--hp); }
       &.interrupt { background: #f0b54a33; color: var(--gold); }
     }
+    .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+    .mode {
+      font: 700 8px var(--disp); border-radius: 4px; padding: 1px 0; cursor: pointer; background: #ffffff14; color: var(--muted);
+      &.RESERVE { background: #f0b54a33; color: var(--gold); }
+      &.MANUAL { background: #8e97b533; color: #cfd6ea; }
+      &.CONDITIONAL { background: #5ec8e033; color: var(--cyan); }
+    }
+    .sk:not(:disabled) { cursor: pointer; }
     .name { font-size: 11px; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes pulse { to { box-shadow: 0 0 18px #5ec8e0, 0 0 30px #b07cf0aa; } }
@@ -140,6 +157,26 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 export class PartyBarComponent {
   readonly units = input<UnitView[]>([]);
   readonly ult = output<number>();
+  /** tap a ready skill icon = use it now (manual command, also for RESERVE / MANUAL skills) */
+  readonly skill = output<{ id: number; slot: 'skill' | 'skill2' }>();
+  /** tap a mode chip = cycle that slot's AI use mode */
+  readonly modeChange = output<{ id: number; slot: 'skill' | 'skill2' | 'ult' }>();
+
+  readonly modeSlots = [
+    { slot: 'skill' as const, short: 'S1', label: 'สกิล 1' },
+    { slot: 'skill2' as const, short: 'S2', label: 'สกิล 2' },
+    { slot: 'ult' as const, short: 'U', label: 'ท่าไม้ตาย' },
+  ];
+
+  modeOf(u: UnitView, slot: 'skill' | 'skill2' | 'ult'): string {
+    return u.modes?.[slot] ?? 'AUTO';
+  }
+  modeName(m: string): string {
+    return m === 'RESERVE' ? 'เก็บไว้ใช้กับจังหวะสำคัญ' : m === 'MANUAL' ? 'กดเองเท่านั้น' : m === 'CONDITIONAL' ? 'ตามเงื่อนไข' : 'AUTO';
+  }
+  modeTag(m: string): string {
+    return m === 'RESERVE' ? '·R' : m === 'MANUAL' ? '·M' : m === 'CONDITIONAL' ? '·C' : '';
+  }
   /** มีศัตรูกำลังร่ายสกิลที่ตัดได้ */
   readonly alert = input(false);
 

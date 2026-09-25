@@ -42,7 +42,7 @@
         <div class="focus-card" [class.on]="f.isFocus" role="group" aria-label="เป้าหมาย">
           <span class="fc-name">{{ f.isFocus ? '🎯 FOCUS · ' : '' }}{{ f.name }}</span>
           <span class="fc-hp"><i [style.width.%]="f.hpPct"></i></span>
-          <small>HP {{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · ตีอยู่ {{ focusCount().on }}/{{ focusCount().total }} }</small>
+          <small>HP {{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · ตีอยู่ {{ focusCount().on }}/{{ focusCount().total }} }@if (f.isFocus && debug() && !focusSafe()) { · FOCUS TARGET OUT OF SAFE RANGE }</small>
           @if (f.isFocus) {
             <button type="button" (click)="cancelFocus()">✕ ยกเลิกโฟกัส</button>
           } @else {
@@ -71,7 +71,7 @@
       </div>
     }
     <div class="party">
-      <app-party-bar [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" />
+      <app-party-bar [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)" />
       <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()"
               title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
     </div>

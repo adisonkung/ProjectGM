@@ -399,17 +399,6 @@ export class StageFlow {
     this.beginWave();
   }
 
-  /** does the next wave contain an enemy with a cast that interrupts can stop? (AI saves interrupts for it) */
-  nextWaveHasCasters(isCaster: (enemyId: string) => boolean): boolean {
-    const next = this.waves[this.waveIndex + 1];
-    if (!next) return false;
-    if (this.casterCache.has(this.waveIndex + 1)) return this.casterCache.get(this.waveIndex + 1)!;
-    const has = next.spawns.some(sp => isCaster(sp.monsterId));
-    this.casterCache.set(this.waveIndex + 1, has);
-    return has;
-  }
-  private casterCache = new Map<number, boolean>();
-
   // ------------------------------------------------------------------ death / revive
 
   /** HP reached 0: death lifecycle (engine already cancelled casts / removed it from the grid) */

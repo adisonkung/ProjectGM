@@ -29,7 +29,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   // Stage 4 — Magic Mushroom: the one mechanic is a cluster-seeking poison AoE
   poison_cloud: {
     id: 'poison_cloud', name: 'เมฆสปอร์พิษ', label: 'POISON CLOUD', type: 'ATTACK',
-    castTime: 1.5, cooldown: 9, interruptible: true, range: 5,
+    castTime: 1.5, cooldown: 9, interruptible: true, interruptPriority: 'MEDIUM', range: 5,
     target: { type: 'HERO_CLUSTER', area: 'ADJACENT_8', min: 2 },
     effects: [
       { type: 'DAMAGE', mul: 0.8, area: 'ADJACENT_8', center: 'TARGET', damageType: 'MAGIC' },
@@ -55,7 +55,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   // Stage 6 — Goblin Shaman: group heal (only when needed)
   healing_ritual: {
     id: 'healing_ritual', name: 'พิธีเยียวยา', label: 'HEALING RITUAL', type: 'SUPPORT',
-    castTime: 3, cooldown: 11, interruptible: true, initialDelayRandom: 1,
+    castTime: 3, cooldown: 11, interruptible: true, interruptPriority: 'HIGH', initialDelayRandom: 1,
     target: { type: 'ALL_ALLIES' },
     effects: [{ type: 'HEAL_PCT', pct: 0.2, to: 'ALL_ALLIES', excludeSummons: true }],
     mockFx: { color: '#8cff9c', area: 'ALL_ALLIES' },
@@ -77,7 +77,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   entangling_roots: {
     id: 'entangling_roots', name: 'รากพันธนาการ', label: 'ENTANGLING ROOTS', type: 'ATTACK',
-    castTime: 2, cooldown: 10, interruptible: true,
+    castTime: 2, cooldown: 10, interruptible: true, interruptPriority: 'MEDIUM',
     target: { type: 'HERO_PRIORITY', classes: ['healer', 'mage', 'archer'], backRowOnly: true },
     effects: [
       { type: 'DAMAGE', mul: 1, area: 'SINGLE', center: 'TARGET', damageType: 'MAGIC' },
@@ -89,9 +89,13 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   call_of_the_forest: {
     id: 'call_of_the_forest', name: 'เสียงเรียกแห่งพงไพร', label: 'CALL OF THE FOREST', type: 'SUMMON',
-    castTime: 3, cooldown: 14, interruptible: true,
+    // first cast 5 s into the boss wave · success = 3 adds + Ancient Protection (boss takes ×0.80 while any lives)
+    castTime: 3, cooldown: 12, interruptible: true, interruptPriority: 'CRITICAL', firstCastDelay: 5,
     target: { type: 'SELF' },
-    effects: [{ type: 'SUMMON', monsters: [{ id: 'forest_spirit', count: 2 }, { id: 'magic_mushroom', count: 1 }], maxActive: 3 }],
+    effects: [{
+      type: 'SUMMON', monsters: [{ id: 'forest_spirit', count: 2 }, { id: 'magic_mushroom', count: 1 }], maxActive: 3,
+      grantWhileAlive: 'ancient_protection',
+    }],
     mockFx: { color: '#5ec8e0', area: 'RADIUS_2' },
     conditions: [{ type: 'SUMMON_SLOTS_FREE' }], recovery: 0.4, interruptRecovery: 0.6,
   },
@@ -111,7 +115,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   // Stage 9 — Dark Shaman
   dark_heal: {
     id: 'dark_heal', name: 'เยียวยามืด', label: 'DARK HEAL', type: 'SUPPORT',
-    castTime: 2, cooldown: 10, interruptible: true,
+    castTime: 2, cooldown: 10, interruptible: true, interruptPriority: 'HIGH',
     target: { type: 'LOWEST_HP_ALLY', priorityBelow: 0.6 },
     effects: [{ type: 'HEAL_PCT', pct: 0.25, to: 'TARGET' }],
     mockFx: { color: '#b58cff', area: 'SINGLE' },
@@ -119,7 +123,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   soul_link: {
     id: 'soul_link', name: 'พันธะวิญญาณ', label: 'SOUL LINK', type: 'SUPPORT',
-    castTime: 2.5, cooldown: 14, interruptible: true,
+    castTime: 2.5, cooldown: 14, interruptible: true, interruptPriority: 'HIGH',
     target: { type: 'ALLY_DEFINITION_HIGHEST_HP', monsterId: 'corrupted_treant' },
     effects: [{ type: 'SOUL_LINK', status: 'soul_link' }],
     mockFx: { color: '#c78cff', area: 'SINGLE' },
@@ -129,7 +133,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   /** Stage 10 only (dark_shaman_ritual): once, 2 s after spawning */
   sacrifice: {
     id: 'sacrifice', name: 'บูชายัญ', label: 'SACRIFICE', type: 'SPECIAL',
-    castTime: 5, cooldown: 999, interruptible: true, once: true, firstCastDelay: 2,
+    castTime: 5, cooldown: 999, interruptible: true, interruptPriority: 'CRITICAL', once: true, firstCastDelay: 2,
     target: { type: 'SELF' },
     effects: [{ type: 'SACRIFICE', bossHealPct: 0.2, buffId: 'guardian_empowered' }],
     mockFx: { color: '#ff3b3b', area: 'SINGLE' },
@@ -139,7 +143,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   // Stage 9 — Mist Witch
   nightmare: {
     id: 'nightmare', name: 'ฝันร้าย', label: 'NIGHTMARE', type: 'ATTACK',
-    castTime: 2.5, cooldown: 10, interruptible: true,
+    castTime: 2.5, cooldown: 10, interruptible: true, interruptPriority: 'HIGH',
     target: { type: 'HIGHEST_ATK_HERO' },
     effects: [
       { type: 'DAMAGE', mul: 1, area: 'SINGLE', center: 'TARGET', damageType: 'MAGIC' },
@@ -168,7 +172,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   death_root: {
     id: 'death_root', name: 'รากมรณะ', label: 'DEATH ROOT', type: 'ATTACK',
-    castTime: 2, cooldown: 9, interruptible: true,
+    castTime: 2, cooldown: 9, interruptible: true, interruptPriority: 'MEDIUM',
     target: { type: 'HERO_PRIORITY', classes: ['healer', 'mage', 'archer'], backRowOnly: true },
     effects: [
       { type: 'DAMAGE', mul: 1.2, area: 'SINGLE', center: 'TARGET', damageType: 'MAGIC' },
@@ -181,7 +185,7 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   /** Phase 4 only — not interruptible, but breakable (Break Gauge 100) */
   forest_oblivion: {
     id: 'forest_oblivion', name: 'พงไพรสูญสิ้น', label: 'FOREST OBLIVION', type: 'ATTACK',
-    castTime: 6, cooldown: 12, interruptible: false, breakRequired: 100, brokenStatus: 'broken',
+    castTime: 6, cooldown: 12, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 100, brokenStatus: 'broken',
     target: { type: 'ALL_HEROES' },
     effects: [
       { type: 'DAMAGE', mul: 2.6, area: 'ALL_ENEMIES', center: 'SELF' },

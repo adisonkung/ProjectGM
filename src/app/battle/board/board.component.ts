@@ -61,6 +61,8 @@ export interface UnitView {
   moveSec?: number;
   buffed?: boolean;
   icon?: string;
+  /** hero AI use modes per slot (party bar chips) */
+  modes?: Partial<Record<'skill' | 'skill2' | 'ult', string>>;
   /** BOSS / FINAL_BOSS (boss bar) */
   bossRank?: string;
   /** placeholder art for monsters without a sheet (+ name / HP% label under it) */

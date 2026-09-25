@@ -91,6 +91,11 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     id: 'enraged_forest', name: 'ป่าคลั่ง', duration: Infinity, stackPolicy: 'NONE', buff: true,
     modifiers: { attackSpeedMultiplier: 1.2 },
   },
+  /** Elder Treant: while any Call-of-the-Forest add lives (removed by the engine when the last one dies) */
+  ancient_protection: {
+    id: 'ancient_protection', name: 'พรพงไพรโบราณ', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { damageTakenMultiplier: 0.8 },
+  },
   guardian_empowered: {
     id: 'guardian_empowered', name: 'พลังบูชายัญ', duration: Infinity, stackPolicy: 'NONE', buff: true,
     modifiers: { attackMultiplier: 1.2 },

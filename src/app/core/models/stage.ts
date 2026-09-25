@@ -53,8 +53,13 @@ export interface StageDef {
   waveDefs?: WaveDefinition[];
   /** display name, e.g. "Normal Forest — Forest Entrance" */
   name?: string;
-  /** multiplies data-driven monster HP/ATK (default 1 = the definition's values) */
-  monsterScale?: number;
+  /**
+   * small per-stage stat tuning of data-driven monsters (1 = the definition's values). Difficulty must come from
+   * mechanics — the engine clamps these to HP ≤ 1.40, ATK ≤ 1.25, DEF ≤ 1.30 (MONSTER_TUNING_LIMITS)
+   */
+  monsterTuning?: { hp?: number; atk?: number; def?: number };
+  /** recommended hero level (UI / balance sims) */
+  recommendedLevel?: number;
   mode: WinCondition;
   /** วินาที: ด่านกำจัดคือเวลาจำกัด, ด่านเอาตัวรอดคือเวลาที่ต้องรอด */
   timeLimit: number;

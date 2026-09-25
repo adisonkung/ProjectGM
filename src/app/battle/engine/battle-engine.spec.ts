@@ -393,18 +393,26 @@ describe('BattleEngine', () => {
       return { e, tank, warrior, archer, mage, healer, shaman };
     };
 
-    it('ranged heroes switch to the focus; the tank holds the frontline; the warrior cannot reach behind the orcs', () => {
+    it('soft focus: nobody chases a shaman behind the orcs; the focus stays stored and is taken once it is safely reachable', () => {
       const { e, tank, warrior, archer, mage, shaman } = setup();
       e.setFocus(shaman.id);
       expect(e.focusTargetId).toBe(shaman.id);
       for (let i = 0; i < 10; i++) e.step(0.05);
-      expect(archer.targetId).toBe(shaman.id);
-      expect(archer.intent).toBe('focus');
-      expect(mage.targetId).toBe(shaman.id);
+      // out of safe range for the backline (leash / threat zones), blocked for the warrior, the tank holds the line
+      expect(archer.targetId).not.toBe(shaman.id);
+      expect(archer.intent).toBe('blocked');
+      expect(mage.targetId).not.toBe(shaman.id);
       expect(tank.targetId).not.toBe(shaman.id);
       expect(tank.intent).toBe('hold');
       expect(warrior.targetId).not.toBe(shaman.id);
       expect(warrior.intent).toBe('blocked');
+      expect(e.focusTargetId).toBe(shaman.id);
+      // the shaman walks into the archer's safe firing range → the archer switches by itself
+      (e as any).relocate(shaman, { r: archer.pos.r, c: archer.pos.c + 5 }, 'blink');
+      archer.lockUntil = 0;
+      for (let i = 0; i < 10; i++) e.step(0.05);
+      expect(archer.targetId).toBe(shaman.id);
+      expect(archer.intent).toBe('focus');
     });
 
     it('the healer keeps emergency-healing instead of chasing the focus', () => {
@@ -423,6 +431,7 @@ describe('BattleEngine', () => {
     it('the archer spots the focused shaman casting MASS HEAL and stun-volleys it', () => {
       const { e, archer, shaman } = setup();
       e.setFocus(shaman.id);
+      (e as any).relocate(shaman, { r: archer.pos.r, c: archer.pos.c + 5 }, 'blink'); // inside the archer's safe range
       e.units.filter(u => u.side === 'enemy').forEach(u => (u.hp = Math.round(u.maxHp * 0.5)));
       shaman.castSkills[0].cd = 0;
       archer.cd2 = 0;
@@ -451,8 +460,8 @@ describe('BattleEngine', () => {
         last = archer.targetId;
       }
       expect(switches).toBeLessThanOrEqual(1);
-      shaman.hp = 1;
-      const evs: BattleEvent[] = [];
+      (e as any).applyDamage(shaman, shaman.hp, false);
+      const evs: BattleEvent[] = [...e.drainEvents()];
       for (let i = 0; i < 60 && e.focusTargetId != null; i++) {
         e.step(0.05);
         evs.push(...e.drainEvents());

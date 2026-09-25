@@ -1,27 +1,26 @@
-/** Debug: print a battle's event log for one floor. npm run trace -- <floor> [seed] [monsterScale] [tactical] */
+/** Debug: print a battle's event log for one floor. npm run trace -- <floor> [seed] [level|rec] [tactical] */
 import { BattleEngine } from '../../src/app/battle/engine/battle-engine';
 import { ENEMIES } from '../../src/app/core/data/enemies';
 import { STAGES } from '../../src/app/core/data/stages';
 import { newGameState } from '../../src/app/core/data/starter';
 import { teamToUnits } from '../../src/app/core/rules/team';
-import { focusPriority } from './policy';
+import { TacticalBot, tacticalFormation } from './policy';
 
 declare const process: { argv: string[] };
 const floor = Number(process.argv[2] ?? 1);
 const seed = Number(process.argv[3] ?? 1);
-const scale = process.argv[4] ? Number(process.argv[4]) : null;
+const stage = STAGES[floor - 1];
+const level = !process.argv[4] || process.argv[4] === 'rec' ? stage.recommendedLevel ?? 1 : Number(process.argv[4]);
 const tactical = process.argv[5] === 'tactical';
 const state = newGameState();
-const base = STAGES[floor - 1];
-const stage = scale != null ? { ...base, monsterScale: scale } : base;
-const e = new BattleEngine({ allies: teamToUnits(state.team, state.heroes), stage, enemyTemplates: ENEMIES, seed, autoUlt: true });
+const heroes = state.heroes.map(h => ({ ...h, level }));
+const allies = teamToUnits(tactical ? tacticalFormation(heroes, state.team) : state.team, heroes);
+const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed, autoUlt: true });
+const bot = tactical ? new TacticalBot() : null;
 const name = (id?: number) => (id == null ? '-' : `${e.units.find(u => u.id === id)?.name}#${id}`);
 const skip = new Set(['move', 'castProgress']);
 while (!e.result && e.time < 300) {
-  if (tactical) {
-    const f = focusPriority(e);
-    if (f != null && f !== e.focusTargetId) e.setFocus(f);
-  }
+  bot?.tick(e);
   e.step(0.05);
   for (const ev of e.drainEvents()) {
     if (skip.has(ev.type)) continue;

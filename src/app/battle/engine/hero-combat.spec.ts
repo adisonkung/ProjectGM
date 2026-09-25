@@ -214,6 +214,7 @@ describe('Tank (Aurel / Morgan)', () => {
     const alpha = b.monsters('alpha_wolf')[0];
     b.root(alpha);
     b.put(tank, alpha.pos.c - 2, alpha.pos.r);
+    b.e.setSkillMode(tank.id, 'skill2', 'RESERVE'); // kept for casts (AUTO would spend it on damage)
     tank.cd2 = 0; // AI: the interrupt opportunity is taken as soon as the cast starts
     b.until(() => b.of('CAST_INTERRUPTED').length > 0, 8);
     const ci = b.of('CAST_INTERRUPTED')[0];
@@ -663,6 +664,10 @@ describe('Stage 3 — Wolf Territory balance', () => {
     for (let seed = 1; seed <= seeds; seed++) {
       const e = new BattleEngine({ allies, stage: STAGES[2], enemyTemplates: ENEMIES, seed, autoUlt: true });
       if (!interrupts) (e as any).tryInterrupt = () => {};
+      // a player who plans to interrupt keeps the interrupt skills in RESERVE (AUTO spends them on damage)
+      else for (const h of e.units.filter(u => u.side === 'ally')) for (const slot of ['skill', 'skill2'] as const) {
+        if (kitOf(h.heroId, h.cls)[slot].ai?.tier === 'INTERRUPT') e.setSkillMode(h.id, slot, 'RESERVE');
+      }
       e.subscribe(ev => {
         if (ev.type === 'skillActivated') howls++;
         if (ev.type === 'CAST_INTERRUPTED') interrupted++;

@@ -96,6 +96,19 @@ export type AreaCenter = 'TARGET' | 'SELF';
 // ------------------------------------------------------------------ skills
 
 export type SkillSlot = 'attack' | 'skill' | 'skill2' | 'ult';
+
+/**
+ * How the AI may spend a skill / ultimate (per hero, changeable by the player / tactical bot):
+ * AUTO        whenever its normal AI condition holds (interrupt skills fall back to damage when no cast is up)
+ * CONDITIONAL only when its SkillDefinition condition holds (interrupt skills: only on a cast — no damage fallback)
+ * RESERVE     kept for high-value tactical moments (interrupts / breaks of important casts, emergencies)
+ * MANUAL      never by the AI — player command only
+ */
+export type SkillUseMode = 'AUTO' | 'CONDITIONAL' | 'RESERVE' | 'MANUAL';
+
+/** how important it is to stop an enemy cast (reserved interrupts go for the highest one) */
+export type InterruptPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export const INTERRUPT_PRIORITY_RANK: Record<InterruptPriority, number> = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
 export type DamageKind = 'PHYSICAL' | 'MAGIC' | 'TRUE';
 
 /**
@@ -179,11 +192,6 @@ export interface SkillAI {
   enemyWithin?: number;
   /** ultimate / heal: fire when a dead ally can be revived */
   whenAllyDead?: boolean;
-  /**
-   * INTERRUPT skills: don't spend the skill on its fallback targets while an enemy owns an interruptible cast
-   * that is ready (or will be within this many seconds) — keep it for the cast bar
-   */
-  holdForInterrupt?: number;
 }
 
 export interface SkillDefinition {
@@ -201,6 +209,8 @@ export interface SkillDefinition {
   /** fallback rules tried in order when `target` finds nobody (e.g. caster → cluster → current) */
   fallback?: TargetRule[];
   movement?: SkillMovement;
+  /** default AI use mode (heroes may override per slot) — AUTO when omitted */
+  useMode?: SkillUseMode;
   /** INSTANT (hit frame) · PROJECTILE (flies from the caster, effects on arrival) · SKY (falls onto the target) */
   delivery?: 'INSTANT' | 'PROJECTILE' | 'SKY';
   /** fire `count` independent shots `gap` s apart (Rapid Shot); later shots stop if the target died */

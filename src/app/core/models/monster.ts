@@ -1,4 +1,4 @@
-import type { StatusEffectDefinition } from './combat';
+import type { InterruptPriority, StatusEffectDefinition } from './combat';
 import { HeroClass } from './hero';
 
 /**
@@ -168,8 +168,11 @@ export type SkillEffect =
   | { type: 'HEAL_PCT'; pct: number; to: 'TARGET' | 'ALL_ALLIES'; excludeSummons?: boolean }
   /** land on the nearest free cell behind the aimed hero (never overlapping a unit) */
   | { type: 'LEAP_BEHIND' }
-  /** summon monsters next to the caster, never more than `maxActive` alive from this skill */
-  | { type: 'SUMMON'; monsters: { id: string; count: number }[]; maxActive: number }
+  /**
+   * summon monsters next to the caster, never more than `maxActive` alive from this skill ·
+   * `grantWhileAlive`: status on the caster while any add of this skill lives (Ancient Protection)
+   */
+  | { type: 'SUMMON'; monsters: { id: string; count: number }[]; maxActive: number; grantWhileAlive?: string }
   /** link the caster to the aimed ally: `transfer` of the caster's final damage goes to that ally */
   | { type: 'SOUL_LINK'; status: string }
   /** self-destruct: the caster dies, every boss ally heals `bossHealPct` and gains `buffId` */
@@ -213,6 +216,8 @@ export interface MonsterSkillDefinition {
   /** cooldown after being interrupted (defaults to cooldown) */
   interruptedCooldown?: number;
   interruptible: boolean;
+  /** how badly the heroes want to stop this cast (reserved interrupts pick the highest) — default MEDIUM */
+  interruptPriority?: InterruptPriority;
   /** Break Gauge: a non-interruptible cast that approved interrupt skills can BREAK with this much break damage */
   breakRequired?: number;
   /** BROKEN status applied on a successful break */

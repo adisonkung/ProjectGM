@@ -53,5 +53,5 @@ export const mockVisualOf = (id: string | undefined): MockVisual | undefined => 
 export const STATUS_ICONS: Record<string, string> = {
   poison: '☠', bleed: '🩸', corruption: '☣', root: '🌿', stun: '💫', untargetable: '👻', boss_seal: '🔒',
   dark_fog: '🌫', soul_link: '🔗', broken: '💥', healing_reduction: '💔', panther_frenzy: '⚡', enraged_forest: '😡',
-  guardian_empowered: '🩸', guardian_enrage: '🔥', taunted: '❗', alpha_howl_buff: '🐺', blood_rage: '😡',
+  guardian_empowered: '🩸', ancient_protection: '🛡', guardian_enrage: '🔥', taunted: '❗', alpha_howl_buff: '🐺', blood_rage: '😡',
 };

@@ -9,7 +9,7 @@ import { StageDef } from '../models/stage';
 export const STAGES: StageDef[] = [
   // ---- Normal Forest (data-driven monsters, core/data/monsters.ts) — encounter data lives here, not in the monsters
   // Stage 1 teaches basic combat: targeting, movement, attack, damage, death, formation contact (no casts)
-  { floor: 1, name: 'Normal Forest — Forest Entrance', background: 'forest-1', mode: 'eliminate', timeLimit: 90, enemies: [
+  { floor: 1, recommendedLevel: 1, name: 'Normal Forest — Forest Entrance', background: 'forest-1', mode: 'eliminate', timeLimit: 90, enemies: [
     { enemy: 'forest_slime', r: 0, c: 0 }, { enemy: 'forest_slime', r: 0, c: 1 }, { enemy: 'forest_slime', r: 0, c: 2 },
   ], rounds: [
     [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 1 }, { enemy: 'goblin_fighter', r: 0, c: 2 }],
@@ -17,7 +17,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'goblin_fighter', r: 1, c: 0 }, { enemy: 'goblin_fighter', r: 1, c: 2 }],
   ] },
   // Stage 2 teaches frontline vs backline, projectiles, target priority (archers hunt the lowest HP%) → Focus Target
-  { floor: 2, name: "Normal Forest — Hunter's Path", background: 'forest-1', mode: 'eliminate', timeLimit: 100, enemies: [
+  { floor: 2, recommendedLevel: 1, name: "Normal Forest — Hunter's Path", background: 'forest-1', mode: 'eliminate', timeLimit: 100, enemies: [
     { enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 2 }, { enemy: 'goblin_archer', r: 3, c: 1 },
   ], rounds: [
     [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 2 },
@@ -26,7 +26,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
   ] },
   // Stage 3 teaches fast melee pressure, the first elite, cast bars and Interrupt (Alpha Howl)
-  { floor: 3, name: 'Normal Forest — Wolf Territory', background: 'forest-1', mode: 'eliminate', timeLimit: 110, enemies: [
+  { floor: 3, recommendedLevel: 2, name: 'Normal Forest — Wolf Territory', background: 'forest-1', mode: 'eliminate', timeLimit: 110, enemies: [
     { enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 1 }, { enemy: 'forest_wolf', r: 0, c: 2 },
   ], rounds: [
     [{ enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 1 }, { enemy: 'forest_wolf', r: 0, c: 2 },
@@ -37,12 +37,12 @@ export const STAGES: StageDef[] = [
   ] },
 
   // ---- Stage 4–10 (core/data/monsters-stage4-10.ts) — mock visuals until art exists.
-  // Monster definitions keep the design stats; `monsterScale` (HP & ATK) is the per-stage difficulty knob, tuned with
-  // `npm run balance` against the 5★ Lv1 starter team (see claude/hero-monster-reference.md for the latest numbers).
+  // Monster definitions keep their authored stats — difficulty comes from composition, casts, phases and decisions.
+  // Only small `monsterTuning` is allowed (clamped by the engine). `recommendedLevel` drives `npm run balance`.
   // Every stage adds ONE new problem; boss waves hold only the boss (its adds come from its own skills / phases).
 
   // Stage 4 — Enchanted Grove: poison + magic AoE (mushrooms midline, spirits backline) — punishes a tightly stacked party
-  { floor: 4, name: 'Enchanted Grove', background: 'twilight-1', monsterScale: 3.4, mode: 'eliminate', timeLimit: 110, enemies: [
+  { floor: 4, recommendedLevel: 2, name: 'Enchanted Grove', background: 'twilight-1', mode: 'eliminate', timeLimit: 110, enemies: [
     { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
     { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 },
   ], rounds: [
@@ -52,7 +52,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
   ] },
   // Stage 5 — Twilight Hunters: backline dive + formation (Shadow Panthers leap onto healers / mages / archers)
-  { floor: 5, name: 'Twilight Hunters', background: 'twilight-1', monsterScale: 3.6, mode: 'eliminate', timeLimit: 110, enemies: [
+  { floor: 5, recommendedLevel: 3, name: 'Twilight Hunters', background: 'twilight-1', mode: 'eliminate', timeLimit: 110, enemies: [
     { enemy: 'shadow_panther', r: 0, c: 1 },
     { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 },
   ], rounds: [
@@ -63,7 +63,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
   ] },
   // Stage 6 — Corrupted Tribe: enemy healing + priority target (Goblin Guards shield the Shaman; Focus / Interrupt it)
-  { floor: 6, name: 'Corrupted Tribe', background: 'twilight-1', monsterScale: 3.0, mode: 'eliminate', timeLimit: 120, enemies: [
+  { floor: 6, recommendedLevel: 3, name: 'Corrupted Tribe', background: 'twilight-1', mode: 'eliminate', timeLimit: 120, enemies: [
     { enemy: 'goblin_guard', r: 0, c: 0 }, { enemy: 'goblin_guard', r: 0, c: 2 }, { enemy: 'goblin_shaman', r: 4, c: 1 },
     { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 },
   ], rounds: [
@@ -75,7 +75,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
   ] },
   // Stage 7 — Guardian of Twilight: first boss (Root Slam: survive · Entangling Roots: situational · Call of the Forest: interrupt)
-  { floor: 7, name: 'Guardian of Twilight', background: 'twilight-1', monsterScale: 2.9, mode: 'eliminate', timeLimit: 150, enemies: [
+  { floor: 7, recommendedLevel: 4, name: 'Guardian of Twilight', background: 'twilight-1', mode: 'eliminate', timeLimit: 150, enemies: [
     { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
     { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 },
   ], rounds: [
@@ -85,7 +85,7 @@ export const STAGES: StageDef[] = [
     [{ enemy: 'elder_treant', r: 1, c: 1 }],
   ] },
   // Stage 8 — Into the Mist: untargetable hunters, body blocking, bleed attrition
-  { floor: 8, name: 'Into the Mist', background: 'misty-1', monsterScale: 2.1, mode: 'eliminate', timeLimit: 120, enemies: [
+  { floor: 8, recommendedLevel: 4, name: 'Into the Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 120, enemies: [
     { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     { enemy: 'corrupted_wolf', r: 1, c: 1 },
   ], rounds: [
@@ -96,7 +96,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }],
   ] },
   // Stage 9 — Death Mist: target-priority puzzle (Treant blocks · Shaman heals / links · Witch controls · Wolves press · Wraith hunts)
-  { floor: 9, name: 'Death Mist', background: 'misty-1', monsterScale: 2.45, mode: 'eliminate', timeLimit: 140, enemies: [
+  { floor: 9, recommendedLevel: 5, name: 'Death Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 140, enemies: [
     { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'dark_shaman', r: 4, c: 1 },
   ], rounds: [
@@ -106,7 +106,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'mist_wraith', r: 2, c: 1 }, { enemy: 'dark_shaman', r: 4, c: 0 }, { enemy: 'mist_witch', r: 4, c: 2 }],
   ] },
   // Stage 10 — Heart of the Dark Forest: the full system exam (seal + wraiths 70%, Sacrifice 40%, enrage + Forest Oblivion 15%)
-  { floor: 10, name: 'Heart of the Dark Forest', background: 'misty-1', monsterScale: 2.4, mode: 'eliminate', timeLimit: 210, enemies: [
+  { floor: 10, recommendedLevel: 5, name: 'Heart of the Dark Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 210, enemies: [
     { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 },
   ], rounds: [

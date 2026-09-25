@@ -619,10 +619,10 @@ describe('Stage 4–10 bosses', () => {
 
 // ------------------------------------------------------------------ the spec's REQUIRED TESTS (1–38)
 
-const stageOfWave = (floor: number, wave: number): { enemies: EnemyPlacement[]; scale?: number } => {
+const stageOfWave = (floor: number, wave: number): { enemies: EnemyPlacement[]; tuning?: StageDef["monsterTuning"]; level: number } => {
   const st = STAGES[floor - 1];
   const w = wavesOf(st)[wave];
-  return { enemies: w.spawns.map(s => mon(s.monsterId, s.formationSlot.depth, s.formationSlot.lane)), scale: st.monsterScale };
+  return { enemies: w.spawns.map(s => mon(s.monsterId, s.formationSlot.depth, s.formationSlot.lane)), tuning: st.monsterTuning, level: st.recommendedLevel ?? 1 };
 };
 
 describe('Stage 4–10 required tests', () => {
@@ -865,7 +865,7 @@ describe('Stage 4–10 required tests', () => {
     const allies = teamToUnits(state.team, state.heroes.map(h => ({ ...h, level: 10 })));
     let wins = 0;
     for (let seed = 1; seed <= 5; seed++) {
-      const stage: StageDef = { floor: 9, mode: 'eliminate', timeLimit: 140, monsterScale: w3.scale, enemies: w3.enemies };
+      const stage: StageDef = { floor: 9, mode: 'eliminate', timeLimit: 140, monsterTuning: w3.tuning, enemies: w3.enemies };
       if (new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed, autoUlt: true }).run(0.05, 200) === 'win') wins++;
     }
     expect(wins).toBeGreaterThan(0);

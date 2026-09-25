@@ -94,6 +94,8 @@ export class BattleComponent implements OnDestroy {
     const p = this.party().filter(v => v.alive);
     return { on: p.filter(v => v.onFocus).length, total: p.length };
   });
+  /** debug: can at least one hero engage the Focus Target safely right now? */
+  readonly focusSafe = signal(true);
   /** ศัตรูที่กำลังร่ายสกิล (แสดงแถบเตือนเหนือสนาม) */
   readonly casts = computed(() => this.views().filter(v => v.alive && v.cast));
   /** มีสกิลร่ายที่ตัดได้อยู่ตอนนี้ → ไฮไลต์ฮีโร่ที่ท่าไม้ตายตัดได้ */
@@ -184,6 +186,22 @@ export class BattleComponent implements OnDestroy {
   /** แตะรูปตัวละคร (หรือกดปุ่ม 1–5): ใช้ท่าไม้ตายเมื่อเกจเต็ม */
   useUlt(id: number): void {
     if (this.running() && this.engine.requestUlt(id)) this.snapshot();
+  }
+
+  /** แตะไอคอนสกิลที่พร้อม: ใช้ทันที (สั่งเอง ใช้ได้แม้สกิลตั้งเป็น เก็บไว้ / กดเอง) */
+  useSkill(ev: { id: number; slot: 'skill' | 'skill2' }): void {
+    if (this.running() && this.engine.requestSkill(ev.id, ev.slot)) this.snapshot();
+  }
+
+  /** แตะชิปโหมด: AUTO → RESERVE (เก็บไว้) → MANUAL (กดเอง) → AUTO */
+  cycleMode(ev: { id: number; slot: 'skill' | 'skill2' | 'ult' }): void {
+    const u = this.engine?.units.find(x => x.id === ev.id);
+    if (!u) return;
+    const order = ['AUTO', 'RESERVE', 'MANUAL'] as const;
+    const cur = this.engine.skills.mode(u, ev.slot);
+    const next = order[(order.indexOf(cur as (typeof order)[number]) + 1) % order.length];
+    this.engine.setSkillMode(ev.id, ev.slot, next);
+    this.snapshot();
   }
 
   /** แตะศัตรู: ครั้งแรก = เลือก (ขึ้นการ์ด) · แตะซ้ำ = 🎯 โฟกัส · แตะเป้าโฟกัส = ยกเลิก */
@@ -285,6 +303,8 @@ export class BattleComponent implements OnDestroy {
       else if (!this.facing.has(u.id)) this.facing.set(u.id, u.side === 'enemy');
     }
     const dbg = this.debug() ? e.flow.debugInfo() : null;
+    const focus = e.focusTargetId != null ? byId.get(e.focusTargetId) : undefined;
+    this.focusSafe.set(!focus || e.units.some(h => h.side === 'ally' && h.alive && e.canEngage(h, focus)));
     this.stageDebug.set(dbg);
     this.worldDebug.set(this.debug() ? this.buildWorldDebug() : null);
     const heroDbg = new Map(dbg?.heroes.map(h => [h.id, h.lines]) ?? []);
@@ -332,6 +352,7 @@ export class BattleComponent implements OnDestroy {
         targetId: u.targetId,
         line: u.line,
         interrupter: u.side === 'ally' && kitInterrupts(kitOf(u.heroId, u.cls), 'ult'),
+        modes: u.side === 'ally' ? { skill: e.skills.mode(u, 'skill'), skill2: e.skills.mode(u, 'skill2'), ult: e.skills.mode(u, 'ult') } : undefined,
         cast: u.casting && !(u.casting.def as MonsterSkillDefinition).untargetableWhileCasting
           ? {
               label: u.casting.def.label,
