@@ -42,7 +42,7 @@ export const STAGES: StageDef[] = [
   // Every stage adds ONE new problem; boss waves hold only the boss (its adds come from its own skills / phases).
 
   // Stage 4 teaches spreading out vs clustered AoE: Poison Cloud seeks the densest hero group (interruptible 1.5 s cast)
-  { floor: 4, name: 'Enchanted Grove — Spore Hollow', background: 'forest-1', monsterScale: 3.2, mode: 'eliminate', timeLimit: 110, enemies: [
+  { floor: 4, name: 'Enchanted Grove — Spore Hollow', background: 'twilight-1', monsterScale: 3.2, mode: 'eliminate', timeLimit: 110, enemies: [
     { enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 2 }, { enemy: 'magic_mushroom', r: 2, c: 1 },
   ], rounds: [
     [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 2 },
@@ -51,7 +51,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 1 }, { enemy: 'magic_mushroom', r: 2, c: 2 }],
   ] },
   // Stage 5 teaches protecting the backline: Forest Spirits pierce armour, Shadow Panthers leap onto healers / mages
-  { floor: 5, name: 'Enchanted Grove — Moonlit Thicket', background: 'forest-1', monsterScale: 3.4, mode: 'eliminate', timeLimit: 110, enemies: [
+  { floor: 5, name: 'Enchanted Grove — Moonlit Thicket', background: 'twilight-1', monsterScale: 3.4, mode: 'eliminate', timeLimit: 110, enemies: [
     { enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 2 },
     { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 },
   ], rounds: [
