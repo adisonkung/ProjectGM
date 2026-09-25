@@ -11,6 +11,8 @@ export interface EnemyTemplate {
   atk: number;
   def: number;
   boss?: boolean;
+  /** แผ่น sprite ใน public/sprites (ไม่มี = โทเคน) — วาดหันขวาเหมือนฮีโร่ */
+  sprite?: string;
   /** สกิลร่าย (คีย์ใน ENEMY_SKILLS) */
   castSkills?: string[];
   /** เตรียมไว้สำหรับบอส (Break Gauge ในอนาคต) — ตอนนี้ยังไม่ใช้ */

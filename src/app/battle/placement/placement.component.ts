@@ -24,7 +24,7 @@ interface AllyCell {
 interface EnemyCell {
   row: number;
   col: number;
-  enemy?: { name: string; cls: HeroClass; boss: boolean };
+  enemy?: { name: string; cls: HeroClass; boss: boolean; sprite?: string };
 }
 
 /** ตำแหน่ง grid (เริ่มที่ 1) ของช่องในฝั่งนั้น */
@@ -118,7 +118,7 @@ export class PlacementComponent {
     );
     for (const p of this.stage()?.enemies ?? []) {
       const t = ENEMIES[p.enemy];
-      if (t) cells[p.r * LANES + p.c].enemy = { name: t.name, cls: t.cls, boss: !!t.boss };
+      if (t) cells[p.r * LANES + p.c].enemy = { name: t.name, cls: t.cls, boss: !!t.boss, sprite: t.sprite };
     }
     return cells;
   });

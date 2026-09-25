@@ -240,6 +240,19 @@ export const SHEETS: Record<string, SheetDef> = {
     fx: { skill: 'velma-s1', skill2: 'velma-s2', ult: 'velma-ult' },
     projectile: { ult: 'velma-beam' },
   },
+  // ---- ศัตรู (วาดหันขวา เกมกลับภาพเอง)
+  // สไลม์เกราะ: 6×5 (tools/sprites/slime.py) · ไม่มีแถวสกิล → สกิล/ท่าไม้ตายใช้ท่าพุ่งชน (attack)
+  'enemy-slime.png': {
+    cols: 6,
+    rows: 5,
+    anims: {
+      idle: { row: 0, frames: 4, seq: [0, 1, 2, 3] },
+      walk: { row: 1, frames: 6 },
+      hurt: { row: 2, frames: 3 },
+      die: { row: 3, frames: 6 },
+      attack: { row: 4, frames: 6, hit: 4 },
+    },
+  },
 };
 
 export const FX: Record<string, FxDef> = {

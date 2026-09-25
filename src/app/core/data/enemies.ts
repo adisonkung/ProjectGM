@@ -1,7 +1,7 @@
 import { EnemyTemplate } from '../models/stage';
 
 export const ENEMIES: Record<string, EnemyTemplate> = {
-  slime:  { id: 'slime',  name: 'สไลม์เกราะ',       cls: 'tank',    hp: 210,  atk: 15, def: 18 },
+  slime:  { id: 'slime',  name: 'สไลม์เกราะ',       cls: 'tank',    hp: 210,  atk: 15, def: 18, sprite: 'enemy-slime.png' },
   goblin: { id: 'goblin', name: 'ก็อบลิน',           cls: 'fighter', hp: 140,  atk: 24, def: 10 },
   archer: { id: 'archer', name: 'โครงกระดูกพลธนู',  cls: 'archer',  hp: 110,  atk: 22, def: 6 },
   mage:   { id: 'mage',   name: 'หมอผีมืด',          cls: 'mage',    hp: 100,  atk: 30, def: 5, castSkills: ['meteor'] },

@@ -391,6 +391,7 @@ export class BattleEngine {
       name: t.name,
       cls: t.cls,
       boss: t.boss,
+      sprite: t.sprite,
       stats: enemyStats(t, this.stage),
       pos,
     });
