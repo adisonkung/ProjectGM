@@ -1,10 +1,11 @@
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
-import { MONSTER_SKILLS } from '../../core/data/monsters';
+import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import { STAGES } from '../../core/data/stages';
 import { newGameState } from '../../core/data/starter';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { ROLE_BEHAVIOR } from '../../core/data/classes';
+import { FLOOR_BANDS } from '../../core/data/progression';
 import { EnemyPlacement, StageDef, wavesOf } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
 import { heroStats, LEVEL_GROWTH } from '../../core/rules/stats';
@@ -74,9 +75,10 @@ describe('Tactical difficulty — stats', () => {
     for (const st of STAGES) expect((st as any).monsterScale).toBeUndefined();
     const b = battle([H('aurel', 0, 1)], [mon('goblin_guard', 3, 1)], { tuning: { hp: 3, atk: 3, def: 3 } });
     const g = b.monsters('goblin_guard')[0];
-    expect(g.maxHp).toBe(Math.round(220 * MONSTER_TUNING_LIMITS.hp));
-    expect(g.atk).toBe(Math.round(33 * MONSTER_TUNING_LIMITS.atk));
-    expect(g.def).toBe(Math.round(24 * MONSTER_TUNING_LIMITS.def));
+    const st = MONSTERS['goblin_guard'].stats;
+    expect(g.maxHp).toBe(Math.round(st.maxHp * MONSTER_TUNING_LIMITS.hp));
+    expect(g.atk).toBe(Math.round(st.attack * MONSTER_TUNING_LIMITS.atk));
+    expect(g.def).toBe(Math.round(st.defense * MONSTER_TUNING_LIMITS.def));
   });
 
   it('moderate level growth: HP +3%, ATK +2.5%, DEF +2% per level (Lv10 ATK = 122.5% of Lv1)', () => {
@@ -114,8 +116,9 @@ describe('Tactical difficulty — stats', () => {
     expect(m.phaseDurations(b.e.time).length).toBeGreaterThanOrEqual(1);
   });
 
-  it('every stage has a recommended level (1 → 5)', () => {
-    expect(STAGES.map(s => s.recommendedLevel)).toEqual([1, 1, 2, 2, 3, 3, 4, 4, 5, 5]);
+  it('Patch 1 recommended levels = the top of each floor band (Floor 10 = Lv9–10 endgame)', () => {
+    expect(STAGES.map(s => s.recommendedLevel)).toEqual([1, 1, 2, 3, 4, 5, 6, 8, 9, 10]);
+    for (const st of STAGES) expect(st.recommendedLevel).toBe(FLOOR_BANDS[st.floor].levels[1]);
   });
 });
 

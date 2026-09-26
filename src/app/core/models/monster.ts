@@ -268,6 +268,8 @@ export interface BossPhase {
   seal?: { pulseEvery: number; pulseAtkPct: number; pulseName: string };
   /** cancel the current cast / idle timers on entry */
   interruptSelf?: boolean;
+  /** short phase-setup window (s, ~0.75–1.25): the boss takes no damage while the phase initialises (`phase_shift`) */
+  transition?: number;
 }
 
 export interface AnimEventMark {

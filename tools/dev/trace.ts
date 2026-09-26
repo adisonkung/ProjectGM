@@ -16,7 +16,7 @@ const level = !process.argv[4] || process.argv[4] === 'rec' ? stage.recommendedL
 const tactical = process.argv[5] === 'tactical';
 const state = newGameState();
 const heroes = state.heroes.map(h => ({ ...h, level }));
-const allies = teamToUnits(tactical ? tacticalFormation(heroes, state.team) : state.team, heroes);
+const allies = teamToUnits(tactical ? tacticalFormation(heroes, state.team, stage) : state.team, heroes);
 const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed, autoUlt: true });
 const bot = tactical ? new TacticalBot() : null;
 const name = (id?: number) => (id == null ? '-' : `${e.units.find(u => u.id === id)?.name}#${id}`);

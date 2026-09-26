@@ -1,3 +1,4 @@
+import { CombatModifiers, ResistableStatus } from '../../core/models/progression';
 import { MANA_PER_ATTACK, MANA_PER_HIT, RECEIVE_GAUGE_ICD, START_CD } from '../../core/data/classes';
 import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { ENEMY_SKILL_START_CD, ENEMY_SKILLS, EnemySkillDef } from '../../core/data/enemy-skills';
@@ -137,6 +138,8 @@ export interface BattleUnit {
   boss?: boolean;
   heroUid?: number;
   heroId?: string;
+  /** hero progression: skill ranks + equipment utility (undefined = rank 1, no gear) */
+  mods?: CombatModifiers;
   /** logical combat cell on the current encounter grid (column 0–15 × lane 0–2) */
   pos: Cell;
   /**
@@ -578,6 +581,7 @@ export class BattleEngine {
       boss: spec.boss,
       heroUid: spec.heroUid,
       heroId: spec.heroId,
+      mods: spec.mods,
       pos,
       x: (this.flow?.formation.originPosition ?? 0) + pos.c,
       y: pos.r,
@@ -1522,6 +1526,12 @@ export class BattleEngine {
       this.events.push({ type: 'immune', src: src.id, dst: dst.id, skill: def.name });
       return;
     }
+    // equipment resistances shorten harmful statuses on heroes (bleed / poison / root / corruption / stun)
+    const resist = dst.mods?.statusResist[def.id as ResistableStatus] ?? 0;
+    if (resist > 0) {
+      const base = duration ?? def.duration;
+      if (Number.isFinite(base)) duration = base * (1 - resist);
+    }
     const r = applyBuff(dst, def, src.id, { magnitude: effectiveAttack(src), duration });
     this.metrics.statusApplied[def.id] = (this.metrics.statusApplied[def.id] ?? 0) + 1;
     this.events.push({ type: 'buff', src: src.id, dst: dst.id, buff: def.id, name: def.name, refreshed: r !== 'applied' });
@@ -1578,6 +1588,7 @@ export class BattleEngine {
       }
     }
     for (const id of ph.statuses ?? []) this.applyStatus(u, id, u);
+    if (ph.transition) this.applyStatus(u, 'phase_shift', u, ph.transition);
     if (ph.cooldownScale != null) {
       s.cooldownScale = ph.cooldownScale;
       for (const cs of u.castSkills) if (cs.cd !== Infinity) cs.cd = Math.min(cs.cd, this.monsterAI.cooldownOf(u, cs.def as MonsterSkillDefinition));

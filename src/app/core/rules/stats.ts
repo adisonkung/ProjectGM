@@ -1,4 +1,5 @@
 import { CLASS_BASE, HERO_CLASS_BASE, starMultiplier } from '../data/classes';
+import { gearStatBonus, levelCap } from './progression';
 import { HeroTemplate, OwnedHero, Potential, Stats } from '../models/hero';
 import { EnemyTemplate, StageDef } from '../models/stage';
 
@@ -10,22 +11,24 @@ export const LEVEL_GROWTH = { hp: 0.03, atk: 0.025, def: 0.02 };
 /** potential nudges level growth a little (B = the table above) */
 export const POTENTIAL_GROWTH: Record<Potential, number> = { C: 0.9, B: 1, A: 1.1, S: 1.2 };
 
-export const maxLevel = (t: HeroTemplate) => 10 + t.star * 4;
+/** Patch 1: every hero caps at Lv10 (breakthrough gates at 5→6, 8→9, 9→10 — core/data/progression.ts) */
+export const maxLevel = (_t?: HeroTemplate) => levelCap();
 export const levelUpCost = (h: OwnedHero) => 30 + h.level * 25;
 
 /**
- * Hero stats = 1★ base (`HERO_CLASS_BASE`) × star multiplier (1.00 / 1.05 / 1.10 / 1.15 / 1.20) × linear level growth.
- * One multiplication chain — no other rarity / equipment / promotion bonus exists in the vertical slice.
+ * Hero stats = 1★ base (`HERO_CLASS_BASE`) × star multiplier (1.00 / 1.05 / 1.10 / 1.15 / 1.20) × linear level growth
+ * × (1 + equipped item stat fractions). Skill ranks / gear utility go to the engine as `CombatModifiers`.
  */
 export function heroStats(t: HeroTemplate, h: OwnedHero): Stats {
   const base = HERO_CLASS_BASE[t.cls];
   const starMul = starMultiplier(t.star);
   const lv = (h.level - 1) * POTENTIAL_GROWTH[h.potential];
+  const gear = gearStatBonus(h);
   return {
     ...base,
-    hp: Math.round(base.hp * starMul * (1 + lv * LEVEL_GROWTH.hp)),
-    atk: Math.round(base.atk * starMul * (1 + lv * LEVEL_GROWTH.atk)),
-    def: Math.round(base.def * starMul * (1 + lv * LEVEL_GROWTH.def)),
+    hp: Math.round(base.hp * starMul * (1 + lv * LEVEL_GROWTH.hp) * (1 + gear.hp)),
+    atk: Math.round(base.atk * starMul * (1 + lv * LEVEL_GROWTH.atk) * (1 + gear.atk)),
+    def: Math.round(base.def * starMul * (1 + lv * LEVEL_GROWTH.def) * (1 + gear.def)),
   };
 }
 

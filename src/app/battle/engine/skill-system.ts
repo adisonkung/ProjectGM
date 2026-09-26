@@ -61,17 +61,27 @@ export const rankOf = (p: InterruptPriority) => INTERRUPT_PRIORITY_RANK[p];
 export const COMMIT_WINDOW = 1.5;
 
 /** interrupt / break power a skill brings (0 = none) */
-export function interruptPowerOf(s: SkillDefinition): { interrupts: boolean; breakPower: number } {
+export function interruptPowerOf(s: SkillDefinition, u?: BattleUnit, slot?: SkillSlot): { interrupts: boolean; breakPower: number } {
   let interrupts = false;
   let breakPower = 0;
   for (const e of s.effects) {
     if ((e.type === 'DAMAGE' && e.interrupt) || e.type === 'INTERRUPT') {
       interrupts = true;
-      breakPower = Math.max(breakPower, e.breakPower ?? 0);
+      breakPower = Math.max(breakPower, breakPowerOf(e.breakPower, u, slot));
     }
   }
   return { interrupts, breakPower };
 }
+
+/** a skill's Break power incl. progression (skill rank + gear) — only Break-capable skills get the bonus */
+export function breakPowerOf(base: number | undefined, u?: BattleUnit, slot?: SkillSlot): number {
+  if (!base) return 0;
+  const bonus = u?.mods && slot && slot !== 'attack' ? u.mods.breakBonus[slot] : 0;
+  return base + bonus;
+}
+
+/** progression multiplier of a skill slot (rank power); basic attacks = 1 */
+const rankPower = (u: BattleUnit, slot: SkillSlot) => (slot !== 'attack' && u.mods ? u.mods.skillPower[slot] : 1);
 const CRIT_CHANCE = 0.1;
 /** minimum skill lock so a skill never gets clipped by the next basic attack */
 const SKILL_LOCK = 0.4;
@@ -198,7 +208,7 @@ export class SkillSystem {
   stoppableCasts(u: BattleUnit, s: SkillDefinition, inRange: (f: BattleUnit) => boolean): BattleUnit[] {
     const focus = this.h.focus(u);
     const min = rankOf(u.interruptMinPriority ?? 'LOW');
-    const { breakPower } = interruptPowerOf(s);
+    const { breakPower } = interruptPowerOf(s, u, this.slotOf(u, s));
     return this.h.foes(u)
       .filter(f => {
         const c = f.casting;
@@ -212,8 +222,14 @@ export class SkillSystem {
   }
 
   /** register an interrupt / break commitment on every stoppable cast this use will hit */
+  /** which kit slot a skill definition belongs to (for progression modifiers) */
+  slotOf(u: BattleUnit, s: SkillDefinition): SkillSlot | undefined {
+    const kit = this.kit(u);
+    return (['skill', 'skill2', 'ult'] as const).find(k => kit[k].id === s.id);
+  }
+
   private commit(u: BattleUnit, s: SkillDefinition, target: BattleUnit): void {
-    const { interrupts, breakPower } = interruptPowerOf(s);
+    const { interrupts, breakPower } = interruptPowerOf(s, u, this.slotOf(u, s));
     if (!interrupts) return;
     const foes = this.h.foes(u);
     const hit = new Set<BattleUnit>();
@@ -419,8 +435,9 @@ export class SkillSystem {
   use(u: BattleUnit, slot: SkillSlot, s: SkillDefinition, target: BattleUnit): void {
     this.commit(u, s, target);
     this.h.onSkillUse?.(u, slot, s, target);
-    if (slot === 'skill') u.cd1 = s.cooldown ?? 0;
-    else if (slot === 'skill2') u.cd2 = s.cooldown ?? 0;
+    // skill rank + gear cooldown reduction
+    if (slot === 'skill') u.cd1 = (s.cooldown ?? 0) * (u.mods?.cooldown.skill ?? 1);
+    else if (slot === 'skill2') u.cd2 = (s.cooldown ?? 0) * (u.mods?.cooldown.skill2 ?? 1);
     const kind = slot as 'attack' | SkillKind;
     const tm = animTiming(u.sprite, kind);
     if (slot === 'attack') {
@@ -493,9 +510,10 @@ export class SkillSystem {
           const targets = e.area === 'ALL_ENEMIES' ? foes : resolveArea({ pattern: e.area, caster: u, primary: p, center: e.center, candidates: foes });
           hits = [];
           for (const f of targets) {
-            if (e.interrupt && f.casting) this.h.interrupt(u, f, e.breakPower);
+            if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
             let mul = f === primary ? e.primary : (e.secondary ?? (e.area === 'SINGLE' ? 0 : e.primary));
             if (mul <= 0) continue;
+            mul *= rankPower(u, slot);
             if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
             const crit = !!e.guaranteedCrit || this.h.rng() < CRIT_CHANCE;
             if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot })) hits.push(f);
@@ -508,7 +526,8 @@ export class SkillSystem {
           const targets =
             e.area === 'PRIMARY' ? (primary.alive && primary.side === u.side ? [primary] : [])
               : resolveArea({ pattern: e.area, caster: u, primary: u, center: e.center ?? 'SELF', candidates: allies });
-          for (const a of targets) this.h.heal(a, effectiveAttack(u) * e.atk + a.maxHp * (e.maxHpPct ?? 0), u);
+          const boost = rankPower(u, slot) * (u.mods?.healing ?? 1);
+          for (const a of targets) this.h.heal(a, (effectiveAttack(u) * e.atk + a.maxHp * (e.maxHpPct ?? 0)) * boost, u);
           if (slot === 'attack' && targets.length) this.h.basicGauge(u);
           break;
         }
@@ -528,7 +547,7 @@ export class SkillSystem {
         case 'INTERRUPT': {
           const foes = this.h.foes(u);
           for (const f of resolveArea({ pattern: e.area, caster: u, primary: focusOf(primary), center: e.center, candidates: foes })) {
-            if (f.casting) this.h.interrupt(u, f, e.breakPower);
+            if (f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
           }
           break;
         }
@@ -537,7 +556,7 @@ export class SkillSystem {
           break;
         case 'SHIELD':
           for (const a of this.h.allies(u)) {
-            this.h.shield(u, a, Math.round(u.maxHp * (a === u ? e.selfPct : e.allyPct)), e.duration);
+            this.h.shield(u, a, Math.round(u.maxHp * (a === u ? e.selfPct : e.allyPct) * rankPower(u, slot) * (u.mods?.healing ?? 1)), e.duration);
           }
           break;
         case 'REVIVE': {

@@ -1,3 +1,4 @@
+import { CombatModifiers } from './progression';
 import { HeroClass, Stats } from './hero';
 
 export type Side = 'ally' | 'enemy';
@@ -22,4 +23,6 @@ export interface UnitSpec {
   heroUid?: number;
   /** id ต้นแบบฮีโร่ (ใช้หาภาพโปรไฟล์/ไอคอนสกิล) */
   heroId?: string;
+  /** progression modifiers (skill ranks, equipment utility) — missing = rank 1, no gear */
+  mods?: CombatModifiers;
 }

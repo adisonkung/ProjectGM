@@ -13,6 +13,9 @@ import { EnemyPlacement, StageDef, wavesOf } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
 import { heroStats } from '../../core/rules/stats';
 import { teamToUnits } from '../../core/rules/team';
+import { applyProfile } from '../../core/rules/progression';
+import { POWER_PROFILES } from '../../core/data/progression';
+import { TacticalBot, tacticalFormation } from './bots/tactical-bot';
 import { BattleEngine, BattleEvent, BattleUnit } from './battle-engine';
 import { applyBuff, buffRemaining, hasFlag, hasStatus, modifier } from './buffs';
 import { DamageResolver } from './damage-resolver';
@@ -95,9 +98,14 @@ describe('Stage 4–10 data', () => {
     for (const id of ids) expect(MONSTERS[id]).withContext(id).toBeDefined();
     expect(Object.keys(STAGE4_10_MONSTERS).length).toBe(13);
     const s = (id: string) => MONSTERS[id].stats;
-    expect([s('magic_mushroom').maxHp, s('magic_mushroom').attack, s('magic_mushroom').defense]).toEqual([135, 30, 8]);
-    expect([s('fallen_forest_guardian').maxHp, s('fallen_forest_guardian').attack, s('fallen_forest_guardian').defense]).toEqual([4200, 62, 42]);
-    expect([s('elder_treant').maxHp, s('elder_treant').attack]).toEqual([1800, 48]);
+    // Patch 1 re-authored stats (tower progression content; the spec's first values were for a Lv1–5 slice)
+    expect([s('magic_mushroom').maxHp, s('magic_mushroom').attack, s('magic_mushroom').defense]).toEqual([220, 48, 12]);
+    expect([s('fallen_forest_guardian').maxHp, s('fallen_forest_guardian').attack, s('fallen_forest_guardian').defense]).toEqual([12000, 125, 60]);
+    expect([s('elder_treant').maxHp, s('elder_treant').attack]).toEqual([7000, 145]);
+    // roles stay readable: the body blocker is the tankiest common, the Wraith fragile but hard-hitting
+    expect(s('corrupted_treant').maxHp).toBeGreaterThan(s('corrupted_wolf').maxHp * 2);
+    expect(s('mist_wraith').maxHp).toBeLessThan(s('corrupted_wolf').maxHp);
+    expect(s('mist_wraith').attack).toBeGreaterThan(s('corrupted_wolf').attack);
     expect(s('forest_spirit').defenseIgnore).toBe(0.2);
     expect(s('corrupted_treant').bodyBlock).toBeTrue();
     expect(MONSTERS['elder_treant'].rank).toBe('BOSS');
@@ -142,13 +150,8 @@ describe('Stage 4–10 data', () => {
     expect(wavesOf(STAGES[9])[2].spawns.map(s => s.monsterId)).toEqual(['fallen_forest_guardian']);
   });
 
-  it('extra 5 — Stages 1–10 are playable back to back (a strong team clears every stage)', () => {
-    const state = newGameState();
-    const allies = teamToUnits(state.team, state.heroes.map(h => ({ ...h, level: 20 })));
-    for (const stage of STAGES) {
-      const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: 3, autoUlt: true });
-      expect(e.run(0.05, 400)).withContext(`F${stage.floor}`).toBe('win');
-    }
+  it('extra 5 — Stages 1–10 are playable back to back (a near-max Patch 1 team with tactics clears every stage)', () => {
+    for (const stage of STAGES) expect(clearsWithTactics(stage, 'F', 10)).withContext(`F${stage.floor}`).toBeTrue();
   });
 });
 
@@ -619,6 +622,24 @@ describe('Stage 4–10 bosses', () => {
 
 // ------------------------------------------------------------------ the spec's REQUIRED TESTS (1–38)
 
+/** a developed team (power profile) played by the TACTICAL bot clears `stage` in at least one of `seeds` tries */
+function clearsWithTactics(stage: StageDef, profile: string, level: number, seeds = 4): boolean {
+  const state = newGameState();
+  const heroes = state.heroes.map(h => applyProfile(h, POWER_PROFILES[profile], level));
+  const allies = teamToUnits(tacticalFormation(heroes, state.team, stage), heroes);
+  for (let seed = 1; seed <= seeds; seed++) {
+    const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed, autoUlt: true });
+    const bot = new TacticalBot();
+    while (!e.result && e.time < 400) {
+      bot.tick(e);
+      e.step(0.05);
+      e.drainEvents();
+    }
+    if (e.result === 'win') return true;
+  }
+  return false;
+}
+
 const stageOfWave = (floor: number, wave: number): { enemies: EnemyPlacement[]; tuning?: StageDef["monsterTuning"]; level: number } => {
   const st = STAGES[floor - 1];
   const w = wavesOf(st)[wave];
@@ -861,14 +882,9 @@ describe('Stage 4–10 required tests', () => {
 
   it('20. Stage 9 Wave 3 remains technically beatable', () => {
     const w3 = stageOfWave(9, 2);
-    const state = newGameState();
-    const allies = teamToUnits(state.team, state.heroes.map(h => ({ ...h, level: 10 })));
-    let wins = 0;
-    for (let seed = 1; seed <= 5; seed++) {
-      const stage: StageDef = { floor: 9, mode: 'eliminate', timeLimit: 140, monsterTuning: w3.tuning, enemies: w3.enemies };
-      if (new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed, autoUlt: true }).run(0.05, 200) === 'win') wins++;
-    }
-    expect(wins).toBeGreaterThan(0);
+    // with the floor's expected development (profile D, Lv9)
+    const stage: StageDef = { floor: 9, mode: 'eliminate', timeLimit: 140, monsterTuning: w3.tuning, enemies: w3.enemies };
+    expect(clearsWithTactics(stage, 'D', 9)).toBeTrue();
   });
 
   it('21. Final Boss Phase 2 triggers exactly once', () => {
@@ -1104,8 +1120,6 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('38. Stage 1 through Stage 10 can be played continuously without final art assets', () => {
-    const state = newGameState();
-    const allies = teamToUnits(state.team, state.heroes.map(h => ({ ...h, level: 20 })));
     for (const stage of STAGES) {
       for (const w of wavesOf(stage)) {
         for (const sp of w.spawns) {
@@ -1114,8 +1128,7 @@ describe('Stage 4–10 required tests', () => {
           expect(VISUALS[m.visual!]?.kind).withContext(sp.monsterId).toBe('mock');
         }
       }
-      const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: 5, autoUlt: true });
-      expect(e.run(0.05, 400)).withContext(`F${stage.floor}`).toBe('win');
+      expect(clearsWithTactics(stage, 'F', 10)).withContext(`F${stage.floor}`).toBeTrue();
     }
   });
 });

@@ -1,7 +1,7 @@
 /**
  * Balance sweep: AUTO bot vs TACTICAL bot (tools/dev/policy.ts), heroes at the stage's recommended level (or a fixed one).
  * Mechanic exposure first (did the boss / casters get time to act?), then win rate, decision metrics and power snapshots.
- * npm run balance -- [runs] [level|rec] [floor|-] [--metrics] [--exposure] [--power] [--star=N] [--tune=hp,atk,def]
+ * npm run balance -- [runs] [level|rec] [floor|-] [--profile=A–F (default: the floor's band profile)] [--metrics] [--exposure] [--power] [--star=N] [--tune=hp,atk,def]
  *   --metrics   decision metrics (interrupts, focus, positioning, break)
  *   --exposure  per-skill casts (started / completed / interrupted / broken) + boss lifetime / phases / statuses
  *   --power     hero + monster power snapshots (final stats, DPS, HPS, ult uses; authored vs tuned monster stats)
@@ -17,6 +17,8 @@ import { heroStats } from '../../src/app/core/rules/stats';
 import { HERO_BY_ID } from '../../src/app/core/data/heroes';
 import { wavesOf } from '../../src/app/core/models/stage';
 import { BotName, TacticalBot, tacticalFormation } from './policy';
+import { FLOOR_BANDS, POWER_PROFILES } from '../../src/app/core/data/progression';
+import { applyProfile } from '../../src/app/core/rules/progression';
 
 declare const process: { argv: string[] };
 const args = process.argv.slice(2);
@@ -29,6 +31,19 @@ const starArg = args.find(a => a.startsWith('--star='));
 const star = starArg ? Number(starArg.slice(7)) : null;
 const tuneArg = args.find(a => a.startsWith('--tune='));
 const tune = tuneArg ? tuneArg.slice(7).split(',').map(Number) : null;
+const profileArg = args.find(a => a.startsWith('--profile='))?.slice(10);
+// what-if authored monster stats (tool only): --mon=id:hp=300,atk=60,def=20;id2:hp=...
+const monArg = args.find(a => a.startsWith('--mon='))?.slice(6);
+for (const part of monArg ? monArg.split(';') : []) {
+  const [id, kv] = part.split(':');
+  const st = MONSTERS[id]?.stats as unknown as Record<string, number>;
+  if (!st) throw new Error(`unknown monster ${id}`);
+  const key: Record<string, string> = { hp: 'maxHp', atk: 'attack', def: 'defense' };
+  for (const x of kv.split(',')) {
+    const [k, v] = x.split('=');
+    st[key[k] ?? k] = Number(v);
+  }
+}
 const state = newGameState();
 
 const pct = (n: number) => `${String(Math.round(n * 100)).padStart(3)}%`;
@@ -57,15 +72,21 @@ const summary: string[] = [];
 
 for (let stage of floors) {
   if (tune) stage = { ...stage, monsterTuning: { hp: tune[0], atk: tune[1], def: tune[2] } };
-  const level = levelArg === 'rec' ? stage.recommendedLevel ?? 1 : Number(levelArg);
-  const heroes = state.heroes.map(h => ({ ...h, level }));
+  // power profile: --profile=X (A–F) or the floor's recommended profile; level = the profile's level clamped to the
+  // floor band ('rec') or the given number
+  const band = FLOOR_BANDS[stage.floor];
+  const profile = POWER_PROFILES[profileArg ?? band?.simProfile ?? 'A'];
+  const level = levelArg === 'rec'
+    ? (profileArg ? profile.level : band?.simLevel ?? Math.min(band?.levels[1] ?? profile.level, Math.max(band?.levels[0] ?? 1, profile.level)))
+    : Number(levelArg);
+  const heroes = state.heroes.map(h => applyProfile(h, profile, level));
   const aggs: Record<BotName, Agg> = { AUTO: newAgg(), TACTICAL: newAgg() };
   let heroSnapshot: string[] = [];
   const phaseIds: string[] = [];
 
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
     const a = aggs[bot];
-    const team = bot === 'TACTICAL' && !flag('--noform') ? tacticalFormation(heroes, state.team) : state.team;
+    const team = bot === 'TACTICAL' && !flag('--noform') ? tacticalFormation(heroes, state.team, stage) : state.team;
     const allies = teamToUnits(team, heroes).map(u => {
       if (star == null) return u;
       const h = heroes.find(x => x.uid === u.heroUid)!;
@@ -141,14 +162,14 @@ for (let stage of floors) {
 
   const n = runs;
   const [A, T] = [aggs.AUTO, aggs.TACTICAL];
-  console.log(`\n=== F${stage.floor} ${stage.name} · ${star ?? 5}★ Lv${level} · tuning ${JSON.stringify(stage.monsterTuning ?? {})} ===`);
+  console.log(`\n=== F${stage.floor} ${stage.name} · profile ${profile.id} (${profile.label}: gear ${typeof profile.gear === 'object' && profile.gear ? JSON.stringify(profile.gear) : profile.gear ?? '-'}, ranks ${profile.ranks.skill}/${profile.ranks.skill2}/${profile.ranks.ult}) · ${star ?? 5}★ Lv${level} · band Lv${band?.levels.join('–')} ${band?.role ?? ''} · tuning ${JSON.stringify(stage.monsterTuning ?? {})} ===`);
   const review = monsterTuningReview(stage);
   if (review.length) console.log(`  ⚠ MECHANIC / COMPOSITION / HERO POWER REVIEW REQUIRED: ${review.join(', ')} (engine clamps to the limits)`);
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
     const a = aggs[bot];
     console.log(`  ${bot.padEnd(8)} win ${pct(a.wins / n)} · time ${f1(a.time / n, 0)}s · deaths ${f1(a.deaths / n, 2)}/run · runs with a death ${pct(a.deathRuns / n)} · with a revive ${pct(a.reviveRuns / n)} · wipes ${pct(a.wipes / n)} · timeouts ${pct(a.timeouts / n)} · waves ${f1(a.wave / n)}`);
   }
-  summary.push(`F${String(stage.floor).padEnd(2)} Lv${level} | AUTO ${pct(A.wins / n)} (deaths ${f1(A.deaths / n)}) | TACTICAL ${pct(T.wins / n)} (deaths ${f1(T.deaths / n)})` +
+  summary.push(`F${String(stage.floor).padEnd(2)} ${profile.id} Lv${String(level).padEnd(2)} | AUTO ${pct(A.wins / n)} (deaths ${f1(A.deaths / n)}) | TACTICAL ${pct(T.wins / n)} (deaths ${f1(T.deaths / n)})` +
     (A.bossRuns + T.bossRuns ? ` | boss life ${f1(A.bossRuns ? A.bossLife / A.bossRuns : 0, 0)}s / ${f1(T.bossRuns ? T.bossLife / T.bossRuns : 0, 0)}s` : ''));
 
   if (flag('--exposure')) {

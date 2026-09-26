@@ -1,7 +1,8 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { HERO_BY_ID } from '../data/heroes';
 import { OwnedHero } from '../models/hero';
-import { heroStats, levelUpCost, maxLevel, power } from '../rules/stats';
+import { heroStats, levelUpCost, power } from '../rules/stats';
+import { canLevelUp, needsBreakthrough } from '../rules/progression';
 import { SaveService } from './save.service';
 
 @Injectable({ providedIn: 'root' })
@@ -25,7 +26,8 @@ export class RosterService {
   levelUp(uid: number): boolean {
     const s = this.save.state();
     const h = s.heroes.find(x => x.uid === uid);
-    if (!h || h.level >= maxLevel(this.template(h))) return false;
+    // Patch 1 cap Lv10; breakthrough gates at 5 → 6, 8 → 9, 9 → 10
+    if (!h || !canLevelUp(h)) return false;
     const cost = levelUpCost(h);
     if (s.gold < cost) return false;
     this.save.update(st => ({
@@ -33,6 +35,17 @@ export class RosterService {
       gold: st.gold - cost,
       heroes: st.heroes.map(x => (x.uid === uid ? { ...x, level: x.level + 1 } : x)),
     }));
+    return true;
+  }
+
+  /**
+   * Break through the gate the hero stands at (Lv5 / Lv8 / Lv9). Material / EXP costs arrive with the
+   * Hero Level / EXP / Breakthrough task — until then the step is free but still explicit.
+   */
+  breakthrough(uid: number): boolean {
+    const h = this.save.state().heroes.find(x => x.uid === uid);
+    if (!h || !needsBreakthrough(h)) return false;
+    this.save.update(st => ({ ...st, heroes: st.heroes.map(x => (x.uid === uid ? { ...x, breakthrough: x.level } : x)) }));
     return true;
   }
 

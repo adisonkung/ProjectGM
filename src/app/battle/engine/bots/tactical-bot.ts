@@ -1,3 +1,5 @@
+import { StageDef, wavesOf } from '../../../core/models/stage';
+import { distance } from '../grid';
 import type { BattleEngine, BattleUnit } from '../battle-engine';
 import { MONSTER_SKILLS, MONSTERS } from '../../../core/data/monsters';
 import { MonsterSkillDefinition } from '../../../core/models/monster';
@@ -18,7 +20,10 @@ import { kitOf } from '../../../core/data/hero-skills';
 export type BotName = 'AUTO' | 'TACTICAL';
 
 /** TACTICAL formation: a full frontline (tank centre) + the backline split to the outer lanes, out of one 3×3 AoE */
-export function tacticalFormation(heroes: OwnedHero[], team: TeamSlot[]): TeamSlot[] {
+export function tacticalFormation(heroes: OwnedHero[], team: TeamSlot[], stage?: StageDef): TeamSlot[] {
+  // against Shadow Panthers (leap onto the back row) a spread backline is picked off alone: keep the default
+  // compact formation (backline behind the tank) instead
+  if (stage && wavesOf(stage).some(w => w.spawns.some(sp => COMPACT_AGAINST.has(sp.monsterId)))) return team;
   const spots: Record<string, [number, number][]> = {
     tank: [[0, 1]], fighter: [[0, 0], [0, 2]], assassin: [[0, 2], [0, 0]], archer: [[3, 2], [3, 0]], mage: [[3, 0], [3, 2]], healer: [[3, 0], [3, 2]],
   };
@@ -34,6 +39,9 @@ export function tacticalFormation(heroes: OwnedHero[], team: TeamSlot[]): TeamSl
 }
 
 /** Focus priorities of the TACTICAL bot (the hero AI only engages them when it is safe) */
+/** enemies that punish a spread backline (measured: Mist Wraiths don't — the spread formation still wins F8) */
+const COMPACT_AGAINST = new Set(['shadow_panther']);
+
 const FOCUS: Record<string, number> = {
   dark_shaman_ritual: 0,
   goblin_shaman: 1,
@@ -41,7 +49,6 @@ const FOCUS: Record<string, number> = {
   mist_witch: 2,
   mist_wraith: 3,
   magic_mushroom: 4,
-  shadow_panther: 5,
 };
 
 const maxCastPriority = (u: BattleUnit): number =>
@@ -151,9 +158,13 @@ export class TacticalBot {
     }
     if (this.opt.interruptPriority !== false) for (const h of heroes) if (h.interruptMinPriority !== RANKS[min]) e.setInterruptMinPriority(h.id, RANKS[min]);
 
-    // soft Focus on the most dangerous support / caster / phase add (the AI only goes for it when it is safe)
+    // soft Focus on the most dangerous support / caster / phase add — only once the backline can already shoot it
+    // from where it stands (no repositioning into the enemy line for it) — Mist Wraiths always (they come to us);
+    // Shadow Panthers are left to the normal AI (measured: focusing them pulls the team apart)
+    const back = heroes.filter(h => h.range >= 3);
     const pick = foes
       .filter(f => f.monster && FOCUS[f.monster.definitionId] != null)
+      .filter(f => f.monster!.definitionId === 'mist_wraith' || back.some(b => distance(b.pos, f.pos) <= b.range))
       .sort((a, b) => FOCUS[a.monster!.definitionId] - FOCUS[b.monster!.definitionId] || a.hp - b.hp)[0];
     if (this.opt.focus !== false && pick && pick.id !== e.focusTargetId) e.setFocus(pick.id);
   }

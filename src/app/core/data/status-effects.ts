@@ -92,6 +92,11 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     modifiers: { attackSpeedMultiplier: 1.2 },
   },
   /** Elder Treant: while any Call-of-the-Forest add lives (removed by the engine when the last one dies) */
+  /** boss phase setup (~1 s): thresholds can't be burst through before the phase mechanics start */
+  phase_shift: {
+    id: 'phase_shift', name: 'เปลี่ยนเฟส', duration: 1, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0 },
+  },
   ancient_protection: {
     id: 'ancient_protection', name: 'พรพงไพรโบราณ', duration: Infinity, stackPolicy: 'NONE', buff: true,
     modifiers: { damageTakenMultiplier: 0.8 },

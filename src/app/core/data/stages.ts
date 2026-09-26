@@ -42,7 +42,7 @@ export const STAGES: StageDef[] = [
   // Every stage adds ONE new problem; boss waves hold only the boss (its adds come from its own skills / phases).
 
   // Stage 4 — Enchanted Grove: poison + magic AoE (mushrooms midline, spirits backline) — punishes a tightly stacked party
-  { floor: 4, recommendedLevel: 2, name: 'Enchanted Grove', background: 'twilight-1', mode: 'eliminate', timeLimit: 110, enemies: [
+  { floor: 4, recommendedLevel: 3, name: 'Enchanted Grove', background: 'twilight-1', mode: 'eliminate', timeLimit: 110, enemies: [
     { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
     { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 },
   ], rounds: [
@@ -52,7 +52,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
   ] },
   // Stage 5 — Twilight Hunters: backline dive + formation (Shadow Panthers leap onto healers / mages / archers)
-  { floor: 5, recommendedLevel: 3, name: 'Twilight Hunters', background: 'twilight-1', mode: 'eliminate', timeLimit: 110, enemies: [
+  { floor: 5, recommendedLevel: 4, monsterTuning: { hp: 1.2, atk: 1.1, def: 1.1 }, name: 'Twilight Hunters', background: 'twilight-1', mode: 'eliminate', timeLimit: 110, enemies: [
     { enemy: 'shadow_panther', r: 0, c: 1 },
     { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 },
   ], rounds: [
@@ -63,7 +63,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
   ] },
   // Stage 6 — Corrupted Tribe: enemy healing + priority target (Goblin Guards shield the Shaman; Focus / Interrupt it)
-  { floor: 6, recommendedLevel: 3, name: 'Corrupted Tribe', background: 'twilight-1', mode: 'eliminate', timeLimit: 120, enemies: [
+  { floor: 6, recommendedLevel: 5, monsterTuning: { hp: 1.15, atk: 1.08, def: 1.05 }, name: 'Corrupted Tribe', background: 'twilight-1', mode: 'eliminate', timeLimit: 120, enemies: [
     { enemy: 'goblin_guard', r: 0, c: 0 }, { enemy: 'goblin_guard', r: 0, c: 2 }, { enemy: 'goblin_shaman', r: 4, c: 1 },
     { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 },
   ], rounds: [
@@ -75,7 +75,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
   ] },
   // Stage 7 — Guardian of Twilight: first boss (Root Slam: survive · Entangling Roots: situational · Call of the Forest: interrupt)
-  { floor: 7, recommendedLevel: 4, name: 'Guardian of Twilight', background: 'twilight-1', mode: 'eliminate', timeLimit: 150, enemies: [
+  { floor: 7, recommendedLevel: 6, monsterTuning: { hp: 1.1, atk: 1.05, def: 1.05 }, name: 'Guardian of Twilight', background: 'twilight-1', mode: 'eliminate', timeLimit: 150, enemies: [
     { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
     { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 },
   ], rounds: [
@@ -85,7 +85,7 @@ export const STAGES: StageDef[] = [
     [{ enemy: 'elder_treant', r: 1, c: 1 }],
   ] },
   // Stage 8 — Into the Mist: untargetable hunters, body blocking, bleed attrition
-  { floor: 8, recommendedLevel: 4, name: 'Into the Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 120, enemies: [
+  { floor: 8, recommendedLevel: 8, name: 'Into the Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 120, enemies: [
     { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     { enemy: 'corrupted_wolf', r: 1, c: 1 },
   ], rounds: [
@@ -96,7 +96,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }],
   ] },
   // Stage 9 — Death Mist: target-priority puzzle (Treant blocks · Shaman heals / links · Witch controls · Wolves press · Wraith hunts)
-  { floor: 9, recommendedLevel: 5, name: 'Death Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 140, enemies: [
+  { floor: 9, recommendedLevel: 9, monsterTuning: { hp: 1.4, atk: 1.25, def: 1.3 }, name: 'Death Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 140, enemies: [
     { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'dark_shaman', r: 4, c: 1 },
   ], rounds: [
@@ -106,7 +106,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'mist_wraith', r: 2, c: 1 }, { enemy: 'dark_shaman', r: 4, c: 0 }, { enemy: 'mist_witch', r: 4, c: 2 }],
   ] },
   // Stage 10 — Heart of the Dark Forest: the full system exam (seal + wraiths 70%, Sacrifice 40%, enrage + Forest Oblivion 15%)
-  { floor: 10, recommendedLevel: 5, name: 'Heart of the Dark Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 210, enemies: [
+  { floor: 10, recommendedLevel: 10, monsterTuning: { hp: 1.35, atk: 1.22, def: 1.1 }, name: 'Heart of the Dark Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 210, enemies: [
     { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 },
   ], rounds: [

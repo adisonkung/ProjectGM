@@ -21,6 +21,12 @@ export interface OwnedHero {
   potential: Potential;
   /** จำนวนรอบที่ต้องพักเพราะบาดเจ็บ (0 = พร้อมรบ) */
   injury: number;
+  /** highest breakthrough gate passed (e.g. 5 = may level 5 → 6); undefined = none */
+  breakthrough?: number;
+  /** skill ranks 1–5 per slot (missing = 1) */
+  skillRanks?: Partial<Record<'skill' | 'skill2' | 'ult', number>>;
+  /** equipped item definition ids per slot (core/data/progression.ts EQUIPMENT) */
+  equipment?: Partial<Record<'WEAPON' | 'ARMOR' | 'ACCESSORY', string>>;
 }
 
 /** ค่าพลังที่ใช้ในการต่อสู้ */
