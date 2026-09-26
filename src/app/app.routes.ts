@@ -6,13 +6,14 @@ import { ForgeComponent } from './pages/forge/forge.component';
 import { GachaComponent } from './pages/gacha/gacha.component';
 import { HeroDetailComponent } from './pages/hero-detail/hero-detail.component';
 import { HeroesComponent } from './pages/heroes/heroes.component';
-import { HomeComponent } from './pages/home/home.component';
+import { IslandComponent } from './pages/island/island.component';
 import { TeamBuilderComponent } from './pages/team-builder/team-builder.component';
 import { TowerComponent } from './pages/tower/tower.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
-  { path: 'home', component: HomeComponent, title: 'Summon Tower' },
+  { path: 'home', component: IslandComponent, title: 'เกาะของฉัน · Summon Tower' },
+  { path: 'island', redirectTo: 'home' },
   { path: 'heroes', component: HeroesComponent, title: 'หอวีรชน · Summon Tower' },
   { path: 'heroes/:uid', component: HeroDetailComponent, title: 'ฮีโร่ · Summon Tower' },
   { path: 'lobby', redirectTo: 'heroes' },

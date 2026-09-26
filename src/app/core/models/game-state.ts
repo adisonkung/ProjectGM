@@ -1,6 +1,7 @@
 import { DailyState } from './economy';
 import { EquipmentInstance, HuntTarget } from './equipment';
 import { OwnedHero } from './hero';
+import { PlayerIsland } from './island';
 
 /** ตำแหน่งฮีโร่ในทีม: พิกัดในฝั่งเรา (r = ความลึก 0-4, 0 = หน้าสุด; c = เลน 0-6) */
 export interface TeamSlot {
@@ -50,4 +51,6 @@ export interface GameState {
   huntTarget: HuntTarget;
   /** saved team setups (fixed count, see TEAM_PRESET_COUNT) — optional in the type so v6 saves load; migrate fills it */
   teamPresets?: TeamPreset[];
+  /** Home Island (theme, main hero, building snapshot, pending events) — optional in the type; migrate / new game fill it */
+  island?: PlayerIsland;
 }

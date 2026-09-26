@@ -24,6 +24,11 @@
           @if (inTeam()) { <span class="gm-chip gold"><app-icon name="team" [size]="12" /> อยู่ในทีม</span> }
           <span class="gm-chip">ศักยภาพ {{ h.potential }}</span>
           <span class="gm-chip">Breakthrough {{ h.breakthroughTier ?? 0 }}/3</span>
+          @if (isMain()) {
+            <span class="gm-chip arcane"><app-icon name="crown" [size]="12" /> ฮีโร่หลักบนเกาะ</span>
+          } @else {
+            <button type="button" class="gm-btn small arcane" (click)="setMain()"><app-icon name="crown" [size]="12" /> ตั้งเป็นฮีโร่หลัก</button>
+          }
         </div>
       </div>
       <div class="level">

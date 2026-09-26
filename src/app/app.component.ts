@@ -12,7 +12,7 @@ import { IconComponent } from './shared/icon.component';
 export class AppComponent {
   readonly save = inject(SaveService);
   readonly nav = [
-    { path: '/home', label: 'หน้าหลัก', icon: 'home' },
+    { path: '/home', label: 'เกาะ', icon: 'home' },
     { path: '/heroes', label: 'ฮีโร่', icon: 'heroes' },
     { path: '/armory', label: 'อุปกรณ์', icon: 'armory' },
     { path: '/forge', label: 'ตีเหล็ก', icon: 'flame' },

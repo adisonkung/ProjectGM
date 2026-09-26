@@ -1,6 +1,7 @@
 import { GameState } from '../models/game-state';
 import { OwnedHero } from '../models/hero';
 import { autoPlace, defaultPresets } from '../rules/team';
+import { newIsland } from '../rules/island';
 
 /** ทีมเริ่มต้น (ลงสนาม) และฮีโร่ที่มีให้ตั้งแต่เริ่มแต่อยู่ม้านั่ง */
 export const STARTER_TEAM = ['aurel', 'jin', 'shade', 'sylvie', 'lumina'];
@@ -27,6 +28,7 @@ export function newGameState(): GameState {
     exp: 0,
     breakthroughTier: 0,
   }));
+  const team = autoPlace(heroes);
   return {
     version: 6,
     gems: 1500,
@@ -34,7 +36,7 @@ export function newGameState(): GameState {
     pity: 0,
     nextUid: heroes.length + 1,
     heroes,
-    team: autoPlace(heroes),
+    team,
     cleared: 0,
     inventory: {},
     daily: { day: '', used: {} },
@@ -45,5 +47,6 @@ export function newGameState(): GameState {
     nextItemId: 1,
     huntTarget: 'ANY',
     teamPresets: defaultPresets(),
+    island: newIsland(0, heroes, team),
   };
 }

@@ -31,6 +31,7 @@ export class HeroesComponent {
     const s = this.save.state();
     const team = new Set(s.team.map(t => t.uid));
     const slots = new Set(s.trainingSlots);
+    const main = s.island?.mainIslandHeroId ?? null;
     const hasPotion = ['exp_potion_s', 'exp_potion_m', 'exp_potion_l'].some(id => (s.inventory[id] ?? 0) > 0);
     return s.heroes.map(h => {
       const t = this.roster.template(h);
@@ -39,7 +40,7 @@ export class HeroesComponent {
       return {
         uid: h.uid, id: t.id, name: t.name, cls: t.cls, star: t.star, level: h.level, cap: p.levelCap,
         power: this.roster.power(h),
-        inTeam: team.has(h.uid), training: slots.has(h.uid),
+        inTeam: team.has(h.uid), training: slots.has(h.uid), isMain: h.uid === main,
         btReady: p.state === 'BREAKTHROUGH_READY', skillReady,
         canLevel: hasPotion && p.state !== 'MAX' && p.state !== 'BREAKTHROUGH_READY',
         expPct: p.state === 'MAX' ? 100 : Math.min(100, (p.exp / p.expToNext) * 100),

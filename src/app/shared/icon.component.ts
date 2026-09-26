@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 /** stroke paths (24×24 viewBox) for the game's UI glyphs — drawn in currentColor */
-const PATHS: Record<string, string> = {
+export const ICON_PATHS: Record<string, string> = {
   home: 'M3 21h18 M5 21V10l3-2 3 2v11 M13 21V6l3-3 3 3v15 M8 13v2 M16 9v2 M16 14v2',
   heroes: 'M12 3l2.2 3.2L18 5l-1 4 3 2.5-3.5 1L15 17H9l-1.5-4.5L4 11.5 7 9 6 5l3.8 1.2z M9 21h6',
   armory: 'M4 4l9 9 M20 4l-9 9 M7 17l-3 3 M17 17l3 3 M6 14l4 4 M18 14l-4 4',
@@ -42,5 +42,5 @@ export class IconComponent {
   readonly name = input.required<string>();
   readonly size = input<number | null>(null);
   readonly stroke = input(1.7);
-  readonly d = computed(() => PATHS[this.name()] ?? PATHS['star']);
+  readonly d = computed(() => ICON_PATHS[this.name()] ?? ICON_PATHS["star"]);
 }

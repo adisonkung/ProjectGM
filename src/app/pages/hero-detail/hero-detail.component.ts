@@ -15,6 +15,7 @@ import { heroGearTotals, itemLines, itemName } from '../../core/rules/equipment'
 import { heroStats } from '../../core/rules/stats';
 import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
+import { IslandService } from '../../core/services/island.service';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
 
@@ -37,6 +38,9 @@ export class HeroDetailComponent {
   private readonly save = inject(SaveService);
   private readonly router = inject(Router);
   readonly roster = inject(RosterService);
+  private readonly isl = inject(IslandService);
+  /** Main Island Hero = identity / cosmetic only (no stats, not the party leader) */
+  readonly isMain = computed(() => this.isl.mainHeroUid() === this.uid());
 
   readonly uid = toSignal(inject(ActivatedRoute).paramMap.pipe(map(p => Number(p.get('uid')))), { initialValue: 0 });
   readonly hero = computed(() => this.save.state().heroes.find(h => h.uid === this.uid()) ?? null);
@@ -141,5 +145,6 @@ export class HeroDetailComponent {
     this.say(err ? UPGRADE_ERROR[err] : 'อัปสกิลสำเร็จ!', !err);
   }
   convert(from: string) { if (this.roster.convertTomes(from)) this.say('แลก Skill Tome แล้ว'); }
+  setMain() { if (this.isl.setMainHero(this.uid())) this.say('ตั้งเป็นฮีโร่หลักบนเกาะแล้ว'); }
   go(uid: number) { this.message.set(null); this.router.navigate(['/heroes', uid]); }
 }

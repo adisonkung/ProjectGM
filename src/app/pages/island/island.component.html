@@ -1,0 +1,96 @@
+<section class="island">
+  <div class="stage">
+    <app-island-scene [theme]="theme()" [buildings]="display()" [skinOverrides]="island().buildingSkinOverrides ?? {}" [heroes]="heroViews()"
+                      [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()"
+                      (buildingTap)="tapBuilding($event)" (heroTap)="tapHero($event)" />
+
+    <!-- essential HUD only: the island itself is the menu -->
+    <div class="hud tl">
+      <span class="stage-name"><app-icon name="home" [size]="14" /> {{ stageName() }}</span>
+      <span class="tower-prog" [attr.aria-label]="'พิชิตหอคอย ' + cleared() + ' จาก ' + totalFloors + ' ชั้น'">
+        <app-icon name="tower" [size]="13" />
+        <span class="pips">@for (i of [1,2,3,4,5,6,7,8,9,10]; track i) { <i [class.on]="i <= cleared()"></i> }</span>
+        <b>{{ cleared() }}/{{ totalFloors }}</b>
+      </span>
+    </div>
+    <div class="hud tr">
+      @if (readyCount()) {
+        <a class="note" routerLink="/heroes" [attr.aria-label]="readyCount() + ' ฮีโร่พร้อมอัป'"><app-icon name="heroes" [size]="15" /><em>{{ readyCount() }}</em></a>
+      }
+    </div>
+    @if (!current()) {
+      <button type="button" class="cta" (click)="go('/battle', { floor: nextFloor(), mode: 'tower' })">
+        <app-icon name="sword" [size]="16" /> ชั้น {{ nextFloor() }}
+      </button>
+    }
+
+    <!-- progression event (one at a time) -->
+    @if (current(); as ev) {
+      <div class="event" [class.show]="phase() === 'reveal'" role="dialog" aria-live="polite" [attr.aria-label]="eventTitle(ev)">
+        <small>{{ eventTitle(ev) }}</small>
+        <b>{{ eventText(ev) }}</b>
+        @if (events().length > 1) { <span class="more">อีก {{ events().length - 1 }} เหตุการณ์</span> }
+        <span class="ev-acts">
+          <button type="button" class="gm-btn small primary" (click)="nextEvent()">{{ events().length > 1 ? 'ถัดไป' : 'เยี่ยม!' }}</button>
+          @if (events().length > 2) { <button type="button" class="gm-btn small ghost" (click)="skipEvents()">ข้ามทั้งหมด</button> }
+        </span>
+      </div>
+    }
+
+    <!-- building sheet -->
+    @if (buildingSheet(); as b) {
+      <div class="sheet" role="dialog" [attr.aria-label]="b.def.name">
+        <button type="button" class="x" (click)="closeSheets()" aria-label="ปิด">✕</button>
+        <header>
+          <small class="gm-class">{{ b.st.isUnlocked ? b.stageLabel : 'ยังไม่เปิด' }}</small>
+          <h2>{{ b.def.name }} @if (b.st.isUnlocked && b.st.progressionLevel && !b.def.future) { <span class="lv">Lv {{ b.st.progressionLevel }}</span> }</h2>
+          <p>{{ b.def.description }}</p>
+        </header>
+        @if (!b.st.isUnlocked) {
+          <p class="lock"><app-icon name="lock" [size]="14" /> ปลดล็อก: ผ่านหอคอยชั้น {{ b.unlockFloor }}</p>
+        } @else if (b.def.future) {
+          <p class="lock"><app-icon name="star" [size]="14" /> จะเปิดใช้งานในแพตช์ถัดไป</p>
+        } @else {
+          <div class="acts">
+            @for (a of b.def.actions; track a.label) {
+              <button type="button" class="gm-btn" [class.primary]="$first" (click)="go(a.route, a.query)"><app-icon [name]="a.icon" [size]="15" /> {{ a.label }}</button>
+            }
+          </div>
+        }
+        @if (b.st.isUnlocked && b.next) { <small class="next">พัฒนาต่อ: {{ b.next.label }} — ผ่านชั้น {{ b.next.minFloor }}</small> }
+      </div>
+    }
+
+    <!-- hero sheet -->
+    @if (heroSheet(); as s) {
+      <div class="sheet hero" role="dialog" [attr.aria-label]="s.t.name">
+        <button type="button" class="x" (click)="closeSheets()" aria-label="ปิด">✕</button>
+        <div class="who">
+          <app-hero-portrait [heroId]="s.t.id" [size]="64" />
+          <div>
+            <small class="gm-class">{{ s.cls }} · Lv {{ s.h.level }} @if (s.isMain) { · <span class="main">ฮีโร่หลัก</span> }</small>
+            <h2>{{ s.t.name }}</h2>
+            <span class="pw"><app-icon name="flame" [size]="13" /> {{ s.power }}</span>
+          </div>
+        </div>
+        <div class="acts">
+          <button type="button" class="gm-btn primary" (click)="go('/heroes/' + s.h.uid)"><app-icon name="heroes" [size]="15" /> รายละเอียด</button>
+          <button type="button" class="gm-btn" (click)="go('/armory', { hero: s.h.uid })"><app-icon name="armory" [size]="15" /> อุปกรณ์</button>
+          <button type="button" class="gm-btn" (click)="go('/heroes/' + s.h.uid)"><app-icon name="book" [size]="15" /> สกิล</button>
+          @if (!s.isMain) { <button type="button" class="gm-btn arcane" (click)="setMain(s.h.uid)"><app-icon name="crown" [size]="15" /> ตั้งเป็นฮีโร่หลัก</button> }
+        </div>
+      </div>
+    }
+  </div>
+
+  <aside class="side gm-panel">
+    <h2 class="gm-h2">ความคืบหน้าเกาะ</h2>
+    <p class="gm-sub">สร้างแล้ว {{ builtCount() }} / {{ buildingTotal }} · ไต่หอคอยเพื่อฟื้นฟูเกาะ</p>
+    @if (nextGoal(); as g) {
+      <p class="goal"><app-icon name="lock" [size]="13" /> ถัดไป: <b>{{ g.name }}</b> — ผ่านชั้น {{ unlockFloorOf(g) }}</p>
+    } @else {
+      <p class="goal done"><app-icon name="crown" [size]="13" /> ฟื้นฟูเกาะใน Patch 1 ครบแล้ว</p>
+    }
+    <p class="hint">แตะสิ่งก่อสร้างเพื่อเข้าใช้งาน · แตะฮีโร่เพื่อดูรายละเอียดหรือตั้งเป็นฮีโร่หลัก</p>
+  </aside>
+</section>

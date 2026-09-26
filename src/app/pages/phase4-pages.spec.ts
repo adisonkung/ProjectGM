@@ -5,7 +5,6 @@ import { HERO_BY_ID } from '../core/data/heroes';
 import { SaveService } from '../core/services/save.service';
 import { HeroDetailComponent } from './hero-detail/hero-detail.component';
 import { HeroesComponent } from './heroes/heroes.component';
-import { HomeComponent } from './home/home.component';
 
 describe('Phase 4 pages', () => {
   beforeEach(() => localStorage.clear());
@@ -34,16 +33,5 @@ describe('Phase 4 pages', () => {
     expect(el.querySelector('h1')!.textContent).toContain(HERO_BY_ID[h.templateId].name);
     expect(el.querySelectorAll('.skill').length).toBe(3);
     expect(el.querySelectorAll('.gear-list > div').length).toBe(3);
-  });
-
-  it('home hub: next floor call to action points at a real tower run', async () => {
-    await TestBed.configureTestingModule({ imports: [HomeComponent], providers: [provideRouter([])] }).compileComponents();
-    const f = TestBed.createComponent(HomeComponent);
-    f.detectChanges();
-    const el: HTMLElement = f.nativeElement;
-    const cta = el.querySelector<HTMLAnchorElement>('.cta a.primary')!;
-    expect(cta.getAttribute('href')).toContain('/battle');
-    expect(cta.getAttribute('href')).toContain('floor=1');
-    expect(el.querySelectorAll('.squad .mem').length).toBe(5);
   });
 });

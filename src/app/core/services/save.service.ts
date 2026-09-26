@@ -4,6 +4,7 @@ import { addMissingStarters, newGameState } from '../data/starter';
 import { autoPlace, normalizePresets } from '../rules/team';
 import { GameState } from '../models/game-state';
 import { migrateHeroProgress } from '../rules/leveling';
+import { normalizeIsland } from '../rules/island';
 
 const KEY = 'projectgm-save-v1';
 
@@ -33,6 +34,7 @@ export function migrate(raw: unknown): GameState | null {
     const { equipment: _legacy, injury: _injury, ...rest } = h as typeof h & { equipment?: unknown; injury?: unknown };
     return migrateHeroProgress(rest);
   });
+  out.island = normalizeIsland(s.island, out);
   return out;
 }
 
