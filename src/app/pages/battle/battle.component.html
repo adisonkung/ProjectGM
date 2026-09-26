@@ -1,4 +1,4 @@
-<section class="lab" [class.run]="mode() !== 'lab'">
+<section class="lab" [class.run]="mode() !== 'lab'" [class.fighting]="!placing()">
   @if (mode() === 'lab') {
     <header class="head">
       <div>
@@ -23,59 +23,172 @@
       <div class="power"><app-icon name="flame" [size]="15" /> <b>{{ teamPower() }}</b></div>
     </header>
   }
-  @if (modeHud(); as h) {
-    <div class="mode-hud" role="status" aria-live="polite">
-      <b>{{ h.goal }}</b>
-      <span>{{ h.line }}</span>
-    </div>
-  }
-
-  <div class="status">
-    <span class="chip" [class.surv]="stage().mode === 'survive'">
-      {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + totalWaves() + ' เวฟ' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ
-    </span>
-    @if (mode() === 'lab' && stage().name) { <span class="stage-name">{{ stage().name }}</span> }
-    @if (debug()) { <span class="chip dbg">DEBUG</span> }
-    @if (debug()) { <span class="chip dbg">{{ phase() }}</span> }
-    @if (totalWaves() > 1) { <span class="rounds">เวฟ <b>{{ wave() + 1 }}</b>/{{ totalWaves() }}</span> }
-    <span class="timer">{{ timeLeft() }}<small>วิ</small></span>
-  </div>
-
   @if (placing()) {
+    @if (modeHud(); as h) {
+      <div class="mode-hud" role="status" aria-live="polite"><b>{{ h.goal }}</b><span>{{ h.line }}</span></div>
+    }
+    <div class="status">
+      <span class="chip" [class.surv]="stage().mode === 'survive'">
+        {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + totalWaves() + ' เวฟ' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ
+      </span>
+      @if (mode() === 'lab' && stage().name) { <span class="stage-name">{{ stage().name }}</span> }
+    </div>
     <app-team-presets />
     <app-placement [stage]="stage()" />
+    <div class="controls">
+      <button type="button" class="primary" (click)="start()" [disabled]="running()">เริ่มต่อสู้</button>
+      @if (mode() === 'lab') { <button type="button" (click)="simulate()" [disabled]="running()">จำลอง 100 รอบ</button> }
+    </div>
   } @else {
-    <div class="stage-wrap">
-      @if (bossBar(); as bb) {
-        <div class="boss-bar" [class.final]="bb.final" [class.enraged]="bb.enraged" role="status" aria-label="พลังชีวิตบอส">
-          <b>{{ bb.final ? '☠ ' : '' }}{{ bb.name }}</b>
-          <span class="bb-track"><i [style.width.%]="bb.hpPct"></i></span>
-          <small>{{ bb.hpPct.toFixed(0) }}%{{ bb.phase ? ' · ' + bb.phase : '' }}{{ bb.sealed ? ' · 🔒 ผนึก (ฆ่าวิญญาณหมอก)' : '' }}{{ bb.broken ? ' · 💥 BROKEN' : '' }}</small>
+    <div class="arena" [class.paused]="paused()">
+      <div class="screen">
+        <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
+                   [scroll]="scroll()" [tickMs]="tickMs" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
+
+        <!-- top HUD (scenery rows only — never over the lanes' units) -->
+        <div class="hud-top">
+          <div class="wave-group">
+            <div class="wave-panel" [class.surv]="stage().mode === 'survive'" role="status" aria-live="polite">
+              <small>{{ farmId() ? runTitle() : 'ชั้น ' + floor() + (stage().name ? ' · ' + stage().name : '') }}</small>
+              @if (stage().mode === 'survive') {
+                <b class="wv">เอาตัวรอด</b>
+              } @else {
+                <b class="wv">เวฟ <em>{{ wave() + 1 }}</em><span>/{{ totalWaves() }}</span></b>
+                @if (totalWaves() > 1) {
+                  <span class="pips" aria-hidden="true">@for (w of wavePips(); track $index) { <i [class.done]="$index < wave()" [class.cur]="$index === wave()"></i> }</span>
+                }
+              }
+            </div>
+            <div class="clock" [class.low]="timeLeft() <= 10" aria-label="เวลาที่เหลือ">{{ timeLeft() }}<small>วิ</small></div>
+          </div>
+          @if (modeHud(); as h) { <div class="mode-line" role="status"><b>{{ h.goal }}</b> {{ h.line }}</div> }
+          @if (debug()) { <span class="chip dbg">DEBUG · {{ phase() }}</span> }
+        </div>
+        <div class="hud-right">
+          <button type="button" class="hud-btn spd" (click)="cycleSpeed()" [attr.aria-label]="'ความเร็ว x' + speed() + ' แตะเพื่อเปลี่ยน'" title="ความเร็ว (x1 → x2 → x4)">
+            <app-icon name="fast" [size]="14" /> x{{ speed() }}
+          </button>
+          <button type="button" class="hud-btn" (click)="openMenu()" [disabled]="!running()" aria-label="ตั้งค่า / หยุดชั่วคราว" title="ตั้งค่า"><app-icon name="gear" [size]="18" /></button>
+        </div>
+
+        @if (focusCard(); as f) {
+          <div class="focus-card" [class.on]="f.isFocus" role="group" aria-label="เป้าหมาย">
+            <span class="fc-name">{{ f.isFocus ? '🎯 FOCUS · ' : '' }}{{ f.name }}</span>
+            <span class="fc-hp"><i [style.width.%]="f.hpPct"></i></span>
+            <small>HP {{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · ตีอยู่ {{ focusCount().on }}/{{ focusCount().total }} }@if (f.isFocus && debug() && !focusSafe()) { · FOCUS TARGET OUT OF SAFE RANGE }</small>
+            @if (f.isFocus) {
+              <button type="button" (click)="cancelFocus()">✕ ยกเลิกโฟกัส</button>
+            } @else {
+              <button type="button" class="go" (click)="setFocus(f.id)">🎯 FOCUS</button>
+            }
+          </div>
+        }
+        @if (banner(); as b) { <div class="banner" aria-live="polite">{{ b }}</div> }
+        @if (casts().length) {
+          <div class="alerts" aria-live="assertive">
+            @for (c of casts(); track c.id) {
+              <span class="alert" [class.hard]="!c.cast!.interruptible">
+                ⚠ {{ c.cast!.label }} · {{ c.cast!.left.toFixed(1) }}s
+                <em>{{ c.cast!.interruptible ? 'ตัดได้ ⚡' : c.cast!.breakPct != null ? 'BREAK ได้ 💥 ' + c.cast!.breakPct!.toFixed(0) + '%' : 'ตัดไม่ได้ — ตั้งรับ/ฮีล' }}</em>
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- free row under the lanes: party (bottom-left) · boss bar + AUTO (right) -->
+      <div class="dock">
+        <app-party-bar [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)" />
+        <div class="dock-side">
+          @if (bossBar(); as bb) {
+            <div class="boss-bar" [class.final]="bb.final" [class.enraged]="bb.enraged" role="status" aria-label="พลังชีวิตบอส">
+              <b>{{ bb.final ? '☠ ' : '' }}{{ bb.name }}</b>
+              <span class="bb-track"><i [style.width.%]="bb.hpPct"></i></span>
+              <small>{{ bb.hpPct.toFixed(0) }}%{{ bb.phase ? ' · ' + bb.phase : '' }}{{ bb.sealed ? ' · 🔒 ผนึก (ฆ่าวิญญาณหมอก)' : '' }}{{ bb.broken ? ' · 💥 BROKEN' : '' }}</small>
+            </div>
+          }
+          <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
+        </div>
+      </div>
+
+      <!-- settings popup (fight paused) -->
+      @if (menuOpen()) {
+        <div class="overlay" (click)="resume()">
+          <div class="menu gm-panel" role="dialog" aria-modal="true" aria-label="หยุดชั่วคราว" (click)="$event.stopPropagation()">
+            <h2>หยุดชั่วคราว</h2>
+            <button type="button" class="gm-btn primary" (click)="resume()"><app-icon name="play" [size]="15" /> เล่นต่อ</button>
+            <button type="button" class="gm-btn" (click)="restart()"><app-icon name="restart" [size]="15" /> เริ่มใหม่</button>
+            <button type="button" class="gm-btn ghost" (click)="exitStage()"><app-icon name="exit" [size]="15" /> ออกจากด่าน</button>
+            <small>ออกจากด่าน = กลับไปจัดทีม/ตำแหน่งใหม่ (ไม่ได้รางวัล)</small>
+          </div>
         </div>
       }
-      <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
-                 [scroll]="scroll()" [tickMs]="tickMs" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
-      @if (focusCard(); as f) {
-        <div class="focus-card" [class.on]="f.isFocus" role="group" aria-label="เป้าหมาย">
-          <span class="fc-name">{{ f.isFocus ? '🎯 FOCUS · ' : '' }}{{ f.name }}</span>
-          <span class="fc-hp"><i [style.width.%]="f.hpPct"></i></span>
-          <small>HP {{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · ตีอยู่ {{ focusCount().on }}/{{ focusCount().total }} }@if (f.isFocus && debug() && !focusSafe()) { · FOCUS TARGET OUT OF SAFE RANGE }</small>
-          @if (f.isFocus) {
-            <button type="button" (click)="cancelFocus()">✕ ยกเลิกโฟกัส</button>
-          } @else {
-            <button type="button" class="go" (click)="setFocus(f.id)">🎯 FOCUS</button>
-          }
+
+      <!-- lab: quick result -->
+      @if (mode() === 'lab' && result(); as r) {
+        <div class="overlay">
+          <div class="result-card lab-card" [class.win]="r === 'win'" role="dialog" aria-label="ผลการต่อสู้">
+            <h2>{{ r === 'win' ? 'ชนะ' : r === 'lose' ? 'แพ้' : 'หมดเวลา' }} <small>{{ time().toFixed(1) }} วินาที</small></h2>
+            @if (summary(); as sm) { <p class="facts">{{ sm }}</p> }
+            <div class="actions">
+              <button type="button" class="primary" (click)="start()">สู้อีกครั้ง</button>
+              <button type="button" (click)="prepare()">จัดตำแหน่งใหม่</button>
+            </div>
+          </div>
         </div>
       }
-      @if (banner(); as b) { <div class="banner" aria-live="polite">{{ b }}</div> }
-      @if (casts().length) {
-        <div class="alerts" aria-live="assertive">
-          @for (c of casts(); track c.id) {
-            <span class="alert" [class.hard]="!c.cast!.interruptible">
-              ⚠ {{ c.cast!.label }} · {{ c.cast!.left.toFixed(1) }}s
-              <em>{{ c.cast!.interruptible ? 'ตัดได้ ⚡' : c.cast!.breakPct != null ? 'BREAK ได้ 💥 ' + c.cast!.breakPct!.toFixed(0) + '%' : 'ตัดไม่ได้ — ตั้งรับ/ฮีล' }}</em>
-            </span>
-          }
+
+      <!-- tower / farm result: centred on the battle screen -->
+      @if (mode() !== 'lab' && outcome(); as o) {
+        <div class="overlay">
+          <div class="result-card" [class.win]="o.win" role="dialog" aria-label="ผลการต่อสู้">
+            <h2>{{ o.win ? 'สำเร็จ!' : o.result === 'timeout' ? 'หมดเวลา' : 'ล้มเหลว' }} <small>{{ runTitle() }}</small></h2>
+            @if (o.failReason) { <p class="fail">ภารกิจล้มเหลว: {{ o.failReason }}</p> }
+            @if (reward()?.rating; as st) { <p class="stars" [attr.aria-label]="st + ' ดาว'">{{ '★'.repeat(st) }}<span>{{ '★'.repeat(3 - st) }}</span></p> }
+            <p class="facts">
+              เวลาสู้ {{ o.time.toFixed(1) }} วิ · ฮีโร่ล้ม {{ o.deaths }}
+              @if (o.mode; as m) {
+                @switch (m.kind) {
+                  @case ('SURVIVAL') { · ฆ่า {{ m.kills }} ตัว }
+                  @case ('TREASURE') { · จับก็อบลินขนสมบัติ {{ m.carriersKilled }}/{{ m.carriersTotal }} (หนี {{ m.escaped }}) }
+                  @case ('CHALLENGE') { @if (m.maxStrikes) { · ร่ายสำเร็จ {{ m.strikes }}/{{ m.maxStrikes }} } }
+                  @case ('BOSS_DUEL') { · {{ m.enraged ? 'บอสคลั่งแล้ว' : 'ล้มก่อนบอสคลั่ง' }} }
+                }
+              }
+            </p>
+            @if (reward(); as rw) {
+              @if (rw.breakdown; as b) {
+                <div class="loot">
+                  <b>{{ b.kind === 'DAILY_BONUS' ? 'โบนัสรายวัน ×' + b.multiplier : b.kind === 'REPEAT' ? 'รางวัลรอบซ้ำ ×' + b.multiplier : b.kind === 'TOWER_FIRST' ? 'เคลียร์ครั้งแรก!' : 'เคลียร์ซ้ำ' }}</b>
+                  @for (it of b.final.items; track $index) { <span>{{ itemName(it.itemId) }} ×{{ it.count }}</span> }
+                  @if (b.final.gold) { <span>ทอง +{{ b.final.gold }}</span> }
+                  @for (eq of b.equipment ?? []; track eq.instanceId) { <span class="drop {{ eq.rarity.toLowerCase() }}">ได้อุปกรณ์: {{ gearName(eq) }}</span> }
+                </div>
+                @if (expStrip().length) {
+                  <ul class="exp-strip" aria-label="EXP ที่ได้รับ">
+                    @for (x of expStrip(); track x.uid) {
+                      <li [class.up]="x.up" [attr.title]="x.name + ' +' + x.gained + ' EXP' + (x.share < 1 ? ' (ช่องฝึก ' + x.share * 100 + '%)' : '')">
+                        <span class="pf">
+                          @if (x.heroId) { <app-hero-portrait [heroId]="x.heroId" [size]="52" /> }
+                          <span class="lv">Lv{{ x.after }}</span>
+                          @if (x.up) { <span class="lvup">LV UP!</span> }
+                        </span>
+                        <span class="xbar" [class.max]="x.max"><i class="old" [style.width.%]="x.from"></i><i class="new" [style.left.%]="x.from" [style.width.%]="x.to - x.from"></i></span>
+                        <b class="gain">+{{ x.gained }}</b>
+                        <small>{{ x.max ? 'MAX' : x.exp + '/' + x.need }}</small>
+                      </li>
+                    }
+                  </ul>
+                }
+              } @else { <p class="facts">ไม่ได้รับรางวัล · ลองเปลี่ยนตำแหน่ง อัปเลเวล/อุปกรณ์ แล้วลองใหม่ ฮีโร่ที่ล้มไม่มีผลค้าง</p> }
+            }
+            <div class="actions">
+              @if (o.win && nextFloor(); as n) { <button type="button" class="primary" (click)="goNext()">ชั้นถัดไป ({{ n }}) →</button> }
+              <button type="button" (click)="start()">{{ o.win ? 'เล่นอีกครั้ง' : 'ลองอีกครั้ง' }}</button>
+              <button type="button" (click)="prepare()">จัดตำแหน่งใหม่</button>
+              <button type="button" (click)="backToTower()">{{ mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย' }}</button>
+            </div>
+          </div>
         </div>
       }
     </div>
@@ -87,73 +200,7 @@
         }
       </div>
     }
-    <div class="party">
-      <app-party-bar [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)" />
-      <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()"
-              title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
-    </div>
   }
 
-  @if (mode() === 'lab' && result(); as r) {
-    <div class="result" [class.win]="r === 'win'">
-      {{ r === 'win' ? 'ชนะ' : r === 'lose' ? 'แพ้' : 'หมดเวลา' }} · {{ time().toFixed(1) }} วินาที
-      @if (summary(); as sm) { <small class="summary">{{ sm }}</small> }
-    </div>
-  }
-  @if (mode() !== 'lab' && outcome(); as o) {
-    <div class="result-card" [class.win]="o.win" role="dialog" aria-label="ผลการต่อสู้">
-      <h2>{{ o.win ? 'สำเร็จ!' : o.result === 'timeout' ? 'หมดเวลา' : 'ล้มเหลว' }} <small>{{ runTitle() }}</small></h2>
-      @if (o.failReason) { <p class="fail">ภารกิจล้มเหลว: {{ o.failReason }}</p> }
-      @if (reward()?.rating; as st) { <p class="stars" [attr.aria-label]="st + ' ดาว'">{{ '★'.repeat(st) }}<span>{{ '★'.repeat(3 - st) }}</span></p> }
-      <p class="facts">
-        เวลาสู้ {{ o.time.toFixed(1) }} วิ · ฮีโร่ล้ม {{ o.deaths }}
-        @if (o.mode; as m) {
-          @switch (m.kind) {
-            @case ('SURVIVAL') { · ฆ่า {{ m.kills }} ตัว }
-            @case ('TREASURE') { · จับก็อบลินขนสมบัติ {{ m.carriersKilled }}/{{ m.carriersTotal }} (หนี {{ m.escaped }}) }
-            @case ('CHALLENGE') { @if (m.maxStrikes) { · ร่ายสำเร็จ {{ m.strikes }}/{{ m.maxStrikes }} } }
-            @case ('BOSS_DUEL') { · {{ m.enraged ? 'บอสคลั่งแล้ว' : 'ล้มก่อนบอสคลั่ง' }} }
-          }
-        }
-      </p>
-      @if (reward(); as rw) {
-        @if (rw.breakdown; as b) {
-          <div class="loot">
-            <b>{{ b.kind === 'DAILY_BONUS' ? 'โบนัสรายวัน ×' + b.multiplier : b.kind === 'REPEAT' ? 'รางวัลรอบซ้ำ ×' + b.multiplier : b.kind === 'TOWER_FIRST' ? 'เคลียร์ครั้งแรก!' : 'เคลียร์ซ้ำ' }}</b>
-            @if (b.final.heroExp) { <span>EXP +{{ b.final.heroExp }} ต่อฮีโร่</span> }
-            @for (it of b.final.items; track $index) { <span>{{ itemName(it.itemId) }} ×{{ it.count }}</span> }
-            @if (b.final.gold) { <span>ทอง +{{ b.final.gold }}</span> }
-            @for (eq of b.equipment ?? []; track eq.instanceId) { <span class="drop {{ eq.rarity.toLowerCase() }}">ได้อุปกรณ์: {{ gearName(eq) }}</span> }
-          </div>
-          @if (rw.exp.length) {
-            <ul class="exp">
-              @for (x of rw.exp; track x.uid) {
-                <li [class.up]="x.after.level > x.before.level">{{ heroName(x.uid) }} Lv{{ x.before.level }}@if (x.after.level > x.before.level) { → <b>Lv{{ x.after.level }}</b> } · +{{ x.gained }} EXP{{ x.share < 1 ? ' (ช่องฝึก ' + (x.share * 100) + '%)' : '' }}</li>
-              }
-            </ul>
-          }
-        } @else { <p class="facts">ไม่ได้รับรางวัล · ลองเปลี่ยนตำแหน่ง อัปเลเวล/อุปกรณ์ แล้วลองใหม่ ฮีโร่ที่ล้มไม่มีผลค้าง</p> }
-      }
-      <div class="actions">
-        @if (o.win && nextFloor(); as n) { <button type="button" class="primary" (click)="goNext()">ชั้นถัดไป ({{ n }}) →</button> }
-        <button type="button" (click)="start()">{{ o.win ? 'เล่นอีกครั้ง' : 'ลองอีกครั้ง' }}</button>
-        <button type="button" (click)="prepare()">จัดตำแหน่งใหม่</button>
-        <button type="button" (click)="backToTower()">{{ mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย' }}</button>
-      </div>
-    </div>
-  }
-
-  <div class="controls">
-    <button type="button" class="primary" (click)="start()" [disabled]="running()">
-      {{ result() ? 'สู้อีกครั้ง' : 'เริ่มต่อสู้' }}
-    </button>
-    <div class="seg" role="group" aria-label="ความเร็ว">
-      @for (v of [1, 2, 4]; track v) {
-        <button type="button" [attr.aria-pressed]="speed() === v" (click)="setSpeed(v)">x{{ v }}</button>
-      }
-    </div>
-    <button type="button" (click)="prepare()" [disabled]="placing()">จัดตำแหน่งใหม่</button>
-    @if (mode() === 'lab') { <button type="button" (click)="simulate()" [disabled]="running()">จำลอง 100 รอบ</button> }
-  </div>
   @if (simReport()) { <p class="sim">{{ simReport() }}</p> }
 </section>

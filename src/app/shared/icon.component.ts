@@ -28,6 +28,11 @@ export const ICON_PATHS: Record<string, string> = {
   gem: 'M6 3h12l4 6-10 12L2 9z M2 9h20 M9 3l3 18 3-18',
   bolt: 'M13 2L4 14h7l-1 8 9-12h-7z',
   scroll: 'M7 3h11a2 2 0 0 1 2 2v2h-4 M16 7v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2h10v2a2 2 0 0 0 2 2 M7 3a2 2 0 0 0-2 2v12 M9 8h4 M9 12h4',
+  gear: 'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z M12 2v3 M12 19v3 M2 12h3 M19 12h3 M4.9 4.9l2.1 2.1 M17 17l2.1 2.1 M4.9 19.1L7 17 M17 7l2.1-2.1',
+  play: 'M7 4l13 8-13 8z',
+  restart: 'M4 12a8 8 0 1 0 2.4-5.7 M4 3v5h5',
+  exit: 'M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5 M10 8l-4 4 4 4 M6 12h10',
+  fast: 'M3 5l8 7-8 7z M12 5l8 7-8 7z',
 };
 
 /** inline SVG glyph: `<app-icon name="tower" />` — size follows font-size (1em) unless `size` is set */

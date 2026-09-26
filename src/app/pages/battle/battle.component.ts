@@ -31,6 +31,8 @@ import { isBossRank, MonsterSkillDefinition } from '../../core/models/monster';
 import { AreaPattern } from '../../core/models/combat';
 import { hasFlag } from '../../battle/engine/buffs';
 import { isPlayerUnit, PLAYER_TEAM } from '../../battle/engine/stage/party';
+import { expToNext } from '../../core/rules/leveling';
+import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 
 const TICK = 0.05;
 
@@ -40,7 +42,7 @@ const TICK = 0.05;
  */
 @Component({
   selector: 'app-battle',
-  imports: [BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink],
+  imports: [BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -67,12 +69,36 @@ export class BattleComponent implements OnDestroy {
     return this.engine?.units.find(u => u.heroUid === uid)?.name ?? `#${uid}`;
   }
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
+  /** result popup: one tile per hero (team order, left → right) with the EXP bar before / after this run */
+  readonly expStrip = computed(() => {
+    const rw = this.reward();
+    if (!rw?.exp.length) return [];
+    const order = (uid: number) => {
+      const i = this.engine?.units.findIndex(u => isPlayerUnit(u) && u.heroUid === uid) ?? -1;
+      return i < 0 ? 999 : i;
+    };
+    return [...rw.exp].sort((a, b) => order(a.uid) - order(b.uid)).map(x => {
+      const u = this.engine?.units.find(v => v.heroUid === x.uid);
+      const up = x.after.level > x.before.level;
+      const need = expToNext(x.after.level);
+      const pct = (e: number) => (need > 0 ? Math.min(100, (e / need) * 100) : 100);
+      return {
+        uid: x.uid, heroId: u?.heroId ?? '', name: u?.name ?? `#${x.uid}`, up, gained: x.gained, share: x.share,
+        before: x.before.level, after: x.after.level, max: need === 0,
+        from: up ? 0 : pct(x.before.exp), to: pct(x.after.exp),
+        exp: x.after.exp, need,
+      };
+    });
+  });
   readonly gearName = itemNameOf;
 
   readonly stages = STAGES;
   readonly floor = signal(1);
   readonly speed = signal(1);
   readonly running = signal(false);
+  /** settings popup open → the fight is paused (engine not stepped, board animations frozen) */
+  readonly paused = signal(false);
+  readonly menuOpen = signal(false);
   readonly result = signal<BattleResult | null>(null);
   readonly time = signal(0);
   readonly views = signal<UnitView[]>([]);
@@ -92,6 +118,7 @@ export class BattleComponent implements OnDestroy {
   /** เวฟปัจจุบัน (เริ่ม 0) / ทั้งหมด · ช่วงของการต่อสู้ (BattlePhase) */
   readonly wave = signal(0);
   readonly totalWaves = signal(1);
+  readonly wavePips = computed(() => Array.from({ length: this.totalWaves() }, (_, i) => i));
   readonly phase = signal<BattlePhase>(BattlePhase.PREPARATION);
   /** ตำแหน่งกล้องในโลก (ช่อง) — ฉากเลื่อนตามอย่างต่อเนื่องตอน Advance */
   readonly scroll = signal(0);
@@ -191,6 +218,8 @@ export class BattleComponent implements OnDestroy {
   prepare(): void {
     clearInterval(this.timer);
     this.running.set(false);
+    this.paused.set(false);
+    this.menuOpen.set(false);
     this.result.set(null);
     this.reward.set(null);
     this.simReport.set(null);
@@ -228,12 +257,12 @@ export class BattleComponent implements OnDestroy {
 
   /** แตะรูปตัวละคร (หรือกดปุ่ม 1–5): ใช้ท่าไม้ตายเมื่อเกจเต็ม */
   useUlt(id: number): void {
-    if (this.running() && this.engine.requestUlt(id)) this.snapshot();
+    if (this.running() && !this.paused() && this.engine.requestUlt(id)) this.snapshot();
   }
 
   /** แตะไอคอนสกิลที่พร้อม: ใช้ทันที (สั่งเอง ใช้ได้แม้สกิลตั้งเป็น เก็บไว้ / กดเอง) */
   useSkill(ev: { id: number; slot: 'skill' | 'skill2' }): void {
-    if (this.running() && this.engine.requestSkill(ev.id, ev.slot)) this.snapshot();
+    if (this.running() && !this.paused() && this.engine.requestSkill(ev.id, ev.slot)) this.snapshot();
   }
 
   /** แตะชิปโหมด: AUTO → RESERVE (เก็บไว้) → MANUAL (กดเอง) → AUTO */
@@ -272,7 +301,8 @@ export class BattleComponent implements OnDestroy {
 
   @HostListener('document:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
-    if (e.key === 'Escape') return this.cancelFocus();
+    if (e.key === 'Escape') return this.menuOpen() ? this.resume() : this.cancelFocus();
+    if (this.paused()) return;
     if ((e.key === 'd' || e.key === 'D') && isDevMode()) {
       this.debug.update(v => !v);
       return this.snapshot();
@@ -293,6 +323,32 @@ export class BattleComponent implements OnDestroy {
     this.speed.set(v);
   }
 
+  /** one speed button: x1 → x2 → x4 → x1 */
+  cycleSpeed(): void {
+    const order = [1, 2, 4];
+    this.speed.set(order[(order.indexOf(this.speed()) + 1) % order.length]);
+  }
+
+  /** settings popup: pauses the fight while open */
+  openMenu(): void {
+    if (!this.running()) return;
+    this.menuOpen.set(true);
+    this.paused.set(true);
+  }
+  resume(): void {
+    this.menuOpen.set(false);
+    this.paused.set(false);
+  }
+  /** start the same stage over (same team / placement) */
+  restart(): void {
+    this.prepare();
+    this.start();
+  }
+  /** leave the stage → back to the pre-fight placement screen (no rewards, nothing saved) */
+  exitStage(): void {
+    this.prepare();
+  }
+
   /** จำลอง 100 รอบแบบไม่แสดงผล เพื่อดูอัตราชนะ */
   simulate(runs = 100): void {
     let wins = 0;
@@ -306,6 +362,7 @@ export class BattleComponent implements OnDestroy {
   }
 
   private tick(): void {
+    if (this.paused()) return;
     for (let i = 0; i < this.speed() && !this.engine.result; i++) this.engine.step(TICK);
     this.handleEvents(this.engine.drainEvents());
     this.time.set(this.engine.fightTime);

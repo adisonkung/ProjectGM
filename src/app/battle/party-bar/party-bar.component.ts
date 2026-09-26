@@ -11,7 +11,7 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
   selector: 'app-party-bar',
   imports: [UnitSpriteComponent],
   template: `
-    <div class="bar" role="group" aria-label="ทีมของเรา แตะรูปเมื่อเกจเต็มเพื่อใช้ท่าไม้ตาย">
+    <div class="bar" [class.compact]="compact()" role="group" aria-label="ทีมของเรา แตะรูปเมื่อเกจเต็มเพื่อใช้ท่าไม้ตาย">
       @for (u of units(); track u.id; let i = $index) {
         @let ready = u.alive && u.manaPct >= 100;
         @let art = artOf(u.heroId);
@@ -57,7 +57,7 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
           <span class="name">{{ u.name }}</span>
           <!-- the status row always takes its space (empty = invisible) so the bar never changes height mid-fight -->
           @let t = u.alive ? tag(u) : '';
-          <span [class]="'intent ' + (t ? (u.onFocus ? 'focus' : u.intent) : 'none')" [attr.aria-hidden]="!t">{{ t || '·' }}</span>
+          <span [class]="'intent ' + (t ? (u.onFocus ? 'focus' : u.intent) : 'none')" [attr.aria-hidden]="!t" [attr.title]="t || null">{{ t || '·' }}</span>
         </div>
       }
     </div>
@@ -154,12 +154,31 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
     .name { display: block; height: 16px; line-height: 16px; font-size: 11px; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes pulse { to { box-shadow: 0 0 18px #5ec8e0, 0 0 30px #b07cf0aa; } }
+    // compact (battle-screen dock): portrait on the left, skill icons + mode chips on the right, bars + name/status below
+    .compact { justify-content: flex-start; gap: 6px; flex-wrap: wrap; }
+    .compact .card {
+      width: auto; column-gap: 4px; row-gap: 3px; padding: 4px; border-radius: 10px; background: #0b0914b3; box-shadow: inset 0 0 0 1px #ffffff14;
+      grid-template-columns: 54px 84px; grid-template-rows: auto auto 1fr auto auto 15px;
+      grid-template-areas: 'frame skills' 'frame modes' 'frame .' 'hp hp' 'mana mana' 'name intent';
+    }
+    .compact .frame { grid-area: frame; width: 54px; height: 54px; }
+    .compact .skills { grid-area: skills; gap: 3px; }
+    .compact .modes { grid-area: modes; }
+    .compact .hp { grid-area: hp; } .compact .mana { grid-area: mana; height: 5px; }
+    .compact .name { grid-area: name; height: 15px; line-height: 15px; font-size: 10px; text-align: left; }
+    .compact .intent { grid-area: intent; font-size: 8px; }
+    .compact .ult { font-size: 9px; bottom: 2px; }
+    .compact .key { font-size: 9px; top: 1px; left: 3px; }
+    .compact .int { font-size: 8px; top: 1px; right: 1px; padding: 0 2px; }
+    .compact .cd { font-size: 11px; }
     @media (max-width: 480px) { .card { width: 62px; } .frame { width: 62px; height: 62px; } .cd { font-size: 10px; } }
     @media (prefers-reduced-motion: reduce) { .ready .frame::before, .ready .frame { animation: none; } }
   `,
 })
 export class PartyBarComponent {
   readonly units = input<UnitView[]>([]);
+  /** battle-screen dock layout (horizontal cards) */
+  readonly compact = input(false);
   readonly ult = output<number>();
   /** tap a ready skill icon = use it now (manual command, also for RESERVE / MANUAL skills) */
   readonly skill = output<{ id: number; slot: 'skill' | 'skill2' }>();
