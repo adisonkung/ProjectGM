@@ -15,7 +15,7 @@
     </div>
   } @else {
     <header class="run-head gm-panel">
-      <a class="gm-btn small ghost back" [routerLink]="'/tower'" aria-label="กลับหอคอย"><app-icon name="back" [size]="14" /></a>
+      <a class="gm-btn small ghost back" [routerLink]="backLink()" [attr.aria-label]="mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย'"><app-icon name="back" [size]="14" /></a>
       <div class="run-title">
         <small class="gm-class">{{ mode() === 'farm' ? 'ดันเจี้ยน' : 'หอคอย · ชั้น ' + floor() }}</small>
         <h1>{{ farmId() ? runTitle() : stage().name ?? 'ชั้น ' + floor() }}</h1>
@@ -138,7 +138,7 @@
         @if (o.win && nextFloor(); as n) { <button type="button" class="primary" (click)="goNext()">ชั้นถัดไป ({{ n }}) →</button> }
         <button type="button" (click)="start()">{{ o.win ? 'เล่นอีกครั้ง' : 'ลองอีกครั้ง' }}</button>
         <button type="button" (click)="prepare()">จัดตำแหน่งใหม่</button>
-        <button type="button" (click)="backToTower()">กลับหอคอย</button>
+        <button type="button" (click)="backToTower()">{{ mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย' }}</button>
       </div>
     </div>
   }

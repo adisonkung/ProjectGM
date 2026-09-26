@@ -50,10 +50,10 @@ export class HomeComponent {
   readonly daily = computed(() => {
     this.save.state(); // re-read after runs
     const pools = [
-      { id: 'TRAINING', label: 'Training', icon: 'shield' },
-      { id: 'ASCENSION', label: 'Ascension', icon: 'crown' },
-      { id: 'HUNT', label: 'Hunt', icon: 'coin' },
-      { id: 'SKILL', label: 'Skill Trial', icon: 'scroll' },
+      { id: 'TRAINING', label: 'Training', icon: 'shield', link: '/dungeons/training' },
+      { id: 'ASCENSION', label: 'Ascension', icon: 'crown', link: '/dungeons/ascension' },
+      { id: 'HUNT', label: 'Hunt', icon: 'coin', link: '/dungeons/hunt' },
+      { id: 'SKILL', label: 'Skill Trial', icon: 'scroll', link: '/dungeons/trial' },
     ];
     return pools.map(p => {
       const left = this.prog.bonusLeft(p.id);
@@ -76,8 +76,9 @@ export class HomeComponent {
 
   readonly links = [
     { path: '/heroes', icon: 'heroes', label: 'หอวีรชน', sub: 'เลเวล · สกิล · Breakthrough' },
-    { path: '/armory', icon: 'armory', label: 'คลังอาวุธ', sub: 'สวม ตีบวก คราฟต์' },
-    { path: '/tower', icon: 'tower', label: 'ดันเจี้ยน', sub: 'Training · Ascension · Hunt · Trial' },
+    { path: '/armory', icon: 'armory', label: 'คลังอุปกรณ์', sub: 'สวม เทียบ ขาย' },
+    { path: '/forge', icon: 'flame', label: 'โรงตีเหล็ก', sub: 'คราฟต์ ตีบวก ย่อย' },
+    { path: '/dungeons', icon: 'scroll', label: 'ดันเจี้ยน', sub: 'Training · Ascension · Hunt · Trial' },
     { path: '/gacha', icon: 'summon', label: 'ประตูอัญเชิญ', sub: 'เร็ว ๆ นี้' },
   ];
 }

@@ -42,7 +42,7 @@
       <h2 class="gm-h2">โบนัสรายวัน</h2>
       <ul>
         @for (d of daily(); track d.id) {
-          <li [class.locked]="cleared() < d.unlock">
+          <li [class.locked]="cleared() < d.unlock"><a [routerLink]="d.link">
             <app-icon [name]="d.icon" [size]="18" />
             <span>{{ d.label }}</span>
             @if (cleared() < d.unlock) {
@@ -51,7 +51,7 @@
               <span class="pips">@for (on of d.pips; track $index) { <i [class.on]="on"></i> }</span>
               <b>{{ d.left }}/{{ d.max }}</b>
             }
-          </li>
+          </a></li>
         }
       </ul>
       <p class="hint">รางวัล ×1.5 · รีเซ็ตเที่ยงคืน</p>

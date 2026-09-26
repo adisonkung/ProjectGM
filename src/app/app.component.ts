@@ -15,8 +15,10 @@ export class AppComponent {
     { path: '/home', label: 'หน้าหลัก', icon: 'home' },
     { path: '/heroes', label: 'ฮีโร่', icon: 'heroes' },
     { path: '/armory', label: 'อุปกรณ์', icon: 'armory' },
+    { path: '/forge', label: 'ตีเหล็ก', icon: 'flame' },
     { path: '/team', label: 'จัดทีม', icon: 'team' },
     { path: '/tower', label: 'หอคอย', icon: 'tower' },
+    { path: '/dungeons', label: 'ดันเจี้ยน', icon: 'scroll' },
     { path: '/gacha', label: 'อัญเชิญ', icon: 'summon' },
     { path: '/lab', label: 'ทดลองสู้', icon: 'lab', dev: true },
   ];

@@ -55,7 +55,9 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
             }
           </span>
           <span class="name">{{ u.name }}</span>
-          @if (u.alive && tag(u); as t) { <span class="intent" [class]="'intent ' + u.intent">{{ t }}</span> }
+          <!-- the status row always takes its space (empty = invisible) so the bar never changes height mid-fight -->
+          @let t = u.alive ? tag(u) : '';
+          <span [class]="'intent ' + (t ? (u.onFocus ? 'focus' : u.intent) : 'none')" [attr.aria-hidden]="!t">{{ t || '·' }}</span>
         </div>
       }
     </div>
@@ -132,7 +134,9 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
     .mana i { background: linear-gradient(90deg, #3d8fd8, var(--cyan)); }
     .mana.full i { background: linear-gradient(90deg, var(--cyan), #fff, #b07cf0); }
     .intent {
+      display: block; height: 15px; line-height: 13px; box-sizing: border-box; overflow: hidden; text-overflow: ellipsis;
       font: 700 9px var(--disp); text-align: center; border-radius: 4px; padding: 1px 2px; white-space: nowrap;
+      &.none { visibility: hidden; }
       background: #ff5a4e33; color: #ffb3ad;
       &.hold { background: #5ec8e033; color: var(--cyan); }
       &.blocked { background: #8e97b533; color: var(--muted); }
@@ -147,7 +151,7 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
       &.CONDITIONAL { background: #5ec8e033; color: var(--cyan); }
     }
     .sk:not(:disabled) { cursor: pointer; }
-    .name { font-size: 11px; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .name { display: block; height: 16px; line-height: 16px; font-size: 11px; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes pulse { to { box-shadow: 0 0 18px #5ec8e0, 0 0 30px #b07cf0aa; } }
     @media (max-width: 480px) { .card { width: 62px; } .frame { width: 62px; height: 62px; } .cd { font-size: 10px; } }

@@ -1,12 +1,12 @@
 <section class="armory">
   <header class="head">
     <div>
-      <h1 class="gm-title">คลังอาวุธ</h1>
-      <p class="gm-sub">สวมใส่ ตีบวก ย่อย และคราฟต์อุปกรณ์ · อุปกรณ์หาได้จาก Equipment Hunt</p>
+      <h1 class="gm-title">คลังอุปกรณ์</h1>
+      <p class="gm-sub">สวมใส่ เทียบค่า ล็อก และขายอุปกรณ์ · ตีบวก / คราฟต์ / ย่อย ที่ <a routerLink="/forge">โรงตีเหล็ก</a></p>
     </div>
     <div class="mats">
       <span class="gm-chip gold"><app-icon name="coin" [size]="12" /> {{ gold() }}</span>
-      @for (m of mats(); track m.id) { <span class="gm-chip">{{ m.name }} <b>×{{ m.n }}</b></span> }
+      <a class="gm-btn small" routerLink="/forge"><app-icon name="flame" [size]="13" /> โรงตีเหล็ก</a>
     </div>
   </header>
 
@@ -37,7 +37,7 @@
                 @for (l of lines(it); track $index) { <small>{{ fmt(l) }}</small> }
                 @if (it.affix) { <small class="affix">{{ affixName(it.affix) }}</small> }
                 <span class="row">
-                  <button type="button" class="gm-btn small" (click)="upgrade(it)" [disabled]="!cost(it)">+1 @if (cost(it); as c) { <small>{{ c.ore }} ore · {{ c.gold }}</small> }</button>
+                  <a class="gm-btn small" routerLink="/forge" [queryParams]="{ tab: 'enhance' }"><app-icon name="bolt" [size]="12" /> ตีบวก</a>
                   <button type="button" class="gm-btn small ghost" (click)="unequip(slot)">ถอด</button>
                   <button type="button" class="gm-btn small ghost" (click)="toggleLock(it)" [attr.aria-pressed]="it.locked" [attr.aria-label]="it.locked ? 'ปลดล็อก' : 'ล็อก'"><app-icon name="lock" [size]="13" /></button>
                 </span>
@@ -50,7 +50,7 @@
   }
   @if (message()) { <p class="msg" role="status">{{ message() }}</p> }
 
-  <div class="two">
+  <div class="bagwrap">
     <section class="gm-panel">
       <h2 class="gm-h2">กระเป๋า <small>{{ eq.bag().length }}</small></h2>
       <div class="row">
@@ -67,42 +67,13 @@
             } @else { <small class="cmp">สายนี้ใช้ไม่ได้</small> }
             <span class="row">
               @if (usable(it)) { <button type="button" class="gm-btn small primary" (click)="equip(it)">สวม</button> }
-              <button type="button" class="gm-btn small" (click)="upgrade(it)" [disabled]="!cost(it)">+1 @if (cost(it); as c) { <small>{{ c.ore }} ore</small> }</button>
               <button type="button" class="gm-btn small ghost" (click)="toggleLock(it)" [attr.aria-pressed]="it.locked"><app-icon name="lock" [size]="13" /> {{ it.locked ? 'ล็อก' : '' }}</button>
-              <button type="button" class="gm-btn small ghost" (click)="dismantle(it)" [disabled]="it.locked" title="{{ dismantleText(it) }}">ย่อย</button>
               <button type="button" class="gm-btn small ghost" (click)="sell(it)" [disabled]="it.locked">ขาย</button>
             </span>
           </li>
-        } @empty { <li class="none"><small>ว่าง — ลง Equipment Hunt ที่หน้าหอคอย</small></li> }
+        } @empty { <li class="none"><small>ว่าง — ลง Equipment Hunt ในเมนูดันเจี้ยน หรือคราฟต์ที่โรงตีเหล็ก</small></li> }
       </ul>
     </section>
 
-    <div class="side">
-      <section class="gm-panel">
-        <h2 class="gm-h2">โรงตีเหล็ก</h2>
-        <small class="lbl">ระดับ</small>
-        <div class="row">
-          @for (r of recipes; track r.rarity) {
-            <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="craftRarity() === r.rarity" (click)="craftRarity.set(r.rarity)">{{ rarityName[r.rarity] }} <small>{{ r.fragments }} เศษ · {{ r.gold }}</small></button>
-          }
-        </div>
-        <small class="lbl">ฐาน</small>
-        <div class="row">
-          @for (b of bases(); track b.id) { <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="craftBase() === b.id" (click)="pickBase(b.id)">{{ b.name }}</button> }
-        </div>
-        <small class="lbl">ค่าหลัก</small>
-        <div class="row">
-          @for (m of mains(); track m) { <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="craftMain() === m" (click)="craftMain.set(m)">{{ statLabel(m) }}</button> }
-        </div>
-        <button type="button" class="gm-btn primary go" (click)="craft()"><app-icon name="flame" [size]="15" /> คราฟต์</button>
-      </section>
-      <section class="gm-panel">
-        <h2 class="gm-h2">เป้าหมาย Hunt</h2>
-        <small class="lbl">ช่องที่ดรอปบ่อยขึ้น</small>
-        <div class="row">
-          @for (t of targets; track t) { <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="eq.huntTarget() === t" (click)="target(t)">{{ targetLabel[t] }}</button> }
-        </div>
-      </section>
-    </div>
   </div>
 </section>

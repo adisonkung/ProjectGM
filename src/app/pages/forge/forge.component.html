@@ -1,0 +1,127 @@
+<section class="forge">
+  <header class="head">
+    <div>
+      <h1 class="gm-title">โรงตีเหล็ก</h1>
+      <p class="gm-sub">หลอมอุปกรณ์ใหม่จากเศษ · ตีบวกด้วย Enhancement Ore · ย่อยของที่ไม่ใช้เป็นวัตถุดิบ</p>
+    </div>
+    <div class="mats">
+      <span class="gm-chip gold"><app-icon name="coin" [size]="12" /> {{ gold() }}</span>
+      <span class="gm-chip arcane"><app-icon name="crystal" [size]="12" /> Ore ×{{ ore() }}</span>
+      @for (m of mats(); track m.id) { <span class="gm-chip">{{ m.name }} <b>×{{ m.n }}</b></span> }
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="โรงตีเหล็ก">
+    @for (t of tabs; track t.id) {
+      <button type="button" role="tab" [attr.aria-selected]="tab() === t.id" [class.on]="tab() === t.id" (click)="setTab(t.id)">
+        <app-icon [name]="t.icon" [size]="18" /> {{ t.label }}
+      </button>
+    }
+  </nav>
+
+  @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
+
+  @switch (tab()) {
+    @case ('craft') {
+      <div class="craft">
+        <section class="gm-panel steps">
+          <h2 class="gm-h2">1 · ระดับ</h2>
+          <div class="row">
+            @for (r of recipes; track r.rarity) {
+              <button type="button" class="rar {{ r.rarity.toLowerCase() }}" [attr.aria-pressed]="craftRarity() === r.rarity" (click)="craftRarity.set(r.rarity)">
+                <b>{{ rarityName[r.rarity] }}</b><small>{{ r.fragments }} {{ itemName(r.fragmentId) }} · {{ r.gold }} ทอง</small>
+              </button>
+            }
+          </div>
+          <h2 class="gm-h2">2 · ประเภท</h2>
+          <div class="row">
+            @for (s of slots; track s) {
+              <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="slotFilter() === s" (click)="pickSlot(s)"><app-icon [name]="slotIcon[s]" [size]="13" /> {{ slotLabel[s] }}</button>
+            }
+          </div>
+          <div class="bases">
+            @for (b of bases(); track b.id) {
+              <button type="button" class="base" [attr.aria-pressed]="craftBase() === b.id" (click)="pickBase(b.id)">
+                <b>{{ b.name }}</b><small>{{ wielders(b.id) }}</small>
+              </button>
+            }
+          </div>
+          <h2 class="gm-h2">3 · ค่าหลัก</h2>
+          <div class="row">
+            @for (m of mains(); track m) { <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="craftMain() === m" (click)="craftMain.set(m)">{{ statLabel(m) }}</button> }
+          </div>
+          <p class="note">ค่ารองและ affix ยังสุ่มอยู่</p>
+        </section>
+
+        <section class="gm-panel glow anvil">
+          <div class="sigil" aria-hidden="true"><app-icon name="flame" [size]="44" /></div>
+          <p class="pick r {{ craftRarity().toLowerCase() }}"><b class="nm">{{ rarityName[craftRarity()] }} {{ baseName() }}</b><small>ค่าหลัก {{ statLabel(craftMain()) }}</small></p>
+          <p class="cost">
+            <span [class.miss]="fragsHave() < recipe().fragments">{{ itemName(recipe().fragmentId) }} {{ fragsHave() }}/{{ recipe().fragments }}</span> ·
+            <span [class.miss]="gold() < recipe().gold">{{ recipe().gold }} ทอง</span>
+          </p>
+          <button type="button" class="gm-btn primary big" [disabled]="!canCraft()" (click)="craft()"><app-icon name="flame" [size]="16" /> หลอม</button>
+          @if (crafted(); as c) {
+            <div class="result r {{ c.rarity.toLowerCase() }}">
+              <small>ได้รับ</small>
+              <b class="nm">{{ name(c) }}</b>
+              @for (l of lines(c); track $index) { <small>{{ l }}</small> }
+              @if (c.affix) { <small class="affix">{{ affixName(c.affix) }}</small> }
+              <a class="gm-btn small" routerLink="/armory">ไปสวมที่คลังอุปกรณ์</a>
+            </div>
+          }
+        </section>
+      </div>
+    }
+
+    @case ('enhance') {
+      <section class="gm-panel">
+        <div class="row">
+          @for (f of enhanceFilters; track f.id) {
+            <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="enhanceSlot() === f.id" (click)="enhanceSlot.set(f.id)">{{ f.label }}</button>
+          }
+        </div>
+        <ul class="items">
+          @for (x of enhanceList(); track x.item.instanceId) {
+            @let it = x.item;
+            <li class="r {{ it.rarity.toLowerCase() }}">
+              <span class="gi"><app-icon [name]="slotIconOf(it)" [size]="20" /></span>
+              <div class="info">
+                <b class="nm">{{ name(it) }} <small>/ +{{ cap(it) }}</small></b>
+                <small>{{ lines(it).join(' · ') }}</small>
+                @if (x.wearer) { <small class="worn">สวมอยู่: {{ x.wearer }}</small> }
+              </div>
+              <div class="act">
+                @if (cost(it); as c) {
+                  <small [class.miss]="ore() < c.ore || gold() < c.gold">{{ c.ore }} ore · {{ c.gold }} ทอง</small>
+                  <button type="button" class="gm-btn small primary" (click)="upgrade(it)" [disabled]="ore() < c.ore || gold() < c.gold">+{{ it.upgradeLevel + 1 }}</button>
+                } @else { <span class="gm-chip gold">MAX</span> }
+              </div>
+            </li>
+          } @empty { <li class="none"><small>ยังไม่มีอุปกรณ์ — ลง Equipment Hunt ในเมนูดันเจี้ยน</small></li> }
+        </ul>
+      </section>
+    }
+
+    @case ('salvage') {
+      <section class="gm-panel">
+        <p class="note">ย่อยได้เฉพาะของในกระเป๋าที่ไม่ได้ล็อก (ของที่สวมอยู่ต้องถอดก่อน)</p>
+        <ul class="items">
+          @for (it of salvageList(); track it.instanceId) {
+            <li class="r {{ it.rarity.toLowerCase() }}">
+              <span class="gi"><app-icon [name]="slotIconOf(it)" [size]="20" /></span>
+              <div class="info">
+                <b class="nm">{{ name(it) }}</b>
+                <small>ได้: {{ dismantleText(it) }}</small>
+              </div>
+              <div class="act">
+                <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="it.locked" (click)="toggleLock(it)" [attr.aria-label]="it.locked ? 'ปลดล็อก' : 'ล็อก'"><app-icon name="lock" [size]="13" /></button>
+                <button type="button" class="gm-btn small" (click)="dismantle(it)" [disabled]="it.locked">ย่อย</button>
+              </div>
+            </li>
+          } @empty { <li class="none"><small>กระเป๋าว่าง</small></li> }
+        </ul>
+      </section>
+    }
+  }
+</section>

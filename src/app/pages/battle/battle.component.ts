@@ -3,6 +3,7 @@ import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { Component, computed, effect, HostListener, inject, isDevMode, OnDestroy, signal, untracked } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TeamPresetsComponent } from '../../shared/team-presets.component';
+import { DUNGEON_TYPES } from '../dungeons/dungeons.component';
 import { IconComponent } from '../../shared/icon.component';
 import { STAGES } from '../../core/data/stages';
 import { FARM_BY_ID } from '../../core/data/economy';
@@ -345,9 +346,16 @@ export class BattleComponent implements OnDestroy {
     this.selectFloorKeepMode(n);
   }
 
-  /** result card: back to the tower screen */
+  /** where "back" goes: the tower, or this dungeon's own menu */
+  readonly backLink = computed(() => {
+    const f = this.farmId();
+    const t = f ? DUNGEON_TYPES.find(x => x.pool === FARM_BY_ID[f].dailyBonusPool) : null;
+    return t ? ['/dungeons', t.id] : ['/tower'];
+  });
+
+  /** result card: back to the tower / dungeon screen */
   backToTower(): void {
-    this.router.navigate(['/tower']);
+    this.router.navigate(this.backLink());
   }
 
   private selectFloorKeepMode(n: number): void {
