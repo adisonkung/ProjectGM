@@ -1,85 +1,79 @@
-@let terr = terrain();
-@let sk = sky();
-<svg class="scene" [attr.viewBox]="view.x + ' ' + view.y + ' ' + view.w + ' ' + view.h" preserveAspectRatio="xMidYMid meet" role="img" aria-label="เกาะของคุณ">
-  <defs>
-    <linearGradient id="isl-sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" [attr.stop-color]="sk.skyTop" /><stop offset="1" [attr.stop-color]="sk.skyBottom" />
-    </linearGradient>
-    <radialGradient id="isl-ground" cx=".5" cy=".42" r=".62">
-      <stop offset="0" [attr.stop-color]="terr.ground" stop-opacity="1" /><stop offset="1" [attr.stop-color]="terr.ground" stop-opacity=".82" />
-    </radialGradient>
-    <filter id="isl-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10" /></filter>
-  </defs>
-
-  <!-- background (theme) -->
-  <rect [attr.x]="view.x" [attr.y]="view.y" [attr.width]="view.w" [attr.height]="view.h" fill="url(#isl-sky)" />
-  <rect [attr.x]="view.x" [attr.y]="view.y" [attr.width]="view.w" [attr.height]="view.h" [attr.fill]="sk.water" opacity=".55" />
-
-  <g class="cam" [style.transform]="camera()">
-    <!-- island body: cliff + ground (coast is decoration; the walkable mask lives in island-layout.ts) -->
-    <path [attr.d]="cliff" [attr.fill]="terr.cliff" />
-    <path [attr.d]="coast" fill="url(#isl-ground)" stroke="#0006" stroke-width="3" />
-    <!-- roads + plaza -->
-    <path [attr.d]="roads" fill="none" [attr.stroke]="terr.path" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" opacity=".75" />
-    <ellipse [attr.cx]="plaza.x" [attr.cy]="plaza.y + 10" rx="78" ry="44" [attr.fill]="terr.plaza" opacity=".85" />
-    <ellipse [attr.cx]="homeSpot.x" [attr.cy]="homeSpot.y + 6" rx="64" ry="34" [attr.fill]="terr.plaza" opacity=".6" />
-    <!-- plot pads (every plot is visible from day one) -->
-    @for (p of plots; track p.plotId) {
-      <rect [attr.x]="p.buildingBounds.x - 8" [attr.y]="p.buildingBounds.y + p.buildingBounds.h - 22" [attr.width]="p.buildingBounds.w + 16" height="30" rx="12"
-            [attr.fill]="terr.plot" opacity=".9" />
-    }
-    <!-- vegetation (theme) -->
-    @for (t of trees(); track $index) {
-      <g class="tree"><ellipse [attr.cx]="t.x" [attr.cy]="t.y + 3" [attr.rx]="t.r * 0.9" [attr.ry]="t.r * 0.35" fill="#0005" />
-        <circle [attr.cx]="t.x" [attr.cy]="t.y - t.r * 0.7" [attr.r]="t.r" [attr.fill]="t.c" stroke="#0a1a0e" stroke-width="2" /></g>
-    }
-
-    <!-- buildings + heroes, depth sorted -->
-    @for (d of drawables(); track trackD($index, d)) {
-      @if (d.kind === 'B') {
-        @let locked = !d.state.isUnlocked;
-        <g class="bld" [class.locked]="locked" [class.sel]="selected() === d.def.id" [class.future]="d.def.future" [class.fx]="fxBuilding() === d.def.id">
-          <ellipse [attr.cx]="d.bounds.x + d.bounds.w / 2" [attr.cy]="d.bounds.y + d.bounds.h" [attr.rx]="d.bounds.w * 0.55" ry="9" fill="#0007" />
-          <g appBuildingVisual [skin]="skinFor(d.def.id)" [stage]="d.state.visualStage" [bounds]="d.bounds" />
-          @if (fxBuilding() === d.def.id) {
-            <g class="burst">
-              @for (i of [0, 1, 2, 3, 4, 5, 6, 7]; track i) {
-                <circle [attr.cx]="d.bounds.x + d.bounds.w * (0.1 + (i % 4) * 0.27)" [attr.cy]="d.bounds.y + d.bounds.h - 6 - (i > 3 ? 18 : 0)" r="9" [style.animation-delay.ms]="i * 90" />
-              }
-            </g>
-          }
-          <!-- name plate: part of the scene, not of the art (stays when sprites arrive) -->
-          <g class="plate" [attr.transform]="'translate(' + (d.bounds.x + d.bounds.w / 2) + ' ' + (d.bounds.y + d.bounds.h + 22) + ')'">
-            <text text-anchor="middle" class="bname">{{ d.def.name }}</text>
-            @if (locked) {
-              <text text-anchor="middle" y="17" class="req">🔒 {{ requirement(d.def) }}</text>
-            } @else if (d.state.progressionLevel && !d.def.future && d.def.id !== 'tower') {
-              <text text-anchor="middle" y="17" class="lv">Lv {{ d.state.progressionLevel }}</text>
-            } @else if (d.def.future) {
-              <text text-anchor="middle" y="17" class="req">เร็ว ๆ นี้</text>
-            }
-          </g>
-          <!-- hit area = the plot footprint + plate -->
-          <rect class="hit" [attr.x]="d.bounds.x - 6" [attr.y]="d.bounds.y - 16" [attr.width]="d.bounds.w + 12" [attr.height]="d.bounds.h + 60"
-                [attr.aria-label]="d.def.name" role="button" tabindex="0" (click)="buildingTap.emit(d.def.id)" (keydown.enter)="buildingTap.emit(d.def.id)" />
-        </g>
-      } @else {
-        <g class="hero" appIslandHero [hero]="d.hero" (click)="heroTap.emit(d.hero.uid)" role="button" [attr.aria-label]="d.hero.name" />
+<div class="vp" #vp (pointerdown)="onPointerDown($event)" (wheel)="onWheel($event)">
+  <div class="stage" [style.width.px]="W * k()" [style.height.px]="H * k()">
+    <div class="world" [style.width.px]="W" [style.height.px]="H" [style.transform]="transform()">
+      <!-- background: sky, parallax ranges, clouds, floating rocks -->
+      @if (sky(); as s) { <img class="px bg" [src]="s.src" alt="" [style.width.px]="s.w" [style.height.px]="s.h" [style.transform]="'translateX(' + scrollX() * 0.9 + 'px)'" /> }
+      @for (r of rocks(); track r.key) {
+        <img class="px bg rock" [src]="r.src" alt="" [style.left.px]="r.x" [style.top.px]="r.y" [style.width.px]="r.w" [style.height.px]="r.h"
+             [style.translate]="scrollX() * 0.7 + 'px 0'" />
       }
-    }
+      @for (c of clouds(); track c.key) {
+        <img class="px bg cloud" [src]="c.src" alt="" [style.left.px]="c.x" [style.top.px]="c.y" [style.width.px]="c.w" [style.height.px]="c.h"
+             [style.animation-duration.s]="c.d" [style.translate]="scrollX() * 0.8 + 'px 0'" />
+      }
+      @for (f of far(); track f.key) {
+        <img class="px bg" [src]="f.src" alt="" [style.left.px]="f.x" [style.top.px]="f.y" [style.width.px]="f.w" [style.height.px]="f.h"
+             [style.transform]="'translateX(' + scrollX() * (1 - f.p) + 'px)'" />
+      }
+      @if (mist(); as m) { <img class="px mist" [src]="m.src" alt="" [style.top.px]="H - m.h + 30" [style.width.px]="m.w" [style.height.px]="m.h" /> }
 
-    <!-- ambient VFX (theme) -->
-    @if (theme().ambientVfx === 'FIREFLIES') {
-      <g class="fireflies" aria-hidden="true">
-        @for (f of fireflies; track $index) {
-          <circle [attr.cx]="f.x" [attr.cy]="f.y" r="2.2" [style.animation-duration.s]="f.d" [style.animation-delay.s]="f.delay" />
+      <!-- gameplay ground: terrain, water, roads, bridges -->
+      @if (ground(); as g) { <img class="px" [src]="g.src" alt="" [style.width.px]="g.w" [style.height.px]="g.h" /> }
+      @if (water(); as w) { <ng-container *ngTemplateOutlet="sheetT; context: { $implicit: w }" /> }
+      @if (waterfall(); as w) { <ng-container *ngTemplateOutlet="sheetT; context: { $implicit: w }" /> }
+      @if (roads(); as r) { <img class="px" [src]="r.src" alt="" [style.width.px]="r.w" [style.height.px]="r.h" /> }
+      @for (b of bridge(); track b.key) { <img class="px" [src]="b.src" alt="" [style.left.px]="b.x" [style.top.px]="b.y" [style.width.px]="b.w" [style.height.px]="b.h" /> }
+
+      <!-- buildings · decorations · heroes (depth = ground line) -->
+      @for (s of sprites(); track s.key) {
+        @if (s.frames) {
+          <ng-container *ngTemplateOutlet="sheetT; context: { $implicit: s }" />
+        } @else {
+          <img class="px" [src]="s.src" alt="" draggable="false" [class.flip]="s.flip" [class]="'px ' + (s.motion ?? '') + (s.glow ? ' glow' : '') + (s.flip ? ' flip' : '') + (fxBuilding() && s.key.startsWith(fxBuilding() + ':') ? ' rise' : '')"
+               [style.left.px]="s.x" [style.top.px]="s.y" [style.width.px]="s.w" [style.height.px]="s.h" [style.z-index]="s.z" [style.animation-delay.s]="s.delay ?? 0" />
         }
-      </g>
-    }
-    @if (theme().weatherPreset === 'MIST') {
-      <g class="mist" aria-hidden="true">
-        <ellipse cx="120" cy="820" rx="200" ry="40" /><ellipse cx="500" cy="120" rx="180" ry="36" />
-      </g>
-    }
-  </g>
-</svg>
+      }
+      @for (p of draw().placeholders; track p.key) {
+        <svg class="ph" [attr.viewBox]="(p.bounds.x - 30) + ' ' + (p.bounds.y - 60) + ' ' + (p.bounds.w + 60) + ' ' + (p.bounds.h + 70)"
+             [style.left.px]="p.bounds.x - 30" [style.top.px]="p.bounds.y - 60" [style.width.px]="p.bounds.w + 60" [style.height.px]="p.bounds.h + 70" [style.z-index]="p.z">
+          <g appPlaceholderBuilding [bounds]="p.bounds" [style]="p.style" />
+        </svg>
+      }
+      @for (h of heroes(); track h.uid) {
+        <app-island-hero [hero]="h" [style.left.px]="h.x" [style.top.px]="h.y" [style.z-index]="100000 + h.y * 10 + 5" (click)="tapHero(h.uid)"
+                         role="button" [attr.aria-label]="h.name" />
+      }
+      @for (f of fireflies(); track f.key) { <ng-container *ngTemplateOutlet="sheetT; context: { $implicit: f, z: 950000 }" /> }
+      @for (b of branches(); track b.key) {
+        <img class="px fore sway-slow" [src]="b.src" alt="" [style.left.px]="b.x" [style.top.px]="b.y" [style.width.px]="b.w" [style.height.px]="b.h" />
+      }
+
+      <!-- lighting: dusk ambient + local light pools -->
+      <div class="ambient" [style.background]="'linear-gradient(to bottom, ' + theme().lightingPreset.ambient + ', transparent 45%, ' + theme().lightingPreset.ambient + ')'"></div>
+      @for (l of lights(); track l.key) {
+        <div class="light" [class.flicker]="l.flicker" [style.left.px]="l.x - l.r" [style.top.px]="l.y - l.r" [style.width.px]="l.r * 2" [style.height.px]="l.r * 2"
+             [style.background]="'radial-gradient(circle, ' + l.color + ' 0%, transparent 70%)'"></div>
+      }
+      @if (theme().weatherPreset === 'MIST') { <div class="fog"></div> }
+
+      <!-- interaction: tap areas + name plates (part of the scene, not of the art) -->
+      @for (b of draw().hits; track b.id) {
+        <button type="button" class="hit" [class.sel]="selected() === b.id" [attr.aria-label]="b.name + (b.locked ? ' (ล็อก)' : '')"
+                [style.left.px]="b.hit.x" [style.top.px]="b.hit.y" [style.width.px]="b.hit.w" [style.height.px]="b.hit.h" (click)="tapBuilding(b.id)"></button>
+        <div class="plate" [class.locked]="b.locked" [style.left.px]="b.plate.x" [style.top.px]="b.plate.y">
+          <b>{{ b.name }}</b>
+          @if (b.locked) { <small>🔒 ชั้น {{ b.requirement }}</small> }
+          @else if (b.future) { <small class="soon">เร็ว ๆ นี้</small> }
+          @else if (b.id !== 'tower' && b.level) { <small class="lv">Lv {{ b.level }}</small> }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<ng-template #sheetT let-s let-z="z">
+  <div class="anim" [class.rare]="s.rare" [class.glow]="s.glow" [class.flip]="s.flip" [class.bob]="s.motion === 'bob'"
+       [style.left.px]="s.x" [style.top.px]="s.y" [style.width.px]="s.w" [style.height.px]="s.h" [style.z-index]="z ?? s.z"
+       [style.background-image]="'url(' + s.src + ')'" [style.--n]="s.frames" [style.--fw.px]="s.w" [style.--dur.s]="s.duration"
+       [style.animation-delay.s]="s.delay ?? 0"></div>
+</ng-template>

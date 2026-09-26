@@ -96,14 +96,15 @@ export class IslandSim {
 
   constructor(input: SimHeroInput[], unlockedBuildings: Iterable<string>, private readonly rng: () => number = Math.random) {
     this.unlocked = new Set(unlockedBuildings);
-    const starts = ['plaza', 'plaza_w', 'plaza_e', 'plaza_s', 'home_w', 'home_e', 'home', 'tower_l', 'tower_r'];
+    // main hero spawns on the central plaza (home position); others start around the settlement
+    const starts = ['plaza', 'plaza_bench', 'plaza_s', 'e_bench', 'e4', 'a_dummy', 'tower_view', 'plaza_ne', 'd_meditate'];
     this.heroes = input.map((h, i) => {
       const at = starts[i % starts.length];
       return {
         heroId: h.uid, templateId: h.templateId, cls: h.cls, isMainHero: h.isMain,
         currentPosition: { ...NAV_BY_ID[at].pos }, currentState: 'IDLE' as IslandHeroActivity, targetWaypoint: at,
         path: [], at, wait: 0.4 + this.rng() * 2.2, busy: 0, facingLeft: this.rng() < 0.5, walking: false,
-        homeArea: i % 2 === 0 ? 'PLAZA' : 'HOME',
+        homeArea: 'PLAZA' as const,
       };
     });
   }
@@ -128,7 +129,7 @@ export class IslandSim {
     const wants = CLASS_HANGOUTS[h.cls] ?? [];
     const spots: { node: string; building?: string }[] = [];
     for (const w of wants) {
-      if (w === 'PLAZA_EDGE') { for (const n of ['plaza_w', 'plaza_e']) if (free(n)) spots.push({ node: n }); continue; }
+      if (w === 'PLAZA_EDGE') { for (const n of ['plaza_bench', 'plaza_ne', 'e4']) if (free(n)) spots.push({ node: n }); continue; }
       if (!this.unlocked.has(w)) continue;
       const plot = PLOT_BY_ID[BUILDING_BY_ID[w].plotId];
       for (const n of plot.heroIdlePoints) if (free(n)) spots.push({ node: n, building: w });
@@ -154,7 +155,7 @@ export class IslandSim {
 
     if (h.currentState === 'BUILDING_IDLE') {
       state = 'RETURN_TO_AREA';
-      target = this.pick(NAV_NODES.filter(n => n.area === h.homeArea && free(n.id)).map(n => n.id)) ?? (h.homeArea === 'PLAZA' ? 'plaza' : 'home');
+      target = this.pick(NAV_NODES.filter(n => n.area === h.homeArea && free(n.id)).map(n => n.id)) ?? 'plaza';
     } else if (r < (h.isMainHero ? 0.3 : 0.45)) {
       const spot = this.buildingSpots(h, free);
       if (spot) { target = spot.node; building = spot.building; state = spot.building ? 'WALK_TO_BUILDING' : 'WANDER'; }

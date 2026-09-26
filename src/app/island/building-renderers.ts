@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { skinStage } from '../core/data/island-themes';
-import { BuildingSkin, PlaceholderStageStyle, Rect, SpriteStageStyle } from '../core/models/island';
+import { PlaceholderStageStyle, Rect } from '../core/models/island';
 import { ICON_PATHS } from '../shared/icon.component';
 
 /**
- * Building RENDERERS — the only code that knows what a building looks like.
- * Both draw inside the plot footprint (`bounds`, bottom-centre anchored) handed to them by the scene; they never decide
- * position, collision, unlocks or interaction. PixelArt = the same contract with an <image>.
+ * PLACEHOLDER building renderer — the final fallback when a theme has no base art for a building.
+ * Draws inside the plot footprint (`bounds`); never decides position, collision, unlocks or interaction.
+ * (Pixel-art buildings are LAYERED skins drawn by the island scene from the theme's asset slots.)
  */
 
 /** PlaceholderBuildingRenderer: simple geometry + icon (Patch 1 prototype) */
@@ -90,42 +89,4 @@ export class PlaceholderBuildingRendererComponent {
     const mid = shape === 'CIRCLE' || shape === 'HEX' ? g.bottom - g.r : shape === 'RUIN' ? g.bottom - 44 : shape === 'PILLAR' ? g.bottom - g.h * 0.6 : g.bottom - g.h * 0.36;
     return mid - 14;
   }
-}
-
-/** PixelArtBuildingRenderer: same contract, draws a sprite anchored bottom-centre on the footprint */
-@Component({
-  selector: 'g[appSpriteBuilding]',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    @let b = bounds();
-    @let w = style().w ?? b.w;
-    @let h = style().h ?? b.h;
-    <svg:image [attr.href]="style().src" [attr.x]="b.x + b.w / 2 - w / 2" [attr.y]="b.y + b.h - h" [attr.width]="w" [attr.height]="h" preserveAspectRatio="xMidYMax meet" style="image-rendering: pixelated" />
-  `,
-})
-export class PixelArtBuildingRendererComponent {
-  readonly bounds = input.required<Rect>();
-  readonly style = input.required<SpriteStageStyle>();
-}
-
-/** picks the renderer from the resolved skin — the scene only hands over (skin, stage, footprint) */
-@Component({
-  selector: 'g[appBuildingVisual]',
-  imports: [PlaceholderBuildingRendererComponent, PixelArtBuildingRendererComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    @let sk = skin();
-    @if (sk.kind === 'SPRITE') {
-      <svg:g appSpriteBuilding [bounds]="bounds()" [style]="spriteStyle()!" />
-    } @else {
-      <svg:g appPlaceholderBuilding [bounds]="bounds()" [style]="placeholderStyle()!" />
-    }
-  `,
-})
-export class BuildingVisualComponent {
-  readonly skin = input.required<BuildingSkin>();
-  readonly stage = input.required<number>();
-  readonly bounds = input.required<Rect>();
-  readonly placeholderStyle = computed(() => { const s = this.skin(); return s.kind === 'PLACEHOLDER' ? skinStage(s.stages, this.stage()) : null; });
-  readonly spriteStyle = computed(() => { const s = this.skin(); return s.kind === 'SPRITE' ? skinStage(s.stages, this.stage()) : null; });
 }

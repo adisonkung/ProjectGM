@@ -1,0 +1,1143 @@
+{
+ "assets": {
+  "bg.cloud1": {
+   "ax": 30.0,
+   "ay": 10.0,
+   "h": 20,
+   "src": "island/default_forest/bg/island_default_bg_cloud_01.png",
+   "w": 60
+  },
+  "bg.cloud2": {
+   "ax": 37.0,
+   "ay": 11.5,
+   "h": 23,
+   "src": "island/default_forest/bg/island_default_bg_cloud_02.png",
+   "w": 74
+  },
+  "bg.cloud3": {
+   "ax": 44.0,
+   "ay": 13.0,
+   "h": 26,
+   "src": "island/default_forest/bg/island_default_bg_cloud_03.png",
+   "w": 88
+  },
+  "bg.floatingRock1": {
+   "ax": 18.0,
+   "ay": 16.0,
+   "h": 32,
+   "src": "island/default_forest/bg/island_default_bg_floating_rock_01.png",
+   "w": 36
+  },
+  "bg.floatingRock2": {
+   "ax": 24.0,
+   "ay": 19.0,
+   "h": 38,
+   "src": "island/default_forest/bg/island_default_bg_floating_rock_02.png",
+   "w": 48
+  },
+  "bg.forestFar": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/bg/island_default_bg_forest_far.png",
+   "w": 1600
+  },
+  "bg.mist": {
+   "ax": 0,
+   "ay": 0,
+   "h": 40,
+   "src": "island/default_forest/bg/island_default_bg_mist.png",
+   "w": 880
+  },
+  "bg.mountains": {
+   "ax": 0,
+   "ay": 0,
+   "h": 90,
+   "src": "island/default_forest/bg/island_default_bg_mountains.png",
+   "w": 1600
+  },
+  "bg.sky": {
+   "ax": 0,
+   "ay": 0,
+   "h": 360,
+   "src": "island/default_forest/bg/island_default_bg_sky.png",
+   "w": 1600
+  },
+  "building.ascension.base.s0": {
+   "ax": 40.0,
+   "ay": 75,
+   "h": 76,
+   "src": "island/default_forest/building/island_default_building_ascension_shrine_s0.png",
+   "w": 80
+  },
+  "building.ascension.base.s1": {
+   "ax": 40.0,
+   "ay": 75,
+   "h": 76,
+   "src": "island/default_forest/building/island_default_building_ascension_shrine_s1.png",
+   "w": 80
+  },
+  "building.ascension.base.s2": {
+   "ax": 40.0,
+   "ay": 75,
+   "h": 76,
+   "src": "island/default_forest/building/island_default_building_ascension_shrine_s2.png",
+   "w": 80
+  },
+  "building.ascension.crystal": {
+   "ax": 9.0,
+   "ay": 12.0,
+   "h": 24,
+   "src": "island/default_forest/building/island_default_building_ascension_crystal.png",
+   "w": 18
+  },
+  "building.ascension.fx.runeCircle": {
+   "ax": 35.0,
+   "ay": 10.0,
+   "fps": 5,
+   "frames": 8,
+   "h": 20,
+   "src": "island/default_forest/fx/island_default_fx_ascension_rune_circle.png",
+   "w": 70
+  },
+  "building.board.base.s0": {
+   "ax": 23.0,
+   "ay": 45,
+   "h": 46,
+   "src": "island/default_forest/building/island_default_building_challenge_board_s0.png",
+   "w": 46
+  },
+  "building.board.base.s1": {
+   "ax": 23.0,
+   "ay": 45,
+   "h": 46,
+   "src": "island/default_forest/building/island_default_building_challenge_board_s1.png",
+   "w": 46
+  },
+  "building.dock.base.s0": {
+   "ax": 60.0,
+   "ay": 67,
+   "h": 68,
+   "src": "island/default_forest/building/island_default_building_dock_s0.png",
+   "w": 120
+  },
+  "building.dock.base.s1": {
+   "ax": 60.0,
+   "ay": 67,
+   "h": 68,
+   "src": "island/default_forest/building/island_default_building_dock_s1.png",
+   "w": 120
+  },
+  "building.forge.arcane": {
+   "ax": 51.0,
+   "ay": 85,
+   "h": 86,
+   "src": "island/default_forest/building/island_default_building_forge_arcane_base.png",
+   "w": 102
+  },
+  "building.forge.base": {
+   "ax": 51.0,
+   "ay": 85,
+   "h": 86,
+   "src": "island/default_forest/building/island_default_building_forge_base.png",
+   "w": 102
+  },
+  "building.forge.fx.fire": {
+   "ax": 7.0,
+   "ay": 15,
+   "fps": 10,
+   "frames": 6,
+   "h": 16,
+   "src": "island/default_forest/fx/island_default_fx_forge_fire.png",
+   "w": 14
+  },
+  "building.forge.fx.smoke": {
+   "ax": 13.0,
+   "ay": 55,
+   "fps": 6,
+   "frames": 8,
+   "h": 56,
+   "src": "island/default_forest/fx/island_default_fx_forge_smoke.png",
+   "w": 26
+  },
+  "building.forge.fx.sparks": {
+   "ax": 10.0,
+   "ay": 17,
+   "fps": 14,
+   "frames": 6,
+   "h": 18,
+   "loop": "rare",
+   "src": "island/default_forest/fx/island_default_fx_forge_sparks.png",
+   "w": 20
+  },
+  "building.forge.light": {
+   "ax": 51.0,
+   "ay": 85,
+   "h": 86,
+   "src": "island/default_forest/building/island_default_building_forge_light.png",
+   "w": 102
+  },
+  "building.hall.base": {
+   "ax": 49.0,
+   "ay": 79,
+   "h": 80,
+   "src": "island/default_forest/building/island_default_building_hero_hall_base.png",
+   "w": 98
+  },
+  "building.memorial.base.s0": {
+   "ax": 25.0,
+   "ay": 65,
+   "h": 66,
+   "src": "island/default_forest/building/island_default_building_memorial_s0.png",
+   "w": 50
+  },
+  "building.memorial.base.s1": {
+   "ax": 25.0,
+   "ay": 65,
+   "h": 66,
+   "src": "island/default_forest/building/island_default_building_memorial_s1.png",
+   "w": 50
+  },
+  "building.ruin.large": {
+   "ax": 41.0,
+   "ay": 31,
+   "h": 32,
+   "src": "island/default_forest/building/island_default_building_ruin_large.png",
+   "w": 82
+  },
+  "building.ruin.medium": {
+   "ax": 32.0,
+   "ay": 27,
+   "h": 28,
+   "src": "island/default_forest/building/island_default_building_ruin_medium.png",
+   "w": 64
+  },
+  "building.ruin.small": {
+   "ax": 23.0,
+   "ay": 23,
+   "h": 24,
+   "src": "island/default_forest/building/island_default_building_ruin_small.png",
+   "w": 46
+  },
+  "building.skill.base.s0": {
+   "ax": 36.0,
+   "ay": 101,
+   "h": 102,
+   "src": "island/default_forest/building/island_default_building_skill_shrine_s0.png",
+   "w": 72
+  },
+  "building.skill.base.s1": {
+   "ax": 36.0,
+   "ay": 101,
+   "h": 102,
+   "src": "island/default_forest/building/island_default_building_skill_shrine_s1.png",
+   "w": 72
+  },
+  "building.skill.base.s2": {
+   "ax": 36.0,
+   "ay": 101,
+   "h": 102,
+   "src": "island/default_forest/building/island_default_building_skill_shrine_s2.png",
+   "w": 72
+  },
+  "building.skill.crystal": {
+   "ax": 9.0,
+   "ay": 12.0,
+   "h": 24,
+   "src": "island/default_forest/building/island_default_building_skill_crystal.png",
+   "w": 18
+  },
+  "building.skill.runes.s1": {
+   "ax": 36.0,
+   "ay": 101,
+   "h": 102,
+   "src": "island/default_forest/building/island_default_building_skill_shrine_runes_s1.png",
+   "w": 72
+  },
+  "building.skill.runes.s2": {
+   "ax": 36.0,
+   "ay": 101,
+   "h": 102,
+   "src": "island/default_forest/building/island_default_building_skill_shrine_runes_s2.png",
+   "w": 72
+  },
+  "building.tavern.base": {
+   "ax": 49.0,
+   "ay": 79,
+   "h": 80,
+   "src": "island/default_forest/building/island_default_building_tavern_base.png",
+   "w": 98
+  },
+  "building.tavern.light": {
+   "ax": 49.0,
+   "ay": 79,
+   "h": 80,
+   "src": "island/default_forest/building/island_default_building_tavern_light.png",
+   "w": 98
+  },
+  "building.tower.base.active": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_base_active.png",
+   "w": 86
+  },
+  "building.tower.base.ascended": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_base_ascended.png",
+   "w": 86
+  },
+  "building.tower.base.awakened": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_base_awakened.png",
+   "w": 86
+  },
+  "building.tower.base.corrupted": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_base_corrupted.png",
+   "w": 86
+  },
+  "building.tower.base.sealed": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_base_sealed.png",
+   "w": 86
+  },
+  "building.tower.crystal.emerald": {
+   "ax": 9.0,
+   "ay": 12.0,
+   "h": 24,
+   "src": "island/default_forest/building/island_default_building_tower_crystal_emerald.png",
+   "w": 18
+  },
+  "building.tower.crystal.gold": {
+   "ax": 9.0,
+   "ay": 12.0,
+   "h": 24,
+   "src": "island/default_forest/building/island_default_building_tower_crystal_gold.png",
+   "w": 18
+  },
+  "building.tower.crystal.violet": {
+   "ax": 9.0,
+   "ay": 12.0,
+   "h": 24,
+   "src": "island/default_forest/building/island_default_building_tower_crystal_violet.png",
+   "w": 18
+  },
+  "building.tower.fx.aura.emerald": {
+   "ax": 55.0,
+   "ay": 80.0,
+   "fps": 4,
+   "frames": 8,
+   "h": 160,
+   "src": "island/default_forest/fx/island_default_fx_tower_aura_emerald.png",
+   "w": 110
+  },
+  "building.tower.fx.aura.gold": {
+   "ax": 55.0,
+   "ay": 80.0,
+   "fps": 4,
+   "frames": 8,
+   "h": 160,
+   "src": "island/default_forest/fx/island_default_fx_tower_aura_gold.png",
+   "w": 110
+  },
+  "building.tower.fx.aura.violet": {
+   "ax": 55.0,
+   "ay": 80.0,
+   "fps": 4,
+   "frames": 8,
+   "h": 160,
+   "src": "island/default_forest/fx/island_default_fx_tower_aura_violet.png",
+   "w": 110
+  },
+  "building.tower.fx.particles.emerald": {
+   "ax": 20.0,
+   "ay": 69,
+   "fps": 6,
+   "frames": 8,
+   "h": 70,
+   "src": "island/default_forest/fx/island_default_fx_tower_particles_emerald.png",
+   "w": 40
+  },
+  "building.tower.fx.particles.gold": {
+   "ax": 20.0,
+   "ay": 69,
+   "fps": 6,
+   "frames": 8,
+   "h": 70,
+   "src": "island/default_forest/fx/island_default_fx_tower_particles_gold.png",
+   "w": 40
+  },
+  "building.tower.fx.particles.violet": {
+   "ax": 20.0,
+   "ay": 69,
+   "fps": 6,
+   "frames": 8,
+   "h": 70,
+   "src": "island/default_forest/fx/island_default_fx_tower_particles_violet.png",
+   "w": 40
+  },
+  "building.tower.fx.pulse.emerald": {
+   "ax": 70.0,
+   "ay": 30.0,
+   "fps": 12,
+   "frames": 10,
+   "h": 60,
+   "loop": "rare",
+   "src": "island/default_forest/fx/island_default_fx_tower_pulse_emerald.png",
+   "w": 140
+  },
+  "building.tower.fx.pulse.gold": {
+   "ax": 70.0,
+   "ay": 30.0,
+   "fps": 12,
+   "frames": 10,
+   "h": 60,
+   "loop": "rare",
+   "src": "island/default_forest/fx/island_default_fx_tower_pulse_gold.png",
+   "w": 140
+  },
+  "building.tower.fx.pulse.violet": {
+   "ax": 70.0,
+   "ay": 30.0,
+   "fps": 12,
+   "frames": 10,
+   "h": 60,
+   "loop": "rare",
+   "src": "island/default_forest/fx/island_default_fx_tower_pulse_violet.png",
+   "w": 140
+  },
+  "building.tower.glow.cyan": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_glow_cyan.png",
+   "w": 86
+  },
+  "building.tower.glow.gold": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_glow_gold.png",
+   "w": 86
+  },
+  "building.tower.runes.emerald": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_rune_emerald.png",
+   "w": 86
+  },
+  "building.tower.runes.gold": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_rune_gold.png",
+   "w": 86
+  },
+  "building.tower.runes.violet": {
+   "ax": 43.0,
+   "ay": 153,
+   "h": 154,
+   "src": "island/default_forest/building/island_default_building_tower_rune_violet.png",
+   "w": 86
+  },
+  "building.tower.shadow": {
+   "ax": 57.0,
+   "ay": 13,
+   "h": 14,
+   "src": "island/default_forest/building/island_default_building_tower_shadow.png",
+   "w": 114
+  },
+  "building.workshop.base": {
+   "ax": 51.0,
+   "ay": 85,
+   "h": 86,
+   "src": "island/default_forest/building/island_default_building_workshop_base.png",
+   "w": 102
+  },
+  "fore.branchLeft": {
+   "ax": 0,
+   "ay": 0,
+   "h": 60,
+   "src": "island/default_forest/fore/island_default_fore_branch_left.png",
+   "w": 120
+  },
+  "fore.branchRight": {
+   "ax": 0,
+   "ay": 0,
+   "h": 60,
+   "src": "island/default_forest/fore/island_default_fore_branch_right.png",
+   "w": 120
+  },
+  "fore.grass": {
+   "ax": 45.0,
+   "ay": 25,
+   "h": 26,
+   "src": "island/default_forest/fore/island_default_fore_grass.png",
+   "w": 90
+  },
+  "fore.grassB": {
+   "ax": 35.0,
+   "ay": 21,
+   "h": 22,
+   "src": "island/default_forest/fore/island_default_fore_grass_b.png",
+   "w": 70
+  },
+  "fx.fire": {
+   "ax": 7.0,
+   "ay": 15,
+   "fps": 10,
+   "frames": 6,
+   "h": 16,
+   "src": "island/default_forest/fx/island_default_fx_fire.png",
+   "w": 14
+  },
+  "fx.fireflies": {
+   "ax": 80.0,
+   "ay": 45.0,
+   "fps": 5,
+   "frames": 8,
+   "h": 90,
+   "src": "island/default_forest/fx/island_default_fx_fireflies.png",
+   "w": 160
+  },
+  "fx.lantern": {
+   "ax": 9.0,
+   "ay": 10.0,
+   "fps": 6,
+   "frames": 4,
+   "h": 20,
+   "src": "island/default_forest/fx/island_default_fx_lantern.png",
+   "w": 18
+  },
+  "fx.particlesCyan": {
+   "ax": 20.0,
+   "ay": 63,
+   "fps": 6,
+   "frames": 8,
+   "h": 64,
+   "src": "island/default_forest/fx/island_default_fx_particles_cyan.png",
+   "w": 40
+  },
+  "fx.particlesGold": {
+   "ax": 20.0,
+   "ay": 63,
+   "fps": 6,
+   "frames": 8,
+   "h": 64,
+   "src": "island/default_forest/fx/island_default_fx_particles_gold.png",
+   "w": 40
+  },
+  "fx.particlesViolet": {
+   "ax": 20.0,
+   "ay": 63,
+   "fps": 6,
+   "frames": 8,
+   "h": 64,
+   "src": "island/default_forest/fx/island_default_fx_particles_violet.png",
+   "w": 40
+  },
+  "fx.smoke": {
+   "ax": 13.0,
+   "ay": 55,
+   "fps": 6,
+   "frames": 8,
+   "h": 56,
+   "src": "island/default_forest/fx/island_default_fx_smoke.png",
+   "w": 26
+  },
+  "fx.sparks": {
+   "ax": 10.0,
+   "ay": 17,
+   "fps": 14,
+   "frames": 6,
+   "h": 18,
+   "loop": "rare",
+   "src": "island/default_forest/fx/island_default_fx_sparks.png",
+   "w": 20
+  },
+  "fx.windowFlicker": {
+   "ax": 0,
+   "ay": 0,
+   "fps": 5,
+   "frames": 6,
+   "h": 4,
+   "src": "island/default_forest/fx/island_default_fx_window_flicker.png",
+   "w": 4
+  },
+  "magic.crystalCluster": {
+   "ax": 12.0,
+   "ay": 23,
+   "h": 24,
+   "src": "island/default_forest/prop/island_default_prop_crystal_cluster.png",
+   "w": 24
+  },
+  "magic.glowMushrooms": {
+   "ax": 8.0,
+   "ay": 11,
+   "h": 12,
+   "src": "island/default_forest/prop/island_default_prop_glow_mushrooms.png",
+   "w": 16
+  },
+  "magic.runeStone": {
+   "ax": 8.0,
+   "ay": 25,
+   "h": 26,
+   "src": "island/default_forest/prop/island_default_prop_rune_stone_glow.png",
+   "w": 16
+  },
+  "prop.bannerBlue": {
+   "ax": 9.0,
+   "ay": 35,
+   "fps": 7,
+   "frames": 6,
+   "h": 36,
+   "src": "island/default_forest/prop/island_default_prop_banner_blue.png",
+   "w": 18
+  },
+  "prop.barrel": {
+   "ax": 7.0,
+   "ay": 15,
+   "h": 16,
+   "src": "island/default_forest/prop/island_default_prop_barrel_01.png",
+   "w": 14
+  },
+  "prop.bench": {
+   "ax": 13.0,
+   "ay": 11,
+   "h": 12,
+   "src": "island/default_forest/prop/island_default_prop_bench.png",
+   "w": 26
+  },
+  "prop.campfire": {
+   "ax": 11.0,
+   "ay": 11,
+   "h": 12,
+   "src": "island/default_forest/prop/island_default_prop_campfire.png",
+   "w": 22
+  },
+  "prop.cart": {
+   "ax": 18.0,
+   "ay": 21,
+   "h": 22,
+   "src": "island/default_forest/prop/island_default_prop_cart.png",
+   "w": 36
+  },
+  "prop.crate": {
+   "ax": 6.0,
+   "ay": 11,
+   "h": 12,
+   "src": "island/default_forest/prop/island_default_prop_crate_01.png",
+   "w": 12
+  },
+  "prop.firewood": {
+   "ax": 11.0,
+   "ay": 13,
+   "h": 14,
+   "src": "island/default_forest/prop/island_default_prop_firewood.png",
+   "w": 22
+  },
+  "prop.fountain": {
+   "ax": 24.0,
+   "ay": 45,
+   "h": 46,
+   "src": "island/default_forest/prop/island_default_prop_fountain.png",
+   "w": 48
+  },
+  "prop.fountainWater": {
+   "ax": 18.0,
+   "ay": 6.0,
+   "fps": 4,
+   "frames": 4,
+   "h": 12,
+   "src": "island/default_forest/fx/island_default_fx_fountain_water.png",
+   "w": 36
+  },
+  "prop.lanternPost": {
+   "ax": 6.0,
+   "ay": 35,
+   "h": 36,
+   "src": "island/default_forest/prop/island_default_prop_lantern_post.png",
+   "w": 12
+  },
+  "prop.signpost": {
+   "ax": 12.0,
+   "ay": 27,
+   "h": 28,
+   "src": "island/default_forest/prop/island_default_prop_signpost.png",
+   "w": 24
+  },
+  "prop.table": {
+   "ax": 12.0,
+   "ay": 15,
+   "h": 16,
+   "src": "island/default_forest/prop/island_default_prop_table.png",
+   "w": 24
+  },
+  "road.bridge": {
+   "ax": 29.0,
+   "ay": 16.0,
+   "h": 32,
+   "src": "island/default_forest/road/island_default_road_bridge.png",
+   "w": 58
+  },
+  "road.bridgeEntrance": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_bridge_entrance.png",
+   "w": 64
+  },
+  "road.broken": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_broken_road.png",
+   "w": 64
+  },
+  "road.curveLeft": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_curve_left.png",
+   "w": 64
+  },
+  "road.curveRight": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_curve_right.png",
+   "w": 64
+  },
+  "road.diagonalNE": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_diagonal_ne.png",
+   "w": 64
+  },
+  "road.diagonalNW": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_diagonal_nw.png",
+   "w": 64
+  },
+  "road.end": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_road_end.png",
+   "w": 64
+  },
+  "road.fork30": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_fork_30.png",
+   "w": 64
+  },
+  "road.fork45": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_fork_45.png",
+   "w": 64
+  },
+  "road.junction": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_junction_irregular.png",
+   "w": 64
+  },
+  "road.layer": {
+   "ax": 0,
+   "ay": 0,
+   "h": 360,
+   "src": "island/default_forest/road/island_default_road_layer.png",
+   "w": 800
+  },
+  "road.narrowTrail": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_narrow_trail.png",
+   "w": 64
+  },
+  "road.plazaConnector": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_plaza_connector.png",
+   "w": 64
+  },
+  "road.sCurve": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_s_curve.png",
+   "w": 64
+  },
+  "road.sharpCurve": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_sharp_curve.png",
+   "w": 64
+  },
+  "road.stairPath": {
+   "ax": 0,
+   "ay": 0,
+   "h": 48,
+   "src": "island/default_forest/road/island_default_road_stair_path.png",
+   "w": 64
+  },
+  "road.stairs": {
+   "ax": 13.0,
+   "ay": 27,
+   "h": 28,
+   "src": "island/default_forest/road/island_default_road_stairs.png",
+   "w": 26
+  },
+  "rock.cluster": {
+   "ax": 19.0,
+   "ay": 21,
+   "h": 22,
+   "src": "island/default_forest/rock/island_default_rock_cluster.png",
+   "w": 38
+  },
+  "rock.largeMossy": {
+   "ax": 21.0,
+   "ay": 29,
+   "h": 30,
+   "src": "island/default_forest/rock/island_default_rock_large_mossy.png",
+   "w": 42
+  },
+  "rock.medium": {
+   "ax": 13.0,
+   "ay": 17,
+   "h": 18,
+   "src": "island/default_forest/rock/island_default_rock_medium.png",
+   "w": 26
+  },
+  "rock.small": {
+   "ax": 8.0,
+   "ay": 11,
+   "h": 12,
+   "src": "island/default_forest/rock/island_default_rock_small.png",
+   "w": 16
+  },
+  "ruin.pillar": {
+   "ax": 10.0,
+   "ay": 45,
+   "h": 46,
+   "src": "island/default_forest/ruin/island_default_ruin_pillar.png",
+   "w": 20
+  },
+  "ruin.runeStone": {
+   "ax": 9.0,
+   "ay": 29,
+   "h": 30,
+   "src": "island/default_forest/ruin/island_default_ruin_runestone.png",
+   "w": 18
+  },
+  "ruin.slab": {
+   "ax": 16.0,
+   "ay": 13,
+   "h": 14,
+   "src": "island/default_forest/ruin/island_default_ruin_slab.png",
+   "w": 32
+  },
+  "ruin.statue": {
+   "ax": 12.0,
+   "ay": 43,
+   "h": 44,
+   "src": "island/default_forest/ruin/island_default_ruin_statue.png",
+   "w": 24
+  },
+  "ruin.wall": {
+   "ax": 23.0,
+   "ay": 27,
+   "h": 28,
+   "src": "island/default_forest/ruin/island_default_ruin_wall.png",
+   "w": 46
+  },
+  "terrain.cliffEdge": {
+   "ax": 0,
+   "ay": 0,
+   "h": 30,
+   "src": "island/default_forest/terrain/island_default_terrain_cliff_edge.png",
+   "w": 64
+  },
+  "terrain.dirt": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_dirt.png",
+   "w": 64
+  },
+  "terrain.dirtPacked": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_dirt_packed.png",
+   "w": 64
+  },
+  "terrain.dirtWorn": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_dirt_worn.png",
+   "w": 64
+  },
+  "terrain.grassA": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_grass_a.png",
+   "w": 64
+  },
+  "terrain.grassB": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_grass_b.png",
+   "w": 64
+  },
+  "terrain.grassDark": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_grass_dark.png",
+   "w": 64
+  },
+  "terrain.grassMoss": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_grass_c.png",
+   "w": 64
+  },
+  "terrain.ground": {
+   "ax": 0,
+   "ay": 0,
+   "h": 360,
+   "src": "island/default_forest/terrain/island_default_terrain_ground_composite.png",
+   "w": 800
+  },
+  "terrain.heightTransition": {
+   "ax": 0,
+   "ay": 0,
+   "h": 10,
+   "src": "island/default_forest/terrain/island_default_terrain_height_transition.png",
+   "w": 64
+  },
+  "terrain.mossyStone": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_mossy_stone.png",
+   "w": 64
+  },
+  "terrain.plazaGround": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_plaza_ground.png",
+   "w": 64
+  },
+  "terrain.stoneGround": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_stone_ground.png",
+   "w": 64
+  },
+  "terrain.stonePlatform": {
+   "ax": 0,
+   "ay": 0,
+   "h": 64,
+   "src": "island/default_forest/terrain/island_default_terrain_stone_platform.png",
+   "w": 64
+  },
+  "terrain.streamWater": {
+   "ax": -564,
+   "ay": -98,
+   "fps": 4,
+   "frames": 4,
+   "h": 237,
+   "src": "island/default_forest/terrain/island_default_terrain_stream_water.png",
+   "w": 46
+  },
+  "terrain.waterfall": {
+   "ax": 9,
+   "ay": 0,
+   "fps": 10,
+   "frames": 6,
+   "h": 52,
+   "src": "island/default_forest/terrain/island_default_terrain_waterfall.png",
+   "w": 18
+  },
+  "training.banner": {
+   "ax": 9.0,
+   "ay": 35,
+   "fps": 7,
+   "frames": 6,
+   "h": 36,
+   "src": "island/default_forest/prop/island_default_prop_training_banner.png",
+   "w": 18
+  },
+  "training.dummy": {
+   "ax": 8.0,
+   "ay": 27,
+   "h": 28,
+   "src": "island/default_forest/prop/island_default_prop_training_dummy.png",
+   "w": 16
+  },
+  "training.fence": {
+   "ax": 14.0,
+   "ay": 14,
+   "h": 15,
+   "src": "island/default_forest/prop/island_default_prop_fence.png",
+   "w": 28
+  },
+  "training.fenceBroken": {
+   "ax": 14.0,
+   "ay": 14,
+   "h": 15,
+   "src": "island/default_forest/prop/island_default_prop_fence_broken.png",
+   "w": 28
+  },
+  "training.mat": {
+   "ax": 32.0,
+   "ay": 19,
+   "h": 20,
+   "src": "island/default_forest/prop/island_default_prop_practice_mat.png",
+   "w": 64
+  },
+  "training.rack": {
+   "ax": 12.0,
+   "ay": 21,
+   "h": 22,
+   "src": "island/default_forest/prop/island_default_prop_weapon_rack.png",
+   "w": 24
+  },
+  "training.target": {
+   "ax": 10.0,
+   "ay": 25,
+   "h": 26,
+   "src": "island/default_forest/prop/island_default_prop_archery_target.png",
+   "w": 20
+  },
+  "tree.blossom": {
+   "ax": 31.0,
+   "ay": 73,
+   "h": 74,
+   "src": "island/default_forest/tree/island_default_tree_blossom.png",
+   "w": 62
+  },
+  "tree.dead": {
+   "ax": 24.0,
+   "ay": 65,
+   "h": 66,
+   "src": "island/default_forest/tree/island_default_tree_dead.png",
+   "w": 48
+  },
+  "tree.largeA": {
+   "ax": 43.0,
+   "ay": 101,
+   "h": 102,
+   "src": "island/default_forest/tree/island_default_tree_large_a.png",
+   "w": 86
+  },
+  "tree.largeB": {
+   "ax": 47.0,
+   "ay": 97,
+   "h": 98,
+   "src": "island/default_forest/tree/island_default_tree_large_b.png",
+   "w": 94
+  },
+  "tree.mediumA": {
+   "ax": 27.0,
+   "ay": 71,
+   "h": 72,
+   "src": "island/default_forest/tree/island_default_tree_medium_a.png",
+   "w": 54
+  },
+  "tree.mediumB": {
+   "ax": 23.0,
+   "ay": 77,
+   "h": 78,
+   "src": "island/default_forest/tree/island_default_tree_medium_b.png",
+   "w": 46
+  },
+  "tree.small": {
+   "ax": 16.0,
+   "ay": 41,
+   "h": 42,
+   "src": "island/default_forest/tree/island_default_tree_small.png",
+   "w": 32
+  },
+  "veg.bushA": {
+   "ax": 16.0,
+   "ay": 19,
+   "h": 20,
+   "src": "island/default_forest/veg/island_default_veg_a.png",
+   "w": 32
+  },
+  "veg.bushB": {
+   "ax": 13.0,
+   "ay": 17,
+   "h": 18,
+   "src": "island/default_forest/veg/island_default_veg_b.png",
+   "w": 26
+  },
+  "veg.fern": {
+   "ax": 12.0,
+   "ay": 17,
+   "h": 18,
+   "src": "island/default_forest/veg/island_default_veg_fern.png",
+   "w": 24
+  },
+  "veg.flowers": {
+   "ax": 11.0,
+   "ay": 11,
+   "h": 12,
+   "src": "island/default_forest/veg/island_default_veg_flowers.png",
+   "w": 22
+  },
+  "veg.moss": {
+   "ax": 14.0,
+   "ay": 7,
+   "h": 8,
+   "src": "island/default_forest/veg/island_default_veg_moss.png",
+   "w": 28
+  },
+  "veg.mushrooms": {
+   "ax": 9.0,
+   "ay": 11,
+   "h": 12,
+   "src": "island/default_forest/veg/island_default_veg_mushrooms.png",
+   "w": 18
+  },
+  "veg.tallGrass": {
+   "ax": 10.0,
+   "ay": 21,
+   "h": 22,
+   "src": "island/default_forest/veg/island_default_veg_tall_grass.png",
+   "w": 20
+  }
+ },
+ "pixelScale": 3,
+ "theme": "default_forest"
+}

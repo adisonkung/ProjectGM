@@ -1,95 +1,99 @@
 import { HeroClass } from '../models/hero';
-import { IslandBuildingDefinition, IslandPlotDefinition, NavEdge, NavNode, PlotId, Vec2 } from '../models/island';
+import { IslandBuildingDefinition, IslandDecor, IslandPlotDefinition, IslandRoad, NavEdge, NavNode, PlotId, Vec2 } from '../models/island';
+
+import LAYOUT_JSON from './island/default-layout.json';
+
+/** shape of `island/default-layout.json` */
+export interface IslandLayoutFile {
+  world: { w: number; h: number };
+  pixelScale: number;
+  camera: { minX: number; maxX: number; minY: number; maxY: number; spawnX: number };
+  ground: number[][];
+  plateau: number[][];
+  stream: { points: number[][]; width: number };
+  plazas: { id: string; points: number[][] }[];
+  nodes: { id: string; x: number; y: number; kind: string; area?: string; tag?: string }[];
+  roads: { id: string; kind: string; width: number; nodes: string[]; stairs?: string[][]; bridges?: string[][] }[];
+  connectors: string[][];
+  plots: { plotId: string; anchor: number[]; bounds: number[]; front: string; idle: string[]; visualOffset: number[]; fx: Record<string, number[]> }[];
+  decor?: IslandDecor[];
+  ambient?: { slot: string; x: number; y: number }[];
+  foreground?: { branches: { slot: string; x: number; y: number }[] };
+}
+export const LAYOUT = LAYOUT_JSON as unknown as IslandLayoutFile;
 
 /**
- * Home Island LAYOUT — shared by every player (never saved per account, never theme-dependent).
+ * Home Island LAYOUT — shared by every player and every theme (never saved per account). Source of truth:
+ * `island/default-layout.json` (also read by tools/island/generate.py to bake the default ground / road layers).
  *
- *                 [H]      TOWER
- *            A (Training)          B (Ascension)
- *                        PLAZA
- *            C (Workshop)          D (Skill Shrine)
- *                      HOME AREA
- *            E (Hero Hall)         F (Endgame)
- *                   G (Expedition Dock)
+ *     [H] Challenge                 TOWER (plateau, stairs)      (stream)      D Skill Shrine
+ *              E Tavern / Hall        [F] Memorial                   ┆            B Ascension
+ *     A Training ~~~~~~~ MAIN PLAZA ~~~~~~~ east road ~~~~ bridge ~~~ mystic court
+ *                                                                           C Workshop   G Dock (edge)
  *
- * World = 600 × 900 portrait canvas (fits a phone screen, one screen, no scrolling).
+ * Wide 2400 × 1080 world (20:9), horizontally pannable; organic spline roads through nav nodes.
  */
-export const ISLAND_WORLD = { w: 600, h: 900 };
-/** what the camera shows: the world plus a ring of sea around it */
-export const ISLAND_VIEW = { x: -40, y: -30, w: 680, h: 960 };
+export const ISLAND_WORLD = { w: LAYOUT.world.w, h: LAYOUT.world.h };
+/** art is authored at native resolution: 1 px = PIXEL_SCALE world units */
+export const PIXEL_SCALE = LAYOUT.pixelScale;
+export const ISLAND_CAMERA = LAYOUT.camera;
 
-/** walkable island mask: superellipse |dx/rx|^4 + |dy/ry|^4 ≤ 1 (the drawn coastline is decoration only) */
-export const ISLAND_SHAPE = { cx: 300, cy: 460, rx: 290, ry: 430, power: 4 };
-/** nav nodes / footprints must satisfy mask ≤ this (keeps a beach margin) */
-export const ISLAND_SAFE = 0.92;
-export const islandMask = (p: Vec2) =>
-  Math.abs((p.x - ISLAND_SHAPE.cx) / ISLAND_SHAPE.rx) ** ISLAND_SHAPE.power + Math.abs((p.y - ISLAND_SHAPE.cy) / ISLAND_SHAPE.ry) ** ISLAND_SHAPE.power;
-export const insideIsland = (p: Vec2, limit = 1) => islandMask(p) <= limit;
+const pts = (a: number[][]): Vec2[] => a.map(([x, y]) => ({ x, y }));
+export const GROUND_POLY: Vec2[] = pts(LAYOUT.ground);
+export const PLATEAU_POLY: Vec2[] = pts(LAYOUT.plateau);
+export const STREAM = { points: pts(LAYOUT.stream.points), width: LAYOUT.stream.width };
+export const PLAZAS = LAYOUT.plazas.map(p => ({ id: p.id, points: pts(p.points) }));
 
-// ------------------------------------------------------------------ navigation graph
+export function pointInPoly(p: Vec2, poly: Vec2[]): boolean {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const a = poly[i], b = poly[j];
+    if ((a.y > p.y) !== (b.y > p.y) && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x) c = !c;
+  }
+  return c;
+}
+export function segDist(p: Vec2, a: Vec2, b: Vec2): number {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1)));
+  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
+}
+export const distToPoly = (p: Vec2, poly: Vec2[]) => Math.min(...poly.map((a, i) => segDist(p, a, poly[(i + 1) % poly.length])));
+/** walkable = on the island, not in the stream (bridges excepted — heroes only walk nav edges anyway) */
+export const insideIsland = (p: Vec2, margin = 0) => pointInPoly(p, GROUND_POLY) && (margin <= 0 || distToPoly(p, GROUND_POLY) >= margin);
+/** nav nodes keep at least this distance to the coast */
+export const COAST_MARGIN = 24;
 
-const n = (id: string, x: number, y: number, kind: NavNode['kind'] = 'PATH', area?: NavNode['area']): NavNode => ({ id, pos: { x, y }, kind, area });
+// ------------------------------------------------------------------ navigation graph (roads + idle connectors)
 
-export const NAV_NODES: NavNode[] = [
-  // spine
-  n('tower_gate', 300, 255),
-  n('plaza', 300, 440, 'SOCIAL', 'PLAZA'),
-  n('home', 300, 640, 'SOCIAL', 'HOME'),
-  n('south', 300, 785),
-  // tower
-  n('tower_l', 250, 258, 'IDLE'), n('tower_r', 350, 258, 'IDLE'),
-  // plaza / home social spots
-  n('plaza_w', 255, 452, 'SOCIAL', 'PLAZA'), n('plaza_e', 345, 452, 'SOCIAL', 'PLAZA'), n('plaza_s', 300, 488, 'SOCIAL', 'PLAZA'),
-  n('home_w', 248, 655, 'SOCIAL', 'HOME'), n('home_e', 352, 655, 'SOCIAL', 'HOME'),
-  // plot fronts + idle points
-  n('a_front', 150, 390, 'FRONT'), n('a_idle1', 95, 393, 'IDLE'), n('a_idle2', 205, 393, 'IDLE'),
-  n('b_front', 450, 402, 'FRONT'), n('b_idle1', 400, 404, 'IDLE'), n('b_idle2', 500, 404, 'IDLE'),
-  n('c_front', 150, 595, 'FRONT'), n('c_idle1', 100, 597, 'IDLE'), n('c_idle2', 200, 597, 'IDLE'),
-  n('d_front', 450, 598, 'FRONT'), n('d_idle1', 402, 600, 'IDLE'), n('d_idle2', 498, 600, 'IDLE'),
-  n('e_front', 150, 772, 'FRONT'), n('e_idle1', 95, 774, 'IDLE'), n('e_idle2', 205, 774, 'IDLE'),
-  n('f_front', 450, 775, 'FRONT'), n('f_idle1', 400, 777, 'IDLE'), n('f_idle2', 500, 777, 'IDLE'),
-  n('h_front', 110, 232, 'FRONT'), n('h_idle1', 62, 236, 'IDLE'), n('h_idle2', 165, 240, 'IDLE'),
-  n('dock_w', 240, 790, 'IDLE'), n('dock_e', 360, 790, 'IDLE'),
-];
-
+export const NAV_NODES: NavNode[] = LAYOUT.nodes.map(n => ({
+  id: n.id, pos: { x: n.x, y: n.y }, kind: n.kind as NavNode['kind'], ...(n.area ? { area: n.area as NavNode['area'] } : {}), ...(n.tag ? { tag: n.tag } : {}),
+}));
+export const ISLAND_ROADS: IslandRoad[] = LAYOUT.roads.map(r => ({
+  id: r.id, kind: r.kind as IslandRoad['kind'], width: r.width, nodes: r.nodes,
+  ...(r.stairs ? { stairs: r.stairs as [string, string][] } : {}), ...(r.bridges ? { bridges: r.bridges as [string, string][] } : {}),
+}));
 export const NAV_EDGES: NavEdge[] = [
-  ['tower_gate', 'plaza'], ['plaza', 'plaza_s'], ['plaza_s', 'home'], ['home', 'south'],
-  ['tower_gate', 'tower_l'], ['tower_gate', 'tower_r'], ['tower_gate', 'h_front'],
-  ['plaza', 'plaza_w'], ['plaza', 'plaza_e'], ['home', 'home_w'], ['home', 'home_e'],
-  ['plaza', 'a_front'], ['plaza', 'b_front'], ['home', 'c_front'], ['home', 'd_front'], ['south', 'e_front'], ['south', 'f_front'],
-  ['a_front', 'a_idle1'], ['a_front', 'a_idle2'], ['b_front', 'b_idle1'], ['b_front', 'b_idle2'],
-  ['c_front', 'c_idle1'], ['c_front', 'c_idle2'], ['d_front', 'd_idle1'], ['d_front', 'd_idle2'],
-  ['e_front', 'e_idle1'], ['e_front', 'e_idle2'], ['f_front', 'f_idle1'], ['f_front', 'f_idle2'],
-  ['h_front', 'h_idle1'], ['h_front', 'h_idle2'], ['south', 'dock_w'], ['south', 'dock_e'],
+  ...ISLAND_ROADS.flatMap(r => r.nodes.slice(1).map((b, i) => [r.nodes[i], b] as NavEdge)),
+  ...LAYOUT.connectors.map(([a, b]) => [a, b] as NavEdge),
 ];
-
 export const NAV_BY_ID: Record<string, NavNode> = Object.fromEntries(NAV_NODES.map(x => [x.id, x]));
 
 // ------------------------------------------------------------------ plots (fixed functional slots)
 
-const plot = (plotId: PlotId, x: number, y: number, w: number, h: number, front: string, idle: string[], links: string[]): IslandPlotDefinition => ({
-  plotId, position: { x, y }, walkInteractionPosition: front, buildingBounds: { x: x - w / 2, y: y - h, w, h }, heroIdlePoints: idle, navigationLinks: links,
-});
-
-export const ISLAND_PLOTS: IslandPlotDefinition[] = [
-  plot('PLOT_TOWER', 300, 220, 90, 160, 'tower_gate', ['tower_l', 'tower_r'], ['plaza', 'h_front']),
-  plot('PLOT_A', 150, 355, 140, 70, 'a_front', ['a_idle1', 'a_idle2'], ['plaza']),
-  plot('PLOT_B', 450, 370, 110, 100, 'b_front', ['b_idle1', 'b_idle2'], ['plaza']),
-  plot('PLOT_C', 150, 560, 110, 80, 'c_front', ['c_idle1', 'c_idle2'], ['home']),
-  plot('PLOT_D', 450, 565, 100, 90, 'd_front', ['d_idle1', 'd_idle2'], ['home']),
-  plot('PLOT_E', 150, 740, 140, 80, 'e_front', ['e_idle1', 'e_idle2'], ['south']),
-  plot('PLOT_F', 450, 745, 120, 90, 'f_front', ['f_idle1', 'f_idle2'], ['south']),
-  plot('PLOT_G', 300, 858, 200, 50, 'south', ['dock_w', 'dock_e'], ['home']),
-  plot('PLOT_H', 110, 200, 80, 60, 'h_front', ['h_idle1', 'h_idle2'], ['tower_gate']),
-];
+export const ISLAND_PLOTS: IslandPlotDefinition[] = LAYOUT.plots.map(p => ({
+  plotId: p.plotId as PlotId,
+  position: { x: p.anchor[0], y: p.anchor[1] },
+  walkInteractionPosition: p.front,
+  buildingBounds: { x: p.bounds[0], y: p.bounds[1], w: p.bounds[2], h: p.bounds[3] },
+  heroIdlePoints: p.idle,
+  navigationLinks: [p.front],
+  visualOffset: { x: p.visualOffset[0], y: p.visualOffset[1] },
+  fxAnchors: Object.fromEntries(Object.entries(p.fx).map(([k, v]) => [k, { x: v[0], y: v[1] }])),
+}));
 export const PLOT_BY_ID = Object.fromEntries(ISLAND_PLOTS.map(p => [p.plotId, p])) as Record<PlotId, IslandPlotDefinition>;
 
-/** decoration spots (trees / rocks) — visual only, no collision; the theme decides what grows there */
-export const DECOR_POINTS: Vec2[] = [
-  { x: 60, y: 300 }, { x: 540, y: 250 }, { x: 555, y: 470 }, { x: 45, y: 480 }, { x: 540, y: 660 }, { x: 55, y: 650 },
-  { x: 205, y: 150 }, { x: 395, y: 150 }, { x: 250, y: 520 }, { x: 355, y: 540 }, { x: 110, y: 840 }, { x: 490, y: 845 },
-  { x: 365, y: 330 }, { x: 235, y: 330 }, { x: 250, y: 720 }, { x: 350, y: 720 },
-];
+/** decoration spots (semantic slots; the theme decides the art) */
+export const ISLAND_DECOR: IslandDecor[] = LAYOUT.decor ?? [];
 
 // ------------------------------------------------------------------ buildings (gameplay config — no art here)
 
@@ -161,7 +165,7 @@ export const ISLAND_BUILDINGS: IslandBuildingDefinition[] = [
   {
     id: 'expedition_dock', plotId: 'PLOT_G', buildingType: 'EXPEDITION_DOCK', name: 'ท่าเรือเหาะ', interactionType: 'FUTURE', future: true,
     description: 'เรือเหาะที่พังอยู่ริมเกาะ — ซ่อมใน Patch 1.1 แล้วใช้เดินทางสู่เกาะใหม่ใน Patch 2',
-    unlockRequirement: { type: 'TOWER_FLOOR', floor: 10 }, navigationTarget: 'south', availableThemeSkins: ['forest_dock'],
+    unlockRequirement: { type: 'TOWER_FLOOR', floor: 10 }, navigationTarget: 'g_front', availableThemeSkins: ['forest_dock'],
     visualStages: [st(0, 0, 'ซากเรือเหาะ', 0), st(1, 10, 'จุดซ่อมเรือเหาะ', 1)],
     actions: [],
   },
@@ -184,7 +188,7 @@ export const MAX_EXTRA_ROAMERS = 5;
 export const CLASS_HANGOUTS: Record<HeroClass, string[]> = {
   tank: ['equipment_workshop', 'training_ground'],
   fighter: ['training_ground'],
-  assassin: ['PLAZA_EDGE', 'challenge_board'],
+  assassin: ['PLAZA_EDGE', 'challenge_board', 'tower'],
   archer: ['training_ground'],
   mage: ['skill_shrine'],
   healer: ['ascension_shrine', 'skill_shrine'],

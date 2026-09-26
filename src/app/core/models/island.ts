@@ -11,7 +11,7 @@
 
 // ------------------------------------------------------------------ 1. layout
 
-/** world units: the island scene is a fixed portrait canvas (see ISLAND_WORLD) */
+/** world units: the island is a fixed wide canvas (see ISLAND_WORLD); art is authored at 1 px = PIXEL_SCALE world units */
 export interface Vec2 {
   x: number;
   y: number;
@@ -40,6 +40,10 @@ export interface IslandPlotDefinition {
   heroIdlePoints: string[];
   /** nav nodes this plot's front node connects to (documentation / validation) */
   navigationLinks: string[];
+  /** where the building's art is drawn relative to `position` (world units) — lets a theme hang art over a cliff edge etc. */
+  visualOffset: Vec2;
+  /** named FX anchors relative to `position` (world units): chimneySmokeAnchor, forgeFireAnchor, auraAnchor … */
+  fxAnchors: Record<string, Vec2>;
 }
 
 export type NavNodeKind = 'PATH' | 'FRONT' | 'IDLE' | 'SOCIAL';
@@ -49,6 +53,31 @@ export interface NavNode {
   kind: NavNodeKind;
   /** area a hero drifts back to (RETURN_TO_AREA) */
   area?: 'PLAZA' | 'HOME';
+  /** environmental idle point name (ForgeWatchingPoint, TowerViewPoint, BenchPoint …) */
+  tag?: string;
+}
+
+export type RoadKind = 'MAIN' | 'SECONDARY' | 'TRAIL' | 'BROKEN';
+/** a road = a spline through nav nodes (drawn by the theme's road layer; walked along its nodes) */
+export interface IslandRoad {
+  id: string;
+  kind: RoadKind;
+  width: number;
+  nodes: string[];
+  stairs?: [string, string][];
+  bridges?: [string, string][];
+}
+
+export type DecorLayer = 'far' | 'mid' | 'fore';
+/** a decoration spot: the layout says WHERE and WHAT KIND (semantic slot), the theme says what it looks like */
+export interface IslandDecor {
+  slot: string;
+  x: number;
+  y: number;
+  layer: DecorLayer;
+  flip?: boolean;
+  /** ambient motion (leaf / grass sway, bob) — cosmetic */
+  sway?: boolean;
 }
 
 /** undirected edge — every edge is a straight segment that stays inside the island and outside every footprint */
@@ -107,6 +136,21 @@ export interface IslandBuildingDefinition {
 
 // ------------------------------------------------------------------ 3. themes / skins (cosmetic only)
 
+/** one generated / painted image (native pixels; the scene scales by PIXEL_SCALE). Sheets are horizontal strips. */
+export interface IslandAsset {
+  src: string;
+  /** one frame, native px */
+  w: number;
+  h: number;
+  /** anchor inside the frame (native px) — placed on the world point */
+  ax: number;
+  ay: number;
+  frames?: number;
+  fps?: number;
+  /** 'rare' = plays once every few seconds (sparks, energy pulse) */
+  loop?: 'rare';
+}
+
 export type PlaceholderShape = 'PILLAR' | 'ROUNDED_RECT' | 'RECT' | 'CIRCLE' | 'HEX' | 'CAPSULE' | 'RUIN' | 'LONG_RECT';
 
 /** how one visual stage is drawn with simple geometry */
@@ -120,32 +164,82 @@ export interface PlaceholderStageStyle {
   glow?: string;
 }
 
-/** pixel-art sprite for one stage (later) — anchored bottom-centre on the plot position, sized by the footprint */
+/** pixel-art sprite for one stage — anchored bottom-centre on the plot position, sized by the footprint */
 export interface SpriteStageStyle {
   src: string;
-  /** sprite size in world units (defaults to the footprint) */
   w?: number;
   h?: number;
 }
 
+/** ambient CSS motion for a static layer (animation never affects gameplay) */
+export type LayerMotion = 'pulse' | 'flicker' | 'bob' | 'breathe' | 'sway';
+
+/**
+ * one layer of a building stage: an asset SLOT (resolved through the theme, falling back to Default Forest),
+ * placed at the plot position (+ visualOffset) or at a named FX anchor (+ dx/dy, world units)
+ */
+export interface SkinLayer {
+  slot: string;
+  /** draw order inside the building: SHADOW → BACK (behind, e.g. aura / ground runes) → BASE → PART → OVERLAY → LIGHT → FX */
+  role: 'SHADOW' | 'BACK' | 'BASE' | 'PART' | 'OVERLAY' | 'LIGHT' | 'FX';
+  at?: string;
+  dx?: number;
+  dy?: number;
+  motion?: LayerMotion;
+  /** additive-looking light (CSS screen blend) */
+  glow?: boolean;
+  /** mirror horizontally */
+  flip?: boolean;
+}
+
 export type BuildingSkin =
   | { id: string; kind: 'PLACEHOLDER'; stages: Record<number, PlaceholderStageStyle> }
-  | { id: string; kind: 'SPRITE'; stages: Record<number, SpriteStageStyle> };
+  | { id: string; kind: 'SPRITE'; stages: Record<number, SpriteStageStyle> }
+  | { id: string; kind: 'LAYERED'; stages: Record<number, SkinLayer[]> };
 
-/** visual-only theme. Deliberately has NO stat / reward fields (see island-themes.spec) */
+/** localized light pools (radial glows over the scene) — per building / anchor */
+export interface LightDef {
+  building: string;
+  at?: string;
+  dx?: number;
+  dy?: number;
+  color: string;
+  radius: number;
+  /** only between these visual stages of the building */
+  minStage?: number;
+  maxStage?: number;
+  flicker?: boolean;
+}
+
+/** light that follows every decoration of a slot (lantern posts, campfire …) */
+export interface DecorLightDef {
+  color: string;
+  radius: number;
+  dy?: number;
+  flicker?: boolean;
+}
+
+/** visual-only theme manifest. Deliberately has NO stat / reward fields (see island.spec) */
 export interface IslandThemeDefinition {
   id: string;
   name: string;
   free: boolean;
-  terrainAsset: { kind: 'PLACEHOLDER'; ground: string; cliff: string; path: string; plaza: string; plot: string } | { kind: 'SPRITE'; src: string };
-  backgroundAsset: { kind: 'PLACEHOLDER'; skyTop: string; skyBottom: string; water: string } | { kind: 'SPRITE'; src: string };
-  towerSkin: BuildingSkin;
-  /** building id → skin (missing → DEFAULT_BUILDING_SKINS) */
+  /** slot → asset. Missing slots fall back to the Default Forest theme (never crash, never hide a building) */
+  assets: Record<string, IslandAsset>;
+  terrainSet: { ground: string; water?: string; waterfall?: string };
+  roadSet: { layer: string; bridge?: string };
+  backgroundSet: { sky: string; far: { slot: string; y: number; parallax: number }[]; clouds: string[]; floatingRocks: string[]; mist?: string };
+  /** building id → skin (missing → Default Forest skin → placeholder) */
   buildingSkins: Record<string, BuildingSkin>;
-  vegetationSet: { kind: 'PLACEHOLDER'; colors: string[] } | { kind: 'SPRITE'; srcs: string[] };
-  ambientVfx: 'NONE' | 'FIREFLIES' | 'SNOW' | 'PETALS' | 'EMBERS';
+  /** decoration slot families this theme provides (informational — placement lives in the layout) */
+  treeSet: string[];
+  vegetationSet: string[];
+  propSet: string[];
+  ambientFxSet: { fireflies?: string; foregroundBranches?: string[] };
+  lightingPreset: { id: 'DAY' | 'DUSK' | 'NIGHT'; ambient: string; lights: LightDef[]; decorLights: Record<string, DecorLightDef> };
+  /** animated sprites attached to decoration slots (campfire flame, fountain water, lantern flame) */
+  decorFx: Record<string, { slot: string; dx: number; dy: number; glow?: boolean }[]>;
   weatherPreset: 'CLEAR' | 'MIST' | 'SNOW' | 'RAIN';
-  lightingPreset: 'DAY' | 'DUSK' | 'NIGHT';
   bgmId: string | null;
 }
 

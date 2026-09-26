@@ -1,0 +1,1821 @@
+{
+ "comment": "Home Island functional layout \u2014 shared by every player and every theme. World units; art is authored at 1 px = pixelScale world units. Read by the game (island-layout.ts) and by tools/island/generate.py.",
+ "world": {
+  "w": 2400,
+  "h": 1080
+ },
+ "pixelScale": 3,
+ "camera": {
+  "minX": 0,
+  "maxX": 2400,
+  "minY": 0,
+  "maxY": 1080,
+  "spawnX": 1060
+ },
+ "ground": [
+  [
+   80,
+   430
+  ],
+  [
+   170,
+   356
+  ],
+  [
+   330,
+   334
+  ],
+  [
+   520,
+   350
+  ],
+  [
+   700,
+   326
+  ],
+  [
+   880,
+   340
+  ],
+  [
+   1040,
+   318
+  ],
+  [
+   1150,
+   300
+  ],
+  [
+   1300,
+   262
+  ],
+  [
+   1480,
+   250
+  ],
+  [
+   1640,
+   268
+  ],
+  [
+   1770,
+   300
+  ],
+  [
+   1950,
+   322
+  ],
+  [
+   2150,
+   350
+  ],
+  [
+   2290,
+   408
+  ],
+  [
+   2348,
+   520
+  ],
+  [
+   2334,
+   700
+  ],
+  [
+   2296,
+   860
+  ],
+  [
+   2206,
+   962
+  ],
+  [
+   2000,
+   1002
+  ],
+  [
+   1750,
+   986
+  ],
+  [
+   1500,
+   1006
+  ],
+  [
+   1250,
+   992
+  ],
+  [
+   1000,
+   1010
+  ],
+  [
+   760,
+   988
+  ],
+  [
+   520,
+   1002
+  ],
+  [
+   300,
+   978
+  ],
+  [
+   150,
+   924
+  ],
+  [
+   82,
+   822
+  ],
+  [
+   56,
+   640
+  ]
+ ],
+ "plateau": [
+  [
+   1160,
+   316
+  ],
+  [
+   1300,
+   266
+  ],
+  [
+   1480,
+   254
+  ],
+  [
+   1640,
+   274
+  ],
+  [
+   1730,
+   332
+  ],
+  [
+   1720,
+   470
+  ],
+  [
+   1600,
+   520
+  ],
+  [
+   1380,
+   540
+  ],
+  [
+   1220,
+   520
+  ],
+  [
+   1150,
+   440
+  ]
+ ],
+ "stream": {
+  "points": [
+   [
+    1790,
+    300
+   ],
+   [
+    1768,
+    420
+   ],
+   [
+    1800,
+    540
+   ],
+   [
+    1742,
+    660
+   ],
+   [
+    1778,
+    800
+   ],
+   [
+    1722,
+    1000
+   ]
+  ],
+  "width": 40
+ },
+ "plazas": [
+  {
+   "id": "main_plaza",
+   "points": [
+    [
+     930,
+     730
+    ],
+    [
+     985,
+     700
+    ],
+    [
+     1080,
+     692
+    ],
+    [
+     1170,
+     715
+    ],
+    [
+     1190,
+     780
+    ],
+    [
+     1150,
+     860
+    ],
+    [
+     1060,
+     885
+    ],
+    [
+     975,
+     858
+    ],
+    [
+     925,
+     800
+    ]
+   ]
+  },
+  {
+   "id": "tower_court",
+   "points": [
+    [
+     1330,
+     470
+    ],
+    [
+     1420,
+     462
+    ],
+    [
+     1560,
+     478
+    ],
+    [
+     1575,
+     520
+    ],
+    [
+     1440,
+     532
+    ],
+    [
+     1340,
+     520
+    ]
+   ]
+  },
+  {
+   "id": "mystic_court",
+   "points": [
+    [
+     1860,
+     660
+    ],
+    [
+     1940,
+     640
+    ],
+    [
+     2040,
+     660
+    ],
+    [
+     2030,
+     730
+    ],
+    [
+     1920,
+     745
+    ],
+    [
+     1860,
+     720
+    ]
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "id": "plaza",
+   "x": 1060,
+   "y": 780,
+   "kind": "SOCIAL",
+   "area": "PLAZA",
+   "tag": "MainHeroSpawn"
+  },
+  {
+   "id": "plaza_bench",
+   "x": 985,
+   "y": 748,
+   "kind": "SOCIAL",
+   "area": "PLAZA",
+   "tag": "BenchPoint"
+  },
+  {
+   "id": "plaza_ne",
+   "x": 1165,
+   "y": 745,
+   "kind": "SOCIAL",
+   "area": "PLAZA"
+  },
+  {
+   "id": "plaza_s",
+   "x": 1085,
+   "y": 852,
+   "kind": "SOCIAL",
+   "area": "PLAZA",
+   "tag": "CampfirePoint"
+  },
+  {
+   "id": "w1",
+   "x": 915,
+   "y": 812,
+   "kind": "PATH"
+  },
+  {
+   "id": "w2",
+   "x": 790,
+   "y": 842,
+   "kind": "PATH"
+  },
+  {
+   "id": "w3",
+   "x": 664,
+   "y": 812,
+   "kind": "PATH"
+  },
+  {
+   "id": "a_front",
+   "x": 598,
+   "y": 772,
+   "kind": "FRONT"
+  },
+  {
+   "id": "a_dummy",
+   "x": 468,
+   "y": 758,
+   "kind": "IDLE",
+   "tag": "TrainingDummyPoint"
+  },
+  {
+   "id": "a_archery",
+   "x": 356,
+   "y": 742,
+   "kind": "IDLE",
+   "tag": "TrainingDummyPoint"
+  },
+  {
+   "id": "n1",
+   "x": 640,
+   "y": 700,
+   "kind": "PATH"
+  },
+  {
+   "id": "n2",
+   "x": 588,
+   "y": 612,
+   "kind": "PATH"
+  },
+  {
+   "id": "n3",
+   "x": 470,
+   "y": 556,
+   "kind": "PATH"
+  },
+  {
+   "id": "h_front",
+   "x": 290,
+   "y": 604,
+   "kind": "FRONT"
+  },
+  {
+   "id": "h_read",
+   "x": 214,
+   "y": 616,
+   "kind": "IDLE",
+   "tag": "NoticeBoardPoint"
+  },
+  {
+   "id": "e_front",
+   "x": 880,
+   "y": 690,
+   "kind": "FRONT"
+  },
+  {
+   "id": "e_bench",
+   "x": 780,
+   "y": 682,
+   "kind": "IDLE",
+   "tag": "BenchPoint"
+  },
+  {
+   "id": "e_table",
+   "x": 972,
+   "y": 664,
+   "kind": "IDLE",
+   "tag": "TavernTablePoint"
+  },
+  {
+   "id": "c1",
+   "x": 1214,
+   "y": 668,
+   "kind": "PATH"
+  },
+  {
+   "id": "c2",
+   "x": 1262,
+   "y": 596,
+   "kind": "PATH"
+  },
+  {
+   "id": "c3",
+   "x": 1334,
+   "y": 516,
+   "kind": "PATH"
+  },
+  {
+   "id": "tower_gate",
+   "x": 1432,
+   "y": 494,
+   "kind": "FRONT"
+  },
+  {
+   "id": "tower_view",
+   "x": 1552,
+   "y": 500,
+   "kind": "IDLE",
+   "tag": "TowerViewPoint"
+  },
+  {
+   "id": "f_front",
+   "x": 1258,
+   "y": 490,
+   "kind": "FRONT"
+  },
+  {
+   "id": "f_idle",
+   "x": 1212,
+   "y": 472,
+   "kind": "IDLE",
+   "tag": "MemorialPoint"
+  },
+  {
+   "id": "e1",
+   "x": 1262,
+   "y": 768,
+   "kind": "PATH"
+  },
+  {
+   "id": "e2",
+   "x": 1404,
+   "y": 736,
+   "kind": "PATH"
+  },
+  {
+   "id": "e3",
+   "x": 1560,
+   "y": 764,
+   "kind": "PATH"
+  },
+  {
+   "id": "bridge_w",
+   "x": 1690,
+   "y": 736,
+   "kind": "PATH"
+  },
+  {
+   "id": "bridge_e",
+   "x": 1826,
+   "y": 716,
+   "kind": "PATH"
+  },
+  {
+   "id": "e4",
+   "x": 1906,
+   "y": 700,
+   "kind": "SOCIAL",
+   "area": "PLAZA",
+   "tag": "MysticCrossing"
+  },
+  {
+   "id": "d_front",
+   "x": 1972,
+   "y": 606,
+   "kind": "FRONT"
+  },
+  {
+   "id": "d_meditate",
+   "x": 2060,
+   "y": 604,
+   "kind": "IDLE",
+   "tag": "ShrineMeditationPoint"
+  },
+  {
+   "id": "d_lib",
+   "x": 1878,
+   "y": 596,
+   "kind": "IDLE",
+   "tag": "ShrineMeditationPoint"
+  },
+  {
+   "id": "m1",
+   "x": 2030,
+   "y": 726,
+   "kind": "PATH"
+  },
+  {
+   "id": "b_front",
+   "x": 2166,
+   "y": 694,
+   "kind": "FRONT"
+  },
+  {
+   "id": "b_altar",
+   "x": 2254,
+   "y": 690,
+   "kind": "IDLE",
+   "tag": "ShrineMeditationPoint"
+  },
+  {
+   "id": "b_idle2",
+   "x": 2090,
+   "y": 724,
+   "kind": "IDLE"
+  },
+  {
+   "id": "s1",
+   "x": 1852,
+   "y": 792,
+   "kind": "PATH"
+  },
+  {
+   "id": "c_front",
+   "x": 1822,
+   "y": 900,
+   "kind": "FRONT"
+  },
+  {
+   "id": "c_forge",
+   "x": 1880,
+   "y": 956,
+   "kind": "IDLE",
+   "tag": "ForgeWatchingPoint"
+  },
+  {
+   "id": "c_tools",
+   "x": 1792,
+   "y": 950,
+   "kind": "IDLE",
+   "tag": "ForgeWatchingPoint"
+  },
+  {
+   "id": "g1",
+   "x": 2198,
+   "y": 778,
+   "kind": "PATH"
+  },
+  {
+   "id": "g_front",
+   "x": 2132,
+   "y": 862,
+   "kind": "FRONT"
+  },
+  {
+   "id": "g_view",
+   "x": 2146,
+   "y": 934,
+   "kind": "IDLE",
+   "tag": "DockViewPoint"
+  },
+  {
+   "id": "s_tree",
+   "x": 1210,
+   "y": 910,
+   "kind": "IDLE",
+   "tag": "TreeRestPoint"
+  }
+ ],
+ "roads": [
+  {
+   "id": "west_road",
+   "kind": "MAIN",
+   "width": 46,
+   "nodes": [
+    "plaza",
+    "plaza_bench",
+    "w1",
+    "w2",
+    "w3",
+    "a_front"
+   ]
+  },
+  {
+   "id": "north_trail",
+   "kind": "TRAIL",
+   "width": 26,
+   "nodes": [
+    "w3",
+    "n1",
+    "n2",
+    "n3",
+    "h_front"
+   ]
+  },
+  {
+   "id": "tavern_lane",
+   "kind": "SECONDARY",
+   "width": 32,
+   "nodes": [
+    "plaza_bench",
+    "e_front",
+    "n1"
+   ]
+  },
+  {
+   "id": "tower_climb",
+   "kind": "MAIN",
+   "width": 40,
+   "nodes": [
+    "plaza",
+    "plaza_ne",
+    "c1",
+    "c2",
+    "c3",
+    "tower_gate"
+   ],
+   "stairs": [
+    [
+     "c2",
+     "c3"
+    ]
+   ]
+  },
+  {
+   "id": "memorial_path",
+   "kind": "TRAIL",
+   "width": 24,
+   "nodes": [
+    "c3",
+    "f_front"
+   ]
+  },
+  {
+   "id": "east_road",
+   "kind": "MAIN",
+   "width": 42,
+   "nodes": [
+    "plaza_ne",
+    "e1",
+    "e2",
+    "e3",
+    "bridge_w",
+    "bridge_e",
+    "e4"
+   ],
+   "bridges": [
+    [
+     "bridge_w",
+     "bridge_e"
+    ]
+   ]
+  },
+  {
+   "id": "skill_path",
+   "kind": "SECONDARY",
+   "width": 30,
+   "nodes": [
+    "e4",
+    "d_front"
+   ]
+  },
+  {
+   "id": "mystic_path",
+   "kind": "SECONDARY",
+   "width": 30,
+   "nodes": [
+    "e4",
+    "m1",
+    "b_front"
+   ]
+  },
+  {
+   "id": "workshop_lane",
+   "kind": "SECONDARY",
+   "width": 34,
+   "nodes": [
+    "e4",
+    "s1",
+    "c_front"
+   ]
+  },
+  {
+   "id": "dock_trail",
+   "kind": "BROKEN",
+   "width": 22,
+   "nodes": [
+    "b_front",
+    "g1",
+    "g_front"
+   ]
+  },
+  {
+   "id": "grove_trail",
+   "kind": "TRAIL",
+   "width": 22,
+   "nodes": [
+    "plaza",
+    "plaza_s",
+    "s_tree"
+   ]
+  }
+ ],
+ "connectors": [
+  [
+   "a_front",
+   "a_dummy"
+  ],
+  [
+   "a_dummy",
+   "a_archery"
+  ],
+  [
+   "h_front",
+   "h_read"
+  ],
+  [
+   "e_front",
+   "e_bench"
+  ],
+  [
+   "e_front",
+   "e_table"
+  ],
+  [
+   "tower_gate",
+   "tower_view"
+  ],
+  [
+   "f_front",
+   "f_idle"
+  ],
+  [
+   "d_front",
+   "d_meditate"
+  ],
+  [
+   "d_front",
+   "d_lib"
+  ],
+  [
+   "b_front",
+   "b_altar"
+  ],
+  [
+   "b_front",
+   "b_idle2"
+  ],
+  [
+   "c_front",
+   "c_forge"
+  ],
+  [
+   "c_front",
+   "c_tools"
+  ],
+  [
+   "g_front",
+   "g_view"
+  ]
+ ],
+ "plots": [
+  {
+   "plotId": "PLOT_TOWER",
+   "anchor": [
+    1450,
+    470
+   ],
+   "bounds": [
+    1380,
+    90,
+    140,
+    372
+   ],
+   "front": "tower_gate",
+   "idle": [
+    "tower_view"
+   ],
+   "visualOffset": [
+    0,
+    0
+   ],
+   "fx": {
+    "auraAnchor": [
+     0,
+     -210
+    ],
+    "runeAnchor": [
+     0,
+     -165
+    ],
+    "crystalAnchor": [
+     0,
+     -402
+    ],
+    "particleAnchor": [
+     0,
+     -300
+    ],
+    "lightAnchor": [
+     0,
+     -120
+    ],
+    "pulseAnchor": [
+     0,
+     -4
+    ]
+   }
+  },
+  {
+   "plotId": "PLOT_A",
+   "anchor": [
+    440,
+    712
+   ],
+   "bounds": [
+    330,
+    626,
+    220,
+    80
+   ],
+   "front": "a_front",
+   "idle": [
+    "a_dummy",
+    "a_archery"
+   ],
+   "visualOffset": [
+    0,
+    0
+   ],
+   "fx": {
+    "bannerAnchor": [
+     -120,
+     -34
+    ],
+    "dustAnchor": [
+     30,
+     -10
+    ]
+   }
+  },
+  {
+   "plotId": "PLOT_B",
+   "anchor": [
+    2160,
+    646
+   ],
+   "bounds": [
+    2084,
+    488,
+    152,
+    152
+   ],
+   "front": "b_front",
+   "idle": [
+    "b_altar",
+    "b_idle2"
+   ],
+   "visualOffset": [
+    0,
+    0
+   ],
+   "fx": {
+    "crystalAnchor": [
+     0,
+     -114
+    ],
+    "runeAnchor": [
+     0,
+     -12
+    ],
+    "particleAnchor": [
+     0,
+     -81
+    ]
+   }
+  },
+  {
+   "plotId": "PLOT_C",
+   "anchor": [
+    2000,
+    940
+   ],
+   "bounds": [
+    1892,
+    772,
+    216,
+    162
+   ],
+   "front": "c_front",
+   "idle": [
+    "c_forge",
+    "c_tools"
+   ],
+   "visualOffset": [
+    0,
+    0
+   ],
+   "fx": {
+    "chimneySmokeAnchor": [
+     63,
+     -249
+    ],
+    "forgeFireAnchor": [
+     -60,
+     -15
+    ],
+    "sparkAnchor": [
+     -60,
+     -36
+    ],
+    "windowLightAnchor": [
+     21,
+     -117
+    ]
+   }
+  },
+  {
+   "plotId": "PLOT_D",
+   "anchor": [
+    1960,
+    562
+   ],
+   "bounds": [
+    1888,
+    350,
+    144,
+    206
+   ],
+   "front": "d_front",
+   "idle": [
+    "d_meditate",
+    "d_lib"
+   ],
+   "visualOffset": [
+    0,
+    0
+   ],
+   "fx": {
+    "crystalAnchor": [
+     0,
+     -243
+    ],
+    "runeAnchor": [
+     0,
+     -120
+    ],
+    "particleAnchor": [
+     0,
+     -123
+    ]
+   }
+  },
+  {
+   "plotId": "PLOT_E",
+   "anchor": [
+    852,
+    642
+   ],
+   "bounds": [
+    742,
+    470,
+    220,
+    166
+   ],
+   "front": "e_front",
+   "idle": [
+    "e_bench",
+    "e_table"
+   ],
+   "visualOffset": [
+    0,
+    0
+   ],
+   "fx": {
+    "chimneySmokeAnchor": [
+     66,
+     -234
+    ],
+    "lanternAnchor": [
+     -51,
+     -75
+    ],
+    "bannerAnchor": [
+     135,
+     0
+    ],
+    "windowLightAnchor": [
+     -6,
+     -90
+    ]
+   }
+  },
+  {
+   "plotId": "PLOT_F",
+   "anchor": [
+    1252,
+    452
+   ],
+   "bounds": [
+    1194,
+    330,
+    116,
+    116
+   ],
+   "front": "f_front",
+   "idle": [
+    "f_idle"
+   ],
+   "visualOffset": [
+    0,
+    0
+   ],
+   "fx": {
+    "auraAnchor": [
+     0,
+     -105
+    ],
+    "runeAnchor": [
+     0,
+     -54
+    ]
+   }
+  },
+  {
+   "plotId": "PLOT_G",
+   "anchor": [
+    2215,
+    890
+   ],
+   "bounds": [
+    2170,
+    846,
+    90,
+    44
+   ],
+   "front": "g_front",
+   "idle": [
+    "g_view"
+   ],
+   "visualOffset": [
+    60,
+    0
+   ],
+   "fx": {
+    "lanternAnchor": [
+     51,
+     -138
+    ]
+   }
+  },
+  {
+   "plotId": "PLOT_H",
+   "anchor": [
+    232,
+    562
+   ],
+   "bounds": [
+    184,
+    476,
+    96,
+    84
+   ],
+   "front": "h_front",
+   "idle": [
+    "h_read"
+   ],
+   "visualOffset": [
+    0,
+    0
+   ],
+   "fx": {
+    "bannerAnchor": [
+     66,
+     0
+    ]
+   }
+  }
+ ],
+ "decor": [
+  {
+   "slot": "tree.mediumB",
+   "x": 95,
+   "y": 452,
+   "layer": "far"
+  },
+  {
+   "slot": "tree.mediumA",
+   "x": 185,
+   "y": 392,
+   "layer": "far",
+   "flip": true,
+   "sway": true
+  },
+  {
+   "slot": "tree.mediumA",
+   "x": 300,
+   "y": 372,
+   "layer": "far",
+   "flip": true
+  },
+  {
+   "slot": "tree.largeB",
+   "x": 530,
+   "y": 388,
+   "layer": "far",
+   "sway": true
+  },
+  {
+   "slot": "tree.small",
+   "x": 745,
+   "y": 368,
+   "layer": "far",
+   "flip": true
+  },
+  {
+   "slot": "tree.largeA",
+   "x": 1010,
+   "y": 356,
+   "layer": "far",
+   "flip": true,
+   "sway": true
+  },
+  {
+   "slot": "tree.mediumB",
+   "x": 1110,
+   "y": 336,
+   "layer": "far",
+   "flip": true
+  },
+  {
+   "slot": "tree.mediumB",
+   "x": 1690,
+   "y": 318,
+   "layer": "far"
+  },
+  {
+   "slot": "tree.mediumA",
+   "x": 1860,
+   "y": 356,
+   "layer": "far"
+  },
+  {
+   "slot": "tree.largeB",
+   "x": 2140,
+   "y": 380,
+   "layer": "far",
+   "sway": true
+  },
+  {
+   "slot": "tree.mediumB",
+   "x": 2250,
+   "y": 420,
+   "layer": "far"
+  },
+  {
+   "slot": "tree.small",
+   "x": 2320,
+   "y": 480,
+   "layer": "far"
+  },
+  {
+   "slot": "tree.largeA",
+   "x": 745,
+   "y": 1004,
+   "layer": "mid",
+   "sway": true
+  },
+  {
+   "slot": "tree.largeB",
+   "x": 1300,
+   "y": 1004,
+   "layer": "mid",
+   "flip": true,
+   "sway": true
+  },
+  {
+   "slot": "tree.mediumA",
+   "x": 150,
+   "y": 955,
+   "layer": "mid"
+  },
+  {
+   "slot": "tree.largeB",
+   "x": 300,
+   "y": 985,
+   "layer": "mid",
+   "sway": true
+  },
+  {
+   "slot": "tree.small",
+   "x": 470,
+   "y": 985,
+   "layer": "mid",
+   "flip": true
+  },
+  {
+   "slot": "tree.dead",
+   "x": 95,
+   "y": 760,
+   "layer": "mid"
+  },
+  {
+   "slot": "tree.mediumB",
+   "x": 640,
+   "y": 1000,
+   "layer": "mid",
+   "flip": true
+  },
+  {
+   "slot": "tree.mediumA",
+   "x": 1470,
+   "y": 990,
+   "layer": "mid"
+  },
+  {
+   "slot": "tree.small",
+   "x": 1600,
+   "y": 930,
+   "layer": "mid"
+  },
+  {
+   "slot": "tree.blossom",
+   "x": 2300,
+   "y": 610,
+   "layer": "mid",
+   "flip": true,
+   "sway": true
+  },
+  {
+   "slot": "tree.dead",
+   "x": 1680,
+   "y": 470,
+   "layer": "mid",
+   "flip": true
+  },
+  {
+   "slot": "tree.small",
+   "x": 1380,
+   "y": 860,
+   "layer": "mid",
+   "flip": true
+  },
+  {
+   "slot": "tree.mediumB",
+   "x": 2070,
+   "y": 470,
+   "layer": "mid"
+  },
+  {
+   "slot": "tree.small",
+   "x": 1790,
+   "y": 420,
+   "layer": "mid",
+   "flip": true
+  },
+  {
+   "slot": "tree.mediumA",
+   "x": 710,
+   "y": 560,
+   "layer": "mid"
+  },
+  {
+   "slot": "tree.small",
+   "x": 600,
+   "y": 470,
+   "layer": "mid",
+   "flip": true
+  },
+  {
+   "slot": "tree.mediumB",
+   "x": 1160,
+   "y": 610,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.bushA",
+   "x": 1000,
+   "y": 985,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.bushB",
+   "x": 1130,
+   "y": 975,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.fern",
+   "x": 1735,
+   "y": 640,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.tallGrass",
+   "x": 1752,
+   "y": 860,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.tallGrass",
+   "x": 1720,
+   "y": 500,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.fern",
+   "x": 1812,
+   "y": 960,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.bushA",
+   "x": 560,
+   "y": 640,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.flowers",
+   "x": 395,
+   "y": 812,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.flowers",
+   "x": 1330,
+   "y": 800,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.mushrooms",
+   "x": 1205,
+   "y": 935,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.bushB",
+   "x": 2250,
+   "y": 760,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.flowers",
+   "x": 2020,
+   "y": 745,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.bushA",
+   "x": 120,
+   "y": 610,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.tallGrass",
+   "x": 240,
+   "y": 850,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.moss",
+   "x": 520,
+   "y": 900,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.fern",
+   "x": 980,
+   "y": 600,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.bushB",
+   "x": 1540,
+   "y": 860,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.mushrooms",
+   "x": 160,
+   "y": 705,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.tallGrass",
+   "x": 1360,
+   "y": 640,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.flowers",
+   "x": 1500,
+   "y": 700,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.bushA",
+   "x": 2330,
+   "y": 700,
+   "layer": "mid"
+  },
+  {
+   "slot": "veg.fern",
+   "x": 1640,
+   "y": 560,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.largeMossy",
+   "x": 60,
+   "y": 880,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.cluster",
+   "x": 1560,
+   "y": 560,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.medium",
+   "x": 1700,
+   "y": 760,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.small",
+   "x": 1790,
+   "y": 720,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.medium",
+   "x": 540,
+   "y": 905,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.small",
+   "x": 1030,
+   "y": 900,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.cluster",
+   "x": 2270,
+   "y": 815,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.largeMossy",
+   "x": 1380,
+   "y": 600,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.small",
+   "x": 720,
+   "y": 680,
+   "layer": "mid"
+  },
+  {
+   "slot": "rock.medium",
+   "x": 2030,
+   "y": 990,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.pillar",
+   "x": 150,
+   "y": 700,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.wall",
+   "x": 210,
+   "y": 880,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.slab",
+   "x": 380,
+   "y": 520,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.runeStone",
+   "x": 1620,
+   "y": 500,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.statue",
+   "x": 1705,
+   "y": 475,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.pillar",
+   "x": 1185,
+   "y": 470,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.wall",
+   "x": 1560,
+   "y": 970,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.slab",
+   "x": 2120,
+   "y": 560,
+   "layer": "mid"
+  },
+  {
+   "slot": "ruin.pillar",
+   "x": 2090,
+   "y": 470,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.fountain",
+   "x": 1080,
+   "y": 760,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.campfire",
+   "x": 1122,
+   "y": 866,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.firewood",
+   "x": 1150,
+   "y": 880,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.bench",
+   "x": 772,
+   "y": 670,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.table",
+   "x": 1004,
+   "y": 655,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.barrel",
+   "x": 706,
+   "y": 640,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.crate",
+   "x": 990,
+   "y": 640,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.lanternPost",
+   "x": 700,
+   "y": 788,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.lanternPost",
+   "x": 1196,
+   "y": 700,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.lanternPost",
+   "x": 1500,
+   "y": 752,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.lanternPost",
+   "x": 1880,
+   "y": 688,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.lanternPost",
+   "x": 1310,
+   "y": 540,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.signpost",
+   "x": 1232,
+   "y": 794,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.signpost",
+   "x": 1934,
+   "y": 742,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.cart",
+   "x": 2090,
+   "y": 985,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.barrel",
+   "x": 2150,
+   "y": 948,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.crate",
+   "x": 2174,
+   "y": 952,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.crate",
+   "x": 1864,
+   "y": 982,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.bannerBlue",
+   "x": 1030,
+   "y": 700,
+   "layer": "mid"
+  },
+  {
+   "slot": "magic.runeStone",
+   "x": 2096,
+   "y": 592,
+   "layer": "mid"
+  },
+  {
+   "slot": "magic.crystalCluster",
+   "x": 2280,
+   "y": 640,
+   "layer": "mid"
+  },
+  {
+   "slot": "magic.glowMushrooms",
+   "x": 2228,
+   "y": 772,
+   "layer": "mid"
+  },
+  {
+   "slot": "magic.runeStone",
+   "x": 1904,
+   "y": 640,
+   "layer": "mid"
+  },
+  {
+   "slot": "magic.crystalCluster",
+   "x": 1850,
+   "y": 560,
+   "layer": "mid"
+  },
+  {
+   "slot": "magic.glowMushrooms",
+   "x": 1418,
+   "y": 560,
+   "layer": "mid"
+  },
+  {
+   "slot": "prop.barrel",
+   "x": 580,
+   "y": 700,
+   "layer": "mid"
+  },
+  {
+   "slot": "fore.grass",
+   "x": 140,
+   "y": 1002,
+   "layer": "fore",
+   "sway": true
+  },
+  {
+   "slot": "fore.grassB",
+   "x": 420,
+   "y": 1010,
+   "layer": "fore",
+   "sway": true
+  },
+  {
+   "slot": "fore.grass",
+   "x": 760,
+   "y": 1004,
+   "layer": "fore",
+   "sway": true
+  },
+  {
+   "slot": "fore.grassB",
+   "x": 1120,
+   "y": 1014,
+   "layer": "fore",
+   "sway": true
+  },
+  {
+   "slot": "fore.grass",
+   "x": 1380,
+   "y": 1006,
+   "layer": "fore",
+   "sway": true
+  },
+  {
+   "slot": "fore.grassB",
+   "x": 1640,
+   "y": 1012,
+   "layer": "fore",
+   "sway": true
+  },
+  {
+   "slot": "fore.grass",
+   "x": 1960,
+   "y": 1010,
+   "layer": "fore",
+   "sway": true
+  },
+  {
+   "slot": "fore.grassB",
+   "x": 2210,
+   "y": 968,
+   "layer": "fore",
+   "sway": true
+  }
+ ],
+ "foreground": {
+  "branches": [
+   {
+    "slot": "fore.branchLeft",
+    "x": 0,
+    "y": 0
+   },
+   {
+    "slot": "fore.branchRight",
+    "x": 2040,
+    "y": 0
+   }
+  ]
+ },
+ "ambient": [
+  {
+   "slot": "ambientFx.fireflies",
+   "x": 420,
+   "y": 640
+  },
+  {
+   "slot": "ambientFx.fireflies",
+   "x": 1060,
+   "y": 700
+  },
+  {
+   "slot": "ambientFx.fireflies",
+   "x": 1480,
+   "y": 560
+  },
+  {
+   "slot": "ambientFx.fireflies",
+   "x": 2060,
+   "y": 600
+  },
+  {
+   "slot": "ambientFx.fireflies",
+   "x": 260,
+   "y": 930
+  },
+  {
+   "slot": "ambientFx.fireflies",
+   "x": 1700,
+   "y": 880
+  }
+ ]
+}

@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { HERO_BY_ID } from '../core/data/heroes';
 import { HeroClass } from '../core/models/hero';
+import { UnitSpriteComponent } from '../battle/unit-sprite/unit-sprite.component';
 
 /** what the scene needs to draw one hero (runtime only — built from the sim every frame) */
 export interface IslandHeroView {
@@ -18,44 +20,47 @@ export interface IslandHeroView {
   interacting: boolean;
 }
 
-/** placeholder hero colours per class (swap for sprites later — the view model stays the same) */
+/** placeholder tint per class (heroes without a sprite sheet) */
 export const CLASS_TINT: Record<HeroClass, string> = {
   tank: '#6f8fd8', fighter: '#e0703a', assassin: '#8a5ad8', archer: '#56b06a', mage: '#4fb0e0', healer: '#f0d070',
 };
 
-/** PlaceholderHeroRenderer: capsule body + head, name tag; the main hero gets a gold ring and a crown */
+/**
+ * Hero on the island (world units): the battle sprite sheet (idle / walk) when the hero has one, else the class token.
+ * Feet sit on (x, y); the main hero gets a gold ring + crown.
+ */
 @Component({
-  selector: 'g[appIslandHero]',
+  selector: 'app-island-hero',
+  imports: [UnitSpriteComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @let h = hero();
-    <svg:g [attr.transform]="'translate(' + h.x + ' ' + h.y + ')'">
-      @if (h.isMain) {
-        <svg:ellipse cx="0" cy="0" rx="20" ry="7" fill="#f6dfa033" stroke="#f6dfa0" stroke-width="2" class="ring" />
-      } @else {
-        <svg:ellipse cx="0" cy="0" rx="13" ry="5" fill="#0006" />
-      }
-      <svg:g [attr.transform]="'translate(0 ' + bob() + ') scale(' + (h.facingLeft ? -1 : 1) * size() + ' ' + size() + ')'">
-        <svg:rect x="-9" y="-34" width="18" height="30" rx="9" [attr.fill]="tint()" stroke="#0b0914" stroke-width="2" />
-        <svg:circle cx="0" cy="-40" r="8" fill="#f1dcc0" stroke="#0b0914" stroke-width="2" />
-        <svg:circle cx="3" cy="-41" r="1.6" fill="#0b0914" />
-        <svg:rect x="-9" y="-20" width="18" height="4" [attr.fill]="'#0005'" />
-      </svg:g>
-      @if (h.isMain) {
-        <svg:path [attr.transform]="'translate(0 ' + (bob() - 58 * size()) + ')'" d="M-8 0 L-8 -8 L-4 -4 L0 -10 L4 -4 L8 -8 L8 0 Z" fill="#f6dfa0" stroke="#8a6a2e" stroke-width="1.5" />
-      }
-      @if (h.interacting) { <svg:text x="12" [attr.y]="-46 * size()" class="spark">✦</svg:text> }
-      <svg:text x="0" y="16" text-anchor="middle" class="name" [class.main]="h.isMain">{{ h.name }}</svg:text>
-    </svg:g>
+    <span class="ring" [class.main]="h.isMain"></span>
+    <span class="body" [class.bob]="!sprite() && h.walking">
+      <app-unit-sprite [cls]="h.cls" [sprite]="sprite()" [star]="star()" [anim]="h.walking ? 'walk' : 'idle'" [flip]="h.facingLeft" />
+    </span>
+    @if (h.isMain) { <span class="crown" aria-hidden="true">♛</span> }
+    @if (h.interacting) { <span class="spark" aria-hidden="true">✦</span> }
+    <span class="name" [class.main]="h.isMain">{{ h.name }}</span>
+  `,
+  styles: `
+    :host { position: absolute; width: 0; height: 0; pointer-events: auto; cursor: pointer; }
+    .ring { position: absolute; left: -26px; top: -9px; width: 52px; height: 18px; border-radius: 50%; background: #0007; }
+    .ring.main { left: -34px; top: -11px; width: 68px; height: 22px; background: #f6dfa033; box-shadow: 0 0 0 3px #f6dfa0, 0 0 18px #f6dfa0aa; animation: ring 2.4s ease-in-out infinite; }
+    .body { position: absolute; left: -50px; top: -56px; width: 100px; height: 76px; pointer-events: none; }
+    .body.bob { animation: bob 0.35s ease-in-out infinite alternate; }
+    .crown { position: absolute; left: -12px; top: -104px; font-size: 26px; color: #f6dfa0; text-shadow: 0 0 8px #f0b54a, 0 2px 0 #3a2a10; animation: float 2.2s ease-in-out infinite; }
+    .spark { position: absolute; left: 16px; top: -84px; font-size: 20px; color: #f6dfa0; animation: float 1.2s ease-in-out infinite; }
+    .name { position: absolute; left: -100px; width: 200px; top: 12px; text-align: center; font: 600 19px var(--body); color: #efe7d6;
+      text-shadow: 0 2px 0 #0b0914, 0 0 6px #0b0914, 2px 0 0 #0b0914, -2px 0 0 #0b0914; white-space: nowrap; pointer-events: none; }
+    .name.main { font: 700 21px var(--title); color: #f6dfa0; }
+    @keyframes ring { 50% { opacity: .55; } }
+    @keyframes float { 50% { transform: translateY(-6px); } }
+    @keyframes bob { to { transform: translateY(-6px); } }
   `,
 })
 export class IslandHeroComponent {
   readonly hero = input.required<IslandHeroView>();
-  readonly tint = computed(() => CLASS_TINT[this.hero().cls] ?? '#aaa');
-  readonly size = computed(() => (this.hero().isMain ? 1.18 : 1));
-  /** walk = hop, idle = slow breathe */
-  readonly bob = computed(() => {
-    const h = this.hero();
-    return h.walking ? -Math.abs(Math.sin(h.phase * Math.PI * 2)) * 4 : Math.sin(h.phase * Math.PI * 2) * 0.8;
-  });
+  readonly sprite = computed(() => HERO_BY_ID[this.hero().templateId]?.sprite);
+  readonly star = computed(() => HERO_BY_ID[this.hero().templateId]?.star ?? 1);
 }

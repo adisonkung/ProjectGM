@@ -2,9 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { newGameState } from '../core/data/starter';
 import {
-  BUILDING_BY_ID, ISLAND_BUILDINGS, ISLAND_PLOTS, ISLAND_SAFE, ISLAND_STAGES, islandMask, MAX_EXTRA_ROAMERS, NAV_BY_ID, NAV_EDGES, NAV_NODES, PLOT_BY_ID,
+  BUILDING_BY_ID, COAST_MARGIN, distToPoly, GROUND_POLY, insideIsland, ISLAND_BUILDINGS, ISLAND_DECOR, ISLAND_PLOTS, ISLAND_ROADS, ISLAND_STAGES, ISLAND_WORLD,
+  MAX_EXTRA_ROAMERS, NAV_BY_ID, NAV_EDGES, NAV_NODES, PLATEAU_POLY, pointInPoly, PLOT_BY_ID, segDist, STREAM,
 } from '../core/data/island-layout';
-import { DEFAULT_BUILDING_SKINS, DEFAULT_THEME_ID, ISLAND_THEMES, resolveBuildingSkin, skinStage } from '../core/data/island-themes';
+import {
+  DEFAULT_FOREST_SKINS, DEFAULT_FOREST_THEME, DEFAULT_THEME_ID, ISLAND_THEMES, layersFor, PLACEHOLDER_SKINS, resolveAsset, resolveBuildingSkin, skinStage, themeOf,
+} from '../core/data/island-themes';
+import { DEFAULT_FOREST_ASSETS } from '../core/data/island/default-forest.assets';
+import { buildingDraw, decorDraw, lightsDraw } from './island-view-model';
 import { BuildingSkin, IslandThemeDefinition, Rect, Vec2 } from '../core/models/island';
 import {
   buildingStageAt, islandVisitView, newIsland, normalizeIsland, pickRoamers, roamerCount, setMainHero, setTheme, syncIsland, towerVisualStageAt, unlockFloorOf,
@@ -27,12 +32,60 @@ function segmentHits(a: Vec2, b: Vec2, r: Rect): boolean {
   }
   return false;
 }
-const corners = (r: Rect): Vec2[] => [{ x: r.x, y: r.y }, { x: r.x + r.w, y: r.y }, { x: r.x, y: r.y + r.h }, { x: r.x + r.w, y: r.y + r.h }];
 
 describe('Home Island — layout (shared by every player)', () => {
-  it('every nav node and building footprint is inside the island mask with a margin', () => {
-    for (const n of NAV_NODES) expect(islandMask(n.pos)).withContext(n.id).toBeLessThanOrEqual(ISLAND_SAFE);
-    for (const p of ISLAND_PLOTS) for (const c of corners(p.buildingBounds)) expect(islandMask(c)).withContext(p.plotId).toBeLessThanOrEqual(ISLAND_SAFE);
+  it('wide horizontal world (≥ 16:9, ~20:9) with left / centre / right districts', () => {
+    expect(ISLAND_WORLD.w / ISLAND_WORLD.h).toBeGreaterThanOrEqual(2);
+    const x = (id: string) => PLOT_BY_ID[BUILDING_BY_ID[id].plotId].position.x;
+    expect(x('training_ground')).toBeLessThan(ISLAND_WORLD.w / 3); // left: training
+    expect(x('hero_hall')).toBeLessThan(x('tower'));
+    for (const id of ['equipment_workshop', 'skill_shrine', 'ascension_shrine', 'expedition_dock']) expect(x(id)).withContext(id).toBeGreaterThan(ISLAND_WORLD.w * 0.7);
+    // the tower is off-centre (upper middle-right), not at the end of a straight central road
+    expect(x('tower')).toBeGreaterThan(ISLAND_WORLD.w * 0.52);
+    expect(PLOT_BY_ID['PLOT_TOWER'].position.y).toBeLessThan(NAV_BY_ID['plaza'].pos.y - 200);
+  });
+
+  it('every nav node is on the island (coast margin) and every building footprint stands on it', () => {
+    for (const n of NAV_NODES) {
+      expect(insideIsland(n.pos)).withContext(n.id).toBeTrue();
+      expect(distToPoly(n.pos, GROUND_POLY)).withContext(n.id).toBeGreaterThanOrEqual(COAST_MARGIN);
+    }
+    for (const p of ISLAND_PLOTS) {
+      const b = p.buildingBounds;
+      for (const c of [{ x: b.x, y: b.y + b.h }, { x: b.x + b.w, y: b.y + b.h }]) expect(pointInPoly(c, GROUND_POLY)).withContext(p.plotId).toBeTrue();
+    }
+  });
+
+  it('roads are organic: curved polylines (no straight axis), stream crossed only on bridges, the plateau only by stairs', () => {
+    const bridged = new Set(ISLAND_ROADS.flatMap(r => (r.bridges ?? []).map(([a, b]) => `${a}|${b}`)));
+    const stairs = new Set(ISLAND_ROADS.flatMap(r => (r.stairs ?? []).map(([a, b]) => `${a}|${b}`)));
+    const wet = (p: { x: number; y: number }) => STREAM.points.slice(1).some((q, i) => segDist(p, STREAM.points[i], q) < STREAM.width / 2 + 8);
+    for (const [a, b] of NAV_EDGES) {
+      const pa = NAV_BY_ID[a].pos, pb = NAV_BY_ID[b].pos;
+      const samples = Array.from({ length: 30 }, (_, i) => ({ x: pa.x + (pb.x - pa.x) * i / 29, y: pa.y + (pb.y - pa.y) * i / 29 }));
+      if (samples.some(wet)) expect(bridged.has(`${a}|${b}`) || bridged.has(`${b}|${a}`)).withContext(`${a}-${b} crosses the stream`).toBeTrue();
+      if (pointInPoly(pa, PLATEAU_POLY) !== pointInPoly(pb, PLATEAU_POLY)) expect(stairs.has(`${a}|${b}`) || stairs.has(`${b}|${a}`)).withContext(`${a}-${b} height change`).toBeTrue();
+    }
+    // main roads bend: consecutive segments change direction (no long straight run with ≥ 3 collinear nodes)
+    for (const r of ISLAND_ROADS.filter(x => x.nodes.length >= 3)) {
+      const turns = r.nodes.slice(2).map((c, i) => {
+        const p0 = NAV_BY_ID[r.nodes[i]].pos, p1 = NAV_BY_ID[r.nodes[i + 1]].pos, p2 = NAV_BY_ID[c].pos;
+        const a1 = Math.atan2(p1.y - p0.y, p1.x - p0.x), a2 = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        return Math.abs(Math.atan2(Math.sin(a2 - a1), Math.cos(a2 - a1)));
+      });
+      expect(Math.max(...turns)).withContext(r.id).toBeGreaterThan(0.2);
+    }
+    // not a mirrored layout: left and right halves hold different numbers of plots
+    const left = ISLAND_PLOTS.filter(p => p.position.x < ISLAND_WORLD.w / 2).length;
+    expect(left).not.toBe(ISLAND_PLOTS.length - left);
+  });
+
+  it('environmental idle points exist (forge, dummy, shrine, tower view, bench, tree rest, dock view)', () => {
+    const tags = new Set(NAV_NODES.map(n => n.tag).filter(Boolean));
+    for (const t of ['ForgeWatchingPoint', 'TrainingDummyPoint', 'ShrineMeditationPoint', 'TowerViewPoint', 'BenchPoint', 'TreeRestPoint', 'DockViewPoint', 'MainHeroSpawn']) {
+      expect(tags.has(t)).withContext(t).toBeTrue();
+    }
+    expect(NAV_BY_ID['plaza'].tag).toBe('MainHeroSpawn');
   });
 
   it('no nav node stands in, and no nav edge crosses, any building footprint (heroes never walk through buildings)', () => {
@@ -163,7 +216,7 @@ describe('Home Island — roaming simulation', () => {
     for (let t = 0; t < 180; t += 0.05) {
       sim.step(0.05);
       for (const h of sim.heroes) {
-        expect(islandMask(h.currentPosition)).toBeLessThanOrEqual(ISLAND_SAFE);
+        expect(insideIsland(h.currentPosition)).toBeTrue();
         for (const p of ISLAND_PLOTS) expect(inside(h.currentPosition, p.buildingBounds)).withContext(`${h.heroId} in ${p.plotId}`).toBeFalse();
         (visited.get(h.heroId) ?? visited.set(h.heroId, new Set()).get(h.heroId)!).add(h.at);
         if (h.targetBuildingId) buildings.add(h.targetBuildingId);
@@ -182,31 +235,100 @@ describe('Home Island — roaming simulation', () => {
   });
 });
 
-describe('Home Island — themes and skins (cosmetic only)', () => {
-  it('the default theme exists, is free, and every building has a placeholder skin for every stage', () => {
-    const t = ISLAND_THEMES[DEFAULT_THEME_ID];
-    expect(t.free).toBeTrue();
+describe('Home Island — themes, assets and fallbacks (cosmetic only)', () => {
+  const T = DEFAULT_FOREST_THEME;
+
+  it('the Default Forest theme exists, is free, and every building stage resolves to real layered art', () => {
+    expect(DEFAULT_THEME_ID).toBe('default_forest');
+    expect(T.free).toBeTrue();
     for (const b of ISLAND_BUILDINGS) {
-      const skin = resolveBuildingSkin(b.id, t);
-      expect(skin.kind).toBe('PLACEHOLDER');
-      for (const s of b.visualStages) expect(skinStage(skin.stages as Record<number, unknown>, s.stage)).withContext(`${b.id} ${s.stage}`).toBeTruthy();
+      const skin = resolveBuildingSkin(b.id, T);
+      expect(skin.kind).withContext(b.id).toBe('LAYERED');
+      for (const st of b.visualStages) {
+        const layers = layersFor(skin, st.stage, T);
+        expect(layers).withContext(`${b.id} ${st.stage}`).not.toBeNull();
+        expect(layers!.some(l => l.layer.role === 'BASE')).withContext(`${b.id} ${st.stage} base`).toBeTrue();
+      }
+    }
+  });
+
+  it('every slot the theme references (skins, decor, background, fx) exists in the asset pack, with the naming convention', () => {
+    const slots = new Set<string>();
+    for (const skin of Object.values(DEFAULT_FOREST_SKINS)) if (skin.kind === 'LAYERED') for (const ls of Object.values(skin.stages)) for (const l of ls) slots.add(l.slot);
+    for (const d of ISLAND_DECOR) slots.add(d.slot);
+    for (const [slot, fx] of Object.entries(T.decorFx)) { slots.add(slot); fx.forEach(f => slots.add(f.slot)); }
+    [T.terrainSet.ground, T.terrainSet.water!, T.terrainSet.waterfall!, T.roadSet.layer, T.roadSet.bridge!, T.backgroundSet.sky, T.backgroundSet.mist!,
+      ...T.backgroundSet.far.map(f => f.slot), ...T.backgroundSet.clouds, ...T.backgroundSet.floatingRocks, T.ambientFxSet.fireflies!, ...T.ambientFxSet.foregroundBranches!,
+      ...T.treeSet, ...T.vegetationSet, ...T.propSet].forEach(x => slots.add(x));
+    for (const slot of slots) expect(DEFAULT_FOREST_ASSETS[slot]).withContext(slot).toBeDefined();
+    for (const [slot, a] of Object.entries(DEFAULT_FOREST_ASSETS)) {
+      expect(a.src).withContext(slot).toMatch(/^island\/default_forest\/[a-z]+\/island_default_[a-z]+_[a-z0-9_]+\.png$/);
+      if (a.frames) expect(a.frames).withContext(slot).toBeGreaterThan(1);
+    }
+  });
+
+  it('required animated assets exist as sprite sheets (smoke 6–10 f, fire 4–6 f, sparks, lantern, runes, particles, tower aura, flags)', () => {
+    const f = (s: string) => DEFAULT_FOREST_ASSETS[s].frames ?? 1;
+    expect(f('building.forge.fx.smoke')).toBeGreaterThanOrEqual(6); expect(f('building.forge.fx.smoke')).toBeLessThanOrEqual(10);
+    expect(f('building.forge.fx.fire')).toBeGreaterThanOrEqual(4); expect(f('building.forge.fx.fire')).toBeLessThanOrEqual(6);
+    expect(DEFAULT_FOREST_ASSETS['building.forge.fx.sparks'].loop).toBe('rare');
+    for (const s of ['fx.lantern', 'fx.particlesCyan', 'fx.particlesViolet', 'building.tower.fx.aura.emerald', 'building.tower.fx.particles.emerald',
+      'building.ascension.fx.runeCircle', 'training.banner', 'prop.bannerBlue', 'fx.fireflies', 'terrain.streamWater', 'terrain.waterfall']) expect(f(s)).withContext(s).toBeGreaterThan(1);
+  });
+
+  it('FX anchors used by skins exist on their plot (layout owns positions, the theme only names them)', () => {
+    for (const b of ISLAND_BUILDINGS) {
+      const skin = DEFAULT_FOREST_SKINS[b.id];
+      if (skin.kind !== 'LAYERED') continue;
+      for (const ls of Object.values(skin.stages)) for (const l of ls) if (l.at) expect(PLOT_BY_ID[b.plotId].fxAnchors[l.at]).withContext(`${b.id} ${l.at}`).toBeDefined();
     }
   });
 
   it('themes carry no stat / reward fields', () => {
-    const allowed = ['id', 'name', 'free', 'terrainAsset', 'backgroundAsset', 'towerSkin', 'buildingSkins', 'vegetationSet', 'ambientVfx', 'weatherPreset', 'lightingPreset', 'bgmId'];
+    const allowed = ['id', 'name', 'free', 'assets', 'terrainSet', 'roadSet', 'backgroundSet', 'buildingSkins', 'treeSet', 'vegetationSet', 'propSet',
+      'ambientFxSet', 'lightingPreset', 'decorFx', 'weatherPreset', 'bgmId'];
     for (const t of Object.values(ISLAND_THEMES)) for (const k of Object.keys(t)) expect(allowed).withContext(k).toContain(k);
+    expect(JSON.stringify(T.lightingPreset)).not.toMatch(/"(atk|hp|def|exp|dropRate|bonus|power)"/i);
   });
 
-  it('skin priority: individual override → theme skin → default; swapping to pixel art changes no gameplay data', () => {
+  it('fallbacks: missing theme asset → Default Forest asset; missing base everywhere → placeholder (never hidden, never a crash)', () => {
+    const empty: typeof T = { ...T, id: 'frozen_test', assets: {} };
+    expect(resolveAsset(empty, 'training.dummy')).toBe(DEFAULT_FOREST_ASSETS['training.dummy']);
+    expect(resolveAsset(empty, 'nope.slot')).toBeNull();
+    // a theme whose training skin points at art nobody has → placeholder for that building, others still drawn
+    const broken: typeof T = { ...T, id: 'broken_test', buildingSkins: { training_ground: { id: 'x', kind: 'LAYERED', stages: { 0: [{ slot: 'missing.base', role: 'BASE' }] } } } };
+    const states = newIsland(3, newGameState().heroes, newGameState().team).buildingProgression;
+    const d = buildingDraw(broken, states, {}, unlockFloorOf);
+    expect(d.placeholders.map(p => p.building)).toEqual(['training_ground']);
+    expect(d.hits.length).toBe(ISLAND_BUILDINGS.length);
+    // missing optional FX layer → the building still draws its static base
+    const noSmoke: typeof T = { ...T, assets: Object.fromEntries(Object.entries(T.assets).filter(([k]) => k !== 'fx.smoke')) };
+    expect(layersFor(DEFAULT_FOREST_SKINS['hero_hall'], 1, { ...noSmoke, assets: noSmoke.assets } as typeof T)!.some(l => l.layer.role === 'BASE')).toBeTrue();
+    expect(themeOf('ancient_forest').id).toBe(DEFAULT_THEME_ID);
+  });
+
+  it('skin priority: individual override → theme skin → Default Forest skin → placeholder; art swaps change no gameplay data', () => {
     const sprite: BuildingSkin = { id: 'frozen_training', kind: 'SPRITE', stages: { 0: { src: 'x/ruin.png' }, 1: { src: 'x/training.png' } } };
     const gold: BuildingSkin = { id: 'gold_training', kind: 'SPRITE', stages: { 0: { src: 'x/gold.png' } } };
-    const frozen: IslandThemeDefinition = { ...ISLAND_THEMES[DEFAULT_THEME_ID], id: 'frozen', buildingSkins: { training_ground: sprite } };
+    const frozen: IslandThemeDefinition = { ...T, id: 'frozen', buildingSkins: { training_ground: sprite } };
     const before = JSON.stringify({ b: BUILDING_BY_ID['training_ground'], p: PLOT_BY_ID['PLOT_A'] });
-    expect(resolveBuildingSkin('training_ground', ISLAND_THEMES[DEFAULT_THEME_ID])).toBe(DEFAULT_BUILDING_SKINS['training_ground']);
+    expect(resolveBuildingSkin('training_ground', { ...T, buildingSkins: {} })).toBe(DEFAULT_FOREST_SKINS['training_ground']);
     expect(resolveBuildingSkin('training_ground', frozen)).toBe(sprite);
     expect(resolveBuildingSkin('training_ground', frozen, { training_ground: 'gold_training' }, { gold_training: gold })).toBe(gold);
+    expect(PLACEHOLDER_SKINS['training_ground'].kind).toBe('PLACEHOLDER');
     expect(JSON.stringify({ b: BUILDING_BY_ID['training_ground'], p: PLOT_BY_ID['PLOT_A'] })).toBe(before);
+  });
+
+  it('island visibly develops: more building art, lights and FX at Floor 10 than on a new account', () => {
+    const h = newGameState();
+    const s0 = newIsland(0, h.heroes, h.team).buildingProgression, s10 = newIsland(10, h.heroes, h.team).buildingProgression;
+    const d0 = buildingDraw(T, s0, {}, unlockFloorOf), d10 = buildingDraw(T, s10, {}, unlockFloorOf);
+    expect(d10.sprites.length).toBeGreaterThan(d0.sprites.length + 10);
+    expect(lightsDraw(T, s10).length).toBeGreaterThan(lightsDraw(T, s0).length);
+    expect(decorDraw(T).length).toBeGreaterThan(60);
+    // tower art changes with its stage (base sprite differs at 0 / 2 / 5)
+    const towerBase = (st: number) => layersFor(DEFAULT_FOREST_SKINS['tower'], st, T)!.find(l => l.layer.role === 'BASE')!.asset.src;
+    expect(new Set([towerBase(0), towerBase(2), towerBase(5)]).size).toBe(3);
   });
 
   it('setTheme accepts known themes only; unknown saved themes fall back to the default', () => {
@@ -214,6 +336,7 @@ describe('Home Island — themes and skins (cosmetic only)', () => {
     expect(setTheme(s.island!, 'nope')).toBeNull();
     expect(setTheme(s.island!, DEFAULT_THEME_ID)!.themeId).toBe(DEFAULT_THEME_ID);
     expect(normalizeIsland({ ...s.island!, themeId: 'deleted_theme' }, s).themeId).toBe(DEFAULT_THEME_ID);
+    expect(normalizeIsland({ ...s.island!, themeId: 'ancient_forest' }, s).themeId).toBe(DEFAULT_THEME_ID);
   });
 });
 
@@ -257,12 +380,13 @@ describe('Home Island — page', () => {
 
   it('draws every plot, the main hero and the extra roamers; locked plots show their requirement', async () => {
     const { f, el } = await mount(0);
-    expect(el.querySelectorAll('g.bld').length).toBe(ISLAND_BUILDINGS.length);
-    expect(el.querySelectorAll('g.bld.locked').length).toBe(ISLAND_BUILDINGS.length - 1);
-    expect(el.querySelectorAll('g.hero').length).toBe(1 + roamerCount(0, 10));
+    expect(el.querySelectorAll('button.hit').length).toBe(ISLAND_BUILDINGS.length);
+    expect(el.querySelectorAll('.plate.locked').length).toBe(ISLAND_BUILDINGS.length - 1);
+    expect(el.querySelectorAll('app-island-hero').length).toBe(1 + roamerCount(0, 10));
+    expect(el.querySelector('img[src*="tower_base_sealed"]')).not.toBeNull();
     f.componentInstance.tapBuilding('equipment_workshop');
     f.detectChanges();
-    expect(el.querySelector('.sheet')!.textContent).toContain('ผ่านหอคอยชั้น 6');
+    expect(el.querySelector('div.sheet[role="dialog"]')!.textContent).toContain('ผ่านหอคอยชั้น 6');
     f.destroy();
   });
 

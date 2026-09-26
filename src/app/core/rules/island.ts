@@ -1,4 +1,4 @@
-import { DEFAULT_THEME_ID, ISLAND_THEMES } from '../data/island-themes';
+import { DEFAULT_THEME_ID, ISLAND_THEMES, THEME_ALIASES } from '../data/island-themes';
 import { BUILDING_BY_ID, ISLAND_BUILDINGS, ISLAND_STAGES, MAX_EXTRA_ROAMERS } from '../data/island-layout';
 import { HERO_BY_ID } from '../data/heroes';
 import { GameState, TeamSlot } from '../models/game-state';
@@ -63,6 +63,11 @@ export function newIsland(cleared: number, heroes: OwnedHero[], team: TeamSlot[]
   };
 }
 
+const themeIdOf = (id?: string) => {
+  const k = id ? THEME_ALIASES[id] ?? id : '';
+  return k && ISLAND_THEMES[k] ? k : DEFAULT_THEME_ID;
+};
+
 /** load-time repair: unknown theme → default, missing / sold main hero → default, missing buildings → derived */
 export function normalizeIsland(raw: Partial<PlayerIsland> | undefined, s: Pick<GameState, 'cleared' | 'heroes' | 'team'>): PlayerIsland {
   if (!raw || raw.version !== 1) return newIsland(s.cleared, s.heroes, s.team);
@@ -73,7 +78,7 @@ export function normalizeIsland(raw: Partial<PlayerIsland> | undefined, s: Pick<
   for (const [id, b] of Object.entries(raw.buildingProgression ?? {})) if (BUILDING_BY_ID[id]) prog[id] = { ...b, buildingId: id };
   return {
     version: 1,
-    themeId: raw.themeId && ISLAND_THEMES[raw.themeId] ? raw.themeId : DEFAULT_THEME_ID,
+    themeId: themeIdOf(raw.themeId),
     mainIslandHeroId: raw.mainIslandHeroId != null && owned.has(raw.mainIslandHeroId) ? raw.mainIslandHeroId : base.mainIslandHeroId,
     unlockedBuildings: Object.values(prog).filter(b => b.isUnlocked).map(b => b.buildingId),
     buildingProgression: prog,

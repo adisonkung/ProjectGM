@@ -1,34 +1,69 @@
-:host { display: block; }
-.scene { display: block; width: 100%; height: 100%; touch-action: manipulation; user-select: none; }
-.cam { transition: transform 0.7s cubic-bezier(.2, .8, .2, 1); transform-origin: 0 0; }
+:host { display: block; position: relative; overflow: hidden; background: #0a0c16; }
+.vp { position: absolute; inset: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; cursor: grab; touch-action: pan-x; -webkit-overflow-scrolling: touch; }
+.vp::-webkit-scrollbar { display: none; }
+.vp:active { cursor: grabbing; }
+.stage { position: relative; overflow: hidden; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; transition: transform 0.7s cubic-bezier(.2, .8, .2, 1); user-select: none; }
 
-.bld { cursor: pointer; }
-.bld .hit { fill: transparent; outline: none; }
-.bld.locked { opacity: 0.9; }
-.bld.sel .hit, .bld .hit:focus-visible { fill: #f6dfa014; stroke: #f6dfa0; stroke-width: 2; stroke-dasharray: 6 4; }
-.bld:hover .hit { fill: #ffffff0a; }
-.bname { font: 700 16px var(--title); fill: #f3e8cf; paint-order: stroke; stroke: #0b0914; stroke-width: 4px; letter-spacing: 0.02em; }
-.locked .bname { fill: #b4aac8; }
-.req { font: 600 13px var(--body); fill: #ffb0a8; paint-order: stroke; stroke: #0b0914; stroke-width: 3.5px; }
-.lv { font: 700 13px var(--title); fill: #f6dfa0; paint-order: stroke; stroke: #0b0914; stroke-width: 3.5px; }
-.fx g[appBuildingVisual] { animation: rise 1.1s ease-out; transform-box: fill-box; transform-origin: 50% 100%; }
-@keyframes rise { from { transform: scale(0.2, 0.05); opacity: 0.2; } 60% { transform: scale(1.08, 1.12); opacity: 1; } }
-.burst circle { fill: #e9d8b0; opacity: 0; animation: dust 1.3s ease-out infinite; transform-box: fill-box; transform-origin: center; }
-@keyframes dust { 0% { opacity: .8; transform: scale(.3) translateY(0); } 100% { opacity: 0; transform: scale(2.2) translateY(-14px); } }
+.px { position: absolute; left: 0; top: 0; image-rendering: pixelated; pointer-events: none; -webkit-user-drag: none; }
+.bg { will-change: transform; }
+.flip { transform: scaleX(-1); }
+.glow { mix-blend-mode: screen; }
+.fore { z-index: 960000; }
+.mist { left: -60px; z-index: 1; opacity: 0.85; animation: drift 40s ease-in-out infinite alternate; }
+.cloud { animation: drift 80s ease-in-out infinite alternate; opacity: 0.9; }
+.rock { animation: bobbing 6s ease-in-out infinite; }
 
-.hero { cursor: pointer; }
-:host ::ng-deep .hero .name { font: 600 12px var(--body); fill: #efe7d6; paint-order: stroke; stroke: #0b0914; stroke-width: 3px; }
-:host ::ng-deep .hero .name.main { font: 700 13px var(--title); fill: #f6dfa0; }
-:host ::ng-deep .hero .ring { animation: ring 2.4s ease-in-out infinite; }
-:host ::ng-deep .hero .spark { font-size: 12px; fill: #f6dfa0; }
-@keyframes ring { 50% { opacity: .55; } }
+// sprite sheets: horizontal strips stepped with CSS (var(--n) frames, var(--fw) frame width, var(--dur) loop)
+.anim {
+  position: absolute; pointer-events: none; image-rendering: pixelated; background-repeat: no-repeat;
+  background-size: calc(var(--fw) * var(--n)) 100%;
+  animation: sheet var(--dur) steps(var(--n)) infinite;
+}
+.anim.flip { transform: scaleX(-1); }
+.anim.rare { animation: sheet-rare calc(var(--dur) * 8) steps(var(--n)) infinite; }
+.anim.bob { animation: sheet var(--dur) steps(var(--n)) infinite, bobbing 3s ease-in-out infinite; }
+@keyframes sheet { from { background-position-x: 0; } to { background-position-x: calc(-1 * var(--fw) * var(--n)); } }
+@keyframes sheet-rare { 0% { background-position-x: 0; } 12.5% { background-position-x: calc(-1 * var(--fw) * var(--n)); } 100% { background-position-x: calc(-1 * var(--fw) * var(--n)); } }
 
-.fireflies circle { fill: #f6f0a0; filter: drop-shadow(0 0 4px #f6f0a0); animation: float ease-in-out infinite alternate; opacity: .0; }
-@keyframes float { 0% { opacity: 0; transform: translate(0, 0); } 50% { opacity: .9; } 100% { opacity: 0; transform: translate(10px, -16px); } }
-.mist ellipse { fill: #c9d6ff; opacity: .06; }
-.tree { pointer-events: none; }
+// ambient motion for static layers (never gameplay)
+.pulse { animation: pulse 2.8s ease-in-out infinite; }
+.flicker { animation: flicker 3.2s steps(1) infinite; }
+.bob { animation: bobbing 3s ease-in-out infinite; }
+.breathe { animation: breathe 4s ease-in-out infinite; transform-origin: 50% 100%; }
+.sway { animation: sway 5s ease-in-out infinite; transform-origin: 50% 100%; }
+.sway.flip { animation-name: sway-flip; }
+.sway-slow { animation: sway 9s ease-in-out infinite; transform-origin: 50% 0; }
+.rise { animation: rise 1.1s ease-out; transform-origin: 50% 100%; }
+@keyframes pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes flicker { 0% { opacity: 1; } 18% { opacity: 0.86; } 22% { opacity: 1; } 55% { opacity: 0.93; } 60% { opacity: 1; } 83% { opacity: 0.8; } 86% { opacity: 1; } }
+@keyframes bobbing { 0%, 100% { translate: 0 -5px; } 50% { translate: 0 5px; } }
+@keyframes breathe { 50% { scale: 1.03; } }
+@keyframes sway { 0%, 100% { rotate: -0.8deg; } 50% { rotate: 0.8deg; } }
+@keyframes sway-flip { 0%, 100% { transform: scaleX(-1) rotate(-0.8deg); } 50% { transform: scaleX(-1) rotate(0.8deg); } }
+@keyframes drift { from { translate: -40px 0; } to { translate: 60px 0; } }
+@keyframes rise { from { scale: 0.2 0.05; opacity: 0.2; } 60% { scale: 1.05 1.1; opacity: 1; } to { scale: 1; } }
+
+.ph { position: absolute; overflow: visible; pointer-events: none; }
+
+.ambient { position: absolute; inset: 0; z-index: 970000; pointer-events: none; mix-blend-mode: multiply; }
+.light { position: absolute; z-index: 971000; pointer-events: none; mix-blend-mode: screen; border-radius: 50%; }
+.light.flicker { animation: flicker 2.6s steps(1) infinite; }
+.fog { position: absolute; left: 0; right: 0; bottom: 0; height: 260px; z-index: 972000; pointer-events: none;
+  background: linear-gradient(to top, #b6bee022, transparent); animation: drift 30s ease-in-out infinite alternate; }
+
+.hit { position: absolute; z-index: 980000; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 16px; }
+.hit:hover { background: #f6dfa00d; }
+.hit.sel, .hit:focus-visible { outline: 3px dashed #f6dfa0; outline-offset: 4px; background: #f6dfa012; }
+.plate { position: absolute; z-index: 981000; transform: translateX(-50%); display: grid; justify-items: center; pointer-events: none; white-space: nowrap;
+  b { font: 700 24px var(--title); color: #f3e8cf; letter-spacing: 0.03em;
+    text-shadow: 0 3px 0 #0b0914, 3px 0 0 #0b0914, -3px 0 0 #0b0914, 0 -2px 0 #0b0914, 0 0 10px #0b0914; }
+  small { font: 700 19px var(--body); color: #ffb0a8; text-shadow: 0 2px 0 #0b0914, 2px 0 0 #0b0914, -2px 0 0 #0b0914; }
+  .lv { color: #f6dfa0; font-family: var(--title); }
+  .soon { color: #c9adff; }
+  &.locked b { color: #b4aac8; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .cam { transition: none; }
-  .fireflies, .burst { display: none; }
+  .world { transition: none; }
+  .anim, .pulse, .flicker, .bob, .breathe, .sway, .sway-slow, .cloud, .mist, .rock, .fog, .light.flicker { animation: none !important; }
 }
