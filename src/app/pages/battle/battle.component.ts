@@ -365,8 +365,8 @@ export class BattleComponent implements OnDestroy {
         heroId: u.heroId,
         cd1: Math.max(0, u.cd1),
         cd2: Math.max(0, u.cd2),
-        cd1Max: kitOf(u.heroId, u.cls).skill.cooldown ?? 1,
-        cd2Max: kitOf(u.heroId, u.cls).skill2.cooldown ?? 1,
+        cd1Max: (u.kit ?? kitOf(u.heroId, u.cls)).skill.cooldown ?? 1,
+        cd2Max: (u.kit ?? kitOf(u.heroId, u.cls)).skill2.cooldown ?? 1,
         onFocus: u.side === 'ally' && e.focusTargetId != null && u.targetId === e.focusTargetId,
         elite: u.elite,
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
@@ -381,7 +381,7 @@ export class BattleComponent implements OnDestroy {
         debug: this.debug() ? (u.monster ? this.debugLines(u, byId) : heroDbg.get(u.id)) : undefined,
         targetId: u.targetId,
         line: u.line,
-        interrupter: u.side === 'ally' && kitInterrupts(kitOf(u.heroId, u.cls), 'ult'),
+        interrupter: u.side === 'ally' && kitInterrupts((u.kit ?? kitOf(u.heroId, u.cls)), 'ult'),
         modes: u.side === 'ally' ? { skill: e.skills.mode(u, 'skill'), skill2: e.skills.mode(u, 'skill2'), ult: e.skills.mode(u, 'ult') } : undefined,
         cast: u.casting && !(u.casting.def as MonsterSkillDefinition).untargetableWhileCasting
           ? {

@@ -4,7 +4,7 @@ import { OwnedHero } from '../models/hero';
 import { TeamSlot } from '../models/game-state';
 import { UnitSpec } from '../models/unit';
 import { heroStats } from './stats';
-import { combatModifiers } from './progression';
+import { combatModifiers, skillRanksOf } from './progression';
 
 export const TEAM_SIZE = 5;
 /** ความลึกของฝั่งเรา (r ใน TeamSlot: 0 = หน้าสุด) และจำนวนเลน (c) */
@@ -53,6 +53,7 @@ export function teamToUnits(team: TeamSlot[], heroes: OwnedHero[]): UnitSpec[] {
       heroId: t.id,
       stats: heroStats(t, h),
       mods: combatModifiers(h),
+      skillRanks: skillRanksOf(h),
       pos: { r: slot.r, c: slot.c },
     });
   }

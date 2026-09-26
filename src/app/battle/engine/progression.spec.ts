@@ -4,7 +4,7 @@ import { kitOf } from '../../core/data/hero-skills';
 import { HERO_5STAR_LV1 } from '../../core/data/classes';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import {
-  BREAKTHROUGH_GATES, FLOOR_BANDS, PATCH_1, POWER_PROFILES, SKILL_RANK_EFFECTS,
+  BREAKTHROUGH_GATES, FLOOR_BANDS, PATCH_1, POWER_PROFILES,
 } from '../../core/data/progression';
 import { STAGES } from '../../core/data/stages';
 import { newGameState } from '../../core/data/starter';
@@ -13,7 +13,7 @@ import { OwnedHero } from '../../core/models/hero';
 import { EnemyPlacement, StageDef } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
 import {
-  applyProfile, canLevelUp, combatModifiers, gearStatBonus, levelCap, needsBreakthrough,
+  applyProfile, canLevelUp, combatModifiers, gearStatBonus, levelCap, needsBreakthrough, skillRanksOf,
 } from '../../core/rules/progression';
 import { heroStats, maxLevel } from '../../core/rules/stats';
 import { teamToUnits } from '../../core/rules/team';
@@ -22,6 +22,7 @@ import { applyBuff } from './buffs';
 import { AFFIXES, EQUIPMENT_DEFS, RARITIES, SLOTS } from '../../core/data/equipment';
 import { EquipmentInstance, EquipStat, Rarity } from '../../core/models/equipment';
 import { heroGearTotals, rollItem } from '../../core/rules/equipment';
+import { rankedSkill } from '../../core/rules/skill-ranks';
 
 /** a fixed item (no RNG): base, rarity, main stat, secondaries, affix, upgrade level */
 let nextId = 1;
@@ -34,7 +35,7 @@ const spec = (id: string, h: OwnedHero, depth: number, lane: number): UnitSpec =
   const t = HERO_BY_ID[id];
   return {
     name: t.name, cls: t.cls, heroId: id, heroUid: 1000 + depth * 10 + lane, sprite: t.sprite,
-    stats: { ...heroStats(t, h), hp: 99999 }, mods: combatModifiers(h), pos: { r: depth, c: lane },
+    stats: { ...heroStats(t, h), hp: 99999 }, mods: combatModifiers(h), skillRanks: skillRanksOf(h), pos: { r: depth, c: lane },
   };
 };
 
@@ -98,13 +99,12 @@ describe('Patch 1 progression — structure', () => {
     for (const a of affixes) if (a.effect.stat !== 'breakPower') expect(a.effect.value).withContext(a.id).toBeLessThan(0.25);
   });
 
-  it('skill ranks 1–5 raise power, lower cooldowns and add Break power', () => {
-    const r = [1, 2, 3, 4, 5].map(n => SKILL_RANK_EFFECTS[n]);
-    for (let i = 1; i < 5; i++) {
-      expect(r[i].power).toBeGreaterThan(r[i - 1].power);
-      expect(r[i].cooldown).toBeLessThanOrEqual(r[i - 1].cooldown);
-      expect(r[i].breakBonus).toBeGreaterThanOrEqual(r[i - 1].breakBonus);
-    }
+  it('skill ranks are per-skill tables (Skill Upgrade spec): Shield Charge R5 = 160 % · Break 70 · cd 11.5', () => {
+    const r5 = rankedSkill(kitOf('aurel', 'tank').skill2, 5);
+    const dmg = r5.effects.find(e => e.type === 'DAMAGE') as { primary: number; breakPower: number };
+    expect(dmg.primary).toBeCloseTo(1.6, 2);
+    expect(dmg.breakPower).toBe(70);
+    expect(r5.cooldown).toBe(11.5);
   });
 });
 
@@ -122,15 +122,15 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
     expect(s.def).toBe(Math.round(49 * 1.18 * (1 + b.def)));
   });
 
-  it('combatModifiers: ranks → skill power / cooldown / Break; gear → Break, CDR, crit, healing, bleed / poison / root, dive', () => {
+  it('combatModifiers: gear → skill power / Break, CDR, crit, healing, bleed / poison / root, dive (ranks live in the ranked kit)', () => {
     const h = hero('sylvie', {
       skillRanks: { skill: 1, skill2: 4, ult: 5 },
       gear: { WEAPON: item('longbow', 'ELITE', 'breakPower', { affix: 'breaker' }), ARMOR: item('guard_armor', 'ELITE', 'hpPct', { affix: 'backline_guard' }), ACCESSORY: item('trinket', 'ELITE', 'cooldownReduction', { affix: 'rootbreaker' }) },
     });
     const m = combatModifiers(h);
     expect(m.skillPower.skill).toBe(1);
-    expect(m.skillPower.skill2).toBe(SKILL_RANK_EFFECTS[4].power);
-    expect(m.breakBonus.skill2).toBe(SKILL_RANK_EFFECTS[4].breakBonus + 6 + 10);
+    expect(m.skillPower.skill2).toBe(1);
+    expect(m.breakBonus.skill2).toBe(6 + 10);
     expect(m.cooldown.skill).toBeCloseTo(1 - 0.04, 5);
     expect(m.diveReduction).toBeCloseTo(0.15, 5);
     expect(m.statusResist.root).toBeCloseTo(0.2, 5);
@@ -146,12 +146,12 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
     const heroes = st.heroes.map(h => applyProfile(h, POWER_PROFILES['E']));
     for (const u of teamToUnits(st.team, heroes)) {
       expect(u.mods).withContext(u.name).toBeDefined();
-      expect(u.mods!.skillPower.skill2).toBe(SKILL_RANK_EFFECTS[4].power);
+      expect(u.skillRanks).withContext(u.name).toEqual(POWER_PROFILES['E'].ranks);
       expect(u.level).toBe(9);
     }
   });
 
-  it('skill rank power multiplies skill damage (not basic attacks)', () => {
+  it('skill rank multiplies skill damage by its table (Piercing Thrust R5 ×1.25, not basic attacks)', () => {
     const slime = (rank: number) => {
       const h = hero('jin', { skillRanks: { skill: 1, skill2: rank, ult: 1 } });
       const b = battle([spec('jin', h, 0, 1)], [{ enemy: 'forest_slime', r: 0, c: 1 }]);
@@ -160,13 +160,13 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
       b.statue(m);
       const jin = b.heroU('jin');
       (b.e as any).relocate(jin, { r: m.pos.r, c: m.pos.c - 1 }, 'blink');
-      b.e.skills.use(jin, 'skill2', kitOf('jin', 'fighter').skill2, m);
+      b.e.skills.use(jin, 'skill2', b.e.skills.kit(jin).skill2, m);
       b.run(1.5);
       return b.log.filter(ev => ev.type === 'damage' && ev.dst === m.id).map(ev => (ev as any).amount / ((ev as any).crit ? 1.5 : 1))[0];
     };
     const r1 = slime(1), r5 = slime(5);
-    expect(r5 / r1).toBeGreaterThan(1.35 * 0.8);
-    expect(r5 / r1).toBeLessThan(1.35 * 1.25);
+    expect(r5 / r1).toBeGreaterThan(1.25 * 0.85);
+    expect(r5 / r1).toBeLessThan(1.25 * 1.18);
   });
 
   it('skill cooldowns shrink with rank / gear (gear CDR capped at 15 %)', () => {
@@ -178,8 +178,9 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
     const b = battle([spec('jin', h, 0, 1)], [{ enemy: 'forest_slime', r: 0, c: 1 }]);
     const jin = b.heroU('jin');
     const m = b.monsters('forest_slime')[0];
-    b.e.skills.use(jin, 'skill', kitOf('jin', 'fighter').skill, m);
-    expect(jin.cd1).toBeCloseTo(kitOf('jin', 'fighter').skill.cooldown! * 0.9 * 0.85, 5);
+    b.e.skills.use(jin, 'skill', b.e.skills.kit(jin).skill, m);
+    // Spinning Sword has no rank CDR: 5 s × (1 − 15 %)
+    expect(jin.cd1).toBeCloseTo(kitOf('jin', 'fighter').skill.cooldown! * 0.85, 5);
   });
 
   it('Break bonus from rank + gear reaches the Break Gauge (gear Break capped at +20)', () => {
@@ -194,10 +195,10 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
     g.monster!.state = 'CASTING';
     g.monster!.currentSkillId = 'forest_oblivion';
     (b.e as any).beginCast(g, MONSTER_SKILLS['forest_oblivion'], null);
-    b.e.skills.use(tank, 'skill2', kitOf('aurel', 'tank').skill2, g);
+    b.e.skills.use(tank, 'skill2', b.e.skills.kit(tank).skill2, g);
     b.run(1);
-    // 60 (Shield Charge) + 15 (rank 5) + 20 (gear cap) = 95 — Forest Oblivion (100) still needs a second breaker
-    expect(g.casting?.breakDamage).toBe(95);
+    // 70 (Shield Charge R5) + 20 (gear cap) = 90 — Forest Oblivion (100) still needs a second breaker
+    expect(g.casting?.breakDamage).toBe(90);
   });
 
   it('Poison Ward / Rootbreaker shorten poison / root; Bleed Guard cuts bleed damage (never immunity)', () => {

@@ -9,7 +9,7 @@
  * skill ranks 15–20 %, composition + tactics on top.
  */
 import { BREAKTHROUGHS } from './economy';
-import { BreakthroughGate, FloorBand, PowerProfile, SkillRankEffect } from '../models/progression';
+import { BreakthroughGate, FloorBand, PowerProfile } from '../models/progression';
 
 export const PATCH_1 = {
   /** hero level cap of the released Patch 1 (Lv10 = a meaningful endgame milestone) */
@@ -23,14 +23,6 @@ export const PATCH_1 = {
 /** level → level + 1 needs a breakthrough first — derived from BREAKTHROUGHS (core/data/economy.ts, items + unlocks) */
 export const BREAKTHROUGH_GATES: BreakthroughGate[] = BREAKTHROUGHS.map(b => ({ from: b.fromLevel, kind: b.tier === 3 ? 'MAJOR' : 'MILESTONE' }));
 
-/** skill rank 1–5 (PROVISIONAL): power = damage / healing / shields · cooldown multiplier · extra Break power */
-export const SKILL_RANK_EFFECTS: Record<number, SkillRankEffect> = {
-  1: { power: 1.0, cooldown: 1.0, breakBonus: 0 },
-  2: { power: 1.08, cooldown: 1.0, breakBonus: 0 },
-  3: { power: 1.16, cooldown: 0.95, breakBonus: 5 },
-  4: { power: 1.25, cooldown: 0.92, breakBonus: 10 },
-  5: { power: 1.35, cooldown: 0.9, breakBonus: 15 },
-};
 
 /**
  * Simulation power profiles (spec §13). Floor 10 design targets (AUTO / TACTICAL):
@@ -55,6 +47,15 @@ export const POWER_PROFILES: Record<string, PowerProfile> = {
   EQ3: { id: 'EQ3', label: 'Lv10 SR1 · Good gear', level: 10, gear: 'GOOD', ranks: { skill: 1, skill2: 1, ult: 1 } },
   EQ4: { id: 'EQ4', label: 'Lv10 SR1 · Very Good gear', level: 10, gear: 'VERY_GOOD', ranks: { skill: 1, skill2: 1, ult: 1 } },
   EQ5: { id: 'EQ5', label: 'Lv10 SR1 · Near-max gear', level: 10, gear: 'NEAR_MAX', ranks: { skill: 1, skill2: 1, ult: 1 } },
+  // combined ladder (Skill Upgrade spec): Lv10 + gear profile + skill profile S0–S5 (ranks by hero priority)
+  SA: { id: 'SA', label: 'Lv10 · no gear · S0', level: 10, gear: null, ranks: { skill: 1, skill2: 1, ult: 1 }, skillProfile: 'S0' },
+  SB: { id: 'SB', label: 'Lv10 · Mid gear · S0', level: 10, gear: 'MID', ranks: { skill: 1, skill2: 1, ult: 1 }, skillProfile: 'S0' },
+  SC: { id: 'SC', label: 'Lv10 · Mid gear · S2', level: 10, gear: 'MID', ranks: { skill: 1, skill2: 1, ult: 1 }, skillProfile: 'S2' },
+  SD: { id: 'SD', label: 'Lv10 · Good gear · S3', level: 10, gear: 'GOOD', ranks: { skill: 1, skill2: 1, ult: 1 }, skillProfile: 'S3' },
+  SE: { id: 'SE', label: 'Lv10 · Very Good gear · S4', level: 10, gear: 'VERY_GOOD', ranks: { skill: 1, skill2: 1, ult: 1 }, skillProfile: 'S4' },
+  SF: { id: 'SF', label: 'Lv10 · Near-max gear · S5', level: 10, gear: 'NEAR_MAX', ranks: { skill: 1, skill2: 1, ult: 1 }, skillProfile: 'S5' },
+  // skill-only ladder: Lv10, no gear, S1–S5 (one system alone must not carry late floors)
+  ...Object.fromEntries([1, 2, 3, 4, 5].map(n => [`SK${n}`, { id: `SK${n}`, label: `Lv10 · no gear · S${n}`, level: 10, gear: null, ranks: { skill: 1, skill2: 1, ult: 1 }, skillProfile: `S${n}` }])),
 };
 
 /** Floor 10 design targets per profile (diagnostic ranges, never forced) — rebalance spec §33 */
@@ -67,6 +68,10 @@ export const FLOOR10_TARGETS: Record<string, { auto: [number, number]; tactical:
   F: { auto: [15, 35], tactical: [50, 75] },
   G: { auto: [35, 55], tactical: [75, 90] },
   LVL: { auto: [0, 0], tactical: [0, 5] },
+  // Skill Upgrade spec: Good+S3 / VG+S4 / NearMax+S5
+  SD: { auto: [5, 15], tactical: [25, 45] },
+  SE: { auto: [15, 35], tactical: [50, 75] },
+  SF: { auto: [35, 55], tactical: [75, 90] },
 };
 
 /** the Patch 1 tower journey (recommendations, never entry locks) */

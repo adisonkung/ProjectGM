@@ -9,6 +9,7 @@ import {
 } from '../models/monster';
 import { STATUS_EFFECTS } from './status-effects';
 import { STAGE4_10_MONSTERS, STAGE4_10_SKILLS } from './monsters-stage4-10';
+import { TRIAL_MONSTERS, TRIAL_SKILLS } from './monsters-trials';
 
 /**
  * Data-driven monsters — Normal Forest, Stage 1–3.
@@ -76,6 +77,7 @@ export const MONSTER_SKILLS: Record<string, MonsterSkillDefinition> = {
     interruptRecovery: 0.6,
   },
   ...STAGE4_10_SKILLS,
+  ...TRIAL_SKILLS,
 };
 
 // ------------------------------------------------------------------ monsters
@@ -246,6 +248,8 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
 
   // ---- Stage 4–10 (mock visuals, data in monsters-stage4-10.ts)
   ...STAGE4_10_MONSTERS,
+  // ---- Skill Trial only (monsters-trials.ts)
+  ...TRIAL_MONSTERS,
 };
 
 // ------------------------------------------------------------------ helpers (pure)

@@ -1,6 +1,7 @@
 import { BREAKTHROUGHS } from '../data/economy';
 import { currentLevelCap } from './leveling';
-import { BREAKTHROUGH_GATES, PATCH_1, SKILL_RANK_EFFECTS } from '../data/progression';
+import { BREAKTHROUGH_GATES, PATCH_1 } from '../data/progression';
+import { skillProfileRanks } from './skill-ranks';
 import { HERO_BY_ID } from '../data/heroes';
 import { OwnedHero } from '../models/hero';
 import { CombatModifiers, PowerProfile, SkillKind, SkillRanks } from '../models/progression';
@@ -32,15 +33,14 @@ export function gearStatBonus(h: OwnedHero): { hp: number; atk: number; def: num
   return { hp: t.hpPct, atk: t.atkPct, def: t.defPct, atkFlat: t.atkFlat, attackSpeed: t.attackSpeed, moveSpeed: t.moveSpeed };
 }
 
-/** skill ranks + equipment utility → what the combat engine reads (gear already capped in gearTotals) */
+/** equipment utility → what the combat engine reads (gear already capped in gearTotals; skill ranks → rankedKit) */
 export function combatModifiers(h: OwnedHero): CombatModifiers {
-  const ranks = skillRanksOf(h);
   const g = heroGearTotals(h);
   const per = <T>(f: (k: SkillKind) => T) => Object.fromEntries(SLOTS.map(k => [k, f(k)])) as Record<SkillKind, T>;
   return {
-    skillPower: per(k => SKILL_RANK_EFFECTS[ranks[k]].power * (1 + g.skillDamage)),
-    cooldown: per(k => SKILL_RANK_EFFECTS[ranks[k]].cooldown * (1 - g.cooldownReduction)),
-    breakBonus: per(k => SKILL_RANK_EFFECTS[ranks[k]].breakBonus + g.breakPower),
+    skillPower: per(() => 1 + g.skillDamage),
+    cooldown: per(() => 1 - g.cooldownReduction),
+    breakBonus: per(() => g.breakPower),
     healing: 1 + g.healingPower,
     shieldPower: 1 + g.shieldPower,
     healingReceived: 1 + g.healingReceived,
@@ -62,5 +62,6 @@ export function applyProfile(h: OwnedHero, p: PowerProfile, level = p.level): Ow
   const gear = p.gear ? profileGear(cls, p.gear) : {};
   for (const i of Object.values(gear)) if (i) i.equippedHeroId = h.uid;
   const tier = BREAKTHROUGHS.filter(b => lv >= b.toLevel).length;
-  return { ...h, level: lv, exp: 0, breakthroughTier: tier, skillRanks: { ...p.ranks }, gear };
+  const ranks = p.skillProfile ? skillProfileRanks(HERO_BY_ID[h.templateId].id, cls, p.skillProfile) : { ...p.ranks };
+  return { ...h, level: lv, exp: 0, breakthroughTier: tier, skillRanks: ranks, gear };
 }

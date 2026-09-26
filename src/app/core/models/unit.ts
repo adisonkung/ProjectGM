@@ -1,4 +1,4 @@
-import { CombatModifiers } from './progression';
+import { CombatModifiers, SkillRanks } from './progression';
 import { HeroClass, Stats } from './hero';
 
 export type Side = 'ally' | 'enemy';
@@ -25,4 +25,6 @@ export interface UnitSpec {
   heroId?: string;
   /** progression modifiers (skill ranks, equipment utility) — missing = rank 1, no gear */
   mods?: CombatModifiers;
+  /** skill ranks 1–5 (missing = rank 1): the engine builds the unit's ranked kit from them */
+  skillRanks?: SkillRanks;
 }

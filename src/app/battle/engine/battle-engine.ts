@@ -1,6 +1,7 @@
 import { CombatModifiers, ResistableStatus } from '../../core/models/progression';
 import { MANA_PER_ATTACK, MANA_PER_HIT, RECEIVE_GAUGE_ICD, START_CD } from '../../core/data/classes';
 import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
+import { rankedKit } from '../../core/rules/skill-ranks';
 import { ENEMY_SKILL_START_CD, ENEMY_SKILLS, EnemySkillDef } from '../../core/data/enemy-skills';
 import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
@@ -11,7 +12,7 @@ import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition
 import { enemyStats } from '../../core/rules/stats';
 import { resolveArea } from './area';
 import { ActiveBuff, applyBuff, dodgeChance, hasFlag, hasStatus, modifier, tauntSource, tickStatuses } from './buffs';
-import { breakRequiredOf, canStopCast, priorityOf, rankOf, SkillHost, SkillSystem } from './skill-system';
+import { breakRequiredOf, canStopCast, priorityOf, rankOf, SkillHost, SkillSystem, StatusApplyOptions } from './skill-system';
 import type { DamageKind, InterruptPriority, SkillSlot, SkillUseMode } from '../../core/models/combat';
 import { BattleMetrics } from './metrics';
 import { isRanged, Positioning, SAFE_DANGER } from './positioning';
@@ -143,6 +144,8 @@ export interface BattleUnit {
   heroId?: string;
   /** hero progression: skill ranks + equipment utility (undefined = rank 1, no gear) */
   mods?: CombatModifiers;
+  /** the kit this unit fights with (skill ranks applied to a copy; undefined = authored kit) */
+  kit?: import('../../core/models/combat').HeroKit;
   /** last time this unit was untargetable (Mist Hunter: +damage for 3 s after it returns) */
   lastUntargetableAt?: number;
   /** logical combat cell on the current encounter grid (column 0–15 × lane 0–2) */
@@ -592,6 +595,7 @@ export class BattleEngine {
       heroUid: spec.heroUid,
       heroId: spec.heroId,
       mods: spec.mods,
+      kit: spec.skillRanks ? rankedKit(spec.heroId, spec.cls, spec.skillRanks) : undefined,
       pos,
       x: (this.flow?.formation.originPosition ?? 0) + pos.c,
       y: pos.r,
@@ -618,8 +622,8 @@ export class BattleEngine {
       moveCd: 0,
       castLock: 0,
       // skills start at 50% of their cooldown
-      cd1: (kitOf(spec.heroId, spec.cls).skill.cooldown ?? 0) * START_CD,
-      cd2: (kitOf(spec.heroId, spec.cls).skill2.cooldown ?? 0) * START_CD,
+      cd1: (rankedKit(spec.heroId, spec.cls, spec.skillRanks).skill.cooldown ?? 0) * START_CD,
+      cd2: (rankedKit(spec.heroId, spec.cls, spec.skillRanks).skill2.cooldown ?? 0) * START_CD,
       ultQueued: false,
       castSkills: [],
       lockUntil: 0,
@@ -1558,9 +1562,9 @@ export class BattleEngine {
     this.hit(src, dst, mul, { crit: this.rng() < CRIT_CHANCE, sourceId: 'cast' });
   }
 
-  private applyStatus(dst: BattleUnit, id: string, src: BattleUnit, duration?: number): void {
+  private applyStatus(dst: BattleUnit, id: string, src: BattleUnit, duration?: number, opts?: StatusApplyOptions): void {
     if (!dst.alive) return;
-    const def = SkillSystem.status(id);
+    const def = this.rankedStatus(SkillSystem.status(id), opts?.modifiers);
     if (this.resists(dst, def)) {
       this.events.push({ type: 'immune', src: src.id, dst: dst.id, skill: def.name });
       return;
@@ -1571,13 +1575,23 @@ export class BattleEngine {
       const base = duration ?? def.duration;
       if (Number.isFinite(base)) duration = base * (1 - resist);
     }
-    const r = applyBuff(dst, def, src.id, { magnitude: effectiveAttack(src), duration });
+    const r = applyBuff(dst, def, src.id, { magnitude: effectiveAttack(src) * (opts?.potency ?? 1), duration });
     this.metrics.statusApplied[def.id] = (this.metrics.statusApplied[def.id] ?? 0) + 1;
     this.events.push({ type: 'buff', src: src.id, dst: dst.id, buff: def.id, name: def.name, refreshed: r !== 'applied' });
     if (def.flags?.includes('taunted')) {
       dst.targetId = src.id;
       if (dst.monster) dst.monster.currentTargetId = src.id;
     }
+  }
+
+  /** a skill rank's status modifiers (taunt_guard 45 % DR …) → a derived definition with the same id (cached) */
+  private statusVariants = new Map<string, import('../../core/models/combat').StatusEffectDefinition>();
+  private rankedStatus(def: import('../../core/models/combat').StatusEffectDefinition, mods?: StatusApplyOptions['modifiers']) {
+    if (!mods) return def;
+    const key = `${def.id}|${JSON.stringify(mods)}`;
+    let v = this.statusVariants.get(key);
+    if (!v) this.statusVariants.set(key, (v = { ...def, modifiers: { ...def.modifiers, ...mods } }));
+    return v;
   }
 
   /** boss immunities (definition `immune`): STUN (unless the status is boss-valid, e.g. BROKEN) / ROOT / TAUNT */
@@ -1737,7 +1751,7 @@ export class BattleEngine {
       },
       hit: (src, dst, mul, o) => self.hit(src, dst, mul, o),
       heal: (dst, amount, src) => self.heal(dst, amount, src),
-      applyStatus: (dst, id, src, duration) => self.applyStatus(dst, id, src, duration),
+      applyStatus: (dst, id, src, duration, opts) => self.applyStatus(dst, id, src, duration, opts),
       interrupt: (src, dst, breakPower) => self.tryInterrupt(src, dst, breakPower),
       knockback: (src, dst, cells) => {
         if (dst.monster && self.monsterDefs[dst.monster.definitionId]?.immune?.includes('KNOCKBACK')) return;

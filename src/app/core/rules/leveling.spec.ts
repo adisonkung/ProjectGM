@@ -206,6 +206,7 @@ describe('Rewards, daily bonus, fragments', () => {
       ['training_1', 0], ['training_2', 3], ['training_3', 5], ['training_4', 7], ['training_5', 8],
       ['ascension_1', 5], ['ascension_2', 7], ['ascension_3', 8],
       ['hunt_1', 3], ['hunt_2', 4], ['hunt_3', 5], ['hunt_4', 7], ['hunt_5', 8],
+      ['trial_1', 4], ['trial_2', 6], ['trial_3', 7], ['trial_4', 8],
     ]);
     expect(isUnlocked(FARM_BY_ID['training_2'], 2)).toBeFalse();
     expect(isUnlocked(FARM_BY_ID['training_2'], 3)).toBeTrue();

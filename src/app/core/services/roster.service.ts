@@ -5,6 +5,10 @@ import { heroStats, power } from '../rules/stats';
 import { breakthrough, BreakthroughFail, heroProgressView, useAllPotionsToCap, useExpPotion } from '../rules/leveling';
 import { TRAINING_SLOTS } from '../data/economy';
 import { SaveService } from './save.service';
+import { SkillKind } from '../models/progression';
+import { SkillRankView, SkillUpgradeError } from '../models/skill-rank';
+import { convertTomes, skillRankView, upgradeSkill } from '../rules/skill-ranks';
+import { SKILL_SLOTS } from '../data/skill-ranks';
 
 @Injectable({ providedIn: 'root' })
 export class RosterService {
@@ -76,5 +80,27 @@ export class RosterService {
         return { ...h, injury: fallen.includes(h.uid) ? rest : injury };
       }),
     }));
+  }
+
+  /** the three skill slots with current / next rank numbers, cost and blocker */
+  skills(h: OwnedHero): SkillRankView[] {
+    const s = this.save.state();
+    return SKILL_SLOTS.map(k => skillRankView(h, k, s.inventory, s.gold));
+  }
+
+  /** spend Skill Tomes + gold → rank + 1 */
+  upgradeSkill(uid: number, slot: SkillKind): SkillUpgradeError | null {
+    const r = upgradeSkill(this.save.state(), uid, slot);
+    if ('error' in r) return r.error;
+    this.save.update(() => r.state);
+    return null;
+  }
+
+  /** 5 lower tomes → 1 higher (inefficient) */
+  convertTomes(from: string): boolean {
+    const r = convertTomes(this.save.state(), from);
+    if ('error' in r) return false;
+    this.save.update(() => r.state);
+    return true;
   }
 }

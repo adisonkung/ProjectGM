@@ -1,4 +1,12 @@
 import { kitOf } from '../../core/data/hero-skills';
+import { SKILL_RANK_LIMITS } from '../../core/data/skill-ranks';
+import type { StatusModifiers } from '../../core/models/combat';
+
+/** per-application status options from a ranked skill (DoT / HoT potency, overridden modifiers) */
+export interface StatusApplyOptions {
+  potency?: number;
+  modifiers?: Partial<StatusModifiers>;
+}
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { animTiming, SkillKind } from '../../core/data/sprites';
 import {
@@ -29,7 +37,7 @@ export interface SkillHost {
   /** one hit through DamageResolver (+ dodge); false = missed / target gone */
   hit(src: BattleUnit, dst: BattleUnit, mul: number, o: { crit?: boolean; damageType?: DamageKind; sourceId: string; slot?: SkillSlot }): boolean;
   heal(dst: BattleUnit, amount: number, src: BattleUnit): void;
-  applyStatus(dst: BattleUnit, statusId: string, src: BattleUnit, duration?: number): void;
+  applyStatus(dst: BattleUnit, statusId: string, src: BattleUnit, duration?: number, opts?: StatusApplyOptions): void;
   /** dedicated interrupt: cancels an interruptible cast (emits CAST_INTERRUPTED / immune); `breakPower` fills a Break Gauge */
   interrupt(src: BattleUnit, dst: BattleUnit, breakPower?: number): void;
   knockback(src: BattleUnit, dst: BattleUnit, cells: number): void;
@@ -77,7 +85,8 @@ export function interruptPowerOf(s: SkillDefinition, u?: BattleUnit, slot?: Skil
 export function breakPowerOf(base: number | undefined, u?: BattleUnit, slot?: SkillSlot): number {
   if (!base) return 0;
   const bonus = u?.mods && slot && slot !== 'attack' ? u.mods.breakBonus[slot] : 0;
-  return base + bonus;
+  // final Break = base (incl. skill rank) + gear — one skill never reaches the 100 a single Oblivion break needs
+  return Math.min(base + bonus, SKILL_RANK_LIMITS.maxSingleBreak);
 }
 
 /** progression multiplier of a skill slot (rank power); basic attacks = 1 */
@@ -96,7 +105,7 @@ export class SkillSystem {
   constructor(private readonly h: SkillHost) {}
 
   kit(u: BattleUnit): HeroKit {
-    return kitOf(u.heroId, u.cls);
+    return u.kit ?? kitOf(u.heroId, u.cls);
   }
 
   rangeOf(u: BattleUnit, s: SkillDefinition): number {
@@ -436,8 +445,13 @@ export class SkillSystem {
     this.commit(u, s, target);
     this.h.onSkillUse?.(u, slot, s, target);
     // skill rank + gear cooldown reduction
-    if (slot === 'skill') u.cd1 = (s.cooldown ?? 0) * (u.mods?.cooldown.skill ?? 1);
-    else if (slot === 'skill2') u.cd2 = (s.cooldown ?? 0) * (u.mods?.cooldown.skill2 ?? 1);
+    if (slot === 'skill' || slot === 'skill2') {
+      // ranked cooldown × gear CDR, never below the authored cooldown × (1 − total CDR cap)
+      const authored = kitOf(u.heroId, u.cls)[slot].cooldown ?? s.cooldown ?? 0;
+      const cd = Math.max((s.cooldown ?? 0) * (u.mods?.cooldown[slot] ?? 1), authored * (1 - SKILL_RANK_LIMITS.maxTotalCdr));
+      if (slot === 'skill') u.cd1 = cd;
+      else u.cd2 = cd;
+    }
     const kind = slot as 'attack' | SkillKind;
     const tm = animTiming(u.sprite, kind);
     if (slot === 'attack') {
@@ -541,7 +555,8 @@ export class SkillSystem {
             const pool = e.team === 'ALLY' ? this.h.allies(u) : this.h.foes(u);
             targets = resolveArea({ pattern: e.area ?? 'SINGLE', caster: u, primary: focusOf(primary), center: e.center, candidates: pool });
           }
-          for (const t of targets) this.h.applyStatus(t, e.status, u, e.duration);
+          const opts = e.potency != null || e.modifiers ? { potency: e.potency, modifiers: e.modifiers } : undefined;
+          for (const t of targets) this.h.applyStatus(t, e.status, u, e.duration, opts);
           break;
         }
         case 'INTERRUPT': {

@@ -40,13 +40,20 @@ export const ITEMS: Record<string, ItemDefinition> = {
   bt_fragment_1: { id: 'bt_fragment_1', name: 'Breakthrough Fragment I', kind: 'BREAKTHROUGH_FRAGMENT', combinesInto: 'bt_stone_1', fragmentsPerItem: 10 },
   bt_fragment_2: { id: 'bt_fragment_2', name: 'Breakthrough Fragment II', kind: 'BREAKTHROUGH_FRAGMENT', combinesInto: 'bt_stone_2', fragmentsPerItem: 10 },
   bt_fragment_3: { id: 'bt_fragment_3', name: 'Breakthrough Fragment III', kind: 'BREAKTHROUGH_FRAGMENT', combinesInto: 'bt_stone_3', fragmentsPerItem: 10 },
+  // Skill Upgrade (claude/patch1-skill-upgrade-spec.md): tomes I–III, 10 fragments = 1 tome
+  skill_tome_1: { id: 'skill_tome_1', name: 'Skill Tome I', kind: 'SKILL_TOME', fragmentId: 'skill_tome_frag_1' },
+  skill_tome_2: { id: 'skill_tome_2', name: 'Skill Tome II', kind: 'SKILL_TOME', fragmentId: 'skill_tome_frag_2' },
+  skill_tome_3: { id: 'skill_tome_3', name: 'Skill Tome III', kind: 'SKILL_TOME', fragmentId: 'skill_tome_frag_3' },
+  skill_tome_frag_1: { id: 'skill_tome_frag_1', name: 'Skill Tome Fragment I', kind: 'SKILL_TOME_FRAGMENT', combinesInto: 'skill_tome_1', fragmentsPerItem: 10 },
+  skill_tome_frag_2: { id: 'skill_tome_frag_2', name: 'Skill Tome Fragment II', kind: 'SKILL_TOME_FRAGMENT', combinesInto: 'skill_tome_2', fragmentsPerItem: 10 },
+  skill_tome_frag_3: { id: 'skill_tome_frag_3', name: 'Skill Tome Fragment III', kind: 'SKILL_TOME_FRAGMENT', combinesInto: 'skill_tome_3', fragmentsPerItem: 10 },
 };
 
 /** EXP potions in the order "use max" spends them (largest first — no EXP wasted past the cap is handled by the rules) */
 export const EXP_POTIONS = ['exp_potion_l', 'exp_potion_m', 'exp_potion_s'];
 
 /** daily bonus pools (reset at the local day change; entry is never blocked) */
-export const DAILY_BONUS = { TRAINING: 3, ASCENSION: 2, HUNT: 3 } as Record<string, number>;
+export const DAILY_BONUS = { TRAINING: 3, ASCENSION: 2, HUNT: 3, SKILL: 2 } as Record<string, number>;
 
 /** reserve heroes in Training Slots get this share of Training battle EXP (no potions) */
 export const TRAINING_SLOTS = { count: 2, expShare: 0.35 };
@@ -414,6 +421,120 @@ const huntDef = (t: HuntTier): FarmDungeonDefinition => ({
   stage: stageOf(HUNT_STAGES, `hunt_${t.n}`),
 });
 
+
+// ------------------------------------------------------------------ Skill Trial (Skill Upgrade spec)
+
+/**
+ * Skill Trial I–IV: the Skill Tome farm. Each teaches one tactical skill: I interrupts (Poison Cloud / Alpha Howl) ·
+ * II support healers (Goblin Shaman Healing Ritual every wave) · III several casts at once (shaman + mushrooms + howl) ·
+ * IV Break coordination (Trial Warden: WARDEN SEAL breakable only, 100 Break = two breakers). Reinforced waves, HP +40 %.
+ * Target active clear: I 75–105 s · II 90–120 · III 105–150 · IV 120–180. Unlock F4 / F6 / F7 / F8.
+ */
+const TRIAL_STAGES: StageDef[] = [
+  farmStage('trial_1', 'Skill Trial I', [
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 2]).concat(row('magic_mushroom', 1, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [1]))),
+    wave(row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2]), row('goblin_archer', 3, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_wolf', 1, [1]))),
+    wave(row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2]), row('magic_mushroom', 1, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2]))),
+  ], 'twilight-1'),
+  farmStage('trial_2', 'Skill Trial II', [
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_shaman', 4, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
+    wave(row('goblin_guard', 0, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_shaman', 4, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
+    wave(row('goblin_guard', 0, [0, 2]).concat(row('goblin_fighter', 0, [1]), row('goblin_shaman', 4, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
+  ], 'twilight-1'),
+  farmStage('trial_3', 'Skill Trial III', [
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [0, 2]), row('goblin_shaman', 4, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2]))),
+    wave(row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2]), row('magic_mushroom', 1, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_shaman', 4, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2])),
+      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1]))),
+    wave(row('goblin_guard', 0, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_shaman', 4, [0, 2]), row('magic_mushroom', 1, [1])),
+      row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
+    wave(row('goblin_guard', 0, [0, 2]).concat(row('goblin_fighter', 0, [1]), row('goblin_shaman', 4, [1]), row('magic_mushroom', 1, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
+  ], 'misty-1'),
+  farmStage('trial_4', 'Skill Trial IV', [
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_shaman', 4, [1]), row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
+      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
+    wave(row('trial_warden', 1, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2]))),
+    wave(row('corrupted_treant', 0, [1]).concat(row('forest_wolf', 0, [0, 2]), row('goblin_shaman', 4, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1])),
+      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1]))),
+    wave(row('trial_warden', 1, [1]).concat(row('goblin_guard', 0, [0, 2]), row('goblin_shaman', 4, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('corrupted_wolf', 0, [0, 1, 2]),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
+  ], 'misty-1'),
+];
+
+const TRIAL_TARGET_TIME = [90, 105, 128, 150];
+
+/** Skill Trial reward per clear (BASE: daily bonus ×1.5 for 2 runs, repeat ×0.6); fractional tomes → fragments */
+interface TrialTier { n: number; unlockFloor: number; levels: [number, number]; gold: number; tomes: [string, number][]; bonus: string; first: [string, number][] }
+/** chance of +1 tome of the Trial's main tier per clear (× the bonus / repeat multiplier like every item) */
+export const TRIAL_BONUS_CHANCE = 0.08;
+
+export const TRIAL_TIERS: TrialTier[] = [
+  { n: 1, unlockFloor: 4, levels: [3, 5], gold: 80, tomes: [['skill_tome_1', 0.16]], bonus: 'skill_tome_1', first: [['skill_tome_1', 2]] },
+  { n: 2, unlockFloor: 6, levels: [6, 7], gold: 120, tomes: [['skill_tome_1', 0.18], ['skill_tome_2', 0.04]], bonus: 'skill_tome_1', first: [['skill_tome_2', 1]] },
+  { n: 3, unlockFloor: 7, levels: [7, 8], gold: 170, tomes: [['skill_tome_1', 0.1], ['skill_tome_2', 0.14]], bonus: 'skill_tome_2', first: [['skill_tome_2', 2]] },
+  { n: 4, unlockFloor: 8, levels: [8, 10], gold: 220, tomes: [['skill_tome_2', 0.1], ['skill_tome_3', 0.09]], bonus: 'skill_tome_3', first: [['skill_tome_3', 1]] },
+];
+
+const trialDef = (t: TrialTier): FarmDungeonDefinition => ({
+  id: `trial_${t.n}`, type: 'SKILL', name: `Skill Trial ${['I', 'II', 'III', 'IV'][t.n - 1]}`, unlockFloor: t.unlockFloor, recommendedLevel: t.levels,
+  baseRewards: {
+    gold: t.gold, items: t.tomes.map(([itemId, count]) => ({ itemId, count })),
+    bonusDrops: [{ chance: TRIAL_BONUS_CHANCE, items: [{ itemId: t.bonus, count: 1 }] }],
+  },
+  firstClearBonus: { items: t.first.map(([itemId, count]) => ({ itemId, count })) },
+  dailyBonusPool: 'SKILL', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: TRIAL_TARGET_TIME[t.n - 1],
+  stage: stageOf(TRIAL_STAGES, `trial_${t.n}`),
+});
+
 export const FARM_DUNGEONS: FarmDungeonDefinition[] = [
   trainingDef(1, 0, [1, 2], 60, 'exp_potion_s', 1),
   trainingDef(2, 3, [3, 4], 100, 'exp_potion_s', 2),
@@ -424,6 +545,7 @@ export const FARM_DUNGEONS: FarmDungeonDefinition[] = [
   ascensionDef(2, 7, [7, 8]),
   ascensionDef(3, 8, [8, 9]),
   ...HUNT_TIERS.map(huntDef),
+  ...TRIAL_TIERS.map(trialDef),
 ];
 
 export const FARM_BY_ID: Record<string, FarmDungeonDefinition> = Object.fromEntries(FARM_DUNGEONS.map(d => [d.id, d]));

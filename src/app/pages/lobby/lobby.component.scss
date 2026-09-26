@@ -17,3 +17,17 @@ small { color: var(--muted); font-size: 12px; }
 button { font-size: 12px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: inherit; cursor: pointer; }
 button.bt { border-color: #a07bff; }
 button[aria-pressed='true'] { background: var(--accent, #d9a441); color: #111; }
+
+.skills {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  .skill {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 6px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.05);
+    .next { color: #9fe39f; }
+    .warn { color: #ffb070; }
+    button { align-self: flex-start; }
+  }
+}

@@ -151,6 +151,10 @@ export type SkillEffect =
       /** only when the previous DAMAGE hit at least this many units */
       minHits?: number;
       duration?: number;
+      /** skill rank: DoT / HoT magnitude = final ATK × potency (default 1) */
+      potency?: number;
+      /** skill rank: this application's modifiers replace the status's defaults (e.g. taunt_guard 0.60 → 0.55) */
+      modifiers?: Partial<StatusModifiers>;
     }
   /** interrupt every interruptible caster in the area (no damage) */
   | { type: 'INTERRUPT'; area: AreaPattern; center?: AreaCenter; breakPower?: number }

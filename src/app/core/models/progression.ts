@@ -16,15 +16,6 @@ export type ResistableStatus = 'bleed' | 'poison' | 'root' | 'corruption' | 'stu
 /** skill rank 1–5 (Patch 1) per skill slot */
 export type SkillRanks = Record<SkillKind, number>;
 
-export interface SkillRankEffect {
-  /** skill damage / healing / shield multiplier */
-  power: number;
-  /** cooldown multiplier (skill 1 / 2) */
-  cooldown: number;
-  /** extra Break power for Break-capable skills */
-  breakBonus: number;
-}
-
 /** breakthrough gate: level `from` → `from + 1` needs a breakthrough first (materials: next task) */
 export interface BreakthroughGate {
   from: number;
@@ -33,11 +24,11 @@ export interface BreakthroughGate {
 
 /** what the combat engine reads from a hero's progression (besides its final Stats) */
 export interface CombatModifiers {
-  /** per skill slot: skill rank power × gear skill damage (skills / ults) — basic attacks stay 1 */
+  /** per skill slot: gear skill damage (skills / ults) — basic attacks stay 1. Skill ranks are baked into the unit's kit */
   skillPower: Record<SkillKind, number>;
-  /** per skill slot: cooldown multiplier (rank × gear CDR, gear capped at 15 %) */
+  /** per skill slot: gear cooldown multiplier (gear CDR capped at 15 %; rank CDR is in the ranked skill) */
   cooldown: Record<SkillKind, number>;
-  /** per skill slot: flat extra Break power (rank + gear, gear capped at +20) */
+  /** per skill slot: gear Break bonus (capped at +20; rank Break is in the ranked skill, final capped < 100) */
   breakBonus: Record<SkillKind, number>;
   /** outgoing healing multiplier (skill rank is separate) · outgoing shields multiplier */
   healing: number;
@@ -84,4 +75,6 @@ export interface PowerProfile {
   gear: GearProfileId | null;
   /** skill ranks of every hero (core skills = skill2 + ult for most kits) */
   ranks: SkillRanks;
+  /** skill profile S0–S5 (core/data/skill-ranks.ts): ranks per hero by slot priority — overrides `ranks` */
+  skillProfile?: string;
 }

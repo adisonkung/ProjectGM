@@ -4,6 +4,12 @@
     คลัง:
     @for (it of items(); track it.id) { <span class="pill">{{ it.name }} ×{{ it.n }}</span> } @empty { ว่าง }
   </p>
+  <p class="sub">ทอง {{ gold() }} ·
+    แลก Skill Tome (ไม่คุ้ม — ฟาร์ม Skill Trial ดีกว่า):
+    @for (c of conversions; track c.from) {
+      <button type="button" [disabled]="(inventory()[c.from] ?? 0) < c.ratio" (click)="convert(c.from)">{{ c.ratio }} {{ itemName(c.from) }} → 1 {{ itemName(c.to) }}</button>
+    }
+  </p>
   <p class="sub">ช่องฝึก {{ slots().length }}/{{ slotsMax }} — ฮีโร่สำรองในช่องฝึกได้ {{ slotShare * 100 }}% ของ EXP จาก Training Ground (ไม่ได้ยา)</p>
   <ul class="heroes">
     @for (r of rows(); track r.h.uid) {
@@ -44,8 +50,32 @@
           @if (!inTeam().has(r.h.uid)) {
             <button type="button" [attr.aria-pressed]="slots().includes(r.h.uid)" (click)="toggleSlot(r.h)">ช่องฝึก</button>
           }
+          <button type="button" [attr.aria-expanded]="open === r.h.uid" (click)="toggleSkills(r.h)">สกิล</button>
           @if (message[r.h.uid]) { <small>{{ message[r.h.uid] }}</small> }
         </div>
+        @if (open === r.h.uid) {
+          <div class="skills">
+            @for (v of roster.skills(r.h); track v.slot) {
+              <div class="skill">
+                <b>{{ slotLabel[v.slot] }} {{ v.name }}</b> <span class="tag">R{{ v.rank }}/{{ v.maxRank }}</span>
+                <small class="cur">ตอนนี้: {{ v.current.join(' · ') }}</small>
+                @if (v.next) {
+                  <small class="next">R{{ v.rank + 1 }}: {{ v.changes.length ? v.changes.join(' · ') : 'ไม่มีตัวเลขเปลี่ยน' }}</small>
+                  @if (v.cost; as c) {
+                    <small>ต้องการ:
+                      @for (m of c.requiredMaterials; track m.itemId) { {{ itemName(m.itemId) }} {{ inventory()[m.itemId] ?? 0 }}/{{ m.count }} · }
+                      ทอง {{ gold() }}/{{ c.requiredGold }} · Lv{{ c.requiredHeroLevel }}+{{ c.requiredBreakthroughTier ? ' · Breakthrough ' + c.requiredBreakthroughTier : '' }}
+                    </small>
+                  }
+                  <button type="button" [disabled]="!!v.blocked" (click)="upgrade(r.h, v.slot)">อัป R{{ v.rank + 1 }}</button>
+                  @if (v.blocked) { <small class="warn">{{ errorText(v.blocked) }}</small> }
+                } @else {
+                  <span class="tag max">MAX</span>
+                }
+              </div>
+            }
+          </div>
+        }
       </li>
     }
   </ul>

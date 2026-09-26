@@ -181,7 +181,7 @@ for (let stage of floors) {
 
   const n = runs;
   const [A, T] = [aggs.AUTO, aggs.TACTICAL];
-  console.log(`\n=== ${farmDef ? farmDef.id : 'F' + stage.floor} ${stage.name} · profile ${profile.id} (${profile.label}: gear ${typeof profile.gear === 'object' && profile.gear ? JSON.stringify(profile.gear) : profile.gear ?? '-'}, ranks ${profile.ranks.skill}/${profile.ranks.skill2}/${profile.ranks.ult}) · ${star ?? 5}★ Lv${level} · band Lv${band?.levels.join('–')} ${band?.role ?? ''} · tuning ${JSON.stringify(stage.monsterTuning ?? {})} ===`);
+  console.log(`\n=== ${farmDef ? farmDef.id : 'F' + stage.floor} ${stage.name} · profile ${profile.id} (${profile.label}: gear ${typeof profile.gear === 'object' && profile.gear ? JSON.stringify(profile.gear) : profile.gear ?? '-'}, ranks ${profile.skillProfile ?? `${profile.ranks.skill}/${profile.ranks.skill2}/${profile.ranks.ult}`}) · ${star ?? 5}★ Lv${level} · band Lv${band?.levels.join('–')} ${band?.role ?? ''} · tuning ${JSON.stringify(stage.monsterTuning ?? {})} ===`);
   const review = monsterTuningReview(stage);
   if (review.length) console.log(`  ⚠ MECHANIC / COMPOSITION / HERO POWER REVIEW REQUIRED: ${review.join(', ')} (engine clamps to the limits)`);
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {

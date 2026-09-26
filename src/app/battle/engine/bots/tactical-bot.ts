@@ -127,7 +127,7 @@ export class TacticalBot {
     const upcoming = this.importantCasts(foes);
     const pool: { h: BattleUnit; slot: 'skill' | 'skill2'; back: number; ready: boolean }[] = [];
     for (const h of heroes) {
-      const kit = kitOf(h.heroId, h.cls);
+      const kit = h.kit ?? kitOf(h.heroId, h.cls);
       for (const slot of ['skill', 'skill2'] as const) {
         if (kit[slot].ai?.tier !== 'INTERRUPT') continue;
         pool.push({ h, slot, back: e.time + (kit[slot].cooldown ?? 0), ready: (slot === 'skill' ? h.cd1 : h.cd2) <= 0 });

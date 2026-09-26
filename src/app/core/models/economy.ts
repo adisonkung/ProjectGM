@@ -33,7 +33,7 @@ export interface BreakthroughDefinition {
   unlockFlags: UnlockFlag[];
 }
 
-export type ItemKind = 'EXP_POTION' | 'BREAKTHROUGH_STONE' | 'BREAKTHROUGH_FRAGMENT' | 'MATERIAL' | 'EQUIPMENT_FRAGMENT';
+export type ItemKind = 'EXP_POTION' | 'BREAKTHROUGH_STONE' | 'BREAKTHROUGH_FRAGMENT' | 'MATERIAL' | 'EQUIPMENT_FRAGMENT' | 'SKILL_TOME' | 'SKILL_TOME_FRAGMENT';
 
 export interface ItemDefinition {
   id: string;

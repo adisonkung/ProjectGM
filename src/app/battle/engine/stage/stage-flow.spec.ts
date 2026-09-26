@@ -741,7 +741,7 @@ describe('In-wave reinforcements (farm dungeons: sustained waves without extra t
 
   it('farm stages use reinforced waves: Training 2/2/3/3/4 waves, Ascension 4, never boss mechanics', () => {
     const waves = FARM_DUNGEONS.map(d => wavesOf(d.stage).length);
-    expect(waves).toEqual([2, 2, 3, 3, 4, 4, 4, 4, 3, 3, 4, 4, 4]);
+    expect(waves).toEqual([2, 2, 3, 3, 4, 4, 4, 4, 3, 3, 4, 4, 4, 3, 3, 4, 4]);
     for (const d of FARM_DUNGEONS) {
       for (const w of wavesOf(d.stage)) expect(w.reinforcements?.length).withContext(d.id).toBeGreaterThan(0);
     }

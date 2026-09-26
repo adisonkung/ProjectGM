@@ -41,6 +41,7 @@ export const VISUALS: Record<string, VisualDefinition> = {
   mock_dark_shaman: { kind: 'mock', shape: 'circle', color: '#5a2d78', accent: '#7fe07a', size: 0.95, glyph: '☽' },
   mock_mist_witch: { kind: 'mock', shape: 'circle', color: '#8a5ad6', accent: '#f0e4ff', size: 0.95, glyph: '✦' },
   mock_fallen_guardian: { kind: 'mock', shape: 'capsule', color: '#5a0f14', accent: '#ff4a3a', size: 2 },
+  mock_trial_warden: { kind: 'mock', shape: 'square', color: '#6b5420', accent: '#ffd76a', size: 1.4, glyph: '⚖' },
 };
 
 export const visualOf = (id: string | undefined): VisualDefinition | undefined => (id ? VISUALS[id] : undefined);
