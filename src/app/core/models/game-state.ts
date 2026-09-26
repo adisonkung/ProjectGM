@@ -9,6 +9,13 @@ export interface TeamSlot {
   c: number;
 }
 
+/** a saved team + placement (Phase 4 team presets) */
+export interface TeamPreset {
+  name: string;
+  /** empty = unused preset */
+  team: TeamSlot[];
+}
+
 /** progress in one farm dungeon */
 export interface FarmRecord {
   clears: number;
@@ -41,4 +48,6 @@ export interface GameState {
   nextItemId: number;
   /** Equipment Hunt target pool (the favoured drop slot) */
   huntTarget: HuntTarget;
+  /** saved team setups (fixed count, see TEAM_PRESET_COUNT) — optional in the type so v6 saves load; migrate fills it */
+  teamPresets?: TeamPreset[];
 }

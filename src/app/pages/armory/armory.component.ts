@@ -1,4 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
+import { IconComponent } from '../../shared/icon.component';
 import { AFFIXES, CRAFT_RECIPES, EQUIPMENT_DEFS, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL, WEAPON_GROUP_OF } from '../../core/data/equipment';
 import { ITEMS } from '../../core/data/economy';
 import { EquipmentInstance, EquipmentSlot, EquipStat, HuntTarget, Rarity, StatLine } from '../../core/models/equipment';
@@ -15,7 +18,7 @@ const ERR: Record<string, string> = {
 /** Armory: hero gear (3 slots), bag with comparison, upgrade / lock / dismantle / sell, targeted crafting, Hunt target */
 @Component({
   selector: 'app-armory',
-  imports: [],
+  imports: [HeroPortraitComponent, IconComponent],
   templateUrl: './armory.component.html',
   styleUrl: './armory.component.scss',
 })
@@ -25,7 +28,13 @@ export class ArmoryComponent {
   readonly eq = inject(EquipmentService);
   readonly slots = SLOTS;
   readonly rarityName = RARITY_NAME;
-  readonly heroUid = signal<number>(this.save.state().heroes[0]?.uid ?? 0);
+  /** ?hero=uid (from the hero page) or the first hero */
+  readonly heroUid = signal<number>(this.initialHero());
+  private initialHero(): number {
+    const q = Number(inject(ActivatedRoute).snapshot.queryParamMap.get('hero'));
+    const heroes = this.save.state().heroes;
+    return heroes.some(h => h.uid === q) ? q : heroes[0]?.uid ?? 0;
+  }
   readonly filter = signal<EquipmentSlot | 'ALL'>('ALL');
   readonly message = signal('');
   readonly hero = computed(() => this.save.state().heroes.find(h => h.uid === this.heroUid()) ?? null);
@@ -58,6 +67,10 @@ export class ArmoryComponent {
   readonly dismantleText = (i: EquipmentInstance) => dismantleRewards(i).map(r => `${ITEMS[r.itemId].name} ×${r.count}`).join(', ');
   readonly usable = (i: EquipmentInstance) => { const c = this.cls(); return !!c && canEquip(c, i); };
   readonly statLabel = (s: EquipStat) => STAT_LABEL[s];
+  readonly slotLabel: Record<EquipmentSlot | 'ALL', string> = { ALL: 'ทั้งหมด', WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
+  readonly slotIcon: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
+  readonly targetLabel: Record<HuntTarget, string> = { ANY: 'ทุกช่อง', WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
+  readonly filters: (EquipmentSlot | 'ALL')[] = ['ALL', 'WEAPON', 'ARMOR', 'ACCESSORY'];
 
   compare(i: EquipmentInstance) {
     return this.eq.compare(this.heroUid(), i).map(d => this.fmt({ stat: d.stat, value: d.delta }));

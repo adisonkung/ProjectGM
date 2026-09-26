@@ -15,6 +15,10 @@ export interface LifeUnit {
  */
 export const PLAYER_TEAM: Side = 'ally';
 export const isHostile = (a: { side: Side }, b: { side: Side }) => a.side !== b.side;
+/** the player's own units (heroes / later summons) — use this instead of comparing with the literal 'ally' */
+export const isPlayerUnit = (u: { side: Side }) => u.side === PLAYER_TEAM;
+/** the opposing team of a side (two teams today; PvP / multi-team later) */
+export const foeSideOf = (side: Side): Side => (side === PLAYER_TEAM ? 'enemy' : PLAYER_TEAM);
 
 export const isDead = (u: LifeUnit) => u.life === 'DEAD_VISIBLE' || u.life === 'DEAD_HIDDEN';
 /** fighting or about to (a REVIVING unit keeps the stage from failing) */

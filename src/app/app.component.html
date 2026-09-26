@@ -1,14 +1,33 @@
 <div class="app">
   <header class="top">
-    <div class="brand"><b>Summon <span>Tower</span></b><small>ProjectGM · dev build</small></div>
+    <a class="brand" routerLink="/home" aria-label="Summon Tower — หน้าหลัก">
+      <svg class="crest" viewBox="0 0 48 48" aria-hidden="true">
+        <defs>
+          <linearGradient id="crestGold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff1c2" /><stop offset=".45" stop-color="#e2bf6d" /><stop offset="1" stop-color="#9a6f2c" />
+          </linearGradient>
+          <radialGradient id="crestCore" cx=".5" cy=".45" r=".5">
+            <stop offset="0" stop-color="#c9adff" /><stop offset=".55" stop-color="#6b3fd6" /><stop offset="1" stop-color="#1a1030" />
+          </radialGradient>
+        </defs>
+        <path d="M24 2l18 8v12c0 11-7.6 19.6-18 24C13.6 41.6 6 33 6 22V10z" fill="#120d20" stroke="url(#crestGold)" stroke-width="2" />
+        <path d="M17 36V20l-2-2v-5h3v2h2v-2h8v2h2v-2h3v5l-2 2v16z" fill="url(#crestCore)" stroke="url(#crestGold)" stroke-width="1.2" stroke-linejoin="round" />
+        <path d="M22 36v-5a2 2 0 0 1 4 0v5" fill="#0b0716" stroke="url(#crestGold)" stroke-width="1" />
+        <circle cx="24" cy="24" r="1.8" fill="#f6dfa0" />
+      </svg>
+      <span class="word"><b>Summon Tower</b><small>Arcane Ascent</small></span>
+    </a>
     <div class="res">
-      <span class="pill" title="เพชร"><i class="gem"></i>{{ save.state().gems }}</span>
-      <span class="pill" title="ทอง"><i class="coin"></i>{{ save.state().gold }}</span>
+      <span class="pill" title="เพชร"><app-icon name="gem" class="gem" />{{ save.state().gems }}</span>
+      <span class="pill" title="ทอง"><app-icon name="coin" class="coin" />{{ save.state().gold }}</span>
     </div>
   </header>
   <nav class="tabs" aria-label="เมนูหลัก">
     @for (n of nav; track n.path) {
-      <a [routerLink]="n.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ n.label }}</a>
+      <a [routerLink]="n.path" routerLinkActive="active" ariaCurrentWhenActive="page" [class.dev]="n.dev">
+        <app-icon [name]="n.icon" [size]="20" />
+        <span>{{ n.label }}</span>
+      </a>
     }
   </nav>
   <main><router-outlet /></main>

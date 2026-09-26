@@ -1,46 +1,64 @@
 <section class="tower">
-  <h1>หอคอย</h1>
-  <p class="sub">ชั้นสูงสุดที่ผ่าน: <b>{{ cleared() }}</b> / 10 · ชนะแล้วฮีโร่ที่ลงสนามได้ EXP (เคลียร์ครั้งแรกได้โบนัส)</p>
-  <ol class="floors">
-    @for (f of floors; track f.floor) {
-      <li [class.done]="f.floor <= cleared()" [class.next]="f.floor === cleared() + 1" [class.locked]="f.floor > cleared() + 1">
-        <span class="n">{{ f.floor }}</span>
-        <span class="name">{{ f.name }}<small>Lv{{ f.band.levels[0] }}–{{ f.band.levels[1] }} · {{ f.band.role }}</small></span>
-        <span class="exp">EXP {{ f.reward.clear.heroExp }}@if (f.floor > cleared()) { <em>+{{ f.reward.firstClear.heroExp }} ครั้งแรก</em> }</span>
-        @if (f.floor <= cleared() + 1) {
-          <a class="go" [routerLink]="['/lab']" [queryParams]="{ floor: f.floor, mode: 'tower' }">{{ f.floor <= cleared() ? 'สู้อีก' : 'สู้' }}</a>
-        } @else {
-          <span class="lock">ผ่านชั้น {{ f.floor - 1 }} ก่อน</span>
-        }
-      </li>
-    }
-  </ol>
+  <header class="head">
+    <div>
+      <h1 class="gm-title">หอคอยอัญเชิญ</h1>
+      <p class="gm-sub">พิชิตแล้ว <b>{{ cleared() }}</b> / {{ floors.length }} ชั้น · ชนะแล้วฮีโร่ที่ลงสนามได้ EXP (เคลียร์ครั้งแรกได้โบนัส)</p>
+    </div>
+  </header>
 
-  <h2>ดันเจี้ยนฟาร์ม</h2>
-  <p class="sub">
-    โบนัสรายวัน (รางวัล ×1.5): Training เหลือ <b>{{ left('TRAINING') }}</b> · Ascension เหลือ <b>{{ left('ASCENSION') }}</b> · Hunt เหลือ <b>{{ left('HUNT') }}</b> · Skill Trial เหลือ <b>{{ left('SKILL') }}</b>
-    — หมดโบนัสแล้วยังเล่นได้ (Training 55% · Ascension / Hunt / Trial 60% ของรางวัลพื้นฐาน, โอกาสดรอปอุปกรณ์เท่าเดิม)
-  </p>
-  <ul class="farms">
-    @for (d of dungeons; track d.id) {
-      @let open = cleared() >= d.unlockFloor;
-      <li [class.locked]="!open">
-        <span class="name">{{ d.name }} <em class="kind {{ kindOf(d).toLowerCase() }}">{{ kindLabel(d) }}</em><small>Lv{{ d.recommendedLevel[0] }}–{{ d.recommendedLevel[1] }} · {{ d.stage.special?.goal }}</small></span>
-        <span class="rw">
-          @if (d.baseRewards.heroExp) { EXP {{ d.baseRewards.heroExp }} }
-          @for (it of d.baseRewards.items ?? []; track it.itemId) { · {{ itemName(it.itemId) }} ×{{ it.count }} }
-          @if (d.baseRewards.gold) { · ทอง {{ d.baseRewards.gold }} }
-          @if (d.baseRewards.bonusDrops?.length) { · 20% +1 }
-          @if (d.equipmentDrops) { · อุปกรณ์ {{ pct(d.equipmentDrops.itemChance) }}% }
-          @if (d.firstClearBonus && !farm()[d.id]?.firstClearDone) { <em>· ครั้งแรก {{ d.firstClearItem ? 'ได้อุปกรณ์ ' + d.firstClearItem : '+1 หิน' }}</em> }
-          @if (farm()[d.id]?.bestRating) { · {{ '★'.repeat(farm()[d.id].bestRating) }} }
-        </span>
-        @if (open) {
-          <a class="go" [routerLink]="['/lab']" [queryParams]="{ farm: d.id }">เข้า</a>
-        } @else {
-          <span class="lock">ผ่านชั้น {{ d.unlockFloor }}</span>
+  <div class="layout">
+    <ol class="spire" aria-label="ชั้นของหอคอย">
+      @for (f of floorsDesc; track f.floor) {
+        <li [class.done]="f.floor <= cleared()" [class.next]="f.floor === cleared() + 1" [class.locked]="f.floor > cleared() + 1" [class.boss]="f.floor === 10 || f.floor === 7">
+          <span class="n">{{ f.floor }}</span>
+          <span class="name">{{ f.name }}<small>Lv{{ f.band.levels[0] }}–{{ f.band.levels[1] }} · {{ f.band.role }}</small></span>
+          <span class="exp">EXP {{ f.reward.clear.heroExp }}@if (f.floor > cleared()) { <em>+{{ f.reward.firstClear.heroExp }} ครั้งแรก</em> }</span>
+          @if (f.floor <= cleared() + 1) {
+            <a class="gm-btn small" [class.primary]="f.floor === cleared() + 1" [routerLink]="['/battle']" [queryParams]="{ floor: f.floor, mode: 'tower' }">
+              {{ f.floor <= cleared() ? 'สู้อีก' : 'ท้าชิง' }}
+            </a>
+          } @else {
+            <span class="lock"><app-icon name="lock" [size]="14" /></span>
+          }
+        </li>
+      }
+    </ol>
+
+    <section class="dungeons">
+      <h2 class="gm-h2">ดันเจี้ยนฟาร์ม</h2>
+      <p class="gm-sub bonus">
+        โบนัสรายวัน ×1.5 — Training <b>{{ left('TRAINING') }}</b> · Ascension <b>{{ left('ASCENSION') }}</b> · Hunt <b>{{ left('HUNT') }}</b> · Trial <b>{{ left('SKILL') }}</b>
+        <br /><small>หมดโบนัสยังเล่นได้ (Training 55% · อื่น ๆ 60% ของรางวัลพื้นฐาน, โอกาสดรอปอุปกรณ์เท่าเดิม)</small>
+      </p>
+      <ul class="farms">
+        @for (d of dungeons; track d.id) {
+          @let open = cleared() >= d.unlockFloor;
+          <li class="gm-panel {{ kindOf(d).toLowerCase() }}" [class.locked]="!open">
+            <span class="badge"><app-icon [name]="kindIcon(d)" [size]="20" /></span>
+            <span class="name">
+              <b>{{ d.name }}</b>
+              <em class="kind">{{ kindLabel(d) }} · Lv{{ d.recommendedLevel[0] }}–{{ d.recommendedLevel[1] }}</em>
+              <small>{{ d.stage.special?.goal }}</small>
+              <span class="rw">
+                @if (d.baseRewards.heroExp) { EXP {{ d.baseRewards.heroExp }} }
+                @for (it of d.baseRewards.items ?? []; track it.itemId) { · {{ itemName(it.itemId) }} ×{{ it.count }} }
+                @if (d.baseRewards.gold) { · ทอง {{ d.baseRewards.gold }} }
+                @if (d.baseRewards.bonusDrops?.length) { · 20% +1 }
+                @if (d.equipmentDrops) { · อุปกรณ์ {{ pct(d.equipmentDrops.itemChance) }}% }
+                @if (d.firstClearBonus && !farm()[d.id]?.firstClearDone) { <em>· ครั้งแรก {{ d.firstClearItem ? 'ได้อุปกรณ์ ' + d.firstClearItem : '+1 หิน' }}</em> }
+              </span>
+            </span>
+            <span class="side">
+              @if (farm()[d.id]?.bestRating) { <span class="stars">{{ '★'.repeat(farm()[d.id].bestRating) }}</span> }
+              @if (open) {
+                <a class="gm-btn small primary" [routerLink]="['/battle']" [queryParams]="{ farm: d.id }">เข้า</a>
+              } @else {
+                <span class="lock"><app-icon name="lock" [size]="13" /> ชั้น {{ d.unlockFloor }}</span>
+              }
+            </span>
+          </li>
         }
-      </li>
-    }
-  </ul>
+      </ul>
+    </section>
+  </div>
 </section>

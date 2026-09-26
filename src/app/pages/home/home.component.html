@@ -1,0 +1,84 @@
+<section class="home">
+  <!-- tower banner -->
+  <article class="banner gm-panel glow" [style.--bg]="next().bg ? 'url(' + next().bg + ')' : null">
+    <div class="veil"></div>
+    <div class="content">
+      <span class="eyebrow"><app-icon name="tower" [size]="14" /> {{ done() ? 'พิชิตหอคอยแล้ว' : 'หอคอย · ชั้นถัดไป' }}</span>
+      <h1 class="gm-title">ชั้น {{ next().floor }}</h1>
+      <p class="stage">{{ next().name }}</p>
+      <p class="rec">แนะนำเลเวล {{ next().level }} · ทีมเฉลี่ย Lv {{ avgLevel() }}</p>
+      <ol class="floors" [attr.aria-label]="'ผ่านแล้ว ' + cleared() + ' จาก ' + total + ' ชั้น'">
+        @for (f of floors(); track f.n) { <li [class.done]="f.done" [class.next]="f.next" [attr.aria-label]="'ชั้น ' + f.n"></li> }
+      </ol>
+      <div class="cta">
+        <a class="gm-btn primary big" routerLink="/battle" [queryParams]="{ floor: next().floor, mode: 'tower' }">
+          <app-icon name="sword" [size]="18" /> {{ done() ? 'ท้าชิงอีกครั้ง' : 'เข้าสู่สนามรบ' }}
+        </a>
+        <a class="gm-btn" routerLink="/tower">ดูทุกชั้น</a>
+      </div>
+    </div>
+  </article>
+
+  <div class="grid">
+    <!-- team -->
+    <section class="gm-panel team">
+      <h2 class="gm-h2">ทีมปัจจุบัน</h2>
+      <div class="squad">
+        @for (h of squad(); track h.uid) {
+          <a [routerLink]="['/heroes', h.uid]" class="mem" [attr.aria-label]="'ดูฮีโร่ #' + h.uid">
+            <app-hero-portrait [heroId]="h.id" [size]="58" />
+            <small>Lv{{ h.level }}</small>
+          </a>
+        } @empty { <p class="hint">ยังไม่มีทีม — ไปหน้าจัดทีม</p> }
+      </div>
+      <div class="pw"><app-icon name="flame" [size]="16" /> พลังทีม <b>{{ squadPower() }}</b>
+        <a class="gm-btn small" routerLink="/team"><app-icon name="team" [size]="13" /> จัดทีม</a>
+      </div>
+      <app-team-presets />
+    </section>
+
+    <!-- daily -->
+    <section class="gm-panel daily">
+      <h2 class="gm-h2">โบนัสรายวัน</h2>
+      <ul>
+        @for (d of daily(); track d.id) {
+          <li [class.locked]="cleared() < d.unlock">
+            <app-icon [name]="d.icon" [size]="18" />
+            <span>{{ d.label }}</span>
+            @if (cleared() < d.unlock) {
+              <small>ผ่านชั้น {{ d.unlock }}</small>
+            } @else {
+              <span class="pips">@for (on of d.pips; track $index) { <i [class.on]="on"></i> }</span>
+              <b>{{ d.left }}/{{ d.max }}</b>
+            }
+          </li>
+        }
+      </ul>
+      <p class="hint">รางวัล ×1.5 · รีเซ็ตเที่ยงคืน</p>
+    </section>
+
+    <!-- ready -->
+    <section class="gm-panel ready">
+      <h2 class="gm-h2">พร้อมเสริมพลัง</h2>
+      @for (r of ready(); track r.uid + r.what) {
+        <a class="row" [routerLink]="['/heroes', r.uid]">
+          <app-hero-portrait [heroId]="r.id" [size]="36" />
+          <span>{{ r.name }}</span>
+          <em class="gm-chip {{ r.tone }}">{{ r.what }}</em>
+          <app-icon name="arrow" [size]="14" />
+        </a>
+      } @empty {
+        <p class="hint">ยังไม่มีฮีโร่ที่อัปได้ตอนนี้ — ลุยหอคอยและดันเจี้ยนเพื่อเก็บวัตถุดิบ</p>
+      }
+    </section>
+  </div>
+
+  <nav class="links" aria-label="ทางลัด">
+    @for (l of links; track l.path) {
+      <a class="link gm-panel" [routerLink]="l.path">
+        <span class="glyph"><app-icon [name]="l.icon" [size]="26" /></span>
+        <span><b>{{ l.label }}</b><small>{{ l.sub }}</small></span>
+      </a>
+    }
+  </nav>
+</section>

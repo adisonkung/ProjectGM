@@ -1,7 +1,9 @@
 import { itemName as itemNameOf } from '../../core/rules/equipment';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { Component, computed, effect, HostListener, inject, isDevMode, OnDestroy, signal, untracked } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TeamPresetsComponent } from '../../shared/team-presets.component';
+import { IconComponent } from '../../shared/icon.component';
 import { STAGES } from '../../core/data/stages';
 import { FARM_BY_ID } from '../../core/data/economy';
 import { ITEMS } from '../../core/data/economy';
@@ -27,6 +29,7 @@ import { mockVisualOf, STATUS_ICONS } from '../../core/data/visuals';
 import { isBossRank, MonsterSkillDefinition } from '../../core/models/monster';
 import { AreaPattern } from '../../core/models/combat';
 import { hasFlag } from '../../battle/engine/buffs';
+import { isPlayerUnit, PLAYER_TEAM } from '../../battle/engine/stage/party';
 
 const TICK = 0.05;
 
@@ -36,7 +39,7 @@ const TICK = 0.05;
  */
 @Component({
   selector: 'app-battle',
-  imports: [BoardComponent, PlacementComponent, PartyBarComponent],
+  imports: [BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -106,7 +109,7 @@ export class BattleComponent implements OnDestroy {
   /** running cast FX per unit (removed on fxStop) */
   private castFx = new Map<number, number>();
   /** ฮีโร่ของเรา เรียงตามทีม (ซ้าย→ขวาในแถบด้านล่าง) */
-  readonly party = computed(() => this.views().filter(v => v.side === 'ally'));
+  readonly party = computed(() => this.views().filter(v => isPlayerUnit(v)));
   /** STEP 9: ศัตรูที่แตะเลือกไว้ และเป้าโฟกัสของทีม */
   readonly selectedId = signal<number | null>(null);
   readonly focusId = signal<number | null>(null);
@@ -147,7 +150,8 @@ export class BattleComponent implements OnDestroy {
   private bannerTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
-    const qp = inject(ActivatedRoute).snapshot.queryParamMap;
+    const route = inject(ActivatedRoute).snapshot;
+    const qp = route.queryParamMap;
     const q = Number(qp.get('floor'));
     if (isDevMode() && qp.get('debug') === '1') this.debug.set(true);
     if (q >= 1 && q <= STAGES.length) this.floor.set(q);
@@ -155,7 +159,12 @@ export class BattleComponent implements OnDestroy {
     if (farm && FARM_BY_ID[farm]) {
       this.farmId.set(farm);
       this.mode.set('farm');
-    } else if (qp.get('mode') === 'tower') this.mode.set('tower');
+    } else if (qp.get('mode') === 'tower' || !route.data['lab']) this.mode.set('tower');
+    // real tower runs: never past the next unlocked floor (default = the next floor to clear)
+    if (this.mode() === 'tower') {
+      const top = Math.min(this.progression.cleared() + 1, STAGES.length);
+      if (!(q >= 1) || q > top) this.floor.set(top);
+    }
     // จัดทีมใหม่ระหว่างรอเริ่ม: สร้างการต่อสู้ใหม่ให้ตรงกับตำแหน่งล่าสุด
     effect(() => {
       this.team.units();
@@ -211,7 +220,7 @@ export class BattleComponent implements OnDestroy {
   start(): void {
     if (this.running()) return;
     if (this.result()) this.prepare();
-    if (!this.engine.alive('ally').length) return;
+    if (!this.engine.alive(PLAYER_TEAM).length) return;
     this.running.set(true);
     this.timer = setInterval(() => this.tick(), TICK * 1000);
   }
@@ -312,7 +321,7 @@ export class BattleComponent implements OnDestroy {
       this.grantRewards();
       const r = this.engine.stageResult;
       if (r) {
-        const names = (ids: number[]) => this.engine.units.filter(u => u.side === 'ally' && ids.includes(u.heroUid ?? u.id)).map(u => u.name).join(', ') || '-';
+        const names = (ids: number[]) => this.engine.units.filter(u => isPlayerUnit(u) && ids.includes(u.heroUid ?? u.id)).map(u => u.name).join(', ') || '-';
         this.summary.set(`เคลียร์ ${r.wavesCleared}/${r.totalWaves} เวฟ · รอด: ${names(r.survivingHeroIds)} · ล้ม: ${names(r.deadHeroIds)}${r.revivedHeroIds.length ? ' · ถูกชุบ: ' + names(r.revivedHeroIds) : ''} · ดาเมจที่รับ ${r.damageTaken}`);
       }
     }
@@ -361,13 +370,13 @@ export class BattleComponent implements OnDestroy {
       this.lastFacingX.set(u.id, u.x);
       // transitions: face where you walk (heroes default forward) · combat: face the target
       if (!combat && Math.abs(dx) > 1e-3) this.facing.set(u.id, dx < 0);
-      else if (!combat && u.side === 'ally' && u.life === 'ALIVE' && e.phase !== BattlePhase.REGROUPING) this.facing.set(u.id, false);
+      else if (!combat && isPlayerUnit(u) && u.life === 'ALIVE' && e.phase !== BattlePhase.REGROUPING) this.facing.set(u.id, false);
       else if (t && t.pos.c !== u.pos.c) this.facing.set(u.id, t.pos.c < u.pos.c);
       else if (!this.facing.has(u.id)) this.facing.set(u.id, u.side === 'enemy');
     }
     const dbg = this.debug() ? e.flow.debugInfo() : null;
     const focus = e.focusTargetId != null ? byId.get(e.focusTargetId) : undefined;
-    this.focusSafe.set(!focus || e.units.some(h => h.side === 'ally' && h.alive && e.canEngage(h, focus)));
+    this.focusSafe.set(!focus || e.units.some(h => isPlayerUnit(h) && h.alive && e.canEngage(h, focus)));
     this.stageDebug.set(dbg);
     this.worldDebug.set(this.debug() ? this.buildWorldDebug() : null);
     const heroDbg = new Map(dbg?.heroes.map(h => [h.id, h.lines]) ?? []);
@@ -394,13 +403,13 @@ export class BattleComponent implements OnDestroy {
         queued: u.ultQueued,
         focused: u.id === e.focusTargetId,
         selected: u.id === this.selectedId(),
-        intent: u.side === 'ally' ? u.intent : undefined,
+        intent: isPlayerUnit(u) ? u.intent : undefined,
         heroId: u.heroId,
         cd1: Math.max(0, u.cd1),
         cd2: Math.max(0, u.cd2),
         cd1Max: (u.kit ?? kitOf(u.heroId, u.cls)).skill.cooldown ?? 1,
         cd2Max: (u.kit ?? kitOf(u.heroId, u.cls)).skill2.cooldown ?? 1,
-        onFocus: u.side === 'ally' && e.focusTargetId != null && u.targetId === e.focusTargetId,
+        onFocus: isPlayerUnit(u) && e.focusTargetId != null && u.targetId === e.focusTargetId,
         elite: u.elite,
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
         buffed: u.buffs.some(b => (b.def.modifiers.attackMultiplier ?? 1) > 1),
@@ -414,8 +423,8 @@ export class BattleComponent implements OnDestroy {
         debug: this.debug() ? (u.monster ? this.debugLines(u, byId) : heroDbg.get(u.id)) : undefined,
         targetId: u.targetId,
         line: u.line,
-        interrupter: u.side === 'ally' && kitInterrupts((u.kit ?? kitOf(u.heroId, u.cls)), 'ult'),
-        modes: u.side === 'ally' ? { skill: e.skills.mode(u, 'skill'), skill2: e.skills.mode(u, 'skill2'), ult: e.skills.mode(u, 'ult') } : undefined,
+        interrupter: isPlayerUnit(u) && kitInterrupts((u.kit ?? kitOf(u.heroId, u.cls)), 'ult'),
+        modes: isPlayerUnit(u) ? { skill: e.skills.mode(u, 'skill'), skill2: e.skills.mode(u, 'skill2'), ult: e.skills.mode(u, 'ult') } : undefined,
         cast: u.casting && !(u.casting.def as MonsterSkillDefinition).untargetableWhileCasting
           ? {
               label: u.casting.def.label,
@@ -529,7 +538,7 @@ export class BattleComponent implements OnDestroy {
     const u = this.engine.units.find(x => x.id === src);
     const sk = u ? this.skillByName(u, skillName) : undefined;
     if (!u || !sk?.mockFx) return;
-    const center = dst != null ? this.engine.units.find(x => x.id === dst) ?? u : sk.target.type === 'ALL_HEROES' ? this.engine.alive('ally')[0] ?? u : u;
+    const center = dst != null ? this.engine.units.find(x => x.id === dst) ?? u : sk.target.type === 'ALL_HEROES' ? this.engine.alive(PLAYER_TEAM)[0] ?? u : u;
     const z: ZoneView = { id: ++this.floatId, ...this.areaRect(sk.mockFx.area, center, u), color: sk.mockFx.color, kind: 'telegraph', sec: castTime / this.speed() };
     this.zones.update(l => [...l, z]);
     this.zoneOwner.set(src, [...(this.zoneOwner.get(src) ?? []), z.id]);
@@ -555,7 +564,7 @@ export class BattleComponent implements OnDestroy {
   }
 
   private flashHeroes(color: string): void {
-    const hero = this.engine.alive('ally')[0];
+    const hero = this.engine.alive(PLAYER_TEAM)[0];
     if (!hero) return;
     const z: ZoneView = { id: ++this.floatId, ...this.areaRect('ALL_ALLIES', hero, hero), color, kind: 'flash' };
     this.zones.update(l => [...l, z]);
@@ -651,7 +660,7 @@ export class BattleComponent implements OnDestroy {
           const p = posOf(e.src), q = posOf(e.dst);
           const to = { x: q.c, y: q.r + SCENERY_ROWS };
           // ตกจากฟ้า: เริ่มเหนือเป้า 3 ช่อง เยื้องมาทางฝั่งผู้ยิง
-          const dir = src.side === 'ally' ? -1 : 1;
+          const dir = isPlayerUnit(src) ? -1 : 1;
           const from = e.sky ? { x: to.x + dir * 1.2, y: to.y - 3.2 } : { x: p.c, y: p.r + SCENERY_ROWS };
           const pv: ProjectileView = { id: ++this.floatId, name, from, to, flight: e.flight * 1000 };
           const sp = this.speed();

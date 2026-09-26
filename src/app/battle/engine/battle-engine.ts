@@ -28,6 +28,7 @@ import { BOARD_COLS, distance, Grid, LANES, Line, lineOf, SIDE_DEPTH, STACK_CAP,
 import { CombatContext, isBigMonster, MonsterCombatState, MonsterController } from './monster-controller';
 import { greedyStep, nextStep } from './pathfinding';
 import { createRng } from './rng';
+import { foeSideOf, isPlayerUnit } from './stage/party';
 
 /** Mist Hunter window after an enemy stops being untargetable (s) */
 const MIST_HUNTER_WINDOW = 3;
@@ -355,7 +356,7 @@ export class BattleEngine {
       grid: this.grid,
       units: this.units,
       isValidTarget: (u, t) => this.isValidTarget(u, t),
-      anchorOf: u => (u.side === PLAYER_TEAM ? this.flow?.formation.localAnchorOf(u.id) ?? null : null),
+      anchorOf: u => (isPlayerUnit(u) ? this.flow?.formation.localAnchorOf(u.id) ?? null : null),
       bodyBlocked: u => this.bodyBlocked(u),
       attackRangeOf: t => (t.monster ? this.monsterDefs[t.monster.definitionId]?.stats.attackRange ?? t.range : t.range),
     });
@@ -365,7 +366,7 @@ export class BattleEngine {
     this.flow = new StageFlow(this.stageHost(), cfg.stage, this.rules);
 
     for (const spec of cfg.allies) {
-      const u = this.addUnit('ally', spec);
+      const u = this.addUnit(PLAYER_TEAM, spec);
       if (u) this.flow.assignPlayer(u, spec.pos.r, spec.pos.c);
     }
     this.flow.spawnWave(0, false);
@@ -450,7 +451,7 @@ export class BattleEngine {
 
   /** ฮีโร่ของเราที่ล้มในการต่อสู้นี้ (ยังตายอยู่) */
   fallenHeroUids(): number[] {
-    return this.units.filter(u => u.side === PLAYER_TEAM && !u.alive && u.life !== 'REVIVING' && u.heroUid != null).map(u => u.heroUid!);
+    return this.units.filter(u => isPlayerUnit(u) && !u.alive && u.life !== 'REVIVING' && u.heroUid != null).map(u => u.heroUid!);
   }
 
   step(dt: number): void {
@@ -481,7 +482,7 @@ export class BattleEngine {
   /** per-tick metrics: Focus uptime, distance from the formation anchors */
   private sampleMetrics(dt: number): void {
     const m = this.metrics;
-    const heroes = this.units.filter(u => u.side === PLAYER_TEAM && u.alive);
+    const heroes = this.units.filter(u => isPlayerUnit(u) && u.alive);
     for (const h of heroes) {
       const a = this.flow.formation.localAnchorOf(h.id);
       if (a) {
@@ -494,7 +495,7 @@ export class BattleEngine {
       m.focusHeroTime += dt * heroes.length;
       m.focusOnTargetHeroTime += dt * heroes.filter(h => h.targetId === this.focusTargetId).length;
     }
-    for (const x of this.units) if (x.alive && x.side !== PLAYER_TEAM && hasFlag(x, 'untargetable')) x.lastUntargetableAt = this.time;
+    for (const x of this.units) if (x.alive && !isPlayerUnit(x) && hasFlag(x, 'untargetable')) x.lastUntargetableAt = this.time;
     for (const b of this.units) {
       if (!b.boss || !b.alive) continue;
       for (const st of b.buffs) if (st.def.buff) m.bossStatusTime[st.def.id] = (m.bossStatusTime[st.def.id] ?? 0) + dt;
@@ -589,7 +590,7 @@ export class BattleEngine {
   private liveTarget(u: BattleUnit, t: BattleUnit): BattleUnit | null {
     if (t.alive) return t;
     return (
-      this.alive(u.side === 'ally' ? 'enemy' : 'ally')
+      this.alive(foeSideOf(u.side))
         .filter(f => distance(f.pos, u.pos) <= u.range + 1)
         .sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0] ?? null
     );
@@ -825,7 +826,7 @@ export class BattleEngine {
 
     const current = this.acquireTarget(u);
     // healers show ✚ while someone needs healing (their basic action is a Heal Bolt then)
-    if (u.side === PLAYER_TEAM && this.skills.healBoltTarget(u)) u.intent = 'heal';
+    if (isPlayerUnit(u) && this.skills.healBoltTarget(u)) u.intent = 'heal';
 
     // player-ordered skill (any mode): fire at the skill's own target rules
     if (u.skillQueued && (u.skillQueued === 'skill' ? u.cd1 : u.cd2) <= 0) {
@@ -843,7 +844,7 @@ export class BattleEngine {
     // ultimate: full gauge + (player tap / AUTO per UltimateUseMode / enemy) → fires once a suitable target exists
     const ultMode = this.skills.mode(u, 'ult');
     const autoOk = this.autoUlt && ultMode !== 'MANUAL' && (ultMode !== 'RESERVE' || this.skills.reserveUltReady(u));
-    const wantsUlt = u.ultQueued || u.side !== PLAYER_TEAM || autoOk;
+    const wantsUlt = u.ultQueued || !isPlayerUnit(u) || autoOk;
     if (u.mana >= u.maxMana && wantsUlt && this.tryUltimate(u, u.ultQueued)) {
       u.ultQueued = false;
       return;
@@ -862,7 +863,7 @@ export class BattleEngine {
       return;
     }
     // an interruptible cast just out of reach of a ready interrupt: walk into range first
-    const chase = u.side === PLAYER_TEAM ? this.skills.interruptChase(u) : null;
+    const chase = isPlayerUnit(u) ? this.skills.interruptChase(u) : null;
     if (chase) u.intent = 'interrupt';
     if (u.atkCd <= 0 && !chase) {
       // skill AI tiers: emergency → interrupt → heal → high value → normal (SkillSystem), else the basic action
@@ -884,7 +885,7 @@ export class BattleEngine {
     }
     const goal = chase ?? current;
     // ranged heroes: safe positioning (leash, threat zones, preferred range, frontline) instead of walking to max range
-    if (u.side === PLAYER_TEAM && isRanged(u)) return this.rangedMove(u, goal, !!chase);
+    if (isPlayerUnit(u) && isRanged(u)) return this.rangedMove(u, goal, !!chase);
     if (!goal) return;
     if (!chase && distance(u.pos, goal.pos) <= u.range) {
       // ranged: keep distance while reloading — step back once when a foe is adjacent
@@ -924,7 +925,7 @@ export class BattleEngine {
    * (ฮีลฉุกเฉินของฮีลเลอร์ และโอกาสตัดการร่าย จัดการใน updateUnit ก่อนมาถึงตรงนี้)
    */
   private acquireTarget(u: BattleUnit): BattleUnit | null {
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally').filter(f => f.targetable && !hasFlag(f, 'untargetable'));
+    const foes = this.alive(foeSideOf(u.side)).filter(f => f.targetable && !hasFlag(f, 'untargetable'));
     if (!foes.length) return null;
 
     // taunted (status from a tank): must attack that tank while it is valid
@@ -940,7 +941,7 @@ export class BattleEngine {
     if (current && u.thinkCd > 0) return current;
     u.thinkCd = THINK;
 
-    const focus = u.side === 'ally' ? this.focusUnit() : null;
+    const focus = isPlayerUnit(u) ? this.focusUnit() : null;
     const hold = this.holdTarget(u, foes, current);
     let pick: BattleUnit;
     let intent: Intent = 'normal';
@@ -972,7 +973,7 @@ export class BattleEngine {
     const inRange = foes.filter(f => d(f) <= u.range);
     if (current && (d(current) <= u.range || !inRange.length) && u.cls !== 'assassin') return current;
     const front = (f: BattleUnit) => (f.line === 'front' ? 0 : 1);
-    if (u.cls === 'assassin' && u.side === PLAYER_TEAM) return this.assassinTarget(u, foes, current);
+    if (u.cls === 'assassin' && isPlayerUnit(u)) return this.assassinTarget(u, foes, current);
     if (u.cls === 'assassin') {
       // นักฆ่า: แถวหลังก่อน ฮีลเลอร์ > นักเวท > นักธนู > เลือดน้อย
       const order: Partial<Record<HeroClass, number>> = { healer: 0, mage: 1, archer: 2 };
@@ -989,7 +990,7 @@ export class BattleEngine {
         const rank = (f: BattleUnit) => (f.monster?.fleeing ? -1 : (order[f.cls] ?? 2));
         return [...inRange].sort((a, b) => rank(a) - rank(b) || a.hp / a.maxHp - b.hp / b.maxHp || d(a) - d(b))[0];
       }
-      if (u.side === PLAYER_TEAM) {
+      if (isPlayerUnit(u)) {
         // nothing in range: the enemy with the safest firing position inside the leash (nearest as a tie-break)
         const scored = foes
           .map(f => ({ f, spot: this.positioning.firingCell(u, f, { respectLeash: true, safeOnly: true }) }))
@@ -1040,7 +1041,7 @@ export class BattleEngine {
 
   /** hurt (< ASSASSIN_ESCAPE_HP) player assassin inside > ASSASSIN_SAFE_THREAT threat zones steps to a safer cell behind */
   private assassinEscape(u: BattleUnit): boolean {
-    if (u.side !== PLAYER_TEAM || u.cls !== 'assassin' || (u.diveUntil ?? 0) > this.time) return false;
+    if (!isPlayerUnit(u) || u.cls !== 'assassin' || (u.diveUntil ?? 0) > this.time) return false;
     if (u.moveCd > 0 || hasFlag(u, 'root') || u.hp / u.maxHp >= ASSASSIN_ESCAPE_HP) return false;
     const here = this.localThreat(u, u.pos);
     if (here <= ASSASSIN_SAFE_THREAT) return false;
@@ -1060,19 +1061,19 @@ export class BattleEngine {
 
   /** player assassin: a far Focus is reached by blinking (when safe), never by walking through the enemy line */
   private assassinMayTakeFocus(u: BattleUnit, focus: BattleUnit): boolean {
-    if (u.side !== PLAYER_TEAM || u.cls !== 'assassin') return true;
+    if (!isPlayerUnit(u) || u.cls !== 'assassin') return true;
     if ((u.diveUntil ?? 0) > this.time && u.diveTargetId === focus.id) return true;
     return distance(u.pos, focus.pos) <= u.range + 1;
   }
 
   /** player assassin (no dive): a step beyond the furthest-forward other melee hero is refused */
   private assassinHeldBack(u: BattleUnit, step: Cell): boolean {
-    if (u.side !== PLAYER_TEAM || u.cls !== 'assassin' || (u.diveUntil ?? 0) > this.time) return false;
+    if (!isPlayerUnit(u) || u.cls !== 'assassin' || (u.diveUntil ?? 0) > this.time) return false;
     if (step.c <= u.pos.c) return false;
     const melee = this.alive(u.side).filter(a => a !== u && !isRanged(a) && a.cls !== 'assassin');
     if (!melee.length || step.c <= Math.max(...melee.map(a => a.pos.c))) return false;
     // only before contact: once an allied melee hero is engaged the assassin joins in; never into an unthreatened cell
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    const foes = this.alive(foeSideOf(u.side));
     if (melee.some(m => foes.some(f => distance(f.pos, m.pos) <= 1))) return false;
     return this.localThreat(u, step) > 0;
   }
@@ -1104,7 +1105,7 @@ export class BattleEngine {
    * - สายประชิด: ใกล้ (≤ 2 ช่อง) หรือไม่มีศัตรูยืนขวางระหว่างทาง (คอลัมน์ระหว่างเรากับเป้า เลนติดกัน)
    */
   canEngage(u: BattleUnit, t: BattleUnit, _foes?: BattleUnit[]): boolean {
-    if (u.side !== PLAYER_TEAM) {
+    if (!isPlayerUnit(u)) {
       if (!this.isValidTarget(u, t)) return false;
       if (u.range >= 3 || u.cls === 'assassin' || distance(u.pos, t.pos) <= 2) return true;
     }
@@ -1121,7 +1122,7 @@ export class BattleEngine {
     if (next === this.focusTargetId) return next;
     this.focusTargetId = next;
     // โฟกัสเปลี่ยน = เหตุการณ์ที่ให้ทุกคนคิดใหม่ทันที (ไม่ต้องรอหมดล็อก)
-    for (const a of this.alive('ally')) {
+    for (const a of this.alive(PLAYER_TEAM)) {
       a.thinkCd = 0;
       a.lockUntil = 0;
     }
@@ -1141,7 +1142,7 @@ export class BattleEngine {
   private clearFocus(reason: 'dead' | 'advance' | 'end'): void {
     if (this.focusTargetId == null) return;
     this.focusTargetId = null;
-    for (const a of this.alive('ally')) {
+    for (const a of this.alive(PLAYER_TEAM)) {
       a.thinkCd = 0;
       a.lockUntil = 0;
     }
@@ -1212,10 +1213,10 @@ export class BattleEngine {
   /** สายระยะไกลถอยหนีศัตรูที่ประชิดตัว 1 ก้าว ไปทางฝั่งตัวเอง (ต้องยังยิงเป้าถึง) — ROOT ห้ามขยับ */
   private kite(u: BattleUnit, target: BattleUnit): void {
     if (hasFlag(u, 'root')) return;
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    const foes = this.alive(foeSideOf(u.side));
     const nearest = (c: Cell) => Math.min(...foes.map(f => distance(f.pos, c)));
     if (nearest(u.pos) > 1) return;
-    const back = u.side === 'ally' ? -1 : 1;
+    const back = isPlayerUnit(u) ? -1 : 1;
     const step = Grid.neighbors(u.pos)
       .filter(c => this.grid.canEnter(c) && Math.sign(c.c - u.pos.c) !== -back && distance(c, target.pos) <= u.range)
       .sort((a, b) => nearest(b) - nearest(a) || Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r))[0];
@@ -1230,7 +1231,7 @@ export class BattleEngine {
 
   /** เริ่มร่ายสกิลที่พร้อมตัวแรกที่มีเป้า */
   private tryStartCast(u: BattleUnit): boolean {
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    const foes = this.alive(foeSideOf(u.side));
     if (!foes.length) return false;
     const near = Math.min(...foes.map(f => distance(f.pos, u.pos)));
     for (const cs of u.castSkills) {
@@ -1264,7 +1265,7 @@ export class BattleEngine {
     if (cs) cs.cd = mdef?.once ? Infinity : this.monsterAI.cooldownOf(u, def);
     const token = this.seq++;
     u.casting = { def, left: def.castTime, target: target?.id ?? null, token, nextProgress: CAST_PROGRESS_STEP, breakDamage: 0 };
-    if (u.side !== PLAYER_TEAM && canStopCast(def)) this.metrics.interruptOpportunities++;
+    if (!isPlayerUnit(u) && canStopCast(def)) this.metrics.interruptOpportunities++;
     if (u.monster) this.metrics.cast(def.id, 'started');
     // Mist Form: the caster turns to mist for the whole cast (no cast bar)
     const hidden = !!mdef?.untargetableWhileCasting;
@@ -1492,14 +1493,14 @@ export class BattleEngine {
   private finishCast(u: BattleUnit): void {
     const c = u.casting!;
     u.casting = null;
-    if (u.side !== PLAYER_TEAM && canStopCast(c.def)) {
+    if (!isPlayerUnit(u) && canStopCast(c.def)) {
       if (rankOf(priorityOf(c.def)) >= rankOf('HIGH')) this.metrics.criticalCastsCompleted++;
       if (breakRequiredOf(c.def) > 0) this.metrics.breakFailure++;
     }
     if (isMonsterSkill(c.def)) {
       if (u.monster) this.metrics.cast(c.def.id, 'completed');
       // CHALLENGE strikes: only casts the heroes could have stopped (interruptible or breakable)
-      if (u.side !== PLAYER_TEAM && canStopCast(c.def)) this.flow.onEnemyCastCompleted(c.def.id);
+      if (!isPlayerUnit(u) && canStopCast(c.def)) this.flow.onEnemyCastCompleted(c.def.id);
       if (c.def.untargetableWhileCasting) this.removeStatus(u, 'untargetable');
       this.activateMonsterSkill(u, c.def, c.target);
       this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
@@ -1509,7 +1510,7 @@ export class BattleEngine {
     u.castLock = CAST_LOCK;
     this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
     this.events.push({ type: 'cast', src: u.id, skill: c.def.name, kind: 'ult', ...(c.target != null ? { dst: c.target } : {}) });
-    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    const foes = this.alive(foeSideOf(u.side));
     switch (c.def.effect) {
       case 'quake':
         for (const f of foes) this.applyDamage(f, Math.max(1, Math.round(f.maxHp * c.def.power)), false);
@@ -1533,7 +1534,7 @@ export class BattleEngine {
   private tryInterrupt(src: BattleUnit, dst: BattleUnit, breakPower = 0): void {
     const c = dst.casting;
     if (!c || !dst.alive) return;
-    if (dst.side !== PLAYER_TEAM && canStopCast(c.def)) this.metrics.interruptAttempts++;
+    if (!isPlayerUnit(dst) && canStopCast(c.def)) this.metrics.interruptAttempts++;
     if (!c.def.interruptible) {
       const need = isMonsterSkill(c.def) ? c.def.breakRequired ?? 0 : 0;
       if (need > 0 && breakPower > 0) return this.addBreak(src, dst, breakPower, need);
@@ -1603,7 +1604,7 @@ export class BattleEngine {
   /** player orders skill 1 / 2 now (works for RESERVE / MANUAL skills too) — false = on cooldown / not possible */
   requestSkill(id: number, slot: 'skill' | 'skill2'): boolean {
     const u = this.units.find(x => x.id === id);
-    if (!u || !u.alive || u.side !== PLAYER_TEAM || this.result) return false;
+    if (!u || !u.alive || !isPlayerUnit(u) || this.result) return false;
     if ((slot === 'skill' ? u.cd1 : u.cd2) > 0) return false;
     u.skillQueued = slot;
     return true;
@@ -1612,7 +1613,7 @@ export class BattleEngine {
   /** ผู้เล่นกดใช้ท่าไม้ตาย (คืน false ถ้ายังใช้ไม่ได้) */
   requestUlt(id: number): boolean {
     const u = this.units.find(x => x.id === id);
-    if (!u || !u.alive || u.side !== 'ally' || u.mana < u.maxMana || this.result) return false;
+    if (!u || !u.alive || !isPlayerUnit(u) || u.mana < u.maxMana || this.result) return false;
     u.ultQueued = true;
     return true;
   }
@@ -1832,22 +1833,22 @@ export class BattleEngine {
         const dead = self.units.filter(a => a.side === u.side && a !== u && (a.life === 'DEAD_VISIBLE' || a.life === 'DEAD_HIDDEN') && a.wave < 0);
         return [...dead.filter(a => a.life === 'DEAD_VISIBLE'), ...dead.filter(a => a.life === 'DEAD_HIDDEN')];
       },
-      focus: u => (u.side === PLAYER_TEAM ? self.focusUnit() : null),
+      focus: u => (isPlayerUnit(u) ? self.focusUnit() : null),
       unitById: id => self.units.find(x => x.id === id),
       blinkAllowed: (u, _s, t) => {
-        if (u.side !== PLAYER_TEAM || u.cls !== 'assassin') return true;
+        if (!isPlayerUnit(u) || u.cls !== 'assassin') return true;
         if (t.hp / t.maxHp <= ASSASSIN_KILL_HP) return true;
         const ok = self.localThreat(u, t.pos, t) <= ASSASSIN_SAFE_THREAT;
         if (!ok) self.metrics.unsafeBlinksSkipped++;
         return ok;
       },
       onDive: (u, t, lock) => {
-        if (u.side !== PLAYER_TEAM) return;
+        if (!isPlayerUnit(u)) return;
         u.diveUntil = self.time + lock + DIVE_WINDOW;
         u.diveTargetId = t.id;
       },
       chaseAllowed: (u, f) => {
-        if (u.side !== PLAYER_TEAM) return true;
+        if (!isPlayerUnit(u)) return true;
         const P = self.positioning;
         if (isRanged(u)) return !!P.firingCell(u, f, { respectLeash: true, maxMove: 3, safeOnly: true });
         const anchor = self.flow.formation.localAnchorOf(u.id);
@@ -1856,11 +1857,11 @@ export class BattleEngine {
         return u.cls !== 'tank' || !self.units.some(o => o.side !== u.side && self.isValidTarget(u, o) && distance(o.pos, u.pos) <= 1);
       },
       onSkillUse: (u, slot, s) => {
-        if (u.side === PLAYER_TEAM && slot !== 'attack') {
+        if (isPlayerUnit(u) && slot !== 'attack') {
           if (slot === 'ult') self.metrics.unit(u.id).ults++;
           else self.metrics.unit(u.id).skills++;
         }
-        if (u.side !== PLAYER_TEAM || slot === 'attack' || self.skills.mode(u, slot) !== 'RESERVE') return;
+        if (!isPlayerUnit(u) || slot === 'attack' || self.skills.mode(u, slot) !== 'RESERVE') return;
         if (s.effects.some(e => (e.type === 'DAMAGE' && e.interrupt) || e.type === 'INTERRUPT') &&
           self.units.some(f => f.side !== u.side && f.alive && f.casting && canStopCast(f.casting.def))) self.metrics.reservedSkillHits++;
         else self.metrics.reservedSkillMisses++;
@@ -1878,7 +1879,7 @@ export class BattleEngine {
       knockback: (src, dst, cells) => {
         if (dst.monster && self.monsterDefs[dst.monster.definitionId]?.immune?.includes('KNOCKBACK')) return;
         for (let i = 0; i < cells; i++) {
-          const back = { r: dst.pos.r, c: dst.pos.c + (Math.sign(dst.pos.c - src.pos.c) || (src.side === 'ally' ? 1 : -1)) };
+          const back = { r: dst.pos.r, c: dst.pos.c + (Math.sign(dst.pos.c - src.pos.c) || (isPlayerUnit(src) ? 1 : -1)) };
           if (!self.grid.canEnter(back)) break;
           self.grid.move(dst.id, dst.pos, back);
           dst.pos = back;
@@ -1939,10 +1940,10 @@ export class BattleEngine {
       dst.lastGaugeHitAt = this.time;
       this.gainMana(dst, MANA_PER_HIT);
     }
-    if (dst.side === PLAYER_TEAM) {
+    if (isPlayerUnit(dst)) {
       this.flow.damageTaken += amount;
       this.metrics.damageTaken += amount;
-    } else if (src?.side === PLAYER_TEAM) {
+    } else if ((src != null && isPlayerUnit(src))) {
       this.metrics.damageDealt += amount;
       this.metrics.unit(src.id).dealt += amount;
     }
@@ -1958,13 +1959,13 @@ export class BattleEngine {
       if (dst.monster) this.monsterAI.markDead(dst);
       if (dst.id === this.focusTargetId) this.clearFocus('dead');
       for (const o of this.units) if (o.targetId === dst.id) o.targetId = null;
-      if (dst.side === PLAYER_TEAM) {
+      if (isPlayerUnit(dst)) {
         this.metrics.deaths++;
         this.metrics.unit(dst.id).deaths++;
         if (isRanged(dst) && this.positioning.threatCount(dst.pos, this.positioning.threats(dst)) > 0) this.metrics.rangedDeathsInThreat++;
       }
       this.grid.remove(dst.id, dst.pos);
-      if (dst.boss && dst.side !== PLAYER_TEAM && this.metrics.bossDiedAt == null) this.metrics.bossDiedAt = this.time;
+      if (dst.boss && !isPlayerUnit(dst) && this.metrics.bossDiedAt == null) this.metrics.bossDiedAt = this.time;
       this.events.push({ type: 'death', dst: dst.id });
       this.flow.onDeath(dst);
       if (dst.summonedBy != null) this.onSummonDied(dst);
@@ -1984,9 +1985,9 @@ export class BattleEngine {
     const a = Math.round(Math.min(amount, dst.maxHp - dst.hp));
     if (a <= 0) return;
     dst.hp += a;
-    if (dst.side === PLAYER_TEAM) {
+    if (isPlayerUnit(dst)) {
       this.metrics.healing += a;
-      if (src?.side === PLAYER_TEAM) this.metrics.unit(src.id).healed += a;
+      if ((src != null && isPlayerUnit(src))) this.metrics.unit(src.id).healed += a;
     }
     this.events.push({ type: 'heal', dst: dst.id, amount: a, ...(src ? { src: src.id } : {}) });
   }
@@ -2085,7 +2086,7 @@ export class BattleEngine {
         return true;
       },
       stepAway: (u, threat, keep, range) => {
-        const back = u.side === 'ally' ? -1 : 1;
+        const back = isPlayerUnit(u) ? -1 : 1;
         const step = Grid.neighbors(u.pos)
           .filter(c => self.grid.canEnter(c) && Math.sign(c.c - u.pos.c) === back && distance(c, threat) > distance(u.pos, threat) && distance(c, keep) <= range)
           .sort((a, b) => Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r))[0];

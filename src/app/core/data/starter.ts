@@ -1,6 +1,6 @@
 import { GameState } from '../models/game-state';
 import { OwnedHero } from '../models/hero';
-import { autoPlace } from '../rules/team';
+import { autoPlace, defaultPresets } from '../rules/team';
 
 /** ทีมเริ่มต้น (ลงสนาม) และฮีโร่ที่มีให้ตั้งแต่เริ่มแต่อยู่ม้านั่ง */
 export const STARTER_TEAM = ['aurel', 'jin', 'shade', 'sylvie', 'lumina'];
@@ -44,5 +44,6 @@ export function newGameState(): GameState {
     equipment: [],
     nextItemId: 1,
     huntTarget: 'ANY',
+    teamPresets: defaultPresets(),
   };
 }

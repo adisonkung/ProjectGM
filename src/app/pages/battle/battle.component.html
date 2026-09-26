@@ -1,14 +1,27 @@
-<section class="lab">
-  <header class="head">
-    <div>
-      <h1>ห้องทดลองต่อสู้</h1>
-      <p class="sub">จัดตำแหน่งแล้วดูทีมสู้บนสนาม 3 เลน × 16 (เรา 6 · กลาง 4 · ศัตรู 6) · ผลแพ้ชนะไม่มีผลกับเซฟ</p>
+<section class="lab" [class.run]="mode() !== 'lab'">
+  @if (mode() === 'lab') {
+    <header class="head">
+      <div>
+        <h1 class="gm-title">ห้องทดลองต่อสู้</h1>
+        <p class="gm-sub">สนามทดสอบ: เลือกชั้น จัดตำแหน่ง แล้วดูทีมสู้ · ผลแพ้ชนะไม่มีผลกับเซฟ</p>
+      </div>
+      <div class="power"><app-icon name="flame" [size]="15" /> พลังทีม <b>{{ teamPower() }}</b></div>
+    </header>
+    <div class="floors" role="group" aria-label="เลือกชั้น">
+      @for (s of stages; track s.floor) {
+        <button type="button" [attr.aria-pressed]="floor() === s.floor" [class.surv]="s.mode === 'survive'"
+                [disabled]="running()" (click)="selectFloor(s.floor)">{{ s.floor }}</button>
+      }
     </div>
-    <div class="power">พลังทีม <b>{{ teamPower() }}</b></div>
-  </header>
-
-  @if (mode() !== 'lab') {
-    <p class="mode">{{ mode() === 'farm' ? 'ดันเจี้ยนฟาร์ม' : 'หอคอย' }} · <b>{{ runTitle() }}</b> · <a href="/tower">กลับหอคอย</a></p>
+  } @else {
+    <header class="run-head gm-panel">
+      <a class="gm-btn small ghost back" [routerLink]="'/tower'" aria-label="กลับหอคอย"><app-icon name="back" [size]="14" /></a>
+      <div class="run-title">
+        <small class="gm-class">{{ mode() === 'farm' ? 'ดันเจี้ยน' : 'หอคอย · ชั้น ' + floor() }}</small>
+        <h1>{{ farmId() ? runTitle() : stage().name ?? 'ชั้น ' + floor() }}</h1>
+      </div>
+      <div class="power"><app-icon name="flame" [size]="15" /> <b>{{ teamPower() }}</b></div>
+    </header>
   }
   @if (modeHud(); as h) {
     <div class="mode-hud" role="status" aria-live="polite">
@@ -16,18 +29,12 @@
       <span>{{ h.line }}</span>
     </div>
   }
-  <div class="floors" role="group" aria-label="เลือกชั้น">
-    @for (s of stages; track s.floor) {
-      <button type="button" [attr.aria-pressed]="floor() === s.floor" [class.surv]="s.mode === 'survive'"
-              [disabled]="running() || (mode() === 'tower' && s.floor > progression.cleared() + 1)" (click)="selectFloor(s.floor)">{{ s.floor }}</button>
-    }
-  </div>
 
   <div class="status">
     <span class="chip" [class.surv]="stage().mode === 'survive'">
       {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + totalWaves() + ' เวฟ' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ
     </span>
-    @if (stage().name) { <span class="stage-name">{{ stage().name }}</span> }
+    @if (mode() === 'lab' && stage().name) { <span class="stage-name">{{ stage().name }}</span> }
     @if (debug()) { <span class="chip dbg">DEBUG</span> }
     @if (debug()) { <span class="chip dbg">{{ phase() }}</span> }
     @if (totalWaves() > 1) { <span class="rounds">เวฟ <b>{{ wave() + 1 }}</b>/{{ totalWaves() }}</span> }
@@ -35,6 +42,7 @@
   </div>
 
   @if (placing()) {
+    <app-team-presets />
     <app-placement [stage]="stage()" />
   } @else {
     <div class="stage-wrap">
@@ -145,7 +153,7 @@
       }
     </div>
     <button type="button" (click)="prepare()" [disabled]="placing()">จัดตำแหน่งใหม่</button>
-    <button type="button" (click)="simulate()" [disabled]="running()">จำลอง 100 รอบ</button>
+    @if (mode() === 'lab') { <button type="button" (click)="simulate()" [disabled]="running()">จำลอง 100 รอบ</button> }
   </div>
   @if (simReport()) { <p class="sim">{{ simReport() }}</p> }
 </section>

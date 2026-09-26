@@ -1,5 +1,6 @@
 import { computed, inject, Injectable } from '@angular/core';
-import { autoPlace, TEAM_SIZE, teamToUnits } from '../rules/team';
+import { TeamPreset } from '../models/game-state';
+import { autoPlace, normalizePresets, presetToTeam, TEAM_SIZE, teamToUnits } from '../rules/team';
 import { SaveService } from './save.service';
 
 @Injectable({ providedIn: 'root' })
@@ -36,5 +37,40 @@ export class TeamService {
 
   auto(): void {
     this.save.update(s => ({ ...s, team: autoPlace(s.heroes) }));
+  }
+
+  // ---------------------------------------------------------------- presets
+
+  readonly presets = computed(() => normalizePresets(this.save.state().teamPresets));
+
+  /** index of the preset that matches the current team exactly (same heroes on the same cells), or -1 */
+  readonly activePreset = computed(() => {
+    const key = (t: { uid: number; r: number; c: number }[]) => t.map(x => `${x.uid}@${x.r},${x.c}`).sort().join('|');
+    const cur = key(this.slots());
+    return cur ? this.presets().findIndex(p => p.team.length > 0 && key(p.team) === cur) : -1;
+  });
+
+  private setPresets(fn: (p: TeamPreset[]) => TeamPreset[]): void {
+    this.save.update(s => ({ ...s, teamPresets: fn(normalizePresets(s.teamPresets)) }));
+  }
+
+  /** store the current team + placement in preset i */
+  savePreset(i: number): void {
+    this.setPresets(p => p.map((x, k) => (k === i ? { ...x, team: this.slots().map(t => ({ ...t })) } : x)));
+  }
+
+  /** replace the current team with preset i (heroes no longer owned are skipped); false when the preset is empty */
+  loadPreset(i: number): boolean {
+    const p = this.presets()[i];
+    if (!p) return false;
+    const team = presetToTeam(p, this.save.state().heroes);
+    if (!team.length) return false;
+    this.save.update(s => ({ ...s, team }));
+    return true;
+  }
+
+  renamePreset(i: number, name: string): void {
+    const n = name.trim().slice(0, 16);
+    if (n) this.setPresets(p => p.map((x, k) => (k === i ? { ...x, name: n } : x)));
   }
 }

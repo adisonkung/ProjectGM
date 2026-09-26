@@ -1,0 +1,52 @@
+<section class="heroes">
+  <header class="head">
+    <div>
+      <h1 class="gm-title">หอวีรชน</h1>
+      <p class="gm-sub">ฮีโร่ทั้งหมด {{ cards().length }} ตน · แตะการ์ดเพื่อดูค่าพลัง อัปเลเวล สกิล และอุปกรณ์</p>
+    </div>
+  </header>
+
+  <div class="bar gm-panel">
+    <div class="filters" role="group" aria-label="กรองตามสาย">
+      @for (c of classes; track c) {
+        <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="cls() === c" (click)="cls.set(c)">
+          {{ className(c) }} <small>{{ count(c) }}</small>
+        </button>
+      }
+    </div>
+    <label class="sort">
+      <span>เรียงตาม</span>
+      <select [value]="sort()" (change)="sort.set($any($event.target).value)">
+        @for (s of sorts; track s.id) { <option [value]="s.id">{{ s.label }}</option> }
+      </select>
+    </label>
+  </div>
+
+  <ul class="grid">
+    @for (h of shown(); track h.uid) {
+      <li>
+        <a class="card r{{ h.star }}" [routerLink]="['/heroes', h.uid]" [attr.aria-label]="h.name + ' เลเวล ' + h.level">
+          <span class="art">
+            <app-hero-portrait [heroId]="h.id" [size]="112" />
+            <span class="lv">Lv<b>{{ h.level }}</b></span>
+            @if (h.inTeam) { <span class="flag team" title="อยู่ในทีม"><app-icon name="team" [size]="13" /></span> }
+            @else if (h.training) { <span class="flag train" title="อยู่ในช่องฝึก"><app-icon name="book" [size]="13" /></span> }
+          </span>
+          <span class="name">{{ h.name }}</span>
+          <span class="meta"><span class="gm-stars">{{ stars(h.star) }}</span> <span class="gm-class">{{ classLabel(h.cls) }}</span></span>
+          <span class="gm-bar gold xp"><i [style.width.%]="h.expPct"></i></span>
+          <span class="pw"><app-icon name="flame" [size]="13" />{{ h.power }}</span>
+          @if (h.btReady || h.skillReady || h.canLevel) {
+            <span class="ready">
+              @if (h.btReady) { <em class="gm-chip ember">Breakthrough</em> }
+              @if (h.skillReady) { <em class="gm-chip arcane">อัปสกิลได้</em> }
+              @if (h.canLevel) { <em class="gm-chip ok">ใช้ยา EXP ได้</em> }
+            </span>
+          }
+        </a>
+      </li>
+    } @empty {
+      <li class="none">ไม่มีฮีโร่สายนี้</li>
+    }
+  </ul>
+</section>

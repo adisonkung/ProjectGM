@@ -1,11 +1,21 @@
 <section class="team">
   <header class="head">
     <div>
-      <h1>จัดทีม</h1>
-      <p class="sub">วางฮีโร่ได้ 5 ตัวในฝั่งซ้าย · FRONT (3 คอลัมน์ติดศัตรู) โดนสายประชิดตีก่อน · BACK ปลอดภัยกว่า แต่นักฆ่าจะพุ่งหา</p>
+      <h1 class="gm-title">จัดทัพ</h1>
+      <p class="gm-sub">วางฮีโร่ได้ 5 ตัว · แถวหน้าโดนสายประชิดตีก่อน · แถวหลังปลอดภัยกว่า แต่นักฆ่าจะพุ่งหา</p>
     </div>
-    <a class="go" routerLink="/lab" [queryParams]="{ floor: floor() }">ทดลองสู้ชั้น {{ floor() }} →</a>
+    <div class="cta">
+      @if (canRun()) {
+        <a class="gm-btn primary" routerLink="/battle" [queryParams]="{ floor: floor(), mode: 'tower' }"><app-icon name="sword" [size]="15" /> ท้าชิงชั้น {{ floor() }}</a>
+      }
+      <a class="gm-btn small ghost" routerLink="/lab" [queryParams]="{ floor: floor() }"><app-icon name="lab" [size]="14" /> ทดลองสู้</a>
+    </div>
   </header>
+
+  <section class="gm-panel presets">
+    <h2 class="gm-h2">ทีมที่บันทึกไว้</h2>
+    <app-team-presets />
+  </section>
 
   <div class="floors" role="group" aria-label="ดูศัตรูของชั้น">
     <span>ศัตรูชั้น</span>
@@ -15,6 +25,7 @@
     }
   </div>
   <p class="mode" [class.surv]="stage().mode === 'survive'">
+    <b>{{ stage().name }}</b> ·
     {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + (1 + (stage().rounds?.length ?? 0)) + ' เวฟ (ภาพนี้คือเวฟแรก)' : 'เอาตัวรอด (มีศัตรูเสริมเป็นระลอก)' }} · {{ stage().timeLimit }} วิ
   </p>
 

@@ -1,0 +1,13 @@
+.gate { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 30px 16px 40px; }
+.portal { position: relative; width: 240px; height: 240px; margin-bottom: 8px; }
+.ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid #d9b46488; box-shadow: 0 0 20px #9b6bff44, inset 0 0 20px #9b6bff33;
+  animation: spin 24s linear infinite; }
+.r1 { border-style: dashed; }
+.r2 { inset: 22px; border-color: #9b6bffaa; animation-duration: 16s; animation-direction: reverse; border-width: 2px; border-style: dotted; }
+.r3 { inset: 48px; border-color: #f6dfa0aa; animation-duration: 30s; }
+.core { position: absolute; inset: 72px; border-radius: 50%;
+  background: radial-gradient(circle, #fff6d8 0%, #c9adff 18%, #6b3fd6 45%, #1a1030 75%, transparent 76%);
+  box-shadow: 0 0 60px #9b6bffaa, 0 0 120px #9b6bff55; animation: breathe 3.2s ease-in-out infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes breathe { 50% { transform: scale(0.92); filter: brightness(0.8); } }
+.gate h1 { font-size: 32px; }

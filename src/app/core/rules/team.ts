@@ -1,7 +1,7 @@
 import { LANES, SIDE_DEPTH } from '../../battle/engine/grid';
 import { HERO_BY_ID } from '../data/heroes';
 import { OwnedHero } from '../models/hero';
-import { TeamSlot } from '../models/game-state';
+import { TeamPreset, TeamSlot } from '../models/game-state';
 import { UnitSpec } from '../models/unit';
 import { heroStats } from './stats';
 import { combatModifiers, skillRanksOf } from './progression';
@@ -56,6 +56,42 @@ export function teamToUnits(team: TeamSlot[], heroes: OwnedHero[]): UnitSpec[] {
       skillRanks: skillRanksOf(h),
       pos: { r: slot.r, c: slot.c },
     });
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- team presets (Phase 4)
+
+export const TEAM_PRESET_COUNT = 3;
+export const defaultPresets = (): TeamPreset[] =>
+  Array.from({ length: TEAM_PRESET_COUNT }, (_, i) => ({ name: `ทีม ${String.fromCharCode(65 + i)}`, team: [] }));
+
+/** always exactly TEAM_PRESET_COUNT presets (old saves / bad data are padded or trimmed) */
+export function normalizePresets(p: TeamPreset[] | undefined): TeamPreset[] {
+  const base = defaultPresets();
+  return base.map((d, i) => {
+    const x = p?.[i];
+    return x && Array.isArray(x.team) ? { name: (x.name ?? '').trim() || d.name, team: x.team.map(t => ({ ...t })) } : d;
+  });
+}
+
+/**
+ * a preset as a playable team: drops heroes no longer owned, cells off the ally side and duplicates;
+ * never more than TEAM_SIZE
+ */
+export function presetToTeam(p: TeamPreset, heroes: OwnedHero[]): TeamSlot[] {
+  const owned = new Set(heroes.map(h => h.uid));
+  const cells = new Set<string>();
+  const uids = new Set<number>();
+  const out: TeamSlot[] = [];
+  for (const t of p.team) {
+    const key = `${t.r},${t.c}`;
+    if (!owned.has(t.uid) || uids.has(t.uid) || cells.has(key)) continue;
+    if (t.r < 0 || t.r >= SIDE_DEPTH || t.c < 0 || t.c >= LANES) continue;
+    uids.add(t.uid);
+    cells.add(key);
+    out.push({ uid: t.uid, r: t.r, c: t.c });
+    if (out.length >= TEAM_SIZE) break;
   }
   return out;
 }

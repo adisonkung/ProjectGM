@@ -2,6 +2,7 @@ import { ROLE_BEHAVIOR, RoleBehavior, THREAT_PADDING } from '../../core/data/cla
 import { Cell } from '../../core/models/unit';
 import type { BattleUnit } from './battle-engine';
 import { BOARD_COLS, BOARD_ROWS, distance, Grid } from './grid';
+import { isPlayerUnit } from './stage/party';
 
 /**
  * Hero positioning rules (soft AI preferences, never hard walls):
@@ -75,7 +76,7 @@ export class Positioning {
   frontlineX(u: BattleUnit): number | null {
     const melee = this.h.units.filter(a => a.side === u.side && a.alive && a.visible && !isRanged(a));
     if (!melee.length) return null;
-    return u.side === 'ally' ? Math.max(...melee.map(a => a.pos.c)) : Math.min(...melee.map(a => a.pos.c));
+    return isPlayerUnit(u) ? Math.max(...melee.map(a => a.pos.c)) : Math.min(...melee.map(a => a.pos.c));
   }
 
   /**
@@ -87,7 +88,7 @@ export class Positioning {
     if (!a || !isRanged(u)) return a;
     const melee = this.h.units.filter(m => m.side === u.side && m.alive && m.visible && !isRanged(m));
     if (!melee.length) return a;
-    const dir = u.side === 'ally' ? 1 : -1;
+    const dir = isPlayerUnit(u) ? 1 : -1;
     let shift = 0;
     for (const m of melee) {
       const ma = this.h.anchorOf(m);
@@ -116,7 +117,7 @@ export class Positioning {
       if (a > role.leash) d += (a - role.leash) * DANGER.beyondLeash;
     }
     if (isRanged(u) && frontX != null) {
-      const ahead = u.side === 'ally' ? cell.c > frontX : cell.c < frontX;
+      const ahead = isPlayerUnit(u) ? cell.c > frontX : cell.c < frontX;
       if (ahead) d += DANGER.aheadOfFrontline;
     }
     if ((cell.r !== u.pos.r || cell.c !== u.pos.c) && !this.h.grid.isFree(cell)) d += DANGER.occupied;

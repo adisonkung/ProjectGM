@@ -1,0 +1,185 @@
+@if (hero(); as h) {
+  @let tp = t()!;
+  @let p = progress()!;
+  <section class="detail">
+    <nav class="crumbs">
+      <a routerLink="/heroes" class="gm-btn small ghost"><app-icon name="back" [size]="14" /> หอวีรชน</a>
+      @if (siblings(); as sb) {
+        <span class="step">
+          <button type="button" class="gm-btn small ghost" (click)="go(sb.prev)" aria-label="ฮีโร่ก่อนหน้า"><app-icon name="back" [size]="14" /></button>
+          <button type="button" class="gm-btn small ghost" (click)="go(sb.next)" aria-label="ฮีโร่ถัดไป"><app-icon name="arrow" [size]="14" /></button>
+        </span>
+      }
+    </nav>
+
+    <!-- hero banner -->
+    <header class="hero gm-panel glow r{{ tp.star }}">
+      <div class="art"><app-hero-portrait [heroId]="tp.id" [size]="168" /></div>
+      <div class="who">
+        <span class="gm-class">{{ className(tp.cls) }} · #{{ h.uid }}</span>
+        <h1 class="gm-title">{{ tp.name }}</h1>
+        <span class="gm-stars big">{{ stars(tp.star) }}</span>
+        <div class="power"><app-icon name="flame" [size]="18" /><span>พลังรบ</span><b>{{ power() }}</b></div>
+        <div class="chips">
+          @if (inTeam()) { <span class="gm-chip gold"><app-icon name="team" [size]="12" /> อยู่ในทีม</span> }
+          <span class="gm-chip">ศักยภาพ {{ h.potential }}</span>
+          <span class="gm-chip">Breakthrough {{ h.breakthroughTier ?? 0 }}/3</span>
+        </div>
+      </div>
+      <div class="level">
+        <div class="lvnum"><small>LEVEL</small><b>{{ p.level }}</b><small>/ {{ p.levelCap }}</small></div>
+        @if (p.state === 'MAX') {
+          <span class="gm-chip gold">เลเวลสูงสุด</span>
+        } @else {
+          <div class="gm-bar gold"><i [style.width.%]="pct(p.exp, p.expToNext)"></i></div>
+          <small class="exp">EXP {{ p.exp }} / {{ p.expToNext }}</small>
+        }
+      </div>
+    </header>
+
+    @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
+
+    <div class="cols">
+      <!-- stats -->
+      <section class="gm-panel stats">
+        <h2 class="gm-h2">ค่าพลัง</h2>
+        <table>
+          <thead><tr><th></th><th>พื้นฐาน</th><th>อุปกรณ์</th><th>รวม</th></tr></thead>
+          <tbody>
+            @for (r of statRows(); track r.label) {
+              <tr><th><app-icon [name]="r.icon" [size]="13" /> {{ r.label }}</th><td>{{ r.base }}</td><td class="bonus">{{ r.bonus }}</td><td class="tot">{{ r.total }}</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (extraStats().length) {
+          <div class="extra">@for (x of extraStats(); track x) { <span class="gm-chip arcane">{{ x }}</span> }</div>
+        }
+      </section>
+
+      <!-- growth -->
+      <section class="gm-panel grow">
+        <h2 class="gm-h2">การเติบโต</h2>
+        @if (p.state === 'BREAKTHROUGH_READY') {
+          <div class="bt">
+            <b><app-icon name="crystal" [size]="16" /> ต้อง Breakthrough เพื่อไปต่อ</b>
+            @if (p.breakthrough; as bt) {
+              <ul>
+                @for (n of bt.def.requiredItems; track n.itemId; let i = $index) {
+                  <li [class.ok]="bt.have[i].count >= n.count">{{ itemName(n.itemId) }} <b>{{ bt.have[i].count }} / {{ n.count }}</b></li>
+                }
+              </ul>
+            }
+            <button type="button" class="gm-btn primary" (click)="breakthrough()">Breakthrough</button>
+          </div>
+        } @else if (p.state !== 'MAX') {
+          @for (po of potions(); track po.id) {
+            <div class="potion">
+              <app-icon name="potion" [size]="18" />
+              <span>{{ po.name }} <small>×{{ po.n }}</small></span>
+              <span class="use">
+                <button type="button" class="gm-btn small" (click)="use(po.id, 1)">1</button>
+                <button type="button" class="gm-btn small" (click)="use(po.id, 10)">10</button>
+                <button type="button" class="gm-btn small" (click)="use(po.id, 'max')">Max</button>
+              </span>
+            </div>
+          } @empty {
+            <p class="hint">ไม่มียา EXP — ได้จากหอคอยและ Training Ground</p>
+          }
+          @if (potions().length) { <button type="button" class="gm-btn arcane" (click)="useMax()">ใช้ยาจนถึงเพดาน</button> }
+        } @else {
+          <p class="hint">เลเวลเต็มแล้ว — เพิ่มพลังด้วยสกิลและอุปกรณ์</p>
+        }
+        <div class="gm-divider">✦</div>
+        <div class="slot">
+          <div>
+            <b>ช่องฝึก</b>
+            <small>ฮีโร่สำรองในช่องฝึกได้ {{ slotShare * 100 }}% ของ EXP จาก Training Ground</small>
+          </div>
+          @if (inTeam()) {
+            <span class="gm-chip">อยู่ในทีมแล้ว</span>
+          } @else {
+            <button type="button" class="gm-btn small" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()">
+              {{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องเต็ม' : 'ส่งเข้าช่องฝึก' }}
+            </button>
+          }
+        </div>
+      </section>
+    </div>
+
+    <!-- skills -->
+    <section class="gm-panel skills">
+      <h2 class="gm-h2">สกิล <small class="gold">ทอง {{ gold() }}</small></h2>
+      <div class="skill-list">
+        @for (v of skills(); track v.slot) {
+          <article class="skill" [class.ult]="v.slot === 'ult'">
+            <div class="icon">
+              @if (v.icon) { <img [src]="v.icon" alt="" loading="lazy" /> } @else { <app-icon [name]="v.slot === 'ult' ? 'bolt' : 'star'" [size]="28" /> }
+              <span class="rank">R{{ v.rank }}</span>
+            </div>
+            <div class="body">
+              <header>
+                <small class="tag">{{ slotTag[v.slot] }}</small>
+                <b>{{ v.name }}</b>
+                @if (v.def.cooldown) { <small class="cd">คูลดาวน์ {{ v.def.cooldown }} วิ</small> }
+              </header>
+              <div class="pips" [attr.aria-label]="'ระดับ ' + v.rank + ' จาก ' + v.maxRank">
+                @for (i of [1, 2, 3, 4, 5].slice(0, v.maxRank); track i) { <i [class.on]="i <= v.rank"></i> }
+              </div>
+              <p class="cur">{{ v.current.join(' · ') }}</p>
+              @if (v.next) {
+                <p class="next"><b>R{{ v.rank + 1 }}</b> {{ v.changes.length ? v.changes.join(' · ') : 'ไม่มีตัวเลขเปลี่ยน' }}</p>
+                @if (v.cost; as c) {
+                  <p class="cost">
+                    @for (m of c.requiredMaterials; track m.itemId) {
+                      <span [class.miss]="(inventory()[m.itemId] ?? 0) < m.count"><app-icon name="book" [size]="12" /> {{ itemName(m.itemId) }} {{ inventory()[m.itemId] ?? 0 }}/{{ m.count }}</span>
+                    }
+                    <span [class.miss]="gold() < c.requiredGold"><app-icon name="coin" [size]="12" /> {{ c.requiredGold }}</span>
+                    <span [class.miss]="h.level < c.requiredHeroLevel">Lv{{ c.requiredHeroLevel }}+</span>
+                    @if (c.requiredBreakthroughTier) { <span [class.miss]="(h.breakthroughTier ?? 0) < c.requiredBreakthroughTier">BT {{ c.requiredBreakthroughTier }}</span> }
+                  </p>
+                }
+                <div class="act">
+                  <button type="button" class="gm-btn small primary" [disabled]="!!v.blocked" (click)="upgrade(v.slot)">อัป R{{ v.rank + 1 }}</button>
+                  @if (v.blocked) { <small class="warn">{{ errorText(v.blocked) }}</small> }
+                </div>
+              } @else {
+                <span class="gm-chip gold">ระดับสูงสุด</span>
+              }
+            </div>
+          </article>
+        }
+      </div>
+      <div class="convert">
+        <small>แลก Skill Tome (ไม่คุ้ม — ฟาร์ม Skill Trial ดีกว่า):</small>
+        @for (c of conversions; track c.from) {
+          <button type="button" class="gm-btn small ghost" [disabled]="(inventory()[c.from] ?? 0) < c.ratio" (click)="convert(c.from)">{{ c.ratio }} {{ itemName(c.from) }} → 1 {{ itemName(c.to) }}</button>
+        }
+      </div>
+    </section>
+
+    <!-- gear -->
+    <section class="gm-panel gear">
+      <h2 class="gm-h2">อุปกรณ์</h2>
+      <div class="gear-list">
+        @for (g of gear(); track g.slot) {
+          <div [class]="'piece t' + g.tier + (g.item ? '' : ' empty')">
+            <span class="gi"><app-icon [name]="g.icon" [size]="22" /></span>
+            <div>
+              <small>{{ g.label }}</small>
+              @if (g.item; as it) {
+                <b>{{ gearName(it) }}</b>
+                <span class="lines">{{ g.lines.join(' · ') }}</span>
+              } @else { <b class="none">ว่าง</b> }
+            </div>
+          </div>
+        }
+      </div>
+      <a class="gm-btn" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }"><app-icon name="armory" [size]="15" /> จัดการอุปกรณ์</a>
+    </section>
+  </section>
+} @else {
+  <section class="placeholder">
+    <h1>ไม่พบฮีโร่</h1>
+    <p><a routerLink="/heroes">กลับหอวีรชน</a></p>
+  </section>
+}

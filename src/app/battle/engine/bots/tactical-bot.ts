@@ -9,6 +9,7 @@ import { OwnedHero } from '../../../core/models/hero';
 import { HERO_BY_ID } from '../../../core/data/heroes';
 import { kitOf } from '../../../core/data/hero-skills';
 import { interruptPowerOf } from '../skill-system';
+import { isPlayerUnit } from '../stage/party';
 
 /**
  * Simulation player bots.
@@ -129,7 +130,7 @@ export class TacticalBot {
   }
 
   tick(e: BattleEngine): void {
-    const heroes = e.units.filter(u => u.side === 'ally' && u.alive);
+    const heroes = e.units.filter(u => isPlayerUnit(u) && u.alive);
     const foes = e.units.filter(u => u.side === 'enemy' && u.alive && u.visible && u.wave === e.waveIndex);
     this.observe(e, foes);
     // interrupt reservation: one ready interrupt skill that can reach the caster per important (HIGH+) stoppable cast that can come before that

@@ -1,7 +1,7 @@
 import { effect, Injectable, signal } from '@angular/core';
 import { validLocal } from '../../battle/engine/grid';
 import { addMissingStarters, newGameState } from '../data/starter';
-import { autoPlace } from '../rules/team';
+import { autoPlace, normalizePresets } from '../rules/team';
 import { GameState } from '../models/game-state';
 import { migrateHeroProgress } from '../rules/leveling';
 
@@ -26,6 +26,7 @@ export function migrate(raw: unknown): GameState | null {
     trainingSlots: s.trainingSlots ?? [],
     farm: s.farm ?? {},
     rewardCarry: s.rewardCarry ?? {},
+    teamPresets: normalizePresets(s.teamPresets),
   } as GameState;
   out.heroes = (out.heroes ?? []).map(h => {
     // `equipment` = provisional v5 field · `injury` = removed injury system (heroes are never locked out now)
