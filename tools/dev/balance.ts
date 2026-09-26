@@ -80,7 +80,8 @@ for (let stage of floors) {
   // power profile: --profile=X (A–F) or the floor's recommended profile; level = the profile's level clamped to the
   // floor band ('rec') or the given number
   const farmDef = stage.id ? FARM_BY_ID[stage.id] : undefined;
-  const band = farmDef ? { levels: farmDef.recommendedLevel, simProfile: 'A', role: farmDef.type, simLevel: farmDef.recommendedLevel[0] } as unknown as typeof FLOOR_BANDS[number] : FLOOR_BANDS[stage.floor];
+  // farm: the team that just cleared the unlock floor (that floor band's profile) at the dungeon's lower recommended level
+  const band = farmDef ? { levels: farmDef.recommendedLevel, simProfile: FLOOR_BANDS[Math.max(1, farmDef.unlockFloor)].simProfile, role: farmDef.type, simLevel: farmDef.recommendedLevel[0] } as unknown as typeof FLOOR_BANDS[number] : FLOOR_BANDS[stage.floor];
   const profile = POWER_PROFILES[profileArg ?? band?.simProfile ?? 'A'];
   const level = levelArg === 'rec'
     ? (profileArg ? profile.level : band?.simLevel ?? Math.min(band?.levels[1] ?? profile.level, Math.max(band?.levels[0] ?? 1, profile.level)))

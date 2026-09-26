@@ -1,4 +1,5 @@
 import { CLASS_BASE } from '../../../core/data/classes';
+import { FARM_DUNGEONS } from '../../../core/data/economy';
 import { ENEMIES } from '../../../core/data/enemies';
 import { BUFFS } from '../../../core/data/monsters';
 import { HeroClass } from '../../../core/models/hero';
@@ -699,5 +700,50 @@ describe('Stage / Wave / Transition flow', () => {
     s.freeze();
     s.run(4);
     expect(s.e.result).toBe('win');
+  });
+});
+
+describe('In-wave reinforcements (farm dungeons: sustained waves without extra transitions)', () => {
+  const sp = (monsterId: string, depth: number, lane: number) => ({ monsterId, formationSlot: { depth, lane } });
+  const reinforcedStage = (): StageDef => ({
+    floor: 0, id: 'reinforce-test', mode: 'eliminate', timeLimit: 300, enemies: [], rounds: [],
+    waveDefs: [
+      {
+        spawns: [sp('forest_slime', 0, 0), sp('forest_slime', 0, 1), sp('forest_slime', 0, 2)],
+        reinforcements: [
+          { whenAliveAtMost: 1, spawns: [sp('forest_slime', 0, 1), sp('forest_slime', 1, 1)] },
+          { whenAliveAtMost: 0, spawns: [sp('goblin_fighter', 0, 1)] },
+        ],
+      },
+      { spawns: [sp('forest_slime', 0, 1)] },
+    ],
+  });
+
+  it('groups arrive in order when the line thins; the wave clears only after every group is defeated', () => {
+    const e = new BattleEngine({ allies: PARTY(), stage: reinforcedStage(), enemyTemplates: ENEMIES, seed: 7 });
+    const seen: string[] = [];
+    let maxAlive = 0;
+    let firstWaveClearAt = -1;
+    for (let i = 0; i < 20 * 60 && !e.result; i++) {
+      e.step(DT);
+      for (const ev of e.drainEvents()) if (ev.type === 'WAVE_CLEARED' && firstWaveClearAt < 0) firstWaveClearAt = e.time;
+      const wave0 = e.units.filter(u => u.side !== 'ally' && u.wave === 0);
+      for (const u of wave0) if (!seen.includes(String(u.id))) seen.push(String(u.id));
+      maxAlive = Math.max(maxAlive, wave0.filter(u => u.alive).length);
+      // the wave never counts as cleared while a group is still to come
+      if (firstWaveClearAt < 0 && seen.length < 6) expect(e.flow.phase).not.toBe(BattlePhase.WAVE_CLEAR);
+    }
+    expect(e.result).toBe('win');
+    expect(seen.length).toBe(6); // 3 + 2 + 1 enemies all belonged to wave 1
+    expect(maxAlive).toBeLessThanOrEqual(3); // reinforcements top the line up, never stack a second full wave
+    expect(firstWaveClearAt).toBeGreaterThan(0);
+  });
+
+  it('farm stages use reinforced waves: Training 2/2/3/3/4 waves, Ascension 4, never boss mechanics', () => {
+    const waves = FARM_DUNGEONS.map(d => wavesOf(d.stage).length);
+    expect(waves).toEqual([2, 2, 3, 3, 4, 4, 4, 4]);
+    for (const d of FARM_DUNGEONS) {
+      for (const w of wavesOf(d.stage)) expect(w.reinforcements?.length).withContext(d.id).toBeGreaterThan(0);
+    }
   });
 });

@@ -64,7 +64,7 @@ describe('Patch 1 progression — structure', () => {
 
   it('floor bands follow the Patch 1 journey (onboarding → wall → endgame)', () => {
     expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(f => FLOOR_BANDS[f].levels)).toEqual([
-      [1, 1], [1, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 8], [8, 9], [9, 10],
+      [1, 1], [1, 1], [1, 2], [2, 3], [4, 5], [5, 6], [6, 8], [7, 8], [8, 10], [9, 10],
     ]);
     expect([1, 2, 3].every(f => FLOOR_BANDS[f].role === 'ONBOARDING')).toBeTrue();
     expect(FLOOR_BANDS[6].role).toBe('TRANSITION');
@@ -125,7 +125,7 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
 
   it('the team builder hands progression to the engine (UnitSpec.mods)', () => {
     const st = newGameState();
-    const heroes = st.heroes.map(h => applyProfile(h, POWER_PROFILES['D']));
+    const heroes = st.heroes.map(h => applyProfile(h, POWER_PROFILES['E']));
     for (const u of teamToUnits(st.team, heroes)) {
       expect(u.mods).withContext(u.name).toBeDefined();
       expect(u.mods!.skillPower.skill2).toBe(SKILL_RANK_EFFECTS[4].power);

@@ -94,23 +94,26 @@ export const PROFILE_ACCESSORY: Record<HeroClass, AccessoryKind> = {
 export const POWER_PROFILES: Record<string, PowerProfile> = {
   A: { id: 'A', label: 'Fresh', level: 1, gear: null, ranks: { skill: 1, skill2: 1, ult: 1 } },
   B: { id: 'B', label: 'Early', level: 5, gear: 'EARLY', ranks: { skill: 1, skill2: 2, ult: 1 } },
-  C: { id: 'C', label: 'Mid', level: 7, gear: 'MID', ranks: { skill: 2, skill2: 3, ult: 2 } },
-  D: { id: 'D', label: 'Endgame ready', level: 9, gear: 'GOOD', ranks: { skill: 3, skill2: 4, ult: 3 } },
-  E: { id: 'E', label: 'Developed', level: 10, gear: { WEAPON: 'VERY_GOOD', ARMOR: 'GOOD', ACCESSORY: 'VERY_GOOD' }, ranks: { skill: 4, skill2: 5, ult: 4 } },
-  F: { id: 'F', label: 'Near-max Patch 1', level: 10, gear: 'VERY_GOOD', ranks: { skill: 5, skill2: 5, ult: 5 } },
-  // diagnostics: one system alone must not guarantee Floor 10
-  LVL: { id: 'LVL', label: 'Level only (Lv10, no gear, rank 1)', level: 10, gear: null, ranks: { skill: 1, skill2: 1, ult: 1 } },
+  C: { id: 'C', label: 'First wall (basic gear)', level: 7, gear: 'EARLY', ranks: { skill: 2, skill2: 2, ult: 1 } },
+  D: { id: 'D', label: 'Mid', level: 8, gear: 'MID', ranks: { skill: 2, skill2: 3, ult: 2 } },
+  E: { id: 'E', label: 'Endgame ready', level: 9, gear: 'GOOD', ranks: { skill: 3, skill2: 4, ult: 3 } },
+  F: { id: 'F', label: 'Developed', level: 10, gear: { WEAPON: 'VERY_GOOD', ARMOR: 'GOOD', ACCESSORY: 'VERY_GOOD' }, ranks: { skill: 4, skill2: 5, ult: 4 } },
+  G: { id: 'G', label: 'Near-max Patch 1', level: 10, gear: 'VERY_GOOD', ranks: { skill: 5, skill2: 5, ult: 5 } },
+  // diagnostics: one system alone must not guarantee late floors
+  LVL: { id: 'LVL', label: 'Level only (no gear, rank 1)', level: 10, gear: null, ranks: { skill: 1, skill2: 1, ult: 1 } },
   GEAR: { id: 'GEAR', label: 'Gear only (Lv1, Very Good gear, rank 1)', level: 1, gear: 'VERY_GOOD', ranks: { skill: 1, skill2: 1, ult: 1 } },
 };
 
-/** Floor 10 design targets per profile (diagnostic ranges, never forced) */
+/** Floor 10 design targets per profile (diagnostic ranges, never forced) — rebalance spec §33 */
 export const FLOOR10_TARGETS: Record<string, { auto: [number, number]; tactical: [number, number] }> = {
   A: { auto: [0, 0], tactical: [0, 0] },
-  B: { auto: [0, 2], tactical: [0, 5] },
-  C: { auto: [0, 5], tactical: [5, 20] },
-  D: { auto: [10, 25], tactical: [40, 65] },
-  E: { auto: [30, 55], tactical: [70, 90] },
-  F: { auto: [50, 65], tactical: [85, 95] },
+  B: { auto: [0, 0], tactical: [0, 2] },
+  C: { auto: [0, 2], tactical: [0, 5] },
+  D: { auto: [0, 5], tactical: [0, 15] },
+  E: { auto: [5, 15], tactical: [25, 45] },
+  F: { auto: [15, 35], tactical: [50, 75] },
+  G: { auto: [35, 55], tactical: [75, 90] },
+  LVL: { auto: [0, 0], tactical: [0, 5] },
 };
 
 /** the Patch 1 tower journey (recommendations, never entry locks) */
@@ -119,22 +122,22 @@ export const FLOOR_BANDS: Record<number, FloorBand> = {
   2: { levels: [1, 1], role: 'ONBOARDING', gear: null, skillRank: 1, simProfile: 'A', failureHints: ['protect the backline from archers', 'Focus Target'] },
   3: { levels: [1, 2], role: 'ONBOARDING', gear: null, skillRank: 1, simProfile: 'A', failureHints: ['interrupt the Alpha Howl'] },
   4: { levels: [2, 3], role: 'EARLY', gear: null, skillRank: 1, simProfile: 'A', failureHints: ['spread out against Poison Cloud', 'HP carries between waves'] },
-  5: { levels: [3, 4], role: 'EARLY', gear: 'EARLY', skillRank: 2, simProfile: 'B', failureHints: ['backline placement vs Shadow Panther'] },
-  6: { levels: [4, 5], role: 'TRANSITION', gear: 'EARLY', skillRank: 2, simProfile: 'B', failureHints: ['Focus / interrupt the Goblin Shaman', 'start upgrading heroes'] },
+  5: { levels: [4, 5], role: 'EARLY', gear: 'EARLY', skillRank: 2, simProfile: 'B', simLevel: 4, failureHints: ['backline placement vs Shadow Panther'] },
+  6: { levels: [5, 6], role: 'TRANSITION', gear: 'EARLY', skillRank: 2, simProfile: 'B', simLevel: 5, failureHints: ['Focus / interrupt the Goblin Shaman', 'start upgrading heroes'] },
   7: {
-    levels: [5, 6], role: 'WALL', gear: 'MID', skillRank: 2, simProfile: 'C', simLevel: 6,
+    levels: [6, 8], role: 'WALL', gear: 'EARLY', skillRank: 2, simProfile: 'C', simLevel: 7,
     failureHints: ['need levels', 'save an interrupt for Call of the Forest', 'need equipment'],
   },
   8: {
-    levels: [6, 8], role: 'WALL', gear: 'MID', skillRank: 3, simProfile: 'C', simLevel: 8,
+    levels: [7, 8], role: 'WALL', gear: 'MID', skillRank: 3, simProfile: 'D', simLevel: 8,
     failureHints: ['backline too fragile', 'defensive gear / bleed resistance', 'formation vs Mist Wraith dives'],
   },
   9: {
-    levels: [8, 9], role: 'WALL', gear: 'GOOD', skillRank: 3, simProfile: 'D',
+    levels: [8, 10], role: 'WALL', gear: 'GOOD', skillRank: 3, simProfile: 'E', simLevel: 9,
     failureHints: ['support enemies not controlled', 'Focus the Dark Shaman', 'interrupt Dark Heal / Nightmare', 'more burst'],
   },
   10: {
-    levels: [9, 10], role: 'ENDGAME', gear: 'GOOD', skillRank: 4, simProfile: 'D', simLevel: 9,
+    levels: [9, 10], role: 'ENDGAME', gear: 'GOOD', skillRank: 4, simProfile: 'E', simLevel: 9,
     failureHints: ['interrupt Sacrifice', 'keep 100 Break for Forest Oblivion', 'hold ultimates for the late phases', 'team not developed enough'],
   },
 };

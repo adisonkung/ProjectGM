@@ -37,9 +37,20 @@ export interface EnemySpawn {
   offset?: { x: number; y: number };
 }
 
+/**
+ * In-wave reinforcements (sustained fights without extra transitions): the group walks in from the back of the
+ * enemy zone once the wave's required enemies still standing drop to `whenAliveAtMost`. Groups trigger in order;
+ * the wave is cleared only after every group has arrived and been defeated.
+ */
+export interface WaveReinforcement {
+  whenAliveAtMost: number;
+  spawns: EnemySpawn[];
+}
+
 /** One enemy encounter inside a Stage */
 export interface WaveDefinition {
   spawns: EnemySpawn[];
+  reinforcements?: WaveReinforcement[];
 }
 
 export interface StageDef {

@@ -35,7 +35,7 @@ const scale = (items: ItemStack[], k: number): ItemStack[] => items.map(i => ({ 
 
 /**
  * Farm reward: daily bonus = base × dailyBonusMultiplier; after the bonus = base × repeatRewardMultiplier
- * (70 % of BASE, not of the doubled reward). First clear adds its bonus once. Item counts may be fractional here —
+ * (65 % Training / 60 % Ascension of BASE, not of the doubled reward). First clear adds its bonus once. Item counts may be fractional here —
  * `grantItems` turns them into stones + fragments or carries the rest.
  */
 export function farmRewardBreakdown(def: FarmDungeonDefinition, o: { bonus: boolean; firstClear: boolean; rng: () => number }): RewardBreakdown {
@@ -64,7 +64,11 @@ export function towerRewardBreakdown(floor: number, firstClear: boolean): Reward
     kind: firstClear ? 'TOWER_FIRST' : 'TOWER_REPEAT',
     multiplier: 1,
     ...(firstClear ? { firstClear: t.firstClear } : {}),
-    final: { heroExp: (t.clear.heroExp ?? 0) + (firstClear ? t.firstClear.heroExp ?? 0 : 0), gold: t.clear.gold ?? 0, items: [] },
+    final: {
+      heroExp: (t.clear.heroExp ?? 0) + (firstClear ? t.firstClear.heroExp ?? 0 : 0),
+      gold: t.clear.gold ?? 0,
+      items: [...(t.clear.items ?? []), ...(firstClear ? t.firstClear.items ?? [] : [])].map(i => ({ ...i })),
+    },
   };
 }
 
@@ -177,5 +181,9 @@ export function completeTowerRun(state: GameState, floor: number, run: RunOutcom
   const first = floor > state.cleared;
   const breakdown = towerRewardBreakdown(floor, first);
   const { heroes, results } = distributeExp(state.heroes, breakdown.final.heroExp, run.participants, state.trainingSlots, 'TOWER');
-  return { state: { ...state, heroes, gold: state.gold + breakdown.final.gold, cleared: Math.max(state.cleared, floor) }, breakdown, exp: results };
+  const { inventory, carry } = grantItems(state.inventory, state.rewardCarry, breakdown.final.items);
+  return {
+    state: { ...state, heroes, inventory, rewardCarry: carry, gold: state.gold + breakdown.final.gold, cleared: Math.max(state.cleared, floor) },
+    breakdown, exp: results,
+  };
 }

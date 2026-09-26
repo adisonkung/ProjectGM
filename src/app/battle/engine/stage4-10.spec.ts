@@ -151,7 +151,7 @@ describe('Stage 4–10 data', () => {
   });
 
   it('extra 5 — Stages 1–10 are playable back to back (a near-max Patch 1 team with tactics clears every stage)', () => {
-    for (const stage of STAGES) expect(clearsWithTactics(stage, 'F', 10)).withContext(`F${stage.floor}`).toBeTrue();
+    for (const stage of STAGES) expect(clearsWithTactics(stage, 'G', 10)).withContext(`F${stage.floor}`).toBeTrue();
   });
 });
 
@@ -884,7 +884,7 @@ describe('Stage 4–10 required tests', () => {
     const w3 = stageOfWave(9, 2);
     // with the floor's expected development (profile D, Lv9)
     const stage: StageDef = { floor: 9, mode: 'eliminate', timeLimit: 140, monsterTuning: w3.tuning, enemies: w3.enemies };
-    expect(clearsWithTactics(stage, 'D', 9)).toBeTrue();
+    expect(clearsWithTactics(stage, 'E', 9)).toBeTrue();
   });
 
   it('21. Final Boss Phase 2 triggers exactly once', () => {
@@ -1128,7 +1128,7 @@ describe('Stage 4–10 required tests', () => {
           expect(VISUALS[m.visual!]?.kind).withContext(sp.monsterId).toBe('mock');
         }
       }
-      expect(clearsWithTactics(stage, 'F', 10)).withContext(`F${stage.floor}`).toBeTrue();
+      expect(clearsWithTactics(stage, 'G', 10)).withContext(`F${stage.floor}`).toBeTrue();
     }
   });
 });

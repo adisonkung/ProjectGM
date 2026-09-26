@@ -93,6 +93,7 @@ export class StageFlow {
   spawnWave(index: number, entry: boolean): BattleUnit[] {
     const wave = this.waves[index];
     if (!wave) return [];
+    this.reinforcementsSent = 0;
     this.enemyFormation.clear();
     this.enemyFormation.originPosition = this.formation.originPosition;
     this.entering = [];
@@ -217,8 +218,31 @@ export class StageFlow {
       if (this.host.fightTime >= this.stage.timeLimit) this.onWaveCleared();
       return;
     }
-    if (this.requiredHostilesAlive() === 0) return this.onWaveCleared();
+    this.checkReinforcements();
+    if (this.requiredHostilesAlive() === 0 && !this.pendingReinforcements()) return this.onWaveCleared();
     if (this.host.fightTime >= this.stage.timeLimit) this.finish('timeout');
+  }
+
+  /** reinforcement groups of the current wave already sent */
+  private reinforcementsSent = 0;
+
+  private pendingReinforcements(): number {
+    return (this.waves[this.waveIndex]?.reinforcements?.length ?? 0) - this.reinforcementsSent;
+  }
+
+  /** send the next reinforcement group(s) whose trigger is met — they walk in from beyond the enemy zone */
+  private checkReinforcements(): void {
+    const groups = this.waves[this.waveIndex]?.reinforcements ?? [];
+    while (this.reinforcementsSent < groups.length && this.requiredHostilesAlive() <= groups[this.reinforcementsSent].whenAliveAtMost) {
+      const g = groups[this.reinforcementsSent++];
+      for (const sp of g.spawns) {
+        const u = this.host.spawnEnemy(sp.monsterId, { r: sp.formationSlot.depth, c: sp.formationSlot.lane });
+        if (!u) continue;
+        u.wave = this.waveIndex;
+        u.y = u.pos.r;
+        u.x = this.formation.originPosition + u.pos.c + this.rules.enemyEntryDistance / 2;
+      }
+    }
   }
 
   /** stage fails only when no combat-capable hero remains (one death never fails it) */
