@@ -35,7 +35,6 @@ export class TeamService {
   }
 
   auto(): void {
-    const ready = this.save.state().heroes.filter(h => h.injury === 0);
-    this.save.update(s => ({ ...s, team: autoPlace(ready) }));
+    this.save.update(s => ({ ...s, team: autoPlace(s.heroes) }));
   }
 }

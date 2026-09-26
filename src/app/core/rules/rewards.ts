@@ -2,7 +2,8 @@
  * Generic rewards, daily bonus and farm / tower run completion (pure). Every source uses RewardBundle:
  * tower clears, Training Ground, Ascension Trial — later equipment / skill dungeons.
  */
-import { DAILY_BONUS, FARM_DUNGEONS, ITEMS, TOWER_REWARDS, TRAINING_SLOTS } from '../data/economy';
+import { CARRIER_DROP_SCALE, DAILY_BONUS, FARM_DUNGEONS, ITEMS, TOWER_REWARDS, TRAINING_SLOTS } from '../data/economy';
+import type { ModeScore } from '../../battle/engine/stage/types';
 import { DailyState, FarmDungeonDefinition, ItemStack, RewardBreakdown, RewardBundle } from '../models/economy';
 import { GameState } from '../models/game-state';
 import { OwnedHero } from '../models/hero';
@@ -141,9 +142,21 @@ export function distributeExp(heroes: OwnedHero[], amount: number, participants:
   return { heroes: out, results };
 }
 
-/** clear rating: 3★ = no death and under the target time, 2★ = one of them, 1★ = cleared */
-export const clearRating = (def: FarmDungeonDefinition, r: { deaths: number; time: number }) =>
-  1 + (r.deaths === 0 ? 1 : 0) + (r.time <= def.targetTime ? 1 : 0);
+/**
+ * Clear rating by mode (1★ = cleared):
+ *   SURVIVAL   2★ at killStars[0] kills · 3★ at killStars[1] kills and no death
+ *   TREASURE   carriers caught (1–3, at least 1★)
+ *   CHALLENGE  CAST_LIMIT: 3★ no strike · 2★ ≤ half the allowed strikes — other rules: like BOSS / STORY
+ *   BOSS_DUEL / STORY  3★ = no death and under the target time, 2★ = one of them
+ */
+export function clearRating(def: FarmDungeonDefinition, r: { deaths: number; time: number; mode?: ModeScore }): number {
+  const sp = def.stage.special;
+  const m = r.mode;
+  if (sp?.kind === 'SURVIVAL' && m && sp.killStars) return 1 + (m.kills >= sp.killStars[0] ? 1 : 0) + (m.kills >= sp.killStars[1] && r.deaths === 0 ? 1 : 0);
+  if (sp?.kind === 'TREASURE' && m) return Math.max(1, Math.min(3, m.carriersKilled));
+  if (sp?.kind === 'CHALLENGE' && m && m.maxStrikes > 0) return 1 + (m.strikes <= Math.floor(m.maxStrikes / 2) ? 1 : 0) + (m.strikes === 0 ? 1 : 0);
+  return 1 + (r.deaths === 0 ? 1 : 0) + (r.time <= def.targetTime ? 1 : 0);
+}
 
 /** future QoL: auto repeat / sweep need a 3★ clear (not implemented yet) */
 export const canAutoRepeat = (s: GameState, id: string) => (s.farm[id]?.bestRating ?? 0) >= 3;
@@ -154,6 +167,8 @@ export interface RunOutcome {
   time: number;
   /** deployed hero uids */
   participants: number[];
+  /** special-mode score (StageResult.mode) */
+  mode?: ModeScore;
 }
 
 /** finish a farm run: daily bonus / repeat reward, first clear, EXP (+ Training Slots), items, rating. Deaths = EVENT_KO. */
@@ -174,7 +189,12 @@ export function completeFarmRun(state: GameState, def: FarmDungeonDefinition, ru
   if (def.equipmentDrops) {
     const groups = [...new Set(run.participants.map(uid => state.heroes.find(h => h.uid === uid)).filter(h => !!h)
       .map(h => WEAPON_GROUP_OF[HERO_BY_ID[h!.templateId].cls]))];
-    const dropped = rollHuntItems(def.equipmentDrops, state.huntTarget ?? 'ANY', groups, rng, nextItemId, !rec.firstClearDone ? def.firstClearItem : undefined);
+    // TREASURE: one roll per carrier caught (at a reduced chance) instead of one roll per clear
+    const treasure = def.stage.special?.kind === 'TREASURE';
+    const rolls = treasure ? run.mode?.carriersKilled ?? 0 : 1;
+    const table = treasure ? { ...def.equipmentDrops, itemChance: def.equipmentDrops.itemChance * CARRIER_DROP_SCALE } : def.equipmentDrops;
+    const dropped = rollHuntItems({ ...table, itemChance: 0 }, state.huntTarget ?? 'ANY', groups, rng, nextItemId, !rec.firstClearDone ? def.firstClearItem : undefined);
+    for (let i = 0; i < rolls; i++) dropped.push(...rollHuntItems(table, state.huntTarget ?? 'ANY', groups, rng, nextItemId + dropped.length));
     nextItemId += dropped.length;
     equipment = [...equipment, ...dropped];
     breakdown.equipment = dropped;

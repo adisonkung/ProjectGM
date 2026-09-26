@@ -2,7 +2,6 @@ import { itemName as itemNameOf } from '../../core/rules/equipment';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { Component, computed, effect, HostListener, inject, isDevMode, OnDestroy, signal, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
 import { FARM_BY_ID } from '../../core/data/economy';
 import { ITEMS } from '../../core/data/economy';
@@ -20,6 +19,8 @@ import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
+import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
+import { Router } from '@angular/router';
 import { monsterSnapshot } from '../../battle/engine/monster-controller';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import { mockVisualOf, STATUS_ICONS } from '../../core/data/visuals';
@@ -41,11 +42,26 @@ const TICK = 0.05;
 })
 export class BattleComponent implements OnDestroy {
   private readonly team = inject(TeamService);
-  private readonly progression = inject(ProgressionService);
-  /** sandbox (no rewards), a tower run (clear EXP + injuries) or a farm dungeon run (?farm=training_1) */
+  readonly progression = inject(ProgressionService);
+  /** sandbox (no rewards), a tower run (clear EXP) or a farm dungeon run (?farm=training_1) */
   readonly mode = signal<'lab' | 'tower' | 'farm'>('lab');
   readonly farmId = signal<string | null>(null);
   readonly reward = signal<RunReward | null>(null);
+  /** finished tower / farm run (result card) · live special-mode HUD */
+  readonly outcome = signal<BattleOutcome | null>(null);
+  readonly modeHud = signal<{ goal: string; line: string } | null>(null);
+  private readonly router = inject(Router);
+  /** tower: the next floor exists and is now reachable */
+  readonly nextFloor = computed(() => {
+    const n = this.floor() + 1;
+    return this.mode() === 'tower' && n <= STAGES.length && this.progression.cleared() >= n - 1 ? n : null;
+  });
+  /** dungeon name / floor name for the result card */
+  readonly runTitle = computed(() => (this.farmId() ? FARM_BY_ID[this.farmId()!].name : `ชั้น ${this.floor()} · ${this.stage().name ?? ''}`));
+  /** hero uid → name (EXP lines on the result card) */
+  heroName(uid: number): string {
+    return this.engine?.units.find(u => u.heroUid === uid)?.name ?? `#${uid}`;
+  }
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
   readonly gearName = itemNameOf;
 
@@ -144,7 +160,8 @@ export class BattleComponent implements OnDestroy {
     effect(() => {
       this.team.units();
       untracked(() => {
-        if (!this.running()) this.prepare();
+        // (not while a result card is up: rewards change the heroes — the next start() rebuilds with them)
+        if (!this.running() && !this.result()) this.prepare();
       });
     });
   }
@@ -173,12 +190,9 @@ export class BattleComponent implements OnDestroy {
     this.bossPhase.set(null);
     this.projectiles.set([]);
     this.anims.set({});
-    this.engine = new BattleEngine({
-      allies: this.team.units(),
-      stage: this.stage(),
-      enemyTemplates: ENEMIES,
-      autoUlt: this.autoUlt(),
-    });
+    this.engine = createBattle({ allies: this.team.units(), stage: this.stage(), autoUlt: this.autoUlt() });
+    this.outcome.set(null);
+    this.modeHud.set(modeStatus(this.engine));
     this.time.set(0);
     this.wave.set(0);
     this.totalWaves.set(this.engine.totalWaves);
@@ -274,7 +288,7 @@ export class BattleComponent implements OnDestroy {
     let wins = 0;
     let t = 0;
     for (let seed = 1; seed <= runs; seed++) {
-      const e = new BattleEngine({ allies: this.team.units(), stage: this.stage(), enemyTemplates: ENEMIES, seed, autoUlt: true });
+      const e = createBattle({ allies: this.team.units(), stage: this.stage(), seed, autoUlt: true });
       if (e.run() === 'win') wins++;
       t += e.time;
     }
@@ -290,6 +304,7 @@ export class BattleComponent implements OnDestroy {
     // outside combat (advance / regroup / enemies walking in): play the walk cycle for whoever is moving
     if (this.engine.phase !== BattlePhase.COMBAT && ++this.walkTick % 8 === 0) this.marchAnim();
     this.snapshot();
+    this.modeHud.set(modeStatus(this.engine));
     if (this.engine.result) {
       clearInterval(this.timer);
       this.running.set(false);
@@ -303,14 +318,32 @@ export class BattleComponent implements OnDestroy {
     }
   }
 
-  /** tower / farm runs: rewards on a win (tower losses keep the injury rule; farm deaths are EVENT_KO) */
+  /** tower / farm runs: rewards on a win (no penalty for heroes that fell) */
   private grantRewards(): void {
+    const out = outcomeOf(this.engine);
+    this.outcome.set(out);
     if (this.mode() === 'lab') return;
-    const e = this.engine;
-    const participants = e.units.filter(u => u.side === 'ally' && u.heroUid != null).map(u => u.heroUid!);
-    const run = { win: e.result === 'win', deaths: e.metrics.deaths, time: e.fightTime, participants };
+    const run = { win: out.win, deaths: out.deaths, time: out.time, participants: out.participants, mode: out.mode };
     if (this.mode() === 'farm' && this.farmId()) this.reward.set(this.progression.completeFarm(this.farmId()!, run));
-    else if (this.mode() === 'tower') this.reward.set(this.progression.completeTower(this.floor(), run, e.stageResult?.deadHeroIds ?? []));
+    else if (this.mode() === 'tower') this.reward.set(this.progression.completeTower(this.floor(), run));
+  }
+
+  /** result card: go to the next tower floor */
+  goNext(): void {
+    const n = this.nextFloor();
+    if (n == null) return;
+    this.router.navigate([], { queryParams: { floor: n, mode: 'tower' } });
+    this.selectFloorKeepMode(n);
+  }
+
+  /** result card: back to the tower screen */
+  backToTower(): void {
+    this.router.navigate(['/tower']);
+  }
+
+  private selectFloorKeepMode(n: number): void {
+    this.floor.set(n);
+    this.prepare();
   }
 
   /** screen position (cells) of a unit: continuous world position minus the camera */

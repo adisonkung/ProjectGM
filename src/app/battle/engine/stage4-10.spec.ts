@@ -32,7 +32,7 @@ const H = (id: string, depth: number, lane: number, o: Partial<UnitSpec['stats']
   const t = HERO_BY_ID[id];
   return {
     name: t.name, cls: t.cls, heroId: id, heroUid: 1000 + depth * 10 + lane, sprite: t.sprite,
-    stats: { ...heroStats(t, { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 }), ...o },
+    stats: { ...heroStats(t, { uid: 0, templateId: id, level: 1, potential: 'B' }), ...o },
     pos: { r: depth, c: lane },
   };
 };

@@ -10,6 +10,7 @@ import {
 import { STATUS_EFFECTS } from './status-effects';
 import { STAGE4_10_MONSTERS, STAGE4_10_SKILLS } from './monsters-stage4-10';
 import { TRIAL_MONSTERS, TRIAL_SKILLS } from './monsters-trials';
+import { FARM_MONSTERS, FARM_SKILLS } from './monsters-farm';
 
 /**
  * Data-driven monsters — Normal Forest, Stage 1–3.
@@ -78,6 +79,7 @@ export const MONSTER_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   ...STAGE4_10_SKILLS,
   ...TRIAL_SKILLS,
+  ...FARM_SKILLS,
 };
 
 // ------------------------------------------------------------------ monsters
@@ -250,6 +252,7 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
   ...STAGE4_10_MONSTERS,
   // ---- Skill Trial only (monsters-trials.ts)
   ...TRIAL_MONSTERS,
+  ...FARM_MONSTERS,
 };
 
 // ------------------------------------------------------------------ helpers (pure)

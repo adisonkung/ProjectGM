@@ -53,8 +53,41 @@ export interface WaveDefinition {
   reinforcements?: WaveReinforcement[];
 }
 
+/**
+ * Special stage modes (farm dungeons): the same combat engine with a different goal. Pure data — the stage flow
+ * reads it; nothing checks a dungeon id.
+ *   STORY      normal waves (tower floors)
+ *   SURVIVAL   hold out until the timer ends while enemies keep arriving (score = kills)
+ *   BOSS_DUEL  one boss in an arena; it enrages after `enrage.at` seconds of combat
+ *   TREASURE   treasure carriers flee off the right edge — only the ones you kill drop loot (score = carriers killed)
+ *   CHALLENGE  normal fight + rules that fail the stage (e.g. let too many enemy casts complete)
+ */
+export type StageModeKind = 'STORY' | 'SURVIVAL' | 'BOSS_DUEL' | 'TREASURE' | 'CHALLENGE';
+
+export type ChallengeRule =
+  /** the stage fails when more than `max` enemy casts complete (optionally only these skill ids) */
+  | { type: 'CAST_LIMIT'; max: number; skills?: string[]; label: string }
+  /** the stage fails when a `monsterId` unit is still alive `seconds` after it spawned */
+  | { type: 'KILL_BEFORE'; monsterId: string; seconds: number; label: string };
+
+export interface StageModeRules {
+  kind: StageModeKind;
+  /** SURVIVAL: every `every` s of combat the next group (cycled) walks in while fewer than `maxAlive` enemies stand */
+  horde?: { every: number; maxAlive: number; groups: EnemySpawn[][] };
+  /** BOSS_DUEL: after `at` s of combat every boss / elite enemy gets `status` (soft time limit) */
+  enrage?: { at: number; status: string };
+  /** CHALLENGE: fail conditions */
+  challenge?: ChallengeRule[];
+  /** SURVIVAL: kills needed for 2★ / 3★ */
+  killStars?: [number, number];
+  /** short goal text for the HUD / tower list */
+  goal: string;
+}
+
 export interface StageDef {
   floor: number;
+  /** special mode (farm dungeons) — default STORY */
+  special?: StageModeRules;
   /** stable id for results / analytics (default `floor-N`) */
   id?: string;
   /** transition rules preset (default: story for eliminate, defense for survive) + overrides */

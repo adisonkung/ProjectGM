@@ -87,7 +87,7 @@ describe('Equipment — items, stats, caps', () => {
     const a = item('guard_armor', 'RARE', 'hpPct', { sec: ['atkPct'] });
     const t = gearTotals([w, a]);
     expect(t.atkPct).toBeCloseTo(0.065 + 0.02 + 0.02, 5);
-    const h: OwnedHero = { uid: 1, templateId: 'jin', level: 10, potential: 'B', injury: 0, gear: { WEAPON: w, ARMOR: a } };
+    const h: OwnedHero = { uid: 1, templateId: 'jin', level: 10, potential: 'B', gear: { WEAPON: w, ARMOR: a } };
     const s = heroStats(HERO_BY_ID['jin'], h);
     expect(s.atk).toBe(Math.round(47 * 1.225 * (1 + t.atkPct)));
     expect(itemLines(item('trinket', 'EPIC', 'breakPower', { level: 10, affix: 'breaker' })).map(l => l.value)).toEqual([8, 13]);
@@ -223,7 +223,9 @@ describe('Equipment — bag actions', () => {
 
 describe('Equipment Hunt', () => {
   const hunts = FARM_DUNGEONS.filter(d => d.type === 'EQUIPMENT');
-  const run = (s: GameState) => ({ win: true, deaths: 2, time: 100, participants: s.team.map(t => t.uid) });
+  // TREASURE CHASE: 2 of 3 carriers caught (the average run)
+  const mode = { kind: 'TREASURE' as const, kills: 20, carriersKilled: 2, carriersTotal: 3, escaped: 1, strikes: 0, maxStrikes: 0, enraged: false };
+  const run = (s: GameState) => ({ win: true, deaths: 2, time: 100, participants: s.team.map(t => t.uid), mode });
 
   it('five tiers, unlock F3 / F4 / F5 / F7 / F8 (Hunt III before the F7 wall — no deadlock), safe farming deaths', () => {
     expect(hunts.map(h => [h.id, h.unlockFloor])).toEqual([['hunt_1', 3], ['hunt_2', 4], ['hunt_3', 5], ['hunt_4', 7], ['hunt_5', 8]]);
@@ -269,8 +271,6 @@ describe('Equipment Hunt', () => {
     // rng 0.99 = never a random drop: only the first clear's guaranteed Rare
     expect(items).toEqual([1, 0, 0, 0, 0]);
     expect(s.equipment[0].rarity).toBe('RARE');
-    // no injuries from farming (EVENT_KO)
-    expect(s.heroes.every(h => h.injury === 0)).toBeTrue();
   });
 
   it('bad RNG still progresses: every clear gives ore + fragments; the Hunt target slot is favoured', () => {
@@ -302,7 +302,7 @@ describe('Equipment in combat', () => {
     e.step(0.05);
     return e;
   };
-  const hero = (templateId: string, gear: OwnedHero['gear'] = {}): OwnedHero => ({ uid: 1, templateId, level: 10, potential: 'B', injury: 0, gear });
+  const hero = (templateId: string, gear: OwnedHero['gear'] = {}): OwnedHero => ({ uid: 1, templateId, level: 10, potential: 'B', gear });
 
   it('Healing Power raises heals, Healing Received raises heals taken, Shield Power raises shields', () => {
     const healAmount = (healer: OwnedHero, target: OwnedHero) => {
@@ -363,7 +363,7 @@ describe('Equipment profiles (simulation)', () => {
           expect(d.mainStats).toContain(i!.main.stat);
           if (i!.affix) expect(AFFIXES[i!.affix].validSlots).toContain(d.slot);
         }
-        expect(heroGearTotals({ uid: 1, templateId: 'aurel', level: 1, potential: 'B', injury: 0, gear: g }).cooldownReduction).toBeLessThanOrEqual(0.15);
+        expect(heroGearTotals({ uid: 1, templateId: 'aurel', level: 1, potential: 'B', gear: g }).cooldownReduction).toBeLessThanOrEqual(0.15);
       }
     }
   });

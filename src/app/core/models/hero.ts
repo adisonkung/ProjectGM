@@ -19,8 +19,6 @@ export interface OwnedHero {
   templateId: string;
   level: number;
   potential: Potential;
-  /** จำนวนรอบที่ต้องพักเพราะบาดเจ็บ (0 = พร้อมรบ) */
-  injury: number;
   /** EXP toward the next level (may exceed the requirement while waiting for a breakthrough — never discarded) */
   exp?: number;
   /** breakthroughs completed (0–3: Lv5→6, Lv8→9, Lv9→10) */

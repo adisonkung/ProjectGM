@@ -71,17 +71,6 @@ export class RosterService {
     return true;
   }
 
-  /** หลังจบการต่อสู้: ลดรอบพักของตัวที่บาดเจ็บ แล้วตั้งบาดเจ็บให้ตัวที่ล้ม */
-  applyInjuries(fallen: number[], rest = 2): void {
-    this.save.update(st => ({
-      ...st,
-      heroes: st.heroes.map(h => {
-        const injury = Math.max(0, h.injury - 1);
-        return { ...h, injury: fallen.includes(h.uid) ? rest : injury };
-      }),
-    }));
-  }
-
   /** the three skill slots with current / next rank numbers, cost and blocker */
   skills(h: OwnedHero): SkillRankView[] {
     const s = this.save.state();

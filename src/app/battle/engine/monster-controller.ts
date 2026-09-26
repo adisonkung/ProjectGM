@@ -5,7 +5,7 @@ import type { BattleEvent, BattleUnit } from './battle-engine';
 import { resolveArea } from './area';
 import { buffRemaining, hasFlag, hasStatus, tauntSource } from './buffs';
 import { effectiveAttack } from './damage-resolver';
-import { distance } from './grid';
+import { BOARD_COLS, distance } from './grid';
 import { selectTarget } from './targeting';
 
 /** One shared state machine for every data-driven monster */
@@ -55,6 +55,9 @@ export interface MonsterCombatState {
   seal: { adds: number[]; pulseEvery: number; pulseAtkPct: number; pulseName: string; timer: number } | null;
   /** SUMMON skills: ids of the units each skill summoned (maxActive counts the living ones) */
   summons: Record<string, number[]>;
+  /** combat seconds since spawn (FLEE timing) · FLEE: running for the edge */
+  aliveTime: number;
+  fleeing: boolean;
 }
 
 /** What the controller may ask of the battle (implemented by BattleEngine) */
@@ -78,6 +81,8 @@ export interface CombatContext {
   startCast(u: BattleUnit, skill: MonsterSkillDefinition, target: BattleUnit | null): void;
   updateCast(u: BattleUnit, dt: number): void;
   emit(e: BattleEvent): void;
+  /** FLEE: the unit left the battlefield (not a kill) */
+  escape(u: BattleUnit): void;
 }
 
 export const tagsOf = (u: BattleUnit): string[] => (u.monster ? (MONSTERS[u.monster.definitionId]?.tags ?? []) : []);
@@ -124,6 +129,8 @@ export class MonsterController {
       cooldownOverride: {},
       seal: null,
       summons: {},
+      aliveTime: 0,
+      fleeing: false,
     };
   }
 
@@ -138,6 +145,7 @@ export class MonsterController {
     if (!u.alive) return this.markDead(u);
     const def = this.def(u);
     s.stateTime += dt;
+    s.aliveTime += dt;
     s.attackCooldownRemaining = Math.max(0, s.attackCooldownRemaining - dt);
     // skill cooldowns (u.castSkills) and u.moveCd are counted down by the engine's shared status tick
     s.thinkTimer -= dt;
@@ -194,6 +202,7 @@ export class MonsterController {
 
   /** IDLE / SEARCHING / MOVING: skills → target → position → attack */
   private think(u: BattleUnit, s: MonsterCombatState, def: MonsterDefinition): void {
+    if (def.ai.movement === 'FLEE') return this.flee(u, s, def);
     if (this.trySkill(u, s, def)) return;
     const t = this.resolveTarget(u, s, def);
     if (!t) {
@@ -234,6 +243,25 @@ export class MonsterController {
       return;
     }
     this.move(u, s, t.pos, c => distance(c, t.pos) <= st.attackRange);
+  }
+
+  /**
+   * FLEE (treasure carrier): stands still until `flee.after` s of combat (or the first hit), then runs along its lane
+   * for the last column of the board; standing on it = escaped. Never attacks, never casts.
+   */
+  private flee(u: BattleUnit, s: MonsterCombatState, def: MonsterDefinition): void {
+    const f = def.ai.flee ?? { after: 0, onHit: true };
+    const guardsGone = () =>
+      f.guardsAtMost != null && this.ctx.alliesOf(u).filter(a => a !== u && this.defs[a.monster?.definitionId ?? '']?.ai.movement !== 'FLEE').length <= f.guardsAtMost;
+    if (!s.fleeing && (s.aliveTime >= f.after || (f.onHit && u.hp < u.maxHp) || guardsGone())) s.fleeing = true;
+    if (!s.fleeing) return this.setState(s, 'IDLE', 'idle');
+    const edge = BOARD_COLS - 1;
+    if (u.pos.c >= edge) {
+      this.ctx.escape(u);
+      return;
+    }
+    s.facingDirection = 1;
+    this.move(u, s, { r: u.pos.r, c: edge }, c => c.c >= edge);
   }
 
   private move(u: BattleUnit, s: MonsterCombatState, to: Cell, goal: (c: Cell) => boolean): void {

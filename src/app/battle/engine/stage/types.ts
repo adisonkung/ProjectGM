@@ -95,6 +95,26 @@ export interface StageResult {
   totalWaves: number;
   /** battle time in seconds (fighting + transitions) */
   battleDuration: number;
+  /** special-mode score (farm dungeons) */
+  mode?: ModeScore;
+  /** why the stage failed (challenge rule label …) */
+  failReason?: string;
+}
+
+/** what a special stage mode counted (the meta-game turns it into stars / loot) */
+export interface ModeScore {
+  kind: import('../../../core/models/stage').StageModeKind;
+  /** enemies killed (summons included) */
+  kills: number;
+  /** TREASURE: carriers (tag 'treasure') killed / spawned / escaped */
+  carriersKilled: number;
+  carriersTotal: number;
+  escaped: number;
+  /** CHALLENGE: enemy casts that completed under a CAST_LIMIT rule / the allowed maximum */
+  strikes: number;
+  maxStrikes: number;
+  /** BOSS_DUEL: the boss enraged */
+  enraged: boolean;
 }
 
 /** Stage-flow events (UI / audio / camera / quests / analytics subscribe instead of being hard-coded) */
@@ -114,6 +134,10 @@ export type StageEvent =
   | { type: 'HERO_REVIVED'; unit: number; hp: number }
   /** emitted once per dead hero at stage resolution — permanent consequences are the meta-game's job */
   | { type: 'HERO_DIED_IN_STAGE'; unit: number; heroUid?: number }
+  /** special modes: a carrier got away · the challenge counted a strike · the boss enraged */
+  | { type: 'TREASURE_ESCAPED'; unit: number; escaped: number; total: number }
+  | { type: 'CHALLENGE_STRIKE'; strikes: number; max: number; skill: string }
+  | { type: 'BOSS_ENRAGED'; units: number[] }
   | { type: 'STAGE_CLEARED'; result: StageResult }
   | { type: 'STAGE_FAILED'; result: StageResult };
 

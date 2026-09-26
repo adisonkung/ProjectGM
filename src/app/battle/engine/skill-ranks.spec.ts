@@ -19,7 +19,7 @@ import { effectiveAttack } from './damage-resolver';
 let nextId = 1;
 const item = (defId: string, rarity: Rarity, main: EquipStat, o: { affix?: string | null; level?: number; sec?: EquipStat[] } = {}): EquipmentInstance =>
   ({ ...rollItem(defId, rarity, () => 0, nextId++, { main, secondaries: o.sec ?? [], affix: o.affix ?? null }), upgradeLevel: o.level ?? 0 });
-const hero = (templateId: string, o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId, level: 10, potential: 'B', injury: 0, breakthroughTier: 3, ...o });
+const hero = (templateId: string, o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId, level: 10, potential: 'B', breakthroughTier: 3, ...o });
 const spec = (id: string, h: OwnedHero, depth: number, lane: number, hp = 99999): UnitSpec => {
   const t = HERO_BY_ID[id];
   return {

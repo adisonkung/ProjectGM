@@ -25,7 +25,7 @@ const H = (id: string, depth: number, lane: number, o: Partial<UnitSpec['stats']
   const t = HERO_BY_ID[id];
   return {
     name: t.name, cls: t.cls, heroId: id, heroUid: 1000 + depth * 10 + lane, sprite: t.sprite,
-    stats: { ...heroStats(t, { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 }), ...o },
+    stats: { ...heroStats(t, { uid: 0, templateId: id, level: 1, potential: 'B' }), ...o },
     pos: { r: depth, c: lane },
   };
 };
@@ -83,7 +83,7 @@ describe('Tactical difficulty — stats', () => {
 
   it('Patch 1 level growth: HP +3%, ATK +2.5%, DEF +2% per level (Lv10 ≈ ×1.27 / ×1.225 / ×1.18)', () => {
     const t = HERO_BY_ID['jin'];
-    const at = (level: number) => heroStats(t, { uid: 0, templateId: 'jin', level, potential: 'B', injury: 0 });
+    const at = (level: number) => heroStats(t, { uid: 0, templateId: 'jin', level, potential: 'B' });
     const l1 = at(1), l10 = at(10);
     expect(l10.atk / l1.atk).toBeCloseTo(1 + 9 * LEVEL_GROWTH.atk, 1);
     expect(l10.hp / l1.hp).toBeCloseTo(1.27, 1);

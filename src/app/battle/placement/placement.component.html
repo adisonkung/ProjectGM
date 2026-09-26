@@ -28,7 +28,7 @@
            role="button" tabindex="0" [attr.aria-label]="cellLabel(cell)">
         @if (at(cell); as h) {
           <div class="unit" cdkDrag [cdkDragData]="h.uid" (cdkDragStarted)="dragStarted(h.uid)"
-               [class.selected]="selected() === h.uid" [class.injured]="h.injury > 0">
+               [class.selected]="selected() === h.uid">
             <app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [star]="h.star" />
             <span class="lv">{{ h.level }}</span>
             <span class="tag">{{ h.name }}</span>
@@ -65,16 +65,15 @@
   <div class="bench" cdkDropList cdkDropListOrientation="mixed" cdkDropListSortingDisabled
        (cdkDropListDropped)="dropOnBench($event)" (click)="tapBench()" [class.drop-out]="selectedInTeam()">
     @for (h of bench(); track h.uid) {
-      <button type="button" class="card" cdkDrag [cdkDragData]="h.uid" [cdkDragDisabled]="h.injury > 0"
+      <button type="button" class="card" cdkDrag [cdkDragData]="h.uid"
               (cdkDragStarted)="dragStarted(h.uid)" (click)="tapHero(h.uid, $event)"
-              [class.selected]="selected() === h.uid" [class.injured]="h.injury > 0"
+              [class.selected]="selected() === h.uid"
               [style.--rc]="'var(--r' + h.star + ')'" [attr.aria-pressed]="selected() === h.uid">
         <span class="portrait">@if (h.portrait) { <img [src]="h.portrait" alt="" draggable="false" /> } @else { <app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [star]="h.star" /> }</span>
         <span class="info">
           <b>{{ h.name }}</b>
           <small>{{ h.clsName }} · ★{{ h.star }} · Lv{{ h.level }}</small>
-          @if (h.injury > 0) { <small class="inj">บาดเจ็บ {{ h.injury }} รอบ</small> }
-          @else { <small>พลัง {{ h.power }}</small> }
+          <small>พลัง {{ h.power }}</small>
         </span>
       </button>
     } @empty {

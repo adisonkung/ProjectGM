@@ -42,6 +42,12 @@ export const VISUALS: Record<string, VisualDefinition> = {
   mock_mist_witch: { kind: 'mock', shape: 'circle', color: '#8a5ad6', accent: '#f0e4ff', size: 0.95, glyph: '✦' },
   mock_fallen_guardian: { kind: 'mock', shape: 'capsule', color: '#5a0f14', accent: '#ff4a3a', size: 2 },
   mock_trial_warden: { kind: 'mock', shape: 'square', color: '#6b5420', accent: '#ffd76a', size: 1.4, glyph: '⚖' },
+  // farm dungeons (monsters-farm.ts)
+  mock_stone_sentinel: { kind: 'mock', shape: 'hex', color: '#7d7466', accent: '#e8dcc0', size: 1.6, glyph: '◈' },
+  mock_pack_lord: { kind: 'mock', shape: 'capsule', color: '#3a4a78', accent: '#c8d4ff', size: 1.5, glyph: '♛' },
+  mock_ancient_colossus: { kind: 'mock', shape: 'hex', color: '#5c4432', accent: '#ff9a4a', size: 2, glyph: '⛰' },
+  mock_treasure_goblin: { kind: 'mock', shape: 'circle', color: '#c89a20', accent: '#fff2a8', size: 0.8, glyph: '$' },
+  mock_treasure_goblin_elite: { kind: 'mock', shape: 'circle', color: '#e0b020', accent: '#ffffff', size: 0.95, glyph: '$$' },
 };
 
 export const visualOf = (id: string | undefined): VisualDefinition | undefined => (id ? VISUALS[id] : undefined);
@@ -54,5 +60,6 @@ export const mockVisualOf = (id: string | undefined): MockVisual | undefined => 
 export const STATUS_ICONS: Record<string, string> = {
   poison: '☠', bleed: '🩸', corruption: '☣', root: '🌿', stun: '💫', untargetable: '👻', boss_seal: '🔒',
   dark_fog: '🌫', soul_link: '🔗', broken: '💥', healing_reduction: '💔', panther_frenzy: '⚡', ancient_rage: '😡',
-  guardian_empowered: '🩸', ancient_protection: '🛡', guardian_enrage: '🔥', taunted: '❗', alpha_howl_buff: '🐺', blood_rage: '😡',
+  guardian_empowered: '🩸', ancient_protection: '🛡', guardian_enrage: '🔥', stone_skin: '🪨', sentinel_fury: '💢', pack_fury: '🐺',
+  lord_frenzy: '🌕', duel_enrage: '🔥', taunted: '❗', alpha_howl_buff: '🐺', blood_rage: '😡',
 };

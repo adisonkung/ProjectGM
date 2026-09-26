@@ -111,6 +111,29 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     modifiers: { attackSpeedMultiplier: 1.4, damageMultiplier: 1.3 },
   },
 
+  // ---- farm-dungeon bosses (monsters-farm.ts) + BOSS DUEL enrage
+  stone_skin: {
+    id: 'stone_skin', name: 'ผิวศิลา', duration: 8, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0.4 },
+  },
+  sentinel_fury: {
+    id: 'sentinel_fury', name: 'หินแตกคลั่ง', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.25 },
+  },
+  pack_fury: {
+    id: 'pack_fury', name: 'พลังฝูง', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackMultiplier: 1.3 },
+  },
+  lord_frenzy: {
+    id: 'lord_frenzy', name: 'จันทร์สีเลือด', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.3 },
+  },
+  /** BOSS DUEL soft time limit: the boss enrages after the duel's `enrage.at` seconds of combat */
+  duel_enrage: {
+    id: 'duel_enrage', name: 'คลั่ง (หมดเวลา)', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackMultiplier: 1.6, attackSpeedMultiplier: 1.3 },
+  },
+
   // ---- monster buffs
   alpha_howl_buff: {
     id: 'alpha_howl_buff', name: 'เสียงหอนจ่าฝูง', duration: 10, stackPolicy: 'REFRESH_DURATION', buff: true,

@@ -393,6 +393,11 @@ export class BattleEngine {
   get result(): BattleResult | null {
     return this.flow.outcome;
   }
+  /** the stage's time limit (s of combat) */
+  get timeLimit(): number {
+    return this.stage.timeLimit;
+  }
+
   get stageResult(): StageResult | null {
     return this.flow.stageResult;
   }
@@ -532,6 +537,9 @@ export class BattleEngine {
       runPending: () => self.runPending(),
       quiesce: reason => self.quiesce(reason),
       heal: (u, amount) => self.heal(u, amount),
+      applyStageStatus: (u, status) => self.applyStatus(u, status, u),
+      tagsOf: u => (u.monster ? (self.monsterDefs[u.monster.definitionId]?.tags ?? []) : []),
+      definitionOf: u => u.monster?.definitionId,
     };
   }
 
@@ -977,7 +985,9 @@ export class BattleEngine {
       // สายระยะไกล: ในระยะยิง นักเวท > นักธนู > เลือดน้อย > ใกล้ · ไม่มีในระยะ → ใกล้สุด
       const order: Partial<Record<HeroClass, number>> = { mage: 0, archer: 1 };
       if (inRange.length) {
-        return [...inRange].sort((a, b) => (order[a.cls] ?? 2) - (order[b.cls] ?? 2) || a.hp / a.maxHp - b.hp / b.maxHp || d(a) - d(b))[0];
+        // a treasure carrier running for the edge is shot first (TREASURE CHASE) — only while it flees
+        const rank = (f: BattleUnit) => (f.monster?.fleeing ? -1 : (order[f.cls] ?? 2));
+        return [...inRange].sort((a, b) => rank(a) - rank(b) || a.hp / a.maxHp - b.hp / b.maxHp || d(a) - d(b))[0];
       }
       if (u.side === PLAYER_TEAM) {
         // nothing in range: the enemy with the safest firing position inside the leash (nearest as a tie-break)
@@ -1488,6 +1498,8 @@ export class BattleEngine {
     }
     if (isMonsterSkill(c.def)) {
       if (u.monster) this.metrics.cast(c.def.id, 'completed');
+      // CHALLENGE strikes: only casts the heroes could have stopped (interruptible or breakable)
+      if (u.side !== PLAYER_TEAM && canStopCast(c.def)) this.flow.onEnemyCastCompleted(c.def.id);
       if (c.def.untargetableWhileCasting) this.removeStatus(u, 'untargetable');
       this.activateMonsterSkill(u, c.def, c.target);
       this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
@@ -2099,6 +2111,15 @@ export class BattleEngine {
       startCast: (u, skill, target) => self.beginCast(u, skill, target),
       updateCast: (u, dt) => self.updateCast(u, dt),
       emit: e => self.events.push(e),
+      escape: u => {
+        if (!u.alive) return;
+        self.cancelCast(u, 'end');
+        self.grid.remove(u.id, u.pos);
+        for (const o of self.units) if (o.targetId === u.id) o.targetId = null;
+        if (u.id === self.focusTargetId) self.clearFocus('dead');
+        if (u.monster) self.monsterAI.markDead(u);
+        self.flow.onEscaped(u);
+      },
     };
   }
 }

@@ -96,3 +96,29 @@ h1 { font: 700 22px/1.2 var(--disp); margin: 0; }
   &.final { border-color: #ff3b3b; box-shadow: 0 0 12px #ff3b3b55; }
   &.enraged .bb-track i { background: linear-gradient(90deg, #ff1a1a, #ffb347); }
 }
+
+// special-mode HUD (farm dungeons)
+.mode-hud {
+  display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; padding: 6px 10px; border-radius: 10px;
+  background: var(--panel); border: 1px solid var(--gold); font-size: 13px;
+  b { color: var(--gold); }
+  span { color: var(--text); font-variant-numeric: tabular-nums; }
+}
+
+// tower / farm result card
+.result-card {
+  display: grid; gap: 8px; padding: 14px 16px; border-radius: 14px; background: var(--panel);
+  border: 1px solid var(--danger); box-shadow: 0 6px 24px #0008;
+  &.win { border-color: var(--gold); }
+  h2 { margin: 0; font: 700 20px var(--disp); display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+    small { font: 500 13px var(--body, inherit); color: var(--muted); } }
+  .fail { margin: 0; color: var(--danger); font-weight: 600; }
+  .stars { margin: 0; font-size: 26px; color: var(--gold); letter-spacing: 2px; span { color: #ffffff22; } }
+  .facts { margin: 0; color: var(--muted); font-size: 13px; }
+  .loot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px;
+    span { padding: 2px 8px; border-radius: 999px; background: var(--panel2); } }
+  .exp { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); li.up { color: var(--text); } }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px;
+    button { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); font-weight: 600; }
+    .primary { background: var(--gold); color: #111; border-color: var(--gold); } }
+}

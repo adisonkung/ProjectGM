@@ -17,7 +17,7 @@ import {
   upgradeBlocker, upgradeSkill,
 } from './skill-ranks';
 
-const hero = (templateId: string, o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId, level: 10, potential: 'B', injury: 0, breakthroughTier: 3, ...o });
+const hero = (templateId: string, o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId, level: 10, potential: 'B', breakthroughTier: 3, ...o });
 const eff = (s: ReturnType<typeof rankedSkill>, type: string) => s.effects.find(e => e.type === type) as any;
 const status = (s: ReturnType<typeof rankedSkill>, id: string) => s.effects.find(e => e.type === 'APPLY_STATUS' && e.status === id) as any;
 const rich = (s: GameState): GameState => ({ ...s, gold: 1e6, inventory: { skill_tome_1: 99, skill_tome_2: 99, skill_tome_3: 99 } });

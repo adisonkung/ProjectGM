@@ -13,7 +13,7 @@ import {
 } from './rewards';
 import { heroStats } from './stats';
 
-const hero = (o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId: 'aurel', level: 1, potential: 'B', injury: 0, exp: 0, breakthroughTier: 0, ...o });
+const hero = (o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId: 'aurel', level: 1, potential: 'B', exp: 0, breakthroughTier: 0, ...o });
 const DAY = new Date(2026, 8, 26, 12);
 const NEXT_DAY = new Date(2026, 8, 27, 9);
 const noLuck = () => 0.99;
@@ -224,7 +224,6 @@ describe('Rewards, daily bonus, fragments', () => {
     expect(expOf(participants[0]).exp).toBe(90); // 60 × 1.5 daily bonus
     expect(expOf(bench[0].uid).exp).toBe(Math.round(90 * TRAINING_SLOTS.expShare));
     expect(expOf(bench[1].uid).exp).toBe(0);
-    expect(r.state.heroes.every(h => h.injury === 0)).toBeTrue();
     expect(TRAINING_SLOTS).toEqual({ count: 2, expShare: 0.35 });
   });
 
@@ -266,7 +265,7 @@ describe('Rewards, daily bonus, fragments', () => {
     const v4: any = { ...state(), version: 4 };
     delete v4.inventory;
     delete v4.daily;
-    v4.heroes[0] = { uid: 1, templateId: 'aurel', level: 7, potential: 'B', injury: 0 };
+    v4.heroes[0] = { uid: 1, templateId: 'aurel', level: 7, potential: 'B' };
     const m = migrate(v4)!;
     expect(m.version).toBe(6);
     expect(m.inventory).toEqual({});

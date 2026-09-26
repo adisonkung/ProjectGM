@@ -31,15 +31,14 @@ export class ProgressionService {
     return !!d && isUnlocked(d, this.save.state().cleared);
   }
 
-  /** tower: clear EXP (+ first clear) on a win; fallen heroes keep the tower's injury rule */
-  completeTower(floor: number, run: RunOutcome, fallenUids: number[]): RunReward {
+  /** tower: clear EXP (+ first clear) on a win — heroes that fell have no lasting penalty (injury system removed) */
+  completeTower(floor: number, run: RunOutcome): RunReward {
     const r = completeTowerRun(this.save.state(), floor, run);
     this.save.update(() => r.state);
-    if (fallenUids.length) this.roster.applyInjuries(fallenUids);
     return { breakdown: r.breakdown, exp: r.exp };
   }
 
-  /** farm dungeon: daily bonus / repeat reward, EXP, items, rating — deaths are EVENT_KO (no injuries) */
+  /** farm dungeon: daily bonus / repeat reward, EXP, items, rating */
   completeFarm(farmId: string, run: RunOutcome, now = new Date(), rng = Math.random): RunReward {
     const def = FARM_BY_ID[farmId];
     const r = completeFarmRun(this.save.state(), def, run, rng, now);

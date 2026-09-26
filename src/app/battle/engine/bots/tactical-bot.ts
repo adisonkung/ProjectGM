@@ -44,6 +44,9 @@ export function tacticalFormation(heroes: OwnedHero[], team: TeamSlot[], stage?:
 const COMPACT_AGAINST = new Set(['shadow_panther']);
 
 const FOCUS: Record<string, number> = {
+  // TREASURE CHASE: catch the loot before it runs off
+  treasure_goblin: -1,
+  treasure_goblin_elite: -1,
   dark_shaman_ritual: 0,
   goblin_shaman: 1,
   dark_shaman: 1,

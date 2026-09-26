@@ -1,11 +1,11 @@
 import { Cell } from '../../../core/models/unit';
-import { StageDef, stageIdOf, WaveDefinition, wavesOf } from '../../../core/models/stage';
+import { EnemySpawn, StageDef, stageIdOf, StageModeRules, WaveDefinition, wavesOf } from '../../../core/models/stage';
 import type { BattleEvent, BattleUnit } from '../battle-engine';
 import { BOARD_COLS, distance, Grid, LANES, zoneOf } from '../grid';
 import { FormationRuntime } from './formation';
 import { getActiveBattlefieldHeroes, getAllPartyHeroes, isCombatCapable, isDead, PLAYER_TEAM } from './party';
 import { StageBattleRules } from './rules';
-import { BattlePhase, ReviveHeroCommand, ReviveResult, StageResult, WaveTransitionMode } from './types';
+import { BattlePhase, ModeScore, ReviveHeroCommand, ReviveResult, StageResult, WaveTransitionMode } from './types';
 
 /** What the stage flow needs from the combat engine (the engine implements it; the flow never touches AI) */
 export interface StageHost {
@@ -25,7 +25,16 @@ export interface StageHost {
   /** drop everything in flight (pending hits, projectiles, casts, focus) */
   quiesce(reason: 'advance' | 'end'): void;
   heal(u: BattleUnit, amount: number): void;
+  /** special modes: put a status on a unit (boss enrage) */
+  applyStageStatus(u: BattleUnit, status: string): void;
+  /** monster definition tags of a unit (treasure carriers …) */
+  tagsOf(u: BattleUnit): string[];
+  /** monster definition id of a unit */
+  definitionOf(u: BattleUnit): string | undefined;
 }
+
+/** tag that marks a treasure carrier (TREASURE mode) */
+export const TREASURE_TAG = 'treasure';
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -71,6 +80,16 @@ export class StageFlow {
   private revivedUnits = new Set<number>();
   /** successful revives that count toward rules.partyReviveLimit this stage */
   limitedRevives = 0;
+  /** special stage mode (STORY when the stage has none) */
+  readonly special: StageModeRules;
+  /** special-mode counters (see ModeScore) */
+  readonly score: ModeScore;
+  failReason: string | null = null;
+  /** SURVIVAL: next horde group index and the combat time it is due */
+  private hordeIndex = 0;
+  private nextHordeAt = 0;
+  /** combat time each enemy unit spawned at (KILL_BEFORE rules) */
+  private spawnedAt = new Map<number, number>();
 
   constructor(
     private readonly host: StageHost,
@@ -80,6 +99,13 @@ export class StageFlow {
     this.waves = wavesOf(stage);
     this.totalWaves = Math.max(1, this.waves.length);
     this.stageId = stageIdOf(stage);
+    this.special = stage.special ?? { kind: 'STORY', goal: '' };
+    this.nextHordeAt = this.special.horde?.every ?? Infinity;
+    const castRule = this.special.challenge?.find(r => r.type === 'CAST_LIMIT');
+    this.score = {
+      kind: this.special.kind, kills: 0, carriersKilled: 0, carriersTotal: 0, escaped: 0,
+      strikes: 0, maxStrikes: castRule?.type === 'CAST_LIMIT' ? castRule.max : 0, enraged: false,
+    };
   }
 
   // ------------------------------------------------------------------ setup
@@ -102,6 +128,7 @@ export class StageFlow {
       const u = this.host.spawnEnemy(sp.monsterId, { r: sp.formationSlot.depth, c: sp.formationSlot.lane });
       if (!u) continue;
       u.wave = index;
+      this.noteSpawn(u);
       const slot = this.enemyFormation.assign(u.id, sp.formationSlot.depth, sp.formationSlot.lane, u.pos, sp.offset);
       const ax = this.enemyFormation.originPosition + slot.localOffset.x;
       u.y = slot.localOffset.y;
@@ -214,6 +241,7 @@ export class StageFlow {
   /** after every combat tick (all events of the tick resolved first — no update-order dependent results) */
   private evaluate(): void {
     if (this.checkWipe()) return;
+    if (this.checkSpecial()) return;
     if (this.stage.mode === 'survive') {
       if (this.host.fightTime >= this.stage.timeLimit) this.onWaveCleared();
       return;
@@ -241,8 +269,86 @@ export class StageFlow {
         u.wave = this.waveIndex;
         u.y = u.pos.r;
         u.x = this.formation.originPosition + u.pos.c + this.rules.enemyEntryDistance / 2;
+        this.noteSpawn(u);
       }
     }
+  }
+
+  // ------------------------------------------------------------------ special modes
+
+  private noteSpawn(u: BattleUnit): void {
+    this.spawnedAt.set(u.id, this.host.fightTime);
+    if (this.host.tagsOf(u).includes(TREASURE_TAG)) this.score.carriersTotal++;
+  }
+
+  /** spawn a group mid-combat: walks in from beyond the enemy zone (like reinforcements) */
+  private spawnGroup(spawns: EnemySpawn[]): void {
+    for (const sp of spawns) {
+      const u = this.host.spawnEnemy(sp.monsterId, { r: sp.formationSlot.depth, c: sp.formationSlot.lane });
+      if (!u) continue;
+      u.wave = this.waveIndex;
+      u.y = u.pos.r;
+      u.x = this.formation.originPosition + u.pos.c + this.rules.enemyEntryDistance / 2;
+      this.noteSpawn(u);
+    }
+  }
+
+  /** SURVIVAL horde · BOSS_DUEL enrage · CHALLENGE fail rules — true when the stage just ended */
+  private checkSpecial(): boolean {
+    const sp = this.special;
+    const t = this.host.fightTime;
+    // SURVIVAL: the next group walks in on schedule, but never above the alive cap (a slow team is not buried)
+    if (sp.horde && sp.horde.groups.length) {
+      const alive = this.host.units.filter(u => u.side !== PLAYER_TEAM && isCombatCapable(u)).length;
+      if (t >= this.nextHordeAt && alive < sp.horde.maxAlive) {
+        this.spawnGroup(sp.horde.groups[this.hordeIndex++ % sp.horde.groups.length]);
+        this.nextHordeAt = t + sp.horde.every;
+      }
+    }
+    // BOSS_DUEL: soft time limit — the boss enrages instead of the run timing out
+    if (sp.enrage && !this.score.enraged && t >= sp.enrage.at) {
+      const bosses = this.host.units.filter(u => u.side !== PLAYER_TEAM && isCombatCapable(u) && (u.boss || u.elite));
+      if (bosses.length) {
+        this.score.enraged = true;
+        for (const b of bosses) this.host.applyStageStatus(b, sp.enrage.status);
+        this.host.emit({ type: 'BOSS_ENRAGED', units: bosses.map(b => b.id) });
+      }
+    }
+    for (const rule of sp.challenge ?? []) {
+      if (rule.type === 'CAST_LIMIT' && this.score.strikes > rule.max) return this.fail(rule.label), true;
+      if (rule.type === 'KILL_BEFORE') {
+        const late = this.host.units.some(
+          u => u.side !== PLAYER_TEAM && isCombatCapable(u) && this.host.definitionOf(u) === rule.monsterId &&
+            t - (this.spawnedAt.get(u.id) ?? t) >= rule.seconds,
+        );
+        if (late) return this.fail(rule.label), true;
+      }
+    }
+    return false;
+  }
+
+  private fail(reason: string): void {
+    this.failReason = reason;
+    this.finish('lose');
+  }
+
+  /** an enemy cast completed (CHALLENGE: CAST_LIMIT strikes) */
+  onEnemyCastCompleted(skillId: string): void {
+    const rule = this.special.challenge?.find(r => r.type === 'CAST_LIMIT');
+    if (rule?.type !== 'CAST_LIMIT' || this.outcome) return;
+    if (rule.skills && !rule.skills.includes(skillId)) return;
+    this.score.strikes++;
+    this.host.emit({ type: 'CHALLENGE_STRIKE', strikes: this.score.strikes, max: rule.max, skill: skillId });
+  }
+
+  /** a treasure carrier reached the edge: gone for good (not a kill, never required for the wave) */
+  onEscaped(u: BattleUnit): void {
+    this.score.escaped++;
+    u.required = false;
+    this.hide(u);
+    u.alive = false;
+    u.activity = 'DEAD';
+    this.host.emit({ type: 'TREASURE_ESCAPED', unit: u.id, escaped: this.score.escaped, total: this.score.carriersTotal });
   }
 
   /** stage fails only when no combat-capable hero remains (one death never fails it) */
@@ -338,6 +444,8 @@ export class StageFlow {
       wavesCleared: this.wavesCleared,
       totalWaves: this.totalWaves,
       battleDuration: 0, // filled by the engine (it owns the clock)
+      ...(this.special.kind !== 'STORY' ? { mode: { ...this.score } } : {}),
+      ...(this.failReason ? { failReason: this.failReason } : {}),
     };
   }
 
@@ -427,6 +535,10 @@ export class StageFlow {
 
   /** HP reached 0: death lifecycle (engine already cancelled casts / removed it from the grid) */
   onDeath(u: BattleUnit): void {
+    if (u.side !== PLAYER_TEAM) {
+      this.score.kills++;
+      if (this.host.tagsOf(u).includes(TREASURE_TAG)) this.score.carriersKilled++;
+    }
     u.hp = 0;
     u.alive = false;
     u.targetable = false;

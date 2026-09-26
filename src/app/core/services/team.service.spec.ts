@@ -36,7 +36,7 @@ describe('TeamService', () => {
   });
 
   it('refuses a 6th hero on an empty cell but replaces on an occupied one', () => {
-    save.update(s => ({ ...s, heroes: [...s.heroes, { uid: 99, templateId: 'bron', level: 1, potential: 'C', injury: 0 }] }));
+    save.update(s => ({ ...s, heroes: [...s.heroes, { uid: 99, templateId: 'bron', level: 1, potential: 'C' }] }));
     const occupied = service.slots()[0];
     const free = { r: 2, c: 0 };
     expect(service.slots().some(s => s.r === free.r && s.c === free.c)).toBeFalse();
@@ -55,12 +55,10 @@ describe('TeamService', () => {
     expect(service.units().length).toBe(0);
   });
 
-  it('auto skips injured heroes', () => {
-    const st = newGameState();
-    save.update(() => ({ ...st, heroes: st.heroes.map((h, i) => (i === 0 ? { ...h, injury: 2 } : h)) }));
+  it('auto fills a full team (no hero is ever locked out — injury system removed)', () => {
+    save.update(() => newGameState());
+    service.clear();
     service.auto();
-    expect(slot(st.heroes[0].uid)).toBeUndefined();
-    // ม้านั่งมีฮีโร่เหลือ: เติมจนครบ 5 ตัว
     expect(service.slots().length).toBe(5);
   });
 });

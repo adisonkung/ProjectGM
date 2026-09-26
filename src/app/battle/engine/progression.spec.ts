@@ -29,7 +29,7 @@ let nextId = 1;
 const item = (defId: string, rarity: Rarity, main: EquipStat, o: { sec?: EquipStat[]; affix?: string | null; level?: number } = {}): EquipmentInstance =>
   ({ ...rollItem(defId, rarity, () => 0, nextId++, { main, secondaries: o.sec ?? [], affix: o.affix ?? null }), upgradeLevel: o.level ?? 0 });
 
-const hero = (templateId: string, o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId, level: 1, potential: 'B', injury: 0, ...o });
+const hero = (templateId: string, o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId, level: 1, potential: 'B', ...o });
 
 const spec = (id: string, h: OwnedHero, depth: number, lane: number): UnitSpec => {
   const t = HERO_BY_ID[id];

@@ -10,7 +10,7 @@ const KEY = 'projectgm-save-v1';
 /**
  * Old saves: v1–3 start over (roster changes); v4 → v5 adds the Patch 1 economy (EXP, breakthrough tier, inventory,
  * daily bonus, Training Slots, farm records); v5 → v6 adds equipment (bag, item ids, Hunt target) and drops the
- * provisional tier-id `equipment` field. Heroes / team / cleared floors are never touched.
+ * provisional tier-id `equipment` field; the old `injury` counter is dropped. Heroes / team / cleared floors are never touched.
  */
 export function migrate(raw: unknown): GameState | null {
   const s = raw as Omit<Partial<GameState>, 'version'> & { version?: number };
@@ -28,7 +28,8 @@ export function migrate(raw: unknown): GameState | null {
     rewardCarry: s.rewardCarry ?? {},
   } as GameState;
   out.heroes = (out.heroes ?? []).map(h => {
-    const { equipment: _legacy, ...rest } = h as typeof h & { equipment?: unknown };
+    // `equipment` = provisional v5 field · `injury` = removed injury system (heroes are never locked out now)
+    const { equipment: _legacy, injury: _injury, ...rest } = h as typeof h & { equipment?: unknown; injury?: unknown };
     return migrateHeroProgress(rest);
   });
   return out;
@@ -59,7 +60,7 @@ export class SaveService {
       // กระดานเปลี่ยนขนาด (3 เลน x ลึก 6): ตำแหน่งเก่าที่หลุดขอบ ให้จัดทีมใหม่อัตโนมัติ
       if (s.team.some(t => !validLocal(t))) {
         const inTeam = new Set(s.team.map(t => t.uid));
-        s.team = autoPlace(s.heroes.filter(h => inTeam.has(h.uid) && h.injury === 0));
+        s.team = autoPlace(s.heroes.filter(h => inTeam.has(h.uid)));
       }
       return addMissingStarters(s);
     } catch {

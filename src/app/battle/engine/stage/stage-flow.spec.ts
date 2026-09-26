@@ -3,7 +3,7 @@ import { FARM_DUNGEONS } from '../../../core/data/economy';
 import { ENEMIES } from '../../../core/data/enemies';
 import { BUFFS } from '../../../core/data/monsters';
 import { HeroClass } from '../../../core/models/hero';
-import { EnemyPlacement, StageDef, wavesOf } from '../../../core/models/stage';
+import { EnemyPlacement, StageDef, StageModeKind, wavesOf } from '../../../core/models/stage';
 import { UnitSpec } from '../../../core/models/unit';
 import { BattleEngine, BattleEvent, BattleUnit } from '../battle-engine';
 import { applyBuff, buffRemaining } from '../buffs';
@@ -739,25 +739,32 @@ describe('In-wave reinforcements (farm dungeons: sustained waves without extra t
     expect(firstWaveClearAt).toBeGreaterThan(0);
   });
 
-  it('farm stages use reinforced waves: Training 2/2/3/3/4 waves, Ascension 4, never boss mechanics', () => {
-    const waves = FARM_DUNGEONS.map(d => wavesOf(d.stage).length);
-    expect(waves).toEqual([2, 2, 3, 3, 4, 4, 4, 4, 3, 3, 4, 4, 4, 3, 3, 4, 4]);
+  it('farm dungeons are special modes: Training SURVIVAL, Ascension BOSS DUEL, Hunt TREASURE, Skill Trial CHALLENGE', () => {
+    const kinds = Object.fromEntries(FARM_DUNGEONS.map(d => [d.id, d.stage.special?.kind]));
     for (const d of FARM_DUNGEONS) {
-      for (const w of wavesOf(d.stage)) expect(w.reinforcements?.length).withContext(d.id).toBeGreaterThan(0);
+      const want = ({ TRAINING: 'SURVIVAL', ASCENSION: 'BOSS_DUEL', EQUIPMENT: 'TREASURE', SKILL: 'CHALLENGE' } as Record<string, StageModeKind>)[d.type];
+      expect(kinds[d.id]).withContext(d.id).toBe(want);
     }
-  });
-
-  it('Ascension II is a challenge, not a wall: ≤ 1 support caster and ≤ 1 backline diver per wave, one of each in the whole trial', () => {
-    const all = (id: string) => wavesOf(FARM_DUNGEONS.find(d => d.id === id)!.stage)
-      .map(w => [...w.spawns, ...(w.reinforcements ?? []).flatMap(r => r.spawns)].map(sp => sp.monsterId));
-    const a2 = all('ascension_2');
-    for (const w of a2) {
-      expect(w.filter(m => m === 'goblin_shaman' || m === 'dark_shaman' || m === 'mist_witch').length).toBeLessThanOrEqual(1);
-      expect(w.filter(m => m === 'shadow_panther' || m === 'mist_wraith').length).toBeLessThanOrEqual(1);
+    // SURVIVAL: one wave held in place + a horde that keeps coming
+    for (const d of FARM_DUNGEONS.filter(x => x.type === 'TRAINING')) {
+      expect(d.stage.mode).toBe('survive');
+      expect(wavesOf(d.stage).length).toBe(1);
+      expect(d.stage.special!.horde!.groups.length).toBeGreaterThan(3);
     }
-    expect(a2.flat().filter(m => m === 'goblin_shaman').length).toBe(1);
-    expect(a2.flat().filter(m => m === 'shadow_panther').length).toBe(1);
-    // Ascension III keeps the tier-3 casters (the hardest farm)
-    expect(all('ascension_3').flat().filter(m => m === 'dark_shaman' || m === 'mist_witch').length).toBeGreaterThanOrEqual(3);
+    // BOSS DUEL: exactly one boss, arena rules, enrage before the hard limit
+    for (const d of FARM_DUNGEONS.filter(x => x.type === 'ASCENSION')) {
+      const w = wavesOf(d.stage);
+      expect(w.length).toBe(1);
+      expect(w[0].spawns.length).toBe(1);
+      expect(d.stage.rulePreset).toBe('arena');
+      expect(d.stage.special!.enrage!.at).toBeLessThan(d.stage.timeLimit);
+    }
+    // TREASURE: three carriers per run
+    for (const d of FARM_DUNGEONS.filter(x => x.type === 'EQUIPMENT')) {
+      const carriers = wavesOf(d.stage).flatMap(w => w.spawns).filter(sp => sp.monsterId.startsWith('treasure_goblin'));
+      expect(carriers.length).withContext(d.id).toBe(3);
+    }
+    // CHALLENGE: every trial has at least one fail rule
+    for (const d of FARM_DUNGEONS.filter(x => x.type === 'SKILL')) expect(d.stage.special!.challenge!.length).toBeGreaterThan(0);
   });
 });

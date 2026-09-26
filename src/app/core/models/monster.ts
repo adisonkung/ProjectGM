@@ -87,7 +87,9 @@ export type MovementMode =
   /** walk until distance <= attackRange */
   | 'MELEE_CHASE'
   /** approach to preferredRange when out of attackRange; optional small retreat */
-  | 'RANGED_HOLD';
+  | 'RANGED_HOLD'
+  /** treasure carrier: never attacks; holds still, then runs for the far edge of the enemy zone and escapes (`flee`) */
+  | 'FLEE';
 
 export interface MonsterAIConfig {
   targeting: TargetingConfig;
@@ -98,6 +100,11 @@ export interface MonsterAIConfig {
   skillPriority?: string[];
   /** seconds in SPAWNING before the monster starts thinking */
   spawnDuration?: number;
+  /**
+   * FLEE: start running after `after` s of combat, at once when first damaged (`onHit`), or when at most
+   * `guardsAtMost` other non-fleeing allies still stand — escapes at the board edge
+   */
+  flee?: { after: number; onHit: boolean; guardsAtMost?: number };
 }
 
 export interface AttackDefinition {

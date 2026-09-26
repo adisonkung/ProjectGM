@@ -28,8 +28,9 @@ const minutesArg = args.find(a => a.startsWith('--minutes='))?.slice(10);
 
 /** measured active clear seconds (npm run balance -- 60 rec - --farm=all, TACTICAL) */
 const RUN_SECONDS: Record<string, number> = {
-  training_1: 63, training_2: 81, training_3: 95, training_4: 107, training_5: 123,
-  ascension_1: 80, ascension_2: 96, ascension_3: 125,
+  // Phase 3 special modes: Training = SURVIVAL (fixed timer) · Ascension = BOSS DUEL (TACTICAL kill time)
+  training_1: 75, training_2: 85, training_3: 95, training_4: 110, training_5: 120,
+  ascension_1: 68, ascension_2: 78, ascension_3: 92,
 };
 const OVERHEAD = 20;
 /** measured tower clear seconds at the floor's band profile (npm run balance -- 200 rec - --all-floors, TACTICAL) */

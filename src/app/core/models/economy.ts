@@ -60,8 +60,8 @@ export interface RewardBundle {
 
 export type FarmDungeonType = 'TRAINING' | 'ASCENSION' | 'EQUIPMENT' | 'SKILL' | 'MATERIAL';
 
-/** how hero deaths are treated: tower = the stage's normal injury rules, farming = a harmless knock-out */
-export type DeathRule = 'STAGE_INJURY' | 'EVENT_KO';
+/** how hero deaths are treated after the run — Patch 1: nothing lasts (injury system removed), kept for future rules */
+export type DeathRule = 'EVENT_KO';
 
 export interface FarmDungeonDefinition {
   id: string;

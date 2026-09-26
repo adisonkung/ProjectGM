@@ -44,7 +44,6 @@ interface HeroView {
   power: number;
   range: number;
   sprite?: string;
-  injury: number;
   portrait?: string;
 }
 
@@ -103,7 +102,7 @@ export class PlacementComponent {
     const inTeam = new Set(this.team.slots().map(s => s.uid));
     return [...this.heroes().values()]
       .filter(h => !inTeam.has(h.uid))
-      .sort((a, b) => a.injury - b.injury || b.star - a.star || b.power - a.power);
+      .sort((a, b) => b.star - a.star || b.power - a.power);
   });
 
   readonly count = computed(() => this.team.slots().length);
@@ -138,7 +137,7 @@ export class PlacementComponent {
 
   // ------------------------------------------------------------ ลากวาง
 
-  canEnterCell = (drag: CdkDrag<number>) => (this.heroes().get(drag.data)?.injury ?? 1) === 0;
+  canEnterCell = (drag: CdkDrag<number>) => this.heroes().has(drag.data);
 
   dropOnCell(e: CdkDragDrop<AllyCell, unknown, number>): void {
     this.lastDrag = Date.now();
@@ -174,11 +173,6 @@ export class PlacementComponent {
   tapHero(uid: number, ev: Event): void {
     ev.stopPropagation();
     if (this.justDragged()) return;
-    const h = this.heroes().get(uid);
-    if (h && h.injury > 0) {
-      this.flash(`${h.name} บาดเจ็บ พักอีก ${h.injury} รอบ`);
-      return;
-    }
     this.selected.update(s => (s === uid ? null : uid));
   }
 
@@ -217,10 +211,6 @@ export class PlacementComponent {
   private placeAt(uid: number, cell: AllyCell): void {
     const h = this.heroes().get(uid);
     if (!h) return;
-    if (h.injury > 0) {
-      this.flash(`${h.name} บาดเจ็บ ลงสนามไม่ได้`);
-      return;
-    }
     if (!this.team.place(uid, cell.r, cell.c)) {
       this.flash(`ทีมเต็มแล้ว (${TEAM_SIZE} ตัว) ลากตัวใดตัวหนึ่งออกก่อน หรือวางทับเพื่อสลับ`);
       return;
@@ -251,7 +241,6 @@ export class PlacementComponent {
       power: this.roster.power(h),
       range: s.range,
       sprite: t.sprite,
-      injury: h.injury,
       portrait: heroArt(t.id)?.portrait,
     };
   }

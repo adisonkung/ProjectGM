@@ -7,6 +7,7 @@
  *   --power     hero + monster power snapshots (final stats, DPS, HPS, ult uses; authored vs tuned monster stats)
  *   --all-floors  also Stage 1–3 when no floor is given
  */
+import { clearRating } from '../../src/app/core/rules/rewards';
 import { BattleEngine, MONSTER_TUNING_LIMITS, monsterTuningReview } from '../../src/app/battle/engine/battle-engine';
 import { ENEMIES } from '../../src/app/core/data/enemies';
 import { MONSTER_SKILLS, MONSTERS } from '../../src/app/core/data/monsters';
@@ -54,6 +55,7 @@ const pct = (n: number) => `${String(Math.round(n * 100)).padStart(3)}%`;
 const f1 = (v: number, d = 1) => v.toFixed(d);
 
 interface Agg {
+  mode?: { runs: number; kills: number; carriers: number; strikes: number; enraged: number; stars: number[]; fails: Record<string, number> };
   wins: number; time: number; deaths: number; revives: number; wave: number; dealt: number; taken: number; heal: number;
   opp: number; att: number; succ: number; crit: number; resHit: number; resMiss: number; focusUp: number; unsafe: number;
   anchor: number; threatDeaths: number; phase: number; brk: number; brkFail: number; fight: number; ults: number;
@@ -216,6 +218,18 @@ for (let stage of floors) {
       }
       a.time += e.time;
       a.fight += e.fightTime;
+      // special modes (farm dungeons): what the run scored
+      const ms = e.stageResult?.mode;
+      if (ms) {
+        const x = (a.mode ??= { runs: 0, kills: 0, carriers: 0, strikes: 0, enraged: 0, stars: [0, 0, 0, 0], fails: {} as Record<string, number> });
+        x.runs++;
+        x.kills += ms.kills;
+        x.carriers += ms.carriersKilled;
+        x.strikes += ms.strikes;
+        if (ms.enraged) x.enraged++;
+        if (e.stageResult?.failReason) x.fails[e.stageResult.failReason] = (x.fails[e.stageResult.failReason] ?? 0) + 1;
+        if (e.result === 'win' && farmDef) x.stars[clearRating(farmDef, { deaths: m.deaths, time: e.fightTime, mode: ms })]++;
+      }
       a.deaths += m.deaths;
       a.revives += m.revives;
       a.wave += e.waveIndex + 1;
@@ -272,6 +286,11 @@ for (let stage of floors) {
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
     const a = aggs[bot];
     console.log(`  ${bot.padEnd(8)} win ${pct(a.wins / n)} · time ${f1(a.time / n, 0)}s · deaths ${f1(a.deaths / n, 2)}/run · runs with a death ${pct(a.deathRuns / n)} · with a revive ${pct(a.reviveRuns / n)} · wipes ${pct(a.wipes / n)} · timeouts ${pct(a.timeouts / n)} · waves ${f1(a.wave / n)}`);
+    const x = a.mode;
+    if (x) {
+      const fails = Object.entries(x.fails).map(([k, v]) => `${k} ${pct(v / n)}`).join(', ');
+      console.log(`  ${''.padEnd(8)} MODE ${stage.special?.kind}: fight ${f1(a.fight / n, 0)}s · kills ${f1(x.kills / n)} · carriers ${f1(x.carriers / n, 2)} · strikes ${f1(x.strikes / n, 2)} · enraged ${pct(x.enraged / n)} · stars 1/2/3 ${x.stars.slice(1).join('/')}${fails ? ' · fails: ' + fails : ''}`);
+    }
   }
   summary.push(`${farmDef ? farmDef.id : 'F' + String(stage.floor).padEnd(2)} ${profile.id} Lv${String(level).padEnd(2)} | AUTO ${pct(A.wins / n)} (deaths ${f1(A.deaths / n)}) | TACTICAL ${pct(T.wins / n)} (deaths ${f1(T.deaths / n)})` +
     (A.bossRuns + T.bossRuns ? ` | boss life ${f1(A.bossRuns ? A.bossLife / A.bossRuns : 0, 0)}s / ${f1(T.bossRuns ? T.bossLife / T.bossRuns : 0, 0)}s` : ''));

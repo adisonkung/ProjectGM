@@ -4,7 +4,7 @@
  */
 import { BreakthroughDefinition, FarmDungeonDefinition, HeroLevelDefinition, ItemDefinition, RewardBundle } from '../models/economy';
 import { EquipmentDropTable, Rarity } from '../models/equipment';
-import { EnemyPlacement, StageDef, WaveDefinition } from '../models/stage';
+import { ChallengeRule, EnemyPlacement, EnemySpawn, StageDef, WaveDefinition } from '../models/stage';
 
 /** EXP for level → level + 1 (Lv1→2 … Lv9→10) — total 27,600 (rebalance spec: claude/patch1-rebalance-spec.md) */
 export const EXP_TO_NEXT = [200, 400, 750, 1250, 2000, 3000, 4500, 6500, 9000];
@@ -258,24 +258,94 @@ const ASCENSION_STAGES: StageDef[] = [
 
 /** 3★ clear-time targets (s) — the middle of the spec's duration windows */
 const TRAINING_TARGET_TIME = [90, 105, 120, 150, 180];
-const ASCENSION_TARGET_TIME = [105, 135, 180];
+/** BOSS DUEL 3★: no death and the guardian down within this many seconds (well before its enrage) */
+const ASCENSION_TARGET_TIME = [75, 80, 100];
 
 const stageOf = (list: StageDef[], id: string) => list.find(s => s.id === id)!;
+
+// ------------------------------------------------------------------ special modes (Phase 3): each farm type plays differently
+
+/**
+ * TRAINING → SURVIVAL: hold out `time` s where you stand. The first group is the old opener; the old waves'
+ * reinforcements and later openers become the horde (one group every `every` s while fewer than `maxAlive` stand).
+ * Stars: 1★ survive · 2★ at `killStars[0]` kills · 3★ at `killStars[1]` kills with no hero death. Rewards are unchanged (EXP on a win, never per kill).
+ */
+const toSurvival = (s: StageDef, time: number, every: number, maxAlive: number, killStars: [number, number]): StageDef => {
+  const waves = s.waveDefs!;
+  const groups: EnemySpawn[][] = waves.flatMap((w, i) => [...(i > 0 ? [w.spawns] : []), ...(w.reinforcements ?? []).map(r => r.spawns)]);
+  return {
+    ...s, mode: 'survive', rulePreset: 'defense', timeLimit: time, rounds: [], waveDefs: [{ spawns: waves[0].spawns }],
+    special: { kind: 'SURVIVAL', horde: { every, maxAlive, groups }, killStars, goal: `อยู่รอด ${time} วินาที · ศัตรูไหลมาไม่หยุด` },
+  };
+};
+
+/**
+ * ASCENSION → BOSS DUEL: one guardian in an arena (no march). It enrages (duel_enrage: ATK ×1.6, speed ×1.3) after
+ * `enrageAt` s of combat — a soft time limit; the hard limit is `timeLimit`. 3★ = no death and before the enrage.
+ */
+const bossDuel = (id: string, name: string, bossId: string, enrageAt: number, timeLimit: number, background: string): StageDef => ({
+  floor: 0, id, name, mode: 'eliminate', rulePreset: 'arena', timeLimit, background,
+  enemies: [{ enemy: bossId, r: 1, c: 1 }], rounds: [], waveDefs: [{ spawns: [{ monsterId: bossId, formationSlot: { depth: 1, lane: 1 } }] }],
+  special: { kind: 'BOSS_DUEL', enrage: { at: enrageAt, status: 'duel_enrage' }, goal: `ล้มผู้พิทักษ์ก่อนมันคลั่ง (${enrageAt} วิ)` },
+});
+
+/**
+ * HUNT → TREASURE CHASE: the old Hunt waves + one treasure carrier in each of the first three waves. Carriers never
+ * attack; they run for the far edge when hit or after 8 s — only carriers you kill roll equipment.
+ */
+const TREASURE_LANES = [1, 0, 2];
+/** the carrier takes the front slot of its lane (reachable by melee heroes); the guard standing there steps back */
+const withCarrier = (w: WaveDefinition, carrier: string, lane: number): WaveDefinition => {
+  const taken = new Set(w.spawns.map(sp => `${sp.formationSlot.depth},${sp.formationSlot.lane}`));
+  const spawns = w.spawns.map(sp => {
+    if (sp.formationSlot.depth !== 0 || sp.formationSlot.lane !== lane) return sp;
+    const depth = [1, 2, 3, 4, 5].find(d => !taken.has(`${d},${lane}`)) ?? 1;
+    taken.add(`${depth},${lane}`);
+    return { ...sp, formationSlot: { depth, lane } };
+  });
+  return { ...w, spawns: [{ monsterId: carrier, formationSlot: { depth: 0, lane } }, ...spawns] };
+};
+const toTreasure = (s: StageDef, carrier: string): StageDef => {
+  const waves = s.waveDefs!.map((w, i) => (i < 3 ? withCarrier(w, carrier, TREASURE_LANES[i]) : w));
+  return { ...s, waveDefs: waves, special: { kind: 'TREASURE', goal: 'ล่าก็อบลินขนสมบัติ 3 ตัวก่อนมันหนี — ตัวที่จับได้เท่านั้นที่ดรอปอุปกรณ์' } };
+};
+
+/** SKILL TRIAL → CHALLENGE: the trial room (regroup in place) + fail rules on the lesson of the tier */
+const toChallenge = (s: StageDef, rules: ChallengeRule[], goal: string): StageDef => ({
+  ...s, rulePreset: 'arena', special: { kind: 'CHALLENGE', challenge: rules, goal },
+});
 
 const trainingDef = (n: number, unlockFloor: number, levels: [number, number], exp: number, potion: string, count: number): FarmDungeonDefinition => ({
   id: `training_${n}`, type: 'TRAINING', name: `Training ${['I', 'II', 'III', 'IV', 'V'][n - 1]}`, unlockFloor, recommendedLevel: levels,
   baseRewards: { heroExp: exp, items: [{ itemId: potion, count }] },
   dailyBonusPool: 'TRAINING', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.55, deathRule: 'EVENT_KO', targetTime: TRAINING_TARGET_TIME[n - 1],
-  stage: stageOf(TRAINING_STAGES, `training_${n}`),
+  stage: toSurvival(stageOf(TRAINING_STAGES, `training_${n}`), ...SURVIVAL_TUNING[n - 1]),
 });
+
+/** SURVIVAL per Training tier: [seconds, group every s, max alive, kills for 2★ / 3★] */
+const SURVIVAL_TUNING: [number, number, number, [number, number]][] = [
+  [75, 5, 7, [60, 68]],
+  [85, 5, 7, [72, 82]],
+  [95, 5, 8, [75, 85]],
+  [110, 6, 8, [68, 78]],
+  [120, 6, 9, [72, 82]],
+];
 
 const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]): FarmDungeonDefinition => ({
   id: `ascension_${n}`, type: 'ASCENSION', name: `Ascension ${['I', 'II', 'III'][n - 1]}`, unlockFloor, recommendedLevel: levels,
   baseRewards: { items: [{ itemId: `bt_stone_${n}`, count: 1 }], bonusDrops: [{ chance: 0.2, items: [{ itemId: `bt_stone_${n}`, count: 1 }] }] },
   firstClearBonus: { items: [{ itemId: `bt_stone_${n}`, count: 1 }] },
   dailyBonusPool: 'ASCENSION', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: ASCENSION_TARGET_TIME[n - 1],
-  stage: stageOf(ASCENSION_STAGES, `ascension_${n}`),
+  stage: ASCENSION_DUELS[n - 1],
 });
+
+/** Ascension I–III = BOSS DUEL guardians (monsters-farm.ts) — the old ASCENSION_STAGES waves are kept for reference sims only */
+const ASCENSION_DUELS: StageDef[] = [
+  bossDuel('ascension_1', 'Ascension I · ศิลาผู้พิทักษ์', 'stone_sentinel', 90, 180, 'twilight-1'),
+  bossDuel('ascension_2', 'Ascension II · ราชันฝูงหมาป่า', 'pack_lord', 110, 210, 'twilight-1'),
+  bossDuel('ascension_3', 'Ascension III · ยักษ์ศิลาโบราณ', 'ancient_colossus', 130, 240, 'misty-1'),
+];
+export const ASCENSION_WAVE_STAGES = ASCENSION_STAGES;
 
 
 // ------------------------------------------------------------------ Equipment Hunt (Equipment spec §22–34)
@@ -418,8 +488,11 @@ const huntDef = (t: HuntTier): FarmDungeonDefinition => ({
   firstClearBonus: { items: [{ itemId: 'enhancement_ore', count: 20 }] },
   dailyBonusPool: 'HUNT', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: HUNT_TARGET_TIME[t.n - 1],
   equipmentDrops: t.drops, firstClearItem: t.first,
-  stage: stageOf(HUNT_STAGES, `hunt_${t.n}`),
+  stage: toTreasure(stageOf(HUNT_STAGES, `hunt_${t.n}`), 'treasure_goblin'),
 });
+
+/** TREASURE: each carrier caught rolls the tier's drop table at itemChance × this (≈ the old one roll per clear) */
+export const CARRIER_DROP_SCALE = 0.5;
 
 
 // ------------------------------------------------------------------ Skill Trial (Skill Upgrade spec)
@@ -532,8 +605,16 @@ const trialDef = (t: TrialTier): FarmDungeonDefinition => ({
   },
   firstClearBonus: { items: t.first.map(([itemId, count]) => ({ itemId, count })) },
   dailyBonusPool: 'SKILL', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: TRIAL_TARGET_TIME[t.n - 1],
-  stage: stageOf(TRIAL_STAGES, `trial_${t.n}`),
+  stage: toChallenge(stageOf(TRIAL_STAGES, `trial_${t.n}`), ...TRIAL_RULES[t.n - 1]),
 });
+
+/** CHALLENGE rules per Skill Trial tier (the tier's lesson) */
+const TRIAL_RULES: [ChallengeRule[], string][] = [
+  [[{ type: 'CAST_LIMIT', max: 1, skills: ['alpha_howl'], label: 'ALPHA HOWL สำเร็จ 2 ครั้ง' }], 'ตัดร่าย! ห้ามปล่อยให้ ALPHA HOWL สำเร็จเกิน 1 ครั้ง'],
+  [[{ type: 'KILL_BEFORE', monsterId: 'goblin_shaman', seconds: 30, label: 'หมอผีรอดเกิน 30 วินาที' }], 'ล่าหมอผี! ก็อบลินหมอผีทุกตัวต้องล้มภายใน 30 วินาทีหลังโผล่'],
+  [[{ type: 'CAST_LIMIT', max: 5, skills: ['healing_ritual', 'alpha_howl'], label: 'ฮีล/ฮาวล์ของศัตรูสำเร็จเกิน 5 ครั้ง' }], 'ร่ายซ้อน! ห้ามปล่อยให้ HEALING RITUAL / ALPHA HOWL สำเร็จรวมเกิน 5 ครั้ง'],
+  [[{ type: 'CAST_LIMIT', max: 1, skills: ['warden_seal'], label: 'ผนึกผู้คุมสำเร็จ 2 ครั้ง' }], 'Break! ห้ามปล่อยให้ WARDEN SEAL สำเร็จเกิน 1 ครั้ง'],
+];
 
 export const FARM_DUNGEONS: FarmDungeonDefinition[] = [
   trainingDef(1, 0, [1, 2], 60, 'exp_potion_s', 1),

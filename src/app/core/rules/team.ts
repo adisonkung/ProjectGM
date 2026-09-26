@@ -36,12 +36,12 @@ export function autoPlace(heroes: OwnedHero[]): TeamSlot[] {
   return slots;
 }
 
-/** แปลงทีมที่จัดไว้เป็นข้อมูลยูนิตสำหรับเอนจินต่อสู้ (ข้ามตัวที่บาดเจ็บ) */
+/** แปลงทีมที่จัดไว้เป็นข้อมูลยูนิตสำหรับเอนจินต่อสู้ */
 export function teamToUnits(team: TeamSlot[], heroes: OwnedHero[]): UnitSpec[] {
   const out: UnitSpec[] = [];
   for (const slot of team) {
     const h = heroes.find(x => x.uid === slot.uid);
-    if (!h || h.injury > 0) continue;
+    if (!h) continue;
     const t = HERO_BY_ID[h.templateId];
     out.push({
       name: t.name,

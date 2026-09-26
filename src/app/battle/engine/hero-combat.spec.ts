@@ -27,7 +27,7 @@ const H = (id: string, depth: number, lane: number, o: Partial<UnitSpec['stats']
   const t = HERO_BY_ID[id];
   return {
     name: t.name, cls: t.cls, heroId: id, heroUid: 1000 + depth * 10 + lane, sprite: t.sprite,
-    stats: { ...heroStats(t, { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 }), ...o },
+    stats: { ...heroStats(t, { uid: 0, templateId: id, level: 1, potential: 'B' }), ...o },
     pos: { r: depth, c: lane },
   };
 };
@@ -78,7 +78,7 @@ const damageTo = (b: ReturnType<typeof battle>, u: BattleUnit, since = 0) =>
 describe('Hero kits (data)', () => {
   it('5★ Lv1 stats match the balance table', () => {
     const row = (id: string) => {
-      const s = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 });
+      const s = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B' });
       return [s.hp, s.atk, s.def, +s.atkSpeed.toFixed(2), s.range];
     };
     expect(row('aurel')).toEqual([393, 27, 49, 0.99, 1]);
@@ -96,7 +96,7 @@ describe('Hero kits (data)', () => {
     expect(HERO_CLASS_BASE.tank.def).toBeCloseTo(40.83, 2);
     expect(HERO_CLASS_BASE.mage.atk).toBeCloseTo(47.5, 2);
     const at = (id: string, star: number, level = 1) =>
-      heroStats({ ...HERO_BY_ID[id], star: star as 1 }, { uid: 0, templateId: id, level, potential: 'B', injury: 0 });
+      heroStats({ ...HERO_BY_ID[id], star: star as 1 }, { uid: 0, templateId: id, level, potential: 'B' });
     const t5 = at('aurel', 5);
     expect([t5.hp, t5.atk, t5.def]).toEqual([393, 27, 49]);
     expect(t5.hp).not.toBe(Math.round(393 * 1.2));
@@ -119,7 +119,7 @@ describe('Hero kits (data)', () => {
     const ids = ['aurel', 'jin', 'shade', 'sylvie', 'velma', 'lumina'];
     const b = battle(ids.map((id, i) => H(id, i < 3 ? 0 : 3, i % 3)), [mon('forest_slime', 5, 1)]);
     for (const id of ids) {
-      const shown = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B', injury: 0 });
+      const shown = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B' });
       const u = b.hero(id);
       expect([u.maxHp, u.atk, u.def]).toEqual([shown.hp, shown.atk, shown.def]);
       expect([u.maxHp, u.atk, u.def]).toEqual([HERO_5STAR_LV1[u.cls].hp, HERO_5STAR_LV1[u.cls].atk, HERO_5STAR_LV1[u.cls].def]);
