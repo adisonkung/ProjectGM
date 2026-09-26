@@ -21,7 +21,7 @@ import { applyBuff, buffRemaining, hasFlag, hasStatus, modifier } from './buffs'
 import { DamageResolver } from './damage-resolver';
 import { distance, Grid } from './grid';
 import { nextStep } from './pathfinding';
-import { selectTarget } from './targeting';
+import { selectTarget, TARGET_STRATEGIES } from './targeting';
 
 // ------------------------------------------------------------------ harness
 
@@ -411,29 +411,92 @@ describe('Stage 4–10 bosses', () => {
     expect(hasFlag(t, 'broken')).toBeTrue();
   });
 
-  it('extra 26 — Elder Treant at 50%: attack speed ×1.2 and Call of the Forest cooldown 14 → 10', () => {
+  it('extra 26 — Elder Treant at 50%: ANCIENT RAGE (attack speed ×1.15, Call cooldown 12 → 10) enables Thorn Pulse', () => {
     const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
     b.freeze('all');
     const t = b.monsters('elder_treant')[0];
+    expect(t.castSkills!.some(c => c.def.id === 'thorn_pulse')).toBeFalse();
     b.dmg(t, Math.ceil(t.maxHp * 0.51));
-    expect(b.of('bossPhase').map(p => p.phase)).toEqual(['enraged_forest']);
-    expect(modifier(t, 'attackSpeedMultiplier')).toBeCloseTo(1.2, 5);
+    expect(b.of('bossPhase').map(p => p.phase)).toEqual(['ancient_rage']);
+    expect(modifier(t, 'attackSpeedMultiplier')).toBeCloseTo(1.15, 5);
     expect((b.e as any).monsterAI.cooldownOf(t, MONSTER_SKILLS['call_of_the_forest'])).toBe(10);
+    expect(t.castSkills!.some(c => c.def.id === 'thorn_pulse')).toBeTrue();
   });
 
-  it('extra 27 — Call of the Forest summons 2 Forest Spirits + 1 Magic Mushroom, never more than 3 alive', () => {
+  it('final pass — Thorn Pulse: every 8 s, not interruptible, moderate damage to every hero (no one-shot)', () => {
+    const tp = MONSTER_SKILLS['thorn_pulse'];
+    expect([tp.cooldown, tp.interruptible, tp.target.type]).toEqual([8, false, 'ALL_HEROES']);
+    const b = battle([H('aurel', 0, 1), H('lumina', 4, 1), H('sylvie', 4, 0)], [mon('elder_treant', 1, 1)]);
+    b.freeze('all');
+    const t = b.monsters('elder_treant')[0];
+    b.cast(t, 'thorn_pulse');
+    expect(b.of('castStart').at(-1)!.interruptible).toBeFalse();
+    b.until(() => !t.casting, 3);
+    for (const id of ['aurel', 'lumina', 'sylvie']) {
+      const h = b.hero(id);
+      expect(h.hp).withContext(id).toBeLessThan(h.maxHp);
+      expect(h.hp / h.maxHp).withContext(id).toBeGreaterThan(0.4); // moderate, even at Lv1 with no gear
+    }
+    // an interrupt attempt does nothing
+    b.cast(t, 'thorn_pulse');
+    (b.e as any).tryInterrupt(b.hero('sylvie'), t);
+    expect(t.casting).withContext('still casting after an interrupt attempt').toBeTruthy();
+  });
+
+  it('extra 27 — Call of the Forest summons 1 Forest Spirit + 1 Magic Mushroom, never more than 2 alive', () => {
     const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
     b.freeze('all');
     const t = b.monsters('elder_treant')[0];
     b.cast(t, 'call_of_the_forest');
     b.until(() => !t.casting, 4);
-    expect(b.monsters('forest_spirit').length).toBe(2);
+    expect(b.monsters('forest_spirit').length).toBe(1);
     expect(b.monsters('magic_mushroom').length).toBe(1);
     const cond = MONSTER_SKILLS['call_of_the_forest'].conditions;
     expect(cond.every(c => (b.e as any).monsterAI.conditionHolds(t, MONSTER_SKILLS['call_of_the_forest'], c))).toBeFalse();
     b.kill(b.monsters('forest_spirit')[0]);
-    (b.e as any).summon(t, 'call_of_the_forest', [{ id: 'forest_spirit', count: 2 }], 3);
-    expect(b.monsters('forest_spirit').filter(u => u.alive).length).toBe(2);
+    (b.e as any).summon(t, 'call_of_the_forest', [{ id: 'forest_spirit', count: 2 }], 2);
+    expect(b.monsters('forest_spirit').filter(u => u.alive).length).toBe(1);
+  });
+
+  it('final pass — F8 synergy: wolves bleed, the Mist Wraith hunts the bleeding hero, Mist Strike +20 % vs bleed', () => {
+    expect(MONSTERS['corrupted_wolf'].attack.onHitEveryN).toEqual({ n: 3, status: 'bleed' });
+    expect(MONSTERS['mist_wraith'].ai.targeting.preferStatus).toBe('bleed');
+    const strike = MONSTER_SKILLS['mist_form'].effects.find(e => e.type === 'DAMAGE') as { bonusVsStatus?: { status: string; mul: number } };
+    expect(strike.bonusVsStatus).toEqual({ status: 'bleed', mul: 1.2 });
+    // targeting: a bleeding front-row hero beats a lower-HP back-row hero
+    const h = (id: number, line: 'front' | 'back', hp: number, bleeding: boolean) => ({
+      id, pos: { r: 1, c: 2 }, hp, maxHp: 100, line, buffs: bleeding ? [{ def: { id: 'bleed' } }] : [],
+    });
+    const cfg = MONSTERS['mist_wraith'].ai.targeting;
+    const pick = TARGET_STRATEGIES.LOWEST_HP_PCT({ from: { r: 1, c: 12 }, candidates: [h(1, 'front', 90, true), h(2, 'back', 30, false)], attackRange: 1.3, cfg });
+    expect(pick!.id).toBe(1);
+    const none = TARGET_STRATEGIES.LOWEST_HP_PCT({ from: { r: 1, c: 12 }, candidates: [h(1, 'front', 90, false), h(2, 'back', 30, false)], attackRange: 1.3, cfg });
+    expect(none!.id).toBe(2);
+    // damage: the same strike deals 1.2× to a bleeding hero
+    const hit = (bleeding: boolean) => {
+      const b = battle([H('lumina', 4, 1, TOUGH), H('aurel', 0, 1, TOUGH)], [mon('mist_wraith', 1, 1)]);
+      b.freeze('all');
+      const w = b.monsters('mist_wraith')[0];
+      const l = b.hero('lumina');
+      if (bleeding) b.status(l, 'bleed', w, 60);
+      const before = l.hp;
+      (b.e as any).activateMonsterSkill(w, MONSTER_SKILLS['mist_form'], l.id);
+      return { dealt: before - l.hp, bonus: b.e.metrics.bonusHits['mist_form'] ?? 0 };
+    };
+    const plain = hit(false);
+    const marked = hit(true);
+    expect(plain.bonus).toBe(0);
+    expect(marked.bonus).toBe(1);
+    expect(marked.dealt / plain.dealt).toBeGreaterThan(1.15);
+    expect(marked.dealt / plain.dealt).toBeLessThan(1.25);
+  });
+
+  it('final pass — F6 transition floor: one Goblin Shaman per wave; F7 lighter openers; F8 opens with a hunting wraith', () => {
+    const waves = (f: number) => wavesOf(STAGES[f - 1]);
+    for (const w of waves(6)) expect(w.spawns.filter(sp => sp.monsterId === 'goblin_shaman').length).toBe(1);
+    expect(waves(7)[0].spawns.length).toBe(4);
+    expect(waves(8)[0].spawns.map(sp => sp.monsterId)).toContain('mist_wraith');
+    expect(STAGES[7].monsterTuning).toEqual({ hp: 1.1 });
   });
 
   it('extra 28 — phases are never skipped: a huge hit stops at the next threshold', () => {
@@ -756,7 +819,7 @@ describe('Stage 4–10 required tests', () => {
     const t = b.monsters('elder_treant')[0];
     b.cast(t, 'call_of_the_forest');
     b.until(() => !t.casting, 4);
-    expect(b.monsters('forest_spirit').length).toBe(2);
+    expect(b.monsters('forest_spirit').length).toBe(1);
     expect(b.monsters('magic_mushroom').length).toBe(1);
     expect(b.of('summon').every(s => s.src === t.id)).toBeTrue();
   });
@@ -770,7 +833,7 @@ describe('Stage 4–10 required tests', () => {
     (b.e as any).heal(t, t.maxHp); // back above 50% …
     b.dmg(t, Math.ceil(t.maxHp * 0.6)); // … and below again
     expect(b.of('bossPhase').filter(p => p.src === t.id).length).toBe(1);
-    expect(modifier(t, 'attackSpeedMultiplier')).toBeCloseTo(1.2, 5);
+    expect(modifier(t, 'attackSpeedMultiplier')).toBeCloseTo(1.15, 5);
   });
 
   it('12. Corrupted Wolf applies Bleed every third successful hit', () => {

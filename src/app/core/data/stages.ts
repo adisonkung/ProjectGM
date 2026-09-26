@@ -63,31 +63,34 @@ export const STAGES: StageDef[] = [
       { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
   ] },
   // Stage 6 — Corrupted Tribe: enemy healing + priority target (Goblin Guards shield the Shaman; Focus / Interrupt it)
-  { floor: 6, recommendedLevel: 6, monsterTuning: { hp: 1.15, atk: 1.08, def: 1.05 }, name: 'Corrupted Tribe', background: 'twilight-1', mode: 'eliminate', timeLimit: 120, enemies: [
+  { floor: 6, recommendedLevel: 6, monsterTuning: { hp: 1.12, atk: 1.05, def: 1.05 }, name: 'Corrupted Tribe', background: 'twilight-1', mode: 'eliminate', timeLimit: 120, enemies: [
     { enemy: 'goblin_guard', r: 0, c: 0 }, { enemy: 'goblin_guard', r: 0, c: 2 }, { enemy: 'goblin_shaman', r: 4, c: 1 },
     { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 },
   ], rounds: [
+    // final Level pass: F6 is the last transition floor, not a wall — one shaman per wave (no double Healing Ritual)
     [{ enemy: 'goblin_guard', r: 0, c: 0 }, { enemy: 'goblin_guard', r: 0, c: 1 }, { enemy: 'goblin_guard', r: 0, c: 2 },
       { enemy: 'goblin_shaman', r: 4, c: 1 }, { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
-    // two shamans: their first Healing Ritual is offset by initialDelayRandom ±1 s
     [{ enemy: 'goblin_guard', r: 0, c: 0 }, { enemy: 'goblin_guard', r: 0, c: 2 },
-      { enemy: 'goblin_shaman', r: 4, c: 0 }, { enemy: 'goblin_shaman', r: 4, c: 2 },
+      { enemy: 'goblin_shaman', r: 4, c: 1 },
       { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
   ] },
   // Stage 7 — Guardian of Twilight: first boss (Root Slam: survive · Entangling Roots: situational · Call of the Forest: interrupt)
-  { floor: 7, recommendedLevel: 8, monsterTuning: { hp: 1.1, atk: 1.05, def: 1.05 }, name: 'Guardian of Twilight', background: 'twilight-1', mode: 'eliminate', timeLimit: 150, enemies: [
+  { floor: 7, recommendedLevel: 8, monsterTuning: { hp: 1.3, atk: 1.05, def: 1.05 }, name: 'Guardian of Twilight', background: 'twilight-1', mode: 'eliminate', timeLimit: 150, enemies: [
+    // lighter opening waves (final Level pass): the boss is the exam, not the attrition before it
     { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
-    { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 },
+    { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 },
   ], rounds: [
-    [{ enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 1 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
+    [{ enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
       { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
     // no starting adds: the boss summons them
     [{ enemy: 'elder_treant', r: 1, c: 1 }],
   ] },
   // Stage 8 — Into the Mist: untargetable hunters, body blocking, bleed attrition
-  { floor: 8, recommendedLevel: 8, name: 'Into the Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 120, enemies: [
+  { floor: 8, recommendedLevel: 8, monsterTuning: { hp: 1.1 }, name: 'Into the Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 120, enemies: [
     { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     { enemy: 'corrupted_wolf', r: 1, c: 1 },
+    // wolves open wounds, the wraith hunts the bleeding hero (final Level pass: wolf → bleed → wraith synergy)
+    { enemy: 'mist_wraith', r: 2, c: 1 },
   ], rounds: [
     [{ enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
       { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }],

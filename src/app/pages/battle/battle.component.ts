@@ -375,7 +375,7 @@ export class BattleComponent implements OnDestroy {
         statuses: u.buffs.filter(b => STATUS_ICONS[b.def.id]).map(b => ({ id: b.def.id, icon: STATUS_ICONS[b.def.id], left: b.remaining })),
         untargetable: hasFlag(u, 'untargetable'),
         broken: hasFlag(u, 'broken'),
-        enraged: u.buffs.some(b => b.def.id === 'guardian_enrage' || b.def.id === 'enraged_forest'),
+        enraged: u.buffs.some(b => b.def.id === 'guardian_enrage' || b.def.id === 'ancient_rage'),
         debug: this.debug() ? (u.monster ? this.debugLines(u, byId) : heroDbg.get(u.id)) : undefined,
         targetId: u.targetId,
         line: u.line,

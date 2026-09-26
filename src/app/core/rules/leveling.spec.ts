@@ -138,13 +138,16 @@ describe('EXP potions', () => {
 describe('Rewards, daily bonus, fragments', () => {
   const state = (o: Partial<GameState> = {}): GameState => ({ ...newGameState(), ...o });
 
-  it('Training: daily bonus ×2 for the first 3 clears, then 65 % of BASE (not of the bonus)', () => {
+  it('Training: daily bonus ×1.5 for the first 3 clears, then 55 % of BASE (not of the bonus)', () => {
     const d = FARM_BY_ID['training_3'];
     const bonus = farmRewardBreakdown(d, { bonus: true, firstClear: false, rng: noLuck });
     const rep = farmRewardBreakdown(d, { bonus: false, firstClear: false, rng: noLuck });
-    expect(bonus.final.heroExp).toBe(440);
-    expect(rep.final.heroExp).toBe(143);
-    expect(rep.final.items).toEqual([{ itemId: 'exp_potion_m', count: 0.65 }]);
+    expect(bonus.final.heroExp).toBe(240);
+    expect(rep.final.heroExp).toBe(88);
+    expect(rep.final.items).toEqual([{ itemId: 'exp_potion_m', count: 0.55 }]);
+    expect(FARM_DUNGEONS.filter(x => x.type === 'TRAINING').map(x => [x.baseRewards.heroExp, x.dailyBonusMultiplier, x.repeatRewardMultiplier])).toEqual([
+      [60, 1.5, 0.55], [100, 1.5, 0.55], [160, 1.5, 0.55], [240, 1.5, 0.55], [320, 1.5, 0.55],
+    ]);
     expect(DAILY_BONUS['TRAINING']).toBe(3);
     let s = state();
     const participants = s.team.map(t => t.uid);
@@ -154,29 +157,42 @@ describe('Rewards, daily bonus, fragments', () => {
       exp.push(r.breakdown!.final.heroExp);
       s = r.state;
     }
-    expect(exp).toEqual([160, 160, 160, 52, 52]);
+    expect(exp).toEqual([90, 90, 90, 33, 33]);
     expect(dailyBonusLeft(s.daily, 'TRAINING')).toBe(0);
     // still playable, still rewarding; the next day resets only the counter
     expect(dailyBonusLeft(ensureDaily(s.daily, NEXT_DAY), 'TRAINING')).toBe(3);
-    // 3 bonus smalls ×2 = 6, then 0.65 + 0.65 carried → 7 potions + 0.3 carry
-    expect(s.inventory['exp_potion_s']).toBe(7);
-    expect(s.rewardCarry['exp_potion_s']).toBeCloseTo(0.3, 5);
+    // 3 bonus smalls ×1.5 = 4.5, then 0.55 + 0.55 → 5 potions + 0.6 carried
+    expect(s.inventory['exp_potion_s']).toBe(5);
+    expect(s.rewardCarry['exp_potion_s']).toBeCloseTo(0.6, 5);
   });
 
-  it('Ascension: guaranteed stone, daily bonus 2, repeat = 6 fragments (60 %), 10 fragments = 1 stone, first clear +1', () => {
+  it('Ascension: guaranteed stone, daily bonus 2 runs ×1.5, repeat = 6 fragments (60 %), 10 fragments = 1 stone, first clear +1', () => {
     let s = state({ cleared: 5 });
     const participants = s.team.map(t => t.uid);
     const run = { win: true, deaths: 0, time: 80, participants };
     const r1 = completeFarmRun(s, FARM_BY_ID['ascension_1'], run, noLuck, DAY);
-    expect(r1.state.inventory['bt_stone_1']).toBe(3); // 1 ×2 bonus + 1 first clear
+    // 1 × 1.5 bonus = 1 stone + 5 fragments, + 1 first clear
+    expect([r1.state.inventory['bt_stone_1'], r1.state.inventory['bt_fragment_1']]).toEqual([2, 5]);
     s = completeFarmRun(r1.state, FARM_BY_ID['ascension_1'], run, noLuck, DAY).state;
-    expect(s.inventory['bt_stone_1']).toBe(5);
+    expect([s.inventory['bt_stone_1'], s.inventory['bt_fragment_1']]).toEqual([4, 0]);
     s = completeFarmRun(s, FARM_BY_ID['ascension_1'], run, noLuck, DAY).state;
-    expect([s.inventory['bt_stone_1'], s.inventory['bt_fragment_1']]).toEqual([5, 6]);
+    expect([s.inventory['bt_stone_1'], s.inventory['bt_fragment_1']]).toEqual([4, 6]);
     s = completeFarmRun(s, FARM_BY_ID['ascension_1'], run, noLuck, DAY).state;
-    expect([s.inventory['bt_stone_1'], s.inventory['bt_fragment_1']]).toEqual([6, 2]);
+    expect([s.inventory['bt_stone_1'], s.inventory['bt_fragment_1']]).toEqual([5, 2]);
+    expect(FARM_DUNGEONS.filter(x => x.type === 'ASCENSION').every(x => x.dailyBonusMultiplier === 1.5 && x.repeatRewardMultiplier === 0.6)).toBeTrue();
     expect(combineFragments({ bt_fragment_2: 23 })).toEqual({ bt_fragment_2: 3, bt_stone_2: 2 });
     expect(grantItems({}, {}, [{ itemId: 'bt_stone_3', count: 1.4 }]).inventory).toEqual({ bt_stone_3: 1, bt_fragment_3: 4 });
+  });
+
+  it('EXP potion throughput is part of Training: effective EXP per hero per run (battle + potions ÷ 5)', () => {
+    const potionExp = (d: typeof FARM_DUNGEONS[number]) => (d.baseRewards.items ?? []).reduce((a, i) => a + i.count * (ITEMS[i.itemId].exp ?? 0), 0);
+    const eff = FARM_DUNGEONS.filter(d => d.type === 'TRAINING').map(d => (d.baseRewards.heroExp! + potionExp(d) / 5));
+    expect(eff).toEqual([70, 120, 190, 300, 420]);
+    // Training V with its daily bonus: 630 per hero (was 1,200) — repeat 231
+    expect(eff[4] * 1.5).toBe(630);
+    expect(Math.round(eff[4] * 0.55)).toBe(231);
+    // higher tiers are more efficient, but gradually (≤ ×1.7 per tier)
+    for (let i = 1; i < eff.length; i++) expect(eff[i] / eff[i - 1]).toBeLessThan(1.75);
   });
 
   it('bonus drop is extra only (20 % +1 stone)', () => {
@@ -203,8 +219,8 @@ describe('Rewards, daily bonus, fragments', () => {
     const participants = s.team.map(t => t.uid);
     const r = completeFarmRun(s, FARM_BY_ID['training_1'], { win: true, deaths: 2, time: 90, participants }, noLuck, DAY);
     const expOf = (uid: number) => r.state.heroes.find(h => h.uid === uid)!;
-    expect(expOf(participants[0]).exp).toBe(160); // 80 × 2 daily bonus
-    expect(expOf(bench[0].uid).exp).toBe(Math.round(160 * TRAINING_SLOTS.expShare));
+    expect(expOf(participants[0]).exp).toBe(90); // 60 × 1.5 daily bonus
+    expect(expOf(bench[0].uid).exp).toBe(Math.round(90 * TRAINING_SLOTS.expShare));
     expect(expOf(bench[1].uid).exp).toBe(0);
     expect(r.state.heroes.every(h => h.injury === 0)).toBeTrue();
     expect(TRAINING_SLOTS).toEqual({ count: 2, expShare: 0.35 });
@@ -223,10 +239,14 @@ describe('Rewards, daily bonus, fragments', () => {
     // clearing every floor once (with first-clear bonuses) doesn't even reach Lv9 — Lv10 needs farming
     const firstClears = Object.values(TOWER_REWARDS).reduce((a, t) => a + t.firstClear.heroExp! + t.clear.heroExp!, 0);
     expect(firstClears).toBeLessThan(totalExpTo(9));
-    // Floors 1–5 first clears alone never make Lv5 heroes (they land around Lv3, toward Lv4)
-    const early = [1, 2, 3, 4, 5].reduce((a, f) => a + TOWER_REWARDS[f].firstClear.heroExp! + TOWER_REWARDS[f].clear.heroExp!, 0);
-    expect(early).toBeGreaterThanOrEqual(totalExpTo(3));
-    expect(early).toBeLessThan(totalExpTo(4));
+    // first clears are a bonus, not the leveling engine: F1–3 ≈ Lv2, F1–5 stays below Lv3 (never Lv5)
+    const sum = (fs: number[]) => fs.reduce((a, f) => a + TOWER_REWARDS[f].firstClear.heroExp! + TOWER_REWARDS[f].clear.heroExp!, 0);
+    expect(sum([1, 2, 3])).toBeGreaterThanOrEqual(totalExpTo(2));
+    expect(sum([1, 2, 3, 4, 5])).toBeLessThan(totalExpTo(3));
+    // ≈ 10–20 % of the EXP inside the band: F6–8 vs Lv5 → 8
+    const f68 = sum([6, 7, 8]) / (totalExpTo(8) - totalExpTo(5));
+    expect(f68).toBeGreaterThan(0.1);
+    expect(f68).toBeLessThan(0.2);
     // Floors 8–10 first clears pay rare breakthrough stones
     s = { ...s, cleared: 7 };
     r = completeTowerRun(s, 8, run);

@@ -60,12 +60,13 @@ interface Agg {
   phaseReached: Record<string, number>; phaseTime: number[]; phaseTimeRuns: number[]; status: Record<string, number>;
   deathRuns: number; reviveRuns: number; wipes: number; timeouts: number;
   heroes: Record<string, { dealt: number; healed: number; skills: number; ults: number; deaths: number; revives: number }>;
+  bonusHits: Record<string, number>; aims: Record<string, { total: number; marked: number }>; bossStatus: Record<string, number>;
 }
 const newAgg = (): Agg => ({
   wins: 0, time: 0, deaths: 0, revives: 0, wave: 0, dealt: 0, taken: 0, heal: 0, opp: 0, att: 0, succ: 0, crit: 0,
   resHit: 0, resMiss: 0, focusUp: 0, unsafe: 0, anchor: 0, threatDeaths: 0, phase: 0, brk: 0, brkFail: 0, fight: 0, ults: 0,
   bossRuns: 0, bossLife: 0, bossKilled: 0, sealBroken: 0, skills: {}, phaseReached: {}, phaseTime: [], phaseTimeRuns: [], status: {},
-  deathRuns: 0, reviveRuns: 0, wipes: 0, timeouts: 0, heroes: {},
+  deathRuns: 0, reviveRuns: 0, wipes: 0, timeouts: 0, heroes: {}, bonusHits: {}, aims: {}, bossStatus: {},
 });
 
 // --farm=training_1,ascension_2 (or --farm=all): farm dungeon encounters instead of tower floors
@@ -150,6 +151,12 @@ for (let stage of floors) {
         t.started += st.started; t.completed += st.completed; t.interrupted += st.interrupted; t.broken += st.broken; t.cancelled += st.cancelled;
       }
       for (const [id, n] of Object.entries(m.statusApplied)) a.status[id] = (a.status[id] ?? 0) + n;
+      for (const [id, n] of Object.entries(m.bonusHits)) a.bonusHits[id] = (a.bonusHits[id] ?? 0) + n;
+      for (const [id, x] of Object.entries(m.skillAims)) {
+        const t = (a.aims[id] ??= { total: 0, marked: 0 });
+        t.total += x.total; t.marked += x.marked;
+      }
+      for (const [id, t] of Object.entries(m.bossStatusTime)) a.bossStatus[id] = (a.bossStatus[id] ?? 0) + t;
       if (m.bossSpawnedAt != null) {
         a.bossRuns++;
         a.bossLife += m.bossLifetime(e.time) ?? 0;
@@ -192,9 +199,16 @@ for (let stage of floors) {
       for (const [id, st] of Object.entries(a.skills).sort()) {
         console.log(`     ${id.padEnd(22)} started ${f1(st.started / n, 2)} · completed ${f1(st.completed / n, 2)} · interrupted ${f1(st.interrupted / n, 2)} · broken ${f1(st.broken / n, 2)} · cancelled ${f1(st.cancelled / n, 2)}`);
       }
-      const statuses = ['ancient_protection', 'broken', 'guardian_empowered', 'guardian_enrage', 'enraged_forest', 'soul_link', 'dark_fog', 'bleed']
+      const statuses = ['ancient_protection', 'broken', 'guardian_empowered', 'guardian_enrage', 'ancient_rage', 'soul_link', 'dark_fog', 'bleed']
         .filter(id => a.status[id]).map(id => `${id} ${f1(a.status[id] / n, 2)}`).join(' · ');
       if (statuses) console.log(`     statuses: ${statuses}`);
+      for (const [id, x] of Object.entries(a.aims)) {
+        console.log(`     ${id} aimed ${f1(x.total / n, 2)}/run · at a marked (status) hero ${pct(x.total ? x.marked / x.total : 0)} · bonus-damage hits ${f1((a.bonusHits[id] ?? 0) / n, 2)}/run`);
+      }
+      const bs = Object.entries(a.bossStatus).filter(([id]) => id !== 'phase_shift').map(([id, t]) => `${id} ${f1(t / n, 1)}s`).join(' · ');
+      if (bs && a.bossRuns) console.log(`     boss status uptime per run: ${bs} (boss lifetime ${f1(a.bossLife / a.bossRuns, 1)}s)`);
+      const dh = Object.entries(a.heroes).map(([name, h]) => `${name} ${f1(h.deaths / n, 2)}`).join(' · ');
+      console.log(`     deaths per hero per run: ${dh}`);
     }
   }
 

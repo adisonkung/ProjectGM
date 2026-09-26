@@ -15,11 +15,11 @@
  * ASSUME the future gear / skill layers (level-only teams cannot clear them); Floor 10 is never assumed.
  * Gear / skill farming time is NOT included (those systems don't exist yet).
  */
-import { BREAKTHROUGHS, FARM_BY_ID, FARM_DUNGEONS } from '../../src/app/core/data/economy';
+import { BREAKTHROUGHS, FARM_BY_ID, FARM_DUNGEONS, TOWER_REWARDS } from '../../src/app/core/data/economy';
 import { newGameState } from '../../src/app/core/data/starter';
 import { GameState } from '../../src/app/core/models/game-state';
 import { OwnedHero } from '../../src/app/core/models/hero';
-import { breakthrough, levelState, nextBreakthrough, useAllPotionsToCap } from '../../src/app/core/rules/leveling';
+import { breakthrough, expToNext, levelState, nextBreakthrough, useAllPotionsToCap } from '../../src/app/core/rules/leveling';
 import { completeFarmRun, completeTowerRun, dailyBonusLeft, ensureDaily, isUnlocked } from '../../src/app/core/rules/rewards';
 
 declare const process: { argv: string[] };
@@ -32,6 +32,12 @@ const RUN_SECONDS: Record<string, number> = {
   ascension_1: 80, ascension_2: 96, ascension_3: 125,
 };
 const OVERHEAD = 20;
+/** measured tower clear seconds at the floor's band profile (npm run balance -- 200 rec - --all-floors, TACTICAL) */
+const TOWER_SECONDS: Record<number, number> = { 1: 20, 2: 25, 3: 20, 4: 28, 5: 36, 6: 60, 7: 71, 8: 43, 9: 59, 10: 132 };
+const TOWER_BAND_TRAINING: Record<number, string> = {
+  1: 'training_1', 2: 'training_1', 3: 'training_1', 4: 'training_2', 5: 'training_2', 6: 'training_3', 7: 'training_3', 8: 'training_4', 9: 'training_5', 10: 'training_5',
+};
+const TRAIN_RATE: Record<string, number> = {};
 const TOWER_RUN_SECONDS = 110;
 /** tracked level at which a floor's first clear happens (F7+ assumes gear / skills on top of the level) */
 const TOWER_CLEAR_LEVEL: Record<number, number> = { 1: 1, 2: 1, 3: 1, 4: 3, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9 };
@@ -39,7 +45,8 @@ const TOWER_CLEAR_LEVEL: Record<number, number> = { 1: 1, 2: 1, 3: 1, 4: 3, 5: 5
 type Plan = number | 'bonus';
 interface Result {
   levelAt: Record<number, { h: number; day: number; tr: number; asc: number }>;
-  gate: Record<number, { expReady?: number; stonesReady?: number; ascBonus: number; ascRepeat: number; jump: number[] }>;
+  gate: Record<number, { expReady?: number; stonesReady?: number; ascBonus: number; ascRepeat: number; jump: number[]; stored: number[] }>;
+  reserveLevels: number[];
   bandRuns: Record<string, { tr: number; asc: number; h: number }>;
   totalH: number;
   runs: { tr: number; asc: number; tower: number };
@@ -49,8 +56,11 @@ function simulate(plan: Plan, mode: 'TEAM' | 'FOCUS'): Result {
   let s: GameState = newGameState();
   const team = s.team.map(t => t.uid);
   const tracked = mode === 'TEAM' ? team : [team[0]];
-  const res: Result = { levelAt: {}, gate: {}, bandRuns: {}, totalH: 0, runs: { tr: 0, asc: 0, tower: 0 } };
-  for (const b of BREAKTHROUGHS) res.gate[b.tier] = { ascBonus: 0, ascRepeat: 0, jump: [] };
+  const res: Result = { levelAt: {}, gate: {}, bandRuns: {}, totalH: 0, runs: { tr: 0, asc: 0, tower: 0 }, reserveLevels: [] };
+  for (const b of BREAKTHROUGHS) res.gate[b.tier] = { ascBonus: 0, ascRepeat: 0, jump: [], stored: [] };
+  // two reserve heroes sit in the Training Slots (35 % of Training battle EXP, no potions)
+  const reserves = s.heroes.filter(h => !team.includes(h.uid)).slice(0, 2).map(h => h.uid);
+  s = { ...s, trainingSlots: reserves };
   let rng = 12345;
   const rand = () => ((rng = (rng * 1103515245 + 12345) % 2 ** 31) / 2 ** 31);
   let seconds = 0;
@@ -94,11 +104,13 @@ function simulate(plan: Plan, mode: 'TEAM' | 'FOCUS'): Result {
         setHero(r.hero);
         if (!tracked.includes(uid)) continue;
         const before = hero(uid).level;
+        const storedExp = (hero(uid).exp ?? 0) - expToNext(before);
         const b = breakthrough(hero(uid), s.inventory);
         if (!('error' in b)) {
           s = { ...s, inventory: b.inventory };
           setHero(b.hero);
           res.gate[b.hero.breakthroughTier ?? 0]?.jump.push(b.hero.level - before);
+          res.gate[b.hero.breakthroughTier ?? 0]?.stored.push(Math.max(0, storedExp));
         }
       }
     }
@@ -167,18 +179,19 @@ function simulate(plan: Plan, mode: 'TEAM' | 'FOCUS'): Result {
     }
   }
   res.totalH = seconds / 3600;
+  res.reserveLevels = reserves.map(u => hero(u).level);
   return res;
 }
 
 const f1 = (v: number | undefined) => (v == null ? '  –  ' : v.toFixed(1).padStart(5));
-const plans: Plan[] = minutesArg ? minutesArg.split(',').map(Number) : ['bonus', 30, 60, 120, 240];
+const plans: Plan[] = minutesArg ? minutesArg.split(',').map(Number) : ['bonus', 30, 60, 120, 240, 480];
 const planName = (p: Plan) => (p === 'bonus' ? 'daily bonus only (3 Training + 2 Ascension / day)' : `${p} min/day`);
 
 for (const mode of ['FOCUS', 'TEAM'] as const) {
   console.log(`\n################ ${mode === 'FOCUS' ? 'ONE priority hero (all potions, own stones only)' : 'CORE TEAM of 5 (potions to the lowest, 5 × stones)'} ################`);
   for (const p of plans) {
     const r = simulate(p, mode);
-    console.log(`\n=== ${planName(p)} — total ${r.totalH.toFixed(1)} h played · ${r.runs.tr} Training + ${r.runs.asc} Ascension + ${r.runs.tower} tower first clears ===`);
+    console.log(`\n=== ${planName(p)} — total ${r.totalH.toFixed(1)} h played · ${r.runs.tr} Training + ${r.runs.asc} Ascension + ${r.runs.tower} tower first clears · 2 Training-Slot reserves end at Lv${r.reserveLevels.join('/')} ===`);
     const lv = (n: number) => r.levelAt[n];
     const seg = (a: number, b: number) => {
       const x = a === 1 ? { h: 0, day: 1, tr: 0, asc: 0 } : lv(a);
@@ -190,17 +203,26 @@ for (const mode of ['FOCUS', 'TEAM'] as const) {
     for (const b of BREAKTHROUGHS) {
       const g = r.gate[b.tier];
       const bottleneck = g.expReady == null || g.stonesReady == null ? '?' : g.stonesReady > g.expReady + 0.05 ? 'STONES' : g.expReady > g.stonesReady + 0.05 ? 'EXP' : 'even';
-      const jumps = g.jump.length ? `levels gained on breakthrough ${g.jump.join(',')}` : '';
+      const jumps = g.jump.length ? `levels gained ${g.jump.join(',')} · stored EXP at breakthrough avg ${Math.round(g.stored.reduce((a, x) => a + x, 0) / g.stored.length)} / max ${Math.max(...g.stored)} (next level needs ${expToNext(b.toLevel) || '–'})` : '';
       console.log(`  BT ${['I', 'II', 'III'][b.tier - 1]} (Lv${b.fromLevel}→${b.toLevel}, ${b.requiredItems[0].count}/hero): Ascension runs ${g.ascBonus} bonus + ${g.ascRepeat} repeat · EXP ready ${f1(g.expReady)} h · stones ready ${f1(g.stonesReady)} h → bottleneck ${bottleneck} · ${jumps}`);
     }
   }
 }
 
-console.log('\n=== reference: per-run EXP per hero (battle EXP; potions ÷ 5 when shared) ===');
+console.log('\n=== reference: effective EXP per hero per run (battle EXP + potions ÷ 5) — bonus / base / repeat ===');
 for (const d of FARM_DUNGEONS.filter(x => x.type === 'TRAINING')) {
   const potion = (d.baseRewards.items ?? []).reduce((a, i) => a + i.count * (i.itemId === 'exp_potion_s' ? 50 : i.itemId === 'exp_potion_m' ? 150 : 500), 0);
   const base = d.baseRewards.heroExp ?? 0;
   const t = RUN_SECONDS[d.id] + OVERHEAD;
   const rep = (base + potion / 5) * d.repeatRewardMultiplier;
-  console.log(`  ${d.id}: bonus ${((base + potion / 5) * d.dailyBonusMultiplier).toFixed(0)} · repeat ${rep.toFixed(0)} EXP/hero · repeat ${(rep / t * 60).toFixed(0)} EXP/hero/min (${t} s/run)`);
+  const eff = base + potion / 5;
+  TRAIN_RATE[d.id] = (rep / t) * 60;
+  console.log(`  ${d.id}: battle ${base} + potions ${potion} (${(potion / 5).toFixed(0)}/hero) → bonus ${(eff * d.dailyBonusMultiplier).toFixed(0)} · base ${eff.toFixed(0)} · repeat ${rep.toFixed(0)} EXP/hero · repeat ${TRAIN_RATE[d.id].toFixed(0)} EXP/hero/min (${t} s/run) · Training Slot reserve ${Math.round(base * d.repeatRewardMultiplier * 0.35)}/repeat run`);
+}
+console.log('\n=== tower repeat EXP per minute vs the band\'s Training repeat ===');
+for (let f = 1; f <= 10; f++) {
+  const t = TOWER_SECONDS[f] + OVERHEAD;
+  const rate = ((TOWER_REWARDS[f].clear.heroExp ?? 0) / t) * 60;
+  const tr = TOWER_BAND_TRAINING[f];
+  console.log(`  F${f}: ${TOWER_REWARDS[f].clear.heroExp} EXP / ${t} s = ${rate.toFixed(0)}/min vs ${tr} ${TRAIN_RATE[tr].toFixed(0)}/min → ${((rate / TRAIN_RATE[tr]) * 100).toFixed(0)} % · first clear +${TOWER_REWARDS[f].firstClear.heroExp}`);
 }

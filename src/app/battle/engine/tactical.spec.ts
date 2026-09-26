@@ -336,23 +336,22 @@ describe('Tactical difficulty — Stage 7', () => {
     expect(MONSTER_SKILLS['entangling_roots'].interruptPriority).toBe('MEDIUM');
   });
 
-  it('Ancient Protection: ×0.80 damage taken while any Call add lives, never stacks, ends with the last add', () => {
+  it('Ancient Protection: ×0.85 damage taken while any Call add lives, never stacks, ends with the last add', () => {
     const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
     const t = b.monsters('elder_treant')[0];
     b.statue(t);
     b.cast(t, 'call_of_the_forest');
     b.until(() => !t.casting, 4);
     expect(hasStatus(t, 'ancient_protection')).toBeTrue();
-    expect(modifier(t, 'damageTakenMultiplier')).toBeCloseTo(0.8, 5);
+    expect(modifier(t, 'damageTakenMultiplier')).toBeCloseTo(0.85, 5);
     applyBuff(t, STATUS_EFFECTS['ancient_protection'], t.id);
-    expect(modifier(t, 'damageTakenMultiplier')).toBeCloseTo(0.8, 5);
+    expect(modifier(t, 'damageTakenMultiplier')).toBeCloseTo(0.85, 5);
     const adds = [...b.monsters('forest_spirit'), ...b.monsters('magic_mushroom')];
-    expect(adds.length).toBe(3);
+    expect(adds.length).toBe(2);
     const x = b.e as any;
     x.applyDamage(adds[0], adds[0].hp, false);
-    x.applyDamage(adds[1], adds[1].hp, false);
     expect(hasStatus(t, 'ancient_protection')).toBeTrue();
-    x.applyDamage(adds[2], adds[2].hp, false);
+    x.applyDamage(adds[1], adds[1].hp, false);
     expect(hasStatus(t, 'ancient_protection')).toBeFalse();
   });
 

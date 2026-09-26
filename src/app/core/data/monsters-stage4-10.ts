@@ -93,11 +93,21 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
     castTime: 3, cooldown: 12, interruptible: true, interruptPriority: 'CRITICAL', firstCastDelay: 5,
     target: { type: 'SELF' },
     effects: [{
-      type: 'SUMMON', monsters: [{ id: 'forest_spirit', count: 2 }, { id: 'magic_mushroom', count: 1 }], maxActive: 3,
+      type: 'SUMMON', monsters: [{ id: 'forest_spirit', count: 1 }, { id: 'magic_mushroom', count: 1 }], maxActive: 2,
       grantWhileAlive: 'ancient_protection',
     }],
     mockFx: { color: '#5ec8e0', area: 'RADIUS_2' },
     conditions: [{ type: 'SUMMON_SLOTS_FREE' }], recovery: 0.4, interruptRecovery: 0.6,
+  },
+
+  /** Elder Treant phase 2 (≤ 50 % HP, Ancient Rage): unavoidable party-wide pressure a correct interrupt can't remove */
+  thorn_pulse: {
+    id: 'thorn_pulse', name: 'ชีพจรหนาม', label: 'THORN PULSE', type: 'ATTACK',
+    castTime: 1, cooldown: 8, interruptible: false,
+    target: { type: 'ALL_HEROES' },
+    effects: [{ type: 'DAMAGE', mul: 0.8, area: 'ALL_ENEMIES', center: 'SELF', damageType: 'MAGIC' }],
+    mockFx: { color: '#9ccc3a', area: 'ALL_ENEMIES' },
+    conditions: [], recovery: 0.3, interruptRecovery: 0,
   },
 
   // Stage 8 — Mist Wraith: untargetable dash + strike from behind (no cast bar: it is "instant")
@@ -107,7 +117,8 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
     target: { type: 'CURRENT_TARGET' },
     effects: [
       { type: 'LEAP_BEHIND' },
-      { type: 'DAMAGE', mul: 1.5, area: 'SINGLE', center: 'TARGET' },
+      // Mist Strike: +20 % against a bleeding hero (Corrupted Wolf bites) — hunts the wounded, never a one-shot alone
+      { type: 'DAMAGE', mul: 1.5, area: 'SINGLE', center: 'TARGET', bonusVsStatus: { status: 'bleed', mul: 1.2 } },
     ],
     conditions: [{ type: 'SELF_LACKS_STATUS', status: 'untargetable' }], recovery: 0.2, interruptRecovery: 0.3,
   },
@@ -251,12 +262,16 @@ export const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 7000, attack: 145, defense: 45, moveSpeed: 1.2, attackRange: 2, attackCooldown: 1.8, attackWindup: 0.45, hitReactionDuration: 0.1, minHitReactionInterval: 3, collisionRadius: 0.7 }),
     ai: {
       targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 2.5 }, movement: 'MELEE_CHASE',
-      skillPriority: ['call_of_the_forest', 'entangling_roots', 'root_slam'],
+      skillPriority: ['call_of_the_forest', 'thorn_pulse', 'entangling_roots', 'root_slam'],
     },
     attack: { id: 'rooted_smash', damageType: 'PHYSICAL', damageMultiplier: 1.1, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.5 },
     skills: ['call_of_the_forest', 'entangling_roots', 'root_slam'], animation: mock,
     phases: [
-      { id: 'enraged_forest', label: 'ป่าคลั่ง', hpBelow: 0.5, statuses: ['enraged_forest'], cooldownOverride: { call_of_the_forest: 10 } },
+      // Ancient Rage: attack speed +15 % + Thorn Pulse every 8 s (not interruptible) — interrupts stop the Call, not the boss
+      {
+        id: 'ancient_rage', label: 'ANCIENT RAGE', hpBelow: 0.5, statuses: ['ancient_rage'], cooldownOverride: { call_of_the_forest: 10 },
+        enableSkills: [{ id: 'thorn_pulse', firstDelay: 2 }],
+      },
     ],
   },
   corrupted_wolf: {
@@ -274,7 +289,7 @@ export const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = {
     id: 'mist_wraith', name: 'วิญญาณหมอก', rank: 'SPECIAL', role: 'ANTI_BACKLINE / EVASIVE', tags: ['mist'],
     displayClass: 'assassin', visual: 'mock_mist_wraith',
     stats: base({ maxHp: 190, attack: 74, defense: 5, moveSpeed: 3.0, attackRange: 1.3, attackCooldown: 1.4 }),
-    ai: { targeting: { strategy: 'LOWEST_HP_PCT', preferBackRow: true, similarHpTolerance: 0.05, targetLockDuration: 1.5 }, movement: 'MELEE_CHASE', skillPriority: ['mist_form'] },
+    ai: { targeting: { strategy: 'LOWEST_HP_PCT', preferStatus: 'bleed', preferBackRow: true, similarHpTolerance: 0.05, targetLockDuration: 1.5 }, movement: 'MELEE_CHASE', skillPriority: ['mist_form'] },
     attack: { id: 'mist_claw', damageType: 'PHYSICAL', damageMultiplier: 1, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.4 },
     skills: ['mist_form'], animation: mock,
   },

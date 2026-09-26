@@ -14,7 +14,11 @@ export interface Targetable {
   def?: number;
   /** class (CLASS_PRIORITY) */
   cls?: HeroClass;
+  /** active statuses (preferStatus) */
+  buffs?: { def: { id: string } }[];
 }
+
+const hasStatus = (t: Targetable, id: string) => !!t.buffs?.some(b => b.def.id === id);
 
 const hpRatio = (t: Targetable) => (t.maxHp > 0 ? t.hp / t.maxHp : 0);
 const byNearest = (from: Cell) => (a: Targetable, b: Targetable) =>
@@ -59,9 +63,11 @@ export const TARGET_STRATEGIES: Record<TargetStrategy, Strategy> = {
 
   LOWEST_HP_PCT: ({ from, candidates: all, attackRange, cfg, current }) => {
     if (!all.length) return null;
-    // preferBackRow (Mist Wraith): the back row is the hunting ground while anyone stands there
+    // preferStatus (Mist Wraith → BLEED): wounded heroes are hunted first, wherever they stand
+    const marked = cfg.preferStatus ? all.filter(t => hasStatus(t, cfg.preferStatus!)) : [];
+    // preferBackRow (Mist Wraith): otherwise the back row is the hunting ground while anyone stands there
     const back = cfg.preferBackRow ? all.filter(t => t.line === 'back') : [];
-    const candidates = back.length ? back : all;
+    const candidates = marked.length ? marked : back.length ? back : all;
     const tol = cfg.similarHpTolerance ?? 0.05;
     const best = Math.min(...candidates.map(hpRatio));
     const similar = candidates.filter(t => hpRatio(t) <= best + tol + 1e-9);

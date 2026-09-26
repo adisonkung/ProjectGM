@@ -87,9 +87,10 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     id: 'panther_frenzy', name: 'สัญชาตญาณล่า', duration: 3, stackPolicy: 'REFRESH_DURATION', buff: true,
     modifiers: { attackSpeedMultiplier: 1.2 },
   },
-  enraged_forest: {
-    id: 'enraged_forest', name: 'ป่าคลั่ง', duration: Infinity, stackPolicy: 'NONE', buff: true,
-    modifiers: { attackSpeedMultiplier: 1.2 },
+  /** Elder Treant ≤ 50 % HP (with Thorn Pulse) */
+  ancient_rage: {
+    id: 'ancient_rage', name: 'Ancient Rage', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.15 },
   },
   /** Elder Treant: while any Call-of-the-Forest add lives (removed by the engine when the last one dies) */
   /** boss phase setup (~1 s): thresholds can't be burst through before the phase mechanics start */
@@ -99,7 +100,7 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
   },
   ancient_protection: {
     id: 'ancient_protection', name: 'พรพงไพรโบราณ', duration: Infinity, stackPolicy: 'NONE', buff: true,
-    modifiers: { damageTakenMultiplier: 0.8 },
+    modifiers: { damageTakenMultiplier: 0.85 },
   },
   guardian_empowered: {
     id: 'guardian_empowered', name: 'พลังบูชายัญ', duration: Infinity, stackPolicy: 'NONE', buff: true,

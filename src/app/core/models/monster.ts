@@ -77,6 +77,8 @@ export interface TargetingConfig {
   similarHpTolerance?: number;
   /** LOWEST_HP_PCT: consider back-row heroes first */
   preferBackRow?: boolean;
+  /** LOWEST_HP_PCT: heroes carrying this status are hunted first (before preferBackRow) — e.g. Mist Wraith → bleed */
+  preferStatus?: string;
   /** CLASS_PRIORITY: hero classes in priority order (others after, by lowest HP%) */
   classPriority?: HeroClass[];
 }
@@ -161,7 +163,11 @@ export type SkillTargetSelector =
 export type SkillEffect =
   | { type: 'APPLY_BUFF'; buffId: string }
   /** damage around the aim point / caster (mitigated normally; never interrupts heroes) */
-  | { type: 'DAMAGE'; mul: number; area: import('./combat').AreaPattern; center: 'TARGET' | 'SELF'; damageType?: DamageType }
+  | {
+      type: 'DAMAGE'; mul: number; area: import('./combat').AreaPattern; center: 'TARGET' | 'SELF'; damageType?: DamageType;
+      /** extra multiplier against a unit carrying `status` (e.g. Mist Strike ×1.2 vs bleeding heroes) */
+      bonusVsStatus?: { status: string; mul: number };
+    }
   /** status on the units just hit / the aimed unit / every hero / self */
   | { type: 'APPLY_STATUS'; status: string; to: 'HIT' | 'TARGET' | 'ALL_HEROES' | 'SELF'; duration?: number }
   /** heal: `pct` of each recipient's max HP (`excludeSummons`: summoned / non-combat units are skipped) */

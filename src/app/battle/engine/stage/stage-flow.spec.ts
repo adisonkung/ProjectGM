@@ -746,4 +746,18 @@ describe('In-wave reinforcements (farm dungeons: sustained waves without extra t
       for (const w of wavesOf(d.stage)) expect(w.reinforcements?.length).withContext(d.id).toBeGreaterThan(0);
     }
   });
+
+  it('Ascension II is a challenge, not a wall: ≤ 1 support caster and ≤ 1 backline diver per wave, one of each in the whole trial', () => {
+    const all = (id: string) => wavesOf(FARM_DUNGEONS.find(d => d.id === id)!.stage)
+      .map(w => [...w.spawns, ...(w.reinforcements ?? []).flatMap(r => r.spawns)].map(sp => sp.monsterId));
+    const a2 = all('ascension_2');
+    for (const w of a2) {
+      expect(w.filter(m => m === 'goblin_shaman' || m === 'dark_shaman' || m === 'mist_witch').length).toBeLessThanOrEqual(1);
+      expect(w.filter(m => m === 'shadow_panther' || m === 'mist_wraith').length).toBeLessThanOrEqual(1);
+    }
+    expect(a2.flat().filter(m => m === 'goblin_shaman').length).toBe(1);
+    expect(a2.flat().filter(m => m === 'shadow_panther').length).toBe(1);
+    // Ascension III keeps the tier-3 casters (the hardest farm)
+    expect(all('ascension_3').flat().filter(m => m === 'dark_shaman' || m === 'mist_witch').length).toBeGreaterThanOrEqual(3);
+  });
 });

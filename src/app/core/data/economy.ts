@@ -50,22 +50,21 @@ export const CATCH_UP = { enabled: false, levelsBehind: 3, trainingExpBonus: 0.2
 
 /**
  * Tower battle-clear EXP per floor (every participating hero) + first-clear bonus (a first clear pays both).
- * Repeat clears ≈ 55–65 % of the same band's post-daily Training EXP per minute (Training stays the farming place;
- * floors are shorter than Training runs, so the per-clear EXP is lower still).
- * First clears ≈ 15–25 % of the EXP inside their band: F1–3 → Lv2 (toward Lv3), F4–5 → Lv3 (toward Lv4),
- * F6–7 useful bonus; F8–10 pay rare breakthrough stones rather than big EXP.
+ * Repeat clears ≈ 50–60 % of the same band's post-daily Training EXP per minute (Training stays the farming place).
+ * First clears ≈ 10–20 % of the EXP inside their band: F1–3 → Lv2, F1–5 stays below Lv3 (never Lv5),
+ * F6–8 useful bonus, F9–10 pay rare breakthrough stones rather than big EXP. Final Level System pass.
  */
 export const TOWER_REWARDS: Record<number, { clear: RewardBundle; firstClear: RewardBundle }> = {
-  1: { clear: { heroExp: 15 }, firstClear: { heroExp: 60 } },
-  2: { clear: { heroExp: 20 }, firstClear: { heroExp: 80 } },
-  3: { clear: { heroExp: 18 }, firstClear: { heroExp: 120 } },
-  4: { clear: { heroExp: 30 }, firstClear: { heroExp: 180 } },
-  5: { clear: { heroExp: 35 }, firstClear: { heroExp: 250 } },
-  6: { clear: { heroExp: 70 }, firstClear: { heroExp: 350, items: [{ itemId: 'bt_stone_1', count: 1 }] } },
-  7: { clear: { heroExp: 75 }, firstClear: { heroExp: 500, items: [{ itemId: 'bt_stone_1', count: 1 }] } },
-  8: { clear: { heroExp: 70 }, firstClear: { heroExp: 600, items: [{ itemId: 'bt_stone_2', count: 2 }] } },
-  9: { clear: { heroExp: 130 }, firstClear: { heroExp: 800, items: [{ itemId: 'bt_stone_3', count: 2 }] } },
-  10: { clear: { heroExp: 230 }, firstClear: { heroExp: 1000, items: [{ itemId: 'bt_stone_3', count: 3 }] } },
+  1: { clear: { heroExp: 10 }, firstClear: { heroExp: 40 } },
+  2: { clear: { heroExp: 11 }, firstClear: { heroExp: 50 } },
+  3: { clear: { heroExp: 10 }, firstClear: { heroExp: 80 } },
+  4: { clear: { heroExp: 17 }, firstClear: { heroExp: 120 } },
+  5: { clear: { heroExp: 20 }, firstClear: { heroExp: 160 } },
+  6: { clear: { heroExp: 40 }, firstClear: { heroExp: 300, items: [{ itemId: 'bt_stone_1', count: 1 }] } },
+  7: { clear: { heroExp: 45 }, firstClear: { heroExp: 450, items: [{ itemId: 'bt_stone_1', count: 1 }] } },
+  8: { clear: { heroExp: 45 }, firstClear: { heroExp: 550, items: [{ itemId: 'bt_stone_2', count: 2 }] } },
+  9: { clear: { heroExp: 70 }, firstClear: { heroExp: 600, items: [{ itemId: 'bt_stone_3', count: 2 }] } },
+  10: { clear: { heroExp: 125 }, firstClear: { heroExp: 800, items: [{ itemId: 'bt_stone_3', count: 3 }] } },
 };
 
 // ------------------------------------------------------------------ farm dungeon encounters
@@ -253,7 +252,7 @@ const stageOf = (list: StageDef[], id: string) => list.find(s => s.id === id)!;
 const trainingDef = (n: number, unlockFloor: number, levels: [number, number], exp: number, potion: string, count: number): FarmDungeonDefinition => ({
   id: `training_${n}`, type: 'TRAINING', name: `Training ${['I', 'II', 'III', 'IV', 'V'][n - 1]}`, unlockFloor, recommendedLevel: levels,
   baseRewards: { heroExp: exp, items: [{ itemId: potion, count }] },
-  dailyBonusPool: 'TRAINING', dailyBonusMultiplier: 2, repeatRewardMultiplier: 0.65, deathRule: 'EVENT_KO', targetTime: TRAINING_TARGET_TIME[n - 1],
+  dailyBonusPool: 'TRAINING', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.55, deathRule: 'EVENT_KO', targetTime: TRAINING_TARGET_TIME[n - 1],
   stage: stageOf(TRAINING_STAGES, `training_${n}`),
 });
 
@@ -261,16 +260,16 @@ const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]):
   id: `ascension_${n}`, type: 'ASCENSION', name: `Ascension ${['I', 'II', 'III'][n - 1]}`, unlockFloor, recommendedLevel: levels,
   baseRewards: { items: [{ itemId: `bt_stone_${n}`, count: 1 }], bonusDrops: [{ chance: 0.2, items: [{ itemId: `bt_stone_${n}`, count: 1 }] }] },
   firstClearBonus: { items: [{ itemId: `bt_stone_${n}`, count: 1 }] },
-  dailyBonusPool: 'ASCENSION', dailyBonusMultiplier: 2, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: ASCENSION_TARGET_TIME[n - 1],
+  dailyBonusPool: 'ASCENSION', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: ASCENSION_TARGET_TIME[n - 1],
   stage: stageOf(ASCENSION_STAGES, `ascension_${n}`),
 });
 
 export const FARM_DUNGEONS: FarmDungeonDefinition[] = [
-  trainingDef(1, 0, [1, 2], 80, 'exp_potion_s', 1),
-  trainingDef(2, 3, [3, 4], 140, 'exp_potion_s', 2),
-  trainingDef(3, 5, [5, 6], 220, 'exp_potion_m', 1),
-  trainingDef(4, 7, [7, 8], 340, 'exp_potion_m', 2),
-  trainingDef(5, 8, [8, 9], 500, 'exp_potion_l', 1),
+  trainingDef(1, 0, [1, 2], 60, 'exp_potion_s', 1),
+  trainingDef(2, 3, [3, 4], 100, 'exp_potion_s', 2),
+  trainingDef(3, 5, [5, 6], 160, 'exp_potion_m', 1),
+  trainingDef(4, 7, [7, 8], 240, 'exp_potion_m', 2),
+  trainingDef(5, 8, [8, 9], 320, 'exp_potion_l', 1),
   ascensionDef(1, 5, [5, 6]),
   ascensionDef(2, 7, [7, 8]),
   ascensionDef(3, 8, [8, 9]),

@@ -467,6 +467,10 @@ export class BattleEngine {
       m.focusHeroTime += dt * heroes.length;
       m.focusOnTargetHeroTime += dt * heroes.filter(h => h.targetId === this.focusTargetId).length;
     }
+    for (const b of this.units) {
+      if (!b.boss || !b.alive) continue;
+      for (const st of b.buffs) if (st.def.buff) m.bossStatusTime[st.def.id] = (m.bossStatusTime[st.def.id] ?? 0) + dt;
+    }
   }
 
   /** visual positions follow the logical cells continuously (no cell-centre locking on screen) */
@@ -1195,6 +1199,13 @@ export class BattleEngine {
     let aim: BattleUnit | null = null;
     if (aimedUnit) aim = aimedUnit.side === u.side ? (aimedUnit.alive ? aimedUnit : null) : this.isValidTarget(u, aimedUnit) ? aimedUnit : null;
     const targets = this.monsterAI.skillTargets(u, def, aim);
+    // exposure: how often a status-hunting skill (Mist Strike vs bleed) lands on a marked target
+    for (const eff of def.effects) {
+      if (eff.type !== 'DAMAGE' || !eff.bonusVsStatus || !aim) continue;
+      const a = (this.metrics.skillAims[def.id] ??= { total: 0, marked: 0 });
+      a.total++;
+      if (aim.buffs.some(b => b.def.id === eff.bonusVsStatus!.status)) a.marked++;
+    }
     const foes = () => this.units.filter(t => this.isValidTarget(u, t));
     const allies = () => this.units.filter(a => a.alive && a.side === u.side && (a.wave < 0 || a.wave === this.flow.waveIndex));
     let hits: BattleUnit[] = [];
@@ -1221,7 +1232,9 @@ export class BattleEngine {
           hits = [];
           for (const t of list) {
             if (single && this.dodged(u, t)) continue;
-            const res = DamageResolver.resolve({ attacker: u, target: t, multiplier: eff.mul, damageType: eff.damageType ?? 'PHYSICAL', sourceId: def.id });
+            const bonus = eff.bonusVsStatus && t.buffs.some(b => b.def.id === eff.bonusVsStatus!.status) ? eff.bonusVsStatus.mul : 1;
+            if (bonus !== 1) this.metrics.bonusHits[def.id] = (this.metrics.bonusHits[def.id] ?? 0) + 1;
+            const res = DamageResolver.resolve({ attacker: u, target: t, multiplier: eff.mul * bonus, damageType: eff.damageType ?? 'PHYSICAL', sourceId: def.id });
             this.applyDamage(t, res.amount, false, false, u);
             hits.push(t);
           }

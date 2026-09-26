@@ -68,6 +68,12 @@ export class BattleMetrics {
   skillStats: Record<string, CastStat> = {};
   /** statuses applied per status id (Ancient Protection, BROKEN, …) */
   statusApplied: Record<string, number> = {};
+  /** damage effects that got their bonusVsStatus multiplier, per skill id */
+  bonusHits: Record<string, number> = {};
+  /** skills with a bonusVsStatus: activations / how many were aimed at a unit carrying that status */
+  skillAims: Record<string, { total: number; marked: number }> = {};
+  /** seconds a boss spent under each status (Ancient Rage uptime …) */
+  bossStatusTime: Record<string, number> = {};
   /** first boss of the stage: spawn / death time, phases entered, end of its sealed (Mist Wraith) phase */
   bossSpawnedAt: number | null = null;
   bossDiedAt: number | null = null;
