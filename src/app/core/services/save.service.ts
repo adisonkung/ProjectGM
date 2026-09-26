@@ -9,21 +9,28 @@ const KEY = 'projectgm-save-v1';
 
 /**
  * Old saves: v1–3 start over (roster changes); v4 → v5 adds the Patch 1 economy (EXP, breakthrough tier, inventory,
- * daily bonus, Training Slots, farm records) without touching heroes / team / cleared floors.
+ * daily bonus, Training Slots, farm records); v5 → v6 adds equipment (bag, item ids, Hunt target) and drops the
+ * provisional tier-id `equipment` field. Heroes / team / cleared floors are never touched.
  */
 export function migrate(raw: unknown): GameState | null {
   const s = raw as Omit<Partial<GameState>, 'version'> & { version?: number };
-  if (!s || (s.version !== 4 && s.version !== 5)) return null;
+  if (!s || (s.version !== 4 && s.version !== 5 && s.version !== 6)) return null;
   const out = {
     ...s,
-    version: 5,
+    version: 6,
+    equipment: s.equipment ?? [],
+    nextItemId: s.nextItemId ?? 1,
+    huntTarget: s.huntTarget ?? 'ANY',
     inventory: s.inventory ?? {},
     daily: s.daily ?? { day: '', used: {} },
     trainingSlots: s.trainingSlots ?? [],
     farm: s.farm ?? {},
     rewardCarry: s.rewardCarry ?? {},
   } as GameState;
-  out.heroes = (out.heroes ?? []).map(migrateHeroProgress);
+  out.heroes = (out.heroes ?? []).map(h => {
+    const { equipment: _legacy, ...rest } = h as typeof h & { equipment?: unknown };
+    return migrateHeroProgress(rest);
+  });
   return out;
 }
 

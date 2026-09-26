@@ -1,0 +1,79 @@
+<section class="armory">
+  <h1>คลังอุปกรณ์</h1>
+  <p class="sub">
+    ทอง {{ gold() }} ·
+    @for (m of mats(); track m.id) { <span class="pill">{{ m.name }} ×{{ m.n }}</span> }
+  </p>
+  <p class="sub">เป้าหมาย Hunt (ช่องที่ดรอปบ่อยขึ้น):
+    @for (t of targets; track t) { <button type="button" [attr.aria-pressed]="eq.huntTarget() === t" (click)="target(t)">{{ t }}</button> }
+  </p>
+
+  <div class="heroes" role="group" aria-label="เลือกฮีโร่">
+    @for (h of roster.heroes(); track h.uid) {
+      <button type="button" [attr.aria-pressed]="heroUid() === h.uid" (click)="heroUid.set(h.uid)">{{ roster.template(h).name }} <small>Lv{{ h.level }}</small></button>
+    }
+  </div>
+
+  @if (hero(); as h) {
+    <div class="panel">
+      <b>{{ roster.template(h).name }}</b> <small>{{ cls() }}</small>
+      @if (stats(); as s) { <small>HP {{ s.hp }} · ATK {{ s.atk }} · DEF {{ s.def }} · AS {{ s.atkSpeed.toFixed(2) }}</small> }
+      <div class="gear">
+        @for (slot of slots; track slot) {
+          <div class="slot">
+            <small>{{ slot }}</small>
+            @if (h.gear?.[slot]; as it) {
+              <b class="r {{ it.rarity.toLowerCase() }}">{{ name(it) }}</b>
+              @for (l of lines(it); track $index) { <small>{{ fmt(l) }}</small> }
+              @if (it.affix) { <small class="affix">{{ affixName(it.affix) }}</small> }
+              <span class="row">
+                <button type="button" (click)="upgrade(it)" [disabled]="!cost(it)">+1 @if (cost(it); as c) { ({{ c.ore }} ore · {{ c.gold }} ทอง) }</button>
+                <button type="button" (click)="unequip(slot)">ถอด</button>
+                <button type="button" (click)="toggleLock(it)">{{ it.locked ? '🔒' : '🔓' }}</button>
+              </span>
+            } @else { <small>ว่าง</small> }
+          </div>
+        }
+      </div>
+    </div>
+  }
+  @if (message()) { <p class="msg">{{ message() }}</p> }
+
+  <h2>กระเป๋า ({{ eq.bag().length }})</h2>
+  <div class="row">
+    @for (f of ['ALL', 'WEAPON', 'ARMOR', 'ACCESSORY']; track f) { <button type="button" [attr.aria-pressed]="filter() === f" (click)="filter.set($any(f))">{{ f }}</button> }
+  </div>
+  <ul class="bag">
+    @for (it of bag(); track it.instanceId) {
+      <li>
+        <b class="r {{ it.rarity.toLowerCase() }}">{{ name(it) }}</b> <small>/ +{{ cap(it) }}</small>
+        @for (l of lines(it); track $index) { <small>{{ fmt(l) }}</small> }
+        @if (it.affix) { <small class="affix">{{ affixName(it.affix) }}</small> }
+        @if (usable(it)) {
+          <small class="cmp">เทียบกับที่ใส่: @for (d of compare(it); track $index) { <span>{{ d }}</span> } @empty { ไม่เปลี่ยน }</small>
+        } @else { <small class="cmp">สายนี้ใช้ไม่ได้</small> }
+        <span class="row">
+          @if (usable(it)) { <button type="button" (click)="equip(it)">สวม</button> }
+          <button type="button" (click)="upgrade(it)" [disabled]="!cost(it)">+1 @if (cost(it); as c) { ({{ c.ore }} ore) }</button>
+          <button type="button" (click)="toggleLock(it)">{{ it.locked ? '🔒 ล็อก' : '🔓' }}</button>
+          <button type="button" (click)="dismantle(it)" [disabled]="it.locked" title="{{ dismantleText(it) }}">ย่อย</button>
+          <button type="button" (click)="sell(it)" [disabled]="it.locked">ขาย</button>
+        </span>
+      </li>
+    } @empty { <li><small>ว่าง — ลง Equipment Hunt ที่หน้าหอคอย</small></li> }
+  </ul>
+
+  <h2>คราฟต์ (เลือกเป้าหมายได้)</h2>
+  <div class="row">
+    @for (r of recipes; track r.rarity) {
+      <button type="button" [attr.aria-pressed]="craftRarity() === r.rarity" (click)="craftRarity.set(r.rarity)">{{ rarityName[r.rarity] }} ({{ r.fragments }} เศษ · {{ r.gold }} ทอง)</button>
+    }
+  </div>
+  <div class="row">
+    @for (b of bases(); track b.id) { <button type="button" [attr.aria-pressed]="craftBase() === b.id" (click)="pickBase(b.id)">{{ b.name }}</button> }
+  </div>
+  <div class="row">
+    @for (m of mains(); track m) { <button type="button" [attr.aria-pressed]="craftMain() === m" (click)="craftMain.set(m)">{{ statLabel(m) }}</button> }
+    <button type="button" class="go" (click)="craft()">คราฟต์</button>
+  </div>
+</section>

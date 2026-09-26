@@ -515,7 +515,7 @@ export class SkillSystem {
             if (mul <= 0) continue;
             mul *= rankPower(u, slot);
             if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
-            const crit = !!e.guaranteedCrit || this.h.rng() < CRIT_CHANCE;
+            const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);
             if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot })) hits.push(f);
           }
           if (slot === 'attack' && hits.length) this.h.basicGauge(u);
@@ -556,7 +556,7 @@ export class SkillSystem {
           break;
         case 'SHIELD':
           for (const a of this.h.allies(u)) {
-            this.h.shield(u, a, Math.round(u.maxHp * (a === u ? e.selfPct : e.allyPct) * rankPower(u, slot) * (u.mods?.healing ?? 1)), e.duration);
+            this.h.shield(u, a, Math.round(u.maxHp * (a === u ? e.selfPct : e.allyPct) * rankPower(u, slot) * (u.mods?.shieldPower ?? 1)), e.duration);
           }
           break;
         case 'REVIVE': {

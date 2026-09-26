@@ -1,4 +1,5 @@
 import { DailyState } from './economy';
+import { EquipmentInstance, HuntTarget } from './equipment';
 import { OwnedHero } from './hero';
 
 /** ตำแหน่งฮีโร่ในทีม: พิกัดในฝั่งเรา (r = ความลึก 0-4, 0 = หน้าสุด; c = เลน 0-6) */
@@ -17,7 +18,7 @@ export interface FarmRecord {
 }
 
 export interface GameState {
-  version: 5;
+  version: 6;
   gems: number;
   gold: number;
   pity: number;
@@ -35,4 +36,9 @@ export interface GameState {
   farm: Record<string, FarmRecord>;
   /** fractional item rewards (e.g. 0.7 potion on a repeat clear) carried to the next run — deterministic, nothing lost */
   rewardCarry: Record<string, number>;
+  /** unequipped items (equipped ones live on their hero) */
+  equipment: EquipmentInstance[];
+  nextItemId: number;
+  /** Equipment Hunt target pool (the favoured drop slot) */
+  huntTarget: HuntTarget;
 }

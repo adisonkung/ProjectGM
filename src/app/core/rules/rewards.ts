@@ -7,6 +7,9 @@ import { DailyState, FarmDungeonDefinition, ItemStack, RewardBreakdown, RewardBu
 import { GameState } from '../models/game-state';
 import { OwnedHero } from '../models/hero';
 import { addExp, Inventory } from './leveling';
+import { rollHuntItems } from './equipment';
+import { WEAPON_GROUP_OF } from '../data/equipment';
+import { HERO_BY_ID } from '../data/heroes';
 
 /** local calendar day key (daily reset at local midnight) */
 export function dayKey(d: Date): string {
@@ -165,9 +168,20 @@ export function completeFarmRun(state: GameState, def: FarmDungeonDefinition, ru
   const { heroes, results } = distributeExp(state.heroes, breakdown.final.heroExp, run.participants, state.trainingSlots, def.type);
   const { inventory, carry } = grantItems(state.inventory, state.rewardCarry, breakdown.final.items);
   const rating = clearRating(def, run);
+  // Equipment Hunt: item drops (same chance on bonus and repeat runs) + the guaranteed first-clear item
+  let equipment = state.equipment ?? [];
+  let nextItemId = state.nextItemId ?? 1;
+  if (def.equipmentDrops) {
+    const groups = [...new Set(run.participants.map(uid => state.heroes.find(h => h.uid === uid)).filter(h => !!h)
+      .map(h => WEAPON_GROUP_OF[HERO_BY_ID[h!.templateId].cls]))];
+    const dropped = rollHuntItems(def.equipmentDrops, state.huntTarget ?? 'ANY', groups, rng, nextItemId, !rec.firstClearDone ? def.firstClearItem : undefined);
+    nextItemId += dropped.length;
+    equipment = [...equipment, ...dropped];
+    breakdown.equipment = dropped;
+  }
   return {
     state: {
-      ...state, heroes, inventory, rewardCarry: carry, daily, gold: state.gold + breakdown.final.gold,
+      ...state, heroes, inventory, rewardCarry: carry, daily, gold: state.gold + breakdown.final.gold, equipment, nextItemId,
       farm: { ...state.farm, [def.id]: { clears: rec.clears + 1, firstClearDone: true, bestRating: Math.max(rec.bestRating, rating) } },
     },
     breakdown, exp: results, rating,

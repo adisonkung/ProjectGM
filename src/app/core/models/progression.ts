@@ -7,34 +7,11 @@
 /** the three upgradable skill slots */
 export type SkillKind = 'skill' | 'skill2' | 'ult';
 
-export type EquipmentSlot = 'WEAPON' | 'ARMOR' | 'ACCESSORY';
-/** Patch 1 gear tiers (EARLY → VERY_GOOD = best normal Patch 1 gear) */
-export type GearTier = 'EARLY' | 'MID' | 'GOOD' | 'VERY_GOOD';
+import type { GearProfileId } from '../data/equipment';
+export type { EquipmentSlot } from './equipment';
 
-/** status ids whose duration equipment can shorten (bleed / poison / root / corruption …) */
+/** status ids whose duration equipment can shorten (poison / root; bleed is a damage reduction instead) */
 export type ResistableStatus = 'bleed' | 'poison' | 'root' | 'corruption' | 'stun';
-
-/** mechanical utility of an item (all optional, additive between items) */
-export interface EquipmentUtility {
-  /** duration reduction per status, 0–1 (0.3 = −30%) */
-  statusResist?: Partial<Record<ResistableStatus, number>>;
-  /** flat Break power added to every Break-capable skill */
-  breakBonus?: number;
-  /** skill cooldown reduction, 0–1 */
-  cooldownReduction?: number;
-  /** outgoing healing / shields +x (0.1 = +10%) */
-  healingBonus?: number;
-}
-
-export interface EquipmentDefinition {
-  id: string;
-  name: string;
-  slot: EquipmentSlot;
-  tier: GearTier;
-  /** raw stats as a fraction of the hero's level-adjusted stat (class-agnostic): 0.1 = +10% */
-  stats: { hp?: number; atk?: number; def?: number };
-  utility?: EquipmentUtility;
-}
 
 /** skill rank 1–5 (Patch 1) per skill slot */
 export type SkillRanks = Record<SkillKind, number>;
@@ -56,14 +33,27 @@ export interface BreakthroughGate {
 
 /** what the combat engine reads from a hero's progression (besides its final Stats) */
 export interface CombatModifiers {
-  /** per skill slot: skill rank power (damage / heal / shield) */
+  /** per skill slot: skill rank power × gear skill damage (skills / ults) — basic attacks stay 1 */
   skillPower: Record<SkillKind, number>;
-  /** per skill slot: cooldown multiplier (rank × gear) */
+  /** per skill slot: cooldown multiplier (rank × gear CDR, gear capped at 15 %) */
   cooldown: Record<SkillKind, number>;
-  /** per skill slot: flat extra Break power (rank + gear) */
+  /** per skill slot: flat extra Break power (rank + gear, gear capped at +20) */
   breakBonus: Record<SkillKind, number>;
-  /** outgoing healing / shields multiplier (gear) */
+  /** outgoing healing multiplier (skill rank is separate) · outgoing shields multiplier */
   healing: number;
+  shieldPower: number;
+  /** incoming healing multiplier */
+  healingReceived: number;
+  /** crit chance (base 10 % + gear) · crit damage multiplier (base 1.5 + gear) */
+  critChance: number;
+  critMultiplier: number;
+  /** incoming damage: every hit × (1 − damageReduction) · bleed ticks × (1 − bleedReduction) · dive skills × (1 − diveReduction) */
+  damageReduction: number;
+  bleedReduction: number;
+  diveReduction: number;
+  /** outgoing damage bonuses: vs targets below 30 % HP · vs targets back from untargetable (3 s) */
+  execution: number;
+  mistHunter: number;
   /** status duration reduction on this hero, 0–1 */
   statusResist: Partial<Record<ResistableStatus, number>>;
 }
@@ -75,8 +65,8 @@ export type FloorRole = 'ONBOARDING' | 'EARLY' | 'TRANSITION' | 'WALL' | 'ENDGAM
 export interface FloorBand {
   levels: [number, number];
   role: FloorRole;
-  /** expected gear / skill ranks (null = none needed) */
-  gear: GearTier | null;
+  /** expected gear profile / skill ranks (null = none needed) */
+  gear: GearProfileId | null;
   skillRank: number;
   /** what the player should learn / improve after failing here (shown later on the result screen) */
   failureHints?: string[];
@@ -90,8 +80,8 @@ export interface PowerProfile {
   id: string;
   label: string;
   level: number;
-  /** one tier for every slot, or per slot (e.g. a Very Good weapon with Good armor) */
-  gear: GearTier | Partial<Record<EquipmentSlot, GearTier>> | null;
+  /** equipment profile (core/data/equipment.ts GEAR_PROFILES) — built per class */
+  gear: GearProfileId | null;
   /** skill ranks of every hero (core skills = skill2 + ult for most kits) */
   ranks: SkillRanks;
 }

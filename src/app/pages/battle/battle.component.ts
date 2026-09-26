@@ -1,3 +1,4 @@
+import { itemName as itemNameOf } from '../../core/rules/equipment';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { Component, computed, effect, HostListener, inject, isDevMode, OnDestroy, signal, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -46,6 +47,7 @@ export class BattleComponent implements OnDestroy {
   readonly farmId = signal<string | null>(null);
   readonly reward = signal<RunReward | null>(null);
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
+  readonly gearName = itemNameOf;
 
   readonly stages = STAGES;
   readonly floor = signal(1);

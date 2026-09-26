@@ -1,9 +1,11 @@
 import { BREAKTHROUGHS } from '../data/economy';
 import { currentLevelCap } from './leveling';
-import { BREAKTHROUGH_GATES, EQUIPMENT, equipmentId, PATCH_1, PROFILE_ACCESSORY, SKILL_RANK_EFFECTS } from '../data/progression';
+import { BREAKTHROUGH_GATES, PATCH_1, SKILL_RANK_EFFECTS } from '../data/progression';
 import { HERO_BY_ID } from '../data/heroes';
 import { OwnedHero } from '../models/hero';
-import { CombatModifiers, EquipmentDefinition, EquipmentSlot, PowerProfile, ResistableStatus, SkillKind, SkillRanks } from '../models/progression';
+import { CombatModifiers, PowerProfile, SkillKind, SkillRanks } from '../models/progression';
+import { CRIT_CHANCE_BASE, CRIT_MULTIPLIER_BASE } from '../data/classes';
+import { heroGearTotals, profileGear } from './equipment';
 
 const SLOTS: SkillKind[] = ['skill', 'skill2', 'ult'];
 const clampRank = (r: number | undefined) => Math.max(1, Math.min(PATCH_1.maxSkillRank, Math.round(r ?? 1)));
@@ -24,41 +26,32 @@ export function skillRanksOf(h: OwnedHero): SkillRanks {
   return { skill: clampRank(h.skillRanks?.skill), skill2: clampRank(h.skillRanks?.skill2), ult: clampRank(h.skillRanks?.ult) };
 }
 
-export function equipmentOf(h: OwnedHero): EquipmentDefinition[] {
-  return Object.values(h.equipment ?? {}).map(id => (id ? EQUIPMENT[id] : undefined)).filter((x): x is EquipmentDefinition => !!x);
+/** equipment raw-stat bonuses (applied once, after level growth): % stats + flat ATK */
+export function gearStatBonus(h: OwnedHero): { hp: number; atk: number; def: number; atkFlat: number; attackSpeed: number; moveSpeed: number } {
+  const t = heroGearTotals(h);
+  return { hp: t.hpPct, atk: t.atkPct, def: t.defPct, atkFlat: t.atkFlat, attackSpeed: t.attackSpeed, moveSpeed: t.moveSpeed };
 }
 
-/** summed raw-stat fractions of the equipped items (applied on top of the level-adjusted stats) */
-export function gearStatBonus(h: OwnedHero): { hp: number; atk: number; def: number } {
-  const b = { hp: 0, atk: 0, def: 0 };
-  for (const e of equipmentOf(h)) {
-    b.hp += e.stats.hp ?? 0;
-    b.atk += e.stats.atk ?? 0;
-    b.def += e.stats.def ?? 0;
-  }
-  return b;
-}
-
-/** skill ranks + equipment utility → what the combat engine reads */
+/** skill ranks + equipment utility → what the combat engine reads (gear already capped in gearTotals) */
 export function combatModifiers(h: OwnedHero): CombatModifiers {
   const ranks = skillRanksOf(h);
-  const gear = equipmentOf(h);
-  const cdr = Math.min(0.3, gear.reduce((a, e) => a + (e.utility?.cooldownReduction ?? 0), 0));
-  const breakGear = gear.reduce((a, e) => a + (e.utility?.breakBonus ?? 0), 0);
-  const healing = 1 + gear.reduce((a, e) => a + (e.utility?.healingBonus ?? 0), 0);
-  const statusResist: Partial<Record<ResistableStatus, number>> = {};
-  for (const e of gear) {
-    for (const [id, v] of Object.entries(e.utility?.statusResist ?? {}) as [ResistableStatus, number][]) {
-      statusResist[id] = Math.min(0.75, (statusResist[id] ?? 0) + v);
-    }
-  }
+  const g = heroGearTotals(h);
   const per = <T>(f: (k: SkillKind) => T) => Object.fromEntries(SLOTS.map(k => [k, f(k)])) as Record<SkillKind, T>;
   return {
-    skillPower: per(k => SKILL_RANK_EFFECTS[ranks[k]].power),
-    cooldown: per(k => SKILL_RANK_EFFECTS[ranks[k]].cooldown * (1 - cdr)),
-    breakBonus: per(k => SKILL_RANK_EFFECTS[ranks[k]].breakBonus + breakGear),
-    healing,
-    statusResist,
+    skillPower: per(k => SKILL_RANK_EFFECTS[ranks[k]].power * (1 + g.skillDamage)),
+    cooldown: per(k => SKILL_RANK_EFFECTS[ranks[k]].cooldown * (1 - g.cooldownReduction)),
+    breakBonus: per(k => SKILL_RANK_EFFECTS[ranks[k]].breakBonus + g.breakPower),
+    healing: 1 + g.healingPower,
+    shieldPower: 1 + g.shieldPower,
+    healingReceived: 1 + g.healingReceived,
+    critChance: CRIT_CHANCE_BASE + g.critChance,
+    critMultiplier: CRIT_MULTIPLIER_BASE + g.critDamage,
+    damageReduction: g.damageReduction,
+    bleedReduction: g.bleedReduction,
+    diveReduction: g.diveReduction,
+    execution: g.execution,
+    mistHunter: g.mistHunter,
+    statusResist: { poison: g.poisonReduction, root: g.rootReduction },
   };
 }
 
@@ -66,12 +59,8 @@ export function combatModifiers(h: OwnedHero): CombatModifiers {
 export function applyProfile(h: OwnedHero, p: PowerProfile, level = p.level): OwnedHero {
   const cls = HERO_BY_ID[h.templateId].cls;
   const lv = Math.min(levelCap(), level);
-  const tierOf = (slot: EquipmentSlot) => (typeof p.gear === 'string' ? p.gear : p.gear?.[slot]);
-  const equipment: Partial<Record<EquipmentSlot, string>> = {};
-  for (const slot of ['WEAPON', 'ARMOR', 'ACCESSORY'] as EquipmentSlot[]) {
-    const t = tierOf(slot);
-    if (t) equipment[slot] = equipmentId(slot, t, PROFILE_ACCESSORY[cls]);
-  }
+  const gear = p.gear ? profileGear(cls, p.gear) : {};
+  for (const i of Object.values(gear)) if (i) i.equippedHeroId = h.uid;
   const tier = BREAKTHROUGHS.filter(b => lv >= b.toLevel).length;
-  return { ...h, level: lv, exp: 0, breakthroughTier: tier, skillRanks: { ...p.ranks }, equipment };
+  return { ...h, level: lv, exp: 0, breakthroughTier: tier, skillRanks: { ...p.ranks }, gear };
 }

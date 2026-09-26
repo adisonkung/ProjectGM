@@ -4,8 +4,8 @@ import { HeroTemplate, OwnedHero, Potential, Stats } from '../models/hero';
 import { EnemyTemplate, StageDef } from '../models/stage';
 
 /**
- * Level growth per level, linear on the final Lv1 stats (Patch 1 Hero Level spec): HP +4.5 %, ATK +4.0 %, DEF +3.5 %
- * (Lv10 = ×1.405 / ×1.36 / ×1.315). Attack speed, range and cooldowns never grow with level.
+ * Level growth per level, linear on the final Lv1 stats (Patch 1 FINAL Level spec): HP +3 %, ATK +2.5 %, DEF +2 %
+ * (Lv10 = ×1.27 / ×1.225 / ×1.18). Attack speed, range and cooldowns never grow with level.
  */
 export const LEVEL_GROWTH = { hp: 0.03, atk: 0.025, def: 0.02 };
 /** potential nudges level growth a little (B = the table above) */
@@ -17,18 +17,21 @@ export const levelUpCost = (h: OwnedHero) => 30 + h.level * 25;
 
 /**
  * Hero stats = 1★ base (`HERO_CLASS_BASE`) × star multiplier (1.00 / 1.05 / 1.10 / 1.15 / 1.20) × linear level growth
- * × (1 + equipped item stat fractions). Skill ranks / gear utility go to the engine as `CombatModifiers`.
+ * (+ gear flat ATK) × (1 + gear % stats). Skill ranks / gear utility go to the engine as `CombatModifiers`.
  */
 export function heroStats(t: HeroTemplate, h: OwnedHero): Stats {
   const base = HERO_CLASS_BASE[t.cls];
   const starMul = starMultiplier(t.star);
   const lv = (h.level - 1) * POTENTIAL_GROWTH[h.potential];
   const gear = gearStatBonus(h);
+  // pipeline: Lv1 base (star resolved) → level growth → gear flat → gear % (once) → battle buffs (engine)
   return {
     ...base,
     hp: Math.round(base.hp * starMul * (1 + lv * LEVEL_GROWTH.hp) * (1 + gear.hp)),
-    atk: Math.round(base.atk * starMul * (1 + lv * LEVEL_GROWTH.atk) * (1 + gear.atk)),
+    atk: Math.round((base.atk * starMul * (1 + lv * LEVEL_GROWTH.atk) + gear.atkFlat) * (1 + gear.atk)),
     def: Math.round(base.def * starMul * (1 + lv * LEVEL_GROWTH.def) * (1 + gear.def)),
+    atkSpeed: base.atkSpeed * (1 + gear.attackSpeed),
+    moveSpeed: base.moveSpeed * (1 + gear.moveSpeed),
   };
 }
 

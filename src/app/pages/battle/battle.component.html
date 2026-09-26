@@ -92,6 +92,8 @@
         <b>{{ b.kind === 'DAILY_BONUS' ? 'โบนัสรายวัน ×' + b.multiplier : b.kind === 'REPEAT' ? 'รางวัลรอบซ้ำ ×' + b.multiplier : b.kind === 'TOWER_FIRST' ? 'เคลียร์ครั้งแรก' : 'เคลียร์ซ้ำ' }}</b>
         · EXP +{{ b.final.heroExp }} ต่อฮีโร่
         @for (it of b.final.items; track $index) { · {{ itemName(it.itemId) }} ×{{ it.count }} }
+        @if (b.final.gold) { · ทอง +{{ b.final.gold }} }
+        @for (eq of b.equipment ?? []; track eq.instanceId) { · <span class="drop {{ eq.rarity.toLowerCase() }}">ได้อุปกรณ์: {{ gearName(eq) }}</span> }
         @if (rw.rating) { · {{ '★'.repeat(rw.rating) }} }
         <ul class="exp">
           @for (x of rw.exp; track x.uid) {

@@ -205,6 +205,7 @@ describe('Rewards, daily bonus, fragments', () => {
     expect(FARM_DUNGEONS.map(d => [d.id, d.unlockFloor])).toEqual([
       ['training_1', 0], ['training_2', 3], ['training_3', 5], ['training_4', 7], ['training_5', 8],
       ['ascension_1', 5], ['ascension_2', 7], ['ascension_3', 8],
+      ['hunt_1', 3], ['hunt_2', 4], ['hunt_3', 5], ['hunt_4', 7], ['hunt_5', 8],
     ]);
     expect(isUnlocked(FARM_BY_ID['training_2'], 2)).toBeFalse();
     expect(isUnlocked(FARM_BY_ID['training_2'], 3)).toBeTrue();
@@ -266,7 +267,7 @@ describe('Rewards, daily bonus, fragments', () => {
     delete v4.daily;
     v4.heroes[0] = { uid: 1, templateId: 'aurel', level: 7, potential: 'B', injury: 0 };
     const m = migrate(v4)!;
-    expect(m.version).toBe(5);
+    expect(m.version).toBe(6);
     expect(m.inventory).toEqual({});
     expect(m.heroes[0]).toEqual(jasmine.objectContaining({ level: 7, exp: 0, breakthroughTier: 1 }));
     expect(migrate({ version: 3 })).toBeNull();

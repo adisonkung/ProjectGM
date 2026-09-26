@@ -1,0 +1,18 @@
+.armory { display: grid; gap: 8px; }
+h1 { font: 700 20px var(--disp); margin: 0; }
+h2 { font: 700 16px var(--disp); margin: 8px 0 0; }
+.sub, .msg { color: var(--muted); margin: 0; font-size: 13px; }
+.pill { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; border-radius: 99px; background: var(--panel); border: 1px solid var(--line); font-size: 12px; }
+.heroes, .row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.panel, .bag li { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: grid; gap: 2px; }
+.gear { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
+@media (max-width: 720px) { .gear { grid-template-columns: 1fr; } }
+.slot { display: grid; gap: 2px; border: 1px dashed var(--line); border-radius: 8px; padding: 6px; }
+.bag { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+small { color: var(--muted); font-size: 12px; }
+.affix { color: #c9a8ff; }
+.cmp span { margin-right: 6px; color: inherit; }
+.r.common { color: #c8c8c8; } .r.uncommon { color: #7fe0a8; } .r.rare { color: #6fb6ff; } .r.elite { color: #c9a8ff; } .r.epic { color: #ffb347; }
+button { font-size: 12px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: inherit; cursor: pointer; }
+button[aria-pressed='true'], button.go { background: var(--accent, #d9a441); color: #111; }
+button:disabled { opacity: 0.45; cursor: default; }

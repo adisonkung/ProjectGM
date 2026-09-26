@@ -60,13 +60,13 @@ interface Agg {
   phaseReached: Record<string, number>; phaseTime: number[]; phaseTimeRuns: number[]; status: Record<string, number>;
   deathRuns: number; reviveRuns: number; wipes: number; timeouts: number;
   heroes: Record<string, { dealt: number; healed: number; skills: number; ults: number; deaths: number; revives: number }>;
-  bonusHits: Record<string, number>; aims: Record<string, { total: number; marked: number }>; bossStatus: Record<string, number>;
+  bonusHits: Record<string, number>; aims: Record<string, { total: number; marked: number }>; bossStatus: Record<string, number>; gear: Record<string, number>;
 }
 const newAgg = (): Agg => ({
   wins: 0, time: 0, deaths: 0, revives: 0, wave: 0, dealt: 0, taken: 0, heal: 0, opp: 0, att: 0, succ: 0, crit: 0,
   resHit: 0, resMiss: 0, focusUp: 0, unsafe: 0, anchor: 0, threatDeaths: 0, phase: 0, brk: 0, brkFail: 0, fight: 0, ults: 0,
   bossRuns: 0, bossLife: 0, bossKilled: 0, sealBroken: 0, skills: {}, phaseReached: {}, phaseTime: [], phaseTimeRuns: [], status: {},
-  deathRuns: 0, reviveRuns: 0, wipes: 0, timeouts: 0, heroes: {}, bonusHits: {}, aims: {}, bossStatus: {},
+  deathRuns: 0, reviveRuns: 0, wipes: 0, timeouts: 0, heroes: {}, bonusHits: {}, aims: {}, bossStatus: {}, gear: {},
 });
 
 // --farm=training_1,ascension_2 (or --farm=all): farm dungeon encounters instead of tower floors
@@ -87,7 +87,11 @@ for (let stage of floors) {
   const level = levelArg === 'rec'
     ? (profileArg ? profile.level : band?.simLevel ?? Math.min(band?.levels[1] ?? profile.level, Math.max(band?.levels[0] ?? 1, profile.level)))
     : Number(levelArg);
-  const heroes = state.heroes.map(h => applyProfile(h, profile, level));
+  // --noaffix: the same gear without tactical affixes (affix ablation) · --affix=id: only that affix is removed
+  const dropAffix = flag('--noaffix') ? () => true : (args.find(a => a.startsWith('--affix='))?.slice(8) ? (id?: string) => id === args.find(a => a.startsWith('--affix='))!.slice(8) : () => false);
+  const heroes = state.heroes.map(h => applyProfile(h, profile, level)).map(h => ({
+    ...h, gear: Object.fromEntries(Object.entries(h.gear ?? {}).map(([k, i]) => [k, i && dropAffix(i.affix) ? { ...i, affix: undefined } : i])),
+  }));
   const aggs: Record<BotName, Agg> = { AUTO: newAgg(), TACTICAL: newAgg() };
   let heroSnapshot: string[] = [];
   const phaseIds: string[] = [];
@@ -157,6 +161,7 @@ for (let stage of floors) {
         t.total += x.total; t.marked += x.marked;
       }
       for (const [id, t] of Object.entries(m.bossStatusTime)) a.bossStatus[id] = (a.bossStatus[id] ?? 0) + t;
+      for (const [id, n] of Object.entries(m.gearProcs)) a.gear[id] = (a.gear[id] ?? 0) + n;
       if (m.bossSpawnedAt != null) {
         a.bossRuns++;
         a.bossLife += m.bossLifetime(e.time) ?? 0;
@@ -209,6 +214,8 @@ for (let stage of floors) {
       if (bs && a.bossRuns) console.log(`     boss status uptime per run: ${bs} (boss lifetime ${f1(a.bossLife / a.bossRuns, 1)}s)`);
       const dh = Object.entries(a.heroes).map(([name, h]) => `${name} ${f1(h.deaths / n, 2)}`).join(' · ');
       console.log(`     deaths per hero per run: ${dh}`);
+      const gp = Object.entries(a.gear).map(([id, v]) => `${id} ${f1(v / n, 1)}`).join(' · ');
+      if (gp) console.log(`     gear procs per run: ${gp}`);
     }
   }
 

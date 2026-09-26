@@ -12,6 +12,7 @@ export class AppComponent {
   readonly save = inject(SaveService);
   readonly nav = [
     { path: '/lobby', label: 'ฐาน' },
+    { path: '/armory', label: 'อุปกรณ์' },
     { path: '/team', label: 'จัดทีม' },
     { path: '/tower', label: 'หอคอย' },
     { path: '/gacha', label: 'สุ่ม' },

@@ -100,3 +100,7 @@ export const ROLE_BEHAVIOR: Record<HeroClass, RoleBehavior> = {
 
 /** hostile melee threat zone = attack range + this padding (cells) */
 export const THREAT_PADDING = 0.5;
+
+/** hero crit before gear (the engine's CRIT_CHANCE / CRIT_MULTIPLIER): 10 % for ×1.5 */
+export const CRIT_CHANCE_BASE = 0.1;
+export const CRIT_MULTIPLIER_BASE = 1.5;

@@ -33,7 +33,7 @@ export interface BreakthroughDefinition {
   unlockFlags: UnlockFlag[];
 }
 
-export type ItemKind = 'EXP_POTION' | 'BREAKTHROUGH_STONE' | 'BREAKTHROUGH_FRAGMENT';
+export type ItemKind = 'EXP_POTION' | 'BREAKTHROUGH_STONE' | 'BREAKTHROUGH_FRAGMENT' | 'MATERIAL' | 'EQUIPMENT_FRAGMENT';
 
 export interface ItemDefinition {
   id: string;
@@ -82,6 +82,9 @@ export interface FarmDungeonDefinition {
   /** clear rating: 3★ = no hero death and under `targetTime` s (QoL unlocks later: auto repeat, sweep) */
   targetTime: number;
   stage: StageDef;
+  /** EQUIPMENT dungeons: item drop table per clear + the guaranteed first-clear item rarity */
+  equipmentDrops?: import('./equipment').EquipmentDropTable;
+  firstClearItem?: import('./equipment').Rarity;
 }
 
 /** per-run reward breakdown (debug / result screen) */
@@ -93,6 +96,8 @@ export interface RewardBreakdown {
   firstClear?: RewardBundle;
   /** what is actually granted: EXP per hero + items (after bonus / repeat / fragments) */
   final: { heroExp: number; gold: number; items: ItemStack[] };
+  /** Equipment Hunt: items that dropped (instances already added to the bag) */
+  equipment?: import('./equipment').EquipmentInstance[];
 }
 
 export type HeroLevelState = 'NORMAL' | 'BREAKTHROUGH_READY' | 'MAX';

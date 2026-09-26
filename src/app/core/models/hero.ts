@@ -27,8 +27,8 @@ export interface OwnedHero {
   breakthroughTier?: number;
   /** skill ranks 1–5 per slot (missing = 1) */
   skillRanks?: Partial<Record<'skill' | 'skill2' | 'ult', number>>;
-  /** equipped item definition ids per slot (core/data/progression.ts EQUIPMENT) */
-  equipment?: Partial<Record<'WEAPON' | 'ARMOR' | 'ACCESSORY', string>>;
+  /** equipped items per slot (the item lives here while equipped; `equippedHeroId` = this uid) */
+  gear?: Partial<Record<'WEAPON' | 'ARMOR' | 'ACCESSORY', import('./equipment').EquipmentInstance>>;
 }
 
 /** ค่าพลังที่ใช้ในการต่อสู้ */

@@ -28,6 +28,9 @@ import { CombatContext, isBigMonster, MonsterCombatState, MonsterController } fr
 import { greedyStep, nextStep } from './pathfinding';
 import { createRng } from './rng';
 
+/** Mist Hunter window after an enemy stops being untargetable (s) */
+const MIST_HUNTER_WINDOW = 3;
+
 export type BattleResult = 'win' | 'lose' | 'timeout';
 
 export type BattleEvent =
@@ -140,6 +143,8 @@ export interface BattleUnit {
   heroId?: string;
   /** hero progression: skill ranks + equipment utility (undefined = rank 1, no gear) */
   mods?: CombatModifiers;
+  /** last time this unit was untargetable (Mist Hunter: +damage for 3 s after it returns) */
+  lastUntargetableAt?: number;
   /** logical combat cell on the current encounter grid (column 0–15 × lane 0–2) */
   pos: Cell;
   /**
@@ -467,6 +472,7 @@ export class BattleEngine {
       m.focusHeroTime += dt * heroes.length;
       m.focusOnTargetHeroTime += dt * heroes.filter(h => h.targetId === this.focusTargetId).length;
     }
+    for (const x of this.units) if (x.alive && x.side !== PLAYER_TEAM && hasFlag(x, 'untargetable')) x.lastUntargetableAt = this.time;
     for (const b of this.units) {
       if (!b.boss || !b.alive) continue;
       for (const st of b.buffs) if (st.def.buff) m.bossStatusTime[st.def.id] = (m.bossStatusTime[st.def.id] ?? 0) + dt;
@@ -755,7 +761,10 @@ export class BattleEngine {
       // DoT (poison): direct damage from the source's ATK snapshot · HoT: heal
       if (t.kind === 'DAMAGE') {
         // an untargetable unit (mist form, boss seal) can't be hurt — its DoTs keep running but deal nothing
-        if (!hasFlag(u, 'untargetable')) this.applyDamage(u, Math.max(1, Math.round(t.amount)), false, true);
+        // equipment Bleed Guard: bleed ticks × (1 − bleedReduction)
+        const bleedCut = t.buff.def.id === 'bleed' ? (u.mods?.bleedReduction ?? 0) : 0;
+        if (bleedCut > 0) this.metrics.gearProcs['bleedReduced'] = (this.metrics.gearProcs['bleedReduced'] ?? 0) + 1;
+        if (!hasFlag(u, 'untargetable')) this.applyDamage(u, Math.max(1, Math.round(t.amount * (1 - bleedCut))), false, true);
       }
       else this.heal(u, t.amount, this.units.find(x => x.id === t.buff.sourceId));
     }
@@ -1208,6 +1217,7 @@ export class BattleEngine {
     }
     const foes = () => this.units.filter(t => this.isValidTarget(u, t));
     const allies = () => this.units.filter(a => a.alive && a.side === u.side && (a.wave < 0 || a.wave === this.flow.waveIndex));
+    const isDive = def.effects.some(e => e.type === 'LEAP_BEHIND');
     let hits: BattleUnit[] = [];
     for (const eff of def.effects) {
       if (!u.alive && eff.type !== 'SACRIFICE') break;
@@ -1232,8 +1242,13 @@ export class BattleEngine {
           hits = [];
           for (const t of list) {
             if (single && this.dodged(u, t)) continue;
-            const bonus = eff.bonusVsStatus && t.buffs.some(b => b.def.id === eff.bonusVsStatus!.status) ? eff.bonusVsStatus.mul : 1;
-            if (bonus !== 1) this.metrics.bonusHits[def.id] = (this.metrics.bonusHits[def.id] ?? 0) + 1;
+            let bonus = eff.bonusVsStatus && t.buffs.some(b => b.def.id === eff.bonusVsStatus!.status) ? eff.bonusVsStatus.mul : 1;
+            // equipment Backline Guard: teleport / dive skills (LEAP_BEHIND) deal less to the wearer
+            if (isDive && t.mods?.diveReduction) {
+              bonus *= 1 - t.mods.diveReduction;
+              this.metrics.gearProcs['diveReduced'] = (this.metrics.gearProcs['diveReduced'] ?? 0) + 1;
+            }
+            if (eff.bonusVsStatus && t.buffs.some(b => b.def.id === eff.bonusVsStatus!.status)) this.metrics.bonusHits[def.id] = (this.metrics.bonusHits[def.id] ?? 0) + 1;
             const res = DamageResolver.resolve({ attacker: u, target: t, multiplier: eff.mul * bonus, damageType: eff.damageType ?? 'PHYSICAL', sourceId: def.id });
             this.applyDamage(t, res.amount, false, false, u);
             hits.push(t);
@@ -1511,9 +1526,20 @@ export class BattleEngine {
     if (src.range > 1.5 && o.slot) {
       mul *= modifier(src, o.slot === 'attack' ? 'rangedAttackMultiplier' : 'rangedSkillMultiplier');
     }
+    // equipment: Execution (target below 30 % HP) · Mist Hunter (target back from untargetable within 3 s)
+    if (src.mods) {
+      if (src.mods.execution > 0 && dst.hp < dst.maxHp * 0.3) {
+        mul *= 1 + src.mods.execution;
+        this.metrics.gearProcs['execution'] = (this.metrics.gearProcs['execution'] ?? 0) + 1;
+      }
+      if (src.mods.mistHunter > 0 && dst.lastUntargetableAt != null && this.time - dst.lastUntargetableAt <= MIST_HUNTER_WINDOW) {
+        mul *= 1 + src.mods.mistHunter;
+        this.metrics.gearProcs['mistHunter'] = (this.metrics.gearProcs['mistHunter'] ?? 0) + 1;
+      }
+    }
     const res = DamageResolver.resolve({
       attacker: src, target: dst, multiplier: mul, damageType: o.damageType ?? 'PHYSICAL',
-      sourceId: o.sourceId, variance: this.rng(), crit: !!o.crit,
+      sourceId: o.sourceId, variance: this.rng(), crit: !!o.crit, critMultiplier: src.mods?.critMultiplier,
     });
     this.applyDamage(dst, res.amount, res.crit, false, src);
     return true;
@@ -1744,6 +1770,8 @@ export class BattleEngine {
    */
   private applyDamage(dst: BattleUnit, total: number, crit: boolean, poison = false, src?: BattleUnit, noTransfer = false): void {
     if (!dst.alive) return;
+    // equipment Damage Reduction (heroes): every incoming hit / tick
+    if (dst.mods?.damageReduction && total > 0) total = Math.max(1, Math.round(total * (1 - dst.mods.damageReduction)));
     if (!noTransfer) {
       const link = dst.buffs.find(b => b.def.damageTransfer);
       const protector = link ? this.units.find(x => x.id === link.sourceId && x.alive) : undefined;
@@ -1815,8 +1843,8 @@ export class BattleEngine {
 
   private heal(dst: BattleUnit, amount: number, src?: BattleUnit): void {
     if (!dst.alive) return;
-    // Forest Oblivion: healing received −50%
-    amount *= modifier(dst, 'healingReceivedMultiplier');
+    // Forest Oblivion: healing received −50% · equipment Healing Received
+    amount *= modifier(dst, 'healingReceivedMultiplier') * (dst.mods?.healingReceived ?? 1);
     const a = Math.round(Math.min(amount, dst.maxHp - dst.hp));
     if (a <= 0) return;
     dst.hp += a;

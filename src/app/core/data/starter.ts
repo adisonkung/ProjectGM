@@ -29,7 +29,7 @@ export function newGameState(): GameState {
     breakthroughTier: 0,
   }));
   return {
-    version: 5,
+    version: 6,
     gems: 1500,
     gold: 600,
     pity: 0,
@@ -42,5 +42,8 @@ export function newGameState(): GameState {
     trainingSlots: [],
     farm: {},
     rewardCarry: {},
+    equipment: [],
+    nextItemId: 1,
+    huntTarget: 'ANY',
   };
 }

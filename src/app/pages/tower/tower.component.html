@@ -14,8 +14,8 @@
 
   <h2>ดันเจี้ยนฟาร์ม</h2>
   <p class="sub">
-    โบนัสรายวัน (รางวัล ×2): Training เหลือ <b>{{ left('TRAINING') }}</b> · Ascension เหลือ <b>{{ left('ASCENSION') }}</b>
-    — หมดโบนัสแล้วยังเล่นได้ รับ 70% ของรางวัลพื้นฐาน · ตายในดันเจี้ยนฟาร์มไม่บาดเจ็บ
+    โบนัสรายวัน (รางวัล ×1.5): Training เหลือ <b>{{ left('TRAINING') }}</b> · Ascension เหลือ <b>{{ left('ASCENSION') }}</b> · Hunt เหลือ <b>{{ left('HUNT') }}</b>
+    — หมดโบนัสแล้วยังเล่นได้ (Training 55% · Ascension / Hunt 60% ของรางวัลพื้นฐาน, โอกาสดรอปอุปกรณ์เท่าเดิม) · ตายในดันเจี้ยนฟาร์มไม่บาดเจ็บ
   </p>
   <ul class="farms">
     @for (d of dungeons; track d.id) {
@@ -25,8 +25,10 @@
         <span class="rw">
           @if (d.baseRewards.heroExp) { EXP {{ d.baseRewards.heroExp }} }
           @for (it of d.baseRewards.items ?? []; track it.itemId) { · {{ itemName(it.itemId) }} ×{{ it.count }} }
+          @if (d.baseRewards.gold) { · ทอง {{ d.baseRewards.gold }} }
           @if (d.baseRewards.bonusDrops?.length) { · 20% +1 }
-          @if (d.firstClearBonus && !farm()[d.id]?.firstClearDone) { <em>· ครั้งแรก +1 หิน</em> }
+          @if (d.equipmentDrops) { · อุปกรณ์ {{ d.equipmentDrops.itemChance * 100 }}% }
+          @if (d.firstClearBonus && !farm()[d.id]?.firstClearDone) { <em>· ครั้งแรก {{ d.firstClearItem ? 'ได้อุปกรณ์ ' + d.firstClearItem : '+1 หิน' }}</em> }
           @if (farm()[d.id]?.bestRating) { · {{ '★'.repeat(farm()[d.id].bestRating) }} }
         </span>
         @if (open) {

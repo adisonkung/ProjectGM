@@ -3,6 +3,7 @@
  * never read directly by combat code. Level curve, breakthroughs, items, tower EXP, farm dungeons, daily bonus.
  */
 import { BreakthroughDefinition, FarmDungeonDefinition, HeroLevelDefinition, ItemDefinition, RewardBundle } from '../models/economy';
+import { EquipmentDropTable, Rarity } from '../models/equipment';
 import { EnemyPlacement, StageDef, WaveDefinition } from '../models/stage';
 
 /** EXP for level → level + 1 (Lv1→2 … Lv9→10) — total 27,600 (rebalance spec: claude/patch1-rebalance-spec.md) */
@@ -25,6 +26,11 @@ export const HERO_LEVELS: HeroLevelDefinition[] = Array.from({ length: 10 }, (_,
 export const EXP_AT_CAP_POLICY = 'STOP' as const;
 
 export const ITEMS: Record<string, ItemDefinition> = {
+  enhancement_ore: { id: 'enhancement_ore', name: 'Enhancement Ore', kind: 'MATERIAL' },
+  equip_frag_basic: { id: 'equip_frag_basic', name: 'Basic Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
+  equip_frag_rare: { id: 'equip_frag_rare', name: 'Rare Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
+  equip_frag_elite: { id: 'equip_frag_elite', name: 'Elite Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
+  equip_frag_epic: { id: 'equip_frag_epic', name: 'Epic Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
   exp_potion_s: { id: 'exp_potion_s', name: 'Small Training Potion', kind: 'EXP_POTION', exp: 50 },
   exp_potion_m: { id: 'exp_potion_m', name: 'Medium Training Potion', kind: 'EXP_POTION', exp: 150 },
   exp_potion_l: { id: 'exp_potion_l', name: 'Large Training Potion', kind: 'EXP_POTION', exp: 500 },
@@ -40,7 +46,7 @@ export const ITEMS: Record<string, ItemDefinition> = {
 export const EXP_POTIONS = ['exp_potion_l', 'exp_potion_m', 'exp_potion_s'];
 
 /** daily bonus pools (reset at the local day change; entry is never blocked) */
-export const DAILY_BONUS = { TRAINING: 3, ASCENSION: 2 } as Record<string, number>;
+export const DAILY_BONUS = { TRAINING: 3, ASCENSION: 2, HUNT: 3 } as Record<string, number>;
 
 /** reserve heroes in Training Slots get this share of Training battle EXP (no potions) */
 export const TRAINING_SLOTS = { count: 2, expShare: 0.35 };
@@ -264,6 +270,150 @@ const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]):
   stage: stageOf(ASCENSION_STAGES, `ascension_${n}`),
 });
 
+
+// ------------------------------------------------------------------ Equipment Hunt (Equipment spec §22–34)
+
+/**
+ * Equipment Hunt I–V: the repeatable gear farm. Real combat with reinforced waves (like Training) and a themed last
+ * wave: I goblins / wolves · II poison + packs · III casters + healing (utility gear) · IV bleed + heavy melee
+ * (defensive gear) · V mist casters + wraith + treant (endgame). Target active clear: I 75–105 s · II 90–120 ·
+ * III 105–150 · IV 120–180 · V 150–210. Unlock F3 / F4 / F5 / F7 / F8 (Hunt III = Floor 7 prep, IV = F8, V = F9–10).
+ */
+const HUNT_STAGES: StageDef[] = [
+  farmStage('hunt_1', 'Equipment Hunt I', [
+    wave(row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_wolf', 1, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [1])),
+      row('goblin_fighter', 0, [0, 2]).concat(row('forest_slime', 1, [0, 1, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2]))),
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_wolf', 1, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2]))),
+    wave(row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2]), row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 1, 2]))),
+  ], 'forest-1'),
+  farmStage('hunt_2', 'Equipment Hunt II', [
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2]))),
+    wave(row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('magic_mushroom', 1, [0, 2]).concat(row('goblin_fighter', 0, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_wolf', 1, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 1, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2]))),
+    wave(row('goblin_guard', 0, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('magic_mushroom', 1, [1]), row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2]))),
+  ], 'twilight-1'),
+  farmStage('hunt_3', 'Equipment Hunt III', [
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1]), row('goblin_archer', 4, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2]))),
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_shaman', 4, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 1, 2]))),
+    wave(row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('goblin_fighter', 0, [0, 2]).concat(row('forest_wolf', 1, [0, 1, 2])),
+      row('goblin_guard', 0, [1]).concat(row('goblin_fighter', 0, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2]))),
+    wave(row('goblin_guard', 0, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_shaman', 4, [1]), row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_wolf', 1, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2]))),
+  ], 'twilight-1'),
+  farmStage('hunt_4', 'Equipment Hunt IV', [
+    wave(row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 0, [1]), row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('corrupted_treant', 0, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_archer', 3, [1]))),
+    wave(row('corrupted_treant', 0, [1]).concat(row('forest_wolf', 0, [0, 2]), row('forest_spirit', 3, [0, 2])),
+      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_wolf', 1, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2]))),
+    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('corrupted_wolf', 1, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_wolf', 1, [1])),
+      row('corrupted_treant', 0, [1]).concat(row('forest_wolf', 0, [0, 2]))),
+    wave(row('corrupted_treant', 0, [1]).concat(row('corrupted_wolf', 0, [0, 2]), row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2])),
+      row('corrupted_treant', 0, [1]).concat(row('forest_wolf', 0, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2]))),
+  ], 'misty-1'),
+  farmStage('hunt_5', 'Equipment Hunt V', [
+    wave(row('corrupted_treant', 0, [1]).concat(row('corrupted_wolf', 0, [0, 2]), row('forest_spirit', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
+      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('corrupted_treant', 0, [1]).concat(row('forest_wolf', 0, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2]))),
+    wave(row('corrupted_wolf', 0, [0, 2]).concat(row('forest_wolf', 0, [1]), row('dark_shaman', 4, [1])),
+      row('corrupted_treant', 0, [1]).concat(row('goblin_fighter', 0, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [0, 2])),
+      row('corrupted_wolf', 0, [0, 1, 2]),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2]))),
+    wave(row('goblin_guard', 0, [0, 2]).concat(row('forest_wolf', 0, [1]), row('mist_witch', 4, [1])),
+      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [0, 2])),
+      row('corrupted_wolf', 0, [0, 1, 2]),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
+      row('corrupted_treant', 0, [1]).concat(row('goblin_fighter', 0, [0, 2])),
+      row('corrupted_treant', 0, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_archer', 3, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2]))),
+    wave(row('corrupted_treant', 0, [1]).concat(row('corrupted_wolf', 0, [0, 2]), row('mist_wraith', 2, [1]), row('forest_spirit', 3, [0, 2])),
+      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [1])),
+      row('corrupted_treant', 0, [1]).concat(row('forest_wolf', 0, [0, 2])),
+      row('corrupted_wolf', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
+      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
+      row('corrupted_treant', 0, [1]).concat(row('forest_wolf', 0, [0, 2]))),
+  ], 'misty-1'),
+];
+
+const HUNT_TARGET_TIME = [105, 120, 150, 180, 210];
+
+/** Hunt reward per clear (BASE: daily bonus ×1.5, repeat ×0.6 — drop chance unchanged) */
+interface HuntTier { n: number; unlockFloor: number; levels: [number, number]; ore: number; gold: number; frags: [string, number][]; drops: EquipmentDropTable; first: Rarity }
+const HUNT_TIERS: HuntTier[] = [
+  { n: 1, unlockFloor: 3, levels: [3, 4], ore: 8, gold: 150, frags: [['equip_frag_basic', 3]], drops: { itemChance: 0.6, rarityWeights: { COMMON: 65, UNCOMMON: 35 } }, first: 'UNCOMMON' },
+  { n: 2, unlockFloor: 4, levels: [4, 5], ore: 12, gold: 250, frags: [['equip_frag_basic', 4], ['equip_frag_rare', 1]], drops: { itemChance: 0.6, rarityWeights: { UNCOMMON: 75, RARE: 25 } }, first: 'UNCOMMON' },
+  { n: 3, unlockFloor: 5, levels: [5, 7], ore: 16, gold: 400, frags: [['equip_frag_rare', 5]], drops: { itemChance: 0.55, rarityWeights: { UNCOMMON: 25, RARE: 65, ELITE: 10 } }, first: 'RARE' },
+  { n: 4, unlockFloor: 7, levels: [7, 8], ore: 22, gold: 600, frags: [['equip_frag_rare', 2], ['equip_frag_elite', 5]], drops: { itemChance: 0.5, rarityWeights: { RARE: 50, ELITE: 45, EPIC: 5 } }, first: 'RARE' },
+  { n: 5, unlockFloor: 8, levels: [8, 10], ore: 30, gold: 900, frags: [['equip_frag_elite', 3], ['equip_frag_epic', 5]], drops: { itemChance: 0.5, rarityWeights: { ELITE: 70, EPIC: 30 } }, first: 'ELITE' },
+];
+
+const huntDef = (t: HuntTier): FarmDungeonDefinition => ({
+  id: `hunt_${t.n}`, type: 'EQUIPMENT', name: `Hunt ${['I', 'II', 'III', 'IV', 'V'][t.n - 1]}`, unlockFloor: t.unlockFloor, recommendedLevel: t.levels,
+  baseRewards: { gold: t.gold, items: [{ itemId: 'enhancement_ore', count: t.ore }, ...t.frags.map(([itemId, count]) => ({ itemId, count }))] },
+  firstClearBonus: { items: [{ itemId: 'enhancement_ore', count: 20 }] },
+  dailyBonusPool: 'HUNT', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: HUNT_TARGET_TIME[t.n - 1],
+  equipmentDrops: t.drops, firstClearItem: t.first,
+  stage: stageOf(HUNT_STAGES, `hunt_${t.n}`),
+});
+
 export const FARM_DUNGEONS: FarmDungeonDefinition[] = [
   trainingDef(1, 0, [1, 2], 60, 'exp_potion_s', 1),
   trainingDef(2, 3, [3, 4], 100, 'exp_potion_s', 2),
@@ -273,6 +423,7 @@ export const FARM_DUNGEONS: FarmDungeonDefinition[] = [
   ascensionDef(1, 5, [5, 6]),
   ascensionDef(2, 7, [7, 8]),
   ascensionDef(3, 8, [8, 9]),
+  ...HUNT_TIERS.map(huntDef),
 ];
 
 export const FARM_BY_ID: Record<string, FarmDungeonDefinition> = Object.fromEntries(FARM_DUNGEONS.map(d => [d.id, d]));

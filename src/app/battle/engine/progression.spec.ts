@@ -4,7 +4,7 @@ import { kitOf } from '../../core/data/hero-skills';
 import { HERO_5STAR_LV1 } from '../../core/data/classes';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import {
-  BREAKTHROUGH_GATES, EQUIPMENT, FLOOR_BANDS, PATCH_1, POWER_PROFILES, SKILL_RANK_EFFECTS,
+  BREAKTHROUGH_GATES, FLOOR_BANDS, PATCH_1, POWER_PROFILES, SKILL_RANK_EFFECTS,
 } from '../../core/data/progression';
 import { STAGES } from '../../core/data/stages';
 import { newGameState } from '../../core/data/starter';
@@ -19,6 +19,14 @@ import { heroStats, maxLevel } from '../../core/rules/stats';
 import { teamToUnits } from '../../core/rules/team';
 import { BattleEngine, BattleEvent, BattleUnit, monsterTuningReview } from './battle-engine';
 import { applyBuff } from './buffs';
+import { AFFIXES, EQUIPMENT_DEFS, RARITIES, SLOTS } from '../../core/data/equipment';
+import { EquipmentInstance, EquipStat, Rarity } from '../../core/models/equipment';
+import { heroGearTotals, rollItem } from '../../core/rules/equipment';
+
+/** a fixed item (no RNG): base, rarity, main stat, secondaries, affix, upgrade level */
+let nextId = 1;
+const item = (defId: string, rarity: Rarity, main: EquipStat, o: { sec?: EquipStat[]; affix?: string | null; level?: number } = {}): EquipmentInstance =>
+  ({ ...rollItem(defId, rarity, () => 0, nextId++, { main, secondaries: o.sec ?? [], affix: o.affix ?? null }), upgradeLevel: o.level ?? 0 });
 
 const hero = (templateId: string, o: Partial<OwnedHero> = {}): OwnedHero => ({ uid: 1, templateId, level: 1, potential: 'B', injury: 0, ...o });
 
@@ -80,12 +88,14 @@ describe('Patch 1 progression — structure', () => {
     }
   });
 
-  it('equipment catalog: 4 tiers × weapon / armor / 5 accessory families, stats grow with the tier, accessories carry utility', () => {
-    const tiers = ['EARLY', 'MID', 'GOOD', 'VERY_GOOD'];
-    expect(Object.keys(EQUIPMENT).length).toBe(4 * 7);
-    const atk = tiers.map(t => EQUIPMENT[`weapon_${t.toLowerCase()}`].stats.atk!);
-    expect([...atk].sort((a, b) => a - b)).toEqual(atk);
-    for (const e of Object.values(EQUIPMENT).filter(x => x.slot === 'ACCESSORY')) expect(e.utility).withContext(e.id).toBeDefined();
+  it('equipment catalog: 3 slots, 5 rarities, 4 weapon groups, ~13 tactical affixes that never grant immunity', () => {
+    expect(SLOTS).toEqual(['WEAPON', 'ARMOR', 'ACCESSORY']);
+    expect(RARITIES).toEqual(['COMMON', 'UNCOMMON', 'RARE', 'ELITE', 'EPIC']);
+    expect(new Set(Object.values(EQUIPMENT_DEFS).filter(d => d.slot === 'WEAPON').map(d => d.weaponGroup))).toEqual(new Set(['HEAVY', 'LIGHT', 'BOW', 'CATALYST']));
+    const affixes = Object.values(AFFIXES);
+    expect(affixes.length).toBeGreaterThanOrEqual(10);
+    expect(affixes.length).toBeLessThanOrEqual(15);
+    for (const a of affixes) if (a.effect.stat !== 'breakPower') expect(a.effect.value).withContext(a.id).toBeLessThan(0.25);
   });
 
   it('skill ranks 1–5 raise power, lower cooldowns and add Break power', () => {
@@ -99,28 +109,36 @@ describe('Patch 1 progression — structure', () => {
 });
 
 describe('Patch 1 progression — stats and combat modifiers', () => {
-  it('base 5★ Lv1 table unchanged; gear adds its stat fractions on top of level growth', () => {
+  it('base 5★ Lv1 table unchanged; gear % stats apply once, after level growth', () => {
     const fresh = heroStats(HERO_BY_ID['aurel'], hero('aurel'));
     expect([fresh.hp, fresh.atk, fresh.def]).toEqual([HERO_5STAR_LV1.tank.hp, HERO_5STAR_LV1.tank.atk, HERO_5STAR_LV1.tank.def]);
-    const geared = hero('aurel', { equipment: { WEAPON: 'weapon_good', ARMOR: 'armor_good' } });
+    const gear = { WEAPON: item('heavy_blade', 'RARE', 'atkPct', { level: 5 }), ARMOR: item('guard_armor', 'RARE', 'hpPct', { sec: ['defPct'] }) };
+    const geared = hero('aurel', { level: 10, gear });
     const b = gearStatBonus(geared);
     const s = heroStats(HERO_BY_ID['aurel'], geared);
-    expect(s.hp).toBe(Math.round(393 * (1 + b.hp)));
-    expect(s.atk).toBe(Math.round(27 * (1 + b.atk)));
-    expect(s.def).toBe(Math.round(49 * (1 + b.def)));
+    expect(b.atk).toBeCloseTo(0.065 * 1.2, 5);
+    expect(s.hp).toBe(Math.round(393 * 1.27 * (1 + b.hp)));
+    expect(s.atk).toBe(Math.round(27 * 1.225 * (1 + b.atk)));
+    expect(s.def).toBe(Math.round(49 * 1.18 * (1 + b.def)));
   });
 
-  it('combatModifiers: ranks → skill power / cooldown / Break, gear → Break, cooldown, healing, resistances', () => {
+  it('combatModifiers: ranks → skill power / cooldown / Break; gear → Break, CDR, crit, healing, bleed / poison / root, dive', () => {
     const h = hero('sylvie', {
       skillRanks: { skill: 1, skill2: 4, ult: 5 },
-      equipment: { ACCESSORY: 'breaker_good' },
+      gear: { WEAPON: item('longbow', 'ELITE', 'breakPower', { affix: 'breaker' }), ARMOR: item('guard_armor', 'ELITE', 'hpPct', { affix: 'backline_guard' }), ACCESSORY: item('trinket', 'ELITE', 'cooldownReduction', { affix: 'rootbreaker' }) },
     });
     const m = combatModifiers(h);
     expect(m.skillPower.skill).toBe(1);
     expect(m.skillPower.skill2).toBe(SKILL_RANK_EFFECTS[4].power);
-    expect(m.breakBonus.skill2).toBe(SKILL_RANK_EFFECTS[4].breakBonus + EQUIPMENT['breaker_good'].utility!.breakBonus!);
-    expect(combatModifiers(hero('jin', { equipment: { ACCESSORY: 'ward_very_good' } })).statusResist.bleed).toBe(0.45);
-    expect(combatModifiers(hero('jin', { equipment: { ACCESSORY: 'focus_mid' } })).cooldown.skill).toBeCloseTo(0.95, 5);
+    expect(m.breakBonus.skill2).toBe(SKILL_RANK_EFFECTS[4].breakBonus + 6 + 10);
+    expect(m.cooldown.skill).toBeCloseTo(1 - 0.04, 5);
+    expect(m.diveReduction).toBeCloseTo(0.15, 5);
+    expect(m.statusResist.root).toBeCloseTo(0.2, 5);
+    expect(m.critChance).toBeCloseTo(0.1, 5);
+    const guard = combatModifiers(hero('jin', { gear: { ARMOR: item('guard_armor', 'EPIC', 'hpPct', { affix: 'bleed_guard' }), ACCESSORY: item('trinket', 'EPIC', 'critChance', { affix: 'bleed_guard' }) } }));
+    // two Epic Bleed Guards: 25 % + 25 % → capped at 40 %
+    expect(guard.bleedReduction).toBe(0.4);
+    expect(guard.critChance).toBeCloseTo(0.1 + 0.06, 5);
   });
 
   it('the team builder hands progression to the engine (UnitSpec.mods)', () => {
@@ -151,17 +169,23 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
     expect(r5 / r1).toBeLessThan(1.35 * 1.25);
   });
 
-  it('skill cooldowns shrink with rank / gear', () => {
-    const h = hero('jin', { skillRanks: { skill: 5, skill2: 1, ult: 1 }, equipment: { ACCESSORY: 'focus_very_good' } });
+  it('skill cooldowns shrink with rank / gear (gear CDR capped at 15 %)', () => {
+    const acc = item('trinket', 'EPIC', 'cooldownReduction', { level: 10, affix: 'focus', sec: ['cooldownReduction'] });
+    const wpn = item('heavy_blade', 'EPIC', 'atkPct', { affix: 'focus' });
+    const h = hero('jin', { skillRanks: { skill: 5, skill2: 1, ult: 1 }, gear: { ACCESSORY: acc, WEAPON: wpn } });
+    // 7 % + 5 % + 2.5 % + 5 % = 19.5 % → 15 %
+    expect(heroGearTotals(h).cooldownReduction).toBe(0.15);
     const b = battle([spec('jin', h, 0, 1)], [{ enemy: 'forest_slime', r: 0, c: 1 }]);
     const jin = b.heroU('jin');
     const m = b.monsters('forest_slime')[0];
     b.e.skills.use(jin, 'skill', kitOf('jin', 'fighter').skill, m);
-    expect(jin.cd1).toBeCloseTo(kitOf('jin', 'fighter').skill.cooldown! * 0.9 * 0.9, 5);
+    expect(jin.cd1).toBeCloseTo(kitOf('jin', 'fighter').skill.cooldown! * 0.9 * 0.85, 5);
   });
 
-  it('Break bonus from rank + gear reaches the Break Gauge', () => {
-    const h = hero('aurel', { skillRanks: { skill: 1, skill2: 5, ult: 1 }, equipment: { ACCESSORY: 'breaker_very_good' } });
+  it('Break bonus from rank + gear reaches the Break Gauge (gear Break capped at +20)', () => {
+    const gear = { ACCESSORY: item('trinket', 'EPIC', 'breakPower', { level: 10, affix: 'breaker' }), WEAPON: item('heavy_blade', 'EPIC', 'breakPower', { level: 10 }) };
+    const h = hero('aurel', { skillRanks: { skill: 1, skill2: 5, ult: 1 }, gear });
+    expect(heroGearTotals(h).breakPower).toBe(20);
     const b = battle([spec('aurel', h, 0, 1)], [{ enemy: 'fallen_forest_guardian', r: 1, c: 1 }]);
     const g = b.monsters('fallen_forest_guardian')[0];
     b.statue(g);
@@ -172,16 +196,39 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
     (b.e as any).beginCast(g, MONSTER_SKILLS['forest_oblivion'], null);
     b.e.skills.use(tank, 'skill2', kitOf('aurel', 'tank').skill2, g);
     b.run(1);
-    // 60 (Shield Charge) + 15 (rank 5) + 20 (Very Good Breaker Sigil) = 95
+    // 60 (Shield Charge) + 15 (rank 5) + 20 (gear cap) = 95 — Forest Oblivion (100) still needs a second breaker
     expect(g.casting?.breakDamage).toBe(95);
   });
 
-  it('equipment resistance shortens bleed on the hero', () => {
+  it('Poison Ward / Rootbreaker shorten poison / root; Bleed Guard cuts bleed damage (never immunity)', () => {
     const plain = battle([spec('jin', hero('jin'), 0, 1)], [{ enemy: 'forest_slime', r: 5, c: 1 }]);
-    const warded = battle([spec('jin', hero('jin', { equipment: { ACCESSORY: 'ward_very_good' } }), 0, 1)], [{ enemy: 'forest_slime', r: 5, c: 1 }]);
-    for (const b of [plain, warded]) (b.e as any).applyStatus(b.heroU('jin'), 'bleed', b.monsters('forest_slime')[0]);
-    const left = (b: ReturnType<typeof battle>) => b.heroU('jin').buffs.find(x => x.def.id === 'bleed')!.remaining;
-    expect(left(warded)).toBeCloseTo(left(plain) * 0.55, 5);
+    const gear = { ARMOR: item('guard_armor', 'ELITE', 'hpPct', { affix: 'poison_ward' }), ACCESSORY: item('trinket', 'ELITE', 'hpPct', { affix: 'rootbreaker' }) };
+    const warded = battle([spec('jin', hero('jin', { gear }), 0, 1)], [{ enemy: 'forest_slime', r: 5, c: 1 }]);
+    for (const b of [plain, warded]) {
+      (b.e as any).applyStatus(b.heroU('jin'), 'poison', b.monsters('forest_slime')[0]);
+      (b.e as any).applyStatus(b.heroU('jin'), 'root', b.monsters('forest_slime')[0]);
+    }
+    const left = (b: ReturnType<typeof battle>, id: string) => b.heroU('jin').buffs.find(x => x.def.id === id)!.remaining;
+    expect(left(warded, 'poison')).toBeCloseTo(left(plain, 'poison') * 0.8, 5);
+    expect(left(warded, 'root')).toBeCloseTo(left(plain, 'root') * 0.8, 5);
+    // bleed: same duration, ticks × 0.8
+    const bleedDamage = (h: OwnedHero) => {
+      const b = battle([spec('jin', h, 0, 1)], [{ enemy: 'corrupted_wolf', r: 5, c: 1 }]);
+      const w = b.monsters('corrupted_wolf')[0];
+      b.statue(w);
+      const jin = b.heroU('jin');
+      jin.castLock = 1e9;
+      (b.e as any).applyStatus(jin, 'bleed', w);
+      const hp = jin.hp;
+      for (let i = 0; i < 40; i++) { jin.castLock = 1e9; b.e.step(0.05); }
+      return hp - jin.hp;
+    };
+    const raw = bleedDamage(hero('jin'));
+    const guarded = bleedDamage(hero('jin', { gear: { ARMOR: item('guard_armor', 'ELITE', 'hpPct', { affix: 'bleed_guard' }) } }));
+    expect(raw).toBeGreaterThan(0);
+    expect(guarded).toBeGreaterThan(0);
+    expect(guarded / raw).toBeGreaterThan(0.7);
+    expect(guarded / raw).toBeLessThan(0.9);
   });
 });
 
