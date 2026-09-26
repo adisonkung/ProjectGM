@@ -62,6 +62,9 @@ export class BattleMetrics {
   /** Forest Oblivion style breakable casts: broken / landed */
   breakSuccess = 0;
   breakFailure = 0;
+  /** assassin AI: dives ended early because the landing spot was unsafe · AI blinks skipped (unsafe landing, no kill) */
+  assassinRetreats = 0;
+  unsafeBlinksSkipped = 0;
 
   // ------------------------------------------------ mechanic exposure (did the mechanics get the time to happen?)
   /** enemy (data-driven monster) casts per skill id */

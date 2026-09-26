@@ -54,6 +54,12 @@ export interface SkillHost {
   chaseAllowed?(u: BattleUnit, f: BattleUnit): boolean;
   /** metrics hook: a skill / ultimate was used */
   onSkillUse?(u: BattleUnit, slot: SkillSlot, s: SkillDefinition, target: BattleUnit): void;
+  /** unit lookup (cast targets) */
+  unitById?(id: number): BattleUnit | undefined;
+  /** AI only: may this hero blink behind `t` now? (assassin post-dive safety — player orders ignore it) */
+  blinkAllowed?(u: BattleUnit, s: SkillDefinition, t: BattleUnit): boolean;
+  /** a blink / deep teleport started (`lock` = the skill's animation lock) */
+  onDive?(u: BattleUnit, t: BattleUnit, lock: number): void;
 }
 
 const hpPct = (u: BattleUnit) => (u.maxHp > 0 ? u.hp / u.maxHp : 0);
@@ -226,8 +232,25 @@ export class SkillSystem {
         return rankOf(priorityOf(c.def)) >= min;
       })
       .sort((a, b) =>
-        rankOf(priorityOf(b.casting!.def)) - rankOf(priorityOf(a.casting!.def)) ||
+        this.urgency(b) - this.urgency(a) ||
         Number(b === focus) - Number(a === focus) || a.casting!.left - b.casting!.left);
+  }
+
+  /**
+   * How urgent stopping this cast is right now (encounter spec §7): its priority rank, +1 when the situation makes it
+   * worse — a disabling hit (stun) aimed at a hero below 50 % HP, a heal aimed at an enemy below 35 %, a damage link
+   * while the hero side has burst ready (an ult at full gauge). Read from the cast's data, nothing monster-specific.
+   */
+  urgency(f: BattleUnit): number {
+    const c = f.casting!;
+    const def = c.def as { effects?: { type: string; status?: string; pct?: number }[] };
+    const base = rankOf(priorityOf(c.def));
+    const tgt = c.target != null ? this.h.unitById?.(c.target) : undefined;
+    const fx = def.effects ?? [];
+    if (tgt && tgt.side !== f.side && hpPct(tgt) < 0.5 && fx.some(e => e.type === 'APPLY_STATUS' && e.status === 'stun')) return base + 1;
+    if (tgt && tgt.side === f.side && hpPct(tgt) < 0.35 && fx.some(e => e.type === 'HEAL_PCT')) return base + 1;
+    if (fx.some(e => e.type === 'SOUL_LINK') && this.h.foes(f).some(h => h.mana >= h.maxMana)) return base + 1;
+    return base;
   }
 
   /** register an interrupt / break commitment on every stoppable cast this use will hit */
@@ -307,6 +330,7 @@ export class SkillSystem {
         const rules = ai.tier === 'INTERRUPT' ? (r.skill.fallback ?? []) : undefined;
         const t = this.pickTarget(u, r.skill, current, rules);
         if (!t) continue;
+        if (r.skill.movement?.type === 'BLINK_BEHIND' && this.h.blinkAllowed && !this.h.blinkAllowed(u, r.skill, t)) continue;
         if (ai.minTargets && this.areaUnits(u, r.skill, t, 'ENEMY', ai.countArea).length < ai.minTargets) continue;
         return { slot: r.slot, skill: r.skill, target: t, tier };
       }
@@ -362,6 +386,7 @@ export class SkillSystem {
     if (!t) return null;
     const heals = s.effects.some(e => e.type === 'HEAL' || e.type === 'REVIVE');
     if (!heals && !foes.length) return null;
+    if (!manual && s.movement?.type === 'BLINK_BEHIND' && this.h.blinkAllowed && !this.h.blinkAllowed(u, s, t)) return null;
     if (manual || !heals || !ai) return t;
     const revivable = ai.whenAllyDead && s.effects.some(e => e.type === 'REVIVE') && this.h.deadAllies(u).length > 0;
     return revivable || this.healNeed(u, s, t).wanted ? t : null;
@@ -471,6 +496,7 @@ export class SkillSystem {
       if (cell) this.h.relocate(u, cell, 'dash');
     }
     if (mv?.type === 'BLINK_BEHIND') {
+      this.h.onDive?.(u, target, Math.max(tm.total, SKILL_LOCK));
       this.h.later(tm.move, u, () => {
         if (!target.alive) return;
         const cell = this.h.freeCellNear(target.pos, u.pos);

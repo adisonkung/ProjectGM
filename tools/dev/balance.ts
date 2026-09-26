@@ -9,7 +9,9 @@
  */
 import { BattleEngine, MONSTER_TUNING_LIMITS, monsterTuningReview } from '../../src/app/battle/engine/battle-engine';
 import { ENEMIES } from '../../src/app/core/data/enemies';
-import { MONSTERS } from '../../src/app/core/data/monsters';
+import { MONSTER_SKILLS, MONSTERS } from '../../src/app/core/data/monsters';
+/** castStart / castDone carry the skill NAME — map back to ids */
+const SKILL_ID_BY_NAME: Record<string, string> = Object.fromEntries(Object.values(MONSTER_SKILLS).map(d => [d.name, d.id]));
 import { STAGES } from '../../src/app/core/data/stages';
 import { newGameState } from '../../src/app/core/data/starter';
 import { teamToUnits } from '../../src/app/core/rules/team';
@@ -20,6 +22,7 @@ import { BotName, TacticalBot, tacticalFormation } from './policy';
 import { FLOOR_BANDS, POWER_PROFILES } from '../../src/app/core/data/progression';
 import { FARM_BY_ID, FARM_DUNGEONS } from '../../src/app/core/data/economy';
 import { applyProfile } from '../../src/app/core/rules/progression';
+import { ENEMY_ZONE_START, distance } from '../../src/app/battle/engine/grid';
 
 declare const process: { argv: string[] };
 const args = process.argv.slice(2);
@@ -61,12 +64,26 @@ interface Agg {
   deathRuns: number; reviveRuns: number; wipes: number; timeouts: number;
   heroes: Record<string, { dealt: number; healed: number; skills: number; ults: number; deaths: number; revives: number }>;
   bonusHits: Record<string, number>; aims: Record<string, { total: number; marked: number }>; bossStatus: Record<string, number>; gear: Record<string, number>;
+  enc: Enc;
 }
+/** --encounter: pre-boss / Forest Oblivion / caster metrics (encounter rebalance spec) */
+interface Enc {
+  wave1: number; wave2: number; bossReach: number; deathsBeforeBoss: number; shadeBeforeBoss: number; shadeDeaths: number;
+  hpAtBoss: number; gaugeAtBoss: number; aliveAtBoss: number;
+  obl: { started: number; broken: number; completed: number; cancelled: number; breakSum: number; ends: number; deaths: number; runs1: number; wins1: number; runs2: number; wins2: number; p4: number; p4runs: number };
+  stopsBy: Record<string, number>; breakHitsBy: Record<string, number>;
+  casterDepth: number; casterDist: number; casterCasts: number; duration: number; winTime: number;
+}
+const newEnc = (): Enc => ({
+  wave1: 0, wave2: 0, bossReach: 0, deathsBeforeBoss: 0, shadeBeforeBoss: 0, shadeDeaths: 0, hpAtBoss: 0, gaugeAtBoss: 0, aliveAtBoss: 0,
+  obl: { started: 0, broken: 0, completed: 0, cancelled: 0, breakSum: 0, ends: 0, deaths: 0, runs1: 0, wins1: 0, runs2: 0, wins2: 0, p4: 0, p4runs: 0 },
+  stopsBy: {}, breakHitsBy: {}, casterDepth: 0, casterDist: 0, casterCasts: 0, duration: 0, winTime: 0,
+});
 const newAgg = (): Agg => ({
   wins: 0, time: 0, deaths: 0, revives: 0, wave: 0, dealt: 0, taken: 0, heal: 0, opp: 0, att: 0, succ: 0, crit: 0,
   resHit: 0, resMiss: 0, focusUp: 0, unsafe: 0, anchor: 0, threatDeaths: 0, phase: 0, brk: 0, brkFail: 0, fight: 0, ults: 0,
   bossRuns: 0, bossLife: 0, bossKilled: 0, sealBroken: 0, skills: {}, phaseReached: {}, phaseTime: [], phaseTimeRuns: [], status: {},
-  deathRuns: 0, reviveRuns: 0, wipes: 0, timeouts: 0, heroes: {}, bonusHits: {}, aims: {}, bossStatus: {}, gear: {},
+  deathRuns: 0, reviveRuns: 0, wipes: 0, timeouts: 0, heroes: {}, bonusHits: {}, aims: {}, bossStatus: {}, gear: {}, enc: newEnc(),
 });
 
 // --farm=training_1,ascension_2 (or --farm=all): farm dungeon encounters instead of tower floors
@@ -110,13 +127,81 @@ for (let stage of floors) {
       const tactical = bot === 'TACTICAL'
         ? new TacticalBot({ focus: !flag('--nofocus'), reserveInterrupts: !flag('--noreserve'), reserveHealerUlt: !flag('--nohealult'), interruptPriority: !flag('--noprio') })
         : null;
+      // --encounter tracking (events as they happen)
+      const E = a.enc;
+      const cleared = new Set<number>();
+      let bossSeen = false;
+      let oblBreak = 0;
+      let oblDone = 0;
+      let oblHitAt = -1;
+      let deathsThisTick: number[] = [];
+      const heroOf = (id: number) => e.units.find(x => x.id === id);
+      const unsub = e.subscribe(ev => {
+        const t = ev.type as string;
+        if (t === 'WAVE_CLEARED') cleared.add((ev as { wave: number }).wave);
+        else if (t === 'death') {
+          const u = heroOf((ev as { dst: number }).dst);
+          if (u?.side !== 'ally') return;
+          if (u.heroId === 'shade') E.shadeDeaths++;
+          if (!bossSeen) { E.deathsBeforeBoss++; if (u.heroId === 'shade') E.shadeBeforeBoss++; }
+          deathsThisTick.push(e.time);
+          if (oblHitAt >= 0 && e.time - oblHitAt <= 0.3) E.obl.deaths++;
+        } else if (t === 'interrupt' || t === 'broken') {
+          const u = heroOf((ev as { src: number }).src);
+          if (u?.side === 'ally') E.stopsBy[u.name] = (E.stopsBy[u.name] ?? 0) + 1;
+          if (t === 'broken' && (ev as { skill: string }).skill === 'forest_oblivion') { E.obl.broken++; E.obl.breakSum += 100; E.obl.ends++; }
+        } else if (t === 'breakGauge') {
+          const g = ev as { src: number; skill: string; value: number };
+          const u = heroOf(g.src);
+          if (u?.side === 'ally') E.breakHitsBy[u.name] = (E.breakHitsBy[u.name] ?? 0) + 1;
+          if (g.skill === 'forest_oblivion') oblBreak = g.value;
+        } else if (t === 'castStart') {
+          const c = { ...(ev as { src: number; skill: string }) };
+          c.skill = SKILL_ID_BY_NAME[c.skill] ?? c.skill;
+          if (c.skill === 'forest_oblivion') { E.obl.started++; oblBreak = 0; }
+          const m = heroOf(c.src);
+          if (m?.monster && ['dark_shaman', 'mist_witch', 'dark_shaman_ritual'].includes(m.monster.definitionId)) {
+            const heroes = e.units.filter(x => x.side === 'ally' && x.alive);
+            E.casterCasts++;
+            E.casterDepth += m.pos.c - ENEMY_ZONE_START;
+            E.casterDist += heroes.length ? Math.min(...heroes.map(h => distance(h.pos, m.pos))) : 0;
+          }
+        } else if (t === 'skillActivated' && (ev as { skill: string }).skill === 'forest_oblivion') {
+          // the damage (and its deaths) is applied before this event in the same tick
+          E.obl.deaths += deathsThisTick.filter(x => x >= e.time - 1e-9).length;
+          oblHitAt = e.time + 1e-6;
+        } else if (t === 'castDone' && SKILL_ID_BY_NAME[(ev as { skill: string }).skill] === 'forest_oblivion') {
+          E.obl.completed++; oblDone++; E.obl.breakSum += oblBreak; E.obl.ends++;
+        } else if (t === 'castCancel' && (ev as { skill: string }).skill === 'forest_oblivion') {
+          E.obl.cancelled++; E.obl.breakSum += oblBreak; E.obl.ends++;
+        }
+      });
       while (!e.result && e.time < 400) {
+        if (!bossSeen && e.metrics.bossSpawnedAt != null) {
+          bossSeen = true;
+          const party = e.units.filter(x => x.side === 'ally');
+          E.bossReach++;
+          E.hpAtBoss += party.reduce((q, x) => q + (x.alive ? x.hp : 0), 0) / party.reduce((q, x) => q + x.maxHp, 0);
+          const alive = party.filter(x => x.alive);
+          E.aliveAtBoss += alive.length;
+          E.gaugeAtBoss += alive.length ? alive.reduce((q, x) => q + x.mana / x.maxMana, 0) / alive.length : 0;
+        }
         tactical?.tick(e);
+        deathsThisTick = [];
         e.step(0.05);
         for (const ev of e.drainEvents()) {
           if (ev.type === 'cast' && (ev as { kind?: string }).kind === 'ult' && e.units.find(u => u.id === ev.src)?.side === 'ally') a.ults++;
         }
       }
+      unsub();
+      if (cleared.has(0)) E.wave1++;
+      if (cleared.has(1)) E.wave2++;
+      E.duration += e.time;
+      if (e.result === 'win') E.winTime += e.time;
+      if (oblDone >= 1) { E.obl.runs1++; if (e.result === 'win') E.obl.wins1++; }
+      if (oblDone >= 2) { E.obl.runs2++; if (e.result === 'win') E.obl.wins2++; }
+      const pd = e.metrics.phaseDurations(e.time);
+      if (pd.length >= 4 && e.metrics.bossPhases.length >= 3) { E.obl.p4 += pd[3]; E.obl.p4runs++; }
       const m = e.metrics;
       if (e.result === 'win') a.wins++;
       if (m.deaths > 0) a.deathRuns++;
@@ -216,6 +301,26 @@ for (let stage of floors) {
       console.log(`     deaths per hero per run: ${dh}`);
       const gp = Object.entries(a.gear).map(([id, v]) => `${id} ${f1(v / n, 1)}`).join(' · ');
       if (gp) console.log(`     gear procs per run: ${gp}`);
+    }
+  }
+
+  if (flag('--encounter')) {
+    for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
+      const a = aggs[bot];
+      const E = a.enc;
+      const o = E.obl;
+      const sk = (id: string) => { const x = a.skills[id]; return x ? `${f1(x.started / n, 2)}/${f1(x.completed / n, 2)}/${f1(x.interrupted / n, 2)}` : '-'; };
+      console.log(`  -- encounter ${bot} (${n} runs): win ${pct(a.wins / n)} · duration ${f1(E.duration / n, 0)}s (wins ${f1(a.wins ? E.winTime / a.wins : 0, 0)}s) · deaths ${f1(a.deaths / n, 2)} · revives ${f1(a.revives / n, 2)}`);
+      console.log(`     casts started/completed/interrupted per run: dark_heal ${sk('dark_heal')} · soul_link ${sk('soul_link')} · nightmare ${sk('nightmare')} · dark_fog ${sk('dark_fog')} · sacrifice ${sk('sacrifice')}`);
+      if (E.casterCasts) console.log(`     casters at cast start: depth ${f1(E.casterDepth / E.casterCasts, 2)} (0 = front of enemy zone) · nearest hero ${f1(E.casterDist / E.casterCasts, 2)} cells`);
+      console.log(`     stops (interrupt / break) per run by hero: ${Object.entries(E.stopsBy).map(([k, v]) => `${k} ${f1(v / n, 2)}`).join(' · ') || '-'} · break hits: ${Object.entries(E.breakHitsBy).map(([k, v]) => `${k} ${f1(v / n, 2)}`).join(' · ') || '-'}`);
+      console.log(`     wave 1 survived ${pct(E.wave1 / n)} · wave 2 survived ${pct(E.wave2 / n)} · boss reached ${pct(E.bossReach / n)} · deaths before boss ${f1(E.deathsBeforeBoss / n, 2)} (Shade ${f1(E.shadeBeforeBoss / n, 2)}; Shade total ${f1(E.shadeDeaths / n, 2)})` +
+        (E.bossReach ? ` · entering boss: team HP ${pct(E.hpAtBoss / E.bossReach)} · alive ${f1(E.aliveAtBoss / E.bossReach, 2)} · ult gauge ${pct(E.gaugeAtBoss / E.bossReach)}` : ''));
+      if (o.started) {
+        console.log(`     Forest Oblivion: started ${f1(o.started / n, 2)}/run · broken ${pct(o.broken / o.started)} · landed ${pct(o.completed / o.started)} · cancelled ${pct(o.cancelled / o.started)} · avg Break at cast end ${f1(o.ends ? o.breakSum / o.ends : 0, 1)}` +
+          ` · deaths from it ${f1(o.deaths / n, 2)}/run · runs with ≥1 landed ${pct(o.runs1 / n)} → won ${pct(o.runs1 ? o.wins1 / o.runs1 : 0)} · ≥2 landed ${pct(o.runs2 / n)} → won ${pct(o.runs2 ? o.wins2 / o.runs2 : 0)}` +
+          ` · boss lifetime ${f1(a.bossRuns ? a.bossLife / a.bossRuns : 0, 1)}s · phase 4 ${f1(o.p4runs ? o.p4 / o.p4runs : 0, 1)}s`);
+      }
     }
   }
 

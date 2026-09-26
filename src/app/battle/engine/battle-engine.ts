@@ -235,6 +235,9 @@ export interface BattleUnit {
   interruptMinPriority: InterruptPriority;
   /** player ordered skill 1 / 2 (manual activation, also for RESERVE / MANUAL skills) */
   skillQueued: 'skill' | 'skill2' | null;
+  /** assassin dive override: battle time it ends + the unit it dove onto */
+  diveUntil?: number;
+  diveTargetId?: number | null;
   /** data-driven monster: runtime state (definition in MONSTERS) */
   monster?: MonsterCombatState;
 }
@@ -284,6 +287,17 @@ const DASH_SPEED = 14;
 /** STEP 9: AI คิดเลือกเป้าทุก 0.25 วิ · เปลี่ยนเป้าแล้วล็อกอย่างน้อย 0.6 วิ (ยกเว้นเป้าตาย/โฟกัสเปลี่ยน) */
 const THINK = 0.25;
 const TARGET_LOCK = 0.6;
+/**
+ * Assassin post-dive safety (encounter spec §22): after a blink the hero may stay on its dive target for the skill
+ * lock + DIVE_WINDOW (one follow-up hit); more than ASSASSIN_SAFE_THREAT hostile melee threat zones on its cell
+ * (without a kill in reach: target ≤ ASSASSIN_KILL_HP) end the dive and it falls back toward the allied frontline.
+ * Without an active dive an assassin never walks through the enemy line for a backline target, and the AI only
+ * blinks into a spot that is safe or onto a kill.
+ */
+export const DIVE_WINDOW = 1.5;
+export const ASSASSIN_SAFE_THREAT = 1;
+export const ASSASSIN_KILL_HP = 0.3;
+export const ASSASSIN_ESCAPE_HP = 0.45;
 
 /**
  * เอนจินต่อสู้อัตโนมัติบนสนาม 3 เลน x 12 (TypeScript ล้วน ไม่ผูกกับ Angular)
@@ -828,6 +842,8 @@ export class BattleEngine {
     }
 
     const aspd = u.atkSpeed * modifier(u, 'attackSpeedMultiplier');
+    // player assassin, no dive, badly hurt inside several threat zones: step out of the pile instead of trading
+    if (this.assassinEscape(u)) return;
     // interrupt opportunity: react right away (a cast bar won't wait for the attack timer)
     const intr = this.skills.chooseInterrupt(u, current);
     if (intr) {
@@ -874,6 +890,11 @@ export class BattleEngine {
       const step =
         nextStep(this.grid, u.pos, c => distance(c, goal.pos) <= (chase ? this.skills.interruptReach(u) : u.range), blocked) ??
         greedyStep(this.grid, u.pos, goal.pos, blocked);
+      // assassin without an active dive: never the first to make contact — no step past the allied frontline
+      if (step && this.assassinHeldBack(u, step)) {
+        u.moveCd = 1 / u.moveSpeed;
+        return;
+      }
       if (step) {
         this.grid.move(u.id, u.pos, step);
         u.pos = step;
@@ -918,7 +939,7 @@ export class BattleEngine {
     if (hold) {
       pick = hold;
       intent = focus && focus !== hold ? 'hold' : 'normal';
-    } else if (focus && this.canEngage(u, focus, foes)) {
+    } else if (focus && this.canEngage(u, focus, foes) && this.assassinMayTakeFocus(u, focus)) {
       // soft Focus: only when this hero can engage it safely (else keep fighting normally; Focus stays stored)
       pick = focus;
       intent = 'focus';
@@ -943,6 +964,7 @@ export class BattleEngine {
     const inRange = foes.filter(f => d(f) <= u.range);
     if (current && (d(current) <= u.range || !inRange.length) && u.cls !== 'assassin') return current;
     const front = (f: BattleUnit) => (f.line === 'front' ? 0 : 1);
+    if (u.cls === 'assassin' && u.side === PLAYER_TEAM) return this.assassinTarget(u, foes, current);
     if (u.cls === 'assassin') {
       // นักฆ่า: แถวหลังก่อน ฮีลเลอร์ > นักเวท > นักธนู > เลือดน้อย
       const order: Partial<Record<HeroClass, number>> = { healer: 0, mage: 1, archer: 2 };
@@ -977,6 +999,78 @@ export class BattleEngine {
     // สายประชิด: แถวหน้าก่อน (ในระยะถ้ามี) แล้วค่อยแถวหลัง
     const pool = inRange.length ? inRange : foes;
     return [...pool].sort((a, b) => front(a) - front(b) || d(a) - d(b) || a.id - b.id)[0];
+  }
+
+  /**
+   * Player assassin (encounter spec §22): stays on its dive target during the dive window unless the landing spot is
+   * unsafe without a kill in reach; otherwise hits what it can reach now (back row first) and never walks through the
+   * enemy line — with nothing in reach it rejoins the fight at the allied frontline (the enemy nearest our heroes).
+   */
+  private assassinTarget(u: BattleUnit, foes: BattleUnit[], current: BattleUnit | null): BattleUnit {
+    const d = (f: BattleUnit) => distance(f.pos, u.pos);
+    const threat = this.localThreat(u, u.pos);
+    const dive = (u.diveUntil ?? 0) > this.time ? foes.find(f => f.id === u.diveTargetId) : undefined;
+    if (dive) {
+      const kill = dive.hp / dive.maxHp <= ASSASSIN_KILL_HP && d(dive) <= u.range + 1;
+      if (threat <= ASSASSIN_SAFE_THREAT || kill) return dive;
+      u.diveUntil = 0;
+      this.metrics.assassinRetreats++;
+    }
+    const order: Partial<Record<HeroClass, number>> = { healer: 0, mage: 1, archer: 2 };
+    const back = (f: BattleUnit) => (f.line === 'back' ? 0 : 1);
+    const inReach = foes.filter(f => d(f) <= u.range);
+    if (inReach.length) {
+      if (current && inReach.includes(current) && threat <= ASSASSIN_SAFE_THREAT) return current;
+      return [...inReach].sort((a, b) => back(a) - back(b) || (order[a.cls] ?? 3) - (order[b.cls] ?? 3) || a.hp / a.maxHp - b.hp / b.maxHp || a.id - b.id)[0];
+    }
+    const mates = this.alive(u.side).filter(a => a !== u);
+    const toTeam = (f: BattleUnit) => (mates.length ? Math.min(...mates.map(a => distance(a.pos, f.pos))) : d(f));
+    return [...foes].sort((a, b) => toTeam(a) - toTeam(b) || d(a) - d(b) || a.id - b.id)[0];
+  }
+
+  /** hurt (< ASSASSIN_ESCAPE_HP) player assassin inside > ASSASSIN_SAFE_THREAT threat zones steps to a safer cell behind */
+  private assassinEscape(u: BattleUnit): boolean {
+    if (u.side !== PLAYER_TEAM || u.cls !== 'assassin' || (u.diveUntil ?? 0) > this.time) return false;
+    if (u.moveCd > 0 || hasFlag(u, 'root') || u.hp / u.maxHp >= ASSASSIN_ESCAPE_HP) return false;
+    const here = this.localThreat(u, u.pos);
+    if (here <= ASSASSIN_SAFE_THREAT) return false;
+    const step = Grid.neighbors(u.pos)
+      .filter(c => this.grid.canEnter(c) && c.c <= u.pos.c)
+      .map(c => ({ c, t: this.localThreat(u, c) }))
+      .filter(x => x.t < here)
+      .sort((a, b) => a.t - b.t || a.c.c - b.c.c)[0];
+    if (!step) return false;
+    this.grid.move(u.id, u.pos, step.c);
+    u.pos = step.c;
+    u.moveCd = 1 / u.moveSpeed;
+    this.events.push({ type: 'move', src: u.id });
+    this.metrics.assassinRetreats++;
+    return true;
+  }
+
+  /** player assassin: a far Focus is reached by blinking (when safe), never by walking through the enemy line */
+  private assassinMayTakeFocus(u: BattleUnit, focus: BattleUnit): boolean {
+    if (u.side !== PLAYER_TEAM || u.cls !== 'assassin') return true;
+    if ((u.diveUntil ?? 0) > this.time && u.diveTargetId === focus.id) return true;
+    return distance(u.pos, focus.pos) <= u.range + 1;
+  }
+
+  /** player assassin (no dive): a step beyond the furthest-forward other melee hero is refused */
+  private assassinHeldBack(u: BattleUnit, step: Cell): boolean {
+    if (u.side !== PLAYER_TEAM || u.cls !== 'assassin' || (u.diveUntil ?? 0) > this.time) return false;
+    if (step.c <= u.pos.c) return false;
+    const melee = this.alive(u.side).filter(a => a !== u && !isRanged(a) && a.cls !== 'assassin');
+    if (!melee.length || step.c <= Math.max(...melee.map(a => a.pos.c))) return false;
+    // only before contact: once an allied melee hero is engaged the assassin joins in; never into an unthreatened cell
+    const foes = this.alive(u.side === 'ally' ? 'enemy' : 'ally');
+    if (melee.some(m => foes.some(f => distance(f.pos, m.pos) <= 1))) return false;
+    return this.localThreat(u, step) > 0;
+  }
+
+  /** hostile melee threat zones covering a cell (Positioning) */
+  private localThreat(u: BattleUnit, cell: Cell, except?: BattleUnit): number {
+    const zones = this.positioning.threats(u).filter(z => z.unitId !== except?.id);
+    return this.positioning.threatCount(cell, zones);
   }
 
   /**
@@ -1058,8 +1152,11 @@ export class BattleEngine {
     // healers: allied survival first — walk (safely) back into heal range of a hurt ally that drifted away
     const hb = this.skills.kit(u).healBolt;
     if (hb) {
+      // never into the enemy line after a diver: only allies at or behind the allied frontline (encounter pass)
+      const front = this.positioning.frontlineX(u);
       const hurt = this.units
         .filter(a => a !== u && a.alive && a.side === u.side && a.visible && a.hp < a.maxHp * hb.allyHpBelow && distance(a.pos, u.pos) > u.range)
+        .filter(a => a.cls !== 'assassin' || front == null || a.pos.c <= Math.max(...this.alive(u.side).filter(m => !isRanged(m) && m.cls !== 'assassin').map(m => m.pos.c), -Infinity))
         .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
       if (hurt) goal = hurt;
     }
@@ -1724,6 +1821,19 @@ export class BattleEngine {
         return [...dead.filter(a => a.life === 'DEAD_VISIBLE'), ...dead.filter(a => a.life === 'DEAD_HIDDEN')];
       },
       focus: u => (u.side === PLAYER_TEAM ? self.focusUnit() : null),
+      unitById: id => self.units.find(x => x.id === id),
+      blinkAllowed: (u, _s, t) => {
+        if (u.side !== PLAYER_TEAM || u.cls !== 'assassin') return true;
+        if (t.hp / t.maxHp <= ASSASSIN_KILL_HP) return true;
+        const ok = self.localThreat(u, t.pos, t) <= ASSASSIN_SAFE_THREAT;
+        if (!ok) self.metrics.unsafeBlinksSkipped++;
+        return ok;
+      },
+      onDive: (u, t, lock) => {
+        if (u.side !== PLAYER_TEAM) return;
+        u.diveUntil = self.time + lock + DIVE_WINDOW;
+        u.diveTargetId = t.id;
+      },
       chaseAllowed: (u, f) => {
         if (u.side !== PLAYER_TEAM) return true;
         const P = self.positioning;

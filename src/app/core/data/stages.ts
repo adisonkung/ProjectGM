@@ -99,22 +99,26 @@ export const STAGES: StageDef[] = [
       { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }],
   ] },
   // Stage 9 — Death Mist: target-priority puzzle (Treant blocks · Shaman heals / links · Witch controls · Wolves press · Wraith hunts)
-  { floor: 9, recommendedLevel: 10, monsterTuning: { hp: 1.4, atk: 1.25, def: 1.3 }, name: 'Death Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 140, enemies: [
+  { floor: 9, recommendedLevel: 10, monsterTuning: { hp: 1.3, atk: 1.18, def: 1.18 }, name: 'Death Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 140, enemies: [
+    // encounter pass (claude/patch1-encounter-rebalance-f9-f10-spec.md): tactical resource management — more stoppable
+    // casts than interrupts every wave (Dark Heal / Nightmare HIGH, Soul Link, Dark Fog unstoppable), casters at depth 3
     { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-    { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'dark_shaman', r: 4, c: 1 },
+    { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'dark_shaman', r: 3, c: 0 }, { enemy: 'mist_witch', r: 3, c: 2 },
   ], rounds: [
     [{ enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-      { enemy: 'mist_witch', r: 4, c: 0 }, { enemy: 'dark_shaman', r: 4, c: 2 }],
+      { enemy: 'mist_witch', r: 3, c: 0 }, { enemy: 'dark_shaman', r: 3, c: 1 }, { enemy: 'dark_shaman', r: 3, c: 2 }],
     [{ enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-      { enemy: 'mist_wraith', r: 2, c: 1 }, { enemy: 'dark_shaman', r: 4, c: 0 }, { enemy: 'mist_witch', r: 4, c: 2 }],
+      { enemy: 'mist_wraith', r: 2, c: 1 }, { enemy: 'dark_shaman', r: 3, c: 0 }, { enemy: 'mist_witch', r: 3, c: 1 }, { enemy: 'mist_witch', r: 3, c: 2 }],
   ] },
   // Stage 10 — Heart of the Dark Forest: the full system exam (seal + wraiths 70%, Sacrifice 40%, enrage + Forest Oblivion 15%)
   { floor: 10, recommendedLevel: 10, monsterTuning: { hp: 1.35, atk: 1.22, def: 1.1 }, name: 'Heart of the Dark Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 210, enemies: [
     { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-    { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 },
+    // encounter pass (claude/patch1-encounter-rebalance-f9-f10-spec.md): one Wraith — wave 1 = bleed / survival pressure
+    { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'mist_wraith', r: 2, c: 1 },
   ], rounds: [
+    // wave 2 = caster priority + backline threat (the second Wraith moved here)
     [{ enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-      { enemy: 'dark_shaman', r: 4, c: 0 }, { enemy: 'mist_witch', r: 4, c: 2 }],
+      { enemy: 'mist_wraith', r: 2, c: 1 }, { enemy: 'dark_shaman', r: 4, c: 0 }, { enemy: 'mist_witch', r: 4, c: 2 }],
     // the boss alone: its phases create the adds
     [{ enemy: 'fallen_forest_guardian', r: 1, c: 1 }],
   ] },

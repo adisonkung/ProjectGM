@@ -196,10 +196,10 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   /** Phase 4 only — not interruptible, but breakable (Break Gauge 100) */
   forest_oblivion: {
     id: 'forest_oblivion', name: 'พงไพรสูญสิ้น', label: 'FOREST OBLIVION', type: 'ATTACK',
-    castTime: 6, cooldown: 12, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 100, brokenStatus: 'broken',
+    castTime: 6.75, cooldown: 12, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 100, brokenStatus: 'broken',
     target: { type: 'ALL_HEROES' },
     effects: [
-      { type: 'DAMAGE', mul: 2.6, area: 'ALL_ENEMIES', center: 'SELF' },
+      { type: 'DAMAGE', mul: 2.1, area: 'ALL_ENEMIES', center: 'SELF' },
       { type: 'APPLY_STATUS', status: 'healing_reduction', to: 'HIT', duration: 6 },
     ],
     mockFx: { color: '#ff2020', area: 'ALL_ENEMIES' },
@@ -301,10 +301,11 @@ export const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = {
     attack: { id: 'heavy_branch', damageType: 'PHYSICAL', damageMultiplier: 1.3, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.4 },
     skills: [], animation: mock,
   },
+  /** encounter pass: casters hold 3.5 cells from their target (attack range 6) — protected, but inside an archer's reach */
   dark_shaman: {
     id: 'dark_shaman', name: 'หมอผีมืด', rank: 'ELITE', role: 'HEALER / LINK SUPPORT', tags: ['caster', 'dark'],
     displayClass: 'healer', visual: 'mock_dark_shaman',
-    stats: base({ maxHp: 290, attack: 62, defense: 14, moveSpeed: 1.7, attackRange: 6, preferredRange: 5.5, attackCooldown: 1.8, minComfortableRange: 3, rangeTolerance: 0.5 }),
+    stats: base({ maxHp: 290, attack: 62, defense: 14, moveSpeed: 1.7, attackRange: 6, preferredRange: 3.5, attackCooldown: 1.8, minComfortableRange: 3, rangeTolerance: 0.5 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.2 }, movement: 'RANGED_HOLD', maxRetreatSteps: 1, skillPriority: ['dark_heal', 'soul_link'] },
     attack: { id: 'dark_bolt', damageType: 'MAGIC', damageMultiplier: 1, delivery: 'PROJECTILE', projectileId: 'dark_bolt', clip: 'attack', event: 'PROJECTILE_SPAWN', hitTolerance: 0 },
     skills: ['dark_heal', 'soul_link'], animation: mock,
@@ -313,7 +314,7 @@ export const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = {
   dark_shaman_ritual: {
     id: 'dark_shaman_ritual', name: 'หมอผีมืด (พิธีบูชายัญ)', rank: 'ELITE', role: 'SACRIFICE SUPPORT', tags: ['caster', 'dark'],
     displayClass: 'healer', visual: 'mock_dark_shaman',
-    stats: base({ maxHp: 290, attack: 62, defense: 14, moveSpeed: 1.7, attackRange: 6, preferredRange: 5.5, attackCooldown: 1.8, minComfortableRange: 3, rangeTolerance: 0.5 }),
+    stats: base({ maxHp: 290, attack: 62, defense: 14, moveSpeed: 1.7, attackRange: 6, preferredRange: 3.5, attackCooldown: 1.8, minComfortableRange: 3, rangeTolerance: 0.5 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.2 }, movement: 'RANGED_HOLD', maxRetreatSteps: 1, skillPriority: ['sacrifice', 'dark_heal', 'soul_link'] },
     attack: { id: 'dark_bolt', damageType: 'MAGIC', damageMultiplier: 1, delivery: 'PROJECTILE', projectileId: 'dark_bolt', clip: 'attack', event: 'PROJECTILE_SPAWN', hitTolerance: 0 },
     skills: ['sacrifice', 'dark_heal', 'soul_link'], animation: mock,
@@ -321,7 +322,7 @@ export const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = {
   mist_witch: {
     id: 'mist_witch', name: 'แม่มดหมอก', rank: 'SPECIAL', role: 'CONTROL / DEBUFF', tags: ['caster', 'mist'],
     displayClass: 'mage', visual: 'mock_mist_witch',
-    stats: base({ maxHp: 240, attack: 76, defense: 9, moveSpeed: 1.8, attackRange: 6, preferredRange: 5.5, attackCooldown: 1.9, minComfortableRange: 3, rangeTolerance: 0.5 }),
+    stats: base({ maxHp: 240, attack: 76, defense: 9, moveSpeed: 1.8, attackRange: 6, preferredRange: 3.5, attackCooldown: 1.9, minComfortableRange: 3, rangeTolerance: 0.5 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.2 }, movement: 'RANGED_HOLD', maxRetreatSteps: 1, skillPriority: ['nightmare', 'dark_fog'] },
     attack: { id: 'dark_bolt', damageType: 'MAGIC', damageMultiplier: 1, delivery: 'PROJECTILE', projectileId: 'dark_bolt', clip: 'attack', event: 'PROJECTILE_SPAWN', hitTolerance: 0 },
     skills: ['nightmare', 'dark_fog'], animation: mock,

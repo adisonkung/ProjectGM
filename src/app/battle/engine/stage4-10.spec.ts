@@ -597,7 +597,7 @@ describe('Stage 4–10 bosses', () => {
     expect((b.e as any).monsterAI.cooldownOf(g, MONSTER_SKILLS['death_root'])).toBeCloseTo(9 * 0.7, 5);
     const fo = g.castSkills.find(c => c.def.id === 'forest_oblivion')!;
     expect(fo.cd).toBeCloseTo(2, 5);
-    expect(MONSTER_SKILLS['forest_oblivion'].castTime).toBe(6);
+    expect(MONSTER_SKILLS['forest_oblivion'].castTime).toBe(6.75);
   });
 
   it('extra 35 — Forest Oblivion is not interruptible: an interrupt without break power is refused', () => {
@@ -643,7 +643,7 @@ describe('Stage 4–10 bosses', () => {
     expect(g.casting!.breakDamage).toBe(0);
   });
 
-  it('extra 38 — Forest Oblivion lands: 260% ATK on every hero + healing received −50% for 6 s', () => {
+  it('extra 38 — Forest Oblivion lands: 210% ATK (encounter pass) on every hero + healing received −50% for 6 s', () => {
     const b = battle([H('aurel', 0, 1, TOUGH), H('lumina', 4, 1, TOUGH)], [mon('fallen_forest_guardian', 1, 1)]);
     b.freeze('heroes');
     const g = b.monsters('fallen_forest_guardian')[0];
@@ -652,7 +652,7 @@ describe('Stage 4–10 bosses', () => {
     b.until(() => b.of('skillActivated').some(s => s.skill === 'forest_oblivion'), 7);
     const calls = spy.calls.allArgs().filter(a => a[0].sourceId === 'forest_oblivion');
     expect(calls.length).toBe(2);
-    expect(calls[0][0].multiplier).toBe(2.6);
+    expect(calls[0][0].multiplier).toBe(2.1);
     const lum = b.hero('lumina');
     expect(buffRemaining(lum, 'healing_reduction')).toBeGreaterThan(5.5);
     lum.hp = 100;
@@ -1115,7 +1115,7 @@ describe('Stage 4–10 required tests', () => {
     b.until(() => b.of('skillActivated').some(s => s.skill === 'forest_oblivion'), 7);
     const t = b.of('skillActivated').find(s => s.skill === 'forest_oblivion')!.t;
     for (const h of b.e.units.filter(u => u.side === 'ally')) {
-      const expected = DamageResolver.resolve({ attacker: g, target: h, multiplier: 2.6, damageType: 'PHYSICAL', sourceId: 'x' }).amount;
+      const expected = DamageResolver.resolve({ attacker: g, target: h, multiplier: 2.1, damageType: 'PHYSICAL', sourceId: 'x' }).amount;
       const got = b.of('damage').find(d => d.dst === h.id && Math.abs(d.t - t) < 1e-6)!;
       expect(got.amount + got.blocked).withContext(h.name).toBe(expected);
     }
