@@ -110,9 +110,9 @@ describe('Hero kits (data)', () => {
       expect([s5.hp, s5.atk, s5.def]).toEqual([HERO_5STAR_LV1[cls].hp, HERO_5STAR_LV1[cls].atk, HERO_5STAR_LV1[cls].def]);
     }
     expect(Object.values(HERO_5STAR_LV1).map(x => x.hp)).not.toContain(678);
-    // linear level growth on the base: Lv10 = +27% HP, +22.5% ATK, +18% DEF
+    // linear level growth on the final Lv1 stats: Lv10 = ×1.405 HP, ×1.36 ATK, ×1.315 DEF
     const l10 = at('jin', 5, 10);
-    expect([l10.hp, l10.atk, l10.def]).toEqual([Math.round(270 * 1.27), Math.round(47 * 1.225), Math.round(27 * 1.18)]);
+    expect([l10.hp, l10.atk, l10.def]).toEqual([Math.round(270 * 1.405), Math.round(47 * 1.36), Math.round(27 * 1.315)]);
   });
 
   it('(32) displayed stats (roster / heroStats) = runtime unit stats used in combat, every class', () => {

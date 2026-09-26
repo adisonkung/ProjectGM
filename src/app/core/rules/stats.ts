@@ -4,10 +4,10 @@ import { HeroTemplate, OwnedHero, Potential, Stats } from '../models/hero';
 import { EnemyTemplate, StageDef } from '../models/stage';
 
 /**
- * Level growth per level (fraction of the star-adjusted base) — deliberately moderate so levels never erase mechanics:
- * HP +3.0%, ATK +2.5%, DEF +2.0% per level (Lv10 ATK = 122.5% of Lv1). Long-term power comes from other systems later.
+ * Level growth per level, linear on the final Lv1 stats (Patch 1 Hero Level spec): HP +4.5 %, ATK +4.0 %, DEF +3.5 %
+ * (Lv10 = ×1.405 / ×1.36 / ×1.315). Attack speed, range and cooldowns never grow with level.
  */
-export const LEVEL_GROWTH = { hp: 0.03, atk: 0.025, def: 0.02 };
+export const LEVEL_GROWTH = { hp: 0.045, atk: 0.04, def: 0.035 };
 /** potential nudges level growth a little (B = the table above) */
 export const POTENTIAL_GROWTH: Record<Potential, number> = { C: 0.9, B: 1, A: 1.1, S: 1.2 };
 

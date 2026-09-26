@@ -2,13 +2,14 @@
  * Patch 1 progression configuration (spec: claude/patch1-progression-spec.md).
  *
  * PROVISIONAL numbers: equipment stats / utility and skill-rank effects are first-pass values so the simulation
- * profiles can run. EXP costs, breakthrough materials, drop rates and daily bonuses are NOT defined here yet
- * (next tasks: Hero Level / EXP / Breakthrough → Equipment farming → Skill upgrade farming).
+ * profiles can run. Hero EXP / breakthrough items / farm dungeons live in core/data/economy.ts
+ * (next tasks: Equipment farming → Skill upgrade farming).
  *
  * Intended share of Patch 1 power (conceptual, not arithmetic): hero level 30–35 %, equipment 25–30 %,
  * skill ranks 15–20 %, composition + tactics on top.
  */
 import { HeroClass } from '../models/hero';
+import { BREAKTHROUGHS } from './economy';
 import {
   BreakthroughGate, EquipmentDefinition, EquipmentSlot, EquipmentUtility, FloorBand, GearTier, PowerProfile, SkillRankEffect,
 } from '../models/progression';
@@ -22,12 +23,8 @@ export const PATCH_1 = {
   maxSkillRank: 5,
 };
 
-/** level → level + 1 needs a breakthrough first (materials come with the Hero Level / EXP task) */
-export const BREAKTHROUGH_GATES: BreakthroughGate[] = [
-  { from: 5, kind: 'MILESTONE' },
-  { from: 8, kind: 'MILESTONE' },
-  { from: 9, kind: 'MAJOR' },
-];
+/** level → level + 1 needs a breakthrough first — derived from BREAKTHROUGHS (core/data/economy.ts, items + unlocks) */
+export const BREAKTHROUGH_GATES: BreakthroughGate[] = BREAKTHROUGHS.map(b => ({ from: b.fromLevel, kind: b.tier === 3 ? 'MAJOR' : 'MILESTONE' }));
 
 /** skill rank 1–5 (PROVISIONAL): power = damage / healing / shields · cooldown multiplier · extra Break power */
 export const SKILL_RANK_EFFECTS: Record<number, SkillRankEffect> = {

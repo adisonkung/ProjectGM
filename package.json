@@ -9,7 +9,8 @@
     "test": "ng test",
     "sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/simulate.js",
     "trace": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/trace.js",
-    "balance": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/balance.js"
+    "balance": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/balance.js",
+    "economy": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/economy.js"
   },
   "private": true,
   "dependencies": {

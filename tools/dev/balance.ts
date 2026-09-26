@@ -18,6 +18,7 @@ import { HERO_BY_ID } from '../../src/app/core/data/heroes';
 import { wavesOf } from '../../src/app/core/models/stage';
 import { BotName, TacticalBot, tacticalFormation } from './policy';
 import { FLOOR_BANDS, POWER_PROFILES } from '../../src/app/core/data/progression';
+import { FARM_BY_ID, FARM_DUNGEONS } from '../../src/app/core/data/economy';
 import { applyProfile } from '../../src/app/core/rules/progression';
 
 declare const process: { argv: string[] };
@@ -67,14 +68,19 @@ const newAgg = (): Agg => ({
   deathRuns: 0, reviveRuns: 0, wipes: 0, timeouts: 0, heroes: {},
 });
 
-const floors = STAGES.filter(s => (onlyFloor != null ? s.floor === onlyFloor : s.floor >= 4 || flag('--all-floors')));
+// --farm=training_1,ascension_2 (or --farm=all): farm dungeon encounters instead of tower floors
+const farmArg = args.find(a => a.startsWith('--farm='))?.slice(7);
+const floors = farmArg
+  ? FARM_DUNGEONS.filter(d => farmArg === 'all' || farmArg.split(',').includes(d.id)).map(d => d.stage)
+  : STAGES.filter(s => (onlyFloor != null ? s.floor === onlyFloor : s.floor >= 4 || flag('--all-floors')));
 const summary: string[] = [];
 
 for (let stage of floors) {
   if (tune) stage = { ...stage, monsterTuning: { hp: tune[0], atk: tune[1], def: tune[2] } };
   // power profile: --profile=X (A–F) or the floor's recommended profile; level = the profile's level clamped to the
   // floor band ('rec') or the given number
-  const band = FLOOR_BANDS[stage.floor];
+  const farmDef = stage.id ? FARM_BY_ID[stage.id] : undefined;
+  const band = farmDef ? { levels: farmDef.recommendedLevel, simProfile: 'A', role: farmDef.type, simLevel: farmDef.recommendedLevel[0] } as unknown as typeof FLOOR_BANDS[number] : FLOOR_BANDS[stage.floor];
   const profile = POWER_PROFILES[profileArg ?? band?.simProfile ?? 'A'];
   const level = levelArg === 'rec'
     ? (profileArg ? profile.level : band?.simLevel ?? Math.min(band?.levels[1] ?? profile.level, Math.max(band?.levels[0] ?? 1, profile.level)))
@@ -162,14 +168,14 @@ for (let stage of floors) {
 
   const n = runs;
   const [A, T] = [aggs.AUTO, aggs.TACTICAL];
-  console.log(`\n=== F${stage.floor} ${stage.name} · profile ${profile.id} (${profile.label}: gear ${typeof profile.gear === 'object' && profile.gear ? JSON.stringify(profile.gear) : profile.gear ?? '-'}, ranks ${profile.ranks.skill}/${profile.ranks.skill2}/${profile.ranks.ult}) · ${star ?? 5}★ Lv${level} · band Lv${band?.levels.join('–')} ${band?.role ?? ''} · tuning ${JSON.stringify(stage.monsterTuning ?? {})} ===`);
+  console.log(`\n=== ${farmDef ? farmDef.id : 'F' + stage.floor} ${stage.name} · profile ${profile.id} (${profile.label}: gear ${typeof profile.gear === 'object' && profile.gear ? JSON.stringify(profile.gear) : profile.gear ?? '-'}, ranks ${profile.ranks.skill}/${profile.ranks.skill2}/${profile.ranks.ult}) · ${star ?? 5}★ Lv${level} · band Lv${band?.levels.join('–')} ${band?.role ?? ''} · tuning ${JSON.stringify(stage.monsterTuning ?? {})} ===`);
   const review = monsterTuningReview(stage);
   if (review.length) console.log(`  ⚠ MECHANIC / COMPOSITION / HERO POWER REVIEW REQUIRED: ${review.join(', ')} (engine clamps to the limits)`);
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
     const a = aggs[bot];
     console.log(`  ${bot.padEnd(8)} win ${pct(a.wins / n)} · time ${f1(a.time / n, 0)}s · deaths ${f1(a.deaths / n, 2)}/run · runs with a death ${pct(a.deathRuns / n)} · with a revive ${pct(a.reviveRuns / n)} · wipes ${pct(a.wipes / n)} · timeouts ${pct(a.timeouts / n)} · waves ${f1(a.wave / n)}`);
   }
-  summary.push(`F${String(stage.floor).padEnd(2)} ${profile.id} Lv${String(level).padEnd(2)} | AUTO ${pct(A.wins / n)} (deaths ${f1(A.deaths / n)}) | TACTICAL ${pct(T.wins / n)} (deaths ${f1(T.deaths / n)})` +
+  summary.push(`${farmDef ? farmDef.id : 'F' + String(stage.floor).padEnd(2)} ${profile.id} Lv${String(level).padEnd(2)} | AUTO ${pct(A.wins / n)} (deaths ${f1(A.deaths / n)}) | TACTICAL ${pct(T.wins / n)} (deaths ${f1(T.deaths / n)})` +
     (A.bossRuns + T.bossRuns ? ` | boss life ${f1(A.bossRuns ? A.bossLife / A.bossRuns : 0, 0)}s / ${f1(T.bossRuns ? T.bossLife / T.bossRuns : 0, 0)}s` : ''));
 
   if (flag('--exposure')) {

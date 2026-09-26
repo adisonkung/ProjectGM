@@ -1,8 +1,9 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { HERO_BY_ID } from '../data/heroes';
 import { OwnedHero } from '../models/hero';
-import { heroStats, levelUpCost, power } from '../rules/stats';
-import { canLevelUp, needsBreakthrough } from '../rules/progression';
+import { heroStats, power } from '../rules/stats';
+import { breakthrough, BreakthroughFail, heroProgressView, useAllPotionsToCap, useExpPotion } from '../rules/leveling';
+import { TRAINING_SLOTS } from '../data/economy';
 import { SaveService } from './save.service';
 
 @Injectable({ providedIn: 'root' })
@@ -23,29 +24,46 @@ export class RosterService {
     return power(this.stats(h));
   }
 
-  levelUp(uid: number): boolean {
+  /** EXP potion use (never automatic): Use 1 / Use 10 / 'max' = just enough to reach the current cap */
+  usePotion(uid: number, itemId: string, count: number | 'max'): number {
     const s = this.save.state();
     const h = s.heroes.find(x => x.uid === uid);
-    // Patch 1 cap Lv10; breakthrough gates at 5 → 6, 8 → 9, 9 → 10
-    if (!h || !canLevelUp(h)) return false;
-    const cost = levelUpCost(h);
-    if (s.gold < cost) return false;
-    this.save.update(st => ({
-      ...st,
-      gold: st.gold - cost,
-      heroes: st.heroes.map(x => (x.uid === uid ? { ...x, level: x.level + 1 } : x)),
-    }));
-    return true;
+    if (!h) return 0;
+    const r = useExpPotion(h, s.inventory, itemId, count);
+    if (r.used) this.save.update(st => ({ ...st, inventory: r.inventory, heroes: st.heroes.map(x => (x.uid === uid ? r.hero : x)) }));
+    return r.used;
   }
 
-  /**
-   * Break through the gate the hero stands at (Lv5 / Lv8 / Lv9). Material / EXP costs arrive with the
-   * Hero Level / EXP / Breakthrough task — until then the step is free but still explicit.
-   */
-  breakthrough(uid: number): boolean {
-    const h = this.save.state().heroes.find(x => x.uid === uid);
-    if (!h || !needsBreakthrough(h)) return false;
-    this.save.update(st => ({ ...st, heroes: st.heroes.map(x => (x.uid === uid ? { ...x, breakthrough: x.level } : x)) }));
+  /** Use Max with every potion size (largest first), stopping at the current cap */
+  usePotionsToCap(uid: number): void {
+    const s = this.save.state();
+    const h = s.heroes.find(x => x.uid === uid);
+    if (!h) return;
+    const r = useAllPotionsToCap(h, s.inventory);
+    this.save.update(st => ({ ...st, inventory: r.inventory, heroes: st.heroes.map(x => (x.uid === uid ? r.hero : x)) }));
+  }
+
+  /** consume the breakthrough stones, raise the level and process the stored EXP */
+  breakthrough(uid: number): BreakthroughFail | null {
+    const s = this.save.state();
+    const h = s.heroes.find(x => x.uid === uid);
+    if (!h) return 'MAX';
+    const r = breakthrough(h, s.inventory);
+    if ('error' in r) return r.error;
+    this.save.update(st => ({ ...st, inventory: r.inventory, heroes: st.heroes.map(x => (x.uid === uid ? r.hero : x)) }));
+    return null;
+  }
+
+  progress(h: OwnedHero) {
+    return heroProgressView(h, this.save.state().inventory);
+  }
+
+  /** reserve heroes in Training Slots get 35 % of Training battle EXP */
+  toggleTrainingSlot(uid: number): boolean {
+    const s = this.save.state();
+    const on = s.trainingSlots.includes(uid);
+    if (!on && s.trainingSlots.length >= TRAINING_SLOTS.count) return false;
+    this.save.update(st => ({ ...st, trainingSlots: on ? st.trainingSlots.filter(x => x !== uid) : [...st.trainingSlots, uid] }));
     return true;
   }
 

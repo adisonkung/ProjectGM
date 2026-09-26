@@ -1,3 +1,5 @@
+import { BREAKTHROUGHS } from '../data/economy';
+import { currentLevelCap } from './leveling';
 import { BREAKTHROUGH_GATES, EQUIPMENT, equipmentId, PATCH_1, PROFILE_ACCESSORY, SKILL_RANK_EFFECTS } from '../data/progression';
 import { HERO_BY_ID } from '../data/heroes';
 import { OwnedHero } from '../models/hero';
@@ -13,8 +15,9 @@ export const levelCap = () => PATCH_1.levelCap;
 export const gateAt = (level: number) => BREAKTHROUGH_GATES.find(g => g.from === level) ?? null;
 
 /** the hero stands at a gate it has not broken through yet */
-export const needsBreakthrough = (h: OwnedHero) => !!gateAt(h.level) && (h.breakthrough ?? 0) < h.level;
+export const needsBreakthrough = (h: OwnedHero) => h.level < levelCap() && h.level >= currentLevelCap(h);
 
+/** a level can still be gained with EXP alone (no breakthrough / cap in the way) */
 export const canLevelUp = (h: OwnedHero) => h.level < levelCap() && !needsBreakthrough(h);
 
 export function skillRanksOf(h: OwnedHero): SkillRanks {
@@ -69,5 +72,6 @@ export function applyProfile(h: OwnedHero, p: PowerProfile, level = p.level): Ow
     const t = tierOf(slot);
     if (t) equipment[slot] = equipmentId(slot, t, PROFILE_ACCESSORY[cls]);
   }
-  return { ...h, level: lv, breakthrough: lv, skillRanks: { ...p.ranks }, equipment };
+  const tier = BREAKTHROUGHS.filter(b => lv >= b.toLevel).length;
+  return { ...h, level: lv, exp: 0, breakthroughTier: tier, skillRanks: { ...p.ranks }, equipment };
 }

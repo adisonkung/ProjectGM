@@ -81,13 +81,13 @@ describe('Tactical difficulty — stats', () => {
     expect(g.def).toBe(Math.round(st.defense * MONSTER_TUNING_LIMITS.def));
   });
 
-  it('moderate level growth: HP +3%, ATK +2.5%, DEF +2% per level (Lv10 ATK = 122.5% of Lv1)', () => {
+  it('Patch 1 level growth: HP +4.5%, ATK +4%, DEF +3.5% per level (Lv10 ATK = 136% of Lv1)', () => {
     const t = HERO_BY_ID['jin'];
     const at = (level: number) => heroStats(t, { uid: 0, templateId: 'jin', level, potential: 'B', injury: 0 });
     const l1 = at(1), l10 = at(10);
     expect(l10.atk / l1.atk).toBeCloseTo(1 + 9 * LEVEL_GROWTH.atk, 1);
-    expect(l10.hp / l1.hp).toBeCloseTo(1.27, 1);
-    expect(l10.def / l1.def).toBeCloseTo(1.18, 1);
+    expect(l10.hp / l1.hp).toBeCloseTo(1.405, 1);
+    expect(l10.def / l1.def).toBeCloseTo(1.315, 1);
   });
 
   it('tuning above the ceilings is flagged for review (never silently applied); stages stay within the limits', () => {

@@ -7,6 +7,9 @@
     <div class="power">พลังทีม <b>{{ teamPower() }}</b></div>
   </header>
 
+  @if (mode() !== 'lab') {
+    <p class="mode">{{ mode() === 'farm' ? 'ดันเจี้ยนฟาร์ม (ตายแล้วไม่บาดเจ็บ)' : 'หอคอย (ได้ EXP เมื่อชนะ · ตายแล้วบาดเจ็บ)' }} · <a href="/tower">กลับหอคอย</a></p>
+  }
   <div class="floors" role="group" aria-label="เลือกชั้น">
     @for (s of stages; track s.floor) {
       <button type="button" [attr.aria-pressed]="floor() === s.floor" [class.surv]="s.mode === 'survive'"
@@ -81,6 +84,21 @@
     <div class="result" [class.win]="r === 'win'">
       {{ r === 'win' ? 'ชนะ' : r === 'lose' ? 'แพ้' : 'หมดเวลา' }} · {{ time().toFixed(1) }} วินาที
       @if (summary(); as sm) { <small class="summary">{{ sm }}</small> }
+    </div>
+  }
+  @if (reward(); as rw) {
+    <div class="reward">
+      @if (rw.breakdown; as b) {
+        <b>{{ b.kind === 'DAILY_BONUS' ? 'โบนัสรายวัน ×' + b.multiplier : b.kind === 'REPEAT' ? 'รางวัลรอบซ้ำ ×' + b.multiplier : b.kind === 'TOWER_FIRST' ? 'เคลียร์ครั้งแรก' : 'เคลียร์ซ้ำ' }}</b>
+        · EXP +{{ b.final.heroExp }} ต่อฮีโร่
+        @for (it of b.final.items; track $index) { · {{ itemName(it.itemId) }} ×{{ it.count }} }
+        @if (rw.rating) { · {{ '★'.repeat(rw.rating) }} }
+        <ul class="exp">
+          @for (x of rw.exp; track x.uid) {
+            <li>#{{ x.uid }} Lv{{ x.before.level }} → Lv{{ x.after.level }} (+{{ x.gained }} EXP{{ x.share < 1 ? ' · ช่องฝึก ' + (x.share * 100) + '%' : '' }})</li>
+          }
+        </ul>
+      } @else { ไม่ได้รับรางวัล (แพ้) }
     </div>
   }
 

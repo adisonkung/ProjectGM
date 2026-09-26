@@ -1,4 +1,40 @@
-<section class="placeholder">
+<section class="tower">
   <h1>หอคอย</h1>
-  <p>เฟส 3 — 10 ชั้น, โหมดกำจัดศัตรูและเอาตัวรอด, รางวัล</p>
+  <p class="sub">ชั้นสูงสุดที่ผ่าน: <b>{{ cleared() }}</b> / 10 · ชนะแล้วฮีโร่ที่ลงสนามได้ EXP (เคลียร์ครั้งแรกได้โบนัส)</p>
+  <ol class="floors">
+    @for (f of floors; track f.floor) {
+      <li [class.done]="f.floor <= cleared()" [class.next]="f.floor === cleared() + 1">
+        <span class="n">{{ f.floor }}</span>
+        <span class="name">{{ f.name }}<small>Lv{{ f.band.levels[0] }}–{{ f.band.levels[1] }} · {{ f.band.role }}</small></span>
+        <span class="exp">EXP {{ f.reward.clear.heroExp }}@if (f.floor > cleared()) { <em>+{{ f.reward.firstClear.heroExp }} ครั้งแรก</em> }</span>
+        <a class="go" [routerLink]="['/lab']" [queryParams]="{ floor: f.floor, mode: 'tower' }">สู้</a>
+      </li>
+    }
+  </ol>
+
+  <h2>ดันเจี้ยนฟาร์ม</h2>
+  <p class="sub">
+    โบนัสรายวัน (รางวัล ×2): Training เหลือ <b>{{ left('TRAINING') }}</b> · Ascension เหลือ <b>{{ left('ASCENSION') }}</b>
+    — หมดโบนัสแล้วยังเล่นได้ รับ 70% ของรางวัลพื้นฐาน · ตายในดันเจี้ยนฟาร์มไม่บาดเจ็บ
+  </p>
+  <ul class="farms">
+    @for (d of dungeons; track d.id) {
+      @let open = cleared() >= d.unlockFloor;
+      <li [class.locked]="!open">
+        <span class="name">{{ d.name }}<small>Lv{{ d.recommendedLevel[0] }}–{{ d.recommendedLevel[1] }}</small></span>
+        <span class="rw">
+          @if (d.baseRewards.heroExp) { EXP {{ d.baseRewards.heroExp }} }
+          @for (it of d.baseRewards.items ?? []; track it.itemId) { · {{ itemName(it.itemId) }} ×{{ it.count }} }
+          @if (d.baseRewards.bonusDrops?.length) { · 20% +1 }
+          @if (d.firstClearBonus && !farm()[d.id]?.firstClearDone) { <em>· ครั้งแรก +1 หิน</em> }
+          @if (farm()[d.id]?.bestRating) { · {{ '★'.repeat(farm()[d.id].bestRating) }} }
+        </span>
+        @if (open) {
+          <a class="go" [routerLink]="['/lab']" [queryParams]="{ farm: d.id }">เข้า</a>
+        } @else {
+          <span class="lock">ผ่านชั้น {{ d.unlockFloor }}</span>
+        }
+      </li>
+    }
+  </ul>
 </section>

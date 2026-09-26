@@ -56,10 +56,10 @@ describe('Patch 1 progression — structure', () => {
     expect(canLevelUp(hero('jin', { level: 4 }))).toBeTrue();
     expect(needsBreakthrough(hero('jin', { level: 5 }))).toBeTrue();
     expect(canLevelUp(hero('jin', { level: 5 }))).toBeFalse();
-    expect(canLevelUp(hero('jin', { level: 5, breakthrough: 5 }))).toBeTrue();
-    expect(canLevelUp(hero('jin', { level: 8, breakthrough: 5 }))).toBeFalse();
-    expect(canLevelUp(hero('jin', { level: 9, breakthrough: 9 }))).toBeTrue();
-    expect(canLevelUp(hero('jin', { level: 10, breakthrough: 9 }))).toBeFalse();
+    expect(canLevelUp(hero('jin', { level: 5, breakthroughTier: 1 }))).toBeTrue();
+    expect(canLevelUp(hero('jin', { level: 8, breakthroughTier: 1 }))).toBeFalse();
+    expect(canLevelUp(hero('jin', { level: 9, breakthroughTier: 3 }))).toBeTrue();
+    expect(canLevelUp(hero('jin', { level: 10, breakthroughTier: 3 }))).toBeFalse();
   });
 
   it('floor bands follow the Patch 1 journey (onboarding → wall → endgame)', () => {

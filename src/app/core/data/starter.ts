@@ -11,7 +11,7 @@ export function addMissingStarters(s: GameState): GameState {
   const owned = new Set(s.heroes.map(h => h.templateId));
   for (const templateId of [...STARTER_TEAM, ...STARTER_BENCH]) {
     if (owned.has(templateId)) continue;
-    s.heroes.push({ uid: s.nextUid++, templateId, level: 1, potential: 'B', injury: 0 });
+    s.heroes.push({ uid: s.nextUid++, templateId, level: 1, potential: 'B', injury: 0, exp: 0, breakthroughTier: 0 });
   }
   return s;
 }
@@ -25,9 +25,11 @@ export function newGameState(): GameState {
     level: 1,
     potential: 'B',
     injury: 0,
+    exp: 0,
+    breakthroughTier: 0,
   }));
   return {
-    version: 4,
+    version: 5,
     gems: 1500,
     gold: 600,
     pity: 0,
@@ -35,5 +37,10 @@ export function newGameState(): GameState {
     heroes,
     team: autoPlace(heroes),
     cleared: 0,
+    inventory: {},
+    daily: { day: '', used: {} },
+    trainingSlots: [],
+    farm: {},
+    rewardCarry: {},
   };
 }

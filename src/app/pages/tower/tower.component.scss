@@ -1,0 +1,15 @@
+.tower { display: grid; gap: 10px; }
+h1, h2 { font: 700 20px var(--disp); margin: 0; }
+h2 { font-size: 17px; margin-top: 10px; }
+.sub { color: var(--muted); margin: 0; font-size: 13px; }
+.floors, .farms { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+li { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+li.done { opacity: .75; }
+li.next { border-color: var(--accent, #d9a441); }
+li.locked { opacity: .5; }
+.n { font-weight: 700; width: 22px; text-align: center; }
+.name { flex: 1; display: grid; }
+.name small, .rw em, .exp em { color: var(--muted); font-size: 12px; font-style: normal; }
+.rw, .exp { font-size: 13px; }
+.go { padding: 4px 12px; border-radius: 8px; background: var(--accent, #d9a441); color: #111; text-decoration: none; font-weight: 700; }
+.lock { font-size: 12px; color: var(--muted); }

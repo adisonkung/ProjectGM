@@ -3,6 +3,9 @@ import { Component, computed, effect, HostListener, inject, isDevMode, OnDestroy
 import { ActivatedRoute } from '@angular/router';
 import { ENEMIES } from '../../core/data/enemies';
 import { STAGES } from '../../core/data/stages';
+import { FARM_BY_ID } from '../../core/data/economy';
+import { ITEMS } from '../../core/data/economy';
+import { ProgressionService, RunReward } from '../../core/services/progression.service';
 import { power } from '../../core/rules/stats';
 import { TeamService } from '../../core/services/team.service';
 import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView, WorldDebug, ZoneView } from '../../battle/board/board.component';
@@ -37,6 +40,12 @@ const TICK = 0.05;
 })
 export class BattleComponent implements OnDestroy {
   private readonly team = inject(TeamService);
+  private readonly progression = inject(ProgressionService);
+  /** sandbox (no rewards), a tower run (clear EXP + injuries) or a farm dungeon run (?farm=training_1) */
+  readonly mode = signal<'lab' | 'tower' | 'farm'>('lab');
+  readonly farmId = signal<string | null>(null);
+  readonly reward = signal<RunReward | null>(null);
+  readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
 
   readonly stages = STAGES;
   readonly floor = signal(1);
@@ -101,7 +110,7 @@ export class BattleComponent implements OnDestroy {
   /** มีสกิลร่ายที่ตัดได้อยู่ตอนนี้ → ไฮไลต์ฮีโร่ที่ท่าไม้ตายตัดได้ */
   readonly cuttable = computed(() => this.casts().some(v => v.cast!.interruptible));
 
-  readonly stage = computed(() => STAGES[this.floor() - 1]);
+  readonly stage = computed(() => (this.farmId() ? FARM_BY_ID[this.farmId()!].stage : STAGES[this.floor() - 1]));
   readonly background = computed(() => BACKGROUNDS[this.stage().background ?? ''] ?? null);
   /** ก่อนกดเริ่ม: แสดงกระดานจัดตำแหน่ง */
   readonly placing = computed(() => !this.running() && !this.result());
@@ -124,6 +133,11 @@ export class BattleComponent implements OnDestroy {
     const q = Number(qp.get('floor'));
     if (isDevMode() && qp.get('debug') === '1') this.debug.set(true);
     if (q >= 1 && q <= STAGES.length) this.floor.set(q);
+    const farm = qp.get('farm');
+    if (farm && FARM_BY_ID[farm]) {
+      this.farmId.set(farm);
+      this.mode.set('farm');
+    } else if (qp.get('mode') === 'tower') this.mode.set('tower');
     // จัดทีมใหม่ระหว่างรอเริ่ม: สร้างการต่อสู้ใหม่ให้ตรงกับตำแหน่งล่าสุด
     effect(() => {
       this.team.units();
@@ -139,6 +153,8 @@ export class BattleComponent implements OnDestroy {
 
   selectFloor(n: number): void {
     this.floor.set(n);
+    this.farmId.set(null);
+    if (this.mode() === 'farm') this.mode.set('lab');
     this.prepare();
   }
 
@@ -147,6 +163,7 @@ export class BattleComponent implements OnDestroy {
     clearInterval(this.timer);
     this.running.set(false);
     this.result.set(null);
+    this.reward.set(null);
     this.simReport.set(null);
     this.floats.set([]);
     this.fx.set([]);
@@ -275,12 +292,23 @@ export class BattleComponent implements OnDestroy {
       clearInterval(this.timer);
       this.running.set(false);
       this.result.set(this.engine.result);
+      this.grantRewards();
       const r = this.engine.stageResult;
       if (r) {
         const names = (ids: number[]) => this.engine.units.filter(u => u.side === 'ally' && ids.includes(u.heroUid ?? u.id)).map(u => u.name).join(', ') || '-';
         this.summary.set(`เคลียร์ ${r.wavesCleared}/${r.totalWaves} เวฟ · รอด: ${names(r.survivingHeroIds)} · ล้ม: ${names(r.deadHeroIds)}${r.revivedHeroIds.length ? ' · ถูกชุบ: ' + names(r.revivedHeroIds) : ''} · ดาเมจที่รับ ${r.damageTaken}`);
       }
     }
+  }
+
+  /** tower / farm runs: rewards on a win (tower losses keep the injury rule; farm deaths are EVENT_KO) */
+  private grantRewards(): void {
+    if (this.mode() === 'lab') return;
+    const e = this.engine;
+    const participants = e.units.filter(u => u.side === 'ally' && u.heroUid != null).map(u => u.heroUid!);
+    const run = { win: e.result === 'win', deaths: e.metrics.deaths, time: e.fightTime, participants };
+    if (this.mode() === 'farm' && this.farmId()) this.reward.set(this.progression.completeFarm(this.farmId()!, run));
+    else if (this.mode() === 'tower') this.reward.set(this.progression.completeTower(this.floor(), run, e.stageResult?.deadHeroIds ?? []));
   }
 
   /** screen position (cells) of a unit: continuous world position minus the camera */

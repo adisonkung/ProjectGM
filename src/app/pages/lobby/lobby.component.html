@@ -1,4 +1,52 @@
-<section class="placeholder">
-  <h1>ฐานปฏิบัติการ</h1>
-  <p>เฟส 4 — รายชื่อฮีโร่ อัปเลเวล และรักษาอาการบาดเจ็บ</p>
+<section class="lobby">
+  <h1>ฐานปฏิบัติการ — ฮีโร่</h1>
+  <p class="sub">
+    คลัง:
+    @for (it of items(); track it.id) { <span class="pill">{{ it.name }} ×{{ it.n }}</span> } @empty { ว่าง }
+  </p>
+  <p class="sub">ช่องฝึก {{ slots().length }}/{{ slotsMax }} — ฮีโร่สำรองในช่องฝึกได้ {{ slotShare * 100 }}% ของ EXP จาก Training Ground (ไม่ได้ยา)</p>
+  <ul class="heroes">
+    @for (r of rows(); track r.h.uid) {
+      <li>
+        <div class="who">
+          <b>{{ r.t.name }}</b> <small>{{ r.t.star }}★ {{ r.t.cls }} · #{{ r.h.uid }}{{ inTeam().has(r.h.uid) ? ' · ในทีม' : '' }}</small>
+          <small>HP {{ r.s.hp }} · ATK {{ r.s.atk }} · DEF {{ r.s.def }}</small>
+        </div>
+        <div class="lv">
+          <b>Lv{{ r.p.level }}</b><small> / cap {{ r.p.levelCap }}</small>
+          @if (r.p.state === 'MAX') {
+            <span class="tag max">MAX</span>
+          } @else {
+            <div class="bar"><i [style.width.%]="Math.min(100, r.p.exp / r.p.expToNext * 100)"></i></div>
+            <small>EXP {{ r.p.exp }} / {{ r.p.expToNext }}</small>
+          }
+          @if (r.p.state === 'BREAKTHROUGH_READY') { <span class="tag bt">BREAKTHROUGH REQUIRED</span> }
+          @if (r.p.breakthrough; as bt) {
+            <small>
+              @for (n of bt.def.requiredItems; track n.itemId; let i = $index) {
+                {{ itemName(n.itemId) }}: {{ bt.have[i].count }} / {{ n.count }}
+              }
+            </small>
+          }
+        </div>
+        <div class="act">
+          @for (id of potions; track id) {
+            @if ((inventory()[id] ?? 0) > 0 && r.p.state !== 'MAX') {
+              <span class="use">{{ itemName(id) }}
+                <button type="button" (click)="use(r.h, id, 1)">1</button>
+                <button type="button" (click)="use(r.h, id, 10)">10</button>
+                <button type="button" (click)="use(r.h, id, 'max')">Max</button>
+              </span>
+            }
+          }
+          @if (r.p.state !== 'MAX') { <button type="button" (click)="useMax(r.h)">ใช้ยาจนถึง cap</button> }
+          @if (r.p.state === 'BREAKTHROUGH_READY') { <button type="button" class="bt" (click)="breakthrough(r.h)">Breakthrough</button> }
+          @if (!inTeam().has(r.h.uid)) {
+            <button type="button" [attr.aria-pressed]="slots().includes(r.h.uid)" (click)="toggleSlot(r.h)">ช่องฝึก</button>
+          }
+          @if (message[r.h.uid]) { <small>{{ message[r.h.uid] }}</small> }
+        </div>
+      </li>
+    }
+  </ul>
 </section>
