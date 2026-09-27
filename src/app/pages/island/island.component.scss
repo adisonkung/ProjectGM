@@ -11,6 +11,8 @@ app-island-scene { position: absolute; inset: 0; }
 .hud { position: absolute; z-index: 2; display: grid; gap: 6px; pointer-events: none; > * { pointer-events: auto; } }
 .tl { top: 10px; left: 10px; }
 .tr { top: 10px; right: 10px; }
+.isle-name { justify-self: start; max-width: 62vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 700 17px/1.1 var(--title); letter-spacing: .04em; color: var(--gold-hi); text-shadow: 0 1px 0 #000, 0 0 10px #000c, 0 0 18px #9b6bff66; }
 .stage-name, .tower-prog { display: inline-flex; align-items: center; gap: 6px; justify-self: start; padding: 4px 10px; border-radius: 99px;
   background: #0b0914cc; border: 1px solid #d9b46466; backdrop-filter: blur(4px); font: 700 12px var(--title); color: var(--gold-hi); }
 .tower-prog { font: 600 11px var(--body); color: var(--muted); b { color: var(--gold-hi); font-family: var(--title); } }

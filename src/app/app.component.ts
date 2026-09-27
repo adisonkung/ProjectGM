@@ -1,5 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SaveService } from './core/services/save.service';
 import { IconComponent } from './shared/icon.component';
 
@@ -11,6 +13,12 @@ import { IconComponent } from './shared/icon.component';
 })
 export class AppComponent {
   readonly save = inject(SaveService);
+  private readonly router = inject(Router);
+  /** the first-launch naming screen shows no game chrome */
+  readonly bare = toSignal(
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd), map(e => (e as NavigationEnd).urlAfterRedirects.startsWith('/welcome'))),
+    { initialValue: false },
+  );
   readonly nav = [
     { path: '/home', label: 'เกาะ', icon: 'home' },
     { path: '/heroes', label: 'ฮีโร่', icon: 'heroes' },

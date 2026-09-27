@@ -1,4 +1,5 @@
-<div class="app">
+<div class="app" [class.bare]="bare()">
+  @if (!bare()) {
   <header class="top">
     <a class="brand" routerLink="/home" aria-label="Summon Tower — หน้าหลัก">
       <svg class="crest" viewBox="0 0 48 48" aria-hidden="true">
@@ -20,6 +21,7 @@
     <div class="res">
       <span class="pill" title="เพชร"><app-icon name="gem" class="gem" />{{ save.state().gems }}</span>
       <span class="pill" title="ทอง"><app-icon name="coin" class="coin" />{{ save.state().gold }}</span>
+      <a class="acct" routerLink="/account" routerLinkActive="active" aria-label="บัญชี & ย้ายเซฟ" title="บัญชี & ย้ายเซฟ"><app-icon name="gear" [size]="18" /></a>
     </div>
   </header>
   <nav class="tabs" aria-label="เมนูหลัก">
@@ -30,5 +32,6 @@
       </a>
     }
   </nav>
+  }
   <main><router-outlet /></main>
 </div>

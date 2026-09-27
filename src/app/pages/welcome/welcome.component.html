@@ -1,0 +1,49 @@
+<section class="welcome">
+  <div class="sky" aria-hidden="true">
+    <i class="star s1"></i><i class="star s2"></i><i class="star s3"></i><i class="star s4"></i><i class="star s5"></i>
+    <svg class="isle" viewBox="0 0 240 150">
+      <defs>
+        <linearGradient id="wGrass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fd48a" /><stop offset="1" stop-color="#3f8f58" /></linearGradient>
+        <linearGradient id="wRock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b5a86" /><stop offset="1" stop-color="#231a36" /></linearGradient>
+        <linearGradient id="wTower" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#cfc3e8" /><stop offset="1" stop-color="#7d6aa6" /></linearGradient>
+      </defs>
+      <path d="M30 70 Q120 52 210 70 L170 112 Q150 140 120 146 Q92 140 72 112 Z" fill="url(#wRock)" />
+      <ellipse cx="120" cy="70" rx="90" ry="18" fill="url(#wGrass)" />
+      <rect x="110" y="18" width="20" height="50" rx="2" fill="url(#wTower)" />
+      <path d="M106 20 L120 2 L134 20 Z" fill="#9b6bff" />
+      <circle cx="120" cy="34" r="3.2" fill="#f6dfa0" />
+      <circle cx="72" cy="62" r="11" fill="#4fae66" /><circle cx="166" cy="62" r="9" fill="#4fae66" />
+    </svg>
+  </div>
+
+  <div class="card gm-panel glow">
+    <p class="kicker">ยินดีต้อนรับสู่</p>
+    <h1 class="gm-title">Summon Tower</h1>
+
+    @if (mode() === 'name') {
+      <p class="lead">เกาะลอยฟ้าแห่งนี้เป็นของคุณแล้ว — ตั้งชื่อให้มันหน่อย</p>
+      <form (submit)="$event.preventDefault(); start()">
+        <label for="isle-name" class="lbl">ชื่อเกาะ</label>
+        <div class="field" [class.bad]="touched() && error()">
+          <input id="isle-name" type="text" autocomplete="off" enterkeyhint="done" [attr.maxlength]="max * 3"
+                 placeholder="เช่น เกาะดาราลอยฟ้า" [value]="name()" (input)="input($any($event.target).value)" />
+          <button type="button" class="dice" (click)="suggest()" aria-label="สุ่มชื่อ" title="สุ่มชื่อ"><app-icon name="summon" [size]="18" /></button>
+        </div>
+        <div class="meta">
+          <span class="err" role="alert">{{ touched() ? error() ?? '' : '' }}</span>
+          <span class="count" [class.over]="length() > max">{{ length() }}/{{ max }}</span>
+        </div>
+        @if (clean() && !error()) {
+          <p class="preview"><app-icon name="home" [size]="14" /> เกาะ <b>{{ clean() }}</b></p>
+        }
+        <button type="submit" class="gm-btn primary go" [disabled]="!!error()">เริ่มผจญภัย <app-icon name="arrow" [size]="15" /></button>
+        <p class="hint">เปลี่ยนชื่อทีหลังได้ที่หน้า “บัญชี”</p>
+      </form>
+      <button type="button" class="switch" (click)="mode.set('import')"><app-icon name="load" [size]="14" /> เคยเล่นที่เครื่องอื่น? ย้ายเซฟมาที่นี่</button>
+    } @else {
+      <p class="lead">วางรหัสย้ายเซฟ หรือเลือกไฟล์เซฟที่ส่งออกจากเครื่องเดิม</p>
+      <app-save-import (imported)="imported()" />
+      <button type="button" class="switch" (click)="mode.set('name')"><app-icon name="back" [size]="14" /> เริ่มเกาะใหม่แทน</button>
+    }
+  </div>
+</section>

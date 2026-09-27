@@ -276,6 +276,8 @@ export interface IslandEvent {
 /** persisted per account — positions are NOT stored (they belong to the shared layout) */
 export interface PlayerIsland {
   version: 1;
+  /** the player's island name (set on first launch at /welcome, renamed in /account) — absent on old saves until named */
+  name?: string;
   themeId: string;
   /** owned hero uid shown as the player's representative (cosmetic / identity only) */
   mainIslandHeroId: number | null;
@@ -306,6 +308,8 @@ export interface IslandHeroState {
 
 /** what a visitor (or the owner) needs to draw someone's island — no gameplay data */
 export interface IslandVisitView {
+  /** island name ('' when not named yet) */
+  name: string;
   themeId: string;
   towerVisualStage: number;
   islandProgressionStage: number;

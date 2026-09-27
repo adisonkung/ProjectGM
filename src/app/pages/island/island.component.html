@@ -6,6 +6,7 @@
 
     <!-- essential HUD only: the island itself is the menu -->
     <div class="hud tl">
+      @if (island().name; as n) { <b class="isle-name">{{ n }}</b> }
       <span class="stage-name"><app-icon name="home" [size]="14" /> {{ stageName() }}</span>
       <span class="tower-prog" [attr.aria-label]="'พิชิตหอคอย ' + cleared() + ' จาก ' + totalFloors + ' ชั้น'">
         <app-icon name="tower" [size]="13" />

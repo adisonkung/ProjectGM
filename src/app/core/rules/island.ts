@@ -1,3 +1,4 @@
+import { islandNameError, normalizeIslandName } from './account';
 import { DEFAULT_THEME_ID, ISLAND_THEMES, THEME_ALIASES } from '../data/island-themes';
 import { BUILDING_BY_ID, ISLAND_BUILDINGS, ISLAND_STAGES, MAX_EXTRA_ROAMERS } from '../data/island-layout';
 import { HERO_BY_ID } from '../data/heroes';
@@ -76,8 +77,10 @@ export function normalizeIsland(raw: Partial<PlayerIsland> | undefined, s: Pick<
   const prog = { ...base.buildingProgression };
   // keep the saved snapshot for known buildings (so progress made while away still produces events on the island)
   for (const [id, b] of Object.entries(raw.buildingProgression ?? {})) if (BUILDING_BY_ID[id]) prog[id] = { ...b, buildingId: id };
+  const name = typeof raw.name === 'string' ? normalizeIslandName(raw.name) : '';
   return {
     version: 1,
+    ...(name && !islandNameError(name) ? { name } : {}),
     themeId: themeIdOf(raw.themeId),
     mainIslandHeroId: raw.mainIslandHeroId != null && owned.has(raw.mainIslandHeroId) ? raw.mainIslandHeroId : base.mainIslandHeroId,
     unlockedBuildings: Object.values(prog).filter(b => b.isUnlocked).map(b => b.buildingId),
@@ -173,6 +176,7 @@ export function islandVisitView(s: Pick<GameState, 'heroes' | 'team' | 'island'>
   const hero = (h: OwnedHero) => ({ uid: h.uid, templateId: h.templateId, name: HERO_BY_ID[h.templateId]?.name ?? h.templateId });
   const main = s.heroes.find(h => h.uid === isl.mainIslandHeroId) ?? null;
   return {
+    name: isl.name ?? '',
     themeId: isl.themeId,
     towerVisualStage: isl.towerVisualStage,
     islandProgressionStage: isl.islandProgressionStage,

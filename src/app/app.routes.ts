@@ -1,8 +1,16 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, Routes } from '@angular/router';
+import { AccountService } from './core/services/account.service';
+
+/** first launch (or an old save without a name): name the island before anything else */
+export const islandNamedGuard: CanActivateFn = () => (inject(AccountService).needsName() ? inject(Router).createUrlTree(['/welcome']) : true);
+/** /welcome only while the island has no name */
+export const welcomeGuard: CanActivateFn = () => (inject(AccountService).needsName() ? true : inject(Router).createUrlTree(['/home']));
 
 /** every page is lazy-loaded: the initial bundle holds only the shell + shared services (keeps it under the size budget) */
-export const routes: Routes = [
+const GAME_ROUTES: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
+  { path: 'account', loadComponent: () => import('./pages/account/account.component').then(m => m.AccountComponent), title: 'บัญชี & ย้ายเซฟ · Summon Tower' },
   { path: 'home', loadComponent: () => import('./pages/island/island.component').then(m => m.IslandComponent), title: 'เกาะของฉัน · Summon Tower' },
   { path: 'island', redirectTo: 'home' },
   { path: 'heroes', loadComponent: () => import('./pages/heroes/heroes.component').then(m => m.HeroesComponent), title: 'หอวีรชน · Summon Tower' },
@@ -19,4 +27,9 @@ export const routes: Routes = [
   { path: 'battle', loadComponent: () => import('./pages/battle/battle.component').then(m => m.BattleComponent), title: 'สนามรบ · Summon Tower' },
   { path: 'lab', loadComponent: () => import('./pages/battle/battle.component').then(m => m.BattleComponent), title: 'ห้องทดลองต่อสู้ · Summon Tower', data: { lab: true } },
   { path: '**', redirectTo: 'home' },
+];
+
+export const routes: Routes = [
+  { path: 'welcome', canActivate: [welcomeGuard], loadComponent: () => import('./pages/welcome/welcome.component').then(m => m.WelcomeComponent), title: 'ยินดีต้อนรับ · Summon Tower' },
+  { path: '', canActivateChild: [islandNamedGuard], children: GAME_ROUTES },
 ];

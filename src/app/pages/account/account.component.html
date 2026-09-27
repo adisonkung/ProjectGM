@@ -1,0 +1,56 @@
+<section class="account">
+  <header class="head">
+    <h1 class="gm-title">บัญชี & ย้ายเซฟ</h1>
+    <p class="gm-sub">เซฟเก็บอยู่ในเบราว์เซอร์เครื่องนี้ — ใช้รหัสหรือไฟล์ด้านล่างเพื่อเล่นต่อที่เครื่องอื่น</p>
+  </header>
+
+  @if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
+
+  <div class="gm-panel card">
+    <h2 class="gm-h2"><app-icon name="home" [size]="16" /> ชื่อเกาะ</h2>
+    @if (!editing()) {
+      <div class="name-row">
+        <b class="isle-name">{{ account.islandName() }}</b>
+        <button type="button" class="gm-btn small ghost" (click)="edit()"><app-icon name="edit" [size]="13" /> เปลี่ยนชื่อ</button>
+      </div>
+    } @else {
+      <form class="rename" (submit)="$event.preventDefault(); saveName()">
+        <input type="text" aria-label="ชื่อเกาะใหม่" autocomplete="off" [value]="draft()" (input)="draft.set($any($event.target).value)" />
+        <button type="submit" class="gm-btn small primary" [disabled]="!!draftError()">บันทึก</button>
+        <button type="button" class="gm-btn small ghost" (click)="editing.set(false)">ยกเลิก</button>
+        <span class="err">{{ draftError() ?? '' }}</span>
+      </form>
+    }
+  </div>
+
+  <div class="grid">
+    <div class="gm-panel card">
+      <h2 class="gm-h2"><app-icon name="save" [size]="16" /> ส่งออก (เครื่องนี้ → เครื่องใหม่)</h2>
+      <ol class="steps">
+        <li>สร้างรหัส แล้วคัดลอกไปวางที่เครื่องใหม่ (ส่งผ่านแชตหรือโน้ตได้)</li>
+        <li>หรือดาวน์โหลดไฟล์เซฟ .json เก็บไว้เป็นสำรองด้วยก็ได้</li>
+      </ol>
+      <div class="row">
+        <button type="button" class="gm-btn primary" (click)="makeCode()"><app-icon name="bolt" [size]="14" /> {{ code() ? 'สร้างรหัสใหม่' : 'สร้างรหัสย้ายเซฟ' }}</button>
+        <button type="button" class="gm-btn ghost" (click)="download()"><app-icon name="load" [size]="14" /> ดาวน์โหลดไฟล์เซฟ</button>
+      </div>
+      @if (code()) {
+        <textarea class="code" readonly rows="4" aria-label="รหัสย้ายเซฟ" (focus)="$any($event.target).select()" [value]="code()"></textarea>
+        <div class="row">
+          <button type="button" class="gm-btn small" (click)="copy()">{{ copied() ? 'คัดลอกแล้ว ✓' : 'คัดลอกรหัส' }}</button>
+          <small class="muted">{{ code().length.toLocaleString() }} ตัวอักษร · รหัสคือเซฟทั้งเกม ใครมีรหัสก็เล่นเซฟนี้ได้</small>
+        </div>
+      }
+    </div>
+
+    <div class="gm-panel card">
+      <h2 class="gm-h2"><app-icon name="load" [size]="16" /> นำเข้า (เครื่องเดิม → เครื่องนี้)</h2>
+      <app-save-import (imported)="imported()" />
+      @if (backup()) {
+        <p class="undo"><button type="button" class="gm-btn small ghost" (click)="undo()"><app-icon name="restart" [size]="13" /> ย้อนกลับเป็นเซฟก่อนนำเข้า</button></p>
+      }
+    </div>
+  </div>
+
+  <p class="soon muted"><app-icon name="lock" [size]="13" /> ระบบล็อกอินและเซฟบนคลาวด์ (ซิงก์อัตโนมัติ) จะตามมาในขั้นถัดไป</p>
+</section>
