@@ -29,9 +29,9 @@ CONFIG = {
     'straw_recruit': dict(labelEnd=172, rows=[4, 6, 3, 6, 6], flip=[], height=67),
     'crossbow_dummy': dict(labelEnd=170, rows=[4, 6, 3, 6, 6, 6], flip=[0, 1, 2, 3, 4, 5], height=67),
     'drill_sergeant': dict(labelEnd=172, rows=[4, 6, 3, 6, 6, 8], flip=[(2, 0)], height=88),  # hurt frame 1 only
-    'brass_shishi': dict(labelEnd=180, rows=[4, 6, 3, 7, 6, 6, 6], flip=[0, 1, 2, 3, 4], height=132),
-    'moonblade_ronin': dict(labelEnd=185, rows=[4, 6, 3, 7, 6, 6, 6], flip=[0, 1, 2, 3, 4, 5, 6], height=160),
-    'astral_seraph': dict(labelEnd=118, rows=[4, 6, 3, 7, 6, 6, 10], flip=[], height=165, holes=False, pastelBars=False,
+    'brass_shishi': dict(labelEnd=180, rows=[4, 6, 3, 7, 6, 6, 6], flip=[0, 1, 2, 3, 4], height=112),
+    'moonblade_ronin': dict(labelEnd=185, rows=[4, 6, 3, 7, 6, 6, 6], flip=[0, 1, 2, 3, 4, 5, 6], height=136),
+    'astral_seraph': dict(labelEnd=118, rows=[4, 6, 3, 7, 6, 6, 10], flip=[], height=140, holes=False, pastelBars=False,
                           tones=[(235, 236, 238), (214, 215, 218), (220, 220, 222), (252, 252, 252)]),
 }
 

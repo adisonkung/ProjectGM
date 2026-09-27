@@ -240,7 +240,7 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 20000, attack: 85, defense: 30, moveSpeed: 1.6, attackRange: 1.5, attackCooldown: 1.9, hitReactionDuration: 0.1, minHitReactionInterval: 3, collisionRadius: 0.8, attackWindup: 0.4 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 2 }, movement: 'MELEE_CHASE', skillPriority: ['lions_roar', 'guardian_pounce'] },
     attack: melee('paw_swipe', 1.1), skills: ['lions_roar', 'guardian_pounce'],
-    animation: anim('enemy-brass-shishi.png', 7, 'DAMAGE', { roar: cast(6, 6, 3), pounce: cast(7, 6, 4, 1) }, { w: 238, h: 155 }),
+    animation: anim('enemy-brass-shishi.png', 7, 'DAMAGE', { roar: cast(6, 6, 3), pounce: cast(7, 6, 4, 1) }, { w: 202, h: 135 }),
     phases: [{ id: 'jade_awakening', label: 'หยกตื่น', hpBelow: 0.5, transition: 1, statuses: ['jade_awakening'], cooldownOverride: { guardian_pounce: 10 } }],
   },
   moonblade_ronin: {
@@ -249,7 +249,7 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 20000, attack: 100, defense: 24, moveSpeed: 2.4, attackRange: 1.5, attackCooldown: 1.4, hitReactionDuration: 0.1, minHitReactionInterval: 3, collisionRadius: 0.7, attackWindup: 0.3 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.5 }, movement: 'MELEE_CHASE', skillPriority: ['mirror_stance', 'crescent_iaido'] },
     attack: melee('moon_cut', 1.1), skills: ['mirror_stance', 'crescent_iaido'],
-    animation: anim('enemy-moonblade-ronin.png', 7, 'DAMAGE', { iaido: cast(6, 6, 4), mirror: cast(7, 6, 2, 1, 110) }, { w: 340, h: 189 }),
+    animation: anim('enemy-moonblade-ronin.png', 7, 'DAMAGE', { iaido: cast(6, 6, 4), mirror: cast(7, 6, 2, 1, 110) }, { w: 290, h: 164 }),
     phases: [{ id: 'twin_moon', label: 'จันทร์คู่', hpBelow: 0.4, transition: 1, statuses: ['twin_moon'], cooldownOverride: { crescent_iaido: 6 } }],
   },
   astral_seraph: {
@@ -258,7 +258,7 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 20000, attack: 95, defense: 34, moveSpeed: 1.2, attackRange: 5, preferredRange: 4.5, attackCooldown: 1.7, minComfortableRange: 0, hitReactionDuration: 0.1, minHitReactionInterval: 3, collisionRadius: 0.8 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 2 }, movement: 'RANGED_HOLD', maxRetreatSteps: 0, skillPriority: ['judgement_beam', 'starfall'] },
     attack: shot('star_shot', 'star_bolt', 'MAGIC'), skills: ['judgement_beam', 'starfall'],
-    animation: anim('enemy-astral-seraph.png', 7, 'PROJECTILE_SPAWN', { starfall: cast(6, 6, 4), judgement: cast(7, 10, 8) }, { w: 304, h: 222 }),
+    animation: anim('enemy-astral-seraph.png', 7, 'PROJECTILE_SPAWN', { starfall: cast(6, 6, 4), judgement: cast(7, 10, 8) }, { w: 260, h: 191 }),
     phases: [{ id: 'seraph_ascend', label: 'เทวรูปตื่น', hpBelow: 0.5, transition: 1, statuses: ['seraph_ascend'], cooldownOverride: { judgement_beam: 15, starfall: 8 } }],
   },
 
