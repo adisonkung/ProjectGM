@@ -121,6 +121,23 @@ describe('Special-dungeon monsters: data', () => {
 });
 
 describe('Special-dungeon monsters: mechanics', () => {
+  it('Ascension guardians hold their shrine: no chasing past 1 cell from the spawn, home again after a pounce', () => {
+    const s = session(stage([mon('brass_shishi@1', 1, 1)]), [H('sylvie', 5, 1, { hp: 99999, atk: 1 }), H('lumina', 5, 0, { hp: 99999, atk: 1 })]);
+    const boss = foe(s.e, 'brass_shishi');
+    s.run(0.2);
+    const home = { ...boss.pos };
+    let far = 0, pounced = false;
+    s.run(20, () => {
+      const d = Math.max(Math.abs(boss.pos.r - home.r), Math.abs(boss.pos.c - home.c));
+      if (s.of('skillActivated').some(x => x.skill === 'guardian_pounce')) pounced = true;
+      if (!pounced) far = Math.max(far, d);
+    });
+    expect(far).toBeLessThanOrEqual(1); // never walked over to the backline on its own
+    expect(pounced).toBeTrue(); // but the pounce still reaches it
+    s.run(12);
+    expect(Math.max(Math.abs(boss.pos.r - home.r), Math.abs(boss.pos.c - home.c))).toBeLessThanOrEqual(1); // walked home
+  });
+
   it('ARCANE SEAL (break-only) silences the highest-ATK hero: no skills / ultimate while silenced, basic attacks go on', () => {
     const s = session(stage([mon('arcane_examiner', 2, 1)]), [H('lumina', 0, 1, { hp: 99999, atk: 1 }), H('jin', 0, 0, { hp: 99999, atk: 5 })]);
     s.run(20, () => s.of('skillActivated').some(x => x.skill === 'arcane_seal'));

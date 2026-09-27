@@ -60,6 +60,9 @@ export interface MonsterCombatState {
   fleeing: boolean;
   /** `ai.dormant` ambusher still asleep (wakes on a hero within wakeRange or on the first hit) */
   dormant: boolean;
+  /** `ai.holdArena`: the spawn cell (set on the first think) and when (aliveTime) it left that ground, 0 = home */
+  home?: Cell;
+  awayTime: number;
 }
 
 /** What the controller may ask of the battle (implemented by BattleEngine) */
@@ -134,6 +137,7 @@ export class MonsterController {
       aliveTime: 0,
       fleeing: false,
       dormant: !!def.ai.dormant,
+      awayTime: 0,
     };
   }
 
@@ -213,6 +217,18 @@ export class MonsterController {
     }
     if (def.ai.movement === 'FLEE') return this.flee(u, s, def);
     if (this.trySkill(u, s, def)) return;
+    const arena = def.ai.holdArena;
+    if (arena) {
+      s.home ??= { ...u.pos };
+      const away = distance(u.pos, s.home) > arena.leash;
+      if (!away) s.awayTime = 0;
+      else if (!s.awayTime) s.awayTime = s.aliveTime; // left its ground at this moment
+      // thrown off its ground by a skill: fight there a moment, then walk home
+      if (away && s.aliveTime - s.awayTime >= arena.returnAfter) {
+        const home = s.home;
+        return this.move(u, s, home, c => distance(c, home) <= arena.leash);
+      }
+    }
     const t = this.resolveTarget(u, s, def);
     if (!t) {
       this.setState(s, 'SEARCHING', 'idle');
@@ -226,8 +242,9 @@ export class MonsterController {
       const tol = st.rangeTolerance ?? 0.5;
       // out of range → close in to preferredRange (keep closing until there: no in/out flicker at the edge)
       if (d > st.attackRange || (s.approaching && d > st.preferredRange + tol)) {
+        if (!this.mayChase(u, s, def, t, st.attackRange)) return this.setState(s, 'IDLE', 'idle');
         s.approaching = true;
-        return this.move(u, s, t.pos, c => distance(c, t.pos) <= st.preferredRange + tol);
+        return this.move(u, s, t.pos, c => distance(c, t.pos) <= st.preferredRange + tol && this.onGround(s, def, c));
       }
       s.approaching = false;
       if (s.attackCooldownRemaining <= 0) return this.startAttack(u, s, def, t);
@@ -251,7 +268,22 @@ export class MonsterController {
       this.setState(s, 'IDLE', 'idle');
       return;
     }
-    this.move(u, s, t.pos, c => distance(c, t.pos) <= st.attackRange);
+    if (!this.mayChase(u, s, def, t, st.attackRange)) return this.setState(s, 'IDLE', 'idle');
+    this.move(u, s, t.pos, c => distance(c, t.pos) <= st.attackRange && this.onGround(s, def, c));
+  }
+
+  /** `holdArena`: a cell the boss may stand on */
+  private onGround(s: MonsterCombatState, def: MonsterDefinition, c: Cell): boolean {
+    const a = def.ai.holdArena;
+    return !a || !s.home || distance(c, s.home) <= a.leash;
+  }
+
+  /** `holdArena`: only step toward a target it can reach without leaving its ground */
+  private mayChase(u: BattleUnit, s: MonsterCombatState, def: MonsterDefinition, t: BattleUnit, range: number): boolean {
+    const a = def.ai.holdArena;
+    if (!a || !s.home) return true;
+    if (distance(u.pos, s.home) > a.leash) return false; // off its ground (after a pounce): no chasing further out
+    return distance(t.pos, s.home) <= a.leash + range;
   }
 
   /**

@@ -107,6 +107,12 @@ export interface MonsterAIConfig {
   flee?: { after: number; onHit: boolean; guardsAtMost?: number };
   /** ambusher (Mimic Chest): does nothing — not even target — until a hero comes within `wakeRange` or it is hit */
   dormant?: { wakeRange: number };
+  /**
+   * duel boss holding its arena: never walks further than `leash` cells from where it spawned — heroes must come to
+   * it. Skills can still move it (a pounce behind the backline); once off its ground it keeps fighting for
+   * `returnAfter` s, then walks home.
+   */
+  holdArena?: { leash: number; returnAfter: number };
 }
 
 export interface AttackDefinition {
