@@ -201,7 +201,9 @@ export type SkillEffect =
   /** shield worth `pct` of each recipient's max HP for `duration` s (Page Barrier) */
   | { type: 'SHIELD_PCT'; pct: number; to: 'ALL_ALLIES' | 'SELF'; duration: number }
   /** jump `cells` columns toward the caster's escape edge (treasure carrier Smoke Pouch) */
-  | { type: 'BLINK_AWAY'; cells: number };
+  | { type: 'BLINK_AWAY'; cells: number }
+  /** push every hero hit by the previous DAMAGE `cells` cells away from the caster (KNOCKBACK-immune units stay) */
+  | { type: 'KNOCKBACK'; cells: number };
 
 /** Conditions a monster checks before starting a skill (all must pass) */
 export type SkillCondition =

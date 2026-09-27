@@ -29,7 +29,7 @@ const anim = (sheet: string, death: number, attackEvent: 'DAMAGE' | 'PROJECTILE_
   },
 });
 
-/** Ascension guardians hold their shrine: at most 1 cell of drift, back home 2.5 s after a pounce */
+/** Ascension guardians hold their shrine: at most 1 cell of drift, back home 2.5 s after being moved off it */
 const ARENA = { leash: 1, returnAfter: 2.5 };
 
 const base = (o: Partial<MonsterStats> & Pick<MonsterStats, 'maxHp' | 'attack' | 'defense' | 'moveSpeed' | 'attackRange' | 'attackCooldown'>): MonsterStats => ({
@@ -89,13 +89,18 @@ export const DUNGEON_SKILLS: Record<string, MonsterSkillDefinition> = {
     mockFx: { color: '#5fe0c4', area: 'FRONT_ARC' },
     conditions: [{ type: 'ENEMY_WITHIN', range: 2 }], recovery: 0.4, interruptRecovery: 0.4,
   },
-  guardian_pounce: {
-    id: 'guardian_pounce', name: 'กระโจนพิทักษ์', label: 'GUARDIAN POUNCE', type: 'MOVEMENT',
-    castTime: 0.7, cooldown: 14, interruptible: false, range: 8, firstCastDelay: 10,
-    clip: 'pounce',
-    target: { type: 'HERO_PRIORITY', classes: ['healer', 'mage', 'archer'], backRowOnly: true },
-    effects: [{ type: 'LEAP_BEHIND' }, { type: 'DAMAGE', mul: 1.1, area: 'SINGLE', center: 'TARGET' }],
-    conditions: [], recovery: 0.3, interruptRecovery: 0.3,
+  jade_quake: {
+    id: 'jade_quake', name: 'หยกสะเทือน', label: 'JADE QUAKE', type: 'ATTACK',
+    castTime: 1.2, cooldown: 13, interruptible: false, firstCastDelay: 9, range: 2,
+    clip: 'quake', fx: { id: 'jade-quake', activationFrame: 3, frameMs: 90 },
+    target: { type: 'SELF' },
+    effects: [
+      { type: 'DAMAGE', mul: 1.2, area: 'RADIUS_2', center: 'SELF' },
+      { type: 'KNOCKBACK', cells: 1 },
+      { type: 'APPLY_STATUS', status: 'jade_weight', to: 'HIT', duration: 4 },
+    ],
+    mockFx: { color: '#3fd29a', area: 'RADIUS_2' },
+    conditions: [{ type: 'ENEMY_WITHIN', range: 2 }], recovery: 0.4, interruptRecovery: 0.4,
   },
   crescent_iaido: {
     id: 'crescent_iaido', name: 'ชักดาบจันทร์เสี้ยว', label: 'CRESCENT IAIDO', type: 'ATTACK',
@@ -241,10 +246,10 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     id: 'brass_shishi', name: 'สิงห์ทองเหลืองพิทักษ์', rank: 'BOSS', role: 'BOSS DUEL / POSITIONING', tags: ['beast', 'ascension'],
     displayClass: 'tank', immune: ['KNOCKBACK', 'STUN'],
     stats: base({ maxHp: 20000, attack: 85, defense: 30, moveSpeed: 1.6, attackRange: 1.5, attackCooldown: 1.9, hitReactionDuration: 0.1, minHitReactionInterval: 3, collisionRadius: 0.8, attackWindup: 0.4 }),
-    ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 2 }, movement: 'MELEE_CHASE', skillPriority: ['lions_roar', 'guardian_pounce'], holdArena: ARENA },
-    attack: melee('paw_swipe', 1.1), skills: ['lions_roar', 'guardian_pounce'],
-    animation: anim('enemy-brass-shishi.png', 7, 'DAMAGE', { roar: cast(6, 6, 3), pounce: cast(7, 6, 4, 1) }, { w: 202, h: 135 }),
-    phases: [{ id: 'jade_awakening', label: 'หยกตื่น', hpBelow: 0.5, transition: 1, statuses: ['jade_awakening'], cooldownOverride: { guardian_pounce: 10 } }],
+    ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 2 }, movement: 'MELEE_CHASE', skillPriority: ['lions_roar', 'jade_quake'], holdArena: ARENA },
+    attack: melee('paw_swipe', 1.1), skills: ['lions_roar', 'jade_quake'],
+    animation: anim('enemy-brass-shishi.png', 7, 'DAMAGE', { roar: cast(6, 6, 3), quake: cast(7, 6, 4, 1) }, { w: 202, h: 135 }),
+    phases: [{ id: 'jade_awakening', label: 'หยกตื่น', hpBelow: 0.5, transition: 1, statuses: ['jade_awakening'], cooldownOverride: { jade_quake: 9 } }],
   },
   moonblade_ronin: {
     id: 'moonblade_ronin', name: 'วิญญาณดาบจันทรา', rank: 'BOSS', role: 'BOSS DUEL / HOLD FIRE', tags: ['spirit', 'ascension'],

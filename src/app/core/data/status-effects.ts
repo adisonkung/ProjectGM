@@ -135,6 +135,10 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
   },
 
   // ---- special-dungeon monsters (monsters-dungeon.ts)
+  jade_weight: {
+    id: 'jade_weight', name: 'หยกถ่วง', duration: 4, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { attackSpeedMultiplier: 0.75 },
+  },
   rally_haste: {
     id: 'rally_haste', name: 'รวมพล!', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
     modifiers: { attackSpeedMultiplier: 1.3 },

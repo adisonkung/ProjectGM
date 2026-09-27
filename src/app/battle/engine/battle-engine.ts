@@ -1318,6 +1318,19 @@ export class BattleEngine {
    * SKILL_ACTIVATE of a data-driven skill — the MonsterSkill executor. Effects run in order on the units valid right now
    * (the aimed unit is re-validated; team-wide skills re-collect their targets). Everything comes from the skill data.
    */
+  /** push `dst` straight back along its row, away from `src` (stops at an occupied / off-board cell) */
+  private knockback(src: BattleUnit, dst: BattleUnit, cells: number): void {
+    this.breakStances(dst);
+    if (dst.monster && this.monsterDefs[dst.monster.definitionId]?.immune?.includes('KNOCKBACK')) return;
+    for (let i = 0; i < cells; i++) {
+      const back = { r: dst.pos.r, c: dst.pos.c + (Math.sign(dst.pos.c - src.pos.c) || (isPlayerUnit(src) ? 1 : -1)) };
+      if (!this.grid.canEnter(back)) break;
+      this.grid.move(dst.id, dst.pos, back);
+      dst.pos = back;
+      dst.dashUntil = this.time + 0.3;
+    }
+  }
+
   private activateMonsterSkill(u: BattleUnit, def: MonsterSkillDefinition, aimedId: number | null): void {
     const aimedUnit = aimedId != null ? this.units.find(x => x.id === aimedId) ?? null : null;
     // an aimed hero must still be a valid target; an aimed ally must still be alive
@@ -1371,6 +1384,9 @@ export class BattleEngine {
           }
           break;
         }
+        case 'KNOCKBACK':
+          for (const t of hits) if (t.alive) this.knockback(u, t, eff.cells);
+          break;
         case 'APPLY_STATUS': {
           const to =
             eff.to === 'HIT' ? hits : eff.to === 'TARGET' ? (aim ? [aim] : []) : eff.to === 'SELF' ? [u] : foes();
@@ -1910,17 +1926,7 @@ export class BattleEngine {
       heal: (dst, amount, src) => self.heal(dst, amount, src),
       applyStatus: (dst, id, src, duration, opts) => self.applyStatus(dst, id, src, duration, opts),
       interrupt: (src, dst, breakPower) => self.tryInterrupt(src, dst, breakPower),
-      knockback: (src, dst, cells) => {
-        self.breakStances(dst);
-        if (dst.monster && self.monsterDefs[dst.monster.definitionId]?.immune?.includes('KNOCKBACK')) return;
-        for (let i = 0; i < cells; i++) {
-          const back = { r: dst.pos.r, c: dst.pos.c + (Math.sign(dst.pos.c - src.pos.c) || (isPlayerUnit(src) ? 1 : -1)) };
-          if (!self.grid.canEnter(back)) break;
-          self.grid.move(dst.id, dst.pos, back);
-          dst.pos = back;
-          dst.dashUntil = self.time + 0.3;
-        }
-      },
+      knockback: (src, dst, cells) => self.knockback(src, dst, cells),
       shield: (src, dst, amount, duration) => {
         dst.shield += amount;
         dst.shieldTime = duration;
