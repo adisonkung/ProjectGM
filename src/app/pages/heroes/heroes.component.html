@@ -27,7 +27,7 @@
       <li>
         <a class="card r{{ h.star }}" [routerLink]="['/heroes', h.uid]" [attr.aria-label]="h.name + ' เลเวล ' + h.level">
           <span class="art">
-            <app-hero-portrait [heroId]="h.id" [size]="112" />
+            <app-hero-portrait [heroId]="h.id" [star]="h.star" [size]="112" />
             <span class="lv">Lv<b>{{ h.level }}</b></span>
             @if (h.isMain) { <span class="flag main" title="ฮีโร่หลักบนเกาะ"><app-icon name="crown" [size]="13" /></span> }
             @if (h.inTeam) { <span class="flag team" title="อยู่ในทีม"><app-icon name="team" [size]="13" /></span> }

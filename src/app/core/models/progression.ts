@@ -47,6 +47,8 @@ export interface CombatModifiers {
   mistHunter: number;
   /** status duration reduction on this hero, 0–1 */
   statusResist: Partial<Record<ResistableStatus, number>>;
+  /** ultimate gauge at battle start (star perks 4★+), 0–100 */
+  startGauge?: number;
 }
 
 /** the tower role of a floor in the Patch 1 journey */

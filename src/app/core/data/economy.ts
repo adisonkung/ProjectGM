@@ -47,6 +47,8 @@ export const ITEMS: Record<string, ItemDefinition> = {
   skill_tome_frag_1: { id: 'skill_tome_frag_1', name: 'Skill Tome Fragment I', kind: 'SKILL_TOME_FRAGMENT', combinesInto: 'skill_tome_1', fragmentsPerItem: 10 },
   skill_tome_frag_2: { id: 'skill_tome_frag_2', name: 'Skill Tome Fragment II', kind: 'SKILL_TOME_FRAGMENT', combinesInto: 'skill_tome_2', fragmentsPerItem: 10 },
   skill_tome_frag_3: { id: 'skill_tome_frag_3', name: 'Skill Tome Fragment III', kind: 'SKILL_TOME_FRAGMENT', combinesInto: 'skill_tome_3', fragmentsPerItem: 10 },
+  // Star development (core/data/stars.ts): usable for any hero's star-up after the hero's own Memory
+  universal_memory: { id: 'universal_memory', name: 'Universal Memory', kind: 'HERO_MEMORY' },
 };
 
 /** EXP potions in the order "use max" spends them (largest first — no EXP wasted past the cap is handled by the rules) */
@@ -68,16 +70,16 @@ export const CATCH_UP = { enabled: false, levelsBehind: 3, trainingExpBonus: 0.2
  * F6–8 useful bonus, F9–10 pay rare breakthrough stones rather than big EXP. Final Level System pass.
  */
 export const TOWER_REWARDS: Record<number, { clear: RewardBundle; firstClear: RewardBundle }> = {
-  1: { clear: { heroExp: 10 }, firstClear: { heroExp: 40 } },
-  2: { clear: { heroExp: 11 }, firstClear: { heroExp: 50 } },
-  3: { clear: { heroExp: 10 }, firstClear: { heroExp: 80 } },
-  4: { clear: { heroExp: 17 }, firstClear: { heroExp: 120 } },
-  5: { clear: { heroExp: 20 }, firstClear: { heroExp: 160 } },
-  6: { clear: { heroExp: 40 }, firstClear: { heroExp: 300, items: [{ itemId: 'bt_stone_1', count: 1 }] } },
-  7: { clear: { heroExp: 45 }, firstClear: { heroExp: 450, items: [{ itemId: 'bt_stone_1', count: 1 }] } },
-  8: { clear: { heroExp: 45 }, firstClear: { heroExp: 550, items: [{ itemId: 'bt_stone_2', count: 2 }] } },
-  9: { clear: { heroExp: 70 }, firstClear: { heroExp: 600, items: [{ itemId: 'bt_stone_3', count: 2 }] } },
-  10: { clear: { heroExp: 125 }, firstClear: { heroExp: 800, items: [{ itemId: 'bt_stone_3', count: 3 }] } },
+  1: { clear: { heroExp: 10 }, firstClear: { heroExp: 40, items: [{ itemId: 'universal_memory', count: 10 }] } },
+  2: { clear: { heroExp: 11 }, firstClear: { heroExp: 50, items: [{ itemId: 'universal_memory', count: 10 }] } },
+  3: { clear: { heroExp: 10 }, firstClear: { heroExp: 80, items: [{ itemId: 'universal_memory', count: 15 }] } },
+  4: { clear: { heroExp: 17 }, firstClear: { heroExp: 120, items: [{ itemId: 'universal_memory', count: 15 }] } },
+  5: { clear: { heroExp: 20 }, firstClear: { heroExp: 160, items: [{ itemId: 'universal_memory', count: 20 }] } },
+  6: { clear: { heroExp: 40 }, firstClear: { heroExp: 300, items: [{ itemId: 'universal_memory', count: 20 }, { itemId: 'bt_stone_1', count: 1 }] } },
+  7: { clear: { heroExp: 45 }, firstClear: { heroExp: 450, items: [{ itemId: 'universal_memory', count: 25 }, { itemId: 'bt_stone_1', count: 1 }] } },
+  8: { clear: { heroExp: 45 }, firstClear: { heroExp: 550, items: [{ itemId: 'universal_memory', count: 30 }, { itemId: 'bt_stone_2', count: 2 }] } },
+  9: { clear: { heroExp: 70 }, firstClear: { heroExp: 600, items: [{ itemId: 'universal_memory', count: 35 }, { itemId: 'bt_stone_3', count: 2 }] } },
+  10: { clear: { heroExp: 125 }, firstClear: { heroExp: 800, items: [{ itemId: 'universal_memory', count: 50 }, { itemId: 'bt_stone_3', count: 3 }] } },
 };
 
 // ------------------------------------------------------------------ farm dungeon encounters
@@ -333,8 +335,8 @@ const SURVIVAL_TUNING: [number, number, number, [number, number]][] = [
 
 const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]): FarmDungeonDefinition => ({
   id: `ascension_${n}`, type: 'ASCENSION', name: `Ascension ${['I', 'II', 'III'][n - 1]}`, unlockFloor, recommendedLevel: levels,
-  baseRewards: { items: [{ itemId: `bt_stone_${n}`, count: 1 }], bonusDrops: [{ chance: 0.2, items: [{ itemId: `bt_stone_${n}`, count: 1 }] }] },
-  firstClearBonus: { items: [{ itemId: `bt_stone_${n}`, count: 1 }] },
+  baseRewards: { items: [{ itemId: `bt_stone_${n}`, count: 1 }, { itemId: 'universal_memory', count: 4 + n }], bonusDrops: [{ chance: 0.2, items: [{ itemId: `bt_stone_${n}`, count: 1 }] }] },
+  firstClearBonus: { items: [{ itemId: `bt_stone_${n}`, count: 1 }, { itemId: 'universal_memory', count: 20 + 10 * n }] },
   dailyBonusPool: 'ASCENSION', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: ASCENSION_TARGET_TIME[n - 1],
   stage: ASCENSION_DUELS[n - 1],
 });

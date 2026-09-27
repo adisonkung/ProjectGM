@@ -198,7 +198,7 @@ describe('Rewards, daily bonus, fragments', () => {
   it('bonus drop is extra only (20 % +1 stone)', () => {
     const d = FARM_BY_ID['ascension_2'];
     const lucky = farmRewardBreakdown(d, { bonus: false, firstClear: false, rng: () => 0.1 });
-    expect(lucky.final.items.reduce((a, i) => a + i.count, 0)).toBeCloseTo(1.2, 5);
+    expect(lucky.final.items.filter(i => i.itemId.startsWith('bt_stone')).reduce((a, i) => a + i.count, 0)).toBeCloseTo(1.2, 5);
   });
 
   it('unlocks follow tower progress (Training II F3 … V F8, Ascension I F5 / II F7 / III F8 — no F9 deadlock); locked runs give nothing', () => {

@@ -236,7 +236,7 @@ export class PlacementComponent {
       name: t.name,
       cls: t.cls,
       clsName: CLASS_NAME[t.cls],
-      star: t.star,
+      star: this.roster.star(h),
       level: h.level,
       power: this.roster.power(h),
       range: s.range,

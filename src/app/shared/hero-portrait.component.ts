@@ -39,7 +39,8 @@ const firstGrapheme = (s: string) => {
     :host { display: inline-flex; flex: none; }
     .frame { position: relative; display: block; border-radius: 12px; overflow: hidden; padding: 2px;
       background: linear-gradient(160deg, var(--rc), #0000 45%, var(--rc)); box-shadow: 0 0 0 1px #000, 0 0 14px color-mix(in srgb, var(--rc) 35%, transparent); }
-    .r1 { --rc: var(--r1); } .r2 { --rc: var(--r2); } .r3 { --rc: var(--r3); } .r4 { --rc: var(--r4); } .r5 { --rc: var(--r5); }
+    .r1 { --rc: var(--r1); } .r2 { --rc: var(--r2); } .r3 { --rc: var(--r3); } .r4 { --rc: var(--r4); } .r5 { --rc: var(--r5); } .r6 { --rc: var(--r6); }
+    .r6 { box-shadow: 0 0 0 1px #000, 0 0 16px color-mix(in srgb, var(--r6) 60%, transparent), 0 0 30px color-mix(in srgb, var(--r5) 35%, transparent); }
     img, .sigil { display: block; width: 100%; height: 100%; border-radius: 10px; object-fit: cover; background: #0c0a14; }
     .sigil { position: relative; display: grid; place-items: center; color: var(--rc);
       background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--rc) 28%, #16122a), #0b0914 75%); }
@@ -50,8 +51,10 @@ const firstGrapheme = (s: string) => {
 export class HeroPortraitComponent {
   readonly heroId = input.required<string>();
   readonly size = input(72);
+  /** owned (developed) star — frame colour; default = the template's base rarity */
+  readonly ownedStar = input<number | null>(null, { alias: 'star' });
   readonly t = computed(() => HERO_BY_ID[this.heroId()]);
-  readonly star = computed(() => this.t()?.star ?? 1);
+  readonly star = computed(() => this.ownedStar() ?? this.t()?.star ?? 1);
   readonly art = computed(() => heroArt(this.heroId())?.portrait ?? null);
   readonly alt = computed(() => this.t()?.name ?? this.heroId());
   readonly initial = computed(() => firstGrapheme(this.alt()));

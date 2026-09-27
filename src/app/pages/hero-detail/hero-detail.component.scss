@@ -116,3 +116,18 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-nu
   .who h1 { font-size: 26px; }
   .level { grid-column: 1 / -1; justify-items: stretch; min-width: 0; .lvnum { justify-content: center; } }
 }
+
+.gm-stars .dim { color: #ffffff26; text-shadow: none; }
+.stars-panel { display: grid; gap: 10px; margin-top: 12px;
+  h2 small { font: 500 12px var(--body); color: var(--muted); margin-left: 6px; }
+  .star-row { display: flex; gap: 6px; font-size: 26px; line-height: 1;
+    .st { color: #ffffff1c; }
+    .st.on { color: var(--rc, var(--gold)); text-shadow: 0 0 10px var(--rc, var(--gold)); }
+    .st.r1 { --rc: var(--r1); } .st.r2 { --rc: var(--r2); } .st.r3 { --rc: var(--r3); } .st.r4 { --rc: var(--r4); } .st.r5 { --rc: var(--r5); } .st.r6 { --rc: var(--r6); } }
+  .mem { display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    .need { flex: 1; min-width: 220px; display: grid; gap: 4px; em { font-style: normal; color: var(--hp); } small { color: var(--muted); } } }
+  .maxed { margin: 0; display: flex; align-items: center; gap: 6px; color: var(--gold-hi); }
+  .steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; color: var(--muted);
+    li.on { color: var(--text); b { color: var(--gold-hi); } } small { color: var(--muted); } }
+  .hint { color: var(--muted); font-size: 11px; } }
+.hero.r6 { --rc: var(--r6); }

@@ -89,29 +89,24 @@ describe('Hero kits (data)', () => {
     expect(row('lumina')).toEqual([209, 30, 17, 1.1, 4]);
   });
 
-  it('(30) star multiplier 1.00–1.20 applied once: internal 1★ base = final 5★ ÷ 1.20 (tank HP ≈ 327.5 → 393, not 393 × 1.2)', () => {
-    expect([1, 2, 3, 4, 5].map(starMultiplier)).toEqual([1, 1.05, 1.1, 1.15, 1.2]);
-    expect(HERO_CLASS_BASE.tank.hp).toBeCloseTo(327.5, 2);
-    expect(HERO_CLASS_BASE.tank.atk).toBeCloseTo(22.5, 2);
-    expect(HERO_CLASS_BASE.tank.def).toBeCloseTo(40.83, 2);
-    expect(HERO_CLASS_BASE.mage.atk).toBeCloseTo(47.5, 2);
-    const at = (id: string, star: number, level = 1) =>
-      heroStats({ ...HERO_BY_ID[id], star: star as 1 }, { uid: 0, templateId: id, level, potential: 'B' });
-    const t5 = at('aurel', 5);
-    expect([t5.hp, t5.atk, t5.def]).toEqual([393, 27, 49]);
-    expect(t5.hp).not.toBe(Math.round(393 * 1.2));
-    expect([at('aurel', 1).hp, at('aurel', 1).atk, at('aurel', 1).def]).toEqual([Math.round(327.5), Math.round(22.5), Math.round(40.833)]);
-    expect(at('aurel', 3).hp).toBe(Math.round(327.5 * 1.1));
-    expect(at('aurel', 1).atkSpeed).toBe(t5.atkSpeed);
-    // every class's final 5★ Lv1 = the table; the legacy 678 / 466 / 403 … table is gone
+  it('(30) star multiplier applied once on the 3★ reference: 1★ 0.91 · 2★ 0.955 · 3★ 1.00 · 4★ 1.05 · 5★ 1.10 · 6★ 1.18', () => {
+    expect([1, 2, 3, 4, 5, 6].map(starMultiplier)).toEqual([0.91, 0.955, 1, 1.05, 1.1, 1.18]);
+    expect(HERO_CLASS_BASE.tank.hp).toBe(393);
+    const at = (id: string, star: number, level = 1) => heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level, potential: 'B', star });
+    const t3 = at('aurel', 3);
+    expect([t3.hp, t3.atk, t3.def]).toEqual([393, 27, 49]);
+    expect([at('aurel', 6).hp, at('aurel', 6).atk, at('aurel', 6).def]).toEqual([Math.round(393 * 1.18), Math.round(27 * 1.18), Math.round(49 * 1.18)]);
+    expect(at('aurel', 1).hp).toBe(Math.round(393 * 0.91));
+    expect(at('aurel', 6).atkSpeed).toBe(t3.atkSpeed);
+    // the starting roster was re-rated 5★ → 3★ at the same power: every class's 3★ Lv1 = the table
     for (const cls of Object.keys(HERO_5STAR_LV1) as (keyof typeof HERO_5STAR_LV1)[]) {
-      const id = Object.values(HERO_BY_ID).find(h => h.cls === cls && h.star === 5)!.id;
-      const s5 = at(id, 5);
-      expect([s5.hp, s5.atk, s5.def]).toEqual([HERO_5STAR_LV1[cls].hp, HERO_5STAR_LV1[cls].atk, HERO_5STAR_LV1[cls].def]);
+      const id = Object.values(HERO_BY_ID).find(h => h.cls === cls && h.star === 3 && h.sprite)!.id;
+      const s3 = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B' });
+      expect([s3.hp, s3.atk, s3.def]).toEqual([HERO_5STAR_LV1[cls].hp, HERO_5STAR_LV1[cls].atk, HERO_5STAR_LV1[cls].def]);
     }
     expect(Object.values(HERO_5STAR_LV1).map(x => x.hp)).not.toContain(678);
     // linear level growth on the final Lv1 stats: Lv10 = ×1.27 HP, ×1.225 ATK, ×1.18 DEF
-    const l10 = at('jin', 5, 10);
+    const l10 = at('jin', 3, 10);
     expect([l10.hp, l10.atk, l10.def]).toEqual([Math.round(270 * 1.27), Math.round(47 * 1.225), Math.round(27 * 1.18)]);
   });
 

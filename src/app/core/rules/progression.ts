@@ -7,6 +7,7 @@ import { OwnedHero } from '../models/hero';
 import { CombatModifiers, PowerProfile, SkillKind, SkillRanks } from '../models/progression';
 import { CRIT_CHANCE_BASE, CRIT_MULTIPLIER_BASE } from '../data/classes';
 import { heroGearTotals, profileGear } from './equipment';
+import { heroStar, starPerk } from './stars';
 
 const SLOTS: SkillKind[] = ['skill', 'skill2', 'ult'];
 const clampRank = (r: number | undefined) => Math.max(1, Math.min(PATCH_1.maxSkillRank, Math.round(r ?? 1)));
@@ -36,15 +37,17 @@ export function gearStatBonus(h: OwnedHero): { hp: number; atk: number; def: num
 /** equipment utility → what the combat engine reads (gear already capped in gearTotals; skill ranks → rankedKit) */
 export function combatModifiers(h: OwnedHero): CombatModifiers {
   const g = heroGearTotals(h);
+  const perk = starPerk(heroStar(h));
   const per = <T>(f: (k: SkillKind) => T) => Object.fromEntries(SLOTS.map(k => [k, f(k)])) as Record<SkillKind, T>;
   return {
     skillPower: per(() => 1 + g.skillDamage),
-    cooldown: per(() => 1 - g.cooldownReduction),
+    // star perk CDR multiplies the gear multiplier (engine still clamps total CDR — SKILL_RANK_LIMITS)
+    cooldown: per(() => (1 - g.cooldownReduction) * perk.cooldown),
     breakBonus: per(() => g.breakPower),
     healing: 1 + g.healingPower,
     shieldPower: 1 + g.shieldPower,
     healingReceived: 1 + g.healingReceived,
-    critChance: CRIT_CHANCE_BASE + g.critChance,
+    critChance: CRIT_CHANCE_BASE + g.critChance + perk.crit,
     critMultiplier: CRIT_MULTIPLIER_BASE + g.critDamage,
     damageReduction: g.damageReduction,
     bleedReduction: g.bleedReduction,
@@ -52,6 +55,7 @@ export function combatModifiers(h: OwnedHero): CombatModifiers {
     execution: g.execution,
     mistHunter: g.mistHunter,
     statusResist: { poison: g.poisonReduction, root: g.rootReduction },
+    ...(perk.startGauge ? { startGauge: perk.startGauge } : {}),
   };
 }
 

@@ -9,6 +9,7 @@ import { SkillKind } from '../models/progression';
 import { SkillRankView, SkillUpgradeError } from '../models/skill-rank';
 import { convertTomes, skillRankView, upgradeSkill } from '../rules/skill-ranks';
 import { SKILL_SLOTS } from '../data/skill-ranks';
+import { heroStar, starUp, starUpView } from '../rules/stars';
 
 @Injectable({ providedIn: 'root' })
 export class RosterService {
@@ -26,6 +27,24 @@ export class RosterService {
 
   power(h: OwnedHero) {
     return power(this.stats(h));
+  }
+
+  /** current star (developed, else base rarity) */
+  star(h: OwnedHero): number {
+    return heroStar(h);
+  }
+
+  /** star-up preview: cost, Hero Memory / Universal Memory it would spend, what's missing */
+  starView(h: OwnedHero) {
+    return starUpView(this.save.state(), h);
+  }
+
+  /** +1 star (Hero Memory first, then Universal Memory) — false when not enough Memory / already 6★ */
+  starUp(uid: number): boolean {
+    const next = starUp(this.save.state(), uid);
+    if (!next) return false;
+    this.save.update(() => next);
+    return true;
   }
 
   /** EXP potion use (never automatic): Use 1 / Use 10 / 'max' = just enough to reach the current cap */

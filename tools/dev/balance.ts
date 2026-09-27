@@ -118,11 +118,8 @@ for (let stage of floors) {
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {
     const a = aggs[bot];
     const team = bot === 'TACTICAL' && !flag('--noform') ? tacticalFormation(heroes, state.team, stage) : state.team;
-    const allies = teamToUnits(team, heroes).map(u => {
-      if (star == null) return u;
-      const h = heroes.find(x => x.uid === u.heroUid)!;
-      return { ...u, star, stats: heroStats({ ...HERO_BY_ID[h.templateId], star: star as 1 }, h) };
-    });
+    // --star=N develops every hero to N★ (stats + star perks, the same path as the game)
+    const allies = teamToUnits(team, star == null ? heroes : heroes.map(h => ({ ...h, star })));
     heroSnapshot = allies.map(u => `${u.name} (${u.cls}) ${u.star ?? '?'}★ Lv${level} HP ${u.stats.hp} ATK ${u.stats.atk} DEF ${u.stats.def} AS ${u.stats.atkSpeed} R ${u.stats.range}`);
     for (let s = 1; s <= runs; s++) {
       const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: s, autoUlt: true });

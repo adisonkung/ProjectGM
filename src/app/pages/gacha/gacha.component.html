@@ -1,9 +1,41 @@
 <section class="gate">
   <div class="portal" aria-hidden="true">
-    <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+    <span class="ring ring1"></span><span class="ring ring2"></span><span class="ring ring3"></span>
     <span class="core"></span>
   </div>
   <h1 class="gm-title">ประตูอัญเชิญ</h1>
-  <p class="gm-sub">ผนึกยังไม่คลาย… อัตราสุ่ม การันตี ศักยภาพ และตัวซ้ำ จะมาในเฟส 5</p>
-  <button type="button" class="gm-btn primary" disabled>อัญเชิญ ×10</button>
+  <p class="gm-sub">ฮีโร่ 1★–3★ · ตัวซ้ำกลายเป็น Hero Memory ใช้อัปดาวได้ถึง {{ MAX_STAR }}★</p>
+
+  <div class="acts">
+    <button type="button" class="gm-btn" (click)="summon(1)" [disabled]="gems() < G.single"><app-icon name="summon" [size]="15" /> อัญเชิญ ×1 <small><app-icon name="gem" [size]="12" /> {{ G.single }}</small></button>
+    <button type="button" class="gm-btn primary" (click)="summon(10)" [disabled]="gems() < G.multi"><app-icon name="summon" [size]="15" /> อัญเชิญ ×10 <small><app-icon name="gem" [size]="12" /> {{ G.multi }}</small></button>
+  </div>
+  <p class="pity">การันตี 3★ ในอีก <b>{{ pityLeft() }}</b> ครั้ง · ×10 ได้ 2★ ขึ้นไปอย่างน้อย 1 ตัว</p>
+  @if (error(); as e) { <p class="err" role="alert">{{ e }}</p> }
+
+  @if (results().length) {
+    <ul class="results" aria-label="ผลการอัญเชิญ">
+      @for (r of results(); track $index) {
+        <li class="res r{{ r.star }}" [class.new]="r.isNew" [style.animation-delay.ms]="$index * 70">
+          <app-hero-portrait [heroId]="r.templateId" [size]="72" />
+          <b>{{ r.name }}</b>
+          <span class="gm-stars">{{ stars(r.star) }}</span>
+          @if (r.isNew) { <em class="tag">ใหม่!</em> }
+          @else if (r.memory) { <small>ตัวซ้ำ → Hero Memory +{{ r.memory }}</small> }
+          @else { <small>6★ แล้ว → Universal +{{ r.universal }}</small> }
+          @if (r.uid) { <a class="more" [routerLink]="['/heroes', r.uid]">ดูฮีโร่</a> }
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="info gm-panel">
+    <h2 class="gm-h2">อัตรา</h2>
+    <table>
+      <tbody>
+        @for (r of rates; track r.star) { <tr><th class="gm-stars">{{ stars(r.star) }}</th><td>{{ r.pct }}%</td><td>{{ r.count }} ฮีโร่</td><td>ตัวซ้ำ = Hero Memory {{ dupMemory[r.star - 1].m }}</td></tr> }
+      </tbody>
+    </table>
+    <p>ดาวเกิดสูงสุด 3★ · ทุกตัวพัฒนาได้ถึง 6★ (3★ → 6★ ใช้ Memory {{ toSix }} ≈ ตัวซ้ำ 4–5 ตัว) · Universal Memory จากเคลียร์หอคอยครั้งแรกและ Ascension ใช้แทนได้ทุกตัว · 3★ → 6★ ค่าพลัง +18% พร้อมความสามารถเสริม ออร่า และกรอบใหม่ (ขนาดตัวละครเท่าเดิม)</p>
+  </div>
 </section>

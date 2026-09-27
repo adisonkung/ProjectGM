@@ -222,3 +222,21 @@
 @media (prefers-reduced-motion: reduce) {
   .zone, .unit.broken app-unit-sprite { animation: none; }
 }
+
+// star visual evolution (sprite size unchanged): 5★ soft ground aura · 6★ awakened aura + rising motes
+.unit.aura5:not(.taunt)::before, .unit.aura6:not(.taunt)::before {
+  content: ''; position: absolute; left: 4%; right: 4%; bottom: -4%; height: 30%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--r5) 70%, transparent) 0%, color-mix(in srgb, var(--r5) 30%, transparent) 55%, transparent 72%);
+  border: 2px solid #ffe29a; box-shadow: 0 0 0 1px #0007, 0 0 12px var(--r5), inset 0 0 8px var(--r5);
+  animation: star-aura 1.6s ease-in-out infinite alternate;
+}
+.unit.aura6:not(.taunt)::before { background: radial-gradient(ellipse at center, color-mix(in srgb, var(--r6) 75%, transparent) 0%, color-mix(in srgb, var(--r5) 35%, transparent) 50%, transparent 72%);
+  border-color: #ffc2de; box-shadow: 0 0 0 1px #0007, 0 0 14px var(--r6), 0 0 26px color-mix(in srgb, var(--r5) 50%, transparent), inset 0 0 8px var(--r6); }
+.unit.aura6::after {
+  content: ''; position: absolute; left: 20%; right: 20%; bottom: 10%; height: 70%; pointer-events: none;
+  background: radial-gradient(circle, #fff 0 1px, transparent 1.5px) 0 0 / 9px 13px, radial-gradient(circle, var(--r6) 0 1px, transparent 1.5px) 4px 6px / 11px 15px;
+  opacity: 0.85; animation: star-motes 2.4s linear infinite; mask-image: linear-gradient(to top, #000, transparent);
+}
+@keyframes star-aura { from { opacity: 0.75; transform: scale(0.94); } to { opacity: 1; transform: scale(1.04); } }
+@keyframes star-motes { from { background-position: 0 0, 4px 6px; } to { background-position: 0 -26px, 4px -24px; } }
+@media (prefers-reduced-motion: reduce) { .unit.aura5::before, .unit.aura6::before, .unit.aura6::after { animation: none; } }

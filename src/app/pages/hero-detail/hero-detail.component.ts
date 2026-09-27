@@ -13,6 +13,9 @@ import { SkillKind } from '../../core/models/progression';
 import { SkillUpgradeError } from '../../core/models/skill-rank';
 import { heroGearTotals, itemLines, itemName } from '../../core/rules/equipment';
 import { heroStats } from '../../core/rules/stats';
+import { starMultiplier } from '../../core/data/classes';
+import { MAX_STAR, STAR_PERKS, STAR_VISUAL } from '../../core/data/stars';
+import { heroStar } from '../../core/rules/stars';
 import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
 import { IslandService } from '../../core/services/island.service';
@@ -46,6 +49,23 @@ export class HeroDetailComponent {
   readonly hero = computed(() => this.save.state().heroes.find(h => h.uid === this.uid()) ?? null);
   readonly t = computed(() => { const h = this.hero(); return h ? this.roster.template(h) : null; });
   readonly message = signal<{ text: string; ok: boolean } | null>(null);
+
+  // ---------------------------------------------------------------- star development (Hero Memory → 6★)
+  readonly MAX_STAR = MAX_STAR;
+  readonly star = computed(() => { const h = this.hero(); return h ? heroStar(h) : 1; });
+  readonly starView = computed(() => { const h = this.hero(); return h ? this.roster.starView(h) : null; });
+  /** raw stat gain of the next star (HP / ATK / DEF) */
+  readonly nextStarGain = computed(() => {
+    const s = this.star();
+    return s >= MAX_STAR ? 0 : Math.round((starMultiplier(s + 1) / starMultiplier(s) - 1) * 1000) / 10;
+  });
+  /** 4★ / 5★ / 6★ perks + visual evolution, reached or not */
+  readonly starSteps = computed(() => [4, 5, 6].map(n => ({ n, perk: STAR_PERKS[n].label, visual: STAR_VISUAL[n].label, reached: this.star() >= n, gain: Math.round((starMultiplier(n) - 1) * 100) })));
+  starUp(): void {
+    const s = this.star();
+    if (this.roster.starUp(this.uid())) this.say(`อัปเป็น ${s + 1}★ แล้ว`);
+    else this.say('Memory ไม่พอ', false);
+  }
 
   readonly inventory = computed(() => this.save.state().inventory);
   /** owned count of an item (missing = 0) */

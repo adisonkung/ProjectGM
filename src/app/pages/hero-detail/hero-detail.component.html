@@ -13,12 +13,12 @@
     </nav>
 
     <!-- hero banner -->
-    <header class="hero gm-panel glow r{{ tp.star }}">
-      <div class="art"><app-hero-portrait [heroId]="tp.id" [size]="168" /></div>
+    <header class="hero gm-panel glow r{{ star() }}">
+      <div class="art"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="168" /></div>
       <div class="who">
         <span class="gm-class">{{ className(tp.cls) }} · #{{ h.uid }}</span>
         <h1 class="gm-title">{{ tp.name }}</h1>
-        <span class="gm-stars big">{{ stars(tp.star) }}</span>
+        <span class="gm-stars big" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">{{ stars(star()) }}<span class="dim">{{ '☆'.repeat(MAX_STAR - star()) }}</span></span>
         <div class="power"><app-icon name="flame" [size]="18" /><span>พลังรบ</span><b>{{ power() }}</b></div>
         <div class="chips">
           @if (inTeam()) { <span class="gm-chip gold"><app-icon name="team" [size]="12" /> อยู่ในทีม</span> }
@@ -43,6 +43,36 @@
     </header>
 
     @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
+
+    <!-- star development: Hero Memory (duplicates) + Universal Memory (gameplay) → up to 6★ -->
+    @if (starView(); as sv) {
+      <section class="gm-panel stars-panel">
+        <h2 class="gm-h2">พัฒนาดาว <small>{{ star() }}★ / {{ MAX_STAR }}★ · ดาวเกิด {{ tp.star }}★</small></h2>
+        <div class="star-row">
+          @for (n of [1, 2, 3, 4, 5, 6]; track n) {
+            <span class="st r{{ n }}" [class.on]="n <= star()" [class.base]="n <= tp.star" [attr.title]="n + '★'">★</span>
+          }
+        </div>
+        @if (sv.maxed) {
+          <p class="maxed"><app-icon name="crown" [size]="14" /> ถึง 6★ แล้ว — ตัวซ้ำจะกลายเป็น Universal Memory</p>
+        } @else {
+          <div class="mem">
+            <div class="need">
+              <span>ใช้ <b>{{ sv.cost }}</b> Memory เพื่อไป {{ star() + 1 }}★ <em>(+{{ nextStarGain() }}% HP/ATK/DEF)</em></span>
+              <div class="gm-bar arcane"><i [style.width.%]="pct(sv.spendHero + sv.spendUniversal, sv.cost)"></i></div>
+              <small>Hero Memory {{ sv.heroMemory }} · Universal Memory {{ sv.universal }}@if (sv.canUp) { · จะใช้ Hero {{ sv.spendHero }} + Universal {{ sv.spendUniversal }} } @else { · ขาดอีก {{ sv.missing }} }</small>
+            </div>
+            <button type="button" class="gm-btn primary" [disabled]="!sv.canUp" (click)="starUp()"><app-icon name="star" [size]="15" /> อัปดาว</button>
+          </div>
+        }
+        <ul class="steps">
+          @for (st of starSteps(); track st.n) {
+            <li [class.on]="st.reached"><b>{{ st.n }}★</b> +{{ st.gain }}% ค่าพลัง · {{ st.perk }}<small> · {{ st.visual }}</small></li>
+          }
+        </ul>
+        <small class="hint">Hero Memory ได้จากการอัญเชิญซ้ำ · Universal Memory ได้จากเคลียร์หอคอยครั้งแรกและ Ascension · ขนาดตัวละครไม่เปลี่ยน</small>
+      </section>
+    }
 
     <div class="cols">
       <!-- stats -->

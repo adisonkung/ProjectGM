@@ -19,7 +19,7 @@
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   &:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--rc) 70%, transparent);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--rc) 40%, transparent), 0 0 22px color-mix(in srgb, var(--rc) 30%, transparent), 0 12px 26px #000a; }
-  &.r2 { --rc: var(--r2); } &.r3 { --rc: var(--r3); } &.r4 { --rc: var(--r4); } &.r5 { --rc: var(--r5); }
+  &.r2 { --rc: var(--r2); } &.r3 { --rc: var(--r3); } &.r4 { --rc: var(--r4); } &.r5 { --rc: var(--r5); } &.r6 { --rc: var(--r6); }
 }
 .art { position: relative; }
 .lv { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); padding: 1px 9px; border-radius: 99px; white-space: nowrap;

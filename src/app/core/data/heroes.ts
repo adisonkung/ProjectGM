@@ -1,5 +1,6 @@
 import { HeroTemplate } from '../models/hero';
 
+/** gacha rarity = the hero's BASE star (1★–3★). Owned heroes develop to 6★ with Hero Memory (`OwnedHero.star`). */
 export const HEROES: HeroTemplate[] = [
   { id: 'bron',     name: 'บรอน',     cls: 'tank',    star: 1 },
   { id: 'tim',      name: 'ทิม',      cls: 'fighter', star: 1 },
@@ -15,20 +16,20 @@ export const HEROES: HeroTemplate[] = [
   { id: 'saki',     name: 'ซากิ',     cls: 'fighter', star: 3 },
   { id: 'fey',      name: 'เฟย์',     cls: 'archer',  star: 3 },
   { id: 'lucian',   name: 'ลูเซียน',  cls: 'mage',    star: 3 },
-  { id: 'valgas',   name: 'วัลกาส',   cls: 'tank',    star: 4 },
-  { id: 'iria',     name: 'อิเรีย',   cls: 'archer',  star: 4 },
-  { id: 'celine',   name: 'เซลีน',    cls: 'healer',  star: 4 },
-  { id: 'jin',      name: 'จิน',      cls: 'fighter', star: 5, sprite: 'hero-jin.png' },
-  { id: 'sylvie',   name: 'ซิลวี',    cls: 'archer',  star: 5, sprite: 'hero-sylvie.png' },
-  { id: 'lumina',   name: 'ลูมิน่า',  cls: 'healer',  star: 5, sprite: 'hero-lumina.png' },
-  { id: 'aria',     name: 'อาเรีย',   cls: 'mage',    star: 5 },
-  { id: 'shade',    name: 'เชด',      cls: 'assassin', star: 5, sprite: 'hero-shade.png' },
-  { id: 'morgan',   name: 'โมร์แกน',  cls: 'tank',    star: 5, sprite: 'hero-morgan.png' },
-  { id: 'ragnar',   name: 'แร็กนาร์', cls: 'fighter', star: 5, sprite: 'hero-ragnar.png' },
-  { id: 'corvin',   name: 'คอร์วิน',  cls: 'healer',  star: 5, sprite: 'hero-corvin.png' },
-  { id: 'nox',      name: 'น็อกซ์',   cls: 'assassin', star: 5, sprite: 'hero-nox.png' },
-  { id: 'velma',    name: 'เวลมา',    cls: 'mage',    star: 5, sprite: 'hero-velma.png' },
-  { id: 'aurel',    name: 'ออเรล',    cls: 'tank',    star: 5, sprite: 'hero-aurel.png' },
+  { id: 'valgas',   name: 'วัลกาส',   cls: 'tank',    star: 3 },
+  { id: 'iria',     name: 'อิเรีย',   cls: 'archer',  star: 3 },
+  { id: 'celine',   name: 'เซลีน',    cls: 'healer',  star: 3 },
+  { id: 'jin',      name: 'จิน',      cls: 'fighter', star: 3, sprite: 'hero-jin.png' },
+  { id: 'sylvie',   name: 'ซิลวี',    cls: 'archer',  star: 3, sprite: 'hero-sylvie.png' },
+  { id: 'lumina',   name: 'ลูมิน่า',  cls: 'healer',  star: 3, sprite: 'hero-lumina.png' },
+  { id: 'aria',     name: 'อาเรีย',   cls: 'mage',    star: 3 },
+  { id: 'shade',    name: 'เชด',      cls: 'assassin', star: 3, sprite: 'hero-shade.png' },
+  { id: 'morgan',   name: 'โมร์แกน',  cls: 'tank',    star: 3, sprite: 'hero-morgan.png' },
+  { id: 'ragnar',   name: 'แร็กนาร์', cls: 'fighter', star: 3, sprite: 'hero-ragnar.png' },
+  { id: 'corvin',   name: 'คอร์วิน',  cls: 'healer',  star: 3, sprite: 'hero-corvin.png' },
+  { id: 'nox',      name: 'น็อกซ์',   cls: 'assassin', star: 3, sprite: 'hero-nox.png' },
+  { id: 'velma',    name: 'เวลมา',    cls: 'mage',    star: 3, sprite: 'hero-velma.png' },
+  { id: 'aurel',    name: 'ออเรล',    cls: 'tank',    star: 3, sprite: 'hero-aurel.png' },
 ];
 
 export const HERO_BY_ID: Record<string, HeroTemplate> = Object.fromEntries(HEROES.map(h => [h.id, h]));

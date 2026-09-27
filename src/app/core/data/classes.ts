@@ -10,19 +10,20 @@ export const CLASS_NAME: Record<HeroClass, string> = {
 };
 
 /**
- * Star (rarity) stat multiplier for HP / ATK / DEF — modest on purpose: rarity is potential / growth ceiling / skills,
- * not raw power (the old 5★ ×2.12 erased every Stage 4–10 mechanic). Attack speed, move speed and range don't scale.
+ * Star stat multiplier for HP / ATK / DEF, relative to the **3★ Lv1** reference table below.
+ * Gacha rarity is 1★–3★; every hero develops to 6★ with Hero Memory (core/data/stars.ts).
+ * 3★ → 6★ = +18 % raw (+ small utility perks per star) — rarity is potential / development, not raw power.
+ * 1★ / 2★ keep the old modest gap below 3★ (÷1.10 / ÷1.05 × … ). Attack speed, move speed and range don't scale.
  */
-export const STAR_STAT_MULTIPLIER: Record<number, number> = { 1: 1.0, 2: 1.05, 3: 1.1, 4: 1.15, 5: 1.2 };
-export const starMultiplier = (star: number) => STAR_STAT_MULTIPLIER[star] ?? 1 + (star - 1) * 0.05;
+export const STAR_STAT_MULTIPLIER: Record<number, number> = { 1: 0.91, 2: 0.955, 3: 1.0, 4: 1.05, 5: 1.1, 6: 1.18 };
+export const starMultiplier = (star: number) => STAR_STAT_MULTIPLIER[Math.max(1, Math.min(6, Math.round(star)))] ?? 1;
 
 /**
- * Authored hero stats: FINAL **5★ Level 1** per class (the design reference, after the star multiplier).
- * Vertical-slice baseline = 58% of the first table (tank 678 / 47 / 85 was ~1.7–2× too strong for the Stage 4–10
- * monsters). The 1★ base is derived from it (`HERO_CLASS_BASE` = this ÷ 1.20), so a 5★ hero ends at exactly these
- * values — never scaled twice. Attack speed / move speed / range are not star-scaled.
+ * Authored hero stats: FINAL **3★ Level 1** per class (the design reference — the old "5★ Lv1" table; the starting
+ * roster was re-rated 5★ → 3★ at the same power, so no Stage 1–10 balance changed). Vertical-slice baseline = 58 %
+ * of the first table. Attack speed / move speed / range are not star-scaled.
  */
-export const HERO_5STAR_LV1: Record<HeroClass, Stats> = {
+export const HERO_3STAR_LV1: Record<HeroClass, Stats> = {
   tank:     { hp: 393, atk: 27, def: 49, atkSpeed: 0.99, moveSpeed: 1.5, range: 1, maxMana: 100 },
   fighter:  { hp: 270, atk: 47, def: 27, atkSpeed: 1.28, moveSpeed: 1.8, range: 1, maxMana: 100 },
   assassin: { hp: 234, atk: 49, def: 19, atkSpeed: 1.51, moveSpeed: 2.0, range: 1, maxMana: 100 },
@@ -30,14 +31,11 @@ export const HERO_5STAR_LV1: Record<HeroClass, Stats> = {
   mage:     { hp: 184, atk: 57, def: 12, atkSpeed: 1.04, moveSpeed: 1.5, range: 5, maxMana: 100 },
   healer:   { hp: 209, atk: 30, def: 17, atkSpeed: 1.1,  moveSpeed: 1.5, range: 4, maxMana: 100 },
 };
+/** @deprecated old name of the same table (the roster used to be 5★) */
+export const HERO_5STAR_LV1 = HERO_3STAR_LV1;
 
-/** hero 1★ Level 1 base (unrounded) = authored 5★ ÷ 1.20 — `heroStats` multiplies by the star table */
-export const HERO_CLASS_BASE: Record<HeroClass, Stats> = Object.fromEntries(
-  Object.entries(HERO_5STAR_LV1).map(([cls, s]) => {
-    const k = starMultiplier(5);
-    return [cls, { ...s, hp: s.hp / k, atk: s.atk / k, def: s.def / k }];
-  }),
-) as Record<HeroClass, Stats>;
+/** hero base = the 3★ Lv1 reference (star multiplier 3★ = ×1.00, so nothing is ever scaled twice) */
+export const HERO_CLASS_BASE: Record<HeroClass, Stats> = HERO_3STAR_LV1;
 
 /**
  * Legacy class stats — only the old token enemies (floors 4–10 fixtures, `enemyStats`) and engine tests use these.

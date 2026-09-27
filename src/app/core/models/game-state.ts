@@ -53,4 +53,6 @@ export interface GameState {
   teamPresets?: TeamPreset[];
   /** Home Island (theme, main hero, building snapshot, pending events) — optional in the type; migrate / new game fill it */
   island?: PlayerIsland;
+  /** Hero Memory per hero template (duplicates) — spent on star-ups; Universal Memory lives in the inventory */
+  heroMemory?: Record<string, number>;
 }

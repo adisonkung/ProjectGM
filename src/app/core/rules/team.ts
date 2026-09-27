@@ -5,6 +5,7 @@ import { TeamPreset, TeamSlot } from '../models/game-state';
 import { UnitSpec } from '../models/unit';
 import { heroStats } from './stats';
 import { combatModifiers, skillRanksOf } from './progression';
+import { heroStar } from './stars';
 
 export const TEAM_SIZE = 5;
 /** ความลึกของฝั่งเรา (r ใน TeamSlot: 0 = หน้าสุด) และจำนวนเลน (c) */
@@ -46,7 +47,7 @@ export function teamToUnits(team: TeamSlot[], heroes: OwnedHero[]): UnitSpec[] {
     out.push({
       name: t.name,
       cls: t.cls,
-      star: t.star,
+      star: heroStar(h),
       level: h.level,
       sprite: t.sprite,
       heroUid: h.uid,

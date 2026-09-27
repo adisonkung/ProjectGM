@@ -638,7 +638,7 @@ export class BattleEngine {
       moveSpeed: s.moveSpeed,
       range: s.range,
       maxMana: s.maxMana,
-      mana: 0,
+      mana: Math.min(s.maxMana, spec.mods?.startGauge ?? 0),
       alive: true,
       targetId: null,
       atkCd: this.rng() * 0.3,

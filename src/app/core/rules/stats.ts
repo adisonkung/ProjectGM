@@ -16,12 +16,13 @@ export const maxLevel = (_t?: HeroTemplate) => levelCap();
 export const levelUpCost = (h: OwnedHero) => 30 + h.level * 25;
 
 /**
- * Hero stats = 1★ base (`HERO_CLASS_BASE`) × star multiplier (1.00 / 1.05 / 1.10 / 1.15 / 1.20) × linear level growth
+ * Hero stats = 3★ Lv1 reference (`HERO_CLASS_BASE`) × star multiplier (1★ 0.91 … 3★ 1.00 … 6★ 1.18, developed star
+ * `OwnedHero.star`, else the template's base rarity) × linear level growth
  * (+ gear flat ATK) × (1 + gear % stats). Skill ranks / gear utility go to the engine as `CombatModifiers`.
  */
 export function heroStats(t: HeroTemplate, h: OwnedHero): Stats {
   const base = HERO_CLASS_BASE[t.cls];
-  const starMul = starMultiplier(t.star);
+  const starMul = starMultiplier(h.star ?? t.star);
   const lv = (h.level - 1) * POTENTIAL_GROWTH[h.potential];
   const gear = gearStatBonus(h);
   // pipeline: Lv1 base (star resolved) → level growth → gear flat → gear % (once) → battle buffs (engine)
