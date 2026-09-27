@@ -622,10 +622,10 @@ interface TrialTier { n: number; unlockFloor: number; levels: [number, number]; 
 export const TRIAL_BONUS_CHANCE = 0.08;
 
 export const TRIAL_TIERS: TrialTier[] = [
-  { n: 1, unlockFloor: 4, levels: [3, 5], gold: 80, tomes: [['skill_tome_1', 0.16]], bonus: 'skill_tome_1', first: [['skill_tome_1', 2]] },
-  { n: 2, unlockFloor: 6, levels: [6, 7], gold: 120, tomes: [['skill_tome_1', 0.18], ['skill_tome_2', 0.04]], bonus: 'skill_tome_1', first: [['skill_tome_2', 1]] },
-  { n: 3, unlockFloor: 7, levels: [7, 8], gold: 170, tomes: [['skill_tome_1', 0.1], ['skill_tome_2', 0.14]], bonus: 'skill_tome_2', first: [['skill_tome_2', 2]] },
-  { n: 4, unlockFloor: 8, levels: [8, 10], gold: 220, tomes: [['skill_tome_2', 0.1], ['skill_tome_3', 0.09]], bonus: 'skill_tome_3', first: [['skill_tome_3', 1]] },
+  { n: 1, unlockFloor: 4, levels: [3, 5], gold: 120, tomes: [['skill_tome_1', 0.2]], bonus: 'skill_tome_1', first: [['skill_tome_1', 2]] },
+  { n: 2, unlockFloor: 6, levels: [6, 7], gold: 180, tomes: [['skill_tome_1', 0.22], ['skill_tome_2', 0.08]], bonus: 'skill_tome_1', first: [['skill_tome_2', 1]] },
+  { n: 3, unlockFloor: 7, levels: [7, 8], gold: 260, tomes: [['skill_tome_1', 0.1], ['skill_tome_2', 0.28]], bonus: 'skill_tome_2', first: [['skill_tome_2', 2]] },
+  { n: 4, unlockFloor: 8, levels: [8, 10], gold: 330, tomes: [['skill_tome_2', 0.15], ['skill_tome_3', 0.22]], bonus: 'skill_tome_3', first: [['skill_tome_3', 1]] },
 ];
 
 const trialDef = (t: TrialTier): FarmDungeonDefinition => ({

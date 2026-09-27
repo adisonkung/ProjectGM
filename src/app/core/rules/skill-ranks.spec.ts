@@ -291,14 +291,17 @@ describe('Skill Trial I–IV', () => {
     const rng = () => 0.99;
     const r1 = completeFarmRun(s, def, run, rng, now);
     expect(r1.breakdown!.kind).toBe('DAILY_BONUS');
-    // 0.16 × 1.5 = 0.24 tome → 2 fragments, + first clear 2 tomes
+    // 0.2 × 1.5 = 0.3 tome → 3 fragments, + first clear 2 tomes
     expect(r1.state.inventory['skill_tome_1']).toBe(2);
-    expect(r1.state.inventory['skill_tome_frag_1']).toBe(2);
-    expect(r1.state.gold).toBe(s.gold + 120);
+    expect(r1.state.inventory['skill_tome_frag_1']).toBe(3);
+    expect(r1.state.gold).toBe(s.gold + 180);
     s = completeFarmRun(r1.state, def, run, rng, now).state;
     const r3 = completeFarmRun(s, def, run, rng, now);
     expect(r3.breakdown!.kind).toBe('REPEAT');
-    expect(r3.breakdown!.final.gold).toBe(48);
+    expect(r3.breakdown!.final.gold).toBe(72);
     expect(r3.rating).toBe(3);
+    // repeat 0.2 × 0.6 = 0.12 tome = 1.2 fragments → 1 now, 0.2 fragment carried (no per-run rounding)
+    expect(r3.state.inventory['skill_tome_frag_1']).toBe(7);
+    expect(r3.state.rewardCarry['skill_tome_frag_1']).toBeCloseTo(0.2, 5);
   });
 });

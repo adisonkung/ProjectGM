@@ -73,6 +73,8 @@ interface Journey {
   gold: { earned: number; gear: number; skills: number; craftBlocked: number; skillBlocked: number };
   towerFails: Record<number, number>;
   endState: string;
+  /** ore held when each gear goal was reached (surplus check) */
+  oreAt: Record<string, number>;
 }
 
 const rank = (r: Rarity) => RARITIES.indexOf(r);
@@ -87,7 +89,7 @@ function journey(plan: Plan, seed: number): Journey {
   const rng = () => (x = (x * 16807 + 0.12345) % 1);
   const J: Journey = {
     floorAt: {}, levelAt: {}, gearAt: {}, skillAt: {}, starsAt: [], hours: 0, days: 0, time: {},
-    gold: { earned: 0, gear: 0, skills: 0, craftBlocked: 0, skillBlocked: 0 }, towerFails: {}, endState: '',
+    gold: { earned: 0, gear: 0, skills: 0, craftBlocked: 0, skillBlocked: 0 }, towerFails: {}, endState: '', oreAt: {},
   };
   let seconds = 0;
   let day = 1;
@@ -216,7 +218,7 @@ function journey(plan: Plan, seed: number): Journey {
         if (!('error' in r)) s = r.state;
       }
     }
-    while (gi < GEAR_LADDER.length && gearDone(gearGoal())) { mark(J.gearAt, gearGoal(), {}); gi++; }
+    while (gi < GEAR_LADDER.length && gearDone(gearGoal())) { mark(J.gearAt, gearGoal(), {}); J.oreAt[gearGoal()] = s.inventory['enhancement_ore'] ?? 0; gi++; }
     return did;
   };
   const tidy = () => {
@@ -355,7 +357,7 @@ function journey(plan: Plan, seed: number): Journey {
   }
   J.days = day - 1;
   J.hours = seconds / 3600;
-  J.endState = `F${s.cleared} · Lv ${core.map(u => hero(u).level).join('/')} · gear ${J.gearAt['NEAR_MAX'] ? 'NEAR_MAX' : gi ? GEAR_LADDER[gi - 1] : '-'} · skills ${qi}/${skillQueue.length} · stars ${core.map(u => heroStar(hero(u))).join('/')} · gold ${s.gold}`;
+  J.endState = `F${s.cleared} · Lv ${core.map(u => hero(u).level).join('/')} · gear ${J.gearAt['NEAR_MAX'] ? 'NEAR_MAX' : gi ? GEAR_LADDER[gi - 1] : '-'} · skills ${qi}/${skillQueue.length} · stars ${core.map(u => heroStar(hero(u))).join('/')} · gold ${s.gold} · ore ${s.inventory['enhancement_ore'] ?? 0} · frags ${['basic', 'rare', 'elite', 'epic'].map(f => s.inventory[`equip_frag_${f}`] ?? 0).join('/')}`;
   return J;
 }
 
@@ -381,5 +383,6 @@ for (const p of plans) {
   console.log(`  total:   ${median(js.map(j => j.days))} days · ${median(js.map(j => j.hours)).toFixed(1)} h — time: tower ${tt('TOWER')} h · training ${tt('TRAINING')} · ascension ${tt('ASCENSION')} · hunt ${tt('EQUIPMENT')} · trial ${tt('SKILL')}`);
   const g = js[0].gold;
   console.log(`  gold (journey 1): earned ${g.earned} · spent gear ${g.gear} · skills ${g.skills} · craft blocked by gold ${g.craftBlocked}× · skill blocked by gold ${g.skillBlocked}×`);
+  console.log(`  ore held at gear goal (journey 1): ${GEAR_LADDER.map(g => `${g} ${js[0].oreAt[g] ?? '-'}`).join(' · ')}`);
   console.log(`  end (journey 1): ${js[0].endState} · tower fails ${JSON.stringify(js[0].towerFails)}`);
 }

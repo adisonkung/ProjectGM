@@ -91,8 +91,8 @@ export function combineFragments(inv: Inventory): Inventory {
 }
 
 /**
- * Add (possibly fractional) item counts: stones split into whole stones + fragments (deterministic), other items keep
- * the fraction in `carry` until it adds up to a whole item.
+ * Add (possibly fractional) item counts: stones / tomes split into whole items + fragments, other items keep the
+ * fraction in `carry` until it adds up to a whole item (a partial fragment is carried the same way — nothing is rounded).
  */
 export function grantItems(inv: Inventory, carry: Record<string, number>, items: ItemStack[]): { inventory: Inventory; carry: Record<string, number> } {
   const inventory = { ...inv };
@@ -105,14 +105,13 @@ export function grantItems(inv: Inventory, carry: Record<string, number>, items:
     if (whole > 0) add(it.itemId, whole);
     if (frac < 1e-9) continue;
     const frag = def?.fragmentId ? ITEMS[def.fragmentId] : undefined;
-    if (frag?.fragmentsPerItem) add(frag.id, Math.round(frac * frag.fragmentsPerItem));
-    else {
-      c[it.itemId] = (c[it.itemId] ?? 0) + frac;
-      const n = Math.floor(c[it.itemId] + 1e-9);
-      if (n > 0) {
-        add(it.itemId, n);
-        c[it.itemId] -= n;
-      }
+    // fractions become fragments; a partial fragment waits in `carry` (rounding per run used to erase rate changes)
+    const [id, amount] = frag?.fragmentsPerItem ? [frag.id, frac * frag.fragmentsPerItem] : [it.itemId, frac];
+    c[id] = (c[id] ?? 0) + amount;
+    const n = Math.floor(c[id] + 1e-6);
+    if (n > 0) {
+      add(id, n);
+      c[id] = Math.max(0, c[id] - n);
     }
   }
   return { inventory: combineFragments(inventory), carry: c };
