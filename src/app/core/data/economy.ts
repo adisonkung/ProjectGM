@@ -506,11 +506,11 @@ const HUNT_TARGET_TIME = [105, 120, 150, 180, 210];
 /** Hunt reward per clear (BASE: daily bonus ×1.5, repeat ×0.6 — drop chance unchanged) */
 interface HuntTier { n: number; unlockFloor: number; levels: [number, number]; ore: number; gold: number; frags: [string, number][]; drops: EquipmentDropTable; first: Rarity }
 const HUNT_TIERS: HuntTier[] = [
-  { n: 1, unlockFloor: 3, levels: [3, 4], ore: 8, gold: 150, frags: [['equip_frag_basic', 3]], drops: { itemChance: 0.6, rarityWeights: { COMMON: 65, UNCOMMON: 35 } }, first: 'UNCOMMON' },
-  { n: 2, unlockFloor: 4, levels: [4, 5], ore: 12, gold: 250, frags: [['equip_frag_basic', 4], ['equip_frag_rare', 1]], drops: { itemChance: 0.6, rarityWeights: { UNCOMMON: 75, RARE: 25 } }, first: 'UNCOMMON' },
-  { n: 3, unlockFloor: 5, levels: [5, 7], ore: 16, gold: 400, frags: [['equip_frag_rare', 5]], drops: { itemChance: 0.55, rarityWeights: { UNCOMMON: 25, RARE: 65, ELITE: 10 } }, first: 'RARE' },
-  { n: 4, unlockFloor: 7, levels: [7, 8], ore: 22, gold: 600, frags: [['equip_frag_rare', 2], ['equip_frag_elite', 5]], drops: { itemChance: 0.5, rarityWeights: { RARE: 50, ELITE: 45, EPIC: 5 } }, first: 'RARE' },
-  { n: 5, unlockFloor: 8, levels: [8, 10], ore: 30, gold: 900, frags: [['equip_frag_elite', 3], ['equip_frag_epic', 5]], drops: { itemChance: 0.5, rarityWeights: { ELITE: 70, EPIC: 30 } }, first: 'ELITE' },
+  { n: 1, unlockFloor: 3, levels: [3, 4], ore: 8, gold: 100, frags: [['equip_frag_basic', 3]], drops: { itemChance: 0.6, rarityWeights: { COMMON: 65, UNCOMMON: 35 } }, first: 'UNCOMMON' },
+  { n: 2, unlockFloor: 4, levels: [4, 5], ore: 12, gold: 160, frags: [['equip_frag_basic', 4], ['equip_frag_rare', 1]], drops: { itemChance: 0.6, rarityWeights: { UNCOMMON: 75, RARE: 25 } }, first: 'UNCOMMON' },
+  { n: 3, unlockFloor: 5, levels: [5, 7], ore: 16, gold: 260, frags: [['equip_frag_rare', 5]], drops: { itemChance: 0.55, rarityWeights: { UNCOMMON: 25, RARE: 65, ELITE: 10 } }, first: 'RARE' },
+  { n: 4, unlockFloor: 7, levels: [7, 8], ore: 22, gold: 390, frags: [['equip_frag_rare', 2], ['equip_frag_elite', 5]], drops: { itemChance: 0.5, rarityWeights: { RARE: 50, ELITE: 45, EPIC: 5 } }, first: 'RARE' },
+  { n: 5, unlockFloor: 8, levels: [8, 10], ore: 30, gold: 580, frags: [['equip_frag_elite', 3], ['equip_frag_epic', 5]], drops: { itemChance: 0.5, rarityWeights: { ELITE: 70, EPIC: 30 } }, first: 'ELITE' },
 ];
 
 const huntDef = (t: HuntTier): FarmDungeonDefinition => ({

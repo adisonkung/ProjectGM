@@ -173,7 +173,7 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
 - `npm test` ยูนิตเทสต์ (เอนจินต่อสู้, TeamService, หน้าจัดทีม/ห้องทดลอง)
 - `npm run sim -- 200` จำลองการต่อสู้ทุกชั้นแบบไม่แสดงผล ดูอัตราชนะ
 - `npm run trace -- 3 [seed] [level|rec] [tactical]` พิมพ์ event log ของการต่อสู้ชั้นนั้น (ดีบัก AI)
-- `npm run skill-economy` ความเร็วอัปสกิลจาก Skill Trial · `npm run gear-economy` ฟาร์มอุปกรณ์
+- `npm run account-economy [-- --minutes=bonus,30,60 --bot=auto --seeds=3 --verbose]` = เส้นทางผู้เล่นทั้งบัญชี (เลเวล+BT+Hunt+อุปกรณ์+Trial+สกิล+ทอง+ดาว Universal Memory+ลองหอคอยด้วยการต่อสู้จริงของบัญชีนั้น) · `npm run skill-economy` ความเร็วอัปสกิลจาก Skill Trial · `npm run gear-economy` ฟาร์มอุปกรณ์
 - `npm run balance -- 200 rec - --all-floors --exposure --metrics --power` กลไกบอส/ร่ายได้ออกไหม + อัตราชนะ + เมตริก แบบ AUTO vs TACTICAL ตามโปรไฟล์ของแต่ละชั้น (`--profile=A..F`, `--star=N`, `--tune=hp,atk,def`, `--mon=…` = ทดลอง)
 
 ## Roadmap
