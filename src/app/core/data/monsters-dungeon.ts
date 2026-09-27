@@ -2,7 +2,8 @@ import { AnimClip, AnimationConfig, MonsterDefinition, MonsterSkillDefinition, M
 
 /**
  * Special-dungeon rosters (claude/special-dungeon-monsters.md) — monsters that only live in the farm dungeons,
- * never in the tower. Pure data like Stage 4–10; art = code-drawn pixel sheets (tools/sprites/dungeon/anim.py).
+ * never in the tower. Pure data like Stage 4–10; art = the user's sheets cut by tools/sprites/sheet_cut.py (Training +
+ * Ascension, FX by tools/sprites/fx_cut.py) or code-drawn pixel sheets (tools/sprites/dungeon/anim.py, the rest).
  *   Training (SURVIVAL)   straw_recruit · crossbow_dummy · drill_sergeant (ELITE: Rally Whistle)
  *   Ascension (BOSS DUEL) brass_shishi · moonblade_ronin · astral_seraph — one boss per weekday (economy.ts)
  *   Hunt (TREASURE)       gem_beetle · mimic_chest (dormant ambusher) · coin_kobold (carrier, Smoke Pouch)
@@ -221,7 +222,7 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 170, attack: 50, defense: 6, moveSpeed: 0.9, attackRange: 6.5, preferredRange: 5.5, minComfortableRange: 0, attackCooldown: 2 }),
     ai: { targeting: { strategy: 'LOWEST_HP_PCT', targetLockDuration: 1, similarHpTolerance: 0.05 }, movement: 'RANGED_HOLD', maxRetreatSteps: 0, skillPriority: ['triple_volley'] },
     attack: shot('crossbow_bolt', 'dummy_bolt'), skills: ['triple_volley'],
-    animation: anim('enemy-crossbow-dummy.png', 6, 'PROJECTILE_SPAWN', { volley: cast(6, 8, 5) }),
+    animation: anim('enemy-crossbow-dummy.png', 6, 'PROJECTILE_SPAWN', { volley: cast(6, 6, 4) }),
   },
   drill_sergeant: {
     id: 'drill_sergeant', name: 'จ่าหุ่นเหล็ก', rank: 'ELITE', role: 'SUMMONER / BUFF', tags: ['construct', 'training', 'drill'],
@@ -229,7 +230,7 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 700, attack: 60, defense: 30, moveSpeed: 1.8, attackRange: 1.3, attackCooldown: 1.7, minHitReactionInterval: 2, collisionRadius: 0.5 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.5 }, movement: 'MELEE_CHASE', skillPriority: ['rally_whistle'] },
     attack: melee('megaphone_bash', 1.1), skills: ['rally_whistle'],
-    animation: anim('enemy-drill-sergeant.png', 6, 'DAMAGE', { rally: cast(6, 8, 5) }, { w: 158, h: 112 }),
+    animation: anim('enemy-drill-sergeant.png', 6, 'DAMAGE', { rally: cast(6, 8, 5) }, { w: 142, h: 110 }),
   },
 
   // ------------------------------------------------ Ascension — Sky Shrine guardians (base = tier II, tiers scale via monsterTuning)
@@ -239,7 +240,7 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 20000, attack: 85, defense: 30, moveSpeed: 1.6, attackRange: 1.5, attackCooldown: 1.9, hitReactionDuration: 0.1, minHitReactionInterval: 3, collisionRadius: 0.8, attackWindup: 0.4 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 2 }, movement: 'MELEE_CHASE', skillPriority: ['lions_roar', 'guardian_pounce'] },
     attack: melee('paw_swipe', 1.1), skills: ['lions_roar', 'guardian_pounce'],
-    animation: anim('enemy-brass-shishi.png', 8, 'DAMAGE', { roar: cast(6, 8, 5), pounce: cast(7, 6, 4, 1) }, { w: 208, h: 179 }),
+    animation: anim('enemy-brass-shishi.png', 7, 'DAMAGE', { roar: cast(6, 6, 3), pounce: cast(7, 6, 4, 1) }, { w: 238, h: 155 }),
     phases: [{ id: 'jade_awakening', label: 'หยกตื่น', hpBelow: 0.5, transition: 1, statuses: ['jade_awakening'], cooldownOverride: { guardian_pounce: 10 } }],
   },
   moonblade_ronin: {
@@ -248,7 +249,7 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 20000, attack: 100, defense: 24, moveSpeed: 2.4, attackRange: 1.5, attackCooldown: 1.4, hitReactionDuration: 0.1, minHitReactionInterval: 3, collisionRadius: 0.7, attackWindup: 0.3 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.5 }, movement: 'MELEE_CHASE', skillPriority: ['mirror_stance', 'crescent_iaido'] },
     attack: melee('moon_cut', 1.1), skills: ['mirror_stance', 'crescent_iaido'],
-    animation: anim('enemy-moonblade-ronin.png', 8, 'DAMAGE', { iaido: cast(6, 8, 5), mirror: cast(7, 6, 2, 1, 110) }, { w: 200, h: 187 }),
+    animation: anim('enemy-moonblade-ronin.png', 7, 'DAMAGE', { iaido: cast(6, 6, 4), mirror: cast(7, 6, 2, 1, 110) }, { w: 340, h: 189 }),
     phases: [{ id: 'twin_moon', label: 'จันทร์คู่', hpBelow: 0.4, transition: 1, statuses: ['twin_moon'], cooldownOverride: { crescent_iaido: 6 } }],
   },
   astral_seraph: {
@@ -257,7 +258,7 @@ export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
     stats: base({ maxHp: 20000, attack: 95, defense: 34, moveSpeed: 1.2, attackRange: 5, preferredRange: 4.5, attackCooldown: 1.7, minComfortableRange: 0, hitReactionDuration: 0.1, minHitReactionInterval: 3, collisionRadius: 0.8 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 2 }, movement: 'RANGED_HOLD', maxRetreatSteps: 0, skillPriority: ['judgement_beam', 'starfall'] },
     attack: shot('star_shot', 'star_bolt', 'MAGIC'), skills: ['judgement_beam', 'starfall'],
-    animation: anim('enemy-astral-seraph.png', 8, 'PROJECTILE_SPAWN', { starfall: cast(6, 6, 4), judgement: cast(7, 10, 8) }, { w: 186, h: 192 }),
+    animation: anim('enemy-astral-seraph.png', 7, 'PROJECTILE_SPAWN', { starfall: cast(6, 6, 4), judgement: cast(7, 10, 8) }, { w: 304, h: 222 }),
     phases: [{ id: 'seraph_ascend', label: 'เทวรูปตื่น', hpBelow: 0.5, transition: 1, statuses: ['seraph_ascend'], cooldownOverride: { judgement_beam: 15, starfall: 8 } }],
   },
 
