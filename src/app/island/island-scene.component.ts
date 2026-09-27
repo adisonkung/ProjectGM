@@ -93,6 +93,12 @@ export class IslandSceneComponent implements AfterViewInit, OnDestroy {
     return a ? { key: b.slot, src: a.src, x: b.x, y: b.y, w: a.w * PIXEL_SCALE, h: a.h * PIXEL_SCALE } : null;
   }).filter(x => !!x));
 
+  /** weather overlay (SNOW …): seamless tiles scrolled by CSS — cosmetic only */
+  readonly weather = computed(() => (this.theme().ambientFxSet.weather ?? []).map((wl, i) => {
+    const a = resolveAsset(this.theme(), wl.slot);
+    return a ? { key: `${wl.slot}:${i}`, src: a.src, w: a.w * PIXEL_SCALE, h: a.h * PIXEL_SCALE, sec: wl.seconds, drift: wl.drift, opacity: wl.opacity ?? 1 } : null;
+  }).filter(x => !!x));
+
   // ---------------------------------------------------------------- dynamic (building states)
   readonly draw = computed(() => buildingDraw(this.theme(), this.buildings(), this.skinOverrides(), unlockFloorOf));
   readonly decor = computed(() => decorDraw(this.theme()));

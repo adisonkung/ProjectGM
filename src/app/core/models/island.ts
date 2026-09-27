@@ -235,7 +235,12 @@ export interface IslandThemeDefinition {
   treeSet: string[];
   vegetationSet: string[];
   propSet: string[];
-  ambientFxSet: { fireflies?: string; foregroundBranches?: string[] };
+  ambientFxSet: {
+    fireflies?: string;
+    foregroundBranches?: string[];
+    /** weather overlay layers (seamless tiles scrolled by CSS) — cosmetic only, never read by gameplay */
+    weather?: { slot: string; seconds: number; drift: number; opacity?: number }[];
+  };
   lightingPreset: { id: 'DAY' | 'DUSK' | 'NIGHT'; ambient: string; lights: LightDef[]; decorLights: Record<string, DecorLightDef> };
   /** animated sprites attached to decoration slots (campfire flame, fountain water, lantern flame) */
   decorFx: Record<string, { slot: string; dx: number; dy: number; glow?: boolean }[]>;

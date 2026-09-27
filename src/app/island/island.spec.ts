@@ -9,6 +9,8 @@ import {
   DEFAULT_FOREST_SKINS, DEFAULT_FOREST_THEME, DEFAULT_THEME_ID, ISLAND_THEMES, layersFor, PLACEHOLDER_SKINS, resolveAsset, resolveBuildingSkin, skinStage, themeOf,
 } from '../core/data/island-themes';
 import { DEFAULT_FOREST_ASSETS } from '../core/data/island/default-forest.assets';
+import { FROZEN_KINGDOM_ASSETS } from '../core/data/island/frozen-kingdom.assets';
+import { FROZEN_KINGDOM_SKINS, FROZEN_KINGDOM_THEME } from '../core/data/island-themes';
 import { buildingDraw, decorDraw, lightsDraw } from './island-view-model';
 import { BuildingSkin, IslandThemeDefinition, Rect, Vec2 } from '../core/models/island';
 import {
@@ -337,6 +339,64 @@ describe('Home Island — themes, assets and fallbacks (cosmetic only)', () => {
     expect(setTheme(s.island!, DEFAULT_THEME_ID)!.themeId).toBe(DEFAULT_THEME_ID);
     expect(normalizeIsland({ ...s.island!, themeId: 'deleted_theme' }, s).themeId).toBe(DEFAULT_THEME_ID);
     expect(normalizeIsland({ ...s.island!, themeId: 'ancient_forest' }, s).themeId).toBe(DEFAULT_THEME_ID);
+  });
+});
+
+describe('Home Island — Frozen Kingdom theme (visuals only)', () => {
+  const F = FROZEN_KINGDOM_THEME, D = DEFAULT_FOREST_THEME;
+  const h = newGameState();
+
+  it('is registered with its own id, snow weather and a full asset pack (every Default Forest slot re-drawn, no fallback needed)', () => {
+    expect(ISLAND_THEMES['frozen_kingdom']).toBe(F);
+    expect(themeOf('frozen_kingdom')).toBe(F);
+    expect(F.weatherPreset).toBe('SNOW');
+    expect(F.ambientFxSet.weather!.length).toBeGreaterThan(0);
+    for (const w of F.ambientFxSet.weather!) expect(resolveAsset(F, w.slot)).withContext(w.slot).not.toBeNull();
+    for (const slot of Object.keys(DEFAULT_FOREST_ASSETS)) expect(FROZEN_KINGDOM_ASSETS[slot]).withContext(slot).toBeDefined();
+    for (const [slot, a] of Object.entries(FROZEN_KINGDOM_ASSETS)) {
+      expect(a.src).withContext(slot).toMatch(/^island\/frozen_kingdom\/[a-z]+\/island_frozen_[a-z]+_[a-z0-9_]+\.png$/);
+      expect(a.src).withContext(slot).not.toBe(DEFAULT_FOREST_ASSETS[slot]?.src);
+    }
+  });
+
+  it('every building stage draws Frozen Kingdom layered art (own skin ids), using only FX anchors the plot already has', () => {
+    for (const b of ISLAND_BUILDINGS) {
+      const skin = resolveBuildingSkin(b.id, F);
+      expect(skin).withContext(b.id).toBe(FROZEN_KINGDOM_SKINS[b.id]);
+      expect(skin.id).withContext(b.id).toContain('frozen_kingdom');
+      for (const st of b.visualStages) {
+        const layers = layersFor(skin, st.stage, F)!;
+        const base = layers.find(l => l.layer.role === 'BASE');
+        expect(base?.asset.src).withContext(`${b.id} ${st.stage}`).toContain('frozen_kingdom');
+      }
+      if (skin.kind === 'LAYERED') for (const ls of Object.values(skin.stages)) for (const l of ls) if (l.at) expect(PLOT_BY_ID[b.plotId].fxAnchors[l.at]).withContext(`${b.id} ${l.at}`).toBeDefined();
+    }
+  });
+
+  it('keeps every footprint: building / training / road / terrain art has the Default Forest size, anchor and frame count', () => {
+    for (const [slot, a] of Object.entries(DEFAULT_FOREST_ASSETS)) {
+      if (!/^(building|training|road|terrain)\./.test(slot)) continue;
+      const f = FROZEN_KINGDOM_ASSETS[slot];
+      expect([f.w, f.h, f.ax, f.ay, f.frames ?? 1]).withContext(slot).toEqual([a.w, a.h, a.ax, a.ay, a.frames ?? 1]);
+    }
+  });
+
+  it('gameplay neutral: same tap areas, name plates, decoration spots, nav graph and save data — only the look changes', () => {
+    const states = newIsland(10, h.heroes, h.team).buildingProgression;
+    const dd = buildingDraw(D, states, {}, unlockFloorOf), df = buildingDraw(F, states, {}, unlockFloorOf);
+    expect(df.hits).toEqual(dd.hits);
+    expect(df.placeholders.length).toBe(0);
+    expect(decorDraw(F).length).toBe(decorDraw(D).length);
+    const nav = JSON.stringify({ NAV_NODES, NAV_EDGES, ISLAND_PLOTS, ISLAND_BUILDINGS });
+    const isl = newIsland(10, h.heroes, h.team);
+    const switched = setTheme(isl, 'frozen_kingdom')!;
+    expect({ ...switched, themeId: isl.themeId }).toEqual(isl);
+    expect(switched.themeId).toBe('frozen_kingdom');
+    expect(JSON.stringify({ NAV_NODES, NAV_EDGES, ISLAND_PLOTS, ISLAND_BUILDINGS })).toBe(nav);
+    expect(JSON.stringify(F)).not.toMatch(/"(atk|hp|def|exp|dropRate|bonus|power|speed)"\s*:/i);
+    // a hypothetical later theme that lacks Frozen-only slots still draws (forge crystal is optional FX)
+    expect(resolveAsset(D, 'building.forge.crystal')).toBeNull();
+    expect(layersFor(FROZEN_KINGDOM_SKINS['equipment_workshop'], 3, D)!.some(l => l.layer.role === 'BASE')).toBeTrue();
   });
 });
 

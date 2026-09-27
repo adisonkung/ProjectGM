@@ -52,3 +52,7 @@ app-island-scene { position: absolute; inset: 0; }
   .stage { height: clamp(300px, 58vh, 500px); border-radius: 14px; }
 }
 .side { max-width: 720px; }
+
+.themes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 8px;
+  .gm-class { flex-basis: 100%; }
+  .tnote { flex-basis: 100%; font-size: 11px; color: var(--muted); } }

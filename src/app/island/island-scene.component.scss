@@ -52,6 +52,10 @@
 .fog { position: absolute; left: 0; right: 0; bottom: 0; height: 260px; z-index: 972000; pointer-events: none;
   background: linear-gradient(to top, #b6bee022, transparent); animation: drift 30s ease-in-out infinite alternate; }
 
+.weather { position: absolute; inset: 0; z-index: 972500; pointer-events: none; image-rendering: pixelated;
+  background-size: var(--tw) var(--th); background-repeat: repeat; animation: snowfall 20s linear infinite; }
+@keyframes snowfall { from { background-position: 0 0; } to { background-position: var(--dx) var(--th); } }
+
 .hit { position: absolute; z-index: 980000; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 16px; }
 .hit:hover { background: #f6dfa00d; }
 .hit.sel, .hit:focus-visible { outline: 3px dashed #f6dfa0; outline-offset: 4px; background: #f6dfa012; }
@@ -65,5 +69,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .world { transition: none; }
-  .anim, .pulse, .flicker, .bob, .breathe, .sway, .sway-slow, .cloud, .mist, .rock, .fog, .light.flicker { animation: none !important; }
+  .anim, .pulse, .flicker, .bob, .breathe, .sway, .sway-slow, .cloud, .mist, .rock, .fog, .weather, .light.flicker { animation: none !important; }
 }

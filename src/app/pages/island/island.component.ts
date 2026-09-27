@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, NgZone, OnDestroy, OnInit, signal, untracked } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { BUILDING_BY_ID, ISLAND_BUILDINGS, PLOT_BY_ID } from '../../core/data/island-layout';
-import { themeOf } from '../../core/data/island-themes';
+import { ISLAND_THEMES, themeOf } from '../../core/data/island-themes';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_NAME } from '../../core/data/classes';
 import { STAGES } from '../../core/data/stages';
@@ -53,6 +53,11 @@ export class IslandComponent implements OnInit, OnDestroy {
 
   readonly island = this.isl.island;
   readonly theme = computed(() => themeOf(this.island().themeId));
+  /** cosmetic themes the player can switch between (visual only) */
+  readonly themes = Object.values(ISLAND_THEMES);
+  setTheme(id: string): void {
+    this.isl.setTheme(id);
+  }
   readonly cleared = computed(() => this.save.state().cleared);
   readonly totalFloors = STAGES.length;
   readonly stageName = computed(() => islandStageName(this.island().islandProgressionStage));

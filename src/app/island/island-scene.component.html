@@ -55,6 +55,10 @@
              [style.background]="'radial-gradient(circle, ' + l.color + ' 0%, transparent 70%)'"></div>
       }
       @if (theme().weatherPreset === 'MIST') { <div class="fog"></div> }
+      @for (wl of weather(); track wl.key) {
+        <div class="weather" [style.background-image]="'url(' + wl.src + ')'" [style.--tw.px]="wl.w" [style.--th.px]="wl.h"
+             [style.--dx.px]="wl.drift" [style.animation-duration.s]="wl.sec" [style.opacity]="wl.opacity"></div>
+      }
 
       <!-- interaction: tap areas + name plates (part of the scene, not of the art) -->
       @for (b of draw().hits; track b.id) {

@@ -2,6 +2,7 @@ import {
   BuildingSkin, IslandAsset, IslandThemeDefinition, PlaceholderShape, PlaceholderStageStyle, SkinLayer,
 } from '../models/island';
 import { DEFAULT_FOREST_ASSETS } from './island/default-forest.assets';
+import { FROZEN_KINGDOM_ASSETS } from './island/frozen-kingdom.assets';
 
 /**
  * Island THEMES and building SKINS — cosmetic only. Nothing here is read by unlocks, navigation, collision or saves.
@@ -205,7 +206,92 @@ export const DEFAULT_FOREST_THEME: IslandThemeDefinition = {
   bgmId: null,
 };
 
-export const ISLAND_THEMES: Record<string, IslandThemeDefinition> = { [DEFAULT_THEME_ID]: DEFAULT_FOREST_THEME };
+// ------------------------------------------------------------------ Frozen Kingdom (cosmetic theme #2)
+
+/**
+ * a theme's layered skins = the Default Forest layer structure (same slots → the theme's own art, same FX anchors,
+ * same footprints) with a new id per building, plus per-stage tweaks (extra / swapped layers). Never touches plots.
+ */
+function reskin(prefix: string, tweak: (building: string, stage: number, layers: SkinLayer[]) => SkinLayer[] = (_b, _s, l) => l): Record<string, BuildingSkin> {
+  const out: Record<string, BuildingSkin> = {};
+  for (const [id, skin] of Object.entries(DEFAULT_FOREST_SKINS)) {
+    if (skin.kind !== 'LAYERED') continue;
+    const stages: Record<number, SkinLayer[]> = {};
+    for (const [st, layers] of Object.entries(skin.stages)) stages[+st] = tweak(id, +st, layers.map(x => ({ ...x })));
+    out[id] = { id: skin.id.replace('default_forest', prefix), kind: 'LAYERED', stages };
+  }
+  return out;
+}
+
+export const FROZEN_KINGDOM_ID = 'frozen_kingdom';
+
+export const FROZEN_KINGDOM_SKINS = reskin(FROZEN_KINGDOM_ID, (b, st, layers) => {
+  if (b === 'equipment_workshop' && st >= 2) {
+    // blue forge crystal hovering over the cold forge; arcane stage vents ice motes instead of violet sparks
+    layers = layers.map(x => (x.slot === 'fx.particlesViolet' ? { ...x, slot: 'fx.particlesCyan' } : x));
+    layers.push(L('building.forge.crystal', 'FX', at('forgeFireAnchor', { dy: -54, motion: 'bob', glow: true })));
+  }
+  if (b === 'expedition_dock' && st >= 1) layers.push(L('fx.particlesCyan', 'FX', at('lanternAnchor', { glow: true, dy: 20 })));
+  return layers;
+});
+
+export const FROZEN_KINGDOM_THEME: IslandThemeDefinition = {
+  id: FROZEN_KINGDOM_ID,
+  name: 'Frozen Kingdom',
+  free: true,
+  assets: FROZEN_KINGDOM_ASSETS,
+  terrainSet: { ground: 'terrain.ground', water: 'terrain.streamWater', waterfall: 'terrain.waterfall' },
+  roadSet: { layer: 'road.layer', bridge: 'road.bridge' },
+  backgroundSet: {
+    sky: 'bg.sky',
+    far: [{ slot: 'bg.mountains', y: 110, parallax: 0.25 }, { slot: 'bg.forestFar', y: 180, parallax: 0.5 }],
+    clouds: ['bg.cloud1', 'bg.cloud2', 'bg.cloud3'],
+    floatingRocks: ['bg.floatingRock1', 'bg.floatingRock2'],
+    mist: 'bg.mist',
+  },
+  buildingSkins: FROZEN_KINGDOM_SKINS,
+  treeSet: ['tree.largeA', 'tree.largeB', 'tree.mediumA', 'tree.mediumB', 'tree.small', 'tree.dead', 'tree.blossom'],
+  vegetationSet: ['veg.bushA', 'veg.bushB', 'veg.fern', 'veg.tallGrass', 'veg.flowers', 'veg.mushrooms', 'veg.moss'],
+  propSet: ['prop.barrel', 'prop.crate', 'prop.lanternPost', 'prop.signpost', 'prop.bench', 'prop.table', 'prop.cart', 'prop.firewood', 'prop.fountain', 'prop.campfire', 'prop.bannerBlue'],
+  ambientFxSet: {
+    fireflies: 'fx.fireflies', // ice glints
+    foregroundBranches: ['fore.branchLeft', 'fore.branchRight'],
+    weather: [
+      { slot: 'weather.snowFar', seconds: 26, drift: 60, opacity: 0.7 },
+      { slot: 'weather.snowNear', seconds: 14, drift: 140, opacity: 0.9 },
+    ],
+  },
+  lightingPreset: {
+    id: 'NIGHT',
+    ambient: 'rgba(8, 20, 52, 0.26)',
+    lights: [
+      { building: 'tower', at: 'auraAnchor', color: 'rgba(120, 220, 255, 0.32)', radius: 380, minStage: 1, maxStage: 2 },
+      { building: 'tower', at: 'auraAnchor', color: 'rgba(160, 120, 255, 0.34)', radius: 390, minStage: 3, maxStage: 4 },
+      { building: 'tower', at: 'auraAnchor', color: 'rgba(250, 220, 150, 0.34)', radius: 430, minStage: 5 },
+      { building: 'equipment_workshop', at: 'forgeFireAnchor', color: 'rgba(90, 170, 255, 0.46)', radius: 240, minStage: 1, flicker: true },
+      { building: 'hero_hall', at: 'windowLightAnchor', color: 'rgba(255, 196, 120, 0.30)', radius: 250, minStage: 1 },
+      { building: 'hero_hall', at: 'lanternAnchor', color: 'rgba(255, 200, 120, 0.32)', radius: 90, minStage: 1, flicker: true },
+      { building: 'skill_shrine', at: 'runeAnchor', color: 'rgba(90, 220, 250, 0.36)', radius: 240, minStage: 1 },
+      { building: 'ascension_shrine', at: 'crystalAnchor', color: 'rgba(180, 130, 255, 0.34)', radius: 210, minStage: 1 },
+      { building: 'endgame_facility', at: 'auraAnchor', color: 'rgba(210, 230, 255, 0.28)', radius: 150, minStage: 1 },
+      { building: 'expedition_dock', at: 'lanternAnchor', color: 'rgba(140, 210, 255, 0.30)', radius: 110, minStage: 1, flicker: true },
+    ],
+    decorLights: {
+      'prop.lanternPost': { color: 'rgba(255, 206, 130, 0.30)', radius: 80, dy: -84, flicker: true },
+      'prop.campfire': { color: 'rgba(90, 170, 255, 0.40)', radius: 150, dy: -12, flicker: true },
+      'magic.runeStone': { color: 'rgba(170, 120, 255, 0.25)', radius: 60, dy: -36 },
+      'magic.crystalCluster': { color: 'rgba(130, 210, 255, 0.30)', radius: 76, dy: -30 },
+      'magic.glowMushrooms': { color: 'rgba(90, 220, 240, 0.25)', radius: 50, dy: -10 },
+      'prop.fountain': { color: 'rgba(150, 210, 255, 0.18)', radius: 130, dy: -40 },
+      'tree.blossom': { color: 'rgba(140, 215, 255, 0.28)', radius: 110, dy: -140 },
+    },
+  },
+  decorFx: DEFAULT_FOREST_THEME.decorFx,
+  weatherPreset: 'SNOW',
+  bgmId: null,
+};
+
+export const ISLAND_THEMES: Record<string, IslandThemeDefinition> = { [DEFAULT_THEME_ID]: DEFAULT_FOREST_THEME, [FROZEN_KINGDOM_ID]: FROZEN_KINGDOM_THEME };
 
 /** individual skins sold / granted later (building skin overrides) — empty in Patch 1 */
 export const BUILDING_SKIN_LIBRARY: Record<string, BuildingSkin> = {};

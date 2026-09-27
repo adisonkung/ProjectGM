@@ -91,6 +91,13 @@
     } @else {
       <p class="goal done"><app-icon name="crown" [size]="13" /> ฟื้นฟูเกาะใน Patch 1 ครบแล้ว</p>
     }
+    <div class="themes" role="group" aria-label="ธีมเกาะ">
+      <small class="gm-class">ธีมเกาะ</small>
+      @for (t of themes; track t.id) {
+        <button type="button" class="gm-btn small" [class.arcane]="t.id === theme().id" [attr.aria-pressed]="t.id === theme().id" (click)="setTheme(t.id)">{{ t.name }}</button>
+      }
+      <small class="tnote">เปลี่ยนแค่หน้าตา — ไม่มีผลกับค่าพลัง รางวัล หรือสิ่งก่อสร้าง</small>
+    </div>
     <p class="hint">เลื่อนซ้าย–ขวาเพื่อสำรวจเกาะ · แตะสิ่งก่อสร้างเพื่อเข้าใช้งาน · แตะฮีโร่เพื่อดูรายละเอียดหรือตั้งเป็นฮีโร่หลัก</p>
   </aside>
 </section>
