@@ -196,10 +196,10 @@ export const STAGE4_10_SKILLS: Record<string, MonsterSkillDefinition> = {
   /** Phase 4 only — not interruptible, but breakable (Break Gauge 100) */
   forest_oblivion: {
     id: 'forest_oblivion', name: 'พงไพรสูญสิ้น', label: 'FOREST OBLIVION', type: 'ATTACK',
-    castTime: 6.75, cooldown: 12, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 100, brokenStatus: 'broken',
+    castTime: 6.0, cooldown: 12, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 150, brokenStatus: 'broken',
     target: { type: 'ALL_HEROES' },
     effects: [
-      { type: 'DAMAGE', mul: 2.1, area: 'ALL_ENEMIES', center: 'SELF' },
+      { type: 'DAMAGE', mul: 1.7, area: 'ALL_ENEMIES', center: 'SELF' },
       { type: 'APPLY_STATUS', status: 'healing_reduction', to: 'HIT', duration: 6 },
     ],
     mockFx: { color: '#ff2020', area: 'ALL_ENEMIES' },
@@ -343,7 +343,7 @@ export const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = {
         summon: [{ id: 'mist_wraith', count: 2 }],
         seal: { pulseEvery: 3, pulseAtkPct: 0.5, pulseName: 'DARK PULSE' },
       },
-      { id: 'sacrifice', label: 'พิธีบูชายัญ', hpBelow: 0.4, transition: 1, summon: [{ id: 'dark_shaman_ritual', count: 1 }] },
+      { id: 'sacrifice', label: 'พิธีบูชายัญ', hpBelow: 0.4, transition: 1, summon: [{ id: 'dark_shaman_ritual', count: 1 }], enableSkills: [{ id: 'forest_oblivion', firstDelay: 4 }] },
       {
         id: 'enrage', label: 'คลั่งสุดขีด', hpBelow: 0.15, interruptSelf: true, transition: 1,
         statuses: ['guardian_enrage'], cooldownScale: 0.7, cooldownOverride: { forest_oblivion: 12 }, enableSkills: [{ id: 'forest_oblivion', firstDelay: 2 }],

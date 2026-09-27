@@ -75,7 +75,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
   ] },
   // Stage 7 — Guardian of Twilight: first boss (Root Slam: survive · Entangling Roots: situational · Call of the Forest: interrupt)
-  { floor: 7, recommendedLevel: 8, monsterTuning: { hp: 1.3, atk: 1.05, def: 1.05 }, name: 'Guardian of Twilight', background: 'twilight-1', mode: 'eliminate', timeLimit: 150, enemies: [
+  { floor: 7, recommendedLevel: 8, monsterTuning: { hp: 1.3, atk: 1.12, def: 1.12 }, name: 'Guardian of Twilight', background: 'twilight-1', mode: 'eliminate', timeLimit: 150, enemies: [
     // lighter opening waves (final Level pass): the boss is the exam, not the attrition before it
     { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
     { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 },
@@ -86,7 +86,7 @@ export const STAGES: StageDef[] = [
     [{ enemy: 'elder_treant', r: 1, c: 1 }],
   ] },
   // Stage 8 — Into the Mist: untargetable hunters, body blocking, bleed attrition
-  { floor: 8, recommendedLevel: 8, monsterTuning: { hp: 1.1 }, name: 'Into the Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 120, enemies: [
+  { floor: 8, recommendedLevel: 8, monsterTuning: { hp: 1.25, atk: 1.15, def: 1.1 }, name: 'Into the Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 120, enemies: [
     { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     { enemy: 'corrupted_wolf', r: 1, c: 1 },
     // wolves open wounds, the wraith hunts the bleeding hero (final Level pass: wolf → bleed → wraith synergy)
@@ -96,7 +96,7 @@ export const STAGES: StageDef[] = [
       { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }],
     [{ enemy: 'corrupted_treant', r: 0, c: 0 }, { enemy: 'corrupted_treant', r: 0, c: 2 },
       { enemy: 'corrupted_wolf', r: 1, c: 0 }, { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'corrupted_wolf', r: 1, c: 2 },
-      { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }],
+      { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }, { enemy: 'mist_witch', r: 3, c: 1 }],
   ] },
   // Stage 9 — Death Mist: target-priority puzzle (Treant blocks · Shaman heals / links · Witch controls · Wolves press · Wraith hunts)
   { floor: 9, recommendedLevel: 10, monsterTuning: { hp: 1.3, atk: 1.18, def: 1.18 }, name: 'Death Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 140, enemies: [
@@ -109,9 +109,11 @@ export const STAGES: StageDef[] = [
       { enemy: 'mist_witch', r: 3, c: 0 }, { enemy: 'dark_shaman', r: 3, c: 1 }, { enemy: 'dark_shaman', r: 3, c: 2 }],
     [{ enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
       { enemy: 'mist_wraith', r: 2, c: 1 }, { enemy: 'dark_shaman', r: 3, c: 0 }, { enemy: 'mist_witch', r: 3, c: 1 }, { enemy: 'mist_witch', r: 3, c: 2 }],
+    [{ enemy: 'corrupted_treant', r: 0, c: 0 }, { enemy: 'corrupted_treant', r: 0, c: 2 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 1, c: 1 },
+      { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }, { enemy: 'dark_shaman', r: 3, c: 1 }, { enemy: 'mist_witch', r: 3, c: 0 }, { enemy: 'mist_witch', r: 3, c: 2 }],
   ] },
   // Stage 10 — Heart of the Dark Forest: the full system exam (seal + wraiths 70%, Sacrifice 40%, enrage + Forest Oblivion 15%)
-  { floor: 10, recommendedLevel: 10, monsterTuning: { hp: 1.35, atk: 1.22, def: 1.1 }, name: 'Heart of the Dark Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 210, enemies: [
+  { floor: 10, recommendedLevel: 10, monsterTuning: { hp: 1.4, atk: 1.22, def: 1.25 }, name: 'Heart of the Dark Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 210, enemies: [
     { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
     // encounter pass (claude/patch1-encounter-rebalance-f9-f10-spec.md): one Wraith — wave 1 = bleed / survival pressure
     { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'mist_wraith', r: 2, c: 1 },

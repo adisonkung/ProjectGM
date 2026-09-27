@@ -119,12 +119,17 @@ describe('Stars — rarity, development, Memory, gacha', () => {
     expect(r3.state.inventory[UNIVERSAL_MEMORY]).toBe(Math.floor(DUPLICATE_MEMORY[1] * 0.5));
   });
 
-  it('Universal Memory comes from gameplay: tower first clears (230) + Ascension first clears and repeat runs', () => {
+  it('Universal Memory is a scarce milestone currency: tower first clears (230) + Ascension first clears only — never from repeat runs', () => {
     const tower = Object.values(TOWER_REWARDS).reduce((a, t) => a + (t.firstClear.items?.find(i => i.itemId === UNIVERSAL_MEMORY)?.count ?? 0), 0);
     expect(tower).toBe(230);
     for (const id of ['ascension_1', 'ascension_2', 'ascension_3']) {
-      expect(FARM_BY_ID[id].baseRewards.items!.some(i => i.itemId === UNIVERSAL_MEMORY)).withContext(id).toBeTrue();
+      expect(FARM_BY_ID[id].baseRewards.items?.some(i => i.itemId === UNIVERSAL_MEMORY) ?? false).withContext(id).toBeFalse();
       expect(FARM_BY_ID[id].firstClearBonus!.items!.some(i => i.itemId === UNIVERSAL_MEMORY)).withContext(id).toBeTrue();
     }
+    // no repeatable source anywhere
+    for (const d of Object.values(FARM_BY_ID)) {
+      expect([...(d.baseRewards.items ?? []), ...(d.baseRewards.bonusDrops ?? []).flatMap(b => b.items ?? [])].some(i => i.itemId === UNIVERSAL_MEMORY)).withContext(d.id).toBeFalse();
+    }
+    for (const t of Object.values(TOWER_REWARDS)) expect(t.clear.items?.some(i => i.itemId === UNIVERSAL_MEMORY) ?? false).toBeFalse();
   });
 });

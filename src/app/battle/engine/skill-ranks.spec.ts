@@ -107,7 +107,7 @@ describe('Skill Upgrade — engine', () => {
     expect(syl.cd2).toBeCloseTo(11 * 0.78, 5);
   });
 
-  it('Break: R5 Shield Charge 70 + Arrow Rain R5 50 break Forest Oblivion together; one skill alone never can (cap 95)', () => {
+  it('Break (150): R5 Guardian ult 95 + Arrow Rain R5 50 is not enough — a third hit (Shield Charge) breaks it; one skill alone never can (cap 95)', () => {
     const gear = { ACCESSORY: item('trinket', 'EPIC', 'breakPower', { level: 10, affix: 'breaker' }), WEAPON: item('heavy_blade', 'EPIC', 'breakPower', { level: 10 }) };
     const b = battle([
       spec('aurel', hero('aurel', { skillRanks: { skill2: 5, ult: 5 }, gear }), 0, 1),
@@ -124,6 +124,8 @@ describe('Skill Upgrade — engine', () => {
     b.e.skills.applyEffects(tank, b.e.skills.kit(tank).ult, 'ult', tank, tank.pos);
     expect(g.casting?.breakDamage).toBe(95);
     b.e.skills.applyEffects(b.heroU('sylvie'), b.e.skills.kit(b.heroU('sylvie')).skill2, 'skill2', g, g.pos);
+    expect(g.casting?.breakDamage).toBe(145);
+    b.e.skills.applyEffects(tank, b.e.skills.kit(tank).skill2, 'skill2', g, g.pos);
     expect(b.log.concat(b.e.drainEvents()).some(ev => ev.type === 'broken')).toBeTrue();
   });
 

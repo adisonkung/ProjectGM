@@ -273,7 +273,7 @@ describe('Tactical difficulty — skill use modes & interrupt reservation', () =
     expect(b.of('cast').filter(c => c.kind === 'skill2').length).toBe(1);
   });
 
-  it('52. FOREST OBLIVION: tank 60 + Sylvie 40 are both committed (60 alone is not "done") → Break', () => {
+  it('52. FOREST OBLIVION: tank 60 + Sylvie 40 are both committed (60 alone is not "done") — with the 150 gauge a third hit (tank ult) breaks it', () => {
     const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 1, TOUGH)], [mon('fallen_forest_guardian', 1, 1)]);
     const a = b.hero('aurel'), sy = b.hero('sylvie');
     const g = b.monsters('fallen_forest_guardian')[0];
@@ -287,9 +287,12 @@ describe('Tactical difficulty — skill use modes & interrupt reservation', () =
     sy.cd2 = 0;
     g.castSkills.push({ def: MONSTER_SKILLS['forest_oblivion'], cd: 0 });
     b.cast(g, 'forest_oblivion');
-    b.until(() => b.of('broken').length > 0, 6);
+    b.until(() => (g.casting?.breakDamage ?? 0) >= 100, 6);
     const gauge = b.of('breakGauge').map(x => [x.src, x.value]);
     expect(gauge).toContain([a.id, 60]);
+    expect(g.casting!.breakDamage).toBe(100);
+    expect(b.of('broken').length).toBe(0);
+    (b.e as any).tryInterrupt(a, g, 70); // the tank's ult (Break 70)
     expect(b.of('broken').length).toBe(1);
     expect(a.cd2).toBeGreaterThan(0);
     expect(sy.cd2).toBeGreaterThan(0);

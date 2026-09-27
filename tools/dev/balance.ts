@@ -34,6 +34,9 @@ const onlyFloor = pos[2] && pos[2] !== '-' ? Number(pos[2]) : null;
 const flag = (f: string) => args.includes(f);
 const starArg = args.find(a => a.startsWith('--star='));
 const star = starArg ? Number(starArg.slice(7)) : null;
+/** --stars=5,5,4,3,3 = per-hero stars in team order (a partially developed account) */
+const starsArg = args.find(a => a.startsWith('--stars='));
+const starList = starsArg ? starsArg.slice(8).split(',').map(Number) : null;
 const tuneArg = args.find(a => a.startsWith('--tune='));
 const tune = tuneArg ? tuneArg.slice(7).split(',').map(Number) : null;
 const profileArg = args.find(a => a.startsWith('--profile='))?.slice(10);
@@ -119,7 +122,9 @@ for (let stage of floors) {
     const a = aggs[bot];
     const team = bot === 'TACTICAL' && !flag('--noform') ? tacticalFormation(heroes, state.team, stage) : state.team;
     // --star=N develops every hero to N★ (stats + star perks, the same path as the game)
-    const allies = teamToUnits(team, star == null ? heroes : heroes.map(h => ({ ...h, star })));
+    const teamUids = team.map(t => t.uid);
+    const starOf = (uid: number) => (starList ? starList[teamUids.indexOf(uid)] ?? undefined : star ?? undefined);
+    const allies = teamToUnits(team, heroes.map(h => ({ ...h, star: starOf(h.uid) ?? h.star })));
     heroSnapshot = allies.map(u => `${u.name} (${u.cls}) ${u.star ?? '?'}★ Lv${level} HP ${u.stats.hp} ATK ${u.stats.atk} DEF ${u.stats.def} AS ${u.stats.atkSpeed} R ${u.stats.range}`);
     for (let s = 1; s <= runs; s++) {
       const e = new BattleEngine({ allies, stage, enemyTemplates: ENEMIES, seed: s, autoUlt: true });
@@ -277,7 +282,7 @@ for (let stage of floors) {
 
   const n = runs;
   const [A, T] = [aggs.AUTO, aggs.TACTICAL];
-  console.log(`\n=== ${farmDef ? farmDef.id : 'F' + stage.floor} ${stage.name} · profile ${profile.id} (${profile.label}: gear ${typeof profile.gear === 'object' && profile.gear ? JSON.stringify(profile.gear) : profile.gear ?? '-'}, ranks ${profile.skillProfile ?? `${profile.ranks.skill}/${profile.ranks.skill2}/${profile.ranks.ult}`}) · ${star ?? 5}★ Lv${level} · band Lv${band?.levels.join('–')} ${band?.role ?? ''} · tuning ${JSON.stringify(stage.monsterTuning ?? {})} ===`);
+  console.log(`\n=== ${farmDef ? farmDef.id : 'F' + stage.floor} ${stage.name} · profile ${profile.id} (${profile.label}: gear ${typeof profile.gear === 'object' && profile.gear ? JSON.stringify(profile.gear) : profile.gear ?? '-'}, ranks ${profile.skillProfile ?? `${profile.ranks.skill}/${profile.ranks.skill2}/${profile.ranks.ult}`}) · ${starList ? starList.join(',') : star ?? 3}★ Lv${level} · band Lv${band?.levels.join('–')} ${band?.role ?? ''} · tuning ${JSON.stringify(stage.monsterTuning ?? {})} ===`);
   const review = monsterTuningReview(stage);
   if (review.length) console.log(`  ⚠ MECHANIC / COMPOSITION / HERO POWER REVIEW REQUIRED: ${review.join(', ')} (engine clamps to the limits)`);
   for (const bot of ['AUTO', 'TACTICAL'] as BotName[]) {

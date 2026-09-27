@@ -140,10 +140,10 @@ describe('Stage 4–10 data', () => {
     }
   });
 
-  it('extra 4 — Stages 4–10 have 3 waves; boss waves hold only the boss', () => {
+  it('extra 4 — Stages 4–10 have 3 waves (F9 has 4 — first-clear pass); boss waves hold only the boss', () => {
     for (const st of STAGES.slice(3)) {
       const w = wavesOf(st);
-      expect(w.length).withContext(`F${st.floor}`).toBe(3);
+      expect(w.length).withContext(`F${st.floor}`).toBe(st.floor === 9 ? 4 : 3);
       for (const sp of w.flatMap(x => x.spawns)) expect(MONSTERS[sp.monsterId]).withContext(sp.monsterId).toBeDefined();
     }
     expect(wavesOf(STAGES[6])[2].spawns.map(s => s.monsterId)).toEqual(['elder_treant']);
@@ -496,7 +496,9 @@ describe('Stage 4–10 bosses', () => {
     for (const w of waves(6)) expect(w.spawns.filter(sp => sp.monsterId === 'goblin_shaman').length).toBe(1);
     expect(waves(7)[0].spawns.length).toBe(4);
     expect(waves(8)[0].spawns.map(sp => sp.monsterId)).toContain('mist_wraith');
-    expect(STAGES[7].monsterTuning).toEqual({ hp: 1.1 });
+    // first-clear pass: F8 is a real wall for the D profile (TACTICAL ~80 %) — tuning + a Mist Witch in the last wave
+    expect(STAGES[7].monsterTuning).toEqual({ hp: 1.25, atk: 1.15, def: 1.1 });
+    expect(waves(8)[2].spawns.map(sp => sp.monsterId)).toContain('mist_witch');
   });
 
   it('extra 28 — phases are never skipped: a huge hit stops at the next threshold', () => {
@@ -597,7 +599,7 @@ describe('Stage 4–10 bosses', () => {
     expect((b.e as any).monsterAI.cooldownOf(g, MONSTER_SKILLS['death_root'])).toBeCloseTo(9 * 0.7, 5);
     const fo = g.castSkills.find(c => c.def.id === 'forest_oblivion')!;
     expect(fo.cd).toBeCloseTo(2, 5);
-    expect(MONSTER_SKILLS['forest_oblivion'].castTime).toBe(6.75);
+    expect(MONSTER_SKILLS['forest_oblivion'].castTime).toBe(6.0);
   });
 
   it('extra 35 — Forest Oblivion is not interruptible: an interrupt without break power is refused', () => {
@@ -610,7 +612,7 @@ describe('Stage 4–10 bosses', () => {
     expect(b.of('immune').length).toBe(1);
   });
 
-  it('extra 36 — Break Gauge: 60 + 40 fills 100 → cast cancelled, BROKEN 3 s (×1.25 damage taken, no actions), full cooldown', () => {
+  it('extra 36 — Break Gauge: 60 + 40 + 50 fills 150 (two skills are not enough) → cast cancelled, BROKEN 3 s (×1.25 damage taken, no actions), full cooldown', () => {
     const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 1, TOUGH)], [mon('fallen_forest_guardian', 1, 1)]);
     b.freeze('heroes');
     const g = b.monsters('fallen_forest_guardian')[0];
@@ -619,6 +621,8 @@ describe('Stage 4–10 bosses', () => {
     (b.e as any).tryInterrupt(b.hero('aurel'), g, 60);
     expect(g.casting!.breakDamage).toBe(60);
     (b.e as any).tryInterrupt(b.hero('sylvie'), g, 40);
+    expect(g.casting!.breakDamage).toBe(100);
+    (b.e as any).tryInterrupt(b.hero('aurel'), g, 50);
     expect(g.casting).toBeNull();
     expect(b.of('broken').length).toBe(1);
     expect(buffRemaining(g, 'broken')).toBeCloseTo(3, 1);
@@ -643,7 +647,7 @@ describe('Stage 4–10 bosses', () => {
     expect(g.casting!.breakDamage).toBe(0);
   });
 
-  it('extra 38 — Forest Oblivion lands: 210% ATK (encounter pass) on every hero + healing received −50% for 6 s', () => {
+  it('extra 38 — Forest Oblivion lands: 170% ATK (first-clear pass: harder to Break, lighter hit) on every hero + healing received −50% for 6 s', () => {
     const b = battle([H('aurel', 0, 1, TOUGH), H('lumina', 4, 1, TOUGH)], [mon('fallen_forest_guardian', 1, 1)]);
     b.freeze('heroes');
     const g = b.monsters('fallen_forest_guardian')[0];
@@ -652,7 +656,7 @@ describe('Stage 4–10 bosses', () => {
     b.until(() => b.of('skillActivated').some(s => s.skill === 'forest_oblivion'), 7);
     const calls = spy.calls.allArgs().filter(a => a[0].sourceId === 'forest_oblivion');
     expect(calls.length).toBe(2);
-    expect(calls[0][0].multiplier).toBe(2.1);
+    expect(calls[0][0].multiplier).toBe(1.7);
     const lum = b.hero('lumina');
     expect(buffRemaining(lum, 'healing_reduction')).toBeGreaterThan(5.5);
     lum.hp = 100;
@@ -679,7 +683,7 @@ describe('Stage 4–10 bosses', () => {
     a.cd2 = 0;
     const pick = b.e.skills.chooseInterrupt(a, g);
     expect(pick?.target).toBe(g);
-    expect((MONSTER_SKILLS['forest_oblivion'] as MonsterSkillDefinition).breakRequired).toBe(100);
+    expect((MONSTER_SKILLS['forest_oblivion'] as MonsterSkillDefinition).breakRequired).toBe(150);
   });
 });
 
@@ -1058,11 +1062,11 @@ describe('Stage 4–10 required tests', () => {
   it('28. Forest Oblivion displays the Break Gauge', () => {
     const { b, g } = oblivion();
     const start = b.of('castStart').find(c => c.src === g.id)!;
-    expect(start.breakRequired).toBe(100);
+    expect(start.breakRequired).toBe(150);
     expect(start.interruptible).toBeFalse();
     (b.e as any).tryInterrupt(b.hero('sylvie'), g, 40);
     const ev = b.of('breakGauge').at(-1)!;
-    expect([ev.value, ev.max]).toEqual([40, 100]);
+    expect([ev.value, ev.max]).toEqual([40, 150]);
     expect(g.casting!.breakDamage).toBe(40);
   });
 
@@ -1083,10 +1087,12 @@ describe('Stage 4–10 required tests', () => {
     expect(b.of('breakGauge')[0].value).toBe(60);
   });
 
-  it('30. Break >= 100 cancels Forest Oblivion', () => {
+  it('30. Break >= 150 cancels Forest Oblivion (70 + 40 is not enough)', () => {
     const { b, g } = oblivion();
     (b.e as any).tryInterrupt(b.hero('aurel'), g, 70);
     (b.e as any).tryInterrupt(b.hero('sylvie'), g, 40);
+    expect(g.casting).not.toBeNull();
+    (b.e as any).tryInterrupt(b.hero('sylvie'), g, 60);
     expect(g.casting).toBeNull();
     expect(b.of('broken').length).toBe(1);
     b.run(7);
@@ -1095,7 +1101,7 @@ describe('Stage 4–10 required tests', () => {
 
   it('31. Broken state lasts exactly 3 sec', () => {
     const { b, g } = oblivion();
-    (b.e as any).tryInterrupt(b.hero('aurel'), g, 100);
+    (b.e as any).tryInterrupt(b.hero('aurel'), g, 150);
     const t0 = b.e.time;
     b.until(() => !hasFlag(g, 'broken'), 5);
     expect(b.e.time - t0).toBeCloseTo(3, 1);
@@ -1105,7 +1111,7 @@ describe('Stage 4–10 required tests', () => {
     const { b, g } = oblivion();
     const a = b.hero('aurel');
     const before = DamageResolver.resolve({ attacker: a, target: g, multiplier: 1, damageType: 'PHYSICAL', sourceId: 'x' }).amount;
-    (b.e as any).tryInterrupt(a, g, 100);
+    (b.e as any).tryInterrupt(a, g, 150);
     const during = DamageResolver.resolve({ attacker: a, target: g, multiplier: 1, damageType: 'PHYSICAL', sourceId: 'x' }).amount;
     expect(during / before).toBeCloseTo(1.25, 1);
   });
@@ -1115,7 +1121,7 @@ describe('Stage 4–10 required tests', () => {
     b.until(() => b.of('skillActivated').some(s => s.skill === 'forest_oblivion'), 7);
     const t = b.of('skillActivated').find(s => s.skill === 'forest_oblivion')!.t;
     for (const h of b.e.units.filter(u => u.side === 'ally')) {
-      const expected = DamageResolver.resolve({ attacker: g, target: h, multiplier: 2.1, damageType: 'PHYSICAL', sourceId: 'x' }).amount;
+      const expected = DamageResolver.resolve({ attacker: g, target: h, multiplier: 1.7, damageType: 'PHYSICAL', sourceId: 'x' }).amount;
       const got = b.of('damage').find(d => d.dst === h.id && Math.abs(d.t - t) < 1e-6)!;
       expect(got.amount + got.blocked).withContext(h.name).toBe(expected);
     }

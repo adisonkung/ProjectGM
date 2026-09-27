@@ -107,12 +107,12 @@ describe('Encounter pass — Floor 10', () => {
     expect(f10.monsterTuning!.atk).toBe(1.22);
   });
 
-  it('Forest Oblivion: Break 100 kept, cast 6.75 s, 210 % ATK, healing received −50 % 6 s kept', () => {
+  it('Forest Oblivion (first-clear pass): Break 150 — two skills are not enough, cast 6.0 s, 170 % ATK, healing received −50 % 6 s kept', () => {
     const d = MONSTER_SKILLS['forest_oblivion'] as MonsterSkillDefinition;
-    expect(d.breakRequired).toBe(100);
+    expect(d.breakRequired).toBe(150);
     expect(d.interruptible).toBeFalse();
-    expect(d.castTime).toBe(6.75);
-    expect((d.effects[0] as { mul: number }).mul).toBe(2.1);
+    expect(d.castTime).toBe(6.0);
+    expect((d.effects[0] as { mul: number }).mul).toBe(1.7);
     expect(d.effects.some(e => e.type === 'APPLY_STATUS' && e.status === 'healing_reduction' && e.duration === 6)).toBeTrue();
     expect(STATUS_EFFECTS['healing_reduction'].modifiers.healingReceivedMultiplier).toBe(0.5);
   });

@@ -335,7 +335,8 @@ const SURVIVAL_TUNING: [number, number, number, [number, number]][] = [
 
 const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]): FarmDungeonDefinition => ({
   id: `ascension_${n}`, type: 'ASCENSION', name: `Ascension ${['I', 'II', 'III'][n - 1]}`, unlockFloor, recommendedLevel: levels,
-  baseRewards: { items: [{ itemId: `bt_stone_${n}`, count: 1 }, { itemId: 'universal_memory', count: 4 + n }], bonusDrops: [{ chance: 0.2, items: [{ itemId: `bt_stone_${n}`, count: 1 }] }] },
+  baseRewards: { items: [{ itemId: `bt_stone_${n}`, count: 1 }], bonusDrops: [{ chance: 0.2, items: [{ itemId: `bt_stone_${n}`, count: 1 }] }] },
+  // Universal Memory = scarce milestone currency: first clears only, never from repeat runs
   firstClearBonus: { items: [{ itemId: `bt_stone_${n}`, count: 1 }, { itemId: 'universal_memory', count: 20 + 10 * n }] },
   dailyBonusPool: 'ASCENSION', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: ASCENSION_TARGET_TIME[n - 1],
   stage: ASCENSION_DUELS[n - 1],
