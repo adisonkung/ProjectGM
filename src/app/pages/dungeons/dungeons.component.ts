@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { DAILY_BONUS, FARM_DUNGEONS, ITEMS } from '../../core/data/economy';
 import { HuntTarget } from '../../core/models/equipment';
@@ -53,7 +53,7 @@ export const DUNGEON_TYPES: DungeonType[] = [
 /** Farm dungeons menu: one tab per dungeon type, each with its tiers (I–V) */
 @Component({
   selector: 'app-dungeons',
-  imports: [RouterLink, RouterLinkActive, IconComponent],
+  imports: [RouterLink, IconComponent],
   templateUrl: './dungeons.component.html',
   styleUrl: './dungeons.component.scss',
 })
@@ -67,6 +67,10 @@ export class DungeonsComponent {
 
   readonly cleared = computed(() => this.save.state().cleared);
   readonly farm = computed(() => this.save.state().farm);
+  /** first-clear bonus already taken for this dungeon (no record yet = not taken) */
+  firstClearDone(id: string): boolean {
+    return !!(this.farm() as Partial<ReturnType<typeof this.farm>>)[id]?.firstClearDone;
+  }
   readonly tiers = computed(() => FARM_DUNGEONS.filter(d => d.dailyBonusPool === this.type().pool));
   readonly unlockOf = (t: DungeonType) => Math.min(...FARM_DUNGEONS.filter(d => d.dailyBonusPool === t.pool).map(d => d.unlockFloor));
   readonly bonus = computed(() => {

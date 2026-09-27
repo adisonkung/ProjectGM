@@ -56,7 +56,7 @@
             @if (d.baseRewards.gold) { <em>ทอง {{ d.baseRewards.gold }}</em> }
             @if (d.baseRewards.bonusDrops?.length) { <em>20% +1</em> }
             @if (d.equipmentDrops) { <em>อุปกรณ์ {{ pct(d.equipmentDrops.itemChance) }}%</em> }
-            @if (d.firstClearBonus && !farm()[d.id]?.firstClearDone) { <em class="first">ครั้งแรก: {{ d.firstClearItem ? 'อุปกรณ์ ' + d.firstClearItem : '+1 หิน' }}</em> }
+            @if (d.firstClearBonus && !firstClearDone(d.id)) { <em class="first">ครั้งแรก: {{ d.firstClearItem ? 'อุปกรณ์ ' + d.firstClearItem : '+1 หิน' }}</em> }
           </span>
         </div>
         <div class="side">

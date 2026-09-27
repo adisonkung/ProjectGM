@@ -48,6 +48,10 @@ export class HeroDetailComponent {
   readonly message = signal<{ text: string; ok: boolean } | null>(null);
 
   readonly inventory = computed(() => this.save.state().inventory);
+  /** owned count of an item (missing = 0) */
+  have(id: string): number {
+    return (this.inventory() as Partial<Record<string, number>>)[id] ?? 0;
+  }
   readonly gold = computed(() => this.save.state().gold);
   readonly inTeam = computed(() => this.save.state().team.some(t => t.uid === this.uid()));
   readonly training = computed(() => this.save.state().trainingSlots.includes(this.uid()));

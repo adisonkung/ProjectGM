@@ -136,7 +136,7 @@
                 @if (v.cost; as c) {
                   <p class="cost">
                     @for (m of c.requiredMaterials; track m.itemId) {
-                      <span [class.miss]="(inventory()[m.itemId] ?? 0) < m.count"><app-icon name="book" [size]="12" /> {{ itemName(m.itemId) }} {{ inventory()[m.itemId] ?? 0 }}/{{ m.count }}</span>
+                      <span [class.miss]="have(m.itemId) < m.count"><app-icon name="book" [size]="12" /> {{ itemName(m.itemId) }} {{ have(m.itemId) }}/{{ m.count }}</span>
                     }
                     <span [class.miss]="gold() < c.requiredGold"><app-icon name="coin" [size]="12" /> {{ c.requiredGold }}</span>
                     <span [class.miss]="h.level < c.requiredHeroLevel">Lv{{ c.requiredHeroLevel }}+</span>
@@ -157,7 +157,7 @@
       <div class="convert">
         <small>แลก Skill Tome (ไม่คุ้ม — ฟาร์ม Skill Trial ดีกว่า):</small>
         @for (c of conversions; track c.from) {
-          <button type="button" class="gm-btn small ghost" [disabled]="(inventory()[c.from] ?? 0) < c.ratio" (click)="convert(c.from)">{{ c.ratio }} {{ itemName(c.from) }} → 1 {{ itemName(c.to) }}</button>
+          <button type="button" class="gm-btn small ghost" [disabled]="have(c.from) < c.ratio" (click)="convert(c.from)">{{ c.ratio }} {{ itemName(c.from) }} → 1 {{ itemName(c.to) }}</button>
         }
       </div>
     </section>
