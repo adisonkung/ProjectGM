@@ -1716,13 +1716,6 @@
    "layer": "mid"
   },
   {
-   "slot": "fore.grass",
-   "x": 140,
-   "y": 1002,
-   "layer": "fore",
-   "sway": true
-  },
-  {
    "slot": "fore.grassB",
    "x": 420,
    "y": 1010,
@@ -1761,13 +1754,6 @@
    "slot": "fore.grass",
    "x": 1960,
    "y": 1010,
-   "layer": "fore",
-   "sway": true
-  },
-  {
-   "slot": "fore.grassB",
-   "x": 2210,
-   "y": 968,
    "layer": "fore",
    "sway": true
   }

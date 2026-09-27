@@ -110,6 +110,16 @@ describe('Home Island — layout (shared by every player)', () => {
     }
   });
 
+  it('foreground grass hangs on the island lip — never floating in the air past the island edge', () => {
+    const bottomAt = (x: number) => { let b = -1; for (let y = 0; y < ISLAND_WORLD.h; y += 2) if (pointInPoly({ x, y }, GROUND_POLY)) b = y; return b; };
+    const grass = ISLAND_DECOR.filter(d => d.slot.startsWith('fore.grass'));
+    expect(grass.length).toBeGreaterThan(0);
+    for (const d of grass) {
+      const half = (DEFAULT_FOREST_ASSETS[d.slot].w * 3) / 2;
+      for (const x of [d.x - half, d.x, d.x + half]) expect(d.y - bottomAt(x)).withContext(`${d.slot} @${d.x} x=${x}`).toBeLessThan(40);
+    }
+  });
+
   it('fixed plots: one building per plot, the tower in the tower plot, 8 functional plots + tower', () => {
     expect(new Set(ISLAND_BUILDINGS.map(b => b.plotId)).size).toBe(ISLAND_BUILDINGS.length);
     expect(BUILDING_BY_ID['tower'].plotId).toBe('PLOT_TOWER');
