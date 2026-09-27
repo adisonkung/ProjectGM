@@ -4,7 +4,7 @@ import { BUILDING_BY_ID, ISLAND_BUILDINGS, ISLAND_STAGES, MAX_EXTRA_ROAMERS } fr
 import { HERO_BY_ID } from '../data/heroes';
 import { GameState, TeamSlot } from '../models/game-state';
 import { OwnedHero } from '../models/hero';
-import { IslandBuildingDefinition, IslandBuildingState, IslandEvent, IslandVisitView, PlayerIsland } from '../models/island';
+import { BuildingAction, IslandBuildingDefinition, IslandBuildingState, IslandEvent, IslandVisitView, PlayerIsland } from '../models/island';
 
 /**
  * Home Island rules — pure functions over the save. Everything visual is derived from `cleared` (tower floors) via
@@ -12,6 +12,8 @@ import { IslandBuildingDefinition, IslandBuildingState, IslandEvent, IslandVisit
  */
 
 export const unlockFloorOf = (b: IslandBuildingDefinition) => (b.unlockRequirement.type === 'TOWER_FLOOR' ? b.unlockRequirement.floor : 0);
+/** floor that opens one building action's feature (see `BuildingAction.unlockFloor`) */
+export const actionUnlockFloor = (b: IslandBuildingDefinition, a: BuildingAction) => a.unlockFloor ?? unlockFloorOf(b);
 export const isBuildingUnlocked = (b: IslandBuildingDefinition, cleared: number) => cleared >= unlockFloorOf(b);
 
 /** highest visual stage whose floor threshold is met (stage 0 = ruin / sealed / inactive) */

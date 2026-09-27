@@ -6,7 +6,7 @@ import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_NAME } from '../../core/data/classes';
 import { STAGES } from '../../core/data/stages';
 import { IslandBuildingState, IslandEvent, IslandThemeDefinition } from '../../core/models/island';
-import { daySeed, islandStageName, pickRoamers, roamerCount, unlockFloorOf } from '../../core/rules/island';
+import { actionUnlockFloor, daySeed, islandStageName, pickRoamers, roamerCount, unlockFloorOf } from '../../core/rules/island';
 import { IslandService } from '../../core/services/island.service';
 import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
@@ -130,7 +130,10 @@ export class IslandComponent implements OnInit, OnDestroy {
     const st = this.display()[id];
     const stage = def.visualStages.find(s => s.stage === st.visualStage) ?? def.visualStages[0];
     const next = def.visualStages.find(s => s.stage > st.visualStage);
-    return { def, st, stageLabel: stage.label, unlockFloor: unlockFloorOf(def), next };
+    const cleared = this.cleared();
+    // the island is the hub: a feature opens on its own floor, even while the building is still a ruin
+    const actions = def.actions.map(a => ({ ...a, floor: actionUnlockFloor(def, a), open: cleared >= actionUnlockFloor(def, a) }));
+    return { def, st, stageLabel: stage.label, unlockFloor: unlockFloorOf(def), next, actions, anyOpen: actions.some(a => a.open) };
   });
   readonly heroSheet = computed(() => {
     const uid = this.selectedHero();
@@ -146,6 +149,11 @@ export class IslandComponent implements OnInit, OnDestroy {
     return ISLAND_BUILDINGS.filter(b => unlockFloorOf(b) > c).sort((a, b) => unlockFloorOf(a) - unlockFloorOf(b))[0] ?? null;
   });
   readonly unlockFloorOf = unlockFloorOf;
+  /** ruins whose feature already opened (e.g. Training I at F0 while the training yard is rebuilt at F3) */
+  readonly usableRuins = computed(() => {
+    const c = this.cleared(), d = this.display();
+    return ISLAND_BUILDINGS.filter(b => !b.future && !d[b.id]?.isUnlocked && b.actions.some(a => c >= actionUnlockFloor(b, a))).map(b => b.id);
+  });
   readonly nextFloor = computed(() => Math.min(this.cleared() + 1, this.totalFloors));
   readonly readyCount = computed(() => this.save.state().heroes.filter(h => {
     const p = this.roster.progress(h);

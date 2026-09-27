@@ -112,6 +112,12 @@ export interface BuildingAction {
   route: string;
   query?: Record<string, string>;
   icon: string;
+  /**
+   * tower floor that opens the FEATURE (not the building's look). The island is the hub for these pages (the main
+   * menu no longer lists them), so a feature that opens before its building is rebuilt stays usable from the ruin.
+   * Absent = the building's unlock floor.
+   */
+  unlockFloor?: number;
 }
 
 export interface IslandBuildingDefinition {

@@ -39,7 +39,7 @@ app-island-scene { position: absolute; inset: 0; }
   header { display: grid; gap: 2px; padding-right: 26px; }
   h2 { margin: 0; font: 800 20px var(--title); color: var(--gold-hi); .lv { font: 700 12px var(--title); color: var(--arcane-hi); margin-left: 6px; } }
   p { margin: 0; font-size: 13px; color: var(--text); }
-  .lock { display: flex; align-items: center; gap: 6px; color: #ffb0a8; font-weight: 600; }
+  .lock { display: flex; align-items: center; gap: 6px; color: #ffb0a8; font-weight: 600; &.ruin { color: #e8cf94; font-weight: 500; } }
   .acts { display: flex; flex-wrap: wrap; gap: 6px; }
   .next { color: var(--muted); font-size: 12px; }
   .x { position: absolute; top: 8px; right: 10px; border: 0; background: none; color: var(--muted); font-size: 16px; padding: 4px; } }

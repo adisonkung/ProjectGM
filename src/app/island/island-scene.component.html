@@ -64,9 +64,10 @@
       @for (b of draw().hits; track b.id) {
         <button type="button" class="hit" [class.sel]="selected() === b.id" [attr.aria-label]="b.name + (b.locked ? ' (ล็อก)' : '')"
                 [style.left.px]="b.hit.x" [style.top.px]="b.hit.y" [style.width.px]="b.hit.w" [style.height.px]="b.hit.h" (click)="tapBuilding(b.id)"></button>
-        <div class="plate" [class.locked]="b.locked" [style.left.px]="b.plate.x" [style.top.px]="b.plate.y">
+        <div class="plate" [class.locked]="b.locked && !usable().includes(b.id)" [style.left.px]="b.plate.x" [style.top.px]="b.plate.y">
           <b>{{ b.name }}</b>
-          @if (b.locked) { <small>🔒 ชั้น {{ b.requirement }}</small> }
+          @if (b.locked && usable().includes(b.id)) { <small class="open">✦ ใช้งานได้</small> }
+          @else if (b.locked) { <small>🔒 ชั้น {{ b.requirement }}</small> }
           @else if (b.future) { <small class="soon">เร็ว ๆ นี้</small> }
           @else if (b.id !== 'tower' && b.level) { <small class="lv">Lv {{ b.level }}</small> }
         </div>

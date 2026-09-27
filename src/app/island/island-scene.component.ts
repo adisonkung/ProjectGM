@@ -26,6 +26,8 @@ import { buildingDraw, decorDraw, lightsDraw, place, SpriteVM } from './island-v
 export class IslandSceneComponent implements AfterViewInit, OnDestroy {
   readonly theme = input.required<IslandThemeDefinition>();
   readonly buildings = input.required<Record<string, IslandBuildingState>>();
+  /** ruins whose feature is already open (tap works; the plate says so instead of a lock) */
+  readonly usable = input<string[]>([]);
   readonly skinOverrides = input<Record<string, string>>({});
   readonly heroes = input<IslandHeroView[]>([]);
   /** camera focus (event presentation) — null = free pan */

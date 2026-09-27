@@ -1,58 +1,124 @@
-.app { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 12px 64px; }
-
-.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 0; }
-.crest { width: 44px; height: 44px; flex: none; filter: drop-shadow(0 0 10px #9b6bff55) drop-shadow(0 2px 4px #000); }
-.word { display: flex; flex-direction: column; line-height: 1; min-width: 0;
-  b { font: 800 21px/1 var(--title); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
-    background: var(--foil); -webkit-background-clip: text; background-clip: text; color: transparent;
-    filter: drop-shadow(0 1px 0 #0009); }
-  small { margin-top: 5px; font: 600 10px var(--title); letter-spacing: 0.42em; text-transform: uppercase; color: var(--arcane-hi); opacity: 0.8; }
-}
-.res { display: flex; gap: 8px; flex: none; }
-.pill { display: flex; align-items: center; gap: 7px; padding: 4px 12px 4px 8px; border-radius: 999px;
-  background: linear-gradient(180deg, #1d1731, #0f0c19); border: 1px solid #d9b46455; box-shadow: inset 0 1px 0 #ffffff12, 0 2px 8px #0008;
-  font: 700 14px var(--title); font-variant-numeric: tabular-nums; color: var(--gold-hi); }
-.acct { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--muted);
-  background: linear-gradient(180deg, #1d1731, #0f0c19); border: 1px solid var(--line); transition: color .15s, border-color .15s;
-  &:hover, &.active { color: var(--gold-hi); border-color: #d9b46488; } }
+// ---------------------------------------------------------------- shell: one command bar (desktop) · top bar + bottom dock (mobile)
+.app { max-width: 1080px; margin: 0 auto; padding-inline: 16px; padding-block: 12px 64px; }
 .app.bare { padding-block: 12px; }
-.gem { color: #7fe0f0; filter: drop-shadow(0 0 4px #5ec8e0aa); }
-.coin { color: var(--gold); filter: drop-shadow(0 0 4px #d9b464aa); }
+main { margin-top: 18px; }
+.app.bare main { margin-top: 0; }
 
-.tabs {
-  position: relative; display: flex; gap: 2px; margin-block: 14px 20px; padding: 5px;
-  border-radius: 14px; background: linear-gradient(180deg, #17122a, #0d0a16); border: 1px solid var(--line);
-  box-shadow: inset 0 0 0 1px #d9b46414, 0 8px 24px #0009;
-  overflow-x: auto; scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
-  &::before { content: ''; position: absolute; left: 12%; right: 12%; top: -1px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.bar {
+  position: sticky; top: 8px; z-index: 40;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px;
+  padding: 7px 10px 7px 8px; border-radius: 18px;
+  background:
+    linear-gradient(180deg, #ffffff0d, transparent 40%),
+    radial-gradient(ellipse 60% 120% at 50% 0%, #6b3fd62e, transparent 70%),
+    linear-gradient(180deg, #1a1430f2, #0c0916f2);
+  border: 1px solid #d9b46438;
+  box-shadow: inset 0 1px 0 #fff1c21f, inset 0 0 0 1px #0008, 0 14px 34px #000c, 0 0 40px #6b3fd61a;
+  backdrop-filter: blur(10px);
+  // gilded rim + corner jewels
+  &::before { content: ''; position: absolute; left: 18%; right: 18%; top: -1px; height: 1px; pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--gold-hi), transparent); box-shadow: 0 0 10px var(--gold); }
+  &::after { content: ''; position: absolute; inset: 4px; border-radius: 14px; pointer-events: none;
+    border: 1px solid transparent;
+    background: linear-gradient(90deg, #d9b46455, transparent 18%, transparent 82%, #d9b46455) border-box;
+    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 }
-.tabs a {
-  flex: 1 0 auto; min-width: 66px; display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 7px 8px 6px; border-radius: 10px; text-decoration: none; color: var(--muted);
-  font: 600 12.5px var(--body); letter-spacing: 0.02em; position: relative; transition: color 0.15s, background 0.15s;
-  app-icon { opacity: 0.75; transition: opacity 0.15s, filter 0.15s; }
-  &:hover { color: var(--text); app-icon { opacity: 1; } }
-  &.dev { color: #7d7394; }
-  &.active {
+
+// ---------------------------------------------------------------- brand
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; text-decoration: none; justify-self: start; }
+.crest-wrap { position: relative; flex: none; display: grid; place-items: center; width: 46px; height: 46px;
+  &::before { content: ''; position: absolute; inset: 2px; border-radius: 50%;
+    background: radial-gradient(circle, #9b6bff55, transparent 68%); animation: breathe 5s ease-in-out infinite; } }
+.crest { position: relative; width: 42px; height: 42px; filter: drop-shadow(0 2px 3px #000) drop-shadow(0 0 8px #9b6bff66); transition: transform .3s; }
+.brand:hover .crest { transform: translateY(-1px) scale(1.04); }
+.word { display: flex; flex-direction: column; min-width: 0; line-height: 1;
+  b { font: 800 19px/1 var(--title); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
+    background: var(--foil); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 0 #000a); }
+  small { margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font: 600 11.5px/1.2 var(--body); letter-spacing: .06em; color: var(--arcane-hi); opacity: .9; }
+}
+@keyframes breathe { 50% { opacity: .45; transform: scale(.9); } }
+
+// ---------------------------------------------------------------- main menu
+.menu { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: #07050dcc; border: 1px solid #2c2442;
+  box-shadow: inset 0 2px 6px #000c; }
+.menu a {
+  position: relative; display: flex; align-items: center; gap: 8px; padding: 9px 16px 9px 12px; border-radius: 10px;
+  text-decoration: none; color: #a79bbf; font: 600 14px var(--body); letter-spacing: .02em; white-space: nowrap;
+  transition: color .18s, background .18s, box-shadow .18s;
+  .glyph { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #ffffff08;
+    border: 1px solid #ffffff10; transition: all .18s; app-icon { opacity: .8; } }
+  &:hover { color: var(--text); .glyph { border-color: #d9b46455; app-icon { opacity: 1; } } }
+  &.on {
     color: var(--gold-hi);
-    background: radial-gradient(ellipse 90% 90% at 50% 100%, #9b6bff33, transparent 70%), linear-gradient(180deg, #2a2146, #1a1430);
-    box-shadow: inset 0 0 0 1px #d9b46440;
-    app-icon { opacity: 1; filter: drop-shadow(0 0 6px #d9b464aa); }
-    &::after { content: ''; position: absolute; left: 22%; right: 22%; bottom: 0; height: 2px; border-radius: 2px;
-      background: linear-gradient(90deg, transparent, var(--gold-hi), transparent); box-shadow: 0 0 8px var(--gold); }
+    background: radial-gradient(ellipse 100% 120% at 50% 110%, #9b6bff3d, transparent 70%), linear-gradient(180deg, #2b2148, #17112a);
+    box-shadow: inset 0 0 0 1px #d9b4644d, 0 4px 14px #000a;
+    .glyph { color: #1a1030; border-color: #fff1c2aa; background: linear-gradient(160deg, #fff1c2, #d9b464 55%, #9a6f2c);
+      box-shadow: 0 0 12px #d9b46488; app-icon { opacity: 1; } }
+    // jewel under the active tab
+    &::after { content: ''; position: absolute; left: 50%; bottom: -5px; width: 8px; height: 8px; transform: translateX(-50%) rotate(45deg);
+      background: linear-gradient(135deg, #fff1c2, #d9b464); box-shadow: 0 0 10px var(--gold); border: 1px solid #120d20; }
   }
 }
 
-@media (max-width: 560px) {
-  .word small { display: none; }
-  .word b { font-size: 16px; letter-spacing: 0.08em; }
-  .crest { width: 36px; height: 36px; }
-  .pill { font-size: 13px; padding: 3px 10px 3px 7px; }
-  .tabs a { min-width: 62px; font-size: 11.5px; }
+// ---------------------------------------------------------------- purse + account
+.purse { display: flex; align-items: center; gap: 8px; justify-self: end; min-width: 0; }
+.treasury { display: flex; align-items: center; gap: 10px; padding: 6px 14px 6px 10px; border-radius: 999px;
+  background: linear-gradient(180deg, #1d1731, #0d0a17); border: 1px solid #d9b46466;
+  box-shadow: inset 0 1px 0 #fff1c224, inset 0 -6px 12px #0006, 0 2px 10px #0009; }
+.coin-row { display: flex; align-items: center; gap: 6px;
+  b { font: 700 14px var(--title); font-variant-numeric: tabular-nums; color: var(--gold-hi); letter-spacing: .02em; } }
+.sep { width: 1px; height: 16px; background: linear-gradient(180deg, transparent, #d9b46488, transparent); }
+.gem { color: #7fe0f0; filter: drop-shadow(0 0 5px #5ec8e0bb); }
+.gold { color: var(--gold); filter: drop-shadow(0 0 5px #d9b464bb); }
+.acct { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: #b7abd0;
+  background: radial-gradient(circle at 50% 30%, #2a2146, #120d20); border: 1px solid #d9b46455;
+  box-shadow: inset 0 1px 0 #fff1c21a, 0 2px 8px #000a; transition: color .18s, box-shadow .18s, transform .4s;
+  &:hover { color: var(--gold-hi); transform: rotate(45deg); }
+  &.on { color: var(--gold-hi); box-shadow: 0 0 0 1px var(--gold), 0 0 14px #d9b46466; } }
+
+// ---------------------------------------------------------------- medium: icon-only menu
+@media (max-width: 980px) {
+  .menu a { padding: 7px; .lbl { display: none; } }
 }
-@media (max-width: 420px) {
+
+// ---------------------------------------------------------------- mobile: bottom dock
+@media (max-width: 720px) {
+  .app { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  // no backdrop-filter here: it would make the fixed dock position against the bar instead of the screen
+  .bar { grid-template-columns: minmax(0, 1fr) auto; top: 6px; padding: 5px 6px 5px 5px; border-radius: 16px; backdrop-filter: none; }
+  .crest-wrap { width: 38px; height: 38px; } .crest { width: 34px; height: 34px; }
+  // phone: the island's own name is the title
+  .word b { display: none; }
+  .word small { margin: 0; font: 700 15px/1.2 var(--title); letter-spacing: .03em; color: var(--gold-hi); opacity: 1; text-shadow: 0 0 12px #9b6bff55; }
+  .treasury { gap: 7px; padding: 5px 10px 5px 8px; }
+  .coin-row b { font-size: 12.5px; }
+  .acct { width: 34px; height: 34px; }
+
+  .menu {
+    position: fixed; z-index: 60; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom));
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 6px; border-radius: 20px;
+    background: linear-gradient(180deg, #1c1532f5, #0b0914f8); border: 1px solid #d9b46444;
+    box-shadow: inset 0 1px 0 #fff1c21c, 0 -6px 30px #000d, 0 0 30px #6b3fd622; backdrop-filter: blur(12px);
+    &::before { content: ''; position: absolute; left: 22%; right: 22%; top: -1px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-hi), transparent); }
+  }
+  .menu a { flex-direction: column; justify-content: center; gap: 3px; padding: 6px 2px 5px; font-size: 11px;
+    .lbl { display: block; }
+    .glyph { width: 34px; height: 30px; }
+    &.on { background: radial-gradient(ellipse 90% 100% at 50% 100%, #9b6bff33, transparent 72%); box-shadow: none;
+      .glyph { transform: translateY(-3px); }
+      &::after { bottom: 1px; width: 6px; height: 6px; } }
+  }
+}
+@media (max-width: 720px) {
+  .app.fight { padding-bottom: 24px; }
+  .app.fight .menu { display: none; }
+}
+@media (max-width: 380px) {
   .word { display: none; }
-  .res { gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .crest-wrap::before { animation: none; }
+  .acct:hover { transform: none; }
 }

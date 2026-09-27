@@ -462,10 +462,12 @@ describe('Home Island — page', () => {
     return { f, el: f.nativeElement as HTMLElement, save, isl: TestBed.inject(IslandService) };
   }
 
-  it('draws every plot, the main hero and the extra roamers; locked plots show their requirement', async () => {
+  it('draws every plot, the main hero and the extra roamers; locked plots show their requirement, ruins whose feature is open say so', async () => {
     const { f, el } = await mount(0);
     expect(el.querySelectorAll('button.hit').length).toBe(ISLAND_BUILDINGS.length);
-    expect(el.querySelectorAll('.plate.locked').length).toBe(ISLAND_BUILDINGS.length - 1);
+    // F0: training yard (Training I), hall, workshop (armory/forge), skill shrine (skills), board (team/lab) are usable ruins
+    expect(el.querySelectorAll('.plate .open').length).toBe(5);
+    expect(el.querySelectorAll('.plate.locked').length).toBe(3); // ascension shrine (F5) + the two future buildings
     expect(el.querySelectorAll('app-island-hero').length).toBe(1 + roamerCount(0, 10));
     expect(el.querySelector('img[src*="tower_base_sealed"]')).not.toBeNull();
     f.componentInstance.tapBuilding('equipment_workshop');

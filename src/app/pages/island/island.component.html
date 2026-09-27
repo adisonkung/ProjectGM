@@ -1,6 +1,6 @@
 <section class="island">
   <div class="stage">
-    <app-island-scene [theme]="theme()" [buildings]="display()" [skinOverrides]="island().buildingSkinOverrides ?? {}" [heroes]="heroViews()"
+    <app-island-scene [theme]="theme()" [buildings]="display()" [usable]="usableRuins()" [skinOverrides]="island().buildingSkinOverrides ?? {}" [heroes]="heroViews()"
                       [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()"
                       (buildingTap)="tapBuilding($event)" (heroTap)="tapHero($event)" />
 
@@ -44,20 +44,27 @@
       <div class="sheet" role="dialog" [attr.aria-label]="b.def.name">
         <button type="button" class="x" (click)="closeSheets()" aria-label="ปิด">✕</button>
         <header>
-          <small class="gm-class">{{ b.st.isUnlocked ? b.stageLabel : 'ยังไม่เปิด' }}</small>
+          <small class="gm-class">{{ b.st.isUnlocked || b.anyOpen ? b.stageLabel : 'ยังไม่เปิด' }}</small>
           <h2>{{ b.def.name }} @if (b.st.isUnlocked && b.st.progressionLevel && !b.def.future) { <span class="lv">Lv {{ b.st.progressionLevel }}</span> }</h2>
           <p>{{ b.def.description }}</p>
         </header>
-        @if (!b.st.isUnlocked) {
-          <p class="lock"><app-icon name="lock" [size]="14" /> ปลดล็อก: ผ่านหอคอยชั้น {{ b.unlockFloor }}</p>
-        } @else if (b.def.future) {
-          <p class="lock"><app-icon name="star" [size]="14" /> จะเปิดใช้งานในแพตช์ถัดไป</p>
+        @if (b.def.future) {
+          <p class="lock"><app-icon name="star" [size]="14" /> {{ b.st.isUnlocked ? 'จะเปิดใช้งานในแพตช์ถัดไป' : 'ปลดล็อก: ผ่านหอคอยชั้น ' + b.unlockFloor }}</p>
         } @else {
-          <div class="acts">
-            @for (a of b.def.actions; track a.label) {
-              <button type="button" class="gm-btn" [class.primary]="$first" (click)="go(a.route, a.query)"><app-icon [name]="a.icon" [size]="15" /> {{ a.label }}</button>
-            }
-          </div>
+          @if (!b.st.isUnlocked) {
+            <p class="lock" [class.ruin]="b.anyOpen"><app-icon [name]="b.anyOpen ? 'edit' : 'lock'" [size]="14" /> {{ b.anyOpen ? 'ยังเป็นซากแต่ใช้งานได้ — ฟื้นฟูเมื่อผ่านหอคอยชั้น ' : 'ปลดล็อก: ผ่านหอคอยชั้น ' }}{{ b.unlockFloor }}</p>
+          }
+          @if (b.anyOpen) {
+            <div class="acts">
+              @for (a of b.actions; track a.label) {
+                @if (a.open) {
+                  <button type="button" class="gm-btn" [class.primary]="$first" (click)="go(a.route, a.query)"><app-icon [name]="a.icon" [size]="15" /> {{ a.label }}</button>
+                } @else {
+                  <button type="button" class="gm-btn ghost" disabled [attr.aria-label]="a.label + ' ปลดที่ชั้น ' + a.floor"><app-icon name="lock" [size]="14" /> {{ a.label }} · ชั้น {{ a.floor }}</button>
+                }
+              }
+            </div>
+          }
         }
         @if (b.st.isUnlocked && b.next) { <small class="next">พัฒนาต่อ: {{ b.next.label }} — ผ่านชั้น {{ b.next.minFloor }}</small> }
       </div>
