@@ -11,6 +11,7 @@ import { STATUS_EFFECTS } from './status-effects';
 import { STAGE4_10_MONSTERS, STAGE4_10_SKILLS } from './monsters-stage4-10';
 import { TRIAL_MONSTERS, TRIAL_SKILLS } from './monsters-trials';
 import { FARM_MONSTERS, FARM_SKILLS } from './monsters-farm';
+import { DUNGEON_MONSTERS, DUNGEON_PROJECTILES, DUNGEON_SKILLS, dungeonVariants } from './monsters-dungeon';
 
 /**
  * Data-driven monsters — Normal Forest, Stage 1–3.
@@ -30,6 +31,7 @@ const death = (row: number, frames: number) => clip(row, frames, [{ frame: frame
 /** monster buffs are entries of the shared status-effect table */
 export const BUFFS: Record<string, BuffDefinition> = {
   alpha_howl_buff: STATUS_EFFECTS['alpha_howl_buff'],
+  rally_haste: STATUS_EFFECTS['rally_haste'],
 };
 
 // ------------------------------------------------------------------ projectiles
@@ -49,6 +51,7 @@ export const PROJECTILES: Record<string, ProjectileDefinition> = {
     hits: 'TARGET',
     fx: 'goblin-arrow',
   },
+  ...DUNGEON_PROJECTILES,
 };
 
 // ------------------------------------------------------------------ monster skills (cast system)
@@ -80,6 +83,7 @@ export const MONSTER_SKILLS: Record<string, MonsterSkillDefinition> = {
   ...STAGE4_10_SKILLS,
   ...TRIAL_SKILLS,
   ...FARM_SKILLS,
+  ...DUNGEON_SKILLS,
 };
 
 // ------------------------------------------------------------------ monsters
@@ -253,7 +257,11 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
   // ---- Skill Trial only (monsters-trials.ts)
   ...TRIAL_MONSTERS,
   ...FARM_MONSTERS,
+  // ---- special-dungeon rosters (monsters-dungeon.ts)
+  ...DUNGEON_MONSTERS,
 };
+// role / tier variants of the dungeon monsters (same art + skills, the power of the monster they replace)
+Object.assign(MONSTERS, dungeonVariants(MONSTERS));
 
 // ------------------------------------------------------------------ helpers (pure)
 

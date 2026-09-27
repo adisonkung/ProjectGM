@@ -761,7 +761,7 @@ describe('In-wave reinforcements (farm dungeons: sustained waves without extra t
     }
     // TREASURE: three carriers per run
     for (const d of FARM_DUNGEONS.filter(x => x.type === 'EQUIPMENT')) {
-      const carriers = wavesOf(d.stage).flatMap(w => w.spawns).filter(sp => sp.monsterId.startsWith('treasure_goblin'));
+      const carriers = wavesOf(d.stage).flatMap(w => w.spawns).filter(sp => sp.monsterId.startsWith('coin_kobold'));
       expect(carriers.length).withContext(d.id).toBe(3);
     }
     // CHALLENGE: every trial has at least one fail rule

@@ -48,6 +48,8 @@ const FOCUS: Record<string, number> = {
   // TREASURE CHASE: catch the loot before it runs off
   treasure_goblin: -1,
   treasure_goblin_elite: -1,
+  coin_kobold: -1,
+  grimoire_familiar: 1,
   dark_shaman_ritual: 0,
   goblin_shaman: 1,
   dark_shaman: 1,
@@ -55,6 +57,9 @@ const FOCUS: Record<string, number> = {
   mist_wraith: 3,
   magic_mushroom: 4,
 };
+
+/** focus priority of a monster (dungeon variants `<design>@<replaced>` use their design's entry) */
+const focusOf = (id: string): number | undefined => FOCUS[id] ?? FOCUS[id.split('@')[0]];
 
 const maxCastPriority = (u: BattleUnit): number =>
   Math.max(-1, ...u.castSkills.filter(cs => cs.def.interruptible || (cs.def as { breakRequired?: number }).breakRequired)
@@ -201,11 +206,11 @@ export class TacticalBot {
     // Shadow Panthers are left to the normal AI (measured: focusing them pulls the team apart)
     const back = heroes.filter(h => h.range >= 3);
     const pick = foes
-      .filter(f => f.monster && FOCUS[f.monster.definitionId] != null)
+      .filter(f => f.monster && focusOf(f.monster.definitionId) != null)
       .filter(f => back.some(b => distance(b.pos, f.pos) <= b.range))
       // a Wraith is focused once it is through to our side of the frontline (diving), not while behind its pack
       .filter(f => f.monster!.definitionId !== 'mist_wraith' || f.pos.c <= Math.max(-Infinity, ...heroes.filter(h => h.range < 3).map(h => h.pos.c)))
-      .sort((a, b) => FOCUS[a.monster!.definitionId] - FOCUS[b.monster!.definitionId] || a.hp - b.hp)[0];
+      .sort((a, b) => focusOf(a.monster!.definitionId)! - focusOf(b.monster!.definitionId)! || a.hp - b.hp)[0];
     if (this.opt.focus !== false && pick && pick.id !== e.focusTargetId) e.setFocus(pick.id);
   }
 }
@@ -213,6 +218,6 @@ export class TacticalBot {
 /** kept for the trace tool: the id the TACTICAL bot would focus now */
 export function focusPriority(e: BattleEngine): number | null {
   const foes = e.units.filter(u => u.side === 'enemy' && u.alive && u.visible && u.wave === e.waveIndex && u.monster);
-  return foes.filter(f => FOCUS[f.monster!.definitionId] != null)
-    .sort((a, b) => FOCUS[a.monster!.definitionId] - FOCUS[b.monster!.definitionId] || a.hp - b.hp)[0]?.id ?? null;
+  return foes.filter(f => focusOf(f.monster!.definitionId) != null)
+    .sort((a, b) => focusOf(a.monster!.definitionId)! - focusOf(b.monster!.definitionId)! || a.hp - b.hp)[0]?.id ?? null;
 }

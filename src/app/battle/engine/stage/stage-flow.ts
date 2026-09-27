@@ -318,7 +318,7 @@ export class StageFlow {
       if (rule.type === 'CAST_LIMIT' && this.score.strikes > rule.max) return this.fail(rule.label), true;
       if (rule.type === 'KILL_BEFORE') {
         const late = this.host.units.some(
-          u => u.side !== PLAYER_TEAM && isCombatCapable(u) && this.host.definitionOf(u) === rule.monsterId &&
+          u => u.side !== PLAYER_TEAM && isCombatCapable(u) && (this.host.definitionOf(u) ?? '').split('@')[0] === rule.monsterId &&
             t - (this.spawnedAt.get(u.id) ?? t) >= rule.seconds,
         );
         if (late) return this.fail(rule.label), true;

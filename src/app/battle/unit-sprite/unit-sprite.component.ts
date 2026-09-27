@@ -45,6 +45,8 @@ export class UnitSpriteComponent {
   readonly flip = input(false);
   /** ท่า `cast`: เวลาร่าย (วินาทีเกม) — เฟรม CAST_START→SKILL_ACTIVATE ยืดให้พอดี */
   readonly castTime = input<number | undefined>();
+  /** ท่า `cast`: clip ของสกิลที่กำลังร่าย (แผ่นที่มีหลายท่าร่าย) */
+  readonly castClip = input<string | undefined>();
   /** เล่นทับท่าที่กำลังเล่นอยู่ (เช่น ถูกตัดร่าย → ท่าโดนตีทันที) */
   readonly force = input(false);
 
@@ -96,7 +98,7 @@ export class UnitSpriteComponent {
     // ไม่ขยับอีกหลังตาย (ยกเว้นรีเซ็ตกลับท่ายืน)
     if (this.currentName === 'die' && name !== 'die' && name !== 'idle') return;
 
-    const a = def.anims[name]!;
+    const a = (name === 'cast' && def.casts?.[this.castClip() ?? '']) || def.anims[name]!;
     const y = def.rows > 1 ? (a.row / (def.rows - 1)) * 100 : 0;
     const x = (i: number) => (i / (def.cols - 1)) * 100;
     const hold = name === 'die';

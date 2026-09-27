@@ -32,6 +32,17 @@
     </div>
   </article>
 
+  @if (t.id === 'ascension') {
+    <section class="gm-panel target guardians">
+      <span><b>ผู้พิทักษ์ประจำวัน</b><small>สลับตัวตามวันในสัปดาห์</small></span>
+      <div class="row">
+        @for (g of guardians; track g.id) {
+          <span class="gm-chip" [class.today]="g.today">{{ g.days }} · {{ g.name }}@if (g.today) { <em>วันนี้</em> }</span>
+        }
+      </div>
+    </section>
+  }
+
   @if (t.id === 'hunt') {
     <section class="gm-panel target">
       <span><b>เป้าหมาย Hunt</b><small>ช่องที่ดรอปบ่อยขึ้น</small></span>

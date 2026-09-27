@@ -42,6 +42,10 @@ export interface SheetDef {
   projectile?: Partial<Record<'attack' | SkillKind, string>>;
   /** ความสูงช่อง (ค่าเริ่มต้น 100) — แผ่นที่มีท่ายกอาวุธสูงใช้ 120 */
   cellH?: number;
+  /** ความกว้างช่อง (ค่าเริ่มต้น 132) — บอสตัวใหญ่ใช้ช่องกว้างกว่า สเกลพิกเซลเท่าเดิม */
+  cellW?: number;
+  /** ท่าร่ายแยกตาม clip ของสกิล (มอนสเตอร์ที่มีหลายสกิล) — ไม่มี = ใช้ anims.cast */
+  casts?: Record<string, AnimDef>;
 }
 
 export interface FxDef {
@@ -259,13 +263,16 @@ const CLIP_ANIM: Record<string, SpriteAnim> = { idle: 'idle', move: 'walk', hurt
  */
 export function monsterSheet(anim: AnimationConfig, attackEvent?: string, projectile?: string): SheetDef {
   const anims: SheetDef['anims'] = {};
+  const casts: Record<string, AnimDef> = {};
   let cols = 0, rows = 0;
   for (const [name, c] of Object.entries(anim.clips)) {
     cols = Math.max(cols, c.frames);
     rows = Math.max(rows, c.row);
     const ev = (e: string) => c.events?.find(m => m.event === e)?.frame;
     if (c.castDriven) {
-      anims.cast = { row: c.row - 1, frames: c.frames, ms: c.frameMs, castStart: (ev('CAST_START') ?? 1) - 1, activate: (ev('SKILL_ACTIVATE') ?? c.frames) - 1 };
+      const a: AnimDef = { row: c.row - 1, frames: c.frames, ms: c.frameMs, castStart: (ev('CAST_START') ?? 1) - 1, activate: (ev('SKILL_ACTIVATE') ?? c.frames) - 1 };
+      anims.cast ??= a;
+      (casts[name] = a);
       continue;
     }
     const key = CLIP_ANIM[name];
@@ -278,7 +285,10 @@ export function monsterSheet(anim: AnimationConfig, attackEvent?: string, projec
       ...(hitFrame ? { hit: hitFrame - 1 } : {}),
     };
   }
-  return { cols, rows, anims, ...(anim.cellH ? { cellH: anim.cellH } : {}), ...(projectile ? { projectile: { attack: projectile } } : {}) };
+  return {
+    cols, rows, anims, ...(anim.cellH ? { cellH: anim.cellH } : {}), ...(anim.cellW ? { cellW: anim.cellW } : {}),
+    ...(Object.keys(casts).length > 1 ? { casts } : {}), ...(projectile ? { projectile: { attack: projectile } } : {}),
+  };
 }
 
 for (const m of Object.values(MONSTERS)) {
@@ -289,6 +299,24 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  // ---- special-dungeon monsters (tools/sprites/dungeon/fx.py: 6 frames × 64 px, directional ones point right)
+  'triple-volley': { file: 'fx-triple-volley.png', frames: 6, w: 64, h: 64, frameMs: 60, at: 'target', orient: 'flip', dy: -10, scale: 0.9 },
+  'rally-whistle': { file: 'fx-rally-whistle.png', frames: 6, w: 64, h: 64, frameMs: 90, at: 'self', dx: 22, dy: -30, scale: 1.2 },
+  'lions-roar': { file: 'fx-lions-roar.png', frames: 6, w: 64, h: 64, frameMs: 90, at: 'self', dx: 70, dy: -40, scale: 1.8 },
+  'crescent-iaido': { file: 'fx-crescent-iaido.png', frames: 6, w: 64, h: 64, frameMs: 70, at: 'target', orient: 'flip', dy: -20, scale: 1.4 },
+  'mirror-stance': { file: 'fx-mirror-stance.png', frames: 6, w: 64, h: 64, frameMs: 110, at: 'self', dy: -50, scale: 1.8 },
+  starfall: { file: 'fx-starfall.png', frames: 6, w: 64, h: 64, frameMs: 80, at: 'target', dy: -25, scale: 1.3 },
+  'judgement-beam': { file: 'fx-judgement-beam.png', frames: 6, w: 64, h: 64, frameMs: 90, at: 'target', dy: -40, scale: 1.4 },
+  'crystal-shell': { file: 'fx-crystal-shell.png', frames: 6, w: 64, h: 64, frameMs: 90, at: 'self', dy: -14, scale: 1 },
+  devour: { file: 'fx-devour.png', frames: 6, w: 64, h: 64, frameMs: 70, at: 'target', dy: -18, scale: 1 },
+  'smoke-pouch': { file: 'fx-smoke-pouch.png', frames: 6, w: 64, h: 64, frameMs: 80, at: 'self', dy: -14, scale: 1.1 },
+  'rune-bolt': { file: 'fx-rune-bolt.png', frames: 6, w: 64, h: 64, frameMs: 60, at: 'target', orient: 'flip', dy: -18, scale: 0.9 },
+  'page-barrier': { file: 'fx-page-barrier.png', frames: 6, w: 64, h: 64, frameMs: 100, at: 'self', dy: -22, scale: 1.2 },
+  'arcane-seal': { file: 'fx-arcane-seal.png', frames: 6, w: 64, h: 64, frameMs: 90, at: 'target', dy: -28, scale: 1 },
+  'dummy-bolt': { file: 'fx-dummy-bolt.png', frames: 1, w: 22, h: 7, frameMs: 60, at: 'target', angle0: 0, scale: 1 },
+  'star-bolt': { file: 'fx-star-bolt.png', frames: 1, w: 18, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.2 },
+  'rune-orb': { file: 'fx-rune-orb.png', frames: 1, w: 14, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
+  'chalk-bolt': { file: 'fx-chalk-bolt.png', frames: 1, w: 14, h: 8, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
   // ---- โมร์แกน / แร็กนาร์ / คอร์วิน / น็อกซ์ / เวลมา (tools/sprites/h5/fx.py)
   'morgan-s1': { file: 'fx-morgan-s1.png', frames: 8, w: 107, h: 76, frameMs: 70, at: 'self', dy: -8, scale: 1.3 },
   'morgan-s2': { file: 'fx-morgan-s2.png', frames: 8, w: 116, h: 67, frameMs: 60, at: 'target', orient: 'flip', dx: -25, dy: -10, scale: 1.2 },

@@ -135,6 +135,8 @@ export interface AnimState {
   key: number;
   /** anim 'cast': cast time in game seconds */
   castTime?: number;
+  /** anim 'cast': the skill's clip (sheets with several cast rows) */
+  castClip?: string;
   /** play over a running attack/cast (interrupt → hurt) */
   force?: boolean;
 }

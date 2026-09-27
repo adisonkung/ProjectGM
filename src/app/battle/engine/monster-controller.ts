@@ -58,6 +58,8 @@ export interface MonsterCombatState {
   /** combat seconds since spawn (FLEE timing) · FLEE: running for the edge */
   aliveTime: number;
   fleeing: boolean;
+  /** `ai.dormant` ambusher still asleep (wakes on a hero within wakeRange or on the first hit) */
+  dormant: boolean;
 }
 
 /** What the controller may ask of the battle (implemented by BattleEngine) */
@@ -131,6 +133,7 @@ export class MonsterController {
       summons: {},
       aliveTime: 0,
       fleeing: false,
+      dormant: !!def.ai.dormant,
     };
   }
 
@@ -202,6 +205,12 @@ export class MonsterController {
 
   /** IDLE / SEARCHING / MOVING: skills → target → position → attack */
   private think(u: BattleUnit, s: MonsterCombatState, def: MonsterDefinition): void {
+    if (s.dormant) {
+      const near = this.ctx.opponentsOf(u).some(t => distance(t.pos, u.pos) <= def.ai.dormant!.wakeRange);
+      if (!near && u.hp >= u.maxHp) return this.setState(s, 'IDLE', 'idle');
+      s.dormant = false;
+      this.ctx.emit({ type: 'animEvent', src: u.id, event: 'FX_START', name: 'WAKE' });
+    }
     if (def.ai.movement === 'FLEE') return this.flee(u, s, def);
     if (this.trySkill(u, s, def)) return;
     const t = this.resolveTarget(u, s, def);
@@ -255,6 +264,8 @@ export class MonsterController {
       f.guardsAtMost != null && this.ctx.alliesOf(u).filter(a => a !== u && this.defs[a.monster?.definitionId ?? '']?.ai.movement !== 'FLEE').length <= f.guardsAtMost;
     if (!s.fleeing && (s.aliveTime >= f.after || (f.onHit && u.hp < u.maxHp) || guardsGone())) s.fleeing = true;
     if (!s.fleeing) return this.setState(s, 'IDLE', 'idle');
+    // escape skills (Smoke Pouch) while running
+    if (def.skills.length && this.trySkill(u, s, def)) return;
     const edge = BOARD_COLS - 1;
     if (u.pos.c >= edge) {
       this.ctx.escape(u);
@@ -408,6 +419,8 @@ export class MonsterController {
       }
       case 'SELF_LACKS_STATUS':
         return !hasStatus(u, c.status);
+      case 'SELF_BELOW':
+        return pct(u) < c.pct;
       case 'HEROES_NEED_STATUS':
         return this.ctx.opponentsOf(u).some(h => buffRemaining(h, c.status) <= c.refreshBelow);
     }

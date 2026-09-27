@@ -134,6 +134,42 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     modifiers: { attackMultiplier: 1.6, attackSpeedMultiplier: 1.3 },
   },
 
+  // ---- special-dungeon monsters (monsters-dungeon.ts)
+  rally_haste: {
+    id: 'rally_haste', name: 'รวมพล!', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.3 },
+  },
+  jade_awakening: {
+    id: 'jade_awakening', name: 'หยกตื่น', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.2 },
+  },
+  /** Moonblade Ronin: hits taken are reflected (60 % as TRUE damage) — a stun or knockback ends the stance */
+  mirror_stance: {
+    id: 'mirror_stance', name: 'ท่ากระจกจันทร์', duration: 2.5, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { reflectDamage: 0.6 }, endOnControl: true,
+  },
+  twin_moon: {
+    id: 'twin_moon', name: 'จันทร์คู่', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.2 },
+  },
+  seraph_ascend: {
+    id: 'seraph_ascend', name: 'เทวรูปตื่น', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { damageMultiplier: 1.15 },
+  },
+  crystal_shell: {
+    id: 'crystal_shell', name: 'เปลือกผลึก', duration: 4, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0.4 },
+  },
+  /** Arcane Examiner: no skills / ultimates (basic attacks still allowed) */
+  silence: {
+    id: 'silence', name: 'ถูกผนึกเวท', duration: 4, stackPolicy: 'REFRESH_DURATION',
+    modifiers: {}, flags: ['silence'],
+  },
+  pop_quiz: {
+    id: 'pop_quiz', name: 'สอบซ่อม', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.15 },
+  },
+
   // ---- monster buffs
   alpha_howl_buff: {
     id: 'alpha_howl_buff', name: 'เสียงหอนจ่าฝูง', duration: 10, stackPolicy: 'REFRESH_DURATION', buff: true,

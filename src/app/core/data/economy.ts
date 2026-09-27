@@ -5,6 +5,7 @@
 import { BreakthroughDefinition, FarmDungeonDefinition, HeroLevelDefinition, ItemDefinition, RewardBundle } from '../models/economy';
 import { EquipmentDropTable, Rarity } from '../models/equipment';
 import { ChallengeRule, EnemyPlacement, EnemySpawn, StageDef, WaveDefinition } from '../models/stage';
+import { ASCENSION_BOSSES, DUNGEON_ROLE_MAP, DUNGEON_MONSTERS, variantId } from './monsters-dungeon';
 
 /** EXP for level → level + 1 (Lv1→2 … Lv9→10) — total 27,600 (rebalance spec: claude/patch1-rebalance-spec.md) */
 export const EXP_TO_NEXT = [200, 400, 750, 1250, 2000, 3000, 4500, 6500, 9000];
@@ -265,6 +266,19 @@ const ASCENSION_TARGET_TIME = [75, 80, 100];
 
 const stageOf = (list: StageDef[], id: string) => list.find(s => s.id === id)!;
 
+/**
+ * Special-dungeon rosters (claude/special-dungeon-monsters.md): each dungeon has its own monsters. The authored
+ * waves above keep their structure and pacing; every monster in them becomes the dungeon's role variant
+ * (`DUNGEON_ROLE_MAP` → `<dungeon monster>@<old monster>`, same HP / DEF / DPS as the monster it replaces).
+ */
+const reskin = (s: StageDef, dungeon: keyof typeof DUNGEON_ROLE_MAP): StageDef => {
+  const map = DUNGEON_ROLE_MAP[dungeon];
+  const swap = (id: string) => (map[id] ? variantId(map[id].to, id) : id);
+  const spawns = (l: EnemySpawn[]) => l.map(sp => ({ ...sp, monsterId: swap(sp.monsterId) }));
+  const waves = s.waveDefs!.map(w => ({ spawns: spawns(w.spawns), reinforcements: w.reinforcements?.map(r => ({ ...r, spawns: spawns(r.spawns) })) }));
+  return { ...s, waveDefs: waves, enemies: s.enemies.map(e => ({ ...e, enemy: swap(e.enemy) })) };
+};
+
 // ------------------------------------------------------------------ special modes (Phase 3): each farm type plays differently
 
 /**
@@ -309,7 +323,7 @@ const withCarrier = (w: WaveDefinition, carrier: string, lane: number): WaveDefi
 };
 const toTreasure = (s: StageDef, carrier: string): StageDef => {
   const waves = s.waveDefs!.map((w, i) => (i < 3 ? withCarrier(w, carrier, TREASURE_LANES[i]) : w));
-  return { ...s, waveDefs: waves, special: { kind: 'TREASURE', goal: 'ล่าก็อบลินขนสมบัติ 3 ตัวก่อนมันหนี — ตัวที่จับได้เท่านั้นที่ดรอปอุปกรณ์' } };
+  return { ...s, waveDefs: waves, special: { kind: 'TREASURE', goal: 'ล่าโคโบลด์ขนทอง 3 ตัวก่อนมันหนี — ตัวที่จับได้เท่านั้นที่ดรอปอุปกรณ์' } };
 };
 
 /** SKILL TRIAL → CHALLENGE: the trial room (regroup in place) + fail rules on the lesson of the tier */
@@ -321,7 +335,7 @@ const trainingDef = (n: number, unlockFloor: number, levels: [number, number], e
   id: `training_${n}`, type: 'TRAINING', name: `Training ${['I', 'II', 'III', 'IV', 'V'][n - 1]}`, unlockFloor, recommendedLevel: levels,
   baseRewards: { heroExp: exp, items: [{ itemId: potion, count }] },
   dailyBonusPool: 'TRAINING', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.55, deathRule: 'EVENT_KO', targetTime: TRAINING_TARGET_TIME[n - 1],
-  stage: toSurvival(stageOf(TRAINING_STAGES, `training_${n}`), ...SURVIVAL_TUNING[n - 1]),
+  stage: toSurvival(reskin(stageOf(TRAINING_STAGES, `training_${n}`), 'training'), ...SURVIVAL_TUNING[n - 1]),
 });
 
 /** SURVIVAL per Training tier: [seconds, group every s, max alive, kills for 2★ / 3★] */
@@ -335,19 +349,33 @@ const SURVIVAL_TUNING: [number, number, number, [number, number]][] = [
 
 const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]): FarmDungeonDefinition => ({
   id: `ascension_${n}`, type: 'ASCENSION', name: `Ascension ${['I', 'II', 'III'][n - 1]}`, unlockFloor, recommendedLevel: levels,
+  // today's guardian (weekday rotation) — read when a page / battle asks for the stage
+  get stage() {
+    return ascensionDuel(n, ascensionBossFor());
+  },
   baseRewards: { items: [{ itemId: `bt_stone_${n}`, count: 1 }], bonusDrops: [{ chance: 0.2, items: [{ itemId: `bt_stone_${n}`, count: 1 }] }] },
   // Universal Memory = scarce milestone currency: first clears only, never from repeat runs
   firstClearBonus: { items: [{ itemId: `bt_stone_${n}`, count: 1 }, { itemId: 'universal_memory', count: 20 + 10 * n }] },
   dailyBonusPool: 'ASCENSION', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: ASCENSION_TARGET_TIME[n - 1],
-  stage: ASCENSION_DUELS[n - 1],
-});
+} as FarmDungeonDefinition);
 
-/** Ascension I–III = BOSS DUEL guardians (monsters-farm.ts) — the old ASCENSION_STAGES waves are kept for reference sims only */
-const ASCENSION_DUELS: StageDef[] = [
-  bossDuel('ascension_1', 'Ascension I · ศิลาผู้พิทักษ์', 'stone_sentinel', 90, 180, 'twilight-1'),
-  bossDuel('ascension_2', 'Ascension II · ราชันฝูงหมาป่า', 'pack_lord', 110, 210, 'twilight-1'),
-  bossDuel('ascension_3', 'Ascension III · ยักษ์ศิลาโบราณ', 'ancient_colossus', 130, 240, 'misty-1'),
-];
+/**
+ * Ascension = the Sky Shrine guardians, one per weekday (user decision): Mon–Tue Brass Shishi · Wed–Thu Moonblade
+ * Ronin · Fri–Sun Astral Seraph. Tier I–III = that guardian's stat step (`<boss>@<tier>`), enrage / hard limit per tier.
+ */
+export const ASCENSION_SCHEDULE: Record<number, (typeof ASCENSION_BOSSES)[number]> = {
+  1: 'brass_shishi', 2: 'brass_shishi', 3: 'moonblade_ronin', 4: 'moonblade_ronin', 5: 'astral_seraph', 6: 'astral_seraph', 0: 'astral_seraph',
+};
+export const ASCENSION_DAY_LABEL: Record<string, string> = { brass_shishi: 'จ.–อ.', moonblade_ronin: 'พ.–พฤ.', astral_seraph: 'ศ.–อา.' };
+/** the guardian on duty for a local date (default: now) */
+export const ascensionBossFor = (date: Date = new Date()): (typeof ASCENSION_BOSSES)[number] => ASCENSION_SCHEDULE[date.getDay()];
+const ASCENSION_LIMITS: [number, number][] = [[90, 180], [110, 210], [130, 240]];
+const ASCENSION_BG = ['twilight-1', 'twilight-1', 'misty-1'];
+export function ascensionDuel(tier: number, boss: (typeof ASCENSION_BOSSES)[number]): StageDef {
+  const [enrageAt, limit] = ASCENSION_LIMITS[tier - 1];
+  const name = `Ascension ${['I', 'II', 'III'][tier - 1]} · ${DUNGEON_MONSTERS[boss].name}`;
+  return bossDuel(`ascension_${tier}`, name, `${boss}@${tier}`, enrageAt, limit, ASCENSION_BG[tier - 1]);
+}
 export const ASCENSION_WAVE_STAGES = ASCENSION_STAGES;
 
 
@@ -491,7 +519,7 @@ const huntDef = (t: HuntTier): FarmDungeonDefinition => ({
   firstClearBonus: { items: [{ itemId: 'enhancement_ore', count: 20 }] },
   dailyBonusPool: 'HUNT', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: HUNT_TARGET_TIME[t.n - 1],
   equipmentDrops: t.drops, firstClearItem: t.first,
-  stage: toTreasure(stageOf(HUNT_STAGES, `hunt_${t.n}`), 'treasure_goblin'),
+  stage: toTreasure(reskin(stageOf(HUNT_STAGES, `hunt_${t.n}`), 'hunt'), 'coin_kobold'),
 });
 
 /** TREASURE: each carrier caught rolls the tier's drop table at itemChance × this (≈ the old one roll per clear) */
@@ -608,15 +636,15 @@ const trialDef = (t: TrialTier): FarmDungeonDefinition => ({
   },
   firstClearBonus: { items: t.first.map(([itemId, count]) => ({ itemId, count })) },
   dailyBonusPool: 'SKILL', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: TRIAL_TARGET_TIME[t.n - 1],
-  stage: toChallenge(stageOf(TRIAL_STAGES, `trial_${t.n}`), ...TRIAL_RULES[t.n - 1]),
+  stage: toChallenge(reskin(stageOf(TRIAL_STAGES, `trial_${t.n}`), 'trial'), ...TRIAL_RULES[t.n - 1]),
 });
 
 /** CHALLENGE rules per Skill Trial tier (the tier's lesson) */
 const TRIAL_RULES: [ChallengeRule[], string][] = [
-  [[{ type: 'CAST_LIMIT', max: 1, skills: ['alpha_howl'], label: 'ALPHA HOWL สำเร็จ 2 ครั้ง' }], 'ตัดร่าย! ห้ามปล่อยให้ ALPHA HOWL สำเร็จเกิน 1 ครั้ง'],
-  [[{ type: 'KILL_BEFORE', monsterId: 'goblin_shaman', seconds: 30, label: 'หมอผีรอดเกิน 30 วินาที' }], 'ล่าหมอผี! ก็อบลินหมอผีทุกตัวต้องล้มภายใน 30 วินาทีหลังโผล่'],
-  [[{ type: 'CAST_LIMIT', max: 5, skills: ['healing_ritual', 'alpha_howl'], label: 'ฮีล/ฮาวล์ของศัตรูสำเร็จเกิน 5 ครั้ง' }], 'ร่ายซ้อน! ห้ามปล่อยให้ HEALING RITUAL / ALPHA HOWL สำเร็จรวมเกิน 5 ครั้ง'],
-  [[{ type: 'CAST_LIMIT', max: 1, skills: ['warden_seal'], label: 'ผนึกผู้คุมสำเร็จ 2 ครั้ง' }], 'Break! ห้ามปล่อยให้ WARDEN SEAL สำเร็จเกิน 1 ครั้ง'],
+  [[{ type: 'CAST_LIMIT', max: 3, skills: ['rune_bolt'], label: 'RUNE BOLT สำเร็จเกิน 3 ครั้ง' }], 'ตัดร่าย! ห้ามปล่อยให้ภูตรูนหัวหน้ายิง RUNE BOLT สำเร็จเกิน 3 ครั้ง'],
+  [[{ type: 'KILL_BEFORE', monsterId: 'grimoire_familiar', seconds: 30, label: 'ตำราเวทรอดเกิน 30 วินาที' }], 'ล่าตำรา! ตำราเวทมีชีวิตทุกเล่มต้องล้มภายใน 30 วินาทีหลังโผล่'],
+  [[{ type: 'CAST_LIMIT', max: 5, skills: ['page_barrier', 'rune_bolt'], label: 'PAGE BARRIER / RUNE BOLT สำเร็จเกิน 5 ครั้ง' }], 'ร่ายซ้อน! ห้ามปล่อยให้ PAGE BARRIER / RUNE BOLT สำเร็จรวมเกิน 5 ครั้ง'],
+  [[{ type: 'CAST_LIMIT', max: 1, skills: ['arcane_seal'], label: 'ARCANE SEAL สำเร็จ 2 ครั้ง' }], 'Break! ห้ามปล่อยให้ผู้คุมสอบร่าย ARCANE SEAL สำเร็จเกิน 1 ครั้ง'],
 ];
 
 export const FARM_DUNGEONS: FarmDungeonDefinition[] = [

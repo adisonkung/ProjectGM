@@ -1,0 +1,426 @@
+{
+ "straw_recruit": {
+  "cellW": 132,
+  "cellH": 100,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    6
+   ],
+   [
+    "attack",
+    6
+   ]
+  ],
+  "size": [
+   792,
+   500
+  ]
+ },
+ "crossbow_dummy": {
+  "cellW": 132,
+  "cellH": 100,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    6
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "volley",
+    8
+   ]
+  ],
+  "size": [
+   1056,
+   600
+  ]
+ },
+ "drill_sergeant": {
+  "cellW": 158,
+  "cellH": 112,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    6
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "rally",
+    8
+   ]
+  ],
+  "size": [
+   1264,
+   672
+  ]
+ },
+ "brass_shishi": {
+  "cellW": 208,
+  "cellH": 179,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    8
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "roar",
+    8
+   ],
+   [
+    "pounce",
+    6
+   ]
+  ],
+  "size": [
+   1664,
+   1253
+  ]
+ },
+ "moonblade_ronin": {
+  "cellW": 200,
+  "cellH": 187,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    8
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "iaido",
+    8
+   ],
+   [
+    "mirror",
+    6
+   ]
+  ],
+  "size": [
+   1600,
+   1309
+  ]
+ },
+ "astral_seraph": {
+  "cellW": 186,
+  "cellH": 192,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    8
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "starfall",
+    6
+   ],
+   [
+    "judgement",
+    10
+   ]
+  ],
+  "size": [
+   1860,
+   1344
+  ]
+ },
+ "gem_beetle": {
+  "cellW": 132,
+  "cellH": 100,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    6
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "shell",
+    6
+   ]
+  ],
+  "size": [
+   792,
+   600
+  ]
+ },
+ "mimic_chest": {
+  "cellW": 132,
+  "cellH": 100,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    6
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "devour",
+    8
+   ],
+   [
+    "wake",
+    4
+   ]
+  ],
+  "size": [
+   1056,
+   700
+  ]
+ },
+ "coin_kobold": {
+  "cellW": 150,
+  "cellH": 105,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    6
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "smoke",
+    4
+   ]
+  ],
+  "size": [
+   900,
+   630
+  ]
+ },
+ "rune_wisp": {
+  "cellW": 132,
+  "cellH": 100,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    6
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "bolt",
+    8
+   ]
+  ],
+  "size": [
+   1056,
+   600
+  ]
+ },
+ "grimoire_familiar": {
+  "cellW": 132,
+  "cellH": 100,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    6
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "barrier",
+    8
+   ]
+  ],
+  "size": [
+   1056,
+   600
+  ]
+ },
+ "arcane_examiner": {
+  "cellW": 182,
+  "cellH": 128,
+  "rows": [
+   [
+    "idle",
+    4
+   ],
+   [
+    "move",
+    6
+   ],
+   [
+    "hurt",
+    3
+   ],
+   [
+    "death",
+    7
+   ],
+   [
+    "attack",
+    6
+   ],
+   [
+    "seal",
+    8
+   ],
+   [
+    "chalk",
+    6
+   ]
+  ],
+  "size": [
+   1456,
+   896
+  ]
+ }
+}

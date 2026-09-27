@@ -6,7 +6,6 @@ import {
   MAX_SKILL_RANK, SKILL_PROFILES, SKILL_RANK_CAP_BY_TIER, SKILL_RANK_COSTS, SKILL_RANK_LIMITS, SKILL_RANK_TABLES, SKILL_SLOTS,
 } from '../data/skill-ranks';
 import { newGameState } from '../data/starter';
-import { VISUALS } from '../data/visuals';
 import { GameState } from '../models/game-state';
 import { OwnedHero } from '../models/hero';
 import { wavesOf } from '../models/stage';
@@ -266,20 +265,22 @@ describe('Skill Trial I–IV', () => {
     });
   });
 
-  it('themes: I interrupt casters · II a Goblin Shaman every wave · III several casters at once · IV Trial Warden (break only, 100)', () => {
-    const ids = (id: string) => wavesOf(FARM_BY_ID[id].stage).map(w => [...w.spawns, ...(w.reinforcements ?? []).flatMap(r => r.spawns)].map(s => s.monsterId));
-    expect(ids('trial_1').flat()).toContain('magic_mushroom');
-    expect(ids('trial_1').flat()).toContain('alpha_wolf');
-    expect(ids('trial_2').every(w => w.includes('goblin_shaman'))).toBeTrue();
-    expect(wavesOf(FARM_BY_ID['trial_3'].stage).some(w => {
-      const casters = w.spawns.filter(s => ['goblin_shaman', 'magic_mushroom', 'alpha_wolf'].includes(s.monsterId));
-      return casters.length >= 3;
-    })).toBeTrue();
-    expect(ids('trial_4').flat()).toContain('trial_warden');
-    const seal = MONSTER_SKILLS['warden_seal'] as unknown as { breakRequired: number; interruptible: boolean };
+  it('themes (Arcane Exam Hall roster): I Rune Wisp casters · II a Grimoire every wave · III several casters at once (Grimoire + Rune-Bolt wisp) · IV Arcane Examiner (break only, 100)', () => {
+    const ids = (id: string) => wavesOf(FARM_BY_ID[id].stage).map(w => [...w.spawns, ...(w.reinforcements ?? []).flatMap(r => r.spawns)].map(s => s.monsterId.split('@')[0]));
+    const casters = (id: string) => wavesOf(FARM_BY_ID[id].stage).flatMap(w => [...w.spawns, ...(w.reinforcements ?? []).flatMap(r => r.spawns)])
+      .filter(s => MONSTERS[s.monsterId].skills.length > 0);
+    expect(casters('trial_1').some(s => MONSTERS[s.monsterId].skills.includes('rune_bolt'))).toBeTrue();
+    expect(ids('trial_2').every(w => w.includes('grimoire_familiar'))).toBeTrue();
+    expect(wavesOf(FARM_BY_ID['trial_3'].stage).some(w => w.spawns.filter(s => MONSTERS[s.monsterId].skills.length > 0).length >= 2)).toBeTrue();
+    expect(ids('trial_4').flat()).toContain('arcane_examiner');
+    // only the Arcane Exam Hall's own monsters
+    for (const t of ['trial_1', 'trial_2', 'trial_3', 'trial_4']) {
+      expect(ids(t).flat().every(id => ['rune_wisp', 'grimoire_familiar', 'arcane_examiner'].includes(id))).withContext(t).toBeTrue();
+    }
+    const seal = MONSTER_SKILLS['arcane_seal'] as unknown as { breakRequired: number; interruptible: boolean };
     expect(seal.breakRequired).toBe(100);
     expect(seal.interruptible).toBeFalse();
-    expect(VISUALS[MONSTERS['trial_warden'].visual!]).toBeDefined();
+    expect(MONSTERS['arcane_examiner'].animation.sheet).toBe('enemy-arcane-examiner.png');
   });
 
   it('a Trial clear pays tomes / fragments + gold, bonus runs ×1.5 then repeats ×0.6, first clear once', () => {

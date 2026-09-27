@@ -33,6 +33,8 @@ export interface StatusModifiers {
   rangedSkillMultiplier?: number;
   /** multiplies healing received (Forest Oblivion −50% = 0.5) */
   healingReceivedMultiplier?: number;
+  /** share of the damage this unit takes that is sent back to the attacker as TRUE damage (Mirror Stance) */
+  reflectDamage?: number;
 }
 
 /** Control flags: stun = no actions / no movement · root = no movement (attacks / casts allowed) · taunted = must target the source */
@@ -41,7 +43,9 @@ export type StatusFlag =
   /** cannot be selected / hit (Mist Form, boss seal); Focus on it becomes temporarily invalid */
   | 'untargetable'
   /** BROKEN: cannot attack or cast (Break Gauge result) */
-  | 'broken';
+  | 'broken'
+  /** SILENCE: heroes cannot use skills / ultimates (basic attacks still allowed) */
+  | 'silence';
 
 /** Periodic effect: every `interval` s deal / heal `perSecond × sourceAtk × interval` (snapshot at application) */
 export interface StatusTick {
@@ -72,6 +76,8 @@ export interface StatusEffectDefinition {
   damageTransfer?: number;
   /** control statuses (stun / root / taunt) only land on bosses when true */
   bossValid?: boolean;
+  /** stance statuses (Mirror Stance) end at once when the unit is stunned or knocked back */
+  endOnControl?: boolean;
   /** DoT / HoT ticks can't crit; they ignore DEF (direct damage) — documented, always true for now */
 }
 

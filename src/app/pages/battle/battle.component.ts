@@ -829,7 +829,10 @@ export class BattleComponent implements OnDestroy {
         case 'castStart': {
           this.telegraph(e.src, e.skill, e.castTime, e.dst);
           // monster cast clip (e.g. Alpha Howl): frames stretched over the cast time; sheets without one fall back
-          if (SHEETS[unitOf(e.src).sprite ?? '']?.anims.cast) set(e.src, 'cast', { castTime: e.castTime });
+          if (SHEETS[unitOf(e.src).sprite ?? '']?.anims.cast) {
+            const sk = this.skillByName(unitOf(e.src), e.skill);
+            set(e.src, 'cast', { castTime: e.castTime, castClip: sk?.clip });
+          }
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
           break;
@@ -850,6 +853,14 @@ export class BattleComponent implements OnDestroy {
         }
         case 'skillActivated': {
           this.flash(e.src, e.skill);
+          // sprite FX on every unit the skill landed on (Starfall, Devour, Arcane Seal …)
+          const hitFx = this.skillByName(unitOf(e.src), e.skill)?.hitFx;
+          if (hitFx && FX[hitFx]) {
+            for (const id of e.targets) {
+              const q = posOf(id);
+              fx.push({ id: ++this.floatId, r: q.r, c: q.c, name: hitFx, angle: 0, flip: !!this.facing.get(e.src) });
+            }
+          }
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.name + '!', kind: 'skill' });
           this.castFx.delete(e.src);
@@ -860,6 +871,11 @@ export class BattleComponent implements OnDestroy {
           const p = posOf(e.dst);
           const text = e.buff === 'alpha_howl_buff' ? (e.refreshed ? 'ATK↑ ต่อเวลา' : 'ATK +25%') : e.refreshed ? '' : e.name;
           if (text) floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: 'buff' });
+          break;
+        }
+        case 'reflect': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `สะท้อน -${e.amount}`, kind: 'dmg' });
           break;
         }
         case 'miss': {

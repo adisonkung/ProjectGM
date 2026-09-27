@@ -28,7 +28,7 @@
       @if (u.alive && (u.focused || u.selected)) { <app-focus-mark [focused]="!!u.focused" /> }
       <app-unit-sprite [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss || !!u.elite" [icon]="u.icon"
                        [mock]="u.mock" [flip]="!!u.flip" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()"
-                       [castTime]="anims()[u.id]?.castTime" [force]="!!anims()[u.id]?.force" />
+                       [castTime]="anims()[u.id]?.castTime" [castClip]="anims()[u.id]?.castClip" [force]="!!anims()[u.id]?.force" />
       @if (u.alive && u.cast) { <app-cast-bar [cast]="u.cast" /> }
       @if (u.alive) {
         <div class="bars">

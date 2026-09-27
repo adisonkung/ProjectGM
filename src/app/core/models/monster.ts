@@ -105,6 +105,8 @@ export interface MonsterAIConfig {
    * `guardsAtMost` other non-fleeing allies still stand — escapes at the board edge
    */
   flee?: { after: number; onHit: boolean; guardsAtMost?: number };
+  /** ambusher (Mimic Chest): does nothing — not even target — until a hero comes within `wakeRange` or it is hit */
+  dormant?: { wakeRange: number };
 }
 
 export interface AttackDefinition {
@@ -189,7 +191,11 @@ export type SkillEffect =
   /** link the caster to the aimed ally: `transfer` of the caster's final damage goes to that ally */
   | { type: 'SOUL_LINK'; status: string }
   /** self-destruct: the caster dies, every boss ally heals `bossHealPct` and gains `buffId` */
-  | { type: 'SACRIFICE'; bossHealPct: number; buffId: string };
+  | { type: 'SACRIFICE'; bossHealPct: number; buffId: string }
+  /** shield worth `pct` of each recipient's max HP for `duration` s (Page Barrier) */
+  | { type: 'SHIELD_PCT'; pct: number; to: 'ALL_ALLIES' | 'SELF'; duration: number }
+  /** jump `cells` columns toward the caster's escape edge (treasure carrier Smoke Pouch) */
+  | { type: 'BLINK_AWAY'; cells: number };
 
 /** Conditions a monster checks before starting a skill (all must pass) */
 export type SkillCondition =
@@ -213,6 +219,8 @@ export type SkillCondition =
   | { type: 'SUMMON_SLOTS_FREE' }
   /** the caster doesn't carry this status */
   | { type: 'SELF_LACKS_STATUS'; status: string }
+  /** the caster is below `pct` HP */
+  | { type: 'SELF_BELOW'; pct: number }
   /** at least one hero lacks this status (or has ≤ refreshBelow s left) */
   | { type: 'HEROES_NEED_STATUS'; status: string; refreshBelow: number };
 
@@ -249,6 +257,8 @@ export interface MonsterSkillDefinition {
   clip?: string;
   /** FX played on the caster, synced so its activation frame lands on SKILL_ACTIVATE */
   fx?: { id: string; activationFrame: number; frameMs: number };
+  /** FX played on every unit the skill hit / aimed at when it activates (sprite FX key) */
+  hitFx?: string;
   /** mock FX shown at the aim point while casting / on activation (placeholder visuals) */
   mockFx?: { color: string; area: import('./combat').AreaPattern };
   target: SkillTargetSelector;
@@ -308,6 +318,8 @@ export interface AnimationConfig {
   sheet?: string;
   /** sheet cell height in px (cells are 132 wide; default 100 — tall poses like the Alpha's howl use 120) */
   cellH?: number;
+  /** sheet cell width in px (default 132) — big bosses use wider cells; drawn at the same px scale */
+  cellW?: number;
   /** token icon when there is no sheet (defaults to the display class icon) */
   tokenIcon?: string;
   clips: Record<string, AnimClip>;
@@ -315,6 +327,8 @@ export interface AnimationConfig {
 
 export interface MonsterDefinition {
   id: string;
+  /** generated variant (dungeon tier / role re-skin): the design it was made from — rules keyed by monster id use this */
+  baseId?: string;
   name: string;
   rank: MonsterRank;
   role: MonsterRole;

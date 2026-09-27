@@ -2,7 +2,8 @@ import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { DAILY_BONUS, FARM_DUNGEONS, ITEMS } from '../../core/data/economy';
+import { ASCENSION_DAY_LABEL, ascensionBossFor, DAILY_BONUS, FARM_DUNGEONS, ITEMS } from '../../core/data/economy';
+import { ASCENSION_BOSSES, DUNGEON_MONSTERS } from '../../core/data/monsters-dungeon';
 import { HuntTarget } from '../../core/models/equipment';
 import { FarmDungeonDefinition } from '../../core/models/economy';
 import { EquipmentService } from '../../core/services/equipment.service';
@@ -32,13 +33,13 @@ export const DUNGEON_TYPES: DungeonType[] = [
   },
   {
     id: 'ascension', pool: 'ASCENSION', name: 'Ascension Trial', mode: 'ตีบอสเดี่ยว', icon: 'crown', tone: 'boss_duel',
-    blurb: 'ดวลผู้พิทักษ์ตัวเดียว ล้มให้ได้ก่อนมันคลั่ง — เกินเวลาแล้วบอสแรงขึ้นมาก',
+    blurb: 'ดวลผู้พิทักษ์ศาลเทพตัวเดียว (สลับตัวตามวัน) ล้มให้ได้ก่อนมันคลั่ง — เกินเวลาแล้วบอสแรงขึ้นมาก',
     rules: ['บอสตัวเดียว เลือดหนา', 'ถึงเวลาที่กำหนดบอสจะคลั่ง', '3★ = ไม่มีใครล้ม + ทันเวลา'],
     reward: 'หิน Breakthrough',
   },
   {
     id: 'hunt', pool: 'HUNT', name: 'Equipment Hunt', mode: 'ล่าสมบัติ', icon: 'coin', tone: 'treasure',
-    blurb: 'ก็อบลินขนสมบัติจะวิ่งหนีเมื่อถูกตีหรืออยู่นานเกิน — จับให้ได้ก่อนมันหลุดขอบสนาม',
+    blurb: 'โคโบลด์ขนทองจะวิ่งหนีเมื่อถูกตีหรืออยู่นานเกิน (ใกล้ตายจะปาระเบิดควันวาร์ปหนี) — จับให้ได้ก่อนมันหลุดขอบสนาม',
     rules: ['ตัวที่จับได้เท่านั้นที่ดรอปอุปกรณ์', 'ตัวที่หนีไม่นับ แต่ไม่ทำให้แพ้', 'ดาวตามจำนวนที่จับได้'],
     reward: 'อุปกรณ์ + Ore + เศษอุปกรณ์',
   },
@@ -88,5 +89,7 @@ export class DungeonsComponent {
 
   // Hunt: favoured drop slot
   readonly targets: HuntTarget[] = ['ANY', 'WEAPON', 'ARMOR', 'ACCESSORY'];
+  /** Ascension: today's guardian + the weekday rotation */
+  readonly guardians = ASCENSION_BOSSES.map(id => ({ id, name: DUNGEON_MONSTERS[id].name, days: ASCENSION_DAY_LABEL[id], today: id === ascensionBossFor() }));
   readonly targetLabel: Record<HuntTarget, string> = { ANY: 'ทุกช่อง', WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
 }

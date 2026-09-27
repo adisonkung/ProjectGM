@@ -55,6 +55,8 @@ export type BattleEvent =
   | { type: 'animEvent'; src: number; event: SemanticEvent; name: string }
   /** melee hit event fired but the target had moved out of reach */
   | { type: 'miss'; src: number; dst: number }
+  /** MIRROR STANCE: `src` (the stance holder) sent `amount` back to `dst` */
+  | { type: 'reflect'; src: number; dst: number; amount: number }
   /** ฟื้นคืนชีพ */
   | { type: 'revive'; src: number; dst: number; amount: number }
   /** ได้โล่ (src = ผู้ให้) */
@@ -828,8 +830,10 @@ export class BattleEngine {
     // healers show ✚ while someone needs healing (their basic action is a Heal Bolt then)
     if (isPlayerUnit(u) && this.skills.healBoltTarget(u)) u.intent = 'heal';
 
+    // SILENCE (Arcane Seal): no skills / ultimates — basic attacks and movement only
+    const silenced = hasFlag(u, 'silence');
     // player-ordered skill (any mode): fire at the skill's own target rules
-    if (u.skillQueued && (u.skillQueued === 'skill' ? u.cd1 : u.cd2) <= 0) {
+    if (!silenced && u.skillQueued && (u.skillQueued === 'skill' ? u.cd1 : u.cd2) <= 0) {
       const slot = u.skillQueued;
       const s = this.skills.kit(u)[slot];
       const t = this.skills.pickTarget(u, s, current);
@@ -845,7 +849,7 @@ export class BattleEngine {
     const ultMode = this.skills.mode(u, 'ult');
     const autoOk = this.autoUlt && ultMode !== 'MANUAL' && (ultMode !== 'RESERVE' || this.skills.reserveUltReady(u));
     const wantsUlt = u.ultQueued || !isPlayerUnit(u) || autoOk;
-    if (u.mana >= u.maxMana && wantsUlt && this.tryUltimate(u, u.ultQueued)) {
+    if (!silenced && u.mana >= u.maxMana && wantsUlt && this.tryUltimate(u, u.ultQueued)) {
       u.ultQueued = false;
       return;
     }
@@ -854,7 +858,7 @@ export class BattleEngine {
     // player assassin, no dive, badly hurt inside several threat zones: step out of the pile instead of trading
     if (this.assassinEscape(u)) return;
     // interrupt opportunity: react right away (a cast bar won't wait for the attack timer)
-    const intr = this.skills.chooseInterrupt(u, current);
+    const intr = silenced ? null : this.skills.chooseInterrupt(u, current);
     if (intr) {
       u.intent = 'interrupt';
       u.lockUntil = this.time + TARGET_LOCK;
@@ -867,7 +871,7 @@ export class BattleEngine {
     if (chase) u.intent = 'interrupt';
     if (u.atkCd <= 0 && !chase) {
       // skill AI tiers: emergency → interrupt → heal → high value → normal (SkillSystem), else the basic action
-      const pick = this.skills.chooseSkill(u, current);
+      const pick = silenced ? null : this.skills.chooseSkill(u, current);
       if (pick) {
         // an interrupt skill spent on damage (AUTO fallback) is not an interrupt: no intent / target lock for it
         const stopping = pick.tier === 'INTERRUPT' && pick.target.side !== u.side && !!pick.target.casting && canStopCast(pick.target.casting.def);
@@ -1403,6 +1407,29 @@ export class BattleEngine {
           this.events.push({ type: 'buff', src: aim.id, dst: u.id, buff: st.id, name: st.name, refreshed: r !== 'applied' });
           break;
         }
+        case 'SHIELD_PCT': {
+          const to = eff.to === 'SELF' ? [u] : allies();
+          for (const a of to) {
+            if (!a.alive) continue;
+            const amount = Math.round(a.maxHp * eff.pct);
+            a.shield += amount;
+            a.shieldTime = eff.duration;
+            this.events.push({ type: 'shield', src: u.id, dst: a.id, amount });
+          }
+          break;
+        }
+        case 'BLINK_AWAY': {
+          // toward the side's escape edge (enemies flee right), nearest free cell up to `cells` columns away
+          const dir = isPlayerUnit(u) ? -1 : 1;
+          for (let k = eff.cells; k >= 1; k--) {
+            const cell = { r: u.pos.r, c: Math.max(0, Math.min(BOARD_COLS - 1, u.pos.c + dir * k)) };
+            if (cell.c !== u.pos.c && Grid.inBounds(cell) && this.grid.isFree(cell)) {
+              this.relocate(u, cell, 'blink');
+              break;
+            }
+          }
+          break;
+        }
         case 'SACRIFICE': {
           const bosses = allies().filter(a => a !== u && a.monster && isBossRank(this.monsterDefs[a.monster.definitionId]?.rank ?? 'COMMON'));
           const b = SkillSystem.status(eff.buffId);
@@ -1686,12 +1713,19 @@ export class BattleEngine {
       if (Number.isFinite(base)) duration = base * (1 - resist);
     }
     const r = applyBuff(dst, def, src.id, { magnitude: effectiveAttack(src) * (opts?.potency ?? 1), duration });
+    // a stun breaks stances (Mirror Stance)
+    if (def.flags?.includes('stun')) this.breakStances(dst);
     this.metrics.statusApplied[def.id] = (this.metrics.statusApplied[def.id] ?? 0) + 1;
     this.events.push({ type: 'buff', src: src.id, dst: dst.id, buff: def.id, name: def.name, refreshed: r !== 'applied' });
     if (def.flags?.includes('taunted')) {
       dst.targetId = src.id;
       if (dst.monster) dst.monster.currentTargetId = src.id;
     }
+  }
+
+  /** stun / knockback end every `endOnControl` status of the unit */
+  private breakStances(u: BattleUnit): void {
+    for (const b of u.buffs.filter(x => x.def.endOnControl)) this.removeStatus(u, b.def.id);
   }
 
   /** a skill rank's status modifiers (taunt_guard 45 % DR …) → a derived definition with the same id (cached) */
@@ -1877,6 +1911,7 @@ export class BattleEngine {
       applyStatus: (dst, id, src, duration, opts) => self.applyStatus(dst, id, src, duration, opts),
       interrupt: (src, dst, breakPower) => self.tryInterrupt(src, dst, breakPower),
       knockback: (src, dst, cells) => {
+        self.breakStances(dst);
         if (dst.monster && self.monsterDefs[dst.monster.definitionId]?.immune?.includes('KNOCKBACK')) return;
         for (let i = 0; i < cells; i++) {
           const back = { r: dst.pos.r, c: dst.pos.c + (Math.sign(dst.pos.c - src.pos.c) || (isPlayerUnit(src) ? 1 : -1)) };
@@ -1948,6 +1983,13 @@ export class BattleEngine {
       this.metrics.unit(src.id).dealt += amount;
     }
     // hit reaction: heroes always flinch visually; monsters go through their anti stun-lock rule
+    // MIRROR STANCE: part of each direct hit goes back to the attacker as TRUE damage (never reflected again)
+    const reflect = Math.max(0, ...dst.buffs.map(b => b.def.modifiers.reflectDamage ?? 0));
+    if (reflect > 0 && !poison && !noTransfer && src && src.alive && src !== dst && src.side !== dst.side && amount + blocked > 0) {
+      const back = Math.max(1, Math.round((amount + blocked) * reflect));
+      this.events.push({ type: 'reflect', src: dst.id, dst: src.id, amount: back });
+      this.applyDamage(src, back, false, false, dst, true);
+    }
     const hurt = !poison && dst.hp > 0 && (dst.monster ? this.monsterAI.onHit(dst) : true);
     this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked, hurt, ...(poison ? { poison } : {}) });
     if (dst.hp <= 0) {

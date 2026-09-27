@@ -8,6 +8,7 @@
  *   --all-floors  also Stage 1–3 when no floor is given
  */
 import { clearRating } from '../../src/app/core/rules/rewards';
+import { ascensionDuel } from '../../src/app/core/data/economy';
 import { BattleEngine, MONSTER_TUNING_LIMITS, monsterTuningReview } from '../../src/app/battle/engine/battle-engine';
 import { ENEMIES } from '../../src/app/core/data/enemies';
 import { MONSTER_SKILLS, MONSTERS } from '../../src/app/core/data/monsters';
@@ -93,8 +94,11 @@ const newAgg = (): Agg => ({
 
 // --farm=training_1,ascension_2 (or --farm=all): farm dungeon encounters instead of tower floors
 const farmArg = args.find(a => a.startsWith('--farm='))?.slice(7);
+// --asc=brass_shishi|moonblade_ronin|astral_seraph: Ascension with that weekday boss (default = today's)
+const ascArg = args.find(a => a.startsWith('--asc='))?.slice(6);
 const floors = farmArg
-  ? FARM_DUNGEONS.filter(d => farmArg === 'all' || farmArg.split(',').includes(d.id)).map(d => d.stage)
+  ? FARM_DUNGEONS.filter(d => farmArg === 'all' || farmArg.split(',').includes(d.id))
+      .map(d => (ascArg && d.type === 'ASCENSION' ? ascensionDuel(+d.id.split('_')[1], ascArg as Parameters<typeof ascensionDuel>[1]) : d.stage))
   : STAGES.filter(s => (onlyFloor != null ? s.floor === onlyFloor : s.floor >= 4 || flag('--all-floors')));
 const summary: string[] = [];
 
