@@ -57,7 +57,7 @@
       @if (theme().weatherPreset === 'MIST') { <div class="fog"></div> }
       @for (wl of weather(); track wl.key) {
         <div class="weather" [style.background-image]="'url(' + wl.src + ')'" [style.--tw.px]="wl.w" [style.--th.px]="wl.h"
-             [style.--dx.px]="wl.drift" [style.animation-duration.s]="wl.sec" [style.opacity]="wl.opacity"></div>
+             [style.--dx.px]="wl.dx" [style.--dy.px]="wl.dy" [style.animation-duration.s]="wl.sec" [style.opacity]="wl.opacity"></div>
       }
 
       <!-- interaction: tap areas + name plates (part of the scene, not of the art) -->

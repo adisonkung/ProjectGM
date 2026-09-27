@@ -1,8 +1,12 @@
 import {
-  BuildingSkin, IslandAsset, IslandThemeDefinition, PlaceholderShape, PlaceholderStageStyle, SkinLayer,
+  BuildingSkin, IslandAsset, IslandThemeDefinition, LightDef, PlaceholderShape, PlaceholderStageStyle, SkinLayer,
 } from '../models/island';
 import { DEFAULT_FOREST_ASSETS } from './island/default-forest.assets';
 import { FROZEN_KINGDOM_ASSETS } from './island/frozen-kingdom.assets';
+import { SAKURA_SANCTUARY_ASSETS } from './island/sakura-sanctuary.assets';
+import { CURSED_HOLLOW_ASSETS } from './island/cursed-hollow.assets';
+import { CELESTIAL_ISLE_ASSETS } from './island/celestial-isle.assets';
+import { DESERT_OASIS_ASSETS } from './island/desert-oasis.assets';
 
 /**
  * Island THEMES and building SKINS — cosmetic only. Nothing here is read by unlocks, navigation, collision or saves.
@@ -157,6 +161,7 @@ export const THEME_ALIASES: Record<string, string> = { ancient_forest: DEFAULT_T
 export const DEFAULT_FOREST_THEME: IslandThemeDefinition = {
   id: DEFAULT_THEME_ID,
   name: 'Ancient Forest Island',
+  description: 'ป่าโบราณยามพลบค่ำ หิ่งห้อย หมอกบาง และหอคอยแห่งการอัญเชิญ',
   free: true,
   assets: DEFAULT_FOREST_ASSETS,
   terrainSet: { ground: 'terrain.ground', water: 'terrain.streamWater', waterfall: 'terrain.waterfall' },
@@ -238,6 +243,7 @@ export const FROZEN_KINGDOM_SKINS = reskin(FROZEN_KINGDOM_ID, (b, st, layers) =>
 export const FROZEN_KINGDOM_THEME: IslandThemeDefinition = {
   id: FROZEN_KINGDOM_ID,
   name: 'Frozen Kingdom',
+  description: 'อาณาจักรเวทโบราณใต้หิมะและน้ำแข็งสีฟ้า ท้องฟ้าออโรร่า เตาหลอมไฟเย็น',
   free: true,
   assets: FROZEN_KINGDOM_ASSETS,
   terrainSet: { ground: 'terrain.ground', water: 'terrain.streamWater', waterfall: 'terrain.waterfall' },
@@ -257,8 +263,8 @@ export const FROZEN_KINGDOM_THEME: IslandThemeDefinition = {
     fireflies: 'fx.fireflies', // ice glints
     foregroundBranches: ['fore.branchLeft', 'fore.branchRight'],
     weather: [
-      { slot: 'weather.snowFar', seconds: 26, drift: 60, opacity: 0.7 },
-      { slot: 'weather.snowNear', seconds: 14, drift: 140, opacity: 0.9 },
+      { slot: 'weather.snowFar', seconds: 60, dx: 1, dy: 3, opacity: 0.7 },
+      { slot: 'weather.snowNear', seconds: 30, dx: 1, dy: 3, opacity: 0.9 },
     ],
   },
   lightingPreset: {
@@ -291,7 +297,134 @@ export const FROZEN_KINGDOM_THEME: IslandThemeDefinition = {
   bgmId: null,
 };
 
-export const ISLAND_THEMES: Record<string, IslandThemeDefinition> = { [DEFAULT_THEME_ID]: DEFAULT_FOREST_THEME, [FROZEN_KINGDOM_ID]: FROZEN_KINGDOM_THEME };
+// ------------------------------------------------------------------ themes #3–6 (same structure, own art / light / weather)
+
+/** light colours of a theme → the standard light pools (same buildings / FX anchors / stages as every theme) */
+interface ThemeLights {
+  tower: [string, string, string]; forge: string; windows: string; lantern: string; skill: string; ascension: string; memorial: string; dock: string;
+}
+function stdLights(c: ThemeLights): LightDef[] {
+  return [
+    { building: 'tower', at: 'auraAnchor', color: c.tower[0], radius: 370, minStage: 1, maxStage: 2 },
+    { building: 'tower', at: 'auraAnchor', color: c.tower[1], radius: 390, minStage: 3, maxStage: 4 },
+    { building: 'tower', at: 'auraAnchor', color: c.tower[2], radius: 430, minStage: 5 },
+    { building: 'equipment_workshop', at: 'forgeFireAnchor', color: c.forge, radius: 240, minStage: 1, flicker: true },
+    { building: 'hero_hall', at: 'windowLightAnchor', color: c.windows, radius: 250, minStage: 1 },
+    { building: 'hero_hall', at: 'lanternAnchor', color: c.lantern, radius: 90, minStage: 1, flicker: true },
+    { building: 'skill_shrine', at: 'runeAnchor', color: c.skill, radius: 240, minStage: 1 },
+    { building: 'ascension_shrine', at: 'crystalAnchor', color: c.ascension, radius: 210, minStage: 1 },
+    { building: 'endgame_facility', at: 'auraAnchor', color: c.memorial, radius: 150, minStage: 1 },
+    { building: 'expedition_dock', at: 'lanternAnchor', color: c.dock, radius: 110, minStage: 1, flicker: true },
+  ];
+}
+
+/** the shared manifest shape (slots are identical in every generated pack) */
+function themeFrom(t: Pick<IslandThemeDefinition, 'id' | 'name' | 'description' | 'assets' | 'buildingSkins' | 'lightingPreset' | 'weatherPreset'> &
+  { weather?: NonNullable<IslandThemeDefinition['ambientFxSet']['weather']>; decorFx?: IslandThemeDefinition['decorFx'] }): IslandThemeDefinition {
+  return {
+    id: t.id, name: t.name, description: t.description, free: true, assets: t.assets,
+    terrainSet: { ...DEFAULT_FOREST_THEME.terrainSet }, roadSet: { ...DEFAULT_FOREST_THEME.roadSet },
+    backgroundSet: { ...DEFAULT_FOREST_THEME.backgroundSet },
+    buildingSkins: t.buildingSkins,
+    treeSet: [...DEFAULT_FOREST_THEME.treeSet], vegetationSet: [...DEFAULT_FOREST_THEME.vegetationSet], propSet: [...DEFAULT_FOREST_THEME.propSet],
+    ambientFxSet: { fireflies: 'fx.fireflies', foregroundBranches: ['fore.branchLeft', 'fore.branchRight'], ...(t.weather ? { weather: t.weather } : {}) },
+    lightingPreset: t.lightingPreset,
+    decorFx: t.decorFx ?? DEFAULT_FOREST_THEME.decorFx,
+    weatherPreset: t.weatherPreset,
+    bgmId: null,
+  };
+}
+
+export const SAKURA_SANCTUARY_THEME = themeFrom({
+  id: 'sakura_sanctuary', name: 'Sakura Sanctuary', description: 'วิหารบนเขายามเย็น ซากุระบาน ป่าไผ่ โคมหินโทโร และกลีบดอกปลิวตามลม',
+  assets: SAKURA_SANCTUARY_ASSETS, buildingSkins: reskin('sakura_sanctuary'), weatherPreset: 'CLEAR',
+  weather: [{ slot: 'weather.petalsFar', seconds: 44, dx: 2, dy: 2, opacity: 0.8 }, { slot: 'weather.petalsNear', seconds: 26, dx: 2, dy: 2, opacity: 0.95 }],
+  // stone tōrō: the flame sits inside the firebox (the Default Forest post hangs it on an arm)
+  decorFx: { ...DEFAULT_FOREST_THEME.decorFx, 'prop.lanternPost': [{ slot: 'fx.lantern', dx: 0, dy: -75, glow: true }] },
+  lightingPreset: {
+    id: 'DUSK', ambient: 'rgba(70, 24, 60, 0.16)',
+    lights: stdLights({
+      tower: ['rgba(110, 230, 170, 0.30)', 'rgba(200, 120, 255, 0.32)', 'rgba(255, 214, 150, 0.34)'], forge: 'rgba(255, 150, 70, 0.42)',
+      windows: 'rgba(255, 200, 130, 0.30)', lantern: 'rgba(255, 196, 120, 0.32)', skill: 'rgba(110, 220, 240, 0.32)', ascension: 'rgba(230, 140, 220, 0.32)',
+      memorial: 'rgba(255, 210, 170, 0.28)', dock: 'rgba(255, 196, 120, 0.30)',
+    }),
+    decorLights: {
+      'prop.lanternPost': { color: 'rgba(255, 206, 130, 0.32)', radius: 84, dy: -75, flicker: true },
+      'prop.campfire': { color: 'rgba(255, 150, 70, 0.38)', radius: 150, dy: -12, flicker: true },
+      'tree.blossom': { color: 'rgba(255, 170, 225, 0.26)', radius: 120, dy: -120 },
+      'magic.crystalCluster': { color: 'rgba(170, 120, 255, 0.25)', radius: 70, dy: -30 },
+      'prop.fountain': { color: 'rgba(120, 220, 200, 0.14)', radius: 120, dy: -40 },
+    },
+  },
+});
+
+export const CURSED_HOLLOW_THEME = themeFrom({
+  id: 'cursed_hollow', name: 'Cursed Hollow', description: 'หุบป่าต้องสาปใต้จันทร์สีเลือด เห็ดยักษ์เรืองแสง หมอกม่วง และเถ้าลอย',
+  assets: CURSED_HOLLOW_ASSETS, buildingSkins: reskin('cursed_hollow'), weatherPreset: 'MIST',
+  weather: [{ slot: 'weather.ash', seconds: 50, dx: 1, dy: 2, opacity: 0.75 }, { slot: 'weather.embers', seconds: 30, dx: 1, dy: -2, opacity: 0.9 }],
+  lightingPreset: {
+    id: 'NIGHT', ambient: 'rgba(24, 6, 36, 0.30)',
+    lights: stdLights({
+      tower: ['rgba(120, 255, 140, 0.30)', 'rgba(180, 90, 255, 0.36)', 'rgba(250, 210, 120, 0.32)'], forge: 'rgba(170, 90, 255, 0.46)',
+      windows: 'rgba(150, 230, 120, 0.26)', lantern: 'rgba(150, 255, 140, 0.32)', skill: 'rgba(90, 220, 200, 0.32)', ascension: 'rgba(190, 110, 255, 0.36)',
+      memorial: 'rgba(220, 70, 80, 0.26)', dock: 'rgba(150, 255, 140, 0.30)',
+    }),
+    decorLights: {
+      'prop.lanternPost': { color: 'rgba(150, 255, 140, 0.30)', radius: 80, dy: -84, flicker: true },
+      'prop.campfire': { color: 'rgba(170, 90, 255, 0.40)', radius: 150, dy: -12, flicker: true },
+      'tree.blossom': { color: 'rgba(170, 110, 255, 0.32)', radius: 130, dy: -130 },
+      'magic.glowMushrooms': { color: 'rgba(170, 110, 255, 0.28)', radius: 60, dy: -10 },
+      'magic.crystalCluster': { color: 'rgba(170, 120, 255, 0.28)', radius: 70, dy: -30 },
+      'magic.runeStone': { color: 'rgba(120, 255, 140, 0.22)', radius: 60, dy: -36 },
+    },
+  },
+});
+
+export const CELESTIAL_ISLE_THEME = themeFrom({
+  id: 'celestial_isle', name: 'Celestial Isle', description: 'เกาะเหนือเมฆยามกลางวัน หินอ่อนขาว โดมทอง ต้นไม้แสงดาว และละอองแสงทองลอยขึ้นฟ้า',
+  assets: CELESTIAL_ISLE_ASSETS, buildingSkins: reskin('celestial_isle'), weatherPreset: 'CLEAR',
+  weather: [{ slot: 'weather.motesFar', seconds: 60, dx: 0, dy: -1, opacity: 0.8 }, { slot: 'weather.feathers', seconds: 50, dx: 1, dy: 2, opacity: 0.85 }],
+  lightingPreset: {
+    id: 'DAY', ambient: 'rgba(255, 236, 190, 0.06)',
+    lights: stdLights({
+      tower: ['rgba(140, 200, 255, 0.24)', 'rgba(190, 150, 255, 0.26)', 'rgba(255, 226, 150, 0.32)'], forge: 'rgba(255, 230, 150, 0.36)',
+      windows: 'rgba(255, 236, 180, 0.20)', lantern: 'rgba(255, 240, 190, 0.26)', skill: 'rgba(140, 210, 255, 0.28)', ascension: 'rgba(210, 170, 255, 0.28)',
+      memorial: 'rgba(255, 230, 160, 0.26)', dock: 'rgba(255, 236, 180, 0.24)',
+    }),
+    decorLights: {
+      'tree.blossom': { color: 'rgba(255, 236, 170, 0.28)', radius: 120, dy: -130 },
+      'tree.small': { color: 'rgba(170, 220, 255, 0.18)', radius: 60, dy: -60 },
+      'magic.crystalCluster': { color: 'rgba(170, 200, 255, 0.24)', radius: 70, dy: -30 },
+      'prop.fountain': { color: 'rgba(180, 230, 255, 0.18)', radius: 130, dy: -40 },
+      'prop.campfire': { color: 'rgba(255, 230, 150, 0.30)', radius: 130, dy: -12, flicker: true },
+    },
+  },
+});
+
+export const DESERT_OASIS_THEME = themeFrom({
+  id: 'desert_oasis', name: 'Desert Oasis', description: 'โอเอซิสหินทรายยามอาทิตย์ตก ต้นปาล์ม โดมเทอร์ควอยซ์ กระบองเพชรยักษ์ และทรายปลิวตามลม',
+  assets: DESERT_OASIS_ASSETS, buildingSkins: reskin('desert_oasis'), weatherPreset: 'CLEAR',
+  weather: [{ slot: 'weather.sandFar', seconds: 40, dx: 3, dy: 1, opacity: 0.7 }, { slot: 'weather.sandNear', seconds: 22, dx: 3, dy: 1, opacity: 0.8 }],
+  lightingPreset: {
+    id: 'DUSK', ambient: 'rgba(80, 30, 20, 0.14)',
+    lights: stdLights({
+      tower: ['rgba(90, 230, 210, 0.30)', 'rgba(190, 120, 255, 0.32)', 'rgba(255, 214, 130, 0.36)'], forge: 'rgba(255, 130, 50, 0.48)',
+      windows: 'rgba(255, 190, 110, 0.30)', lantern: 'rgba(255, 190, 100, 0.34)', skill: 'rgba(90, 220, 220, 0.32)', ascension: 'rgba(200, 130, 255, 0.32)',
+      memorial: 'rgba(255, 210, 130, 0.28)', dock: 'rgba(255, 190, 100, 0.30)',
+    }),
+    decorLights: {
+      'prop.lanternPost': { color: 'rgba(255, 190, 100, 0.32)', radius: 80, dy: -84, flicker: true },
+      'prop.campfire': { color: 'rgba(255, 150, 70, 0.40)', radius: 150, dy: -12, flicker: true },
+      'tree.blossom': { color: 'rgba(255, 150, 200, 0.22)', radius: 100, dy: -170 },
+      'prop.fountain': { color: 'rgba(90, 220, 210, 0.16)', radius: 130, dy: -40 },
+      'magic.crystalCluster': { color: 'rgba(170, 120, 255, 0.25)', radius: 70, dy: -30 },
+    },
+  },
+});
+
+export const ISLAND_THEMES: Record<string, IslandThemeDefinition> = Object.fromEntries(
+  [DEFAULT_FOREST_THEME, FROZEN_KINGDOM_THEME, SAKURA_SANCTUARY_THEME, CURSED_HOLLOW_THEME, CELESTIAL_ISLE_THEME, DESERT_OASIS_THEME].map(t => [t.id, t]),
+);
 
 /** individual skins sold / granted later (building skin overrides) — empty in Patch 1 */
 export const BUILDING_SKIN_LIBRARY: Record<string, BuildingSkin> = {};

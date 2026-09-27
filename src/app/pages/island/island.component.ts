@@ -5,7 +5,7 @@ import { ISLAND_THEMES, themeOf } from '../../core/data/island-themes';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_NAME } from '../../core/data/classes';
 import { STAGES } from '../../core/data/stages';
-import { IslandBuildingState, IslandEvent } from '../../core/models/island';
+import { IslandBuildingState, IslandEvent, IslandThemeDefinition } from '../../core/models/island';
 import { daySeed, islandStageName, pickRoamers, roamerCount, unlockFloorOf } from '../../core/rules/island';
 import { IslandService } from '../../core/services/island.service';
 import { RosterService } from '../../core/services/roster.service';
@@ -57,6 +57,20 @@ export class IslandComponent implements OnInit, OnDestroy {
   readonly themes = Object.values(ISLAND_THEMES);
   setTheme(id: string): void {
     this.isl.setTheme(id);
+  }
+  readonly themeSheet = signal(false);
+  openThemes(): void {
+    this.selectedBuilding.set(null);
+    this.selectedHero.set(null);
+    this.themeSheet.set(true);
+  }
+  /** picker preview: the theme's own sky + tower art */
+  previewOf(t: IslandThemeDefinition): string {
+    const sky = t.assets['bg.sky'];
+    return sky ? `url(${sky.src})` : 'none';
+  }
+  towerOf(t: IslandThemeDefinition): string | null {
+    return t.assets['building.tower.base.active']?.src ?? null;
   }
   readonly cleared = computed(() => this.save.state().cleared);
   readonly totalFloors = STAGES.length;
@@ -222,6 +236,7 @@ export class IslandComponent implements OnInit, OnDestroy {
   closeSheets(): void {
     this.selectedBuilding.set(null);
     this.selectedHero.set(null);
+    this.themeSheet.set(false);
   }
   go(route: string, query?: Record<string, string | number>): void {
     this.router.navigate([route], { queryParams: query });

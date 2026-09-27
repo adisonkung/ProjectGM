@@ -223,6 +223,8 @@ export interface DecorLightDef {
 export interface IslandThemeDefinition {
   id: string;
   name: string;
+  /** one-line flavour text for the theme picker */
+  description?: string;
   free: boolean;
   /** slot → asset. Missing slots fall back to the Default Forest theme (never crash, never hide a building) */
   assets: Record<string, IslandAsset>;
@@ -238,8 +240,11 @@ export interface IslandThemeDefinition {
   ambientFxSet: {
     fireflies?: string;
     foregroundBranches?: string[];
-    /** weather overlay layers (seamless tiles scrolled by CSS) — cosmetic only, never read by gameplay */
-    weather?: { slot: string; seconds: number; drift: number; opacity?: number }[];
+    /**
+     * weather overlay layers — seamless tiles scrolled by CSS (cosmetic only, never read by gameplay).
+     * One loop moves the tile by (dx, dy) whole tiles (keeps the loop seamless); negative dy = rising (embers, motes).
+     */
+    weather?: { slot: string; seconds: number; dx: number; dy: number; opacity?: number }[];
   };
   lightingPreset: { id: 'DAY' | 'DUSK' | 'NIGHT'; ambient: string; lights: LightDef[]; decorLights: Record<string, DecorLightDef> };
   /** animated sprites attached to decoration slots (campfire flame, fountain water, lantern flame) */

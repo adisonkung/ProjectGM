@@ -33,6 +33,7 @@ export const ICON_PATHS: Record<string, string> = {
   restart: 'M4 12a8 8 0 1 0 2.4-5.7 M4 3v5h5',
   exit: 'M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5 M10 8l-4 4 4 4 M6 12h10',
   fast: 'M3 5l8 7-8 7z M12 5l8 7-8 7z',
+  palette: 'M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2 0-1.5-1.5-1.8-1.5-3 0-1 .8-1.8 2-1.8H17a4 4 0 0 0 4-4C21 6 17 3 12 3z M7.5 11h.01 M10 7h.01 M14.5 7h.01 M17 10.5h.01',
 };
 
 /** inline SVG glyph: `<app-icon name="tower" />` — size follows font-size (1em) unless `size` is set */

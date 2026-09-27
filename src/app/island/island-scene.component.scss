@@ -54,7 +54,7 @@
 
 .weather { position: absolute; inset: 0; z-index: 972500; pointer-events: none; image-rendering: pixelated;
   background-size: var(--tw) var(--th); background-repeat: repeat; animation: snowfall 20s linear infinite; }
-@keyframes snowfall { from { background-position: 0 0; } to { background-position: var(--dx) var(--th); } }
+@keyframes snowfall { from { background-position: 0 0; } to { background-position: var(--dx) var(--dy); } }
 
 .hit { position: absolute; z-index: 980000; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 16px; }
 .hit:hover { background: #f6dfa00d; }

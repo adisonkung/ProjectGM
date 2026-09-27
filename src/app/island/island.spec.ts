@@ -287,7 +287,7 @@ describe('Home Island — themes, assets and fallbacks (cosmetic only)', () => {
   });
 
   it('themes carry no stat / reward fields', () => {
-    const allowed = ['id', 'name', 'free', 'assets', 'terrainSet', 'roadSet', 'backgroundSet', 'buildingSkins', 'treeSet', 'vegetationSet', 'propSet',
+    const allowed = ['id', 'name', 'description', 'free', 'assets', 'terrainSet', 'roadSet', 'backgroundSet', 'buildingSkins', 'treeSet', 'vegetationSet', 'propSet',
       'ambientFxSet', 'lightingPreset', 'decorFx', 'weatherPreset', 'bgmId'];
     for (const t of Object.values(ISLAND_THEMES)) for (const k of Object.keys(t)) expect(allowed).withContext(k).toContain(k);
     expect(JSON.stringify(T.lightingPreset)).not.toMatch(/"(atk|hp|def|exp|dropRate|bonus|power)"/i);
@@ -342,59 +342,73 @@ describe('Home Island — themes, assets and fallbacks (cosmetic only)', () => {
   });
 });
 
-describe('Home Island — Frozen Kingdom theme (visuals only)', () => {
-  const F = FROZEN_KINGDOM_THEME, D = DEFAULT_FOREST_THEME;
+describe('Home Island — cosmetic themes (Frozen Kingdom, Sakura, Cursed, Celestial, Desert — visuals only)', () => {
+  const D = DEFAULT_FOREST_THEME;
   const h = newGameState();
+  const THEMES = Object.values(ISLAND_THEMES).filter(t => t.id !== DEFAULT_THEME_ID);
+  const PREFIX: Record<string, string> = { frozen_kingdom: 'frozen', sakura_sanctuary: 'sakura', cursed_hollow: 'cursed', celestial_isle: 'celestial', desert_oasis: 'desert' };
 
-  it('is registered with its own id, snow weather and a full asset pack (every Default Forest slot re-drawn, no fallback needed)', () => {
-    expect(ISLAND_THEMES['frozen_kingdom']).toBe(F);
-    expect(themeOf('frozen_kingdom')).toBe(F);
-    expect(F.weatherPreset).toBe('SNOW');
-    expect(F.ambientFxSet.weather!.length).toBeGreaterThan(0);
-    for (const w of F.ambientFxSet.weather!) expect(resolveAsset(F, w.slot)).withContext(w.slot).not.toBeNull();
-    for (const slot of Object.keys(DEFAULT_FOREST_ASSETS)) expect(FROZEN_KINGDOM_ASSETS[slot]).withContext(slot).toBeDefined();
-    for (const [slot, a] of Object.entries(FROZEN_KINGDOM_ASSETS)) {
-      expect(a.src).withContext(slot).toMatch(/^island\/frozen_kingdom\/[a-z]+\/island_frozen_[a-z]+_[a-z0-9_]+\.png$/);
-      expect(a.src).withContext(slot).not.toBe(DEFAULT_FOREST_ASSETS[slot]?.src);
+  it('five extra themes are registered, each with a name, description and a full asset pack (every Default Forest slot re-drawn)', () => {
+    expect(THEMES.map(t => t.id).sort()).toEqual(Object.keys(PREFIX).sort());
+    expect(ISLAND_THEMES['frozen_kingdom']).toBe(FROZEN_KINGDOM_THEME);
+    expect(FROZEN_KINGDOM_THEME.weatherPreset).toBe('SNOW');
+    for (const t of THEMES) {
+      expect(themeOf(t.id)).toBe(t);
+      expect(t.name.length).withContext(t.id).toBeGreaterThan(3);
+      expect(t.description?.length ?? 0).withContext(t.id).toBeGreaterThan(10);
+      expect(t.ambientFxSet.weather?.length ?? 0).withContext(t.id).toBeGreaterThan(0);
+      for (const w of t.ambientFxSet.weather!) {
+        expect(resolveAsset(t, w.slot)).withContext(`${t.id} ${w.slot}`).not.toBeNull();
+        expect(Number.isInteger(w.dx) && Number.isInteger(w.dy)).withContext(`${t.id} ${w.slot} seamless loop`).toBeTrue();
+      }
+      for (const slot of Object.keys(DEFAULT_FOREST_ASSETS)) expect(t.assets[slot]).withContext(`${t.id} ${slot}`).toBeDefined();
+      const re = new RegExp(`^island\\/${t.id}\\/[a-z]+\\/island_${PREFIX[t.id]}_[a-z]+_[a-z0-9_]+\\.png$`);
+      for (const [slot, a] of Object.entries(t.assets)) {
+        expect(a.src).withContext(`${t.id} ${slot}`).toMatch(re);
+        expect(a.src).withContext(slot).not.toBe(DEFAULT_FOREST_ASSETS[slot]?.src);
+      }
     }
   });
 
-  it('every building stage draws Frozen Kingdom layered art (own skin ids), using only FX anchors the plot already has', () => {
-    for (const b of ISLAND_BUILDINGS) {
-      const skin = resolveBuildingSkin(b.id, F);
-      expect(skin).withContext(b.id).toBe(FROZEN_KINGDOM_SKINS[b.id]);
-      expect(skin.id).withContext(b.id).toContain('frozen_kingdom');
+  it('every building stage draws the theme own layered art (own skin ids), using only FX anchors the plot already has', () => {
+    for (const t of THEMES) for (const b of ISLAND_BUILDINGS) {
+      const skin = resolveBuildingSkin(b.id, t);
+      expect(skin).withContext(`${t.id} ${b.id}`).toBe(t.buildingSkins[b.id]);
+      expect(skin.id).withContext(b.id).toContain(t.id);
       for (const st of b.visualStages) {
-        const layers = layersFor(skin, st.stage, F)!;
-        const base = layers.find(l => l.layer.role === 'BASE');
-        expect(base?.asset.src).withContext(`${b.id} ${st.stage}`).toContain('frozen_kingdom');
+        const base = layersFor(skin, st.stage, t)!.find(l => l.layer.role === 'BASE');
+        expect(base?.asset.src).withContext(`${t.id} ${b.id} ${st.stage}`).toContain(t.id);
       }
       if (skin.kind === 'LAYERED') for (const ls of Object.values(skin.stages)) for (const l of ls) if (l.at) expect(PLOT_BY_ID[b.plotId].fxAnchors[l.at]).withContext(`${b.id} ${l.at}`).toBeDefined();
     }
   });
 
   it('keeps every footprint: building / training / road / terrain art has the Default Forest size, anchor and frame count', () => {
-    for (const [slot, a] of Object.entries(DEFAULT_FOREST_ASSETS)) {
+    for (const t of THEMES) for (const [slot, a] of Object.entries(DEFAULT_FOREST_ASSETS)) {
       if (!/^(building|training|road|terrain)\./.test(slot)) continue;
-      const f = FROZEN_KINGDOM_ASSETS[slot];
-      expect([f.w, f.h, f.ax, f.ay, f.frames ?? 1]).withContext(slot).toEqual([a.w, a.h, a.ax, a.ay, a.frames ?? 1]);
+      const f = t.assets[slot];
+      expect([f.w, f.h, f.ax, f.ay, f.frames ?? 1]).withContext(`${t.id} ${slot}`).toEqual([a.w, a.h, a.ax, a.ay, a.frames ?? 1]);
     }
+    expect(FROZEN_KINGDOM_ASSETS['building.forge.crystal']).toBeDefined();
   });
 
   it('gameplay neutral: same tap areas, name plates, decoration spots, nav graph and save data — only the look changes', () => {
     const states = newIsland(10, h.heroes, h.team).buildingProgression;
-    const dd = buildingDraw(D, states, {}, unlockFloorOf), df = buildingDraw(F, states, {}, unlockFloorOf);
-    expect(df.hits).toEqual(dd.hits);
-    expect(df.placeholders.length).toBe(0);
-    expect(decorDraw(F).length).toBe(decorDraw(D).length);
+    const dd = buildingDraw(D, states, {}, unlockFloorOf);
     const nav = JSON.stringify({ NAV_NODES, NAV_EDGES, ISLAND_PLOTS, ISLAND_BUILDINGS });
     const isl = newIsland(10, h.heroes, h.team);
-    const switched = setTheme(isl, 'frozen_kingdom')!;
-    expect({ ...switched, themeId: isl.themeId }).toEqual(isl);
-    expect(switched.themeId).toBe('frozen_kingdom');
+    for (const t of THEMES) {
+      const df = buildingDraw(t, states, {}, unlockFloorOf);
+      expect(df.hits).withContext(t.id).toEqual(dd.hits);
+      expect(df.placeholders.length).withContext(t.id).toBe(0);
+      expect(decorDraw(t).length).withContext(t.id).toBe(decorDraw(D).length);
+      const switched = setTheme(isl, t.id)!;
+      expect({ ...switched, themeId: isl.themeId }).withContext(t.id).toEqual(isl);
+      expect(switched.themeId).toBe(t.id);
+      expect(JSON.stringify(t)).withContext(t.id).not.toMatch(/"(atk|hp|def|exp|dropRate|bonus|power|speed)"\s*:/i);
+    }
     expect(JSON.stringify({ NAV_NODES, NAV_EDGES, ISLAND_PLOTS, ISLAND_BUILDINGS })).toBe(nav);
-    expect(JSON.stringify(F)).not.toMatch(/"(atk|hp|def|exp|dropRate|bonus|power|speed)"\s*:/i);
-    // a hypothetical later theme that lacks Frozen-only slots still draws (forge crystal is optional FX)
+    // theme-only optional slots fall back to nothing (layer skipped), never to a hidden building
     expect(resolveAsset(D, 'building.forge.crystal')).toBeNull();
     expect(layersFor(FROZEN_KINGDOM_SKINS['equipment_workshop'], 3, D)!.some(l => l.layer.role === 'BASE')).toBeTrue();
   });
@@ -447,6 +461,22 @@ describe('Home Island — page', () => {
     f.componentInstance.tapBuilding('equipment_workshop');
     f.detectChanges();
     expect(el.querySelector('div.sheet[role="dialog"]')!.textContent).toContain('ผ่านหอคอยชั้น 6');
+    f.destroy();
+  });
+
+  it('theme button on the island opens the picker; choosing a theme redraws the island and saves only the theme id', async () => {
+    const { f, el, isl } = await mount(3);
+    const before = JSON.stringify({ ...isl.island(), themeId: null });
+    el.querySelector<HTMLButtonElement>('.hud.tr .theme-btn')!.click();
+    f.detectChanges();
+    const cards = el.querySelectorAll<HTMLButtonElement>('.themes-sheet .theme-card');
+    expect(cards.length).toBe(Object.keys(ISLAND_THEMES).length);
+    [...cards].find(c => c.textContent!.includes('Cursed Hollow'))!.click();
+    f.detectChanges();
+    expect(isl.island().themeId).toBe('cursed_hollow');
+    expect(JSON.stringify({ ...isl.island(), themeId: null })).toBe(before);
+    expect(el.querySelector('img[src*="island/cursed_hollow/"]')).not.toBeNull();
+    expect(el.querySelectorAll('.weather').length).toBe(2);
     f.destroy();
   });
 

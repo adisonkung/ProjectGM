@@ -14,6 +14,7 @@
       </span>
     </div>
     <div class="hud tr">
+      <button type="button" class="note theme-btn" (click)="openThemes()" aria-label="เปลี่ยนธีมเกาะ" title="ธีมเกาะ"><app-icon name="palette" [size]="17" /></button>
       @if (readyCount()) {
         <a class="note" routerLink="/heroes" [attr.aria-label]="readyCount() + ' ฮีโร่พร้อมอัป'"><app-icon name="heroes" [size]="15" /><em>{{ readyCount() }}</em></a>
       }
@@ -81,6 +82,29 @@
         </div>
       </div>
     }
+    <!-- theme picker (visual only) -->
+    @if (themeSheet()) {
+      <div class="sheet themes-sheet" role="dialog" aria-label="ธีมเกาะ">
+        <button type="button" class="x" (click)="closeSheets()" aria-label="ปิด">✕</button>
+        <header>
+          <small class="gm-class">ธีมเกาะ</small>
+          <h2>เปลี่ยนหน้าตาเกาะ</h2>
+          <p class="tnote">เปลี่ยนแค่ภาพ — สิ่งก่อสร้าง เส้นทาง ค่าพลัง และรางวัลเหมือนเดิมทุกอย่าง</p>
+        </header>
+        <div class="theme-grid">
+          @for (t of themes; track t.id) {
+            <button type="button" class="theme-card" [class.on]="t.id === theme().id" [attr.aria-pressed]="t.id === theme().id" (click)="setTheme(t.id)">
+              <span class="pv" [style.background-image]="previewOf(t)">
+                @if (towerOf(t); as tw) { <img [src]="tw" alt="" /> }
+              </span>
+              <b>{{ t.name }}</b>
+              <small>{{ t.description }}</small>
+              @if (t.id === theme().id) { <em>ใช้อยู่</em> }
+            </button>
+          }
+        </div>
+      </div>
+    }
   </div>
 
   <aside class="side gm-panel">
@@ -91,13 +115,8 @@
     } @else {
       <p class="goal done"><app-icon name="crown" [size]="13" /> ฟื้นฟูเกาะใน Patch 1 ครบแล้ว</p>
     }
-    <div class="themes" role="group" aria-label="ธีมเกาะ">
-      <small class="gm-class">ธีมเกาะ</small>
-      @for (t of themes; track t.id) {
-        <button type="button" class="gm-btn small" [class.arcane]="t.id === theme().id" [attr.aria-pressed]="t.id === theme().id" (click)="setTheme(t.id)">{{ t.name }}</button>
-      }
-      <small class="tnote">เปลี่ยนแค่หน้าตา — ไม่มีผลกับค่าพลัง รางวัล หรือสิ่งก่อสร้าง</small>
-    </div>
+    <p class="theme-line"><app-icon name="palette" [size]="13" /> ธีม: <b>{{ theme().name }}</b>
+      <button type="button" class="gm-btn small ghost" (click)="openThemes()">เปลี่ยนธีม</button></p>
     <p class="hint">เลื่อนซ้าย–ขวาเพื่อสำรวจเกาะ · แตะสิ่งก่อสร้างเพื่อเข้าใช้งาน · แตะฮีโร่เพื่อดูรายละเอียดหรือตั้งเป็นฮีโร่หลัก</p>
   </aside>
 </section>
