@@ -21,6 +21,9 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
              [style.background-position]="'calc(var(--shift) * var(--screen) * -1) ' + g.yGround"></div>
         <div class="mid faint" [style.top.%]="g.cut * 100"></div>
       </div>
+      <!-- free strip under the lanes: the image's bottom band again, darkened into a tray -->
+      <div class="foot" [style.background-image]="g.url" [style.background-size]="g.size"
+           [style.background-position]="'calc(' + shift() + ' * var(--cell) * -1) 100%'"></div>
     } @else {
     <div class="layers" [style.--shift]="shift()" [style.--dur]="duration() + 'ms'">
       <div class="sky" [style.height.%]="skyPct"></div>
@@ -31,11 +34,16 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
       <div class="tint" [style.top.%]="skyPct"></div>
       <div class="mid" [style.top.%]="skyPct"></div>
     </div>
+    <div class="foot plain"></div>
     }
   `,
   styles: `
     :host { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-    .layers { position: absolute; inset: 0; --screen: var(--cell); }
+    .layers { position: absolute; left: 0; right: 0; top: 0; bottom: var(--foot, 0px); --screen: var(--cell); }
+    .foot { position: absolute; left: 0; right: 0; bottom: 0; height: var(--foot, 0px); background-repeat: repeat-x; image-rendering: pixelated;
+      transition: background-position var(--dur, 0ms) linear; }
+    .foot::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #0b081400 0%, #0b081499 35%, #0b0814d9 100%); }
+    .foot.plain { background: linear-gradient(180deg, #27432b, #1b2e1f); }
     .layers > div { position: absolute; left: 0; right: 0; }
     .sky {
       top: 0;

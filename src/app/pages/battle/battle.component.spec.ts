@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
 
 import { provideRouter } from '@angular/router';
 import { BattleComponent } from './battle.component';
@@ -34,13 +34,13 @@ describe('BattleComponent', () => {
     component.ngOnDestroy();
   });
 
-  it('battle screen: wave panel + clock on top, one speed button cycling x1/x2/x4, party in the dock', () => {
+  it('battle screen: wave panel + clock on top, one speed button cycling x1/x2/x4, party inside the field', () => {
     component.start();
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('.screen .hud-top .wave-panel')).not.toBeNull();
     expect(el.querySelector('.screen .hud-top .clock')).not.toBeNull();
-    expect(el.querySelector('.dock app-party-bar')).not.toBeNull();
+    expect(el.querySelector('.screen app-party-bar.party-in .auto')).not.toBeNull();
     expect(el.querySelectorAll('.hud-right .hud-btn').length).toBe(2);
     const spd = el.querySelector<HTMLButtonElement>('.hud-btn.spd')!;
     expect(spd.textContent).toContain('x1');
@@ -81,4 +81,23 @@ describe('BattleComponent', () => {
     expect(el.querySelector('app-placement')).not.toBeNull();
     component.ngOnDestroy();
   });
+
+  it('stage end: a short outro on the battle screen before the result popup', fakeAsync(() => {
+    component.start();
+    component.setSpeed(4);
+    const step = () => (component as unknown as { tick(): void }).tick();
+    for (let i = 0; i < 6000 && !component.ending(); i++) step();
+    expect(component.ending()).toBeTrue();
+    expect(component.result()).toBeNull();
+    expect(component.outcome()).not.toBeNull(); // rewards already granted
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.overlay')).toBeNull();
+    tick(BattleComponent.OUTRO_MS + 10);
+    fixture.detectChanges();
+    expect(component.ending()).toBeFalse();
+    expect(component.result()).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.overlay .result-card')).not.toBeNull();
+    discardPeriodicTasks();
+    component.ngOnDestroy();
+  }));
 });

@@ -199,13 +199,12 @@
   &.spd { min-width: 64px; }
 }
 
-// free row under the lanes
-.dock {
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding: 6px; border-radius: 12px;
-  background: linear-gradient(180deg, #1a1426, #0d0a16); border: 1px solid var(--line);
-  app-party-bar { flex: 1 1 auto; min-width: 0; }
-}
-.dock-side { display: grid; justify-items: end; gap: 6px; flex: 0 1 320px; }
+// free strip under the lanes, inside the field (board --foot): party bottom-left, AUTO after the last card, boss bar bottom-right
+.screen { --foot: 82px; }
+.party-in { position: absolute; left: 6px; bottom: 4px; z-index: 240; max-width: calc(100% - 12px); }
+.party-in .auto { align-self: center; }
+.screen.boss { --hud-h: 116px; }
+.hud-top .boss-bar { width: min(360px, 60vw); }
 
 // popups centred on the battle screen
 .overlay {
@@ -249,13 +248,14 @@
   .pips { display: none; }
   .clock { font-size: 16px; padding: 0 8px; border-radius: 8px; small { margin-bottom: 3px; font-size: 9px; } }
   .mode-line { display: none; }
-  .banner { top: 55%; font-size: 12px; padding: 3px 10px; }
+  .banner { top: 62px; font-size: 12px; padding: 3px 10px; }
   .exp-strip { gap: 6px; li { width: 60px; } }
   .hud-right { top: 3px; right: 3px; gap: 4px; }
   .hud-btn { height: 28px; min-width: 30px; padding: 0 6px; font-size: 12px; &.spd { min-width: 46px; } }
-  .dock { flex-direction: column; align-items: stretch; }
-  .dock-side { justify-items: stretch; flex-basis: auto; display: flex; align-items: center; }
-  .dock-side .boss-bar { flex: 1; }
+  .screen { --foot: 0px; }
+  .party-in { position: static; max-width: none; margin-top: 6px; }
+  .screen.boss { --hud-h: 44px; }
+  .hud-top .boss-bar { width: 40vw; padding: 2px 6px; b, small { display: none; } .bb-track { height: 5px; } }
   // small screens: popups cover the viewport (the board alone is too short)
   .overlay { position: fixed; border-radius: 0; }
 }

@@ -41,7 +41,7 @@
     </div>
   } @else {
     <div class="arena" [class.paused]="paused()">
-      <div class="screen">
+      <div class="screen" [class.boss]="!!bossBar()">
         <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
                    [scroll]="scroll()" [tickMs]="tickMs" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
 
@@ -61,6 +61,13 @@
             </div>
             <div class="clock" [class.low]="timeLeft() <= 10" aria-label="เวลาที่เหลือ">{{ timeLeft() }}<small>วิ</small></div>
           </div>
+          @if (bossBar(); as bb) {
+            <div class="boss-bar" [class.final]="bb.final" [class.enraged]="bb.enraged" role="status" aria-label="พลังชีวิตบอส">
+              <b>{{ bb.final ? '☠ ' : '' }}{{ bb.name }}</b>
+              <span class="bb-track"><i [style.width.%]="bb.hpPct"></i></span>
+              <small>{{ bb.hpPct.toFixed(0) }}%{{ bb.phase ? ' · ' + bb.phase : '' }}{{ bb.sealed ? ' · 🔒 ผนึก (ฆ่าวิญญาณหมอก)' : '' }}{{ bb.broken ? ' · 💥 BROKEN' : '' }}</small>
+            </div>
+          }
           @if (modeHud(); as h) { <div class="mode-line" role="status"><b>{{ h.goal }}</b> {{ h.line }}</div> }
           @if (debug()) { <span class="chip dbg">DEBUG · {{ phase() }}</span> }
         </div>
@@ -71,6 +78,10 @@
           <button type="button" class="hud-btn" (click)="openMenu()" [disabled]="!running()" aria-label="ตั้งค่า / หยุดชั่วคราว" title="ตั้งค่า"><app-icon name="gear" [size]="18" /></button>
         </div>
 
+        <!-- free strip under the lanes (inside the field): party bottom-left, AUTO right of the last hero -->
+        <app-party-bar class="party-in" [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
+          <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
+        </app-party-bar>
         @if (focusCard(); as f) {
           <div class="focus-card" [class.on]="f.isFocus" role="group" aria-label="เป้าหมาย">
             <span class="fc-name">{{ f.isFocus ? '🎯 FOCUS · ' : '' }}{{ f.name }}</span>
@@ -94,21 +105,6 @@
             }
           </div>
         }
-      </div>
-
-      <!-- free row under the lanes: party (bottom-left) · boss bar + AUTO (right) -->
-      <div class="dock">
-        <app-party-bar [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)" />
-        <div class="dock-side">
-          @if (bossBar(); as bb) {
-            <div class="boss-bar" [class.final]="bb.final" [class.enraged]="bb.enraged" role="status" aria-label="พลังชีวิตบอส">
-              <b>{{ bb.final ? '☠ ' : '' }}{{ bb.name }}</b>
-              <span class="bb-track"><i [style.width.%]="bb.hpPct"></i></span>
-              <small>{{ bb.hpPct.toFixed(0) }}%{{ bb.phase ? ' · ' + bb.phase : '' }}{{ bb.sealed ? ' · 🔒 ผนึก (ฆ่าวิญญาณหมอก)' : '' }}{{ bb.broken ? ' · 💥 BROKEN' : '' }}</small>
-            </div>
-          }
-          <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
-        </div>
       </div>
 
       <!-- settings popup (fight paused) -->
@@ -139,7 +135,7 @@
       }
 
       <!-- tower / farm result: centred on the battle screen -->
-      @if (mode() !== 'lab' && outcome(); as o) {
+      @if (mode() !== 'lab' && result() && outcome(); as o) {
         <div class="overlay">
           <div class="result-card" [class.win]="o.win" role="dialog" aria-label="ผลการต่อสู้">
             <h2>{{ o.win ? 'สำเร็จ!' : o.result === 'timeout' ? 'หมดเวลา' : 'ล้มเหลว' }} <small>{{ runTitle() }}</small></h2>

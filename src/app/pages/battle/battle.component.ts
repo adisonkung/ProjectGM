@@ -205,6 +205,7 @@ export class BattleComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     clearInterval(this.timer);
+    this.endTimers.forEach(clearTimeout);
   }
 
   selectFloor(n: number): void {
@@ -217,6 +218,9 @@ export class BattleComponent implements OnDestroy {
   /** สร้างการต่อสู้ใหม่และแสดงตำแหน่งเริ่มต้น */
   prepare(): void {
     clearInterval(this.timer);
+    this.endTimers.forEach(clearTimeout);
+    this.endTimers = [];
+    this.ending.set(false);
     this.running.set(false);
     this.paused.set(false);
     this.menuOpen.set(false);
@@ -331,7 +335,7 @@ export class BattleComponent implements OnDestroy {
 
   /** settings popup: pauses the fight while open */
   openMenu(): void {
-    if (!this.running()) return;
+    if (!this.running() || this.ending()) return;
     this.menuOpen.set(true);
     this.paused.set(true);
   }
@@ -374,15 +378,46 @@ export class BattleComponent implements OnDestroy {
     this.modeHud.set(modeStatus(this.engine));
     if (this.engine.result) {
       clearInterval(this.timer);
-      this.running.set(false);
-      this.result.set(this.engine.result);
-      this.grantRewards();
-      const r = this.engine.stageResult;
-      if (r) {
-        const names = (ids: number[]) => this.engine.units.filter(u => isPlayerUnit(u) && ids.includes(u.heroUid ?? u.id)).map(u => u.name).join(', ') || '-';
-        this.summary.set(`เคลียร์ ${r.wavesCleared}/${r.totalWaves} เวฟ · รอด: ${names(r.survivingHeroIds)} · ล้ม: ${names(r.deadHeroIds)}${r.revivedHeroIds.length ? ' · ถูกชุบ: ' + names(r.revivedHeroIds) : ''} · ดาเมจที่รับ ${r.damageTaken}`);
-      }
+      this.finishSoon();
     }
+  }
+
+  /** stage over: a short outro on the battle screen (winners swing once more, banner) before the result popup */
+  readonly ending = signal(false);
+  private endTimers: ReturnType<typeof setTimeout>[] = [];
+  static readonly OUTRO_MS = 2400;
+  private finishSoon(): void {
+    const win = this.engine.result === 'win';
+    this.ending.set(true);
+    // rewards are saved right away (leaving during the outro loses nothing); only the popup waits
+    this.grantRewards();
+    const r = this.engine.stageResult;
+    if (r) {
+      const names = (ids: number[]) => this.engine.units.filter(u => isPlayerUnit(u) && ids.includes(u.heroUid ?? u.id)).map(u => u.name).join(', ') || '-';
+      this.summary.set(`เคลียร์ ${r.wavesCleared}/${r.totalWaves} เวฟ · รอด: ${names(r.survivingHeroIds)} · ล้ม: ${names(r.deadHeroIds)}${r.revivedHeroIds.length ? ' · ถูกชุบ: ' + names(r.revivedHeroIds) : ''} · ดาเมจที่รับ ${r.damageTaken}`);
+    }
+
+    this.showBanner(win ? 'ชนะ!' : this.engine.result === 'timeout' ? 'หมดเวลา' : 'พ่ายแพ้…', BattleComponent.OUTRO_MS * this.speed());
+    if (win) {
+      const swing = () => {
+        const anims = { ...this.anims() };
+        for (const u of this.engine.units) {
+          if (!isPlayerUnit(u) || !u.alive || !u.visible) continue;
+          this.facing.set(u.id, false);
+          anims[u.id] = { anim: 'attack', key: ++this.animKey, force: true };
+        }
+        this.anims.set(anims);
+        this.snapshot();
+      };
+      this.endTimers.push(setTimeout(swing, 350), setTimeout(swing, 1350));
+    }
+    this.endTimers.push(setTimeout(() => this.finish(), BattleComponent.OUTRO_MS));
+  }
+
+  private finish(): void {
+    this.ending.set(false);
+    this.running.set(false);
+    this.result.set(this.engine.result);
   }
 
   /** tower / farm runs: rewards on a win (no penalty for heroes that fell) */

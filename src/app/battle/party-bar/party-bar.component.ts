@@ -60,6 +60,7 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
           <span [class]="'intent ' + (t ? (u.onFocus ? 'focus' : u.intent) : 'none')" [attr.aria-hidden]="!t" [attr.title]="t || null">{{ t || '·' }}</span>
         </div>
       }
+      <ng-content />
     </div>
   `,
   styles: `
@@ -157,16 +158,16 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
     // compact (battle-screen dock): portrait on the left, skill icons + mode chips on the right, bars + name/status below
     .compact { justify-content: flex-start; gap: 6px; flex-wrap: wrap; }
     .compact .card {
-      width: auto; column-gap: 4px; row-gap: 3px; padding: 4px; border-radius: 10px; background: #0b0914b3; box-shadow: inset 0 0 0 1px #ffffff14;
-      grid-template-columns: 54px 84px; grid-template-rows: auto auto 1fr auto auto 15px;
-      grid-template-areas: 'frame skills' 'frame modes' 'frame .' 'hp hp' 'mana mana' 'name intent';
+      width: auto; column-gap: 4px; row-gap: 2px; padding: 3px; border-radius: 9px; background: #0b0914c7; box-shadow: inset 0 0 0 1px #ffffff1f, 0 2px 8px #0008;
+      grid-template-columns: 50px 78px; grid-template-rows: auto auto 1fr auto auto 14px;
+      grid-template-areas: 'frame skills' 'frame modes' 'frame .' 'frame hp' 'frame mana' 'name intent';
     }
-    .compact .frame { grid-area: frame; width: 54px; height: 54px; }
-    .compact .skills { grid-area: skills; gap: 3px; }
-    .compact .modes { grid-area: modes; }
-    .compact .hp { grid-area: hp; } .compact .mana { grid-area: mana; height: 5px; }
-    .compact .name { grid-area: name; height: 15px; line-height: 15px; font-size: 10px; text-align: left; }
-    .compact .intent { grid-area: intent; font-size: 8px; }
+    .compact .frame { grid-area: frame; width: 50px; height: 50px; }
+    .compact .skills { grid-area: skills; gap: 2px; }
+    .compact .modes { grid-area: modes; gap: 2px; }
+    .compact .hp { grid-area: hp; height: 4px; } .compact .mana { grid-area: mana; height: 4px; }
+    .compact .name { grid-area: name; height: 14px; line-height: 14px; font-size: 10px; text-align: left; color: var(--text); }
+    .compact .intent { grid-area: intent; height: 14px; line-height: 12px; font-size: 8px; }
     .compact .ult { font-size: 9px; bottom: 2px; }
     .compact .key { font-size: 9px; top: 1px; left: 3px; }
     .compact .int { font-size: 8px; top: 1px; right: 1px; padding: 0 2px; }
