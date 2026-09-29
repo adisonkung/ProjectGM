@@ -113,3 +113,46 @@ function densify(pts: Pt[], step: number): Pt[] {
   }
   return out;
 }
+
+// ---------------------------------------------------------------- finisher (shadow figure cut to pieces)
+export interface FinisherCut {
+  grade: SlashGrade;
+  /** degrees, 0 = horizontal */
+  angle: number;
+  /** sideways offset from the figure's centre (figure units: 100 × 200 box) */
+  offset: number;
+  /** seconds after the finisher starts */
+  at: number;
+}
+export interface FinisherPlan {
+  cuts: FinisherCut[];
+  /** the last big cut (gold) — the figure splits along it right after */
+  finalAt: number;
+  finalAngle: number;
+  /** total length; damage lands after this */
+  duration: number;
+}
+
+/** rapid cuts per trail grade: a clean trail = a flurry, a missed one = a single weak (red) cut */
+export const FINISHER_CUTS: Record<SlashGrade, number> = { PERFECT: 3, GOOD: 2, OK: 1, MISS: 1 };
+export const FINISHER_START = 0.3;
+export const FINISHER_GAP = 0.085;
+export const FINISHER_SPLIT = 0.75;
+
+/** the finisher's cut schedule from the trail grades (deterministic for a given rng) */
+export function finisherPlan(grades: SlashGrade[], rng: () => number): FinisherPlan {
+  const cuts: FinisherCut[] = [];
+  let t = FINISHER_START;
+  let side = 1;
+  for (const g of grades) {
+    for (let k = 0; k < FINISHER_CUTS[g]; k++) {
+      side = -side;
+      // alternate steep / shallow crossing cuts so the flurry reads as many directions
+      const base = side > 0 ? -35 : 35;
+      cuts.push({ grade: g, angle: base + (rng() - 0.5) * 40 + (k % 2 ? 90 : 0), offset: (rng() - 0.5) * 50, at: t });
+      t += FINISHER_GAP;
+    }
+  }
+  const finalAt = t + 0.12;
+  return { cuts, finalAt, finalAngle: -18 + (rng() - 0.5) * 10, duration: finalAt + FINISHER_SPLIT };
+}

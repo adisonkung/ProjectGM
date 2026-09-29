@@ -2,7 +2,7 @@ import { HERO_BY_ID } from '../../core/data/heroes';
 import { BLADE_TRACE } from '../../core/data/special-skills';
 import { StageDef } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
-import { gradeOf, gradeStroke, Pt, slashPattern, strokeMultipliers, toSpace } from '../../core/rules/slash-trace';
+import { FINISHER_START, finisherPlan, gradeOf, gradeStroke, Pt, slashPattern, strokeMultipliers, toSpace } from '../../core/rules/slash-trace';
 import { heroStats } from '../../core/rules/stats';
 import { createBattle } from '../battle-session';
 import { BattleEvent } from './battle-engine';
@@ -85,6 +85,17 @@ describe('Special skill — Blade Trace (rules)', () => {
   it('a slightly shaky trace stays GOOD or better', () => {
     const shaky = trail.points.map((p, i) => ({ x: p.x, y: p.y + (i % 2 ? 1 : -1) * tol * 0.4 }));
     expect(['PERFECT', 'GOOD']).toContain(gradeStroke(trail, shaky, tol, true, BLADE_TRACE).grade);
+  });
+
+  it('finisher: a flurry of cuts per trail grade (PERFECT 3 · GOOD 2 · OK 1 · MISS 1 red), in time order, then the final split', () => {
+    let x = 0.2;
+    const p = finisherPlan(['PERFECT', 'GOOD', 'OK', 'MISS'], () => (x = (x * 16807 + 0.12345) % 1));
+    expect(p.cuts.map(c => c.grade)).toEqual(['PERFECT', 'PERFECT', 'PERFECT', 'GOOD', 'GOOD', 'OK', 'MISS']);
+    expect(p.cuts[0].at).toBeCloseTo(FINISHER_START, 5);
+    for (let i = 1; i < p.cuts.length; i++) expect(p.cuts[i].at).toBeGreaterThan(p.cuts[i - 1].at);
+    expect(p.finalAt).toBeGreaterThan(p.cuts.at(-1)!.at);
+    expect(p.duration).toBeGreaterThan(p.finalAt);
+    expect(p.duration).toBeLessThan(2.5);
   });
 
   it('grade thresholds and multipliers: PERFECT 1.2 · GOOD 1 · OK 0.65 · MISS 0.3 (never 0)', () => {
