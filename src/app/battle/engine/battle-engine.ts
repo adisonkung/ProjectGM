@@ -1,3 +1,4 @@
+import { BLADE_TRACE, SlashTraceDefinition } from '../../core/data/special-skills';
 import { CombatModifiers, ResistableStatus } from '../../core/models/progression';
 import { MANA_PER_ATTACK, MANA_PER_HIT, RECEIVE_GAUGE_ICD, START_CD } from '../../core/data/classes';
 import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
@@ -46,6 +47,8 @@ export type BattleEvent =
   /** hurt = play the hit reaction (monsters: rate-limited, never while attacking/casting) */
   | { type: 'damage'; dst: number; amount: number; crit: boolean; blocked: number; poison?: boolean; hurt?: boolean }
   | { type: 'heal'; dst: number; amount: number; src?: number }
+  /** player special skill (Blade Trace): trails landed with their multipliers, total damage dealt */
+  | { type: 'special'; skill: string; multipliers: number[]; targets: number; total: number }
   /** ลูกธนู/ลูกแสงที่บินไปหาเป้า (sky = ตกจากฟ้า) ดาเมจเข้าเมื่อถึง */
   | { type: 'projectile'; src: number; dst: number; kind: 'attack' | SkillKind; flight: number; sky?: boolean; pid?: number }
   /** a real (colliding) projectile hit a unit / ran out of lifetime */
@@ -326,6 +329,9 @@ export class BattleEngine {
   time = 0;
   /** เวลาที่ต่อสู้จริง (ใช้กับเวลาจำกัดของด่าน) */
   fightTime = 0;
+  /** player special skill (separate button, not a hero skill): charge 0–1, fills during COMBAT only */
+  readonly special: SlashTraceDefinition = BLADE_TRACE;
+  specialCharge = BLADE_TRACE.startCharge;
   /** Stage / Wave / transition state machine of this battle session */
   readonly flow: StageFlow;
   readonly rules: StageBattleRules;
@@ -468,6 +474,7 @@ export class BattleEngine {
     this.runPending();
     this.updateProjectiles(dt);
     this.fightTime += dt;
+    this.specialCharge = Math.min(1, this.specialCharge + dt / this.special.chargeTime);
     // all units act; wave clear / wipe is evaluated by the flow after the whole tick (no update-order effects)
     for (const u of this.units) {
       if (!u.alive) continue;
@@ -1650,6 +1657,48 @@ export class BattleEngine {
     if (!u || !u.alive || !isPlayerUnit(u) || this.result) return false;
     if ((slot === 'skill' ? u.cd1 : u.cd2) > 0) return false;
     u.skillQueued = slot;
+    return true;
+  }
+
+  /** enemies the special skill can hit now (alive, on the field, targetable) */
+  private specialTargets(): BattleUnit[] {
+    return this.units.filter(t => t.alive && t.visible && t.targetable && !isPlayerUnit(t) && !hasFlag(t, 'untargetable'));
+  }
+
+  /** the special skill button is live: charged, fighting, something to hit */
+  canUseSpecial(): boolean {
+    return !this.result && this.specialCharge >= 1 && this.phase === BattlePhase.COMBAT && this.specialTargets().length > 0;
+  }
+
+  /**
+   * Player special skill (Blade Trace), after the mini-game: one hit per trail on every enemy on the field.
+   * Trail damage = team average final ATK × strokeAtkPct × that trail's grade multiplier (fixed base damage: no hero
+   * crit / gear / skill rank, no gauge for heroes, never reflected). Uses the whole charge. false = not usable now.
+   */
+  useSpecial(multipliers: number[]): boolean {
+    if (!this.canUseSpecial()) return false;
+    const heroes = this.units.filter(u => isPlayerUnit(u) && u.heroId);
+    const avgAtk = heroes.reduce((a, u) => a + effectiveAttack(u), 0) / Math.max(1, heroes.length);
+    const striker = { id: -1, atk: avgAtk, buffs: [] as ActiveBuff[] };
+    const targets = this.specialTargets();
+    let total = 0;
+    for (const m of multipliers.slice(0, this.special.strokes)) {
+      for (const t of targets) {
+        if (!t.alive) continue;
+        const res = DamageResolver.resolve({
+          attacker: striker, target: t, baseDamage: avgAtk * this.special.strokeAtkPct * Math.max(0, m),
+          damageType: this.special.damageType, sourceId: this.special.id,
+        });
+        const before = t.hp + t.shield;
+        this.applyDamage(t, res.amount, false);
+        total += Math.max(0, before - Math.max(0, t.hp) - t.shield);
+      }
+    }
+    this.specialCharge = 0;
+    this.metrics.specialUses++;
+    this.metrics.specialDamage += total;
+    this.metrics.damageDealt += total;
+    this.events.push({ type: 'special', skill: this.special.id, multipliers: [...multipliers], targets: targets.length, total });
     return true;
   }
 

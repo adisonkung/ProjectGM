@@ -78,6 +78,17 @@
           <button type="button" class="hud-btn" (click)="openMenu()" [disabled]="!running()" aria-label="ตั้งค่า / หยุดชั่วคราว" title="ตั้งค่า"><app-icon name="gear" [size]="18" /></button>
         </div>
 
+        <!-- player special skill (not a hero skill): charges during combat, opens the Blade Trace mini-game -->
+        <button type="button" class="special" [class.ready]="specialReady()" [disabled]="!specialReady()" (click)="useSpecial()"
+                [style.--charge]="specialCharge()" [attr.aria-label]="specialDef.name + (specialReady() ? ' พร้อมใช้' : ' ชาร์จ ' + (specialCharge() * 100).toFixed(0) + '%')"
+                [title]="specialDef.description">
+          <span class="sp-ring"></span>
+          <span class="sp-icon">⚔</span>
+          <small>{{ specialReady() ? specialDef.name : (specialCharge() * 100).toFixed(0) + '%' }}</small>
+        </button>
+        @if (specialFlash()) { <div class="special-flash" aria-hidden="true"><i></i><i></i><i></i><i></i></div> }
+        @if (tracing()) { <app-slash-trace [def]="specialDef" [seed]="traceSeed()" (done)="specialDone($event)" /> }
+
         <!-- free strip under the lanes (inside the field): party bottom-left, AUTO right of the last hero -->
         <app-party-bar class="party-in" [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
           <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>

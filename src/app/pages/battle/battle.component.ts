@@ -33,6 +33,9 @@ import { hasFlag } from '../../battle/engine/buffs';
 import { isPlayerUnit, PLAYER_TEAM } from '../../battle/engine/stage/party';
 import { expToNext } from '../../core/rules/leveling';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
+import { SlashTraceComponent } from '../../battle/slash-trace/slash-trace.component';
+import { SlashGrade } from '../../core/data/special-skills';
+import { strokeMultipliers } from '../../core/rules/slash-trace';
 
 const TICK = 0.05;
 
@@ -42,7 +45,7 @@ const TICK = 0.05;
  */
 @Component({
   selector: 'app-battle',
-  imports: [BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent],
+  imports: [BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -132,6 +135,16 @@ export class BattleComponent implements OnDestroy {
   readonly banner = signal<string | null>(null);
   /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม */
   readonly autoUlt = signal(false);
+  /** player special skill (separate button, not a hero skill): charge 0–1 · usable now · mini-game open */
+  readonly specialCharge = signal(0);
+  readonly specialReady = signal(false);
+  readonly tracing = signal(false);
+  readonly traceSeed = signal(1);
+  /** impact flash after the mini-game (key re-triggers the CSS animation) */
+  readonly specialFlash = signal<number | null>(null);
+  get specialDef() {
+    return this.engine.special;
+  }
   /** combat debug overlay (dev builds only): ?debug=1 or key D */
   readonly debug = signal(false);
   /** running cast FX per unit (removed on fxStop) */
@@ -224,6 +237,7 @@ export class BattleComponent implements OnDestroy {
     this.running.set(false);
     this.paused.set(false);
     this.menuOpen.set(false);
+    this.tracing.set(false);
     this.result.set(null);
     this.reward.set(null);
     this.simReport.set(null);
@@ -305,6 +319,7 @@ export class BattleComponent implements OnDestroy {
 
   @HostListener('document:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
+    if (this.tracing()) return;
     if (e.key === 'Escape') return this.menuOpen() ? this.resume() : this.cancelFocus();
     if (this.paused()) return;
     if ((e.key === 'd' || e.key === 'D') && isDevMode()) {
@@ -312,10 +327,29 @@ export class BattleComponent implements OnDestroy {
       return this.snapshot();
     }
     if ((e.key === 'f' || e.key === 'F') && this.selectedId() != null) return this.setFocus(this.selectedId());
+    if ((e.key === 's' || e.key === 'S' || e.key === ' ') && this.specialReady()) return this.useSpecial();
     const n = Number(e.key);
     if (!this.running() || !Number.isInteger(n) || n < 1) return;
     const u = this.party()[n - 1];
     if (u) this.useUlt(u.id);
+  }
+
+  /** special skill button: pause the fight and open the Blade Trace mini-game */
+  useSpecial(): void {
+    if (!this.running() || this.paused() || this.ending() || !this.engine.canUseSpecial()) return;
+    this.traceSeed.update(v => v + 1);
+    this.tracing.set(true);
+    this.paused.set(true);
+  }
+
+  /** mini-game over: grades → trail multipliers → the engine deals the hits, the fight goes on */
+  specialDone(grades: SlashGrade[]): void {
+    this.tracing.set(false);
+    this.paused.set(false);
+    if (this.engine.useSpecial(strokeMultipliers(grades, this.engine.special))) {
+      this.handleEvents(this.engine.drainEvents());
+      this.snapshot();
+    }
   }
 
   toggleAuto(): void {
@@ -335,7 +369,7 @@ export class BattleComponent implements OnDestroy {
 
   /** settings popup: pauses the fight while open */
   openMenu(): void {
-    if (!this.running() || this.ending()) return;
+    if (!this.running() || this.ending() || this.tracing()) return;
     this.menuOpen.set(true);
     this.paused.set(true);
   }
@@ -462,6 +496,8 @@ export class BattleComponent implements OnDestroy {
 
   private snapshot(): void {
     const e = this.engine;
+    this.specialCharge.set(e.specialCharge);
+    this.specialReady.set(this.running() && e.canUseSpecial());
     const byId = new Map(e.units.map(u => [u.id, u]));
     const combat = e.phase === BattlePhase.COMBAT;
     for (const u of e.units) {
@@ -698,6 +734,14 @@ export class BattleComponent implements OnDestroy {
         case 'WAVE_STARTED':
           this.wave.set(e.wave);
           if (e.wave > 0) this.showBanner(`เวฟ ${e.wave + 1}/${e.totalWaves} ศัตรูบุก!`, 1200);
+          break;
+        case 'special':
+          this.showBanner(`⚔ ${this.engine.special.name} · ${e.total.toLocaleString()} ดาเมจ`, 1300);
+          {
+            const key = Date.now();
+            this.specialFlash.set(key);
+            setTimeout(() => this.specialFlash() === key && this.specialFlash.set(null), 700);
+          }
           break;
         case 'WAVE_CLEARED':
           if (!e.final) this.showBanner(`เคลียร์เวฟ ${e.wave + 1}/${e.totalWaves}!`, 900);

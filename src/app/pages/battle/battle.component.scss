@@ -201,8 +201,39 @@
 
 // free strip under the lanes, inside the field (board --foot): party bottom-left, AUTO after the last card, boss bar bottom-right
 .screen { --foot: 82px; }
-.party-in { position: absolute; left: 6px; bottom: 4px; z-index: 240; max-width: calc(100% - 12px); }
+.party-in { position: absolute; left: 6px; bottom: 4px; z-index: 240; max-width: calc(100% - 92px); }
 .party-in .auto { align-self: center; }
+// special skill button (bottom-right of the free strip): conic charge ring, glows when ready
+.special {
+  position: absolute; right: 10px; bottom: 8px; z-index: 240; width: 66px; height: 66px; border-radius: 50%; padding: 0;
+  display: grid; place-items: center; align-content: center; gap: 0; border: none; cursor: pointer; color: #bff4ff;
+  background: radial-gradient(circle at 50% 40%, #2b2140, #0e0a18);
+  box-shadow: 0 2px 10px #0009; font: 800 10px var(--title);
+  .sp-ring { position: absolute; inset: -3px; border-radius: 50%; z-index: -1;
+    background: conic-gradient(#7fe3ff calc(var(--charge, 0) * 360deg), #ffffff1c 0); }
+  .sp-icon { font-size: 24px; line-height: 1; filter: grayscale(0.7); }
+  small { font-size: 9px; letter-spacing: 0.02em; white-space: nowrap; }
+  &:disabled { cursor: default; small { color: #9fb7c4; } }
+  &.ready { color: #fff; animation: sp-glow 0.9s ease-in-out infinite alternate;
+    .sp-ring { background: conic-gradient(#ffe27a, #7fe3ff, #ffe27a); }
+    .sp-icon { filter: none; } }
+}
+// impact after Blade Trace: four white cuts sweep across the enemy side + a quick flash
+.special-flash {
+  position: absolute; inset: 0; z-index: 235; pointer-events: none; overflow: hidden;
+  animation: sp-flash 0.7s ease-out forwards;
+  i { position: absolute; left: 45%; top: 50%; width: 70%; height: 4px; border-radius: 2px; transform-origin: 0 50%;
+    background: linear-gradient(90deg, transparent, #fff 30%, #bff4ff 70%, transparent); box-shadow: 0 0 12px #bff4ff;
+    animation: sp-cut 0.35s ease-out both; }
+  i:nth-child(1) { transform: translate(-30%, -60px) rotate(18deg); }
+  i:nth-child(2) { transform: translate(-30%, 40px) rotate(-22deg); animation-delay: 0.06s; }
+  i:nth-child(3) { transform: translate(-20%, -10px) rotate(-6deg); animation-delay: 0.12s; }
+  i:nth-child(4) { transform: translate(-25%, 10px) rotate(35deg); animation-delay: 0.18s; }
+}
+@keyframes sp-cut { from { clip-path: inset(0 100% 0 0); opacity: 1; } 60% { clip-path: inset(0 0 0 0); opacity: 1; } to { clip-path: inset(0 0 0 0); opacity: 0; } }
+@keyframes sp-flash { from { background: #ffffff38; } to { background: transparent; } }
+@keyframes sp-glow { from { box-shadow: 0 0 8px #7fe3ff88; } to { box-shadow: 0 0 22px #ffe27acc; transform: scale(1.05); } }
+@media (prefers-reduced-motion: reduce) { .special.ready { animation: none; } }
 .screen.boss { --hud-h: 116px; }
 .hud-top .boss-bar { width: min(360px, 60vw); }
 
@@ -253,6 +284,9 @@
   .hud-right { top: 3px; right: 3px; gap: 4px; }
   .hud-btn { height: 28px; min-width: 30px; padding: 0 6px; font-size: 12px; &.spd { min-width: 46px; } }
   .screen { --foot: 0px; }
+  .special { width: 52px; height: 52px; right: 6px; bottom: 6px; .sp-icon { font-size: 18px; } small { font-size: 8px; } }
+  // phones: the field is short — the Blade Trace mini-game takes the whole viewport
+  .screen app-slash-trace { position: fixed; inset: 0; z-index: 1000; }
   .party-in { position: static; max-width: none; margin-top: 6px; }
   .screen.boss { --hud-h: 44px; }
   .hud-top .boss-bar { width: 40vw; padding: 2px 6px; b, small { display: none; } .bb-track { height: 5px; } }

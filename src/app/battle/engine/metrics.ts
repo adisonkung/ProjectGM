@@ -77,6 +77,9 @@ export class BattleMetrics {
   skillAims: Record<string, { total: number; marked: number }> = {};
   /** equipment effects that fired: execution / mistHunter hits, bleedReduced ticks, diveReduced hits */
   gearProcs: Record<string, number> = {};
+  /** player special skill (Blade Trace): uses · damage dealt */
+  specialUses = 0;
+  specialDamage = 0;
   /** seconds a boss spent under each status (Ancient Rage uptime …) */
   bossStatusTime: Record<string, number> = {};
   /** first boss of the stage: spawn / death time, phases entered, end of its sealed (Mist Wraith) phase */
