@@ -59,7 +59,7 @@ const GRADE_TEXT: Record<SlashGrade, string> = { PERFECT: 'PERFECT!', GOOD: 'GOO
           <!-- the figure, drawn as two halves that part along the final cut -->
           @for (half of halves; track half) {
             <g class="half" [class]="'half ' + half" [attr.clip-path]="'url(#st-' + half + ')'" [style.animation-delay]="p.finalAt + 0.1 + 's'">
-              <g class="fig" [style.animation-iteration-count]="p.cuts.length" [style.animation-delay]="p.cuts[0]?.at + 's'">
+              <g class="fig" [style.animation-iteration-count]="p.cuts.length" [style.animation-delay]="p.cuts[0].at + 's'">
                 <path [attr.d]="fig.head" /><path [attr.d]="fig.body" /><path [attr.d]="fig.armL" /><path [attr.d]="fig.armR" />
                 <path class="fig-blade" [attr.d]="fig.blade" />
               </g>
