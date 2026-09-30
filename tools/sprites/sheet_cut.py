@@ -26,7 +26,7 @@ FEET = 14
 
 # rows: frames per row (sheet order idle, move, hurt, death, attack, skills…) · flip: rows (0-based) or (row, frame) drawn facing LEFT
 CONFIG = {
-    'straw_recruit': dict(labelEnd=172, rows=[4, 6, 3, 6, 6], flip=[], height=67),
+    'straw_recruit': dict(labelEnd=172, rows=[4, 6, 3, 6, 6], flip=[0, 1, 2, 3, (4, 0), (4, 5)], height=67),  # idle/move/hurt/death + attack wind-up/recover face LEFT
     'crossbow_dummy': dict(labelEnd=170, rows=[4, 6, 3, 6, 6, 6], flip=[0, 1, 2, 3, 4, 5], height=67),
     'drill_sergeant': dict(labelEnd=172, rows=[4, 6, 3, 6, 6, 8], flip=[(2, 0)], height=88),  # hurt frame 1 only
     'brass_shishi': dict(labelEnd=180, rows=[4, 6, 3, 7, 6, 6, 6], flip=[0, 1, 2, 3, 4], height=112),
