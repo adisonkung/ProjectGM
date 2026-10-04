@@ -85,6 +85,8 @@ export const SKY_MASKS = { falls: `${SKY_CITY_DIR}/m_falls.png`, crystals: `${SK
 export const SKY_LAYERS = {
   sky: `${SKY_CITY_DIR}/bg_sky_dusk.webp`, bank: `${SKY_CITY_DIR}/bg_cloud_bank.webp`, sea: `${SKY_CITY_DIR}/bg_cloud_sea.webp`,
   mist: `${SKY_CITY_DIR}/fg_cloud_wisps.webp`, whale: `${SKY_CITY_DIR}/sprite_sky_whale.webp`,
+  farIslands: `${SKY_CITY_DIR}/bg_far_islands.webp`, rays: `${SKY_CITY_DIR}/bg_god_rays.webp`, birds: `${SKY_CITY_DIR}/sheet_birds.webp`,
+  dragonBody: `${SKY_CITY_DIR}/dragon_body.webp`, dragonWing: `${SKY_CITY_DIR}/dragon_wing.webp`,
   clouds: `${SKY_CITY_DIR}/clouds.webp`, wisps: `${SKY_CITY_DIR}/wisps.webp`, far: `${SKY_CITY_DIR}/far_islands.webp`,
 };
 /** island heroes are drawn smaller here (the city is painted at a smaller scale than the battle sprites) */

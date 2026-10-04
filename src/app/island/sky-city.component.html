@@ -8,9 +8,17 @@
       @for (s of stars; track $index) {
         <i class="star" [style.left.px]="s.x" [style.top.px]="s.y" [style.width.px]="s.s" [style.height.px]="s.s" [style.animation-delay.s]="s.delay"></i>
       }
+      <div class="far-isles" [style.background-image]="'url(' + layers.farIslands + ')'" [style.transform]="par(0.12)"></div>
       <div class="bank" [style.background-image]="'url(' + layers.bank + ')'" [style.transform]="par(0.22)"></div>
       <div class="whale-path" [style.transform]="par(0.3)">
         <div class="whale"><img [src]="layers.whale" alt="" draggable="false" /><i class="whale-glow"></i></div>
+      </div>
+      <div class="dragon-path" [style.transform]="par(0.32)">
+        <div class="dragon">
+          <img class="wing far" [src]="layers.dragonWing" alt="" draggable="false" />
+          <img class="body" [src]="layers.dragonBody" alt="" draggable="false" />
+          <img class="wing near" [src]="layers.dragonWing" alt="" draggable="false" />
+        </div>
       </div>
       <div class="sea back" [style.background-image]="'url(' + layers.sea + ')'" [style.transform]="par(0.45)"></div>
 
@@ -101,7 +109,12 @@
       <!-- ── in front of the island ── -->
       <div class="sea front" [style.background-image]="'url(' + layers.sea + ')'" [style.transform]="par(1.1)"></div>
       <div class="mist" [style.background-image]="'url(' + layers.mist + ')'" [style.transform]="par(1.25)"></div>
-      <div class="rays"></div>
+      <div class="flock-wrap" [style.transform]="par(1.05)"><div class="flock">
+        @for (b of flock; track $index) {
+          <i class="bird" [style.left.px]="b.x" [style.top.px]="b.y" [style.animation-delay.s]="b.d" [style.background-image]="'url(' + layers.birds + ')'"></i>
+        }
+      </div></div>
+      <div class="godrays" [style.background-image]="'url(' + layers.rays + ')'" [style.transform]="par(0.15)"></div>
       @for (m of motes; track $index) {
         <i class="mote" [style.left.px]="m.x" [style.top.px]="m.y" [style.width.px]="m.s" [style.height.px]="m.s" [style.animation-duration.s]="m.d" [style.animation-delay.s]="m.delay"></i>
       }

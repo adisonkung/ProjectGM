@@ -92,5 +92,55 @@ def main():
     print('whale', im.size)
 
 
+def extras():
+    """far islands strip, god rays (brightness → alpha), bird flap sheet (8 frames), dragon body + wing (flapped in CSS)"""
+    from scipy import ndimage
+    rgb, al = key(load('bg_far_islands'), lo=60, span=90)
+    rgb, al = best_cut(rgb, al)
+    # the islands were painted half-transparent over magenta: rebuild a lavender haze ramp from the green channel
+    g = rgb[..., 1] / 255
+    lo, hi = np.array([118, 112, 178.]), np.array([236, 230, 252.])
+    rgb = lo + (hi - lo) * np.clip((g - 0.3) / 0.6, 0, 1)[..., None]
+    save(rgb, al * 0.9, 'bg_far_islands')
+
+    g = load('bg_god_rays')
+    lum = g.max(axis=2)
+    al = np.clip((lum - 8) / 230, 0, 1) ** 1.1
+    col = g / np.maximum(lum[..., None], 1) * 255
+    im = Image.fromarray(np.dstack([np.clip(col, 0, 255), al * 255]).astype(np.uint8), 'RGBA').resize((1400, 788), Image.LANCZOS)
+    im.save(os.path.join(OUT, 'bg_god_rays.webp'), 'WEBP', quality=80, method=6)
+
+    # birds: 8 cells on an even pitch, same box per frame (the art keeps the body at the same place in each cell)
+    rgb, al = key(load('sheet_birds'))
+    x0, pitch, cw, y0, y1 = 14, 269.7, 268, 196, 526
+    frames = []
+    for i in range(8):
+        x = int(round(x0 + i * pitch))
+        frames.append(Image.fromarray(np.dstack([np.clip(rgb[y0:y1, x:x + cw], 0, 255), al[y0:y1, x:x + cw] * 255]).astype(np.uint8), 'RGBA'))
+    fw, fh = 120, round(120 * (y1 - y0) / cw)
+    sheet = Image.new('RGBA', (fw * 8, fh))
+    for i, f in enumerate(frames):
+        sheet.paste(f.resize((fw, fh), Image.LANCZOS), (i * fw, 0))
+    sheet.save(os.path.join(OUT, 'sheet_birds.webp'), 'WEBP', quality=88, method=6)
+    print('birds', sheet.size)
+
+    # dragon parts: largest component = body, next = first wing (the two wings are the same art)
+    a = load('sprite_dragon_parts')
+    rgb, al = key(a)
+    fg = ndimage.binary_opening(al > 0.5, iterations=1)
+    lab, k = ndimage.label(fg)
+    sizes = ndimage.sum(fg, lab, range(1, k + 1))
+    objs = ndimage.find_objects(lab)
+    order = [i for i in np.argsort(sizes)[::-1][:3]]
+    order.sort(key=lambda i: objs[i][1].start)  # body, wing A, wing B (left → right)
+    for name, i in (('dragon_body', order[0]), ('dragon_wing', order[1])):
+        sl = objs[i]
+        m = ndimage.binary_dilation(lab[sl] == i + 1, iterations=2).astype(np.float32) * al[sl]
+        im = Image.fromarray(np.dstack([np.clip(rgb[sl], 0, 255), m * 255]).astype(np.uint8), 'RGBA')
+        im.save(os.path.join(OUT, f'{name}.webp'), 'WEBP', quality=88, method=6)
+        print(name, im.size, 'at', sl[1].start, sl[0].start)
+
+
 if __name__ == '__main__':
     main()
+    extras()

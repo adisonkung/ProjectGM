@@ -58,6 +58,10 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly layers = SKY_LAYERS;
   readonly motes = MOTES;
   readonly stars = STARS;
+  /** a small V of birds (offsets inside the flock box, flap phase) */
+  readonly flock = [
+    { x: 0, y: 40, d: 0 }, { x: 90, y: 0, d: -0.21 }, { x: 95, y: 92, d: -0.4 }, { x: 185, y: -30, d: -0.13 }, { x: 200, y: 130, d: -0.55 },
+  ];
   readonly heroScale = SKY_HERO_SCALE;
   readonly vp = viewChild.required<ElementRef<HTMLElement>>('vp');
   private readonly zone = inject(NgZone);
