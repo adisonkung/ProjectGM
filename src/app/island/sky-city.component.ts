@@ -2,7 +2,7 @@ import {
   AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, input, NgZone, OnDestroy, output, signal, untracked, viewChild,
 } from '@angular/core';
 import { BUILDING_BY_ID } from '../core/data/island-layout';
-import { SKY_BASE, SKY_FX, SKY_HERO_SCALE, SKY_LAYERS, SKY_MASKS, SKY_NODES, SKY_PAD, SKY_PLOTS, SKY_SPAWN, SKY_SPIRE, SKY_WORLD } from '../core/data/sky-city';
+import { SKY_ZOOM, SKY_BASE, SKY_FX, SKY_HERO_SCALE, SKY_LAYERS, SKY_MASKS, SKY_NODES, SKY_PAD, SKY_PLOTS, SKY_SPAWN, SKY_SPIRE, SKY_WORLD } from '../core/data/sky-city';
 import { IslandBuildingState, Vec2 } from '../core/models/island';
 import { unlockFloorOf } from '../core/rules/island';
 import { IslandHeroComponent, IslandHeroView } from './island-hero.component';
@@ -63,8 +63,13 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   private readonly zone = inject(NgZone);
   private resize?: ResizeObserver;
 
-  readonly k = signal(0.4);
+  /** fit-to-height scale × player zoom (the city is big: default zoom shows a district, pan in 2-D) */
+  readonly fitK = signal(0.4);
+  readonly zoom = signal(SKY_ZOOM.start);
+  readonly k = computed(() => this.fitK() * this.zoom());
   readonly scrollX = signal(0);
+  readonly zoomMin = SKY_ZOOM.min;
+  readonly zoomMax = SKY_ZOOM.max;
 
   readonly spireLook = computed(() => SPIRE_STAGE[Math.max(0, Math.min(5, this.towerStage()))]);
   readonly gold = computed(() => this.towerStage() >= 5);
@@ -100,14 +105,14 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly transform = computed(() => {
     const k = this.k(), f = this.focus();
     if (!f) return `scale(${k})`;
-    const z = 1.3;
+    const z = 1.15;
     return `translate(${k * f.x * (1 - z)}px, ${k * f.y * (1 - z)}px) scale(${k * z})`;
   });
 
   constructor() {
     effect(() => {
       const f = this.focus();
-      untracked(() => { if (f) this.panTo(f.x, true); });
+      untracked(() => { if (f) this.panTo(f.x, f.y, true); });
     });
   }
 
@@ -119,7 +124,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
       el.addEventListener('scroll', () => this.zone.run(() => this.scrollX.set(el.scrollLeft / this.k())), { passive: true });
     });
     this.fit();
-    this.panTo(SKY_NODES[SKY_SPAWN].x, false);
+    this.panTo(SKY_NODES[SKY_SPAWN].x, SKY_NODES[SKY_SPAWN].y - 120, false);
   }
 
   ngOnDestroy(): void {
@@ -129,31 +134,52 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   private fit(): void {
     const el = this.vp().nativeElement;
     const h = el.clientHeight || 540;
-    this.k.set(Math.max(h / this.H, (el.clientWidth || 0) / this.W));
+    this.fitK.set(Math.max(h / this.H, (el.clientWidth || 0) / this.W));
   }
 
-  panTo(x: number, smooth: boolean): void {
+  /** centre the camera on a world point */
+  panTo(x: number, y: number, smooth: boolean): void {
     const el = this.vp()?.nativeElement;
     if (!el) return;
     const left = Math.max(0, x * this.k() - el.clientWidth / 2);
-    if (smooth && el.scrollTo) el.scrollTo({ left, behavior: 'smooth' });
-    else el.scrollLeft = left;
+    const top = Math.max(0, y * this.k() - el.clientHeight / 2);
+    if (smooth && el.scrollTo) el.scrollTo({ left, top, behavior: 'smooth' });
+    else {
+      el.scrollLeft = left;
+      el.scrollTop = top;
+    }
+  }
+
+  /** zoom around the viewport centre (buttons, ctrl/pinch wheel) */
+  setZoom(z: number): void {
+    const el = this.vp()?.nativeElement;
+    const nz = Math.max(SKY_ZOOM.min, Math.min(SKY_ZOOM.max, z));
+    if (!el || nz === this.zoom()) return;
+    const k0 = this.k();
+    const cx = (el.scrollLeft + el.clientWidth / 2) / k0, cy = (el.scrollTop + el.clientHeight / 2) / k0;
+    this.zoom.set(nz);
+    requestAnimationFrame(() => this.panTo(cx, cy, false));
   }
 
   // ---------------------------------------------------------------- drag / wheel pan (touch = native scroll)
-  private drag: { x: number; left: number; moved: boolean } | null = null;
+  private drag: { x: number; y: number; left: number; top: number; moved: boolean } | null = null;
   suppressClick = false;
 
   onPointerDown(e: PointerEvent): void {
     if (e.pointerType !== 'mouse' || e.button !== 0) return;
-    this.drag = { x: e.clientX, left: this.vp().nativeElement.scrollLeft, moved: false };
+    const el = this.vp().nativeElement;
+    this.drag = { x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop, moved: false };
   }
   @HostListener('window:pointermove', ['$event'])
   onPointerMove(e: PointerEvent): void {
     if (!this.drag) return;
-    const dx = e.clientX - this.drag.x;
-    if (Math.abs(dx) > 5) this.drag.moved = true;
-    if (this.drag.moved) this.vp().nativeElement.scrollLeft = this.drag.left - dx;
+    const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
+    if (Math.hypot(dx, dy) > 5) this.drag.moved = true;
+    if (this.drag.moved) {
+      const el = this.vp().nativeElement;
+      el.scrollLeft = this.drag.left - dx;
+      el.scrollTop = this.drag.top - dy;
+    }
   }
   @HostListener('window:pointerup')
   onPointerUp(): void {
@@ -163,10 +189,11 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
     }
     this.drag = null;
   }
+  /** ctrl / pinch wheel = zoom; plain wheel scrolls the city in 2-D (native) */
   onWheel(e: WheelEvent): void {
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-      this.vp().nativeElement.scrollLeft += e.deltaY;
+    if (e.ctrlKey) {
       e.preventDefault();
+      this.setZoom(this.zoom() * (e.deltaY < 0 ? 1.12 : 1 / 1.12));
     }
   }
   tapBuilding(id: string): void {

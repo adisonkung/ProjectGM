@@ -85,4 +85,6 @@ export const SKY_LAYERS = {
   clouds: `${SKY_CITY_DIR}/clouds.webp`, wisps: `${SKY_CITY_DIR}/wisps.webp`, far: `${SKY_CITY_DIR}/far_islands.webp`,
 };
 /** island heroes are drawn smaller here (the city is painted at a smaller scale than the battle sprites) */
-export const SKY_HERO_SCALE = 1.05;
+export const SKY_HERO_SCALE = 0.5;
+/** camera zoom over fit-to-height: the city is shown close up (heroes stay small next to the buildings) */
+export const SKY_ZOOM = { min: 1, start: 1.8, max: 2.8 };

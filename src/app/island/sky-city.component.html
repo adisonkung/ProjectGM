@@ -1,6 +1,6 @@
 <div class="vp" #vp (pointerdown)="onPointerDown($event)" (wheel)="onWheel($event)">
   <div class="stage" [style.width.px]="W * k()" [style.height.px]="H * k()">
-    <div class="world" [style.width.px]="W" [style.height.px]="H" [style.transform]="transform()" [class.gold]="gold()">
+    <div class="world" [style.width.px]="W" [style.height.px]="H" [style.transform]="transform()" [class.gold]="gold()" [class.focusing]="!!focus()">
 
       <!-- ── sky (parallax, behind the island) ── -->
       <div class="sky"></div>
@@ -119,4 +119,9 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="zoom" role="group" aria-label="ซูมแผนที่">
+  <button type="button" (click)="setZoom(zoom() * 1.25)" [disabled]="zoom() >= zoomMax" aria-label="ซูมเข้า">+</button>
+  <button type="button" (click)="setZoom(zoom() / 1.25)" [disabled]="zoom() <= zoomMin" aria-label="ซูมออก">−</button>
 </div>

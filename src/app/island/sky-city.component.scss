@@ -1,8 +1,8 @@
-:host { display: block; width: 100%; height: 100%; }
-.vp { width: 100%; height: 100%; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; cursor: grab; touch-action: pan-x;
+:host { position: relative; display: block; width: 100%; height: 100%; }
+.vp { width: 100%; height: 100%; overflow: auto; scrollbar-width: none; cursor: grab; touch-action: pan-x pan-y;
   background: #2a1f5a; &::-webkit-scrollbar { display: none; } &:active { cursor: grabbing; } }
 .stage { position: relative; overflow: hidden; }
-.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; transition: transform 0.9s cubic-bezier(.3, .7, .2, 1); }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; &.focusing { transition: transform 0.9s cubic-bezier(.3, .7, .2, 1); } }
 .world > *, .isle > * { position: absolute; }
 img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 
@@ -66,6 +66,10 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
   animation: dust 1.8s ease-out both; }
 
 .hero { width: 0; height: 0; transform-origin: 0 0; }
+.zoom { position: absolute; left: 12px; bottom: 12px; z-index: 5; display: grid; gap: 6px;
+  button { width: 36px; height: 36px; border-radius: 10px; border: 1px solid #d9b46488; background: #0b0914cc; color: var(--gold-hi);
+    font: 700 20px/1 var(--title); cursor: pointer; backdrop-filter: blur(4px); box-shadow: 0 4px 12px #0008;
+    &:hover:not(:disabled) { border-color: var(--gold); box-shadow: 0 0 10px #d9b46466; } &:disabled { opacity: .4; cursor: default; } } }
 // names would be unreadably small at city scale — the main hero keeps its crown + ring
 :host ::ng-deep .hero .name { display: none; }
 
@@ -92,9 +96,9 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .hit { border: 0; background: transparent; cursor: pointer; border-radius: 30px; outline-offset: 4px; }
 .hit:hover, .hit.sel { background: radial-gradient(ellipse at 50% 70%, #f6dfa01f, transparent 70%); }
 .plate { transform: translateX(-50%); display: grid; justify-items: center; pointer-events: none; white-space: nowrap; gap: 2px;
-  b { font: 700 40px var(--title); letter-spacing: .03em; color: #fff3d6;
-    text-shadow: 0 4px 0 #1a1030, 4px 0 0 #1a1030, -4px 0 0 #1a1030, 0 -3px 0 #1a1030, 0 0 18px #1a1030; }
-  small { font: 700 30px var(--body); color: #ffb0a8; text-shadow: 0 3px 0 #1a1030, 3px 0 0 #1a1030, -3px 0 0 #1a1030; }
+  b { font: 700 25px var(--title); letter-spacing: .03em; color: #fff3d6;
+    text-shadow: 0 3px 0 #1a1030, 3px 0 0 #1a1030, -3px 0 0 #1a1030, 0 -2px 0 #1a1030, 0 0 12px #1a1030; }
+  small { font: 700 19px var(--body); color: #ffb0a8; text-shadow: 0 2px 0 #1a1030, 2px 0 0 #1a1030, -2px 0 0 #1a1030; }
   .lv { color: #f6dfa0; font-family: var(--title); } .soon { color: #c9adff; } .open { color: #9fe6b6; }
   &.locked b { color: #c4bad6; } }
 
