@@ -81,7 +81,10 @@ export const SKY_FX = {
 
 /** masks for code FX (half resolution, stretched over the art) */
 export const SKY_MASKS = { falls: `${SKY_CITY_DIR}/m_falls.png`, crystals: `${SKY_CITY_DIR}/m_crystals.png`, water: `${SKY_CITY_DIR}/m_water.png` };
+/** painted sky layers (user art via tools/island/sky_city/bg_layers.py); clouds/wisps/far = procedural fallbacks */
 export const SKY_LAYERS = {
+  sky: `${SKY_CITY_DIR}/bg_sky_dusk.webp`, bank: `${SKY_CITY_DIR}/bg_cloud_bank.webp`, sea: `${SKY_CITY_DIR}/bg_cloud_sea.webp`,
+  mist: `${SKY_CITY_DIR}/fg_cloud_wisps.webp`, whale: `${SKY_CITY_DIR}/sprite_sky_whale.webp`,
   clouds: `${SKY_CITY_DIR}/clouds.webp`, wisps: `${SKY_CITY_DIR}/wisps.webp`, far: `${SKY_CITY_DIR}/far_islands.webp`,
 };
 /** island heroes are drawn smaller here (the city is painted at a smaller scale than the battle sprites) */
