@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# user source art (AI originals) — kept out of git, processed by tools/* into public/
+/art/incoming/
