@@ -452,11 +452,12 @@ describe('Home Island — save / load', () => {
 describe('Home Island — page', () => {
   beforeEach(() => localStorage.clear());
 
+  // these cases cover the classic (procedural) island; the Sky City has its own spec (sky-city.spec.ts)
   async function mount(cleared = 0) {
     await TestBed.configureTestingModule({ imports: [IslandComponent], providers: [provideRouter([])] }).compileComponents();
     const save = TestBed.inject(SaveService);
     save.reset();
-    save.update(s => ({ ...s, cleared }));
+    save.update(s => ({ ...s, cleared, island: { ...s.island!, map: 'classic' } }));
     const f = TestBed.createComponent(IslandComponent);
     f.detectChanges();
     return { f, el: f.nativeElement as HTMLElement, save, isl: TestBed.inject(IslandService) };

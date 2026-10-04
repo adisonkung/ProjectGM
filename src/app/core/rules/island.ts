@@ -83,6 +83,7 @@ export function normalizeIsland(raw: Partial<PlayerIsland> | undefined, s: Pick<
   return {
     version: 1,
     ...(name && !islandNameError(name) ? { name } : {}),
+    ...(raw.map === 'classic' ? { map: 'classic' as const } : {}),
     themeId: themeIdOf(raw.themeId),
     mainIslandHeroId: raw.mainIslandHeroId != null && owned.has(raw.mainIslandHeroId) ? raw.mainIslandHeroId : base.mainIslandHeroId,
     unlockedBuildings: Object.values(prog).filter(b => b.isUnlocked).map(b => b.buildingId),

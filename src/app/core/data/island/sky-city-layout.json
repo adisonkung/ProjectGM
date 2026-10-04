@@ -1,0 +1,62 @@
+{
+ "comment": "Sky City (image-based home island). World = the art's pixel size. Plots: hit/plate/focus per building id; nodes/edges = hero walking graph on the city roads; fx = effect anchors. Preview: python3 tools/island/sky_city/preview_layout.py",
+ "world": { "w": 3740, "h": 1682 },
+ "spawn": "plaza_s",
+ "plots": {
+  "tower": { "hit": [2150, 60, 330, 640], "plate": [2265, 690], "focus": [2265, 420], "front": "tower_steps" },
+  "ascension_shrine": { "hit": [300, 120, 320, 300], "plate": [450, 430], "focus": [450, 300], "front": "temple_c" },
+  "skill_shrine": { "hit": [1220, 120, 480, 380], "plate": [1470, 500], "focus": [1460, 330], "front": "academy_front" },
+  "hero_hall": { "hit": [680, 540, 520, 340], "plate": [940, 890], "focus": [940, 700], "front": "hall_front" },
+  "equipment_workshop": { "hit": [2600, 360, 460, 440], "plate": [2830, 800], "focus": [2830, 590], "front": "forge_front" },
+  "expedition_dock": { "hit": [3200, 290, 470, 220], "plate": [3440, 520], "focus": [3440, 420], "front": "harbor_c" },
+  "endgame_facility": { "hit": [1800, 740, 200, 220], "plate": [1820, 985], "focus": [1900, 860], "front": "plaza_e" },
+  "challenge_board": { "hit": [2050, 900, 110, 120], "plate": [2215, 1045], "focus": [2105, 960], "front": "plaza_e" },
+  "training_ground": { "hit": [2300, 860, 580, 280], "plate": [2590, 1150], "focus": [2590, 1000], "front": "training_front" }
+ },
+ "nodes": {
+  "gate": [1900, 1150],
+  "plaza_s": [1900, 1040],
+  "plaza_w": [1730, 970],
+  "plaza_e": [2060, 960],
+  "plaza_n": [2010, 800],
+  "market": [1500, 940],
+  "fountain_w": [1250, 1010],
+  "hall_front": [1100, 900],
+  "west_road": [1200, 780],
+  "canal_w": [1380, 640],
+  "academy_front": [1480, 540],
+  "north_road": [1720, 600],
+  "tower_steps": [2140, 760],
+  "tower_base": [2210, 680],
+  "east_road": [2420, 860],
+  "forge_front": [2700, 820],
+  "training_front": [2500, 980],
+  "training_c": [2640, 1060],
+  "east_bridge": [2960, 900],
+  "chain_l_end": [960, 520],
+  "chain_l_mid": [800, 470],
+  "temple_c": [470, 400],
+  "chain_r_end": [3040, 590],
+  "chain_r_mid": [3140, 530],
+  "harbor_c": [3380, 470]
+ },
+ "edges": [
+  ["gate", "plaza_s"], ["plaza_s", "plaza_w"], ["plaza_s", "plaza_e"], ["plaza_w", "plaza_n"], ["plaza_e", "plaza_n"],
+  ["plaza_w", "market"], ["market", "fountain_w"], ["fountain_w", "hall_front"], ["hall_front", "west_road"], ["market", "west_road"],
+  ["west_road", "canal_w"], ["canal_w", "academy_front"], ["academy_front", "north_road"], ["north_road", "plaza_n"], ["plaza_n", "tower_steps"],
+  ["tower_steps", "tower_base"], ["plaza_e", "east_road"], ["tower_steps", "east_road"], ["east_road", "forge_front"], ["east_road", "training_front"],
+  ["training_front", "training_c"], ["forge_front", "east_bridge"], ["training_c", "east_bridge"],
+  ["canal_w", "chain_l_end"], ["chain_l_end", "chain_l_mid"], ["chain_l_mid", "temple_c"],
+  ["forge_front", "chain_r_end"], ["chain_r_end", "chain_r_mid"], ["chain_r_mid", "harbor_c"]
+ ],
+ "fx": {
+  "spireTip": [2268, 70],
+  "spireRing": [2262, 210, 150, 34],
+  "spireAura": [2240, 560],
+  "spireBox": [2120, 0, 300, 600],
+  "fountains": [[1480, 540], [1250, 1020], [1960, 460]],
+  "forgeSmoke": [[2730, 400], [2910, 520]],
+  "forgeFire": [2900, 660],
+  "templeHalo": [430, 170]
+ }
+}

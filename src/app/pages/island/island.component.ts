@@ -12,6 +12,9 @@ import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
 import { IslandHeroView } from '../../island/island-hero.component';
 import { IslandSceneComponent } from '../../island/island-scene.component';
+import { SkyCityComponent } from '../../island/sky-city.component';
+import { CityHero, CitySim } from '../../island/city-sim';
+import { SKY_PLOTS } from '../../core/data/sky-city';
 import { IslandSim, SimHero } from '../../island/island-sim';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
@@ -40,7 +43,7 @@ const EVENT_TITLE: Record<IslandEvent['type'], string> = {
  */
 @Component({
   selector: 'app-island',
-  imports: [IslandSceneComponent, HeroPortraitComponent, IconComponent, RouterLink],
+  imports: [IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, RouterLink],
   templateUrl: './island.component.html',
   styleUrl: './island.component.scss',
 })
@@ -57,6 +60,12 @@ export class IslandComponent implements OnInit, OnDestroy {
   readonly themes = Object.values(ISLAND_THEMES);
   setTheme(id: string): void {
     this.isl.setTheme(id);
+  }
+  /** Sky City (default) or the classic island */
+  readonly isCity = this.isl.isCity;
+  readonly towerStage = computed(() => this.island().towerVisualStage);
+  setMap(m: 'city' | 'classic'): void {
+    this.isl.setMap(m);
   }
   readonly themeSheet = signal(false);
   openThemes(): void {
@@ -106,6 +115,7 @@ export class IslandComponent implements OnInit, OnDestroy {
   readonly focus = computed(() => {
     const ev = this.current();
     if (!ev?.buildingId) return null;
+    if (this.isCity()) return SKY_PLOTS[ev.buildingId]?.focus ?? null;
     const p = PLOT_BY_ID[BUILDING_BY_ID[ev.buildingId].plotId];
     return { x: p.position.x, y: p.position.y - p.buildingBounds.h / 2 };
   });
@@ -114,7 +124,7 @@ export class IslandComponent implements OnInit, OnDestroy {
   // ---------------------------------------------------------------- heroes
   readonly mainUid = this.isl.mainHeroUid;
   readonly heroViews = signal<IslandHeroView[]>([]);
-  private sim: IslandSim | null = null;
+  private sim: IslandSim | CitySim | null = null;
   private raf = 0;
   private last = 0;
   private acc = 0;
@@ -176,6 +186,7 @@ export class IslandComponent implements OnInit, OnDestroy {
     effect(() => {
       const main = this.mainUid();
       const stage = this.island().islandProgressionStage;
+      this.isCity();
       untracked(() => this.buildSim(main, stage));
     });
     effect(() => {
@@ -200,7 +211,7 @@ export class IslandComponent implements OnInit, OnDestroy {
     const extra = pickRoamers(s.heroes, s.team, mainUid, roamerCount(stage, s.heroes.length), daySeed());
     const list = [...(main ? [main] : []), ...extra].map(h => ({ uid: h.uid, templateId: h.templateId, cls: HERO_BY_ID[h.templateId].cls, isMain: h.uid === mainUid }));
     const unlocked = Object.values(this.display()).filter(b => b.isUnlocked).map(b => b.buildingId);
-    this.sim = new IslandSim(list, unlocked);
+    this.sim = this.isCity() ? new CitySim(list, unlocked) : new IslandSim(list, unlocked);
     this.publish();
   }
 
@@ -222,7 +233,7 @@ export class IslandComponent implements OnInit, OnDestroy {
 
   private publish(): void {
     if (!this.sim) return;
-    const views = this.sim.heroes.map((h: SimHero, i) => ({
+    const views = (this.sim.heroes as (SimHero | CityHero)[]).map((h, i) => ({
       uid: h.heroId, templateId: h.templateId, name: HERO_BY_ID[h.templateId]?.name ?? '', cls: h.cls,
       x: h.currentPosition.x, y: h.currentPosition.y, walking: h.walking, facingLeft: h.facingLeft, isMain: h.isMainHero,
       phase: (this.cycle * (h.walking ? 2.4 : 0.5) + i * 0.37) % 1, interacting: h.currentState === 'BUILDING_IDLE',

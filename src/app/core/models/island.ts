@@ -284,6 +284,8 @@ export interface PlayerIsland {
   version: 1;
   /** the player's island name (set on first launch at /welcome, renamed in /account) — absent on old saves until named */
   name?: string;
+  /** which home map: absent = the Sky City (image-based, default) · 'classic' = the procedural forest island + its themes */
+  map?: 'classic';
   themeId: string;
   /** owned hero uid shown as the player's representative (cosmetic / identity only) */
   mainIslandHeroId: number | null;

@@ -13,6 +13,16 @@ export class IslandService {
     return s.island ?? normalizeIsland(undefined, s);
   });
   readonly mainHeroUid = computed(() => this.island().mainIslandHeroId);
+  /** the Sky City is the default home map; 'classic' = the procedural forest island with cosmetic themes */
+  readonly isCity = computed(() => this.island().map !== 'classic');
+
+  setMap(map: 'city' | 'classic'): void {
+    this.save.update(st => {
+      const isl = st.island ?? this.island();
+      const { map: _old, ...rest } = isl;
+      return { ...st, island: map === 'classic' ? { ...rest, map: 'classic' } : rest };
+    });
+  }
 
   /**
    * "Return to Island": compare the saved snapshot with tower progress, queue new progression events, persist.
@@ -42,9 +52,10 @@ export class IslandService {
     return !!next;
   }
 
+  /** a cosmetic theme belongs to the classic island — choosing one switches the map to classic */
   setTheme(themeId: string): boolean {
     const next = setTheme(this.island(), themeId);
-    if (next) this.save.update(st => ({ ...st, island: next }));
+    if (next) this.save.update(st => ({ ...st, island: { ...next, map: 'classic' } }));
     return !!next;
   }
 
