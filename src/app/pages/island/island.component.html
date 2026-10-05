@@ -1,5 +1,5 @@
 <section class="island">
-  <div class="stage" #stage [class.full]="isCity()">
+  <div class="stage" #stage>
     @if (isCity()) {
       <app-sky-city [buildings]="display()" [usable]="usableRuins()" [heroes]="heroViews()" [towerStage]="towerStage()"
                     [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()"
@@ -130,16 +130,4 @@
     }
   </div>
 
-  <aside class="side gm-panel">
-    <h2 class="gm-h2">ความคืบหน้าเกาะ</h2>
-    <p class="gm-sub">สร้างแล้ว {{ builtCount() }} / {{ buildingTotal }} · ไต่หอคอยเพื่อฟื้นฟูเกาะ</p>
-    @if (nextGoal(); as g) {
-      <p class="goal"><app-icon name="lock" [size]="13" /> ถัดไป: <b>{{ g.name }}</b> — ผ่านชั้น {{ unlockFloorOf(g) }}</p>
-    } @else {
-      <p class="goal done"><app-icon name="crown" [size]="13" /> ฟื้นฟูเกาะใน Patch 1 ครบแล้ว</p>
-    }
-    <p class="theme-line"><app-icon name="palette" [size]="13" /> แผนที่: <b>{{ isCity() ? "นครลอยฟ้า" : theme().name }}</b>
-      <button type="button" class="gm-btn small ghost" (click)="openThemes()">เปลี่ยนธีม</button></p>
-    <p class="hint">เลื่อนซ้าย–ขวาเพื่อสำรวจเกาะ · แตะสิ่งก่อสร้างเพื่อเข้าใช้งาน · แตะฮีโร่เพื่อดูรายละเอียดหรือตั้งเป็นฮีโร่หลัก</p>
-  </aside>
 </section>

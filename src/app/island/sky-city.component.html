@@ -1,5 +1,5 @@
-<div class="vp" #vp [class.loading]="!ready()" [class.lite]="lite()" (pointerdown)="onPointerDown($event)" (wheel)="onWheel($event)">
-  <div class="stage" [style.width.px]="W * k()" [style.height.px]="H * k()">
+<div class="vp" #vp [class.loading]="!ready()" [class.lite]="lite()" (pointerdown)="onPointerDown($event)">
+  <div class="stage">
     <div class="world" [style.width.px]="W" [style.height.px]="H" [style.transform]="transform()" [class.gold]="gold()" [class.focusing]="!!focus()">
 
       <!-- ── sky (parallax, behind the island) ── -->

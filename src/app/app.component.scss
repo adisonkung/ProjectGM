@@ -122,3 +122,14 @@ main { margin-top: 18px; }
   .crest-wrap::before { animation: none; }
   .acct:hover { transform: none; }
 }
+
+// ---------------------------------------------------------------- island home: locked full screen, chrome floats over the map
+// (no backdrop-filter here: blurring the animated map behind the bar / dock every frame is expensive)
+.app.immersive { padding: 0; max-width: none; }
+.app.immersive main { margin-top: 0; }
+.app.immersive .bar { position: fixed; top: 8px; left: 0; right: 0; margin-inline: auto; width: min(1048px, calc(100% - 20px)); box-sizing: border-box; backdrop-filter: none; }
+@media (max-width: 720px) {
+  .app.immersive { padding: 0; }
+  .app.immersive .bar { top: 6px; width: calc(100% - 12px); }
+  .app.immersive .menu { backdrop-filter: none; }
+}

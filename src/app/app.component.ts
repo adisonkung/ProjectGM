@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
@@ -51,6 +51,8 @@ export class AppComponent {
   /** in a fight the mobile dock steps aside (the battle screen needs the height) */
   readonly fight = computed(() => /^\/(battle|lab)(\/|\?|$)/.test(this.url()));
   readonly onAccount = computed(() => this.url().startsWith('/account'));
+  /** home = the island fills the locked screen; the bar / dock float over it */
+  readonly immersive = computed(() => /^\/home([?#]|$)/.test(this.url()));
 
   readonly gems = computed(() => this.save.state().gems.toLocaleString('en-US'));
   readonly gold = computed(() => this.save.state().gold.toLocaleString('en-US'));
@@ -58,5 +60,6 @@ export class AppComponent {
   constructor() {
     // start decoding the island art right away (the home screen is the island)
     inject(PreloadService).warmCity();
+    effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive()));
   }
 }

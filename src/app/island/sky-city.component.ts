@@ -79,7 +79,6 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly fitK = signal(0.4);
   readonly zoom = signal(SKY_ZOOM.start);
   readonly k = computed(() => this.fitK() * this.zoom());
-  readonly scrollX = signal(0);
   readonly zoomMin = SKY_ZOOM.min;
   readonly zoomMax = SKY_ZOOM.max;
 
@@ -114,11 +113,21 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
     });
   });
 
+  /** camera: our own pan (screen px) — no native scrolling, so the parallax layers move in the very same frame as the
+   *  world (native scroll moved the world on the compositor first and the layers a frame later → shaking / tearing) */
+  readonly panX = signal(0);
+  readonly panY = signal(0);
+  private readonly vpW = signal(800);
+  private readonly vpH = signal(450);
+  /** camera left edge in world px (parallax input) */
+  readonly scrollX = computed(() => this.panX() / this.k());
+
   readonly transform = computed(() => {
     const k = this.k(), f = this.focus();
-    if (!f) return `scale(${k})`;
+    const pan = `translate3d(${(-this.panX()).toFixed(1)}px, ${(-this.panY()).toFixed(1)}px, 0)`;
+    if (!f) return `${pan} scale(${k})`;
     const z = 1.15;
-    return `translate(${k * f.x * (1 - z)}px, ${k * f.y * (1 - z)}px) scale(${k * z})`;
+    return `${pan} translate(${k * f.x * (1 - z)}px, ${k * f.y * (1 - z)}px) scale(${k * z})`;
   });
 
   constructor() {
@@ -134,7 +143,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
     this.zone.runOutsideAngular(() => {
       this.resize = new ResizeObserver(() => this.zone.run(() => this.fit()));
       this.resize.observe(el);
-      el.addEventListener('scroll', () => this.zone.run(() => this.scrollX.set(el.scrollLeft / this.k())), { passive: true });
+      el.addEventListener('wheel', e => this.onWheel(e), { passive: false });
     });
     this.fit();
     this.panTo(SKY_NODES[SKY_SPAWN].x, SKY_NODES[SKY_SPAWN].y - 120, false);
@@ -143,72 +152,94 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed = true;
     this.resize?.disconnect();
+    cancelAnimationFrame(this.tween);
   }
 
   private fit(): void {
     const el = this.vp().nativeElement;
-    const h = el.clientHeight || 540;
-    this.fitK.set(Math.max(h / this.H, (el.clientWidth || 0) / this.W));
+    const h = el.clientHeight || 540, w = el.clientWidth || 800;
+    const cx = (this.panX() + this.vpW() / 2) / this.k(), cy = (this.panY() + this.vpH() / 2) / this.k();
+    const first = !this.fitted;
+    this.fitted = true;
+    this.vpW.set(w);
+    this.vpH.set(h);
+    this.fitK.set(Math.max(h / this.H, w / this.W));
+    if (!first) this.panTo(cx, cy, false);
+  }
+  private fitted = false;
+
+  private clampPan(x: number, y: number): [number, number] {
+    const k = this.k();
+    return [Math.max(0, Math.min(this.W * k - this.vpW(), x)), Math.max(0, Math.min(this.H * k - this.vpH(), y))];
+  }
+  private setPan(x: number, y: number): void {
+    const [cx, cy] = this.clampPan(x, y);
+    this.panX.set(cx);
+    this.panY.set(cy);
   }
 
+  private tween = 0;
   /** centre the camera on a world point */
   panTo(x: number, y: number, smooth: boolean): void {
-    const el = this.vp()?.nativeElement;
-    if (!el) return;
-    const left = Math.max(0, x * this.k() - el.clientWidth / 2);
-    const top = Math.max(0, y * this.k() - el.clientHeight / 2);
-    if (smooth && el.scrollTo) el.scrollTo({ left, top, behavior: 'smooth' });
-    else {
-      el.scrollLeft = left;
-      el.scrollTop = top;
-    }
+    cancelAnimationFrame(this.tween);
+    const [tx, ty] = this.clampPan(x * this.k() - this.vpW() / 2, y * this.k() - this.vpH() / 2);
+    if (!smooth || typeof requestAnimationFrame === 'undefined') return this.setPan(tx, ty);
+    const fx = this.panX(), fy = this.panY(), t0 = performance.now(), dur = 600;
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
+      this.setPan(fx + (tx - fx) * e, fy + (ty - fy) * e);
+      if (t < 1) this.tween = requestAnimationFrame(step);
+    };
+    this.tween = requestAnimationFrame(step);
   }
 
-  /** zoom around the viewport centre (buttons, ctrl/pinch wheel) */
+  /** zoom around the viewport centre (buttons, ctrl/pinch wheel) — only when SKY_ZOOM allows a range */
   setZoom(z: number): void {
-    const el = this.vp()?.nativeElement;
     const nz = Math.max(SKY_ZOOM.min, Math.min(SKY_ZOOM.max, z));
-    if (!el || nz === this.zoom()) return;
+    if (nz === this.zoom()) return;
     const k0 = this.k();
-    const cx = (el.scrollLeft + el.clientWidth / 2) / k0, cy = (el.scrollTop + el.clientHeight / 2) / k0;
+    const cx = (this.panX() + this.vpW() / 2) / k0, cy = (this.panY() + this.vpH() / 2) / k0;
     this.zoom.set(nz);
-    requestAnimationFrame(() => this.panTo(cx, cy, false));
+    this.panTo(cx, cy, false);
   }
 
-  // ---------------------------------------------------------------- drag / wheel pan (touch = native scroll)
-  private drag: { x: number; y: number; left: number; top: number; moved: boolean } | null = null;
+  // ---------------------------------------------------------------- drag (mouse + touch) / wheel pan
+  private drag: { id: number; x: number; y: number; px: number; py: number; moved: boolean } | null = null;
   suppressClick = false;
 
   onPointerDown(e: PointerEvent): void {
-    if (e.pointerType !== 'mouse' || e.button !== 0) return;
-    const el = this.vp().nativeElement;
-    this.drag = { x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop, moved: false };
+    if (this.drag || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    cancelAnimationFrame(this.tween);
+    this.drag = { id: e.pointerId, x: e.clientX, y: e.clientY, px: this.panX(), py: this.panY(), moved: false };
   }
   @HostListener('window:pointermove', ['$event'])
   onPointerMove(e: PointerEvent): void {
-    if (!this.drag) return;
-    const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
-    if (Math.hypot(dx, dy) > 5) this.drag.moved = true;
-    if (this.drag.moved) {
-      const el = this.vp().nativeElement;
-      el.scrollLeft = this.drag.left - dx;
-      el.scrollTop = this.drag.top - dy;
-    }
+    const d = this.drag;
+    if (!d || e.pointerId !== d.id) return;
+    const dx = e.clientX - d.x, dy = e.clientY - d.y;
+    if (!d.moved && Math.hypot(dx, dy) > 6) d.moved = true;
+    if (d.moved) this.setPan(d.px - dx, d.py - dy);
   }
-  @HostListener('window:pointerup')
-  onPointerUp(): void {
-    if (this.drag?.moved) {
+  @HostListener('window:pointerup', ['$event'])
+  @HostListener('window:pointercancel', ['$event'])
+  onPointerUp(e?: PointerEvent): void {
+    if (!this.drag || (e && e.pointerId !== this.drag.id)) return;
+    if (this.drag.moved) {
       this.suppressClick = true;
       setTimeout(() => (this.suppressClick = false));
     }
     this.drag = null;
   }
-  /** ctrl / pinch wheel = zoom; plain wheel scrolls the city in 2-D (native) */
+  /** wheel / trackpad pans the city (ctrl / pinch = zoom when enabled); the page itself never scrolls */
   onWheel(e: WheelEvent): void {
-    if (e.ctrlKey) {
-      e.preventDefault();
-      this.setZoom(this.zoom() * (e.deltaY < 0 ? 1.12 : 1 / 1.12));
-    }
+    e.preventDefault();
+    this.zone.run(() => {
+      if (e.ctrlKey) return this.setZoom(this.zoom() * (e.deltaY < 0 ? 1.12 : 1 / 1.12));
+      const dx = e.shiftKey && !e.deltaX ? e.deltaY : e.deltaX;
+      const dy = e.shiftKey && !e.deltaX ? 0 : e.deltaY;
+      cancelAnimationFrame(this.tween);
+      this.setPan(this.panX() + dx, this.panY() + dy);
+    });
   }
   tapBuilding(id: string): void {
     if (!this.suppressClick) this.buildingTap.emit(id);
