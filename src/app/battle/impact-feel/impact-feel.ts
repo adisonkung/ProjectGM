@@ -28,5 +28,14 @@ export function playImpactFeel(root: HTMLElement | null | undefined, feel: Impac
       { duration: feel.shakeMs ?? 140, delay: stop, easing: 'linear' },
     );
   }
+  const flash = feel.flashMs ?? 0;
+  if (flash > 0 && typeof document !== 'undefined') {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:absolute;inset:0;background:#fff;pointer-events:none;z-index:400;mix-blend-mode:screen;opacity:0';
+    ((root.querySelector('.board') as HTMLElement | null) ?? root).appendChild(el);
+    const a = el.animate([{ opacity: reduced ? 0.25 : 0.7 }, { opacity: 0 }], { duration: flash, delay: stop * 0.5, easing: 'ease-out' });
+    a.onfinish = a.oncancel = () => el.remove();
+    setTimeout(() => el.remove(), flash + stop + 200);
+  }
   return stop;
 }

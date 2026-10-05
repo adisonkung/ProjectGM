@@ -206,16 +206,21 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
     kit: rename(tank, ['ป้อมปราการมืด', 'โล่กระแทก', 'ระเบิดโล่ทมิฬ']),
   },
   jin: { id: 'jin', cls: 'fighter', identity: 'Formation Cleave · Multi-target Melee DPS', kit: fighter },
-  // ไป๋หลง (ทวนมังกรขาว, 3★): ไม่มีค่าเดิม → ตัวเลข Fighter baseline ทั้งหมด (ไม่มีบาลานซ์ใหม่)
-  // Dragon Thrust = แทงทะลวงของคลาส (LINE_2 180 % / 120 %, cd 10, rank table เดิม) ย้ายมาเป็นสกิล 1 พร้อมภาพของเขาเอง
-  // สกิล 2 / ท่าไม้ตาย = ของคลาสชั่วคราว (ยังไม่ออกแบบ/ไม่มีภาพ — รอรีวิว Dragon Thrust ก่อน)
+  // ไป๋หลง (ทวนมังกรขาว, 3★): ตัวเลข Fighter baseline ทั้งหมด (ไม่มีบาลานซ์ใหม่) — ภาพ/จังหวะอยู่ใน sprites.ts
+  // · S1 Dragon Thrust = แทงทะลวงของคลาส (LINE_2 180 % / 120 %, cd 10, id/rank table เดิม) ย้ายมาช่อง 1
+  // · S2 Sweeping Moon = ดาบหมุนวนของคลาส (ADJACENT_8 รอบตัว 170 % / 100 %, cd 5, รอโดน ≥ 2 ตัว) แค่เปลี่ยนชื่อ
+  // · Ult Nine Dragon Sequence = ดาบมังกรประหารของคลาส (range 2, ADJACENT_8 รอบเป้า 280 % / 140 %) แบ่งเป็น 3 จังหวะ
+  //   25 / 30 / 45 % (รวม = ค่าเดิม) ลงตาม DAMAGE ของท่า · จังหวะหลังยังลงที่จุดเดิมแม้เป้าตาย (เหมือนตีครั้งเดียว)
   bailong: {
-    id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce (Skill 2 / Ultimate pending review)',
+    id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {
       ...fighter,
       skill: { ...fighter.skill2, slot: 'skill', name: 'ทวนมังกรทะลวง', label: 'Dragon Thrust' },
-      skill2: { ...fighter.skill, slot: 'skill2', name: 'ทวนหมุนวน', label: 'Spinning Spear (placeholder)' },
-      ult: { ...fighter.ult, name: 'ทวนมังกรประหาร', label: 'Dragon Execution (placeholder)' },
+      skill2: { ...fighter.skill, slot: 'skill2', name: 'จันทร์กวาด', label: 'Sweeping Moon' },
+      ult: {
+        ...fighter.ult, name: 'ลำดับเก้ามังกร', label: 'Nine Dragon Sequence',
+        repeat: { count: 3, gap: 0.6, weights: [0.25, 0.3, 0.45], keepAfterKill: true },
+      },
     },
   },
   ragnar: {

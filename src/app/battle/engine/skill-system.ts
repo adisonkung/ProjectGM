@@ -493,7 +493,8 @@ export class SkillSystem {
     const clipEvents = slot === 'attack' ? [] : animEvents(u.sprite, kind).filter(ev => ev.event !== 'DAMAGE' && ev.event !== 'IMPACT');
     const queueClip = (before: boolean) => {
       for (const ev of clipEvents.filter(x => (x.t < tm.hit) === before))
-        this.h.later(ev.t, u, () => this.h.emit({ type: 'animEvent', src: u.id, event: ev.event, name: `${s.id.toUpperCase()}_${ev.event}`, kind: kind as SkillKind }));
+        this.h.later(ev.t, u, () =>
+          this.h.emit({ type: 'animEvent', src: u.id, event: ev.event, name: `${s.id.toUpperCase()}_${ev.event}${ev.index ? '_' + (ev.index + 1) : ''}`, kind: kind as SkillKind, index: ev.index }));
     };
     queueClip(true);
     if (target !== u && target.side !== u.side) u.targetId = target.id;
@@ -513,14 +514,25 @@ export class SkillSystem {
       });
     }
 
-    const land = (primary: BattleUnit, at: Cell, skill = s) => {
+    const authoredImpact = slot !== 'attack' && animEvents(u.sprite, kind).some(e => e.event === 'IMPACT');
+    const land = (primary: BattleUnit, at: Cell, skill = s, index = 0) => {
+      const dst = primary.alive ? primary.id : undefined;
+      const hits = this.applyEffects(u, skill, slot, primary, at);
       if (slot !== 'attack') {
-        if (animEvents(u.sprite, kind).some(e => e.event === 'IMPACT'))
-          this.h.emit({ type: 'animEvent', src: u.id, event: 'IMPACT', name: `${s.id.toUpperCase()}_IMPACT`, kind: kind as SkillKind });
-        this.h.emit({ type: 'impact', src: u.id, dst: primary.alive ? primary.id : undefined, kind: kind as SkillKind });
+        // contact presentation after the effects resolved: which units this hit really damaged (impact FX per target)
+        if (authoredImpact) this.h.emit({ type: 'animEvent', src: u.id, event: 'IMPACT', name: `${s.id.toUpperCase()}_IMPACT`, kind: kind as SkillKind, index });
+        this.h.emit({ type: 'impact', src: u.id, dst, kind: kind as SkillKind, index, hits: hits.map(f => f.id) });
       }
-      this.applyEffects(u, skill, slot, primary, at);
       if (mv?.type === 'DASH_THROUGH') this.dashThrough(u, primary, at);
+    };
+    // multi-hit: the clip's DAMAGE events place the hits (else `repeat.gap`); `weights` split the multipliers
+    const shots = s.repeat?.count ?? 1;
+    const clipHits = shots > 1 && tm.hits.length === shots;
+    const offsetOf = (i: number) => (clipHits ? tm.hits[i] - tm.hits[0] : i * (s.repeat?.gap ?? 0));
+    const weighted = (i: number): SkillDefinition => {
+      const w = s.repeat?.weights?.[i];
+      if (w == null) return s;
+      return { ...s, effects: s.effects.map(e => (e.type === 'DAMAGE' ? { ...e, primary: e.primary * w, ...(e.secondary != null ? { secondary: e.secondary * w } : {}) } : e)) };
     };
 
     this.h.later(tm.hit, u, () => {
@@ -535,16 +547,21 @@ export class SkillSystem {
         );
         return;
       }
-      this.h.emit({ type: 'animEvent', src: u.id, event: delivery === 'INSTANT' ? 'DAMAGE' : 'PROJECTILE_SPAWN', name: `${s.id.toUpperCase()}_${delivery === 'INSTANT' ? 'HIT' : 'SPAWN'}` });
-      const shots = s.repeat?.count ?? 1;
+      const evName = delivery === 'INSTANT' ? 'DAMAGE' : 'PROJECTILE_SPAWN';
+      if (!clipHits) this.h.emit({ type: 'animEvent', src: u.id, event: evName, name: `${s.id.toUpperCase()}_${delivery === 'INSTANT' ? 'HIT' : 'SPAWN'}` });
+      let last = { ...target.pos };
       for (let i = 0; i < shots; i++) {
-        this.h.later(i * (s.repeat?.gap ?? 0), u, () => {
-          // later shots are cancelled when the target already died (no automatic retarget yet)
-          if (i > 0 && !target.alive) return;
+        this.h.later(offsetOf(i), u, () => {
+          // later shots are cancelled when the target already died (no automatic retarget yet) — unless the skill keeps
+          // striking the spot (multi-hit area finisher)
+          const keep = !!s.repeat?.keepAfterKill && delivery === 'INSTANT';
+          if (i > 0 && !target.alive && !keep) return;
           if (target.side !== u.side && target !== u && !target.alive && delivery !== 'INSTANT') return;
-          const at = { ...target.pos };
-          if (delivery === 'INSTANT' || target === u) land(target, at);
-          else this.h.shoot(u, target, slot, delivery === 'SKY', () => land(target, target.alive ? { ...target.pos } : at));
+          if (clipHits) this.h.emit({ type: 'animEvent', src: u.id, event: evName, name: `${s.id.toUpperCase()}_HIT_${i + 1}`, kind: kind as SkillKind, index: i });
+          if (target.alive) last = { ...target.pos };
+          const at = { ...last };
+          if (delivery === 'INSTANT' || target === u) land(target, at, weighted(i), i);
+          else this.h.shoot(u, target, slot, delivery === 'SKY', () => land(target, target.alive ? { ...target.pos } : at, weighted(i), i));
         });
       }
     });
@@ -552,10 +569,11 @@ export class SkillSystem {
   }
 
   /** run a skill's effects in order (primary may have died: areas centre on its last cell) */
-  applyEffects(u: BattleUnit, s: SkillDefinition, slot: SkillSlot, primary: BattleUnit, at: Cell): void {
+  applyEffects(u: BattleUnit, s: SkillDefinition, slot: SkillSlot, primary: BattleUnit, at: Cell): BattleUnit[] {
     const ghost = { ...primary, pos: at } as BattleUnit;
     const focusOf = (p: BattleUnit) => (p.alive || p === u ? p : ghost);
     let hits: BattleUnit[] = [];
+    const damaged = new Set<BattleUnit>();
     for (const e of s.effects) {
       switch (e.type) {
         case 'DAMAGE': {
@@ -570,7 +588,7 @@ export class SkillSystem {
             mul *= rankPower(u, slot);
             if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
             const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);
-            if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot })) hits.push(f);
+            if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot })) (hits.push(f), damaged.add(f));
           }
           if (slot === 'attack' && hits.length) this.h.basicGauge(u);
           break;
@@ -625,6 +643,7 @@ export class SkillSystem {
         }
       }
     }
+    return [...damaged];
   }
 
   /** Ghost Dash: pass through the primary target and land behind it (nearest valid cell otherwise) */

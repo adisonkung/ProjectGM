@@ -224,7 +224,12 @@ export interface SkillDefinition {
   /** INSTANT (hit frame) · PROJECTILE (flies from the caster, effects on arrival) · SKY (falls onto the target) */
   delivery?: 'INSTANT' | 'PROJECTILE' | 'SKY';
   /** fire `count` independent shots `gap` s apart (Rapid Shot); later shots stop if the target died */
-  repeat?: { count: number; gap: number };
+  /**
+   * several hits from one use. `gap` = seconds between hits, unless the caster's clip authors one DAMAGE event per hit
+   * (then the hits land on those events). `weights` split the skill's multipliers over the hits (sum 1 = same total
+   * as one hit). `keepAfterKill` = later hits still land (areas centred on the last cell) when the target dies.
+   */
+  repeat?: { count: number; gap: number; weights?: number[]; keepAfterKill?: boolean };
   effects: SkillEffect[];
   ai?: SkillAI;
 }

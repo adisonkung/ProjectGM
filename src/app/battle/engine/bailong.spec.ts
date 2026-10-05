@@ -1,7 +1,7 @@
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_KITS, HERO_DEFINITIONS, kitOf } from '../../core/data/hero-skills';
-import { animEvents, animTiming, FX, FxDef, impactFeelOf, SHEETS } from '../../core/data/sprites';
+import { animEvents, animTiming, FX, FxDef, fxFor, fxNames, fxOffset, impactFeelOf, SHEETS } from '../../core/data/sprites';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { EnemyPlacement, StageDef } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
@@ -28,8 +28,8 @@ const spec = (id: string, depth = 0, lane = 1): UnitSpec => {
   };
 };
 
-/** Bai Long vs two slimes in his lane (adjacent + one behind): Dragon Thrust used by hand at t0 */
-function thrust(seed = 7) {
+/** Bai Long vs two slimes in his lane (adjacent + one behind): a skill used by hand at t0 */
+function thrust(seed = 7, slot: 'skill' | 'skill2' | 'ult' = 'skill', foeHp = 99999) {
   const enemies: EnemyPlacement[] = [{ enemy: 'forest_slime', r: 0, c: 1 }, { enemy: 'forest_slime', r: 1, c: 1 }];
   const stage: StageDef = { floor: 1, mode: 'eliminate', timeLimit: 999, enemies };
   const e = new BattleEngine({ allies: [spec('bailong')], stage, enemyTemplates: ENEMIES, seed });
@@ -42,7 +42,7 @@ function thrust(seed = 7) {
   step();
   const hero = e.units.find(u => u.heroId === 'bailong')!;
   const foes = e.units.filter(u => u.side === 'enemy');
-  for (const f of foes) f.hp = f.maxHp = 99999;
+  for (const f of foes) f.hp = f.maxHp = foeHp;
   // line them up: hero c, target c+1, the one behind c+2 (same lane)
   (e as any).relocate(hero, { r: 1, c: 5 }, 'blink');
   (e as any).relocate(foes[0], { r: 1, c: 6 }, 'blink');
@@ -50,9 +50,9 @@ function thrust(seed = 7) {
   hero.cd1 = hero.cd2 = 99;
   hero.atkCd = 99;
   const t0 = e.time;
-  e.skills.use(hero, 'skill', kitOf('bailong', 'fighter').skill, foes[0]);
+  e.skills.use(hero, slot, kitOf('bailong', 'fighter')[slot], foes[0]);
   for (const ev of e.drainEvents()) log.push({ ...ev, t: e.time });
-  for (let i = 0; i < 40; i++) step();
+  for (let i = 0; i < 70; i++) step();
   return { e, log, hero, foes, t0 };
 }
 
@@ -62,9 +62,9 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
   it('atlas rows + frame counts: idle 6 · move 8 · hurt 4 · attack 6 · death 7 · Dragon Thrust 10 (2×5)', () => {
     const a = sheet.anims;
     expect([a.idle!.frames, a.walk!.frames, a.hurt!.frames, a.attack!.frames, a.die!.frames, a.skill!.frames]).toEqual([6, 8, 4, 6, 7, 10]);
-    expect(new Set(Object.values(a).map(x => x!.row)).size).toBe(6);
-    expect(sheet.cols).toBe(10);
-    expect(sheet.rows).toBe(6);
+    expect(new Set(Object.values(a).map(x => x!.row)).size).toBe(8);
+    expect(sheet.cols).toBe(20);
+    expect(sheet.rows).toBe(8);
     expect(sheet.cellW).toBe(200);
     expect(sheet.cellH).toBe(120);
     expect(sheet.pixelated).toBeTrue();
@@ -100,7 +100,7 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
   });
 
   it('VFX is a separate layer: own strip, spawns on VFX_SPAWN, left-centre pivot, flips with the owner, anchored ahead of the root', () => {
-    const v: FxDef = FX[sheet.fx!.skill!];
+    const v: FxDef = FX[sheet.fx!.skill as string];
     expect(sheet.fx!.skill).toBe(FX_NAME);
     expect(v.file).not.toBe(SPRITE);
     expect(v.frames).toBe(14);
@@ -113,12 +113,12 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
     expect(v.dy!).toBeLessThan(0); // above the feet line
   });
 
-  it('Skill 2 / Ultimate do not reuse the Dragon Thrust clip or VFX (not implemented yet)', () => {
-    expect(sheet.anims.skill2!.row).toBe(sheet.anims.attack!.row);
-    expect(sheet.anims.ult!.row).toBe(sheet.anims.attack!.row);
-    expect(sheet.fx!.skill2).toBeUndefined();
-    expect(sheet.fx!.ult).toBeUndefined();
-    expect(animEvents(SPRITE, 'skill2')).toEqual([]);
+  it('Skill 2 / Ultimate have their own rows and never reuse the Dragon Thrust clip or VFX', () => {
+    const rows = ['skill', 'skill2', 'ult'].map(k => (sheet.anims as any)[k].row);
+    expect(new Set(rows).size).toBe(3);
+    expect(fxNames(SPRITE, 'skill2')).not.toContain(FX_NAME);
+    expect(fxNames(SPRITE, 'ult')).not.toContain(FX_NAME);
+    expect([sheet.anims.skill2!.frames, sheet.anims.ult!.frames]).toEqual([12, 20]);
   });
 
   it('every other sheet keeps the old hit-frame timing (no events authored)', () => {
@@ -144,6 +144,7 @@ describe('Bai Long — balance unchanged (fighter baseline)', () => {
     expect(kit.skill.slot).toBe('skill');
     expect(kit.attack).toBe(fighter.attack);
     expect(kit.ult.effects).toEqual(fighter.ult.effects);
+    expect(kit.ult.range).toBe(fighter.ult.range);
   });
 });
 
@@ -196,5 +197,181 @@ describe('Bai Long — engine (semantic events, damage timing, missing VFX)', ()
     const names = e.drainEvents().filter(x => x.type === 'animEvent' && x.src === hero.id).map(x => (x as any).event);
     expect(names).not.toContain('VFX_SPAWN');
     expect(names).not.toContain('DAMAGE');
+  });
+});
+
+// ------------------------------------------------------------------ Skill 2 · Sweeping Moon
+
+describe('Bai Long — Sweeping Moon (Skill 2) visuals', () => {
+  const at = (n: string, i = 0) => animEvents(SPRITE, 'skill2').find(x => x.event === n && x.index === i)!;
+
+  it('12-frame clip, 1.0–1.3 s; anticipation F5 · activation + VFX F7 · damage F8 (art frames, 1-based)', () => {
+    const tm = animTiming(SPRITE, 'skill2');
+    expect(tm.total).toBeGreaterThanOrEqual(1.0);
+    expect(tm.total).toBeLessThanOrEqual(1.3);
+    expect(at('ANTICIPATION_PEAK').frame + 1).toBe(5);
+    expect(at('SKILL_ACTIVATE').frame + 1).toBe(7);
+    expect(at('VFX_SPAWN').frame + 1).toBe(7);
+    expect(at('DAMAGE').frame + 1).toBe(8);
+    expect(at('CAST_START').t).toBeLessThan(at('ANTICIPATION_PEAK').t);
+    expect(at('RECOVERY_START').t).toBeGreaterThan(at('DAMAGE').t);
+    expect(tm.hit).toBeCloseTo(at('DAMAGE').t, 6);
+  });
+
+  it('main crescent = separate VFX on VFX_SPAWN at skillOrigin, left-centre pivot, flips; impact FX on hit targets (max 3)', () => {
+    expect(fxFor(SPRITE, 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['bailong-sweeping-moon']);
+    const main = FX['bailong-sweeping-moon'];
+    expect([main.at, main.orient, main.anchor]).toEqual(['self', 'flip', 'skillOrigin']);
+    expect(main.pivot![0]).toBeLessThan(0.1);
+    // ≈ 2–2.5 hero widths forward (hero ≈ 1 cell): frame width × px→cell × scale × FX scale
+    const cells = (main.w * 1.25 * main.scale! * 1.5) / 100;
+    expect(cells).toBeGreaterThan(1.8);
+    expect(cells).toBeLessThan(2.8);
+    expect(fxFor(SPRITE, 'skill2', { on: 'impact' })).toEqual(['bailong-sweeping-moon-hit']);
+    expect(FX['bailong-sweeping-moon-hit'].at).toBe('target');
+    expect(FX['bailong-sweeping-moon-hit'].perHit).toBe(3);
+    expect(fxOffset('bailong-sweeping-moon', SPRITE)).toEqual(SHEETS[SPRITE].anchors!['skillOrigin']);
+  });
+
+  it('hit-stop 50–70 ms, small shake (below the ultimate final hit)', () => {
+    const f = impactFeelOf(SPRITE, 'skill2')!;
+    expect(f.hitStopMs!).toBeGreaterThanOrEqual(50);
+    expect(f.hitStopMs!).toBeLessThanOrEqual(70);
+    expect(f.shakePx!).toBeLessThan(impactFeelOf(SPRITE, 'ult', 2)!.shakePx!);
+  });
+
+  it('engine: damage on the DAMAGE event, impact lists every unit hit, events in order', () => {
+    const b = thrust(5, 'skill2');
+    const evs = b.log.filter(x => x.type === 'animEvent' && x.src === b.hero.id).map(x => (x as any).event);
+    expect(evs).toEqual(['CAST_START', 'ANTICIPATION_PEAK', 'SKILL_ACTIVATE', 'VFX_SPAWN', 'DAMAGE', 'IMPACT', 'RECOVERY_START', 'ANIMATION_END']);
+    const ids = b.foes.map(f => f.id);
+    const dmg = b.log.filter(x => x.type === 'damage' && ids.includes((x as any).dst));
+    expect(dmg.length).toBeGreaterThan(0);
+    for (const d of dmg) expect(d.t - b.t0).toBeCloseTo(animTiming(SPRITE, 'skill2').hit, 1);
+    const imp = b.log.find(x => x.type === 'impact' && x.src === b.hero.id) as any;
+    expect(imp.hits.sort()).toEqual([...new Set(dmg.map(d => (d as any).dst))].sort());
+  });
+
+  it('kit = fighter Spinning Sword numbers, only renamed', () => {
+    const k = HERO_DEFINITIONS['bailong'].kit.skill2;
+    const f = CLASS_KITS.fighter.skill;
+    expect(k.effects).toEqual(f.effects);
+    expect([k.id, k.cooldown, k.target]).toEqual([f.id, f.cooldown, f.target]);
+    expect(k.ai).toEqual(f.ai);
+    expect(k.label).toBe('Sweeping Moon');
+  });
+});
+
+// ------------------------------------------------------------------ Ultimate · Nine Dragon Sequence
+
+describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
+  const ev = () => animEvents(SPRITE, 'ult');
+  const at = (n: string, i = 0) => ev().find(x => x.event === n && x.index === i)!;
+
+  it('20-frame clip, 2.0–2.7 s; charge peak F5 · hits F8 / F13 / F18 · final anticipation F16', () => {
+    const tm = animTiming(SPRITE, 'ult');
+    expect(tm.total).toBeGreaterThanOrEqual(2.0);
+    expect(tm.total).toBeLessThanOrEqual(2.7);
+    expect(at('CHARGE_PEAK').frame + 1).toBe(5);
+    expect([0, 1, 2].map(i => at('DAMAGE', i).frame + 1)).toEqual([8, 13, 18]);
+    expect(at('FINAL_ANTICIPATION').frame + 1).toBe(16);
+    expect(tm.hits.length).toBe(3);
+    // each strike starts before its hit, after the previous one
+    for (const i of [0, 1, 2]) expect(at('STRIKE_START', i).t).toBeLessThan(at('DAMAGE', i).t);
+    expect(at('STRIKE_START', 1).t).toBeGreaterThan(at('DAMAGE', 0).t);
+  });
+
+  it('charge VFX: around the body/root, under the units, starts on CHARGE_START and is gone before hit 1', () => {
+    expect(fxFor(SPRITE, 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['bailong-nine-dragon-charge']);
+    const c = FX['bailong-nine-dragon-charge'];
+    expect([c.at, c.anchor, c.layer]).toEqual(['self', 'ultimateChargeOrigin', 'under']);
+    expect(at('CHARGE_START').t + (c.frames * c.frameMs) / 1000).toBeLessThan(at('DAMAGE', 0).t);
+  });
+
+  it('main VFX = 3 segments of one strip, each starts on its strike and peaks on its hit', () => {
+    const seg = (trig: any) => fxFor(SPRITE, 'ult', trig);
+    expect(seg({ on: 'event', event: 'STRIKE_START', index: 0 })).toEqual(['bailong-nine-dragon-1']);
+    expect(seg({ on: 'event', event: 'STRIKE_START', index: 1 })).toEqual(['bailong-nine-dragon-2']);
+    expect(seg({ on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual(['bailong-nine-dragon-3']);
+    const parts = ['bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3'].map(n => FX[n]);
+    expect(parts.map(p => p.file)).toEqual(Array(3).fill('fx-bailong-nine-dragon.png'));
+    expect(parts[0].from! + parts[0].frames).toBe(parts[1].from!);
+    expect(parts[1].from! + parts[1].frames).toBe(parts[2].from!);
+    expect(parts[2].from! + parts[2].frames).toBe(parts[0].stripFrames!);
+    // each segment still playing when its hit lands
+    const starts = [at('STRIKE_START', 0).t, at('STRIKE_START', 1).t, at('FINAL_ANTICIPATION').t];
+    parts.forEach((p, i) => expect(starts[i] + (p.frames * p.frameMs) / 1000).toBeGreaterThan(at('DAMAGE', i).t));
+    // peak width ≈ 40–60 % of the 16-column field
+    const cells = (parts[2].w * 1.25 * parts[2].scale! * 1.5) / 100;
+    expect(cells).toBeGreaterThan(6.4 * 0.9);
+    expect(cells).toBeLessThan(9.6);
+  });
+
+  it('final impact FX only on hit 3; hit-stop / shake escalate 1 < 2 < 3 (+ flash on 3)', () => {
+    expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 0 })).toEqual([]);
+    expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 1 })).toEqual([]);
+    expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 2 })).toEqual(['bailong-nine-dragon-impact']);
+    const f = [0, 1, 2].map(i => impactFeelOf(SPRITE, 'ult', i)!);
+    expect(f[0].hitStopMs!).toBeGreaterThanOrEqual(20);
+    expect(f[0].hitStopMs!).toBeLessThanOrEqual(30);
+    expect(f[1].hitStopMs!).toBeGreaterThanOrEqual(30);
+    expect(f[1].hitStopMs!).toBeLessThanOrEqual(40);
+    expect(f[2].hitStopMs!).toBeGreaterThanOrEqual(80);
+    expect(f[2].hitStopMs!).toBeLessThanOrEqual(110);
+    expect(f[0].shakePx!).toBeLessThan(f[1].shakePx!);
+    expect(f[1].shakePx!).toBeLessThan(f[2].shakePx!);
+    expect(f[2].flashMs!).toBeGreaterThan(0);
+  });
+
+  it('balance: same targeting / range / area as the class ult; 3 weights sum to 1 (total multiplier unchanged)', () => {
+    const k = HERO_DEFINITIONS['bailong'].kit.ult;
+    const f = CLASS_KITS.fighter.ult;
+    expect(k.effects).toEqual(f.effects);
+    expect([k.id, k.range, k.target]).toEqual([f.id, f.range, f.target]);
+    const w = k.repeat!.weights!;
+    expect(w.length).toBe(3);
+    expect(w.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9);
+  });
+
+  it('engine: three hits on the three DAMAGE events; per-hit damage follows 25 / 30 / 45 %', () => {
+    const b = thrust(3, 'ult');
+    const hits = b.log.filter(x => x.type === 'animEvent' && x.src === b.hero.id && (x as any).event === 'DAMAGE') as any[];
+    expect(hits.map(h => h.index)).toEqual([0, 1, 2]);
+    const want = animTiming(SPRITE, 'ult').hits;
+    hits.forEach((h, i) => expect(h.t - b.t0).toBeCloseTo(want[i], 1));
+    const prim = b.foes[0].id;
+    const amounts = [0, 1, 2].map(i => b.log.filter(x => x.type === 'damage' && (x as any).dst === prim && Math.abs(x.t - b.t0 - want[i]) < 0.06).reduce((a, d: any) => a + d.amount, 0));
+    expect(amounts.every(a => a > 0)).toBeTrue();
+    // ratio check (±10 % variance + crit per hit → loose)
+    expect(amounts[2]).toBeGreaterThan(amounts[0]);
+    const impacts = b.log.filter(x => x.type === 'impact' && x.src === b.hero.id) as any[];
+    expect(impacts.map(i => i.index)).toEqual([0, 1, 2]);
+  });
+
+  it('later hits keep striking the spot when the first hit kills the target (no damage lost vs one hit)', () => {
+    const b = thrust(3, 'ult', 30);
+    const back = b.foes[1].id;
+    const want = animTiming(SPRITE, 'ult').hits;
+    const late = b.log.filter(x => x.type === 'damage' && (x as any).dst === back && x.t - b.t0 > want[1] - 0.06);
+    expect(late.length).toBeGreaterThan(0);
+  });
+
+  it('missing ultimate VFX never changes combat', () => {
+    const names = fxNames(SPRITE, 'ult');
+    const a = thrust(9, 'ult');
+    const saved = names.map(n => FX[n]);
+    names.forEach(n => delete (FX as any)[n]);
+    try {
+      const b = thrust(9, 'ult');
+      const pick = (r: ReturnType<typeof thrust>) => r.log.filter(x => x.type === 'damage').map(x => [x.t.toFixed(3), (x as any).amount]);
+      expect(pick(b)).toEqual(pick(a));
+    } finally {
+      names.forEach((n, i) => ((FX as any)[n] = saved[i]));
+    }
+  });
+
+  it('the hero footprint / logical position never follows the art (no root motion)', () => {
+    const b = thrust(4, 'ult');
+    expect(b.hero.pos).toEqual({ r: 1, c: 5 });
   });
 });

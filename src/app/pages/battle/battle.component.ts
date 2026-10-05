@@ -21,7 +21,7 @@ import { hasStatus } from '../../battle/engine/buffs';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
-import { CLASS_PROJECTILE, FX, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
+import { CLASS_PROJECTILE, FX, fxFor, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
 import { Router } from '@angular/router';
@@ -767,18 +767,25 @@ export class BattleComponent implements OnDestroy {
     const unitOf = (id: number) => this.engine.units.find(u => u.id === id)!;
     const posOf = (id: number) => this.screenOf(unitOf(id));
     const set = (id: number, anim: AnimState['anim'], extra: Partial<AnimState> = {}) => (anims[id] = { anim, key: ++this.animKey, ...extra });
-    /** เอฟเฟกต์ของสกิลนี้ เล่นตอนเริ่มท่าหรือตอนโดน ตามที่ตั้งไว้ใน FX */
-    const addFx = (src: number, dst: number | undefined, kind: SkillKind, when: 'cast' | 'impact' | 'vfx') => {
-      const name = SHEETS[unitOf(src).sprite ?? '']?.fx?.[kind];
-      const def = name ? FX[name] : undefined;
-      if (!name || !def || (def.on ?? 'impact') !== when) return;
-      const p = posOf(src);
-      const q = def.at === 'target' && dst != null ? posOf(dst) : p;
-      const rotate = q !== p && def.orient !== 'flip';
-      const angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
-      // หันตามผู้ใช้ (หรือตามทิศไปหาเป้าหมาย ถ้าเป้าไม่ได้อยู่คอลัมน์เดียวกัน)
-      const flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(src);
-      fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip });
+    /** FX layers of this skill that start on this trigger (data: FxDef.on / event / hitIndex / perHit / anchor / layer) */
+    const addFx = (src: number, dst: number | undefined, kind: SkillKind, trig: FxTrigger, hits?: number[]) => {
+      const sprite = unitOf(src).sprite;
+      for (const name of fxFor(sprite, kind, trig)) {
+        const def = FX[name];
+        const p = posOf(src);
+        // contact FX on every unit the hit damaged (capped, primary first) — or the primary only
+        const at = def.at === 'target'
+          ? (def.perHit ? [...new Set([dst, ...(hits ?? [])].filter((x): x is number => x != null && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit) : dst != null ? [dst] : [src])
+          : [src];
+        for (const id of at) {
+          const q = id === src ? p : posOf(id);
+          const rotate = q !== p && def.orient !== 'flip';
+          const angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
+          // หันตามผู้ใช้ (หรือตามทิศไปหาเป้าหมาย ถ้าเป้าไม่ได้อยู่คอลัมน์เดียวกัน)
+          const flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(src);
+          fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under' });
+        }
+      }
     };
 
     for (const e of events) {
@@ -824,19 +831,21 @@ export class BattleComponent implements OnDestroy {
           set(e.src, e.kind);
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
-          addFx(e.src, e.dst, e.kind, 'cast');
+          addFx(e.src, e.dst, e.kind, { on: 'cast' });
           break;
         }
         case 'impact': {
-          addFx(e.src, e.dst, e.kind, 'impact');
-          // contact feel authored on the clip (AnimDef.impact): hit-stop + small shake
-          const stop = playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(unitOf(e.src).sprite, e.kind));
-          if (stop) this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + stop);
+          addFx(e.src, e.dst, e.kind, { on: 'impact', hit: e.index }, e.hits);
+          // contact feel authored on the clip (AnimDef.impact, per hit): hit-stop + shake (+ flash) — only on a real hit
+          if (e.hits?.length !== 0) {
+            const stop = playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(unitOf(e.src).sprite, e.kind, e.index ?? 0));
+            if (stop) this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + stop);
+          }
           break;
         }
         case 'animEvent':
-          // VFX_SPAWN of a hero clip: the skill's VFX layer (FX `on: 'vfx'`) at its anchor; a missing FX is a no-op
-          if (e.event === 'VFX_SPAWN' && e.kind) addFx(e.src, undefined, e.kind, 'vfx');
+          // hero clip events (VFX_SPAWN, CHARGE_START, STRIKE_START …): the FX layers bound to them; missing FX = no-op
+          if (e.kind) addFx(e.src, undefined, e.kind, { on: 'event', event: e.event, index: e.index });
           break;
         case 'blink':
           // วาร์ป: ย้ายทันที + ค่อย ๆ ปรากฏ (ไม่ไถลข้ามสนาม)

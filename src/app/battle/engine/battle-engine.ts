@@ -41,7 +41,7 @@ export type BattleEvent =
   | { type: 'cast'; src: number; skill: string; kind: SkillKind; dst?: number }
   | { type: 'move'; src: number }
   /** จังหวะที่สกิลโดนจริง (ตรงเฟรม hit ของท่า) — ใช้เล่นเอฟเฟกต์ที่เป้าหมาย */
-  | { type: 'impact'; src: number; dst?: number; kind: SkillKind }
+  | { type: 'impact'; src: number; dst?: number; kind: SkillKind; index?: number; hits?: number[] }
   /** ย้ายตัวแบบวาร์ป (ไม่ต้องเลื่อนตัวบนจอ) */
   | { type: 'blink'; src: number }
   /** hurt = play the hit reaction (monsters: rate-limited, never while attacking/casting) */
@@ -55,7 +55,7 @@ export type BattleEvent =
   | { type: 'projectileHit'; pid: number; dst: number }
   | { type: 'projectileExpire'; pid: number }
   /** semantic animation event reached (DAMAGE, PROJECTILE_SPAWN, SKILL_ACTIVATE …) */
-  | { type: 'animEvent'; src: number; event: SemanticEvent; name: string; kind?: SkillKind }
+  | { type: 'animEvent'; src: number; event: SemanticEvent; name: string; kind?: SkillKind; index?: number }
   /** melee hit event fired but the target had moved out of reach */
   | { type: 'miss'; src: number; dst: number }
   /** MIRROR STANCE: `src` (the stance holder) sent `amount` back to `dst` */

@@ -5,7 +5,8 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { HEROES } from '../../core/data/heroes';
-import { animEvents, animOf, animTiming, FX, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
+import { animEvents, animOf, animTiming, FX, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
+import { kitOf } from '../../core/data/hero-skills';
 
 type Action = 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
 
@@ -36,7 +37,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
         <app-board #board [units]="units()" [fx]="fx()" [floats]="floats()" [anims]="anims()" [speed]="speed()" />
         @if (showAnchors()) {
           <i class="mark root" [style.left]="mark().root.x" [style.top]="mark().root.y" title="root (feet)"></i>
-          @if (mark().tip; as t) { <i class="mark tip" [style.left]="t.x" [style.top]="t.y" title="VFX anchor (weapon tip)"></i> }
+          @for (t of mark().anchors; track t.name) { <i class="mark tip" [style.left]="t.x" [style.top]="t.y" [title]="t.name"><b>{{ t.name }}</b></i> }
         }
       </div>
 
@@ -69,6 +70,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
     .mark { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; z-index: 300; pointer-events: none; }
     .mark.root { background: #ff3b3b; box-shadow: 0 0 0 2px #fff; }
     .mark.tip { background: #3bd1ff; box-shadow: 0 0 0 2px #fff; }
+    .mark b { position: absolute; left: 10px; top: -4px; font: 600 9px monospace; color: #fff; text-shadow: 0 0 2px #000; white-space: nowrap; }
     .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
     button { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line, #555); background: var(--panel2, #222); color: inherit; }
     button.on { outline: 2px solid var(--accent, #7cf); }
@@ -113,26 +115,23 @@ export class SpriteLabComponent implements OnDestroy {
 
   readonly actions = computed(() => {
     const d = this.sheet();
-    const list: { id: Action; label: string }[] = [
-      { id: 'idle', label: 'Idle' }, { id: 'walk', label: 'Move' }, { id: 'attack', label: 'Attack' },
-      { id: 'hurt', label: 'Hurt' }, { id: 'die', label: 'Death' },
-    ];
-    const name = (k: SkillKind) => (d?.fx?.[k] ? FX[d.fx[k]!] && d.fx[k]! : null);
-    if (d?.anims.skill) list.push({ id: 'skill', label: name('skill') === 'bailong-dragon-thrust' ? 'Dragon Thrust' : 'Skill 1' });
+    const h = this.hero();
+    const kit = kitOf(h.id, h.cls);
+    const list: { id: Action; label: string }[] = [{ id: 'idle', label: 'Idle' }, { id: 'walk', label: 'Move' }, { id: 'attack', label: 'Normal Attack' }];
+    for (const k of ['skill', 'skill2', 'ult'] as const) if (d?.anims[k]) list.push({ id: k, label: kit[k].label ?? k });
+    list.push({ id: 'hurt', label: 'Hurt' }, { id: 'die', label: 'Death' });
     return list;
   });
 
-  /** root (feet) and VFX anchor in board px — the same maths the board / FX layer use */
+  /** root (feet) and the sheet's named anchors in board px — the same maths the board / FX layer use */
   readonly mark = computed(() => {
     const u = this.units()[0];
     const cell = (k: number) => `calc(var(--cell) * ${k})`;
     const root = { x: cell(u.c + 0.5), y: cell(u.r + SCENERY_ROWS + 0.7725) };
-    const fxName = this.sheet()?.fx?.skill;
-    const f = fxName ? FX[fxName] : undefined;
-    const tip = f?.at === 'self'
-      ? { x: cell(u.c + 0.5 + ((f.dx ?? 0) / 100) * (u.flip ? -1 : 1)), y: cell(u.r + SCENERY_ROWS + 0.5 + (f.dy ?? 0) / 100) }
-      : null;
-    return { root, tip };
+    const anchors = Object.entries(this.sheet()?.anchors ?? {})
+      .filter(([n]) => n !== 'feet')
+      .map(([name, [dx, dy]]) => ({ name, x: cell(u.c + 0.5 + (dx / 100) * (u.flip ? -1 : 1)), y: cell(u.r + SCENERY_ROWS + 0.5 + dy / 100) }));
+    return { root, anchors };
   });
 
   ngOnDestroy(): void {
@@ -164,43 +163,61 @@ export class SpriteLabComponent implements OnDestroy {
     if (a === 'attack' || a === 'skill' || a === 'skill2' || a === 'ult') {
       const events = animEvents(sprite, a);
       const tm = animTiming(sprite, a);
-      // sheets without authored events: the old hit frame is the DAMAGE (+ IMPACT for skills)
-      const list = events.length ? events : [{ event: 'DAMAGE' as const, t: tm.hit, frame: -1 }];
+      // sheets without authored events: the old hit frame(s) are the DAMAGE (+ IMPACT for skills)
+      const list = events.length ? events : tm.hits.map((t, index) => ({ event: 'DAMAGE' as const, t, frame: -1, index }));
+      const kind = a === 'attack' ? null : a;
+      const hasImpact = list.some(e => e.event === 'IMPACT');
       for (const ev of list) {
         this.at(ev.t, () => {
-          this.note(ev.t, `${ev.event}${ev.frame >= 0 ? ` (frame ${ev.frame})` : ''}`);
-          if (ev.event === 'VFX_SPAWN' && a !== 'attack') this.spawnVfx(a);
-          if (ev.event === 'DAMAGE') this.hitDummies(a);
-          if (ev.event === 'IMPACT' && a !== 'attack') playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(sprite, a));
+          this.note(ev.t, `${ev.event}${ev.index ? ' #' + (ev.index + 1) : ''}${ev.event === 'ANIMATION_END' ? ' (end)' : ev.frame >= 0 ? ` (frame ${ev.frame + 1})` : ''}`);
+          if (!kind) {
+            if (ev.event === 'DAMAGE') this.hitDummies('attack', 0);
+            return;
+          }
+          if (ev.event !== 'DAMAGE' && ev.event !== 'IMPACT') this.spawn(kind, { on: 'event', event: ev.event, index: ev.index });
+          if (ev.event === 'DAMAGE') {
+            const hits = this.hitDummies(kind, ev.index);
+            this.spawn(kind, { on: 'impact', hit: ev.index }, hits);
+            if (!hasImpact) playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(sprite, kind, ev.index));
+          }
+          if (ev.event === 'IMPACT') playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(sprite, kind, ev.index));
         });
       }
+      if (kind) this.spawn(kind, { on: 'cast' });
     }
     if (this.loop() && a !== 'die') this.at(len + 0.6, () => this.play(a));
     if (this.loop() && a === 'die') this.at(len + 1.2, () => (this.set(HERO_ID, 'idle'), this.play('die')));
   }
 
-  private spawnVfx(kind: SkillKind): void {
-    const name = this.sheet()?.fx?.[kind];
-    const def = name ? FX[name] : undefined;
-    if (!name || !def) {
-      this.note(-1, `VFX "${name ?? '-'}" missing → skipped (combat unaffected)`);
-      return;
+  /** the FX layers bound to this trigger (same `fxFor` / `fxOffset` the battle page uses) */
+  private spawn(kind: SkillKind, trig: FxTrigger, hits: number[] = []): void {
+    const sprite = this.hero().sprite;
+    const names = fxFor(sprite, kind, trig);
+    if (!names.length && trig.on === 'event' && trig.event === 'VFX_SPAWN') this.note(-1, 'no VFX for VFX_SPAWN → skipped (combat unaffected)');
+    const units = this.units();
+    const me = units[0];
+    for (const name of names) {
+      const def = FX[name];
+      const at = def.at === 'target' ? hits.slice(0, def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
+      for (const u of at) {
+        const f: FxView = { id: ++this.id, r: u.r, c: u.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under' };
+        this.fx.update(l => [...l, f]);
+        setTimeout(() => this.fx.update(l => l.filter(x => x.id !== f.id)), fxDuration(name, this.speed()) + 50);
+      }
     }
-    const u = this.units()[0];
-    const f: FxView = { id: ++this.id, r: u.r, c: u.c, name, angle: 0, flip: !!u.flip };
-    this.fx.update(l => [...l, f]);
-    setTimeout(() => this.fx.update(l => l.filter(x => x.id !== f.id)), fxDuration(name, this.speed()) + 50);
   }
 
-  private hitDummies(kind: 'attack' | SkillKind): void {
+  /** dummies hit by this action (ult / sweep = both, thrust = both in the line, attack = the front one) → ids */
+  private hitDummies(kind: 'attack' | SkillKind, index = 0): number[] {
     const targets = kind === 'attack' ? DUMMY_IDS.slice(0, 1) : DUMMY_IDS;
     const fl: FloatText[] = targets.map(id => {
       this.set(id, 'hurt', { force: true });
       const u = this.units().find(x => x.id === id)!;
-      return { id: ++this.id, r: u.r, c: u.c, text: kind === 'attack' ? '-38' : '-68', kind: 'dmg' as const };
+      return { id: ++this.id, r: u.r, c: u.c, text: kind === 'attack' ? '-38' : kind === 'ult' ? `-${[45, 54, 81][index] ?? 50}` : '-68', kind: 'dmg' as const };
     });
     this.floats.update(l => [...l, ...fl]);
     setTimeout(() => this.floats.update(l => l.filter(x => !fl.includes(x))), 900);
+    return targets;
   }
 
   private set(id: number, anim: SpriteAnim, extra: Partial<AnimState> = {}): void {

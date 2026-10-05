@@ -110,6 +110,10 @@ export interface FxView {
   name: string;
   angle: number;
   flip?: boolean;
+  /** resolved [dx, dy] on the owner's anchor (`fxOffset`) */
+  offset?: [number, number];
+  /** drawn below the units (FxDef.layer 'under') */
+  under?: boolean;
 }
 
 /** กระสุนที่กำลังบิน: ตำแหน่งเป็นจำนวนช่องบนจอ (รวมแถวฉากแล้ว) */

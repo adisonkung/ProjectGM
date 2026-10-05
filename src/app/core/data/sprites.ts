@@ -31,9 +31,10 @@ export interface AnimDef {
    * never to frame numbers): CAST_START, SKILL_ACTIVATE, VFX_SPAWN, PROJECTILE_SPAWN, DAMAGE (= `hit`), IMPACT,
    * RECOVERY_START, ANIMATION_END (default = the clip length). The engine turns them into seconds with `animEvents()`.
    */
-  events?: Partial<Record<SemanticEvent, number>>;
-  /** contact feel when this clip's skill lands (battle page + sprite lab): hit-stop + small screen shake */
-  impact?: ImpactFeel;
+  /** one frame per event, or a list for repeated events (multi-hit: DAMAGE / IMPACT / STRIKE_START per hit) */
+  events?: Partial<Record<SemanticEvent, number | number[]>>;
+  /** contact feel when this clip's skill lands (battle page + sprite lab): hit-stop + screen shake — a list = per hit */
+  impact?: ImpactFeel | ImpactFeel[];
 }
 
 /** hit-stop (the whole board freezes for `hitStopMs` real ms) + a small screen shake */
@@ -41,14 +42,21 @@ export interface ImpactFeel {
   hitStopMs?: number;
   shakePx?: number;
   shakeMs?: number;
+  /** brief white flash over the board (ms) */
+  flashMs?: number;
 }
 
 export interface SheetDef {
   cols: number;
   rows: number;
   anims: Partial<Record<SpriteAnim, AnimDef>>;
-  /** เอฟเฟกต์ที่เล่นตอนใช้สกิลแต่ละแบบ (คีย์ของ FX) */
-  fx?: Partial<Record<SkillKind, string>>;
+  /** เอฟเฟกต์ที่เล่นตอนใช้สกิลแต่ละแบบ (คีย์ของ FX) — หลายชั้นได้ (ชาร์จ / VFX หลัก / กระทบ) แต่ละอันบอกเองว่าเกิดตอนไหน */
+  fx?: Partial<Record<SkillKind, string | string[]>>;
+  /**
+   * named anchors on the hero, [dx, dy] in % of a board cell from the cell centre (same units as FX dx/dy; dx is
+   * mirrored with the facing) — e.g. bodyCenter, weaponTip, skillOrigin. FX pick one with `FxDef.anchor`.
+   */
+  anchors?: Record<string, [number, number]>;
   /** เอฟเฟกต์ที่ตัวเพื่อนตอนได้โล่จากตัวนี้ */
   shieldFx?: string;
   /** เอฟเฟกต์ที่ตัวเพื่อนตอนได้รับฮีลจากตัวนี้ */
@@ -90,6 +98,20 @@ export interface FxDef {
   pivot?: [number, number];
   /** nearest-neighbour rendering (pixel-art FX) */
   pixelated?: boolean;
+  /** spawn on a semantic clip event instead (e.g. CHARGE_START, STRIKE_START) — `eventIndex` for repeated events */
+  event?: SemanticEvent;
+  eventIndex?: number;
+  /** on 'impact': only the n-th hit of a multi-hit skill (0-based) */
+  hitIndex?: number;
+  /** on 'impact' at 'target': one copy on each unit the hit damaged, at most this many (primary first) */
+  perHit?: number;
+  /** placed on the owner's named anchor (SheetDef.anchors) + dx/dy */
+  anchor?: string;
+  /** a segment of a longer strip: first frame + total frames in the file (`frames` = this segment's length) */
+  from?: number;
+  stripFrames?: number;
+  /** 'under' = drawn below the units (ground aura), default above them */
+  layer?: 'under' | 'over';
   /** กระสุน: ทิศที่ภาพวาดชี้อยู่ (องศา, 0 = ขวา, 90 = ลง) — เฟรมสุดท้ายคือตอนกระทบ */
   angle0?: number;
   /** กระสุน: เอฟเฟกต์ที่เล่นเพิ่มตรงเป้าเมื่อกระทบ */
@@ -276,11 +298,21 @@ export const SHEETS: Record<string, SheetDef> = {
     projectile: { ult: 'velma-beam' },
   },
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
-  // ไป๋หลง (ทวนมังกรขาว) — tools/sprites/bailong.py จากภาพ 4 แผ่นของผู้ใช้ (แผ่นตัวละคร ≠ แผ่น VFX)
+  // ไป๋หลง (ทวนมังกรขาว) — tools/sprites/bailong.py จากภาพของผู้ใช้ (แผ่นตัวละคร ≠ แผ่น VFX)
   // ช่องกว้าง 200 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (100, 105) · หันขวา
-  // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10 (ภาพที่ 3)
+  // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
+  //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
   'hero-bailong.png': {
-    cols: 10, rows: 6, cellW: 200, cellH: 120, pixelated: true,
+    cols: 20, rows: 8, cellW: 200, cellH: 120, pixelated: true,
+    // % of a board cell from the cell centre (feet = +27.25 %: sheet bottom 4 % + 15 px × 1.25 %) — x mirrors with facing
+    anchors: {
+      feet: [0, 27.25],
+      bodyCenter: [0, -16.5],
+      weaponTip: [97.5, -26.5],
+      skillOrigin: [30, -16.5],
+      ultimateChargeOrigin: [0, 27.25],
+      ultimateForwardOrigin: [175, -16.5],
+    },
     anims: {
       idle: { row: 0, frames: 6 },
       walk: { row: 1, frames: 8, ms: 75 },
@@ -293,11 +325,31 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 0, SKILL_ACTIVATE: 4, VFX_SPAWN: 6, DAMAGE: 8, IMPACT: 8, RECOVERY_START: 8 },
         impact: { hitStopMs: 50, shakePx: 3, shakeMs: 140 },
       },
-      // สกิล 2 / ท่าไม้ตาย ยังไม่ทำภาพ (รอรีวิว Dragon Thrust) → เล่นท่าแทงทวนธรรมดา ไม่ใช้ท่า/ลำมังกรของสกิล 1
-      skill2: { row: 3, frames: 6, hit: 3 },
-      ult: { row: 3, frames: 6, hit: 3 },
+      // Sweeping Moon: 12 × 95 ms = 1.14 s · F5 ง้างสุด · F7 เริ่มกวาด + ปล่อยจันทร์เสี้ยว · F8 กวาดสุด = ดาเมจ
+      skill2: {
+        row: 6, frames: 12, ms: 95,
+        events: { CAST_START: 2, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 6, VFX_SPAWN: 6, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
+        impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
+      },
+      // Nine Dragon Sequence: 20 × 120 ms = 2.4 s · ชาร์จ F1–F6 (พีค F5) · ตี 3 จังหวะ F8 / F13 / F18 · ง้างสุดท้าย F16
+      ult: {
+        row: 7, frames: 20, ms: 120,
+        events: {
+          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, STRIKE_START: [5, 10, 16], FINAL_ANTICIPATION: 15,
+          DAMAGE: [7, 12, 17], IMPACT: [7, 12, 17], RECOVERY_START: 18,
+        },
+        impact: [
+          { hitStopMs: 25, shakePx: 2, shakeMs: 110 },
+          { hitStopMs: 35, shakePx: 4, shakeMs: 150 },
+          { hitStopMs: 95, shakePx: 7, shakeMs: 220, flashMs: 140 },
+        ],
+      },
     },
-    fx: { skill: 'bailong-dragon-thrust' },
+    fx: {
+      skill: 'bailong-dragon-thrust',
+      skill2: ['bailong-sweeping-moon', 'bailong-sweeping-moon-hit'],
+      ult: ['bailong-nine-dragon-charge', 'bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3', 'bailong-nine-dragon-impact'],
+    },
   },
 };
 
@@ -420,6 +472,39 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-dragon-thrust.png', frames: 14, w: 401, h: 75, frameMs: 45, at: 'self', orient: 'flip', on: 'vfx',
     pivot: [0.06, 0.493], dx: 97.5, dy: -26.5, scale: 0.45, pixelated: true,
   },
+  // Sweeping Moon — จันทร์เสี้ยวปราณ (13 เฟรม: โตขึ้น 7 แล้วสลาย 6) เกิดตอน VFX_SPAWN หน้าอก, pivot ขอบซ้ายกลาง พุ่ง/กวาดไปทางขวา
+  'bailong-sweeping-moon': {
+    file: 'fx-bailong-sweeping-moon.png', frames: 13, w: 171, h: 202, frameMs: 35, at: 'self', orient: 'flip', on: 'vfx',
+    anchor: 'skillOrigin', pivot: [0.012, 0.5], scale: 0.6, pixelated: true,
+  },
+  // ประกายกระทบของ Sweeping Moon — บนตัวที่โดนจริง (สูงสุด 3 ตัว ตัวหลักก่อน) ไม่ใช่ตัวทำดาเมจ
+  'bailong-sweeping-moon-hit': {
+    file: 'fx-bailong-sweeping-moon-hit.png', frames: 8, w: 160, h: 145, frameMs: 55, at: 'target', orient: 'flip', on: 'impact',
+    perHit: 3, dy: -16.5, scale: 0.43, pixelated: true,
+  },
+  // Nine Dragon — ชาร์จ: ออร่ามังกรรอบตัว (ใต้ยูนิต) CHARGE_START → หมดก่อนจังหวะแรก (10 × 65 ms = 0.65 วิ)
+  'bailong-nine-dragon-charge': {
+    file: 'fx-bailong-nine-dragon-charge.png', frames: 10, w: 164, h: 126, frameMs: 65, at: 'self', orient: 'flip',
+    event: 'CHARGE_START', anchor: 'ultimateChargeOrigin', pivot: [0.5, 0.984], scale: 0.85, layer: 'under', pixelated: true,
+  },
+  // VFX หลัก 28 เฟรม = 3 ช่วงของแผ่นเดียว เริ่มใหม่ทุกจังหวะ → เฟรมพีคตรงดาเมจแต่ละครั้ง (+0.24 วิ หลังเริ่มช่วง)
+  'bailong-nine-dragon-1': {
+    file: 'fx-bailong-nine-dragon.png', from: 0, frames: 10, stripFrames: 28, w: 292, h: 173, frameMs: 70, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
+  },
+  'bailong-nine-dragon-2': {
+    file: 'fx-bailong-nine-dragon.png', from: 10, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 60, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
+  },
+  'bailong-nine-dragon-3': {
+    file: 'fx-bailong-nine-dragon.png', from: 19, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 80, at: 'self', orient: 'flip',
+    event: 'FINAL_ANTICIPATION', anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
+  },
+  // กระแทกครั้งสุดท้าย — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
+  'bailong-nine-dragon-impact': {
+    file: 'fx-bailong-nine-dragon-impact.png', frames: 12, w: 202, h: 168, frameMs: 60, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, scale: 0.69, pixelated: true,
+  },
 };
 
 /** กระสุนของสายระยะไกลที่ไม่มีแผ่น sprite (ศัตรู/ฮีโร่โทเคน) */
@@ -454,18 +539,17 @@ const TOKEN_TIMING: Record<'attack' | SkillKind, { total: number; hit: number }>
  * จังหวะของท่า (วินาที ที่ความเร็ว x1) ให้เอนจินรอดาเมจเข้าตรงเฟรม hit และล็อกตัวจนท่าจบ
  * total = ความยาวท่า, hit = เวลาที่ดาเมจเข้า, move = เวลาที่ย้ายตำแหน่ง (วาร์ป)
  */
-export function animTiming(sprite: string | undefined, anim: 'attack' | SkillKind): { total: number; hit: number; move: number } {
-  const sheet = sprite ? SHEETS[sprite] : undefined;
-  let name: SpriteAnim | null = anim;
-  while (sheet && name && !sheet.anims[name]) name = ANIM_FALLBACK[name];
-  const a = name ? sheet?.anims[name] : undefined;
+export function animTiming(sprite: string | undefined, anim: 'attack' | SkillKind): { total: number; hit: number; move: number; hits: number[] } {
+  const a = animOf(sprite, anim);
   if (!a) {
     const t = TOKEN_TIMING[anim];
-    return { ...t, move: t.hit / 2 };
+    return { ...t, move: t.hit / 2, hits: [t.hit] };
   }
   const ms = (a.ms ?? FRAME_MS) / 1000;
-  const hit = (a.events?.DAMAGE ?? a.hit ?? Math.floor(a.frames / 2)) * ms;
-  return { total: (a.events?.ANIMATION_END ?? a.frames) * ms, hit, move: (a.move ?? 0) * ms };
+  const dmg = a.events?.DAMAGE;
+  const hits = (dmg == null ? [a.hit ?? Math.floor(a.frames / 2)] : Array.isArray(dmg) ? dmg : [dmg]).map(f => f * ms);
+  const end = a.events?.ANIMATION_END;
+  return { total: (typeof end === 'number' ? end : a.frames) * ms, hit: hits[0], move: (a.move ?? 0) * ms, hits };
 }
 
 /** the clip a sheet really plays for this action (ANIM_FALLBACK walked) */
@@ -476,19 +560,66 @@ export function animOf(sprite: string | undefined, anim: SpriteAnim): AnimDef | 
   return name ? sheet?.anims[name] : undefined;
 }
 
+export interface ClipEvent {
+  event: SemanticEvent;
+  /** seconds at speed ×1 */
+  t: number;
+  frame: number;
+  /** n-th occurrence of a repeated event (0-based) */
+  index: number;
+}
+
 /**
  * Semantic events of a hero clip in seconds (speed ×1), sorted by time — [] when the clip has no `events`
  * (every sheet without them keeps the old hit-frame timing). ANIMATION_END defaults to the clip length.
+ * Same-time events keep their authored order (DAMAGE → IMPACT → RECOVERY_START).
  */
-export function animEvents(sprite: string | undefined, anim: 'attack' | SkillKind): { event: SemanticEvent; t: number; frame: number }[] {
+export function animEvents(sprite: string | undefined, anim: 'attack' | SkillKind): ClipEvent[] {
   const a = animOf(sprite, anim);
   if (!a?.events) return [];
   const ms = (a.ms ?? FRAME_MS) / 1000;
-  const ev: Partial<Record<SemanticEvent, number>> = { ANIMATION_END: a.frames, ...a.events };
-  return (Object.entries(ev) as [SemanticEvent, number][])
-    .map(([event, frame]) => ({ event, frame, t: frame * ms }))
-    .sort((x, y) => x.t - y.t);
+  const out: ClipEvent[] = [];
+  for (const [event, v] of Object.entries(a.events) as [SemanticEvent, number | number[]][])
+    (Array.isArray(v) ? v : [v]).forEach((frame, index) => out.push({ event, frame, index, t: frame * ms }));
+  if (!a.events.ANIMATION_END) out.push({ event: 'ANIMATION_END', frame: a.frames, index: 0, t: a.frames * ms });
+  return out.sort((x, y) => x.t - y.t);
 }
 
-/** hit-stop / shake of the clip a unit plays for this skill (none = no contact feel) */
-export const impactFeelOf = (sprite: string | undefined, anim: 'attack' | SkillKind): ImpactFeel | undefined => animOf(sprite, anim)?.impact;
+/** hit-stop / shake of the clip a unit plays for this skill (per hit for multi-hit clips; none = no contact feel) */
+export function impactFeelOf(sprite: string | undefined, anim: 'attack' | SkillKind, hit = 0): ImpactFeel | undefined {
+  const f = animOf(sprite, anim)?.impact;
+  return Array.isArray(f) ? f[Math.min(hit, f.length - 1)] : f;
+}
+
+/** every FX layer a sheet lists for a skill */
+export function fxNames(sprite: string | undefined, kind: SkillKind): string[] {
+  const v = sprite ? SHEETS[sprite]?.fx?.[kind] : undefined;
+  return v == null ? [] : Array.isArray(v) ? v : [v];
+}
+
+export type FxTrigger = { on: 'cast' } | { on: 'impact'; hit?: number } | { on: 'event'; event: SemanticEvent; index?: number };
+
+/**
+ * FX layers of a skill that start on this trigger (shared by the battle page and the sprite lab).
+ * 'cast' = the skill starts · 'impact' = a hit lands (`hitIndex` picks one hit) · 'event' = a clip event
+ * (`on: 'vfx'` is VFX_SPAWN, or any `event`). Missing FX entries are skipped — never an error.
+ */
+export function fxFor(sprite: string | undefined, kind: SkillKind, trig: FxTrigger): string[] {
+  return fxNames(sprite, kind).filter(name => {
+    const d = FX[name];
+    if (!d) return false;
+    const ev = d.event ?? (d.on === 'vfx' ? 'VFX_SPAWN' : undefined);
+    if (trig.on === 'event') return ev === trig.event && (d.eventIndex ?? 0) === (trig.index ?? 0);
+    if (ev) return false;
+    if (trig.on === 'cast') return d.on === 'cast';
+    return (d.on ?? 'impact') === 'impact' && (d.hitIndex == null || d.hitIndex === (trig.hit ?? 0));
+  });
+}
+
+/** where an FX sits on its owner: the named anchor (if any) + its own dx / dy, in % of a cell from the cell centre */
+export function fxOffset(name: string, sprite?: string): [number, number] {
+  const d = FX[name];
+  if (!d) return [0, 0];
+  const a = d.anchor && sprite ? SHEETS[sprite]?.anchors?.[d.anchor] : undefined;
+  return [(a?.[0] ?? 0) + (d.dx ?? 0), (a?.[1] ?? 0) + (d.dy ?? 0)];
+}

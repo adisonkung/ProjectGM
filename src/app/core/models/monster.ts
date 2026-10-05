@@ -20,7 +20,9 @@ export type DamageType = 'PHYSICAL' | 'MAGIC' | 'TRUE';
 export type SemanticEvent =
   | 'DAMAGE' | 'PROJECTILE_SPAWN' | 'CAST_START' | 'SKILL_ACTIVATE' | 'FX_START' | 'DEATH_COMPLETE'
   /** hero skill clips (AnimDef.events): spawn the skill's VFX layer · contact feel (hit-stop / shake) · recovery · clip end */
-  | 'VFX_SPAWN' | 'IMPACT' | 'RECOVERY_START' | 'ANIMATION_END';
+  | 'VFX_SPAWN' | 'IMPACT' | 'RECOVERY_START' | 'ANIMATION_END'
+  /** longer hero clips: wind-up peak · charge (ultimate preparation) · start of each strike of a multi-hit skill · last wind-up */
+  | 'ANTICIPATION_PEAK' | 'CHARGE_START' | 'CHARGE_PEAK' | 'STRIKE_START' | 'FINAL_ANTICIPATION';
 
 export interface MonsterStats {
   maxHp: number;
