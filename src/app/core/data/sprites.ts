@@ -23,6 +23,11 @@ export interface AnimDef {
   move?: number;
   /** ลำดับเฟรมที่เล่นจริง (ใช้กับท่ายืน: ตัดเฟรมที่กระตุกออกและเรียงให้ต่อเนื่อง) */
   seq?: number[];
+  /**
+   * choreography of an action clip: ms per `seq` step (hold key poses, drop odd art frames). With it, `events`
+   * and `hit` count `seq` steps, not sheet frames, and the clip lasts the sum of `steps`.
+   */
+  steps?: number[];
   /** ท่าร่าย (castDriven): เฟรม CAST_START / SKILL_ACTIVATE (0-based) — เฟรมระหว่างนั้นยืดให้พอดีเวลาร่าย */
   castStart?: number;
   activate?: number;
@@ -332,12 +337,17 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 2, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 6, VFX_SPAWN: 6, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
         impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
       },
-      // Nine Dragon Sequence: 20 × 120 ms = 2.4 s · ชาร์จ F1–F6 (พีค F5) · ตี 3 จังหวะ F8 / F13 / F18 · ง้างสุดท้าย F16
+      // Nine Dragon Sequence (choreographed, 2.5 s): the art's prone F4 / upright F5 bob, the F7 side-step and the
+      // F10 / F15 in-betweens made the clip read as a dance → 15 key poses with holds:
+      // charge F1 F2 F5(peak, hold) · strike 1 F6 → F8 (hit, hold) F9 · strike 2 F11 F12 → F13 (hit) F14 ·
+      // final F16 (overhead, hold) F17 → F18 (hit, hold) F19 F20  — events count these steps
       ult: {
         row: 7, frames: 20, ms: 120,
+        seq: [0, 1, 4, 5, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 19],
+        steps: [120, 120, 360, 120, 240, 120, 100, 120, 220, 120, 220, 100, 260, 120, 160],
         events: {
-          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, STRIKE_START: [5, 10, 16], FINAL_ANTICIPATION: 15,
-          DAMAGE: [7, 12, 17], IMPACT: [7, 12, 17], RECOVERY_START: 18,
+          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 2, STRIKE_START: [3, 6, 11], FINAL_ANTICIPATION: 10,
+          DAMAGE: [4, 8, 12], IMPACT: [4, 8, 12], RECOVERY_START: 13,
         },
         impact: [
           { hitStopMs: 25, shakePx: 2, shakeMs: 110 },
@@ -471,7 +481,7 @@ export const FX: Record<string, FxDef> = {
   // pivot = หางมังกรซ้ายกลาง, พุ่งซ้าย→ขวา, กลับด้านตามผู้ใช้ · ไม่ถูกตัดด้วยกรอบตัวละคร (วาดบนชั้น fx ของกระดาน)
   'bailong-dragon-thrust': {
     file: 'fx-bailong-dragon-thrust.png', frames: 14, w: 401, h: 75, frameMs: 45, at: 'self', orient: 'flip', on: 'vfx',
-    anchor: 'weaponTip', pivot: [0.06, 0.493], scale: 0.45, pixelated: true,
+    anchor: 'weaponTip', pivot: [0.06, 0.493], scale: 0.68, pixelated: true,
   },
   // Sweeping Moon — จันทร์เสี้ยวปราณ (13 เฟรม: โตขึ้น 7 แล้วสลาย 6) เกิดตอน VFX_SPAWN หน้าอก, pivot ขอบซ้ายกลาง พุ่ง/กวาดไปทางขวา
   'bailong-sweeping-moon': {
@@ -490,7 +500,7 @@ export const FX: Record<string, FxDef> = {
   },
   // VFX หลัก 28 เฟรม = 3 ช่วงของแผ่นเดียว เริ่มใหม่ทุกจังหวะ → เฟรมพีคตรงดาเมจแต่ละครั้ง (+0.24 วิ หลังเริ่มช่วง)
   'bailong-nine-dragon-1': {
-    file: 'fx-bailong-nine-dragon.png', from: 0, frames: 10, stripFrames: 28, w: 292, h: 173, frameMs: 70, at: 'self', orient: 'flip',
+    file: 'fx-bailong-nine-dragon.png', from: 0, frames: 10, stripFrames: 28, w: 292, h: 173, frameMs: 45, at: 'self', orient: 'flip',
     event: 'STRIKE_START', eventIndex: 0, anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
   },
   'bailong-nine-dragon-2': {
@@ -498,7 +508,7 @@ export const FX: Record<string, FxDef> = {
     event: 'STRIKE_START', eventIndex: 1, anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
   },
   'bailong-nine-dragon-3': {
-    file: 'fx-bailong-nine-dragon.png', from: 19, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 80, at: 'self', orient: 'flip',
+    file: 'fx-bailong-nine-dragon.png', from: 19, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 105, at: 'self', orient: 'flip',
     event: 'FINAL_ANTICIPATION', anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
   },
   // กระแทกครั้งสุดท้าย — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
@@ -546,11 +556,26 @@ export function animTiming(sprite: string | undefined, anim: 'attack' | SkillKin
     const t = TOKEN_TIMING[anim];
     return { ...t, move: t.hit / 2, hits: [t.hit] };
   }
-  const ms = (a.ms ?? FRAME_MS) / 1000;
+  const clk = clipClock(a);
   const dmg = a.events?.DAMAGE;
-  const hits = (dmg == null ? [a.hit ?? Math.floor(a.frames / 2)] : Array.isArray(dmg) ? dmg : [dmg]).map(f => f * ms);
+  const hits = (dmg == null ? [a.hit ?? Math.floor(clk.count / 2)] : Array.isArray(dmg) ? dmg : [dmg]).map(clk.at);
   const end = a.events?.ANIMATION_END;
-  return { total: (typeof end === 'number' ? end : a.frames) * ms, hit: hits[0], move: (a.move ?? 0) * ms, hits };
+  return { total: typeof end === 'number' ? clk.at(end) : clk.total, hit: hits[0], move: clk.at(a.move ?? 0), hits };
+}
+
+/**
+ * clock of an action clip: start time (s, speed ×1) of each step — authored choreography (`seq` + `steps` ms)
+ * or one sheet frame per step at `ms`. `art(step)` = the sheet frame shown (for logs).
+ */
+export function clipClock(a: AnimDef): { at: (step: number) => number; count: number; total: number; art: (step: number) => number } {
+  if (a.seq && a.steps) {
+    const starts = [0];
+    for (const ms of a.steps) starts.push(starts[starts.length - 1] + ms / 1000);
+    const seq = a.seq;
+    return { at: i => starts[Math.min(Math.max(i, 0), starts.length - 1)], count: seq.length, total: starts[starts.length - 1], art: i => seq[Math.min(i, seq.length - 1)] };
+  }
+  const ms = (a.ms ?? FRAME_MS) / 1000;
+  return { at: i => i * ms, count: a.frames, total: a.frames * ms, art: i => i };
 }
 
 /** the clip a sheet really plays for this action (ANIM_FALLBACK walked) */
@@ -568,6 +593,8 @@ export interface ClipEvent {
   frame: number;
   /** n-th occurrence of a repeated event (0-based) */
   index: number;
+  /** sheet frame on screen at this event (0-based; differs from `frame` for choreographed clips) */
+  art?: number;
 }
 
 /**
@@ -578,11 +605,11 @@ export interface ClipEvent {
 export function animEvents(sprite: string | undefined, anim: 'attack' | SkillKind): ClipEvent[] {
   const a = animOf(sprite, anim);
   if (!a?.events) return [];
-  const ms = (a.ms ?? FRAME_MS) / 1000;
+  const clk = clipClock(a);
   const out: ClipEvent[] = [];
   for (const [event, v] of Object.entries(a.events) as [SemanticEvent, number | number[]][])
-    (Array.isArray(v) ? v : [v]).forEach((frame, index) => out.push({ event, frame, index, t: frame * ms }));
-  if (!a.events.ANIMATION_END) out.push({ event: 'ANIMATION_END', frame: a.frames, index: 0, t: a.frames * ms });
+    (Array.isArray(v) ? v : [v]).forEach((frame, index) => out.push({ event, frame, index, t: clk.at(frame), art: clk.art(frame) }));
+  if (!a.events.ANIMATION_END) out.push({ event: 'ANIMATION_END', frame: clk.count, index: 0, t: clk.total, art: -1 });
   return out.sort((x, y) => x.t - y.t);
 }
 

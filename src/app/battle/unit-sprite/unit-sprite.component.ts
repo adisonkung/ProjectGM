@@ -115,6 +115,10 @@ export class UnitSpriteComponent {
       this.playIdle(el, a.seq ?? Array.from({ length: a.frames }, (_, i) => i), a.ms ?? IDLE_FRAME_MS, x, y);
       return;
     }
+    if (a.seq && a.steps) {
+      this.playSteps(el, def, a.seq, a.steps, x, y, hold);
+      return;
+    }
     this.current = el.animate(
       [{ backgroundPosition: `0% ${y}%` }, { backgroundPosition: `${x(frames)}% ${y}%` }],
       {
@@ -152,6 +156,20 @@ export class UnitSpriteComponent {
     k.push({ offset: 1, backgroundPosition: `${x(a.frames - 1)}% ${y}%` });
     this.current = el.animate(k, { duration: total, iterations: 1 });
     this.current.onfinish = () => this.play(el, def, 'idle');
+  }
+
+  /** choreographed action clip (AnimDef.seq + steps): each key pose held for its own time, then back to idle */
+  private playSteps(el: HTMLElement, def: SheetDef, seq: number[], steps: number[], x: (i: number) => number, y: number, hold: boolean): void {
+    const total = steps.reduce((a, b) => a + b, 0);
+    let t = 0;
+    const k: Keyframe[] = seq.map((f, i) => {
+      const kf = { offset: t / total, easing: 'steps(1, end)', backgroundPosition: `${x(f)}% ${y}%` };
+      t += steps[i] ?? 0;
+      return kf;
+    });
+    k.push({ offset: 1, backgroundPosition: `${x(seq[seq.length - 1])}% ${y}%` });
+    this.current = el.animate(k, { duration: total / this.speed(), iterations: 1, fill: hold ? 'forwards' : 'none' });
+    if (!hold) this.current.onfinish = () => this.play(el, def, 'idle');
   }
 
   private playIdle(el: HTMLElement, order: number[], ms: number, x: (i: number) => number, y: number): void {

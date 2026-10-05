@@ -5,7 +5,7 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { HEROES } from '../../core/data/heroes';
-import { animEvents, animOf, animTiming, FX, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
+import { animEvents, animOf, animTiming, clipClock, FX, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
 import { kitOf } from '../../core/data/hero-skills';
 
 type Action = 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
@@ -157,19 +157,20 @@ export class SpriteLabComponent implements OnDestroy {
     const sprite = this.hero().sprite;
     this.set(HERO_ID, a as SpriteAnim, { force: true });
     const clip = animOf(sprite, a as 'attack' | SkillKind) ?? this.sheet()?.anims[a as SpriteAnim];
-    const len = clip ? (clip.frames * (clip.ms ?? FRAME_MS)) / 1000 : 0.5;
-    this.note(0, `${a} start · ${clip?.frames ?? '?'} frames × ${clip?.ms ?? FRAME_MS} ms = ${len.toFixed(2)} s`);
+    const clk = clip ? clipClock(clip) : null;
+    const len = clk ? clk.total : 0.5;
+    this.note(0, `${a} start · ${clip?.steps ? `${clk!.count} key poses (choreographed)` : `${clip?.frames ?? '?'} frames × ${clip?.ms ?? FRAME_MS} ms`} = ${len.toFixed(2)} s`);
 
     if (a === 'attack' || a === 'skill' || a === 'skill2' || a === 'ult') {
       const events = animEvents(sprite, a);
       const tm = animTiming(sprite, a);
       // sheets without authored events: the old hit frame(s) are the DAMAGE (+ IMPACT for skills)
-      const list = events.length ? events : tm.hits.map((t, index) => ({ event: 'DAMAGE' as const, t, frame: -1, index }));
+      const list = events.length ? events : tm.hits.map((t, index) => ({ event: 'DAMAGE' as const, t, frame: -1, index, art: undefined as number | undefined }));
       const kind = a === 'attack' ? null : a;
       const hasImpact = list.some(e => e.event === 'IMPACT');
       for (const ev of list) {
         this.at(ev.t, () => {
-          this.note(ev.t, `${ev.event}${ev.index ? ' #' + (ev.index + 1) : ''}${ev.event === 'ANIMATION_END' ? ' (end)' : ev.frame >= 0 ? ` (frame ${ev.frame + 1})` : ''}`);
+          this.note(ev.t, `${ev.event}${ev.index ? ' #' + (ev.index + 1) : ''}${ev.event === 'ANIMATION_END' ? ' (end)' : ev.frame >= 0 ? ` (frame ${(ev.art ?? ev.frame) + 1})` : ''}`);
           if (!kind) {
             if (ev.event === 'DAMAGE') this.hitDummies('attack', 0);
             return;

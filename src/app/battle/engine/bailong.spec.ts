@@ -268,13 +268,17 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
   const ev = () => animEvents(SPRITE, 'ult');
   const at = (n: string, i = 0) => ev().find(x => x.event === n && x.index === i)!;
 
-  it('20-frame clip, 2.0–2.7 s; charge peak F5 · hits F8 / F13 / F18 · final anticipation F16', () => {
+  it('20-frame sheet row played as 15 key poses, 2.0–2.7 s; charge peak F5 · hits F8 / F13 / F18 · final anticipation F16', () => {
     const tm = animTiming(SPRITE, 'ult');
     expect(tm.total).toBeGreaterThanOrEqual(2.0);
     expect(tm.total).toBeLessThanOrEqual(2.7);
-    expect(at('CHARGE_PEAK').frame + 1).toBe(5);
-    expect([0, 1, 2].map(i => at('DAMAGE', i).frame + 1)).toEqual([8, 13, 18]);
-    expect(at('FINAL_ANTICIPATION').frame + 1).toBe(16);
+    // choreographed clip: events count key-pose steps; `art` = the sheet frame on screen
+    expect(at('CHARGE_PEAK').art! + 1).toBe(5);
+    expect([0, 1, 2].map(i => at('DAMAGE', i).art! + 1)).toEqual([8, 13, 18]);
+    expect(at('FINAL_ANTICIPATION').art! + 1).toBe(16);
+    const ult = SHEETS[SPRITE].anims.ult!;
+    expect(ult.seq!.length).toBe(ult.steps!.length);
+    expect(ult.seq).not.toContain(3); // the prone F4 pose is out of the choreography
     expect(tm.hits.length).toBe(3);
     // each strike starts before its hit, after the previous one
     for (const i of [0, 1, 2]) expect(at('STRIKE_START', i).t).toBeLessThan(at('DAMAGE', i).t);
