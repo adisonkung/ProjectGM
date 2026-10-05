@@ -1,11 +1,11 @@
-import { Component, ElementRef, afterNextRender, computed, input, viewChild } from '@angular/core';
+import { Component, ElementRef, afterNextRender, computed, inject, input, viewChild } from '@angular/core';
 import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 
 /** เล่นเอฟเฟกต์สกิลหนึ่งรอบแล้วหายไป (ผู้เรียกลบออกจากรายการเองตาม fxDuration) */
 @Component({
   selector: 'app-fx-sprite',
   template: `<div #el class="fx" [style.background-image]="'url(sprites/' + def().file + ')'"
-    [style.background-size]="strip() * 100 + '% 100%'" [style.width.%]="def().w * pxToCell * (def().scale ?? 1) * fxScale"
+    [style.background-size]="strip() * 100 + '% 100%'" [style.width.%]="def().fitCells ? def().fitCells! * 100 : def().w * pxToCell * (def().scale ?? 1) * fxScale"
     [style.aspect-ratio]="def().w + ' / ' + def().h" [style.left]="'calc(50% + ' + (offset()?.[0] ?? def().dx ?? 0) * (flip() ? -1 : 1) + '%)'"
     [style.top]="'calc(50% + ' + (offset()?.[1] ?? def().dy ?? 0) + '%)'" [style.transform-origin]="origin()" [class.pixelated]="!!def().pixelated"
     [style.transform]="'translate(' + -pivot()[0] * 100 + '%, ' + -pivot()[1] * 100 + '%) rotate(' + angle() + 'deg)' + (flip() ? ' scaleX(-1)' : '')"></div>`,
@@ -34,6 +34,7 @@ export class FxSpriteComponent {
   readonly origin = computed(() => `${this.pivot()[0] * 100}% ${this.pivot()[1] * 100}%`);
   readonly pxToCell = PX_TO_CELL;
   readonly fxScale = FX_SCALE;
+  private readonly host = inject(ElementRef);
 
   constructor() {
     afterNextRender(() => {
@@ -49,6 +50,20 @@ export class FxSpriteComponent {
         // (ถ้าใช้ n-1 ตำแหน่งจะคร่อมระหว่างเฟรม เห็นครึ่งเฟรมข้าง ๆ เป็นรอยตัดแนวตั้ง)
         { duration: fxDuration(this.name(), this.speed()), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
       );
+      // travelling FX (a dragon launched from the spear): flies `travel` % of a cell forward, fading at the end
+      if (d.travel) {
+        const host = this.host.nativeElement as HTMLElement;
+        const px = (d.travel / 100) * host.offsetWidth * (this.flip() ? -1 : 1);
+        this.el().nativeElement.animate(
+          [
+            { translate: '0px 0px', opacity: 1 },
+            { translate: `${px * 0.8}px 0px`, opacity: 1, offset: 0.75 },
+            { translate: `${px}px 0px`, opacity: 0 },
+          ],
+          // ease-in: the dragon leaves the spear tip, is still on the target at the hit (peak frame), then shoots away
+          { duration: fxDuration(this.name(), this.speed()), easing: 'cubic-bezier(.55,0,.8,.6)', fill: 'none' },
+        );
+      }
     });
   }
 }

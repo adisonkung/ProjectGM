@@ -115,6 +115,10 @@ export interface FxDef {
   /** a segment of a longer strip: first frame + total frames in the file (`frames` = this segment's length) */
   from?: number;
   stripFrames?: number;
+  /** travelling FX: flies this far forward (% of a cell, mirrored with the facing) over its duration, fading at the end */
+  travel?: number;
+  /** size the frame to this many board cells wide (e.g. an area burst matching the skill's hit area), instead of w × scale */
+  fitCells?: number;
   /** 'under' = drawn below the units (ground aura), default above them */
   layer?: 'under' | 'over';
   /** กระสุน: ทิศที่ภาพวาดชี้อยู่ (องศา, 0 = ขวา, 90 = ลง) — เฟรมสุดท้ายคือตอนกระทบ */
@@ -501,24 +505,25 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-nine-dragon-charge.png', frames: 10, w: 164, h: 126, frameMs: 65, at: 'self', orient: 'flip',
     event: 'CHARGE_START', anchor: 'ultimateChargeOrigin', pivot: [0.5, 0.984], scale: 0.72, layer: 'under', pixelated: true,
   },
-  // VFX หลัก v2: แผ่นละจังหวะ (1 × 8, หางประกายซ้ายกลาง = pivot ที่ปลายทวนของท่าตี) — เฟรม 5 = พีค ตรงดาเมจ
+  // VFX หลัก v2: มังกรถูกปล่อยจากปลายทวนแล้วพุ่งไปข้างหน้า (travel) — เล่นแค่เฟรม 2–6 ของแผ่น (ก่อตัว → พีค)
+  // ไม่เล่นเฟรมสลายตัว · เฟรมพีค (เฟรม 5 ของแผ่น) ตรงจังหวะดาเมจ แล้วบินเลยเป้าไปจางหาย
   'bailong-nine-dragon-1': {
-    file: 'fx-bailong-nine-dragon-1.png', frames: 8, w: 262, h: 81, frameMs: 45, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultTip1', pivot: [0.07, 0.5], scale: 0.85, pixelated: true,
+    file: 'fx-bailong-nine-dragon-1.png', from: 1, frames: 5, stripFrames: 8, w: 262, h: 81, frameMs: 60, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultTip1', pivot: [0.07, 0.5], scale: 0.85, travel: 380, pixelated: true,
   },
   'bailong-nine-dragon-2': {
-    file: 'fx-bailong-nine-dragon-2.png', frames: 8, w: 205, h: 194, frameMs: 48, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultTip2', pivot: [0.077, 0.5], scale: 0.9, pixelated: true,
+    file: 'fx-bailong-nine-dragon-2.png', from: 1, frames: 5, stripFrames: 8, w: 205, h: 194, frameMs: 63, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultTip2', pivot: [0.077, 0.5], scale: 0.9, travel: 380, pixelated: true,
   },
-  // เก้ามังกร: เริ่มตอนง้างสุดท้าย พีคตรงจังหวะ 3 แล้วค้างนานกว่า
+  // เก้ามังกร: ปล่อยตอนง้างสุดท้าย พีคตรงจังหวะ 3 พุ่งไกลที่สุด
   'bailong-nine-dragon-3': {
-    file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 82, at: 'self', orient: 'flip',
-    event: 'FINAL_ANTICIPATION', anchor: 'ultTip3', pivot: [0.068, 0.5], scale: 1.1, pixelated: true,
+    file: 'fx-bailong-nine-dragon-3.png', from: 1, frames: 5, stripFrames: 8, w: 277, h: 143, frameMs: 110, at: 'self', orient: 'flip',
+    event: 'FINAL_ANTICIPATION', anchor: 'ultTip3', pivot: [0.068, 0.5], scale: 1.1, travel: 520, pixelated: true,
   },
-  // กระแทกครั้งสุดท้าย — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
+  // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
   'bailong-nine-dragon-impact': {
     file: 'fx-bailong-nine-dragon-impact.png', frames: 12, w: 202, h: 168, frameMs: 60, at: 'target', orient: 'flip', on: 'impact',
-    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, scale: 0.78, pixelated: true,
+    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, fitCells: 3.4, scale: 0.78, pixelated: true,
   },
 };
 

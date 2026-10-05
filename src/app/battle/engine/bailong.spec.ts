@@ -300,16 +300,18 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     expect(new Set(parts.map(p => p.file)).size).toBe(3);
     const starts = [at('STRIKE_START', 0).t, at('STRIKE_START', 1).t, at('FINAL_ANTICIPATION').t];
     parts.forEach((p, i) => {
-      const peak = starts[i] + (4 * p.frameMs) / 1000;
+      const peak = starts[i] + ((4 - (p.from ?? 0)) * p.frameMs) / 1000; // sheet frame 5 = peak
+      expect(p.travel!).toBeGreaterThan(200); // launched forward, not collapsing in place
       expect(Math.abs(peak - at('DAMAGE', i).t)).toBeLessThan(0.06);
       expect(p.pivot![0]).toBeLessThan(0.1);
       expect(SHEETS[SPRITE].anchors![p.anchor!]).toBeDefined();
     });
-    // the finisher is the biggest (≈ 30–40 % of the 16-column field)
+    // the finisher is the biggest and flies the furthest
     const cells = (p: FxDef) => (p.w * 1.25 * p.scale! * 1.5) / 100;
     expect(cells(parts[2])).toBeGreaterThan(cells(parts[0]));
-    expect(cells(parts[2])).toBeGreaterThan(4.5);
-    expect(cells(parts[2])).toBeLessThan(6.5);
+    expect(parts[2].travel!).toBeGreaterThan(parts[0].travel!);
+    // the final burst covers the hit area (ADJACENT_8 around the target = 3 cells)
+    expect(FX['bailong-nine-dragon-impact'].fitCells!).toBeGreaterThanOrEqual(3);
   });
 
   it('final impact FX only on hit 3; hit-stop / shake escalate 1 < 2 < 3 (+ flash on 3)', () => {
