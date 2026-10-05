@@ -494,7 +494,7 @@ export class SkillSystem {
     const queueClip = (before: boolean) => {
       for (const ev of clipEvents.filter(x => (x.t < tm.hit) === before))
         this.h.later(ev.t, u, () =>
-          this.h.emit({ type: 'animEvent', src: u.id, event: ev.event, name: `${s.id.toUpperCase()}_${ev.event}${ev.index ? '_' + (ev.index + 1) : ''}`, kind: kind as SkillKind, index: ev.index }));
+          this.h.emit({ type: 'animEvent', src: u.id, event: ev.event, name: `${s.id.toUpperCase()}_${ev.event}${ev.index ? '_' + (ev.index + 1) : ''}`, kind: kind as SkillKind, index: ev.index, dst: target.alive ? target.id : undefined }));
     };
     queueClip(true);
     if (target !== u && target.side !== u.side) u.targetId = target.id;

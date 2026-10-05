@@ -21,7 +21,7 @@ Skill 2 / Ultimate (optional, used when the files exist):
   sweep_vfx.png     Sweeping Moon crescent (7 + 6 = 13 frames)            → fx-bailong-sweeping-moon.png
   sweep_impact.png  Sweeping Moon contact FX (4 + 4)                      → fx-bailong-sweeping-moon-hit.png
   ult_char.png      Nine Dragon Sequence character clip v2 (magenta, 4 x 5 = 20 frames) → atlas row 7 (ult)
-  ult_strike1..3.png  v2 main VFX: one 1×8 strip per strike (thrust / crescent / nine dragons) → fx-bailong-nine-dragon-1..3.png
+  ult_strike1..3.png  v2 main VFX: one 1×8 strip per strike (thrust / dragon pillar under the target / nine dragons) → fx-bailong-nine-dragon-1..3.png
   ult_charge.png    charge aura around the body (5 + 5)                   → fx-bailong-nine-dragon-charge.png
   ult_impact.png    final contact burst (4 + 4 + 4)                       → fx-bailong-nine-dragon-impact.png
   Frames that touch (spear / qi across neighbours) are split by a watershed seeded on each body / core, never by
@@ -56,7 +56,7 @@ def load(name):
     key = (r > 180) & (b > 180) & (g < 90) & (np.abs(r - b) < 70)
     im[key, 3] = 0
     # magenta spill on anti-aliased edges (pink-tinted white / blue): drop — no Bai Long colour is magenta
-    spill = (im[..., 3] > 0) & (r - g > 50) & (b - g > 50) & (r > 120)
+    spill = (im[..., 3] > 0) & (((r - g > 50) & (b - g > 50) & (r > 120)) | ((r - g > 22) & (b > g + 22) & (r > 90)))
     im[spill, 3] = 0
     return im.astype(np.uint8), int(key.sum())
 
@@ -334,13 +334,14 @@ VFX_SHEETS = {
 # Nine Dragon strikes (v2 art): one 1×8 strip per strike, magenta background, the dragon's tail spark at the left.
 STRIKE_STRIPS = {
     'ult_strike1': ('fx-bailong-nine-dragon-1.png', 0.62),
-    'ult_strike2': ('fx-bailong-nine-dragon-2.png', 0.62),
+    'ult_strike2': ('fx-bailong-nine-dragon-2.png', 0.62, 'ground'),
     'ult_strike3': ('fx-bailong-nine-dragon-3.png', 0.62),
 }
 
 
-def cut_strip(name, scale, want=8):
-    """1-row VFX strip → equal frames anchored on the tail spark (left-centre pivot, same spot every frame)"""
+def cut_strip(name, scale, want=8, mode='tail'):
+    """1-row VFX strip → equal frames on one pivot: 'tail' = the tail spark (left-centre), 'ground' = the centre of the
+    magic circle on the floor (bottom-centre — a pillar rising from under the target)"""
     im, _ = load(name)
     a = im[..., 3]
     cols = (a > 0).sum(0) > 0
@@ -363,23 +364,38 @@ def cut_strip(name, scale, want=8):
         ys, xs = np.nonzero(crop[..., 3] > 0)
         crop = crop[ys.min():ys.max() + 1]
         y_off = ys.min()
-        # tail spark = the bright pixels at the far left of the frame (its centre = the pivot)
         lum = crop[..., :3].astype(int).mean(-1)
         bright = (crop[..., 3] > 200) & (lum > 200)
         by, bx = np.nonzero(bright)
-        left = bx <= bx.min() + 24
-        cx, cy = float(np.median(bx[left])), float(np.median(by[left]))
+        if mode == 'ground':
+            # floor circle = the widest row of opaque pixels in the lower third; pivot = its middle
+            op = crop[..., 3] > 120
+            h = op.shape[0]
+            widths = [(np.ptp(np.nonzero(op[y])[0]) if op[y].any() else 0) for y in range(h)]
+            lo = int(h * 0.66)
+            cy = float(lo + int(np.argmax(widths[lo:])))
+            xs_ = np.nonzero(op[int(cy)])[0]
+            cx = float((xs_.min() + xs_.max()) / 2)
+        else:
+            # tail spark = the bright pixels at the far left of the frame (its centre = the pivot)
+            left = bx <= bx.min() + 24
+            cx, cy = float(np.median(bx[left])), float(np.median(by[left]))
         img = resize_rgba(Image.fromarray(crop), max(1, round(crop.shape[1] * scale)), max(1, round(crop.shape[0] * scale)))
         frames.append((img, cx * scale, cy * scale))
         if DEBUG_STRIP: print(name, x0, x1, round(cx), crop.shape[1])
     L = max(cx for _, cx, _ in frames) + 4
     R = max(f.width - cx for f, cx, _ in frames) + 4
-    V = max(max(cy, f.height - cy) for f, _, cy in frames) + 4
-    W, H = int(L + R), int(2 * V)
+    if mode == 'ground':
+        L = R = max(L, R)
+        U = max(cy for _, _, cy in frames) + 4
+        D = max(f.height - cy for f, _, cy in frames) + 4
+    else:
+        U = D = max(max(cy, f.height - cy) for f, _, cy in frames) + 4
+    W, H = int(L + R), int(U + D)
     strip = Image.new('RGBA', (W * len(frames), H), (0, 0, 0, 0))
     for i, (f, cx, cy) in enumerate(frames):
-        strip.alpha_composite(f, (int(round(i * W + L - cx)), int(round(V - cy))))
-    return strip, {'frames': len(frames), 'w': W, 'h': H, 'pivot': [round(L / W, 3), 0.5], 'scale': scale}
+        strip.alpha_composite(f, (int(round(i * W + L - cx)), int(round(U - cy))))
+    return strip, {'frames': len(frames), 'w': W, 'h': H, 'pivot': [round(L / W, 3), round(U / H, 3)], 'scale': scale}
 
 
 def main():
@@ -547,9 +563,9 @@ def main():
         strip, info = cut_vfx(src, rows_cfg, align, sc)
         strip.save(f'{OUT}/{out}', optimize=True)
         report[out] = info
-    for src, (out, sc) in STRIKE_STRIPS.items():
+    for src, (out, sc, *mode) in STRIKE_STRIPS.items():
         if os.path.exists(f'{SRC}/{src}.png'):
-            strip, info = cut_strip(src, sc)
+            strip, info = cut_strip(src, sc, mode=(mode or ['tail'])[0])
             strip.save(f'{OUT}/{out}', optimize=True)
             report[out] = info
     # named anchors measured on the clips (px from the root, x forward, up = above the feet)

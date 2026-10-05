@@ -291,7 +291,7 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     expect(at('CHARGE_START').t + (c.frames * c.frameMs) / 1000).toBeLessThan(at('DAMAGE', 0).t);
   });
 
-  it('main VFX = one strip per strike, each starts before its hit and peaks (frame 5) on it, tail on the spear tip', () => {
+  it('main VFX = one strip per strike: plays to its peak (sheet frame 5) on the hit, then holds and fades (no fly, no collapse)', () => {
     const seg = (trig: any) => fxFor(SPRITE, 'ult', trig);
     expect(seg({ on: 'event', event: 'STRIKE_START', index: 0 })).toEqual(['bailong-nine-dragon-1']);
     expect(seg({ on: 'event', event: 'STRIKE_START', index: 1 })).toEqual(['bailong-nine-dragon-2']);
@@ -300,17 +300,19 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     expect(new Set(parts.map(p => p.file)).size).toBe(3);
     const starts = [at('STRIKE_START', 0).t, at('STRIKE_START', 1).t, at('FINAL_ANTICIPATION').t];
     parts.forEach((p, i) => {
-      const peak = starts[i] + ((4 - (p.from ?? 0)) * p.frameMs) / 1000; // sheet frame 5 = peak
-      expect(p.travel!).toBeGreaterThan(200); // launched forward, not collapsing in place
+      expect((p.from ?? 0) + p.frames - 1).toBe(4); // last frame played = the peak, collapse frames never shown
+      const peak = starts[i] + ((p.frames - 1) * p.frameMs) / 1000;
       expect(Math.abs(peak - at('DAMAGE', i).t)).toBeLessThan(0.06);
-      expect(p.pivot![0]).toBeLessThan(0.1);
-      expect(SHEETS[SPRITE].anchors![p.anchor!]).toBeDefined();
+      expect(p.fadeOutMs!).toBeGreaterThan(0);
+      expect((p as any).travel).toBeUndefined();
     });
-    // the finisher is the biggest and flies the furthest
+    // strikes 1 / 3 leave the spear tip; strike 2 is a dragon pillar rising from the floor under the target
+    expect(SHEETS[SPRITE].anchors![parts[0].anchor!]).toBeDefined();
+    expect(SHEETS[SPRITE].anchors![parts[2].anchor!]).toBeDefined();
+    expect(parts[1].at).toBe('target');
+    expect(parts[1].pivot![1]).toBeGreaterThan(0.7);
     const cells = (p: FxDef) => (p.w * 1.25 * p.scale! * 1.5) / 100;
     expect(cells(parts[2])).toBeGreaterThan(cells(parts[0]));
-    expect(parts[2].travel!).toBeGreaterThan(parts[0].travel!);
-    // the final burst covers the hit area (ADJACENT_8 around the target = 3 cells)
     expect(FX['bailong-nine-dragon-impact'].fitCells!).toBeGreaterThanOrEqual(3);
   });
 

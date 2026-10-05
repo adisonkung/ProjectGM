@@ -845,7 +845,7 @@ export class BattleComponent implements OnDestroy {
         }
         case 'animEvent':
           // hero clip events (VFX_SPAWN, CHARGE_START, STRIKE_START …): the FX layers bound to them; missing FX = no-op
-          if (e.kind) addFx(e.src, undefined, e.kind, { on: 'event', event: e.event, index: e.index });
+          if (e.kind) addFx(e.src, e.dst, e.kind, { on: 'event', event: e.event, index: e.index });
           break;
         case 'blink':
           // วาร์ป: ย้ายทันที + ค่อย ๆ ปรากฏ (ไม่ไถลข้ามสนาม)

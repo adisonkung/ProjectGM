@@ -50,18 +50,16 @@ export class FxSpriteComponent {
         // (ถ้าใช้ n-1 ตำแหน่งจะคร่อมระหว่างเฟรม เห็นครึ่งเฟรมข้าง ๆ เป็นรอยตัดแนวตั้ง)
         { duration: fxDuration(this.name(), this.speed()), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
       );
-      // travelling FX (a dragon launched from the spear): flies `travel` % of a cell forward, fading at the end
-      if (d.travel) {
-        const host = this.host.nativeElement as HTMLElement;
-        const px = (d.travel / 100) * host.offsetWidth * (this.flip() ? -1 : 1);
+      // release-and-vanish FX: the last (peak) frame stays and fades out over fadeOutMs instead of collapsing
+      if (d.fadeOutMs) {
+        const play = (d.frames * d.frameMs) / this.speed();
+        const total = fxDuration(this.name(), this.speed());
         this.el().nativeElement.animate(
           [
-            { translate: '0px 0px', opacity: 1 },
-            { translate: `${px * 0.8}px 0px`, opacity: 1, offset: 0.75 },
-            { translate: `${px}px 0px`, opacity: 0 },
+            { backgroundPosition: `${pos((d.from ?? 0) + d.frames - 1)}% 0%`, opacity: 1, offset: 0 },
+            { backgroundPosition: `${pos((d.from ?? 0) + d.frames - 1)}% 0%`, opacity: 0, offset: 1 },
           ],
-          // ease-in: the dragon leaves the spear tip, is still on the target at the hit (peak frame), then shoots away
-          { duration: fxDuration(this.name(), this.speed()), easing: 'cubic-bezier(.55,0,.8,.6)', fill: 'none' },
+          { duration: total - play, delay: play, easing: 'ease-in', fill: 'none' },
         );
       }
     });
@@ -70,5 +68,5 @@ export class FxSpriteComponent {
 
 export function fxDuration(name: string, speed = 1): number {
   const d = FX[name];
-  return d ? (d.frames * d.frameMs) / speed : 0;
+  return d ? (d.frames * d.frameMs + (d.fadeOutMs ?? 0)) / speed : 0;
 }
