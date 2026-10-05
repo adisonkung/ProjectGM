@@ -26,6 +26,7 @@ from scipy import ndimage
 
 sys.path.insert(0, os.path.dirname(__file__))
 import bailong as B  # noqa: E402
+import aurel_bash_vfx as BV  # noqa: E402
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/aurel'
 OUT = sys.argv[2] if len(sys.argv) > 2 else 'public/sprites'
@@ -139,7 +140,7 @@ def stabilise(tx):
 
 
 def body_h(fr):
-    m = ndimage.binary_opening(fr['img'][..., 3] >= B.ALPHA_CUT, structure=np.ones((9, 9)))
+    m = ndimage.binary_opening(fr.get('char', fr['img'])[..., 3] >= B.ALPHA_CUT, structure=np.ones((9, 9)))
     ys = np.nonzero(m)[0]
     return ys.max() - ys.min()
 
@@ -192,6 +193,8 @@ def main():
     rows = [(n, groups[n], sc_base) for n in BASE_NAMES]
     for name, file, counts, soft in ROWS[1:]:
         frs = sheet_frames(file, counts, soft)
+        if file == 'bash':   # Shield Bash: the supplied VFX strips placed on the clip (aurel_bash_vfx.py)
+            frs = BV.combine(frs)
         sc = sc_base * body_h(groups['idle'][0]) / body_h(frs[0])
         rows.append((name, frs, sc))
         report['notes'].append(f'{file}: {len(frs)} frames, scale {sc:.3f}')
@@ -201,7 +204,7 @@ def main():
     probe = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * len(rows)), (0, 0, 0, 0))
     for r, (name, frs, sc) in enumerate(rows):
         for c, fr in enumerate(frs):
-            B.paste(probe, fr, r, c, sc)
+            B.paste(probe, {**fr, 'img': fr.get('char', fr['img'])}, r, c, sc)
     pa = np.array(probe)[..., 3]
     tx = {name: [torso_x(pa[r * B.CELL_H:(r + 1) * B.CELL_H, c * B.CELL_W:(c + 1) * B.CELL_W]) for c in range(len(frs))]
           for r, (name, frs, _) in enumerate(rows)}

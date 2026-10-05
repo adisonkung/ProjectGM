@@ -156,6 +156,7 @@ export const SHEETS: Record<string, SheetDef> = {
         row: 5, frames: 10, ms: 80,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         steps: [80, 70, 110, 70, 60, 60, 130, 80, 90, 90],
+        // VFX baked into the clip (tools/sprites/aurel_bash_vfx.py): gather F4–F5 · burst F6 · peak F7 · wave F8 · fade F9–F10
         events: { CAST_START: 0, ANTICIPATION_PEAK: 4, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 },
         impact: { hitStopMs: 55, shakePx: 3, shakeMs: 140 },
       },
@@ -177,7 +178,7 @@ export const SHEETS: Record<string, SheetDef> = {
         impact: { hitStopMs: 90, shakePx: 6, shakeMs: 220, flashMs: 120 },
       },
     },
-    fx: { skill: 'aurel-defense', skill2: 'aurel-charge', ult: 'aurel-ult' },
+    fx: { skill2: 'aurel-charge', ult: 'aurel-ult' },
     shieldFx: 'aurel-ward',
   },
   'hero-shade.png': {
