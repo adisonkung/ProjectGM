@@ -324,6 +324,13 @@ VFX_SHEETS = {
     'ult_charge': ('fx-bailong-nine-dragon-charge.png', 'bottom', 0.35, [
         (0, 350, [206, 624, 1043, 1504, 1944]),
         (350, 724, [206, 630, 1086, 1542, 1955])]),
+    # old 28-frame main sheet (alpha version of the white-background render the user re-sent): strikes 1–2 use
+    # its first two segments (frames 1–10 straight dragon, 11–19 curling dragons)
+    'ult_main': ('fx-bailong-nine-dragon.png', 'center', 0.7, [
+        (0, 222, [115, 345, 575, 815, 1035, 1265, 1510]),
+        (222, 440, [160, 450, 690, 900, 1085, 1305, 1535]),
+        (440, 680, [105, 310, 530, 740, 945, 1180, 1480]),
+        (680, 941, [215, 615, 815, 1030, 1235, 1400, 1580])]),
     'ult_impact': ('fx-bailong-nine-dragon-impact.png', 'bottom', 0.45, [
         (0, 380, [165, 510, 865, 1240]),
         (380, 770, [225, 590, 945, 1280]),

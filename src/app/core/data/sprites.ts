@@ -345,21 +345,20 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 2, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 6, VFX_SPAWN: 6, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
         impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
       },
-      // Nine Dragon Sequence (v2 art) — one continuous move, no in-between strikes:
-      // charge F1–F5 (aura, peak hold) → F15 guard → F16 overhead wind-up (hold, nine dragons gather) → F17 →
-      // F18 final lunge, held while the three hits land in a flurry inside it → F19 → F20 ready.
-      // Events count `seq` steps (fractions = inside the held lunge).
+      // Nine Dragon Sequence (v2 art, 3-strike dance): all 20 frames, key poses held — charge F1–F5 (peak hold) ·
+      // F8 thrust (dragon 1) · F13 rising sweep (curling dragons) · F16 overhead wind-up → F18 final lunge
+      // (nine dragons + burst) · F20 ready. Events count `seq` steps (= sheet frames).
       ult: {
         row: 7, frames: 20, ms: 120,
-        seq: [0, 1, 2, 3, 4, 14, 15, 16, 17, 18, 19],
-        steps: [110, 110, 120, 120, 300, 110, 300, 80, 420, 140, 130],
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        steps: [100, 100, 110, 110, 260, 100, 80, 200, 100, 100, 110, 80, 200, 110, 100, 260, 70, 260, 120, 110],
         events: {
-          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, FINAL_ANTICIPATION: 6, STRIKE_START: [7, 8.3, 8.6],
-          DAMAGE: [8, 8.3, 8.6], IMPACT: [8, 8.3, 8.6], RECOVERY_START: 9,
+          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, STRIKE_START: [5, 10, 16], FINAL_ANTICIPATION: 15,
+          DAMAGE: [7, 12, 17], IMPACT: [7, 12, 17], RECOVERY_START: 18,
         },
         impact: [
-          { hitStopMs: 20, shakePx: 2, shakeMs: 90 },
-          { hitStopMs: 30, shakePx: 4, shakeMs: 110 },
+          { hitStopMs: 25, shakePx: 2, shakeMs: 110 },
+          { hitStopMs: 35, shakePx: 4, shakeMs: 150 },
           { hitStopMs: 95, shakePx: 7, shakeMs: 220, flashMs: 140 },
         ],
       },
@@ -367,7 +366,7 @@ export const SHEETS: Record<string, SheetDef> = {
     fx: {
       skill: 'bailong-dragon-thrust',
       skill2: ['bailong-sweeping-moon', 'bailong-sweeping-moon-hit'],
-      ult: ['bailong-nine-dragon-charge', 'bailong-nine-dragon-3', 'bailong-nine-dragon-impact'],
+      ult: ['bailong-nine-dragon-charge', 'bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3', 'bailong-nine-dragon-impact'],
     },
   },
 };
@@ -506,9 +505,18 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-nine-dragon-charge.png', frames: 10, w: 164, h: 126, frameMs: 65, at: 'self', orient: 'flip',
     event: 'CHARGE_START', anchor: 'ultimateChargeOrigin', pivot: [0.5, 0.984], scale: 0.72, layer: 'under', pixelated: true,
   },
-  // VFX หลัก: เก้ามังกร เล่นครบ 8 เฟรม (ปล่อย → พีคเฟรม 5 ตรงดาเมจแรก → สลายเอง)
+  // จังหวะ 1–2: แผ่นมังกรเดิม 28 เฟรม (ช่วงเฟรม 1–10 มังกรพุ่งตรง · 11–19 มังกรขดโค้ง) กลางอยู่ 1.5 ช่องหน้าตัว
+  'bailong-nine-dragon-1': {
+    file: 'fx-bailong-nine-dragon.png', from: 0, frames: 10, stripFrames: 28, w: 292, h: 173, frameMs: 45, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
+  },
+  'bailong-nine-dragon-2': {
+    file: 'fx-bailong-nine-dragon.png', from: 10, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 63, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
+  },
+  // จังหวะ 3 (ปิด): เก้ามังกร v2 เล่นครบ 8 เฟรม พีคเฟรม 5 ตรงดาเมจ แล้วสลายเอง
   'bailong-nine-dragon-3': {
-    file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 95, at: 'self', orient: 'flip',
+    file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 82, at: 'self', orient: 'flip',
     event: 'FINAL_ANTICIPATION', anchor: 'ultTip3', pivot: [0.068, 0.5], scale: 1.1, pixelated: true,
   },
   // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า

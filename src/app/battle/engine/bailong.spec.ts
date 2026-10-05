@@ -268,24 +268,18 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
   const ev = () => animEvents(SPRITE, 'ult');
   const at = (n: string, i = 0) => ev().find(x => x.event === n && x.index === i)!;
 
-  it('one continuous move, 1.6–2.4 s: charge → overhead wind-up F16 → final lunge F18 held while 3 hits land', () => {
+  it('20-frame dance with held key poses, 2.0–2.7 s; charge peak F5 · hits F8 / F13 / F18 · final anticipation F16', () => {
     const tm = animTiming(SPRITE, 'ult');
-    expect(tm.total).toBeGreaterThanOrEqual(1.6);
-    expect(tm.total).toBeLessThanOrEqual(2.4);
+    expect(tm.total).toBeGreaterThanOrEqual(2.0);
+    expect(tm.total).toBeLessThanOrEqual(2.7);
     expect(at('CHARGE_PEAK').art! + 1).toBe(5);
+    expect([0, 1, 2].map(i => at('DAMAGE', i).art! + 1)).toEqual([8, 13, 18]);
     expect(at('FINAL_ANTICIPATION').art! + 1).toBe(16);
-    expect([0, 1, 2].map(i => at('DAMAGE', i).art! + 1)).toEqual([18, 18, 18]);
     expect(tm.hits.length).toBe(3);
-    // the flurry: 3 hits inside the held lunge, ~0.1–0.2 s apart
-    for (const i of [1, 2]) {
-      const gap = tm.hits[i] - tm.hits[i - 1];
-      expect(gap).toBeGreaterThan(0.08);
-      expect(gap).toBeLessThan(0.2);
-    }
     const ult = SHEETS[SPRITE].anims.ult!;
     expect(ult.seq!.length).toBe(ult.steps!.length);
-    // no in-between strike poses (F6–F14)
-    expect(ult.seq!.filter(f => f >= 5 && f <= 13)).toEqual([]);
+    for (const i of [0, 1, 2]) expect(at('STRIKE_START', i).t).toBeLessThan(at('DAMAGE', i).t);
+    expect(at('STRIKE_START', 1).t).toBeGreaterThan(at('DAMAGE', 0).t);
   });
 
   it('charge VFX: around the body/root, under the units, starts on CHARGE_START and is gone before the hit', () => {
@@ -295,14 +289,21 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     expect(at('CHARGE_START').t + (c.frames * c.frameMs) / 1000).toBeLessThan(at('DAMAGE', 0).t);
   });
 
-  it('main VFX = the nine dragons, released on the wind-up, peak (frame 5) on the first hit, dissipates by itself', () => {
-    expect(fxFor(SPRITE, 'ult', { on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual(['bailong-nine-dragon-3']);
-    const p = FX['bailong-nine-dragon-3'];
-    expect(p.frames).toBe(8);
-    expect(p.fadeOutMs).toBeUndefined();
-    const peak = at('FINAL_ANTICIPATION').t + (4 * p.frameMs) / 1000;
-    expect(Math.abs(peak - at('DAMAGE', 0).t)).toBeLessThan(0.06);
-    expect(SHEETS[SPRITE].anchors![p.anchor!]).toBeDefined();
+  it('main VFX: strikes 1–2 = two segments of the old 28-frame sheet, strike 3 = the nine-dragon strip; each peaks on its hit', () => {
+    const seg = (trig: any) => fxFor(SPRITE, 'ult', trig);
+    expect(seg({ on: 'event', event: 'STRIKE_START', index: 0 })).toEqual(['bailong-nine-dragon-1']);
+    expect(seg({ on: 'event', event: 'STRIKE_START', index: 1 })).toEqual(['bailong-nine-dragon-2']);
+    expect(seg({ on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual(['bailong-nine-dragon-3']);
+    const [p1, p2, p3] = ['bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3'].map(n => FX[n]);
+    expect(p1.file).toBe(p2.file);
+    expect(p1.from! + p1.frames).toBe(p2.from!);
+    const peaks = [
+      at('STRIKE_START', 0).t + (4 * p1.frameMs) / 1000, // ring + arrow frame
+      at('STRIKE_START', 1).t + (3 * p2.frameMs) / 1000, // biggest curling dragon
+      at('FINAL_ANTICIPATION').t + (4 * p3.frameMs) / 1000, // nine dragons peak
+    ];
+    peaks.forEach((t, i) => expect(Math.abs(t - at('DAMAGE', i).t)).toBeLessThan(0.06));
+    expect(p3.frames).toBe(8);
     expect(FX['bailong-nine-dragon-impact'].fitCells!).toBeGreaterThanOrEqual(3);
   });
 
@@ -347,7 +348,7 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     const b = thrust(3, 'ult', 30);
     const back = b.foes[1].id;
     const want = animTiming(SPRITE, 'ult').hits;
-    const late = b.log.filter(x => x.type === 'damage' && (x as any).dst === back && x.t - b.t0 > want[1] - 0.04);
+    const late = b.log.filter(x => x.type === 'damage' && (x as any).dst === back && x.t - b.t0 > want[1] - 0.06);
     expect(late.length).toBeGreaterThan(0);
   });
 
