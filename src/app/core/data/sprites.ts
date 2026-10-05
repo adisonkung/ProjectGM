@@ -318,6 +318,10 @@ export const SHEETS: Record<string, SheetDef> = {
       skillOrigin: [33, -21],
       ultimateChargeOrigin: [0, 27.25],
       ultimateForwardOrigin: [150, -21],
+      // spear tip on the three Nine Dragon hit poses (v2 art F8 / F13 / F18) — each strike's dragon starts here
+      ultTip1: [117.5, -20.25],
+      ultTip2: [86.25, -47.75],
+      ultTip3: [121.25, -5.25],
     },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -337,17 +341,16 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 2, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 6, VFX_SPAWN: 6, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
         impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
       },
-      // Nine Dragon Sequence (choreographed, 2.5 s): the art's prone F4 / upright F5 bob, the F7 side-step and the
-      // F10 / F15 in-betweens made the clip read as a dance → 15 key poses with holds:
-      // charge F1 F2 F5(peak, hold) · strike 1 F6 → F8 (hit, hold) F9 · strike 2 F11 F12 → F13 (hit) F14 ·
-      // final F16 (overhead, hold) F17 → F18 (hit, hold) F19 F20  — events count these steps
+      // Nine Dragon Sequence (v2 art: clean 4 × 5 clip) — every frame used, key poses held:
+      // charge F1–F5 (peak hold) · strike 1 F6 → F8 thrust · strike 2 F11 → F13 sweep · F16 overhead wind-up (hold)
+      // → F18 final lunge (hold) → F20 ready. Events count steps (= sheet frames here).
       ult: {
         row: 7, frames: 20, ms: 120,
-        seq: [0, 1, 4, 5, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 19],
-        steps: [120, 120, 360, 120, 240, 120, 100, 120, 220, 120, 220, 100, 260, 120, 160],
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        steps: [100, 100, 110, 110, 260, 100, 80, 200, 100, 100, 110, 80, 200, 110, 100, 260, 70, 250, 120, 110],
         events: {
-          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 2, STRIKE_START: [3, 6, 11], FINAL_ANTICIPATION: 10,
-          DAMAGE: [4, 8, 12], IMPACT: [4, 8, 12], RECOVERY_START: 13,
+          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, STRIKE_START: [5, 10, 16], FINAL_ANTICIPATION: 15,
+          DAMAGE: [7, 12, 17], IMPACT: [7, 12, 17], RECOVERY_START: 18,
         },
         impact: [
           { hitStopMs: 25, shakePx: 2, shakeMs: 110 },
@@ -498,23 +501,24 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-nine-dragon-charge.png', frames: 10, w: 164, h: 126, frameMs: 65, at: 'self', orient: 'flip',
     event: 'CHARGE_START', anchor: 'ultimateChargeOrigin', pivot: [0.5, 0.984], scale: 0.72, layer: 'under', pixelated: true,
   },
-  // VFX หลัก 28 เฟรม = 3 ช่วงของแผ่นเดียว เริ่มใหม่ทุกจังหวะ → เฟรมพีคตรงดาเมจแต่ละครั้ง (+0.24 วิ หลังเริ่มช่วง)
+  // VFX หลัก v2: แผ่นละจังหวะ (1 × 8, หางประกายซ้ายกลาง = pivot ที่ปลายทวนของท่าตี) — เฟรม 5 = พีค ตรงดาเมจ
   'bailong-nine-dragon-1': {
-    file: 'fx-bailong-nine-dragon.png', from: 0, frames: 10, stripFrames: 28, w: 292, h: 173, frameMs: 45, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
+    file: 'fx-bailong-nine-dragon-1.png', frames: 8, w: 262, h: 81, frameMs: 45, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultTip1', pivot: [0.07, 0.5], scale: 0.85, pixelated: true,
   },
   'bailong-nine-dragon-2': {
-    file: 'fx-bailong-nine-dragon.png', from: 10, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 60, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
+    file: 'fx-bailong-nine-dragon-2.png', frames: 8, w: 205, h: 194, frameMs: 48, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultTip2', pivot: [0.077, 0.5], scale: 0.9, pixelated: true,
   },
+  // เก้ามังกร: เริ่มตอนง้างสุดท้าย พีคตรงจังหวะ 3 แล้วค้างนานกว่า
   'bailong-nine-dragon-3': {
-    file: 'fx-bailong-nine-dragon.png', from: 19, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 105, at: 'self', orient: 'flip',
-    event: 'FINAL_ANTICIPATION', anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
+    file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 82, at: 'self', orient: 'flip',
+    event: 'FINAL_ANTICIPATION', anchor: 'ultTip3', pivot: [0.068, 0.5], scale: 1.1, pixelated: true,
   },
   // กระแทกครั้งสุดท้าย — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
   'bailong-nine-dragon-impact': {
     file: 'fx-bailong-nine-dragon-impact.png', frames: 12, w: 202, h: 168, frameMs: 60, at: 'target', orient: 'flip', on: 'impact',
-    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, scale: 0.6, pixelated: true,
+    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, scale: 0.78, pixelated: true,
   },
 };
 

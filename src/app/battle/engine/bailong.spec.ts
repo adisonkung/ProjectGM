@@ -268,7 +268,7 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
   const ev = () => animEvents(SPRITE, 'ult');
   const at = (n: string, i = 0) => ev().find(x => x.event === n && x.index === i)!;
 
-  it('20-frame sheet row played as 15 key poses, 2.0–2.7 s; charge peak F5 · hits F8 / F13 / F18 · final anticipation F16', () => {
+  it('20-frame clip with held key poses, 2.0–2.7 s; charge peak F5 · hits F8 / F13 / F18 · final anticipation F16', () => {
     const tm = animTiming(SPRITE, 'ult');
     expect(tm.total).toBeGreaterThanOrEqual(2.0);
     expect(tm.total).toBeLessThanOrEqual(2.7);
@@ -278,7 +278,6 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     expect(at('FINAL_ANTICIPATION').art! + 1).toBe(16);
     const ult = SHEETS[SPRITE].anims.ult!;
     expect(ult.seq!.length).toBe(ult.steps!.length);
-    expect(ult.seq).not.toContain(3); // the prone F4 pose is out of the choreography
     expect(tm.hits.length).toBe(3);
     // each strike starts before its hit, after the previous one
     for (const i of [0, 1, 2]) expect(at('STRIKE_START', i).t).toBeLessThan(at('DAMAGE', i).t);
@@ -292,23 +291,25 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     expect(at('CHARGE_START').t + (c.frames * c.frameMs) / 1000).toBeLessThan(at('DAMAGE', 0).t);
   });
 
-  it('main VFX = 3 segments of one strip, each starts on its strike and peaks on its hit', () => {
+  it('main VFX = one strip per strike, each starts before its hit and peaks (frame 5) on it, tail on the spear tip', () => {
     const seg = (trig: any) => fxFor(SPRITE, 'ult', trig);
     expect(seg({ on: 'event', event: 'STRIKE_START', index: 0 })).toEqual(['bailong-nine-dragon-1']);
     expect(seg({ on: 'event', event: 'STRIKE_START', index: 1 })).toEqual(['bailong-nine-dragon-2']);
     expect(seg({ on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual(['bailong-nine-dragon-3']);
     const parts = ['bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3'].map(n => FX[n]);
-    expect(parts.map(p => p.file)).toEqual(Array(3).fill('fx-bailong-nine-dragon.png'));
-    expect(parts[0].from! + parts[0].frames).toBe(parts[1].from!);
-    expect(parts[1].from! + parts[1].frames).toBe(parts[2].from!);
-    expect(parts[2].from! + parts[2].frames).toBe(parts[0].stripFrames!);
-    // each segment still playing when its hit lands
+    expect(new Set(parts.map(p => p.file)).size).toBe(3);
     const starts = [at('STRIKE_START', 0).t, at('STRIKE_START', 1).t, at('FINAL_ANTICIPATION').t];
-    parts.forEach((p, i) => expect(starts[i] + (p.frames * p.frameMs) / 1000).toBeGreaterThan(at('DAMAGE', i).t));
-    // peak width ≈ 30–40 % of the 16-column field (toned down from the spec's 40–60 % on user review)
-    const cells = (parts[2].w * 1.25 * parts[2].scale! * 1.5) / 100;
-    expect(cells).toBeGreaterThan(4.5);
-    expect(cells).toBeLessThan(6.5);
+    parts.forEach((p, i) => {
+      const peak = starts[i] + (4 * p.frameMs) / 1000;
+      expect(Math.abs(peak - at('DAMAGE', i).t)).toBeLessThan(0.06);
+      expect(p.pivot![0]).toBeLessThan(0.1);
+      expect(SHEETS[SPRITE].anchors![p.anchor!]).toBeDefined();
+    });
+    // the finisher is the biggest (≈ 30–40 % of the 16-column field)
+    const cells = (p: FxDef) => (p.w * 1.25 * p.scale! * 1.5) / 100;
+    expect(cells(parts[2])).toBeGreaterThan(cells(parts[0]));
+    expect(cells(parts[2])).toBeGreaterThan(4.5);
+    expect(cells(parts[2])).toBeLessThan(6.5);
   });
 
   it('final impact FX only on hit 3; hit-stop / shake escalate 1 < 2 < 3 (+ flash on 3)', () => {
@@ -342,9 +343,9 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     const hits = b.log.filter(x => x.type === 'animEvent' && x.src === b.hero.id && (x as any).event === 'DAMAGE') as any[];
     expect(hits.map(h => h.index)).toEqual([0, 1, 2]);
     const want = animTiming(SPRITE, 'ult').hits;
-    hits.forEach((h, i) => expect(h.t - b.t0).toBeCloseTo(want[i], 1));
+    hits.forEach((h, i) => expect(Math.abs(h.t - b.t0 - want[i])).toBeLessThan(0.11)); // ≤ 2 engine ticks
     const prim = b.foes[0].id;
-    const amounts = [0, 1, 2].map(i => b.log.filter(x => x.type === 'damage' && (x as any).dst === prim && Math.abs(x.t - b.t0 - want[i]) < 0.06).reduce((a, d: any) => a + d.amount, 0));
+    const amounts = [0, 1, 2].map(i => b.log.filter(x => x.type === 'damage' && (x as any).dst === prim && Math.abs(x.t - hits[i].t) < 0.06).reduce((a, d: any) => a + d.amount, 0));
     expect(amounts.every(a => a > 0)).toBeTrue();
     // ratio check (±10 % variance + crit per hit → loose)
     expect(amounts[2]).toBeGreaterThan(amounts[0]);

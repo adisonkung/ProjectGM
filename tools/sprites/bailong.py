@@ -20,9 +20,9 @@ Skill 2 / Ultimate (optional, used when the files exist):
   sweep_char.png    Sweeping Moon character clip, 2 rows x 6 = 12 frames  → atlas row 6 (skill2)
   sweep_vfx.png     Sweeping Moon crescent (7 + 6 = 13 frames)            → fx-bailong-sweeping-moon.png
   sweep_impact.png  Sweeping Moon contact FX (4 + 4)                      → fx-bailong-sweeping-moon-hit.png
-  ult_char.png      Nine Dragon Sequence character clip, 4 x 5 = 20 frames → atlas row 7 (ult), qi glow kept (soft alpha)
+  ult_char.png      Nine Dragon Sequence character clip v2 (magenta, 4 x 5 = 20 frames) → atlas row 7 (ult)
+  ult_strike1..3.png  v2 main VFX: one 1×8 strip per strike (thrust / crescent / nine dragons) → fx-bailong-nine-dragon-1..3.png
   ult_charge.png    charge aura around the body (5 + 5)                   → fx-bailong-nine-dragon-charge.png
-  ult_main.png      main ultimate VFX, 4 x 7 = 28 frames (3 strike segments) → fx-bailong-nine-dragon.png
   ult_impact.png    final contact burst (4 + 4 + 4)                       → fx-bailong-nine-dragon-impact.png
   Frames that touch (spear / qi across neighbours) are split by a watershed seeded on each body / core, never by
   straight cuts. VFX frames are aligned per sheet (left-centre crescent, centre, bottom-centre ground bursts).
@@ -55,6 +55,9 @@ def load(name):
     r, g, b = im[..., 0], im[..., 1], im[..., 2]
     key = (r > 180) & (b > 180) & (g < 90) & (np.abs(r - b) < 70)
     im[key, 3] = 0
+    # magenta spill on anti-aliased edges (pink-tinted white / blue): drop — no Bai Long colour is magenta
+    spill = (im[..., 3] > 0) & (r - g > 50) & (b - g > 50) & (r > 120)
+    im[spill, 3] = 0
     return im.astype(np.uint8), int(key.sum())
 
 
@@ -181,7 +184,6 @@ CLIP_FIXES = {
     'sweep_char': [(830, 721, 962, 765, 2, 'not_blue'), (840, 760, 900, 801, 2, 'not_blue'),
                    (1050, 800, 1112, 845, 3, 'not_blue'), (1290, 812, 1342, 860, 4, 'not_blue')],
     # Nine Dragon row 3: F13 spear + glow run into F14's hair, F14's crescent arc / F15's spear tip
-    'ult_char': [(740, 690, 905, 748, 2, 'any'), (905, 680, 925, 748, 2, 'not_dark'), (1060, 620, 1112, 700, 3, 'any'), (1112, 695, 1165, 740, 4, 'not_blue')],
 }
 
 
@@ -237,6 +239,7 @@ def resize_rgba(img, w, h):
 
 
 SEAM_FADE = 14
+DEBUG_STRIP = False
 SEAM_REACH = 26
 
 
@@ -321,16 +324,62 @@ VFX_SHEETS = {
     'ult_charge': ('fx-bailong-nine-dragon-charge.png', 'bottom', 0.35, [
         (0, 350, [206, 624, 1043, 1504, 1944]),
         (350, 724, [206, 630, 1086, 1542, 1955])]),
-    'ult_main': ('fx-bailong-nine-dragon.png', 'center', 0.7, [
-        (0, 222, [115, 345, 575, 815, 1035, 1265, 1510]),
-        (222, 440, [160, 450, 690, 900, 1085, 1305, 1535]),
-        (440, 680, [105, 310, 530, 740, 945, 1180, 1480]),
-        (680, 941, [215, 615, 815, 1030, 1235, 1400, 1580])]),
     'ult_impact': ('fx-bailong-nine-dragon-impact.png', 'bottom', 0.45, [
         (0, 380, [165, 510, 865, 1240]),
         (380, 770, [225, 590, 945, 1280]),
         (770, 1086, [210, 560, 900, 1260])]),
 }
+
+
+# Nine Dragon strikes (v2 art): one 1×8 strip per strike, magenta background, the dragon's tail spark at the left.
+STRIKE_STRIPS = {
+    'ult_strike1': ('fx-bailong-nine-dragon-1.png', 0.62),
+    'ult_strike2': ('fx-bailong-nine-dragon-2.png', 0.62),
+    'ult_strike3': ('fx-bailong-nine-dragon-3.png', 0.62),
+}
+
+
+def cut_strip(name, scale, want=8):
+    """1-row VFX strip → equal frames anchored on the tail spark (left-centre pivot, same spot every frame)"""
+    im, _ = load(name)
+    a = im[..., 3]
+    cols = (a > 0).sum(0) > 0
+    runs, x = [], 0
+    while x < len(cols):
+        if cols[x]:
+            x0 = x
+            while x < len(cols) and cols[x]:
+                x += 1
+            runs.append([x0, x])
+        x += 1
+    # merge runs into `want` frames at the widest gaps
+    while len(runs) > want:
+        gaps = [runs[i + 1][0] - runs[i][1] for i in range(len(runs) - 1)]
+        i = int(np.argmin(gaps))
+        runs[i:i + 2] = [[runs[i][0], runs[i + 1][1]]]
+    frames = []
+    for x0, x1 in runs:
+        crop = im[:, x0:x1].copy()
+        ys, xs = np.nonzero(crop[..., 3] > 0)
+        crop = crop[ys.min():ys.max() + 1]
+        y_off = ys.min()
+        # tail spark = the bright pixels at the far left of the frame (its centre = the pivot)
+        lum = crop[..., :3].astype(int).mean(-1)
+        bright = (crop[..., 3] > 200) & (lum > 200)
+        by, bx = np.nonzero(bright)
+        left = bx <= bx.min() + 24
+        cx, cy = float(np.median(bx[left])), float(np.median(by[left]))
+        img = resize_rgba(Image.fromarray(crop), max(1, round(crop.shape[1] * scale)), max(1, round(crop.shape[0] * scale)))
+        frames.append((img, cx * scale, cy * scale))
+        if DEBUG_STRIP: print(name, x0, x1, round(cx), crop.shape[1])
+    L = max(cx for _, cx, _ in frames) + 4
+    R = max(f.width - cx for f, cx, _ in frames) + 4
+    V = max(max(cy, f.height - cy) for f, _, cy in frames) + 4
+    W, H = int(L + R), int(2 * V)
+    strip = Image.new('RGBA', (W * len(frames), H), (0, 0, 0, 0))
+    for i, (f, cx, cy) in enumerate(frames):
+        strip.alpha_composite(f, (int(round(i * W + L - cx)), int(round(V - cy))))
+    return strip, {'frames': len(frames), 'w': W, 'h': H, 'pivot': [round(L / W, 3), 0.5], 'scale': scale}
 
 
 def main():
@@ -372,13 +421,43 @@ def main():
     # Skill 2 / Ultimate character clips: same root, same on-screen size as the base sheet (body height of the
     # ready stance matched to the base idle) — the spectacle comes from the VFX layers, never a bigger hero
     import os
-    for name, file, counts, soft in [('skill2', 'sweep_char', [6, 6], False), ('ult', 'ult_char', [5, 5, 5, 5], True)]:
+    for name, file, counts, soft in [('skill2', 'sweep_char', [6, 6], False), ('ult', 'ult_char', [5, 5, 5, 5], False)]:
         if not os.path.exists(f'{SRC}/{file}.png'):
             continue
         cim, _ = load(file)
         cb = bands(cim[..., 3] >= ALPHA_CUT)
-        assert len(cb) == len(counts), (file, cb)
-        frs = [f for band, want in zip(cb, counts) for f in clip_frames(cim, band, want, 'feet', soft, CLIP_FIXES.get(file, ()))]
+        frs = []
+        if len(cb) == len(counts):
+            frs = [f for band, want in zip(cb, counts) for f in clip_frames(cim, band, want, 'feet', soft, CLIP_FIXES.get(file, ()))]
+        else:
+            # rows touch (a raised spear reaches into the row above): cut at the emptiest rows, then every blob
+            # belongs to the row holding its centre and that row's band grows to the blob's full extent
+            hard = cim[..., 3] >= ALPHA_CUT
+            prof = hard.sum(1)
+            edges = [0]
+            for y0, y1 in zip([b[1] for b in cb[:-1]], [b[0] for b in cb[1:]]):
+                edges.append((y0 + y1) // 2)
+            cuts = sorted(set(edges[1:]))
+            while len(cuts) < len(counts) - 1:
+                # split the tallest band at its emptiest row in the middle half
+                spans = [(b1 - b0, b0, b1) for b0, b1 in zip([0] + cuts, cuts + [cim.shape[0]])]
+                _, b0, b1 = max(spans)
+                q = (b1 - b0) // 4
+                cuts = sorted(cuts + [b0 + q + int(np.argmin(prof[b0 + q:b1 - q]))])
+            lab, n = ndimage.label(hard)
+            coms = ndimage.center_of_mass(hard, lab, range(1, n + 1))
+            lims = [0] + cuts + [cim.shape[0]]
+            for r_, want in enumerate(counts):
+                ids = [i + 1 for i, (cy, _) in enumerate(coms) if lims[r_] <= cy < lims[r_ + 1]]
+                part = cim.copy()
+                keep = np.isin(lab, ids)
+                # translucent pixels follow the nearest hard pixel's row
+                _, (iy, ix) = ndimage.distance_transform_edt(lab == 0, return_indices=True)
+                near = keep[iy, ix] & ~(lab > 0) | keep
+                part[~near] = 0
+                ys = np.nonzero(keep.any(1))[0]
+                frs += clip_frames(part, (int(ys.min()), int(ys.max()) + 1), want, 'feet', soft, CLIP_FIXES.get(file, ()))
+            report['notes'].append(f'{file}: rows touch, split at y={cuts}')
         sc = BASE_SCALE * body_h(base_fr['idle'][0]) / body_h(frs[0])
         report['notes'].append(f'{file}: {len(frs)} frames, scale {sc:.3f}')
         rows.append((name, frs, sc))
@@ -468,6 +547,11 @@ def main():
         strip, info = cut_vfx(src, rows_cfg, align, sc)
         strip.save(f'{OUT}/{out}', optimize=True)
         report[out] = info
+    for src, (out, sc) in STRIKE_STRIPS.items():
+        if os.path.exists(f'{SRC}/{src}.png'):
+            strip, info = cut_strip(src, sc)
+            strip.save(f'{OUT}/{out}', optimize=True)
+            report[out] = info
     # named anchors measured on the clips (px from the root, x forward, up = above the feet)
     report['anchors'] = {'weaponTip(skill f6)': report['weaponTip']}
     print(json.dumps(report, indent=1, default=str))
