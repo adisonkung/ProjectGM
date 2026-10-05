@@ -333,8 +333,7 @@ VFX_SHEETS = {
 
 # Nine Dragon strikes (v2 art): one 1×8 strip per strike, magenta background, the dragon's tail spark at the left.
 STRIKE_STRIPS = {
-    'ult_strike1': ('fx-bailong-nine-dragon-1.png', 0.62),
-    'ult_strike2': ('fx-bailong-nine-dragon-2.png', 0.62, 'ground'),
+    # (ult_strike1 / ult_strike2 — straight dragon / pillar — retired with the in-between strikes; art kept in incoming)
     'ult_strike3': ('fx-bailong-nine-dragon-3.png', 0.62),
 }
 

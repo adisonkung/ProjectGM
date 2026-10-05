@@ -36,7 +36,7 @@ export interface AnimDef {
    * never to frame numbers): CAST_START, SKILL_ACTIVATE, VFX_SPAWN, PROJECTILE_SPAWN, DAMAGE (= `hit`), IMPACT,
    * RECOVERY_START, ANIMATION_END (default = the clip length). The engine turns them into seconds with `animEvents()`.
    */
-  /** one frame per event, or a list for repeated events (multi-hit: DAMAGE / IMPACT / STRIKE_START per hit) */
+  /** one frame (or step; fractions = inside a held step) per event, or a list for repeated events (multi-hit) */
   events?: Partial<Record<SemanticEvent, number | number[]>>;
   /** contact feel when this clip's skill lands (battle page + sprite lab): hit-stop + screen shake — a list = per hit */
   impact?: ImpactFeel | ImpactFeel[];
@@ -345,20 +345,21 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 2, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 6, VFX_SPAWN: 6, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
         impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
       },
-      // Nine Dragon Sequence (v2 art, 3 hits): charge F1–F5 (peak hold) · F8 thrust → straight dragon ·
-      // F12 low stab → dragon pillar under the target · (F13 / F14 rising sweep left out) F15 guard → F16 overhead
-      // wind-up → F18 final lunge → nine dragons + burst · F20 ready. Events count `seq` steps.
+      // Nine Dragon Sequence (v2 art) — one continuous move, no in-between strikes:
+      // charge F1–F5 (aura, peak hold) → F15 guard → F16 overhead wind-up (hold, nine dragons gather) → F17 →
+      // F18 final lunge, held while the three hits land in a flurry inside it → F19 → F20 ready.
+      // Events count `seq` steps (fractions = inside the held lunge).
       ult: {
         row: 7, frames: 20, ms: 120,
-        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19],
-        steps: [100, 100, 110, 110, 260, 90, 80, 180, 90, 90, 100, 200, 120, 250, 70, 260, 120, 110],
+        seq: [0, 1, 2, 3, 4, 14, 15, 16, 17, 18, 19],
+        steps: [110, 110, 120, 120, 300, 110, 300, 80, 420, 140, 130],
         events: {
-          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, STRIKE_START: [5, 9, 14], FINAL_ANTICIPATION: 13,
-          DAMAGE: [7, 11, 15], IMPACT: [7, 11, 15], RECOVERY_START: 16,
+          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, FINAL_ANTICIPATION: 6, STRIKE_START: [7, 8.3, 8.6],
+          DAMAGE: [8, 8.3, 8.6], IMPACT: [8, 8.3, 8.6], RECOVERY_START: 9,
         },
         impact: [
-          { hitStopMs: 25, shakePx: 2, shakeMs: 110 },
-          { hitStopMs: 35, shakePx: 4, shakeMs: 150 },
+          { hitStopMs: 20, shakePx: 2, shakeMs: 90 },
+          { hitStopMs: 30, shakePx: 4, shakeMs: 110 },
           { hitStopMs: 95, shakePx: 7, shakeMs: 220, flashMs: 140 },
         ],
       },
@@ -366,7 +367,7 @@ export const SHEETS: Record<string, SheetDef> = {
     fx: {
       skill: 'bailong-dragon-thrust',
       skill2: ['bailong-sweeping-moon', 'bailong-sweeping-moon-hit'],
-      ult: ['bailong-nine-dragon-charge', 'bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3', 'bailong-nine-dragon-impact'],
+      ult: ['bailong-nine-dragon-charge', 'bailong-nine-dragon-3', 'bailong-nine-dragon-impact'],
     },
   },
 };
@@ -505,19 +506,9 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-nine-dragon-charge.png', frames: 10, w: 164, h: 126, frameMs: 65, at: 'self', orient: 'flip',
     event: 'CHARGE_START', anchor: 'ultimateChargeOrigin', pivot: [0.5, 0.984], scale: 0.72, layer: 'under', pixelated: true,
   },
-  // VFX หลัก v2: เล่นครบ 8 เฟรมของแผ่น (ปล่อย → พีคเฟรม 5 ตรงดาเมจ → สลายไปเองตามภาพ) ไม่พุ่ง ไม่จางทับ
-  'bailong-nine-dragon-1': {
-    file: 'fx-bailong-nine-dragon-1.png', frames: 8, w: 262, h: 81, frameMs: 43, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultTip1', pivot: [0.07, 0.5], scale: 0.85, pixelated: true,
-  },
-  // จังหวะ 2: แทงต่ำ → เสามังกรพุ่งขึ้นจากพื้นใต้เป้า
-  'bailong-nine-dragon-2': {
-    file: 'fx-bailong-nine-dragon-2.png', frames: 8, w: 267, h: 441, frameMs: 48, at: 'target', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 1, pivot: [0.502, 0.85], dy: 27.25, fitCells: 2.6, pixelated: true,
-  },
-  // จังหวะ 3: เก้ามังกร ปล่อยตอนง้างสุดท้าย พีคตรงดาเมจ
+  // VFX หลัก: เก้ามังกร เล่นครบ 8 เฟรม (ปล่อย → พีคเฟรม 5 ตรงดาเมจแรก → สลายเอง)
   'bailong-nine-dragon-3': {
-    file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 80, at: 'self', orient: 'flip',
+    file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 95, at: 'self', orient: 'flip',
     event: 'FINAL_ANTICIPATION', anchor: 'ultTip3', pivot: [0.068, 0.5], scale: 1.1, pixelated: true,
   },
   // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
@@ -581,7 +572,12 @@ export function clipClock(a: AnimDef): { at: (step: number) => number; count: nu
     const starts = [0];
     for (const ms of a.steps) starts.push(starts[starts.length - 1] + ms / 1000);
     const seq = a.seq;
-    return { at: i => starts[Math.min(Math.max(i, 0), starts.length - 1)], count: seq.length, total: starts[starts.length - 1], art: i => seq[Math.min(i, seq.length - 1)] };
+    // fractional steps = a point inside a held pose (e.g. a flurry of hits while the final lunge is held)
+    const at = (i: number) => {
+      const k = Math.min(Math.max(Math.floor(i), 0), starts.length - 1);
+      return starts[k] + (k < a.steps!.length ? (i - k) * (a.steps![k] / 1000) : 0);
+    };
+    return { at, count: seq.length, total: starts[starts.length - 1], art: i => seq[Math.min(Math.floor(i), seq.length - 1)] };
   }
   const ms = (a.ms ?? FRAME_MS) / 1000;
   return { at: i => i * ms, count: a.frames, total: a.frames * ms, art: i => i };
