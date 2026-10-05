@@ -236,6 +236,10 @@ def resize_rgba(img, w, h):
     return img.convert('RGBa').resize((w, h), Image.BOX).convert('RGBA')
 
 
+SEAM_FADE = 14
+SEAM_REACH = 26
+
+
 def cut_vfx(name, rows, align, scale, min_alpha=16, flip=False):
     """VFX sheet → one strip. rows = [(y_from, y_to, [frame centre x, …]), …]. Every core blob (alpha >= 200) seeds
     the frame whose centre is nearest; the rest of the glow joins its seed by a watershed on the alpha (frames split
@@ -271,6 +275,21 @@ def cut_vfx(name, rows, align, scale, min_alpha=16, flip=False):
         x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
         crop = im[y0:y1, x0:x1].copy()
         crop[~own[y0:y1, x0:x1]] = 0
+        # where this frame touched a neighbour in the sheet the split leaves a hard seam → fade the glow out over
+        # SEAM_FADE source px towards the neighbour instead of a cut edge
+        m = SEAM_REACH + 2
+        Y0, Y1, X0, X1 = max(0, y0 - m), min(seg.shape[0], y1 + m), max(0, x0 - m), min(seg.shape[1], x1 + m)
+        other = (seg[Y0:Y1, X0:X1] > 0) & (seg[Y0:Y1, X0:X1] != k + 1)
+        if other.any():
+            # near a neighbour keep only glow that hugs this frame's own bright core (organic edge, not a cut wall):
+            # weight = max(closeness to own core, distance from the neighbour)
+            d_other = ndimage.distance_transform_edt(~other)[y0 - Y0:y1 - Y0, x0 - X0:x1 - X0]
+            # the art is opaque, so a seam is a cut through the drawing: fade it out over SEAM_REACH px (smoothstep,
+            # with a little noise so the fade edge isn't a ruler-straight line)
+            rng = np.random.default_rng(k)
+            t = np.clip((d_other - 1 + rng.normal(0, 3, d_other.shape)) / SEAM_REACH, 0, 1)
+            w = t * t * (3 - 2 * t)
+            crop[..., 3] = (crop[..., 3] * w).astype(np.uint8)
         img = Image.fromarray(crop)
         img = resize_rgba(img, max(1, round(img.width * scale)), max(1, round(img.height * scale)))
         if flip:

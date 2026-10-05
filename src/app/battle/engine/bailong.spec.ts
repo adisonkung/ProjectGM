@@ -305,10 +305,10 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     // each segment still playing when its hit lands
     const starts = [at('STRIKE_START', 0).t, at('STRIKE_START', 1).t, at('FINAL_ANTICIPATION').t];
     parts.forEach((p, i) => expect(starts[i] + (p.frames * p.frameMs) / 1000).toBeGreaterThan(at('DAMAGE', i).t));
-    // peak width ≈ 40–60 % of the 16-column field
+    // peak width ≈ 30–40 % of the 16-column field (toned down from the spec's 40–60 % on user review)
     const cells = (parts[2].w * 1.25 * parts[2].scale! * 1.5) / 100;
-    expect(cells).toBeGreaterThan(6.4 * 0.9);
-    expect(cells).toBeLessThan(9.6);
+    expect(cells).toBeGreaterThan(4.5);
+    expect(cells).toBeLessThan(6.5);
   });
 
   it('final impact FX only on hit 3; hit-stop / shake escalate 1 < 2 < 3 (+ flash on 3)', () => {

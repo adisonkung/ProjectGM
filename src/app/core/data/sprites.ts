@@ -317,7 +317,7 @@ export const SHEETS: Record<string, SheetDef> = {
       weaponTip: [106.25, -32.75],
       skillOrigin: [33, -21],
       ultimateChargeOrigin: [0, 27.25],
-      ultimateForwardOrigin: [175, -21],
+      ultimateForwardOrigin: [150, -21],
     },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -496,25 +496,25 @@ export const FX: Record<string, FxDef> = {
   // Nine Dragon — ชาร์จ: ออร่ามังกรรอบตัว (ใต้ยูนิต) CHARGE_START → หมดก่อนจังหวะแรก (10 × 65 ms = 0.65 วิ)
   'bailong-nine-dragon-charge': {
     file: 'fx-bailong-nine-dragon-charge.png', frames: 10, w: 164, h: 126, frameMs: 65, at: 'self', orient: 'flip',
-    event: 'CHARGE_START', anchor: 'ultimateChargeOrigin', pivot: [0.5, 0.984], scale: 0.85, layer: 'under', pixelated: true,
+    event: 'CHARGE_START', anchor: 'ultimateChargeOrigin', pivot: [0.5, 0.984], scale: 0.72, layer: 'under', pixelated: true,
   },
   // VFX หลัก 28 เฟรม = 3 ช่วงของแผ่นเดียว เริ่มใหม่ทุกจังหวะ → เฟรมพีคตรงดาเมจแต่ละครั้ง (+0.24 วิ หลังเริ่มช่วง)
   'bailong-nine-dragon-1': {
     file: 'fx-bailong-nine-dragon.png', from: 0, frames: 10, stripFrames: 28, w: 292, h: 173, frameMs: 45, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
+    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
   },
   'bailong-nine-dragon-2': {
     file: 'fx-bailong-nine-dragon.png', from: 10, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 60, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
+    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
   },
   'bailong-nine-dragon-3': {
     file: 'fx-bailong-nine-dragon.png', from: 19, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 105, at: 'self', orient: 'flip',
-    event: 'FINAL_ANTICIPATION', anchor: 'ultimateForwardOrigin', scale: 1.28, pixelated: true,
+    event: 'FINAL_ANTICIPATION', anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
   },
   // กระแทกครั้งสุดท้าย — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
   'bailong-nine-dragon-impact': {
     file: 'fx-bailong-nine-dragon-impact.png', frames: 12, w: 202, h: 168, frameMs: 60, at: 'target', orient: 'flip', on: 'impact',
-    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, scale: 0.69, pixelated: true,
+    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, scale: 0.6, pixelated: true,
   },
 };
 
