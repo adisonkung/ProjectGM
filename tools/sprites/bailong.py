@@ -41,9 +41,9 @@ from skimage.segmentation import watershed
 SRC = sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/bailong'
 OUT = sys.argv[2] if len(sys.argv) > 2 else 'public/sprites'
 
-CELL_W, CELL_H, FOOT = 200, 120, 15        # wide cell: the spear may overflow the 132 px body cell
+CELL_W, CELL_H, FOOT = 220, 132, 15        # wide cell: the spear may overflow the 132 px body cell
 ROOT_X, ROOT_Y = CELL_W // 2, CELL_H - FOOT
-BASE_SCALE = 0.36                           # base sheet: body ~66 px tall like Jin / Ragnar
+BASE_SCALE = 0.396                          # base sheet: +10 % over the first pass (user, 2026-10-05) — body ≈ Jin / Shade on screen
 ALPHA_CUT = 96                              # below = the soft dark halo of the AI render → transparent
 
 report = {'frames': {}, 'notes': []}

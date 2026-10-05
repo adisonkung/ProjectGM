@@ -65,8 +65,8 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
     expect(new Set(Object.values(a).map(x => x!.row)).size).toBe(8);
     expect(sheet.cols).toBe(20);
     expect(sheet.rows).toBe(8);
-    expect(sheet.cellW).toBe(200);
-    expect(sheet.cellH).toBe(120);
+    expect(sheet.cellW).toBe(220);
+    expect(sheet.cellH).toBe(132);
     expect(sheet.pixelated).toBeTrue();
   });
 
@@ -109,8 +109,8 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
     expect(v.orient).toBe('flip');
     expect(v.pivot![0]).toBeLessThan(0.15);
     expect(v.pivot![1]).toBeCloseTo(0.5, 1);
-    expect(v.dx!).toBeGreaterThan(50); // weapon tip in front of the feet
-    expect(v.dy!).toBeLessThan(0); // above the feet line
+    expect(fxOffset(FX_NAME, SPRITE)[0]).toBeGreaterThan(50); // weapon tip in front of the feet
+    expect(fxOffset(FX_NAME, SPRITE)[1]).toBeLessThan(0); // above the feet line
   });
 
   it('Skill 2 / Ultimate have their own rows and never reuse the Dragon Thrust clip or VFX', () => {

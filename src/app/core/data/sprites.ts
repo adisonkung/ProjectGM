@@ -299,19 +299,20 @@ export const SHEETS: Record<string, SheetDef> = {
   },
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
   // ไป๋หลง (ทวนมังกรขาว) — tools/sprites/bailong.py จากภาพของผู้ใช้ (แผ่นตัวละคร ≠ แผ่น VFX)
-  // ช่องกว้าง 200 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (100, 105) · หันขวา
+  // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
   'hero-bailong.png': {
-    cols: 20, rows: 8, cellW: 200, cellH: 120, pixelated: true,
+    cols: 20, rows: 8, cellW: 220, cellH: 132, pixelated: true,
     // % of a board cell from the cell centre (feet = +27.25 %: sheet bottom 4 % + 15 px × 1.25 %) — x mirrors with facing
     anchors: {
       feet: [0, 27.25],
-      bodyCenter: [0, -16.5],
-      weaponTip: [97.5, -26.5],
-      skillOrigin: [30, -16.5],
+      bodyCenter: [0, -21],
+      // tip of the spear at the Dragon Thrust VFX_SPAWN frame (+85 px ahead of the feet, 48 px up — bailong.py report)
+      weaponTip: [106.25, -32.75],
+      skillOrigin: [33, -21],
       ultimateChargeOrigin: [0, 27.25],
-      ultimateForwardOrigin: [175, -16.5],
+      ultimateForwardOrigin: [175, -21],
     },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -466,11 +467,11 @@ export const FX: Record<string, FxDef> = {
   'goblin-arrow': { file: 'fx-goblin-arrow.png', frames: 1, w: 39, h: 12, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
   'aurel-ult': { file: 'fx-aurel-ult.png', frames: 8, w: 123, h: 90, frameMs: 95, at: 'self', dy: -18, scale: 1.55 },
   // ลำมังกรของ Dragon Thrust (ภาพที่ 4: 2 คอลัมน์ × 7 แถว อ่านซ้าย→ขวา ทีละแถว = 14 เฟรม) — ชั้น VFX แยกจากตัวละคร
-  // เกิดตอน event VFX_SPAWN ที่ปลายทวน (weaponTip ของเฟรม 6: +78 px หน้า root, สูง 43 px → dx 97.5 %, dy −26.5 %)
+  // เกิดตอน event VFX_SPAWN ที่ปลายทวน (anchor weaponTip ของเฟรม 6)
   // pivot = หางมังกรซ้ายกลาง, พุ่งซ้าย→ขวา, กลับด้านตามผู้ใช้ · ไม่ถูกตัดด้วยกรอบตัวละคร (วาดบนชั้น fx ของกระดาน)
   'bailong-dragon-thrust': {
     file: 'fx-bailong-dragon-thrust.png', frames: 14, w: 401, h: 75, frameMs: 45, at: 'self', orient: 'flip', on: 'vfx',
-    pivot: [0.06, 0.493], dx: 97.5, dy: -26.5, scale: 0.45, pixelated: true,
+    anchor: 'weaponTip', pivot: [0.06, 0.493], scale: 0.45, pixelated: true,
   },
   // Sweeping Moon — จันทร์เสี้ยวปราณ (13 เฟรม: โตขึ้น 7 แล้วสลาย 6) เกิดตอน VFX_SPAWN หน้าอก, pivot ขอบซ้ายกลาง พุ่ง/กวาดไปทางขวา
   'bailong-sweeping-moon': {
