@@ -145,8 +145,9 @@ export const SHEETS: Record<string, SheetDef> = {
   // Guardian Rush F8 (collision) · Bastion of Dawn F5 = max charge (held), F9 = shield slam (shield + taunt land).
   // Character sheets carry only small local FX — the big VFX stay on the separate fx layer ('aurel-*').
   'hero-aurel.png': {
-    // 260 wide (root at the centre, same pixel scale): room for the Shield Bash VFX in front of the shield
-    cols: 16, rows: 8, cellW: 260, cellH: 132, pixelated: true,
+    // 260 × 170 (root at the centre x, 15 px above the bottom; same pixel scale — the sprite is bottom-anchored so the
+    // feet do not move): room for the baked skill VFX in front of the shield and the ultimate's charge / slam above
+    cols: 16, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -175,16 +176,20 @@ export const SHEETS: Record<string, SheetDef> = {
         impact: { hitStopMs: 70, shakePx: 4, shakeMs: 160 },
       },
       // Bastion of Dawn: 16 frames · F5 max charge (held) · F6 leap → F9 shield slam (held) = interrupt + shields + taunt
+      // · VFX: charge F2–F6 → compressed into the shield F7 → slam F8 early / F9 peak / F10–F11 decay (baked) ·
+      // bastion field F9 → peak F11 → hold F12 → fade F13–F15 (board FX 'aurel-bastion')
       ult: {
         row: 7, frames: 16, ms: 85,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        steps: [90, 90, 90, 100, 240, 110, 80, 70, 220, 110, 100, 90, 90, 90, 90, 90],
+        // F11 bastion peak / F12 hold held a little longer (the largest frames of the ultimate)
+        steps: [90, 90, 90, 100, 240, 110, 80, 70, 220, 110, 160, 140, 100, 90, 90, 90],
         events: { CAST_START: 0, CHARGE_START: 2, CHARGE_PEAK: 4, STRIKE_START: 5, DAMAGE: 8, IMPACT: 8, RECOVERY_START: 12 },
         impact: { hitStopMs: 90, shakePx: 6, shakeMs: 220, flashMs: 120 },
       },
     },
     // Shield Bash / Guardian Rush: main + impact VFX baked into the clips (aurel_bash_vfx.py / aurel_rush_vfx.py)
-    fx: { ult: 'aurel-ult' },
+    // Bastion of Dawn: charge + ground slam baked into the clip (aurel_ult_vfx.py), the bastion field on the board
+    fx: { ult: 'aurel-bastion' },
     shieldFx: 'aurel-ward',
   },
   'hero-shade.png': {
@@ -503,6 +508,13 @@ export const FX: Record<string, FxDef> = {
   // ฮีลที่เพื่อนได้รับจากลูมิน่า: แผ่นบทสวด ย่อลง
   'lumina-heal': { file: 'fx-lumina-prayer.png', frames: 8, w: 87, h: 98, frameMs: 60, at: 'self', dy: -12, scale: 0.6 },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
+  // Bastion of Dawn main field (aurel_ult_vfx.bastion_strip, sheet pixel scale): grows from the ground contact point
+  // (75 sheet px ahead of the feet), under the unit so Aurel stays readable · frames laid out on the clip's own timing
+  // (F9 tail → F15, 50 ms each) · delay = F9 until its end (160 ms) + the slam hit-stop (90 ms)
+  'aurel-bastion': {
+    file: 'fx-aurel-bastion.png', frames: 15, w: 213, h: 212, frameMs: 50, at: 'self', on: 'impact', layer: 'under',
+    pivot: [0.5, 0.991], dx: 32.8, dy: 27.25, scale: 1 / 1.5, delayMs: 250, pixelated: true,
+  },
   'aurel-defense': { file: 'fx-aurel-defense.png', frames: 8, w: 112, h: 90, frameMs: 70, at: 'self', dx: 18, dy: -14, scale: 1.25 },
   'aurel-charge': { file: 'fx-aurel-charge.png', frames: 8, w: 131, h: 78, frameMs: 60, at: 'target', orient: 'flip', dx: -20, dy: -8, scale: 1.2 },
   'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 140, h: 131, frameMs: 80, at: 'target', orient: 'flip', dy: -14, on: 'cast' },

@@ -28,14 +28,16 @@ sys.path.insert(0, os.path.dirname(__file__))
 import bailong as B  # noqa: E402
 import aurel_bash_vfx as BV  # noqa: E402
 import aurel_rush_vfx as RV  # noqa: E402
+import aurel_ult_vfx as UV  # noqa: E402
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/aurel'
 OUT = sys.argv[2] if len(sys.argv) > 2 else 'public/sprites'
 POUT = sys.argv[3] if len(sys.argv) > 3 else 'public/portraits'
 B.SRC = SRC
-# cell 260 wide (root kept at the centre): room for the Shield Bash VFX in front of the shield
-B.CELL_W, B.CELL_H, B.FOOT = 260, 132, 15
-B.ROOT_X, B.ROOT_Y = 130, 117
+# cell 260 × 170 (root at the centre x, 15 px above the bottom — the sprite is bottom-anchored on the board, so the
+# feet stay where they were): room for the skill VFX in front of the shield and the ultimate's charge / slam above
+B.CELL_W, B.CELL_H, B.FOOT = 260, 170, 15
+B.ROOT_X, B.ROOT_Y = 130, 155
 # body height of the base idle on screen (px): Aurel is a tank — a touch taller than Bai Long (≈ 75)
 IDLE_BODY = 78
 SEAM_FADE = 18
@@ -141,6 +143,13 @@ def stabilise(tx):
     return out
 
 
+def paste_frame(sheet, fr, r, c, sc, shift):
+    """one atlas cell; a frame with 'layers' (VFX under / character / VFX over) pastes each with its own alpha mode"""
+    if 'layers' not in fr:
+        return B.paste(sheet, fr, r, c, sc, shift)
+    return sum(B.paste(sheet, {'img': img, 'root': fr['root'], 'soft': soft}, r, c, sc, shift) for img, soft in fr['layers'])
+
+
 def body_h(fr):
     m = ndimage.binary_opening(fr.get('char', fr['img'])[..., 3] >= B.ALPHA_CUT, structure=np.ones((9, 9)))
     ys = np.nonzero(m)[0]
@@ -199,6 +208,8 @@ def main():
             frs = BV.combine(frs)
         if file == 'rush':   # Guardian Rush: main VFX travels with Aurel + collision burst (aurel_rush_vfx.py)
             frs = RV.combine(frs)
+        if file == 'ult':    # Bastion of Dawn: charge + ground slam baked; the bastion field is a board FX
+            frs = UV.combine(frs, with_bastion=False)
         sc = sc_base * body_h(groups['idle'][0]) / body_h(frs[0])
         rows.append((name, frs, sc))
         report['notes'].append(f'{file}: {len(frs)} frames, scale {sc:.3f}')
@@ -219,7 +230,7 @@ def main():
     sheet = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * len(rows)), (0, 0, 0, 0))
     for r, (name, frs, sc) in enumerate(rows):
         report['rows'][name] = {'row': r, 'frames': len(frs),
-                                'clipped': [B.paste(sheet, fr, r, c, sc, (shifts[name][c], 0)) for c, fr in enumerate(frs)]}
+                                'clipped': [paste_frame(sheet, fr, r, c, sc, (shifts[name][c], 0)) for c, fr in enumerate(frs)]}
     sheet.save(f'{OUT}/hero-aurel.png', optimize=True)
     report['sheet'] = {'cols': cols, 'rows': len(rows), 'size': sheet.size}
 
