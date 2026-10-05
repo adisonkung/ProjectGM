@@ -206,6 +206,10 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   tapHero(uid: number): void {
     if (!this.suppressClick) this.heroTap.emit(uid);
   }
+  /** depth by ground line (z-index must be an integer or the browser drops it) */
+  zi(y: number): number {
+    return 10 + Math.round(y);
+  }
   /** parallax: a layer at depth p (0 = glued to the sky, 1 = moves with the island) */
   par(p: number): string {
     return `translateX(${this.scrollX() * (1 - p)}px)`;

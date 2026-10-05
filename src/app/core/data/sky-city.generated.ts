@@ -116,5 +116,28 @@ export const SKY_CITY_ART = {
   "y": 0,
   "w": 320,
   "h": 640
+ },
+ "masks": {
+  "falls": {
+   "src": "island/sky_city/m_falls.png",
+   "x": 306,
+   "y": 402,
+   "w": 3386,
+   "h": 1192
+  },
+  "crystals": {
+   "src": "island/sky_city/m_crystals.png",
+   "x": 430,
+   "y": 904,
+   "w": 3016,
+   "h": 724
+  },
+  "water": {
+   "src": "island/sky_city/m_water.png",
+   "x": 92,
+   "y": 0,
+   "w": 3466,
+   "h": 1062
+  }
  }
 } as const;

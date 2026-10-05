@@ -215,7 +215,7 @@ export class IslandComponent implements OnInit, OnDestroy {
     this.publish();
   }
 
-  /** ~30 fps render of the sim (the sim itself steps every animation frame) */
+  /** render the sim every animation frame (heroes move with a GPU transform, so 60 fps is cheap and smooth) */
   private frame(t: number): void {
     const dt = this.last ? Math.min(0.1, (t - this.last) / 1000) : 0;
     this.last = t;
@@ -223,7 +223,7 @@ export class IslandComponent implements OnInit, OnDestroy {
       this.sim.step(dt);
       this.cycle += dt;
       this.acc += dt;
-      if (this.acc >= 1 / 30) {
+      if (this.acc >= 1 / 75) {
         this.acc = 0;
         this.publish();
       }

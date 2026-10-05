@@ -155,9 +155,16 @@ def main():
         im = Image.fromarray((np.clip(m, 0, 1) * 255).astype(np.uint8)).resize((W // 2, H // 2), Image.BILINEAR)
         im = im.filter(ImageFilter.GaussianBlur(rad))
         # white + alpha (CSS mask-image uses alpha in every browser; luminance masks are not universal)
+        # cropped to the painted area (+ pad): a full-world masked layer re-composited every frame stutters
+        a = np.asarray(im)
+        ys, xs = np.nonzero(a > 24)
+        x0, y0 = max(0, xs.min() - 8), max(0, ys.min() - 8)
+        x1, y1 = min(a.shape[1], xs.max() + 9), min(a.shape[0], ys.max() + 9)
+        im = im.crop((x0, y0, x1, y1))
         rgba = Image.new('RGBA', im.size, (255, 255, 255, 0))
         rgba.putalpha(im)
         rgba.save(os.path.join(OUT, name), optimize=True)
+        meta.setdefault('masks', {})[name[2:-4]] = {'src': 'island/sky_city/' + name, 'x': int(x0) * 2, 'y': int(y0) * 2, 'w': int(x1 - x0) * 2, 'h': int(y1 - y0) * 2}
     save_mask(falls, 'm_falls.png')
     save_mask(crystals, 'm_crystals.png', 2)
     save_mask(canal, 'm_water.png')

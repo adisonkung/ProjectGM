@@ -8,10 +8,17 @@
       @for (s of stars; track $index) {
         <i class="star" [style.left.px]="s.x" [style.top.px]="s.y" [style.width.px]="s.s" [style.height.px]="s.s" [style.animation-delay.s]="s.delay"></i>
       }
-      <div class="far-isles" [style.background-image]="'url(' + layers.farIslands + ')'" [style.transform]="par(0.12)"></div>
-      <div class="bank" [style.background-image]="'url(' + layers.bank + ')'" [style.transform]="par(0.22)"></div>
+      <div class="drift far-isles" [style.transform]="par(0.12)"><i class="strip" [style.background-image]="'url(' + layers.farIslands + ')'"></i></div>
+      <div class="drift bank" [style.transform]="par(0.22)"><i class="strip" [style.background-image]="'url(' + layers.bank + ')'"></i></div>
       <div class="whale-path" [style.transform]="par(0.3)">
-        <div class="whale"><img [src]="layers.whale" alt="" draggable="false" /><i class="whale-glow"></i></div>
+        <div class="whale-x"><div class="whale-y"><div class="whale">
+          <img class="w-fin-back" [src]="layers.whaleFinBack" alt="" draggable="false" />
+          <img class="w-tail" [src]="layers.whaleTail" alt="" draggable="false" />
+          <img class="w-body" [src]="layers.whaleBody" alt="" draggable="false" />
+          <img class="w-fin-front" [src]="layers.whaleFinFront" alt="" draggable="false" />
+          <img class="w-shards" [src]="layers.whaleShards" alt="" draggable="false" />
+          <i class="whale-glow"></i>
+        </div></div></div>
       </div>
       <div class="dragon-path" [style.transform]="par(0.32)">
         <div class="dragon">
@@ -20,7 +27,7 @@
           <img class="wing near" [src]="layers.dragonWing" alt="" draggable="false" />
         </div>
       </div>
-      <div class="sea back" [style.background-image]="'url(' + layers.sea + ')'" [style.transform]="par(0.45)"></div>
+      <div class="drift sea back" [style.transform]="par(0.45)"><i class="strip" [style.background-image]="'url(' + layers.sea + ')'"></i></div>
 
       <!-- ── the island (bobs gently as one piece) ── -->
       <div class="isle">
@@ -28,12 +35,12 @@
              [style.left.px]="base.x" [style.top.px]="base.y" [style.width.px]="base.w" [style.height.px]="base.h" />
 
         <!-- living water & crystals (masks cut from the art) -->
-        <div class="mfx falls" [style.top.px]="base.y" [style.height.px]="base.h" [style.width.px]="base.w"
-             [style.--m]="'url(' + masks.falls + ')'"></div>
-        <div class="mfx water" [style.top.px]="base.y" [style.height.px]="base.h" [style.width.px]="base.w"
-             [style.--m]="'url(' + masks.water + ')'"></div>
-        <div class="mfx crystals" [style.top.px]="base.y" [style.height.px]="base.h" [style.width.px]="base.w"
-             [style.--m]="'url(' + masks.crystals + ')'"></div>
+        <div class="mfx falls" [style.left.px]="masks.falls.x" [style.top.px]="masks.falls.y" [style.width.px]="masks.falls.w" [style.height.px]="masks.falls.h"
+             [style.--m]="'url(' + masks.falls.src + ')'"><i></i></div>
+        <div class="mfx water" [style.left.px]="masks.water.x" [style.top.px]="masks.water.y" [style.width.px]="masks.water.w" [style.height.px]="masks.water.h"
+             [style.--m]="'url(' + masks.water.src + ')'"><i></i></div>
+        <div class="mfx crystals" [style.left.px]="masks.crystals.x" [style.top.px]="masks.crystals.y" [style.width.px]="masks.crystals.w" [style.height.px]="masks.crystals.h"
+             [style.--m]="'url(' + masks.crystals.src + ')'"><i></i></div>
 
         <!-- summoning circles on the empty plots -->
         @for (c of circles(); track c.id) {
@@ -82,7 +89,7 @@
           }
         }
         @for (h of heroes(); track h.uid) {
-          <div class="hero" [style.left.px]="h.x" [style.top.px]="h.y" [style.z-index]="10 + h.y" [style.transform]="'scale(' + heroScale + ')'">
+          <div class="hero" [style.z-index]="zi(h.y)" [style.transform]="'translate3d(' + h.x + 'px,' + h.y + 'px,0) scale(' + heroScale + ')'">
             <app-island-hero [hero]="h" (click)="tapHero(h.uid)" role="button" [attr.aria-label]="h.name" />
           </div>
         }
@@ -107,8 +114,8 @@
       </div>
 
       <!-- ── in front of the island ── -->
-      <div class="sea front" [style.background-image]="'url(' + layers.sea + ')'" [style.transform]="par(1.1)"></div>
-      <div class="mist" [style.background-image]="'url(' + layers.mist + ')'" [style.transform]="par(1.25)"></div>
+      <div class="drift sea front" [style.transform]="par(1.1)"><i class="strip" [style.background-image]="'url(' + layers.sea + ')'"></i></div>
+      <div class="drift mist" [style.transform]="par(1.25)"><i class="strip" [style.background-image]="'url(' + layers.mist + ')'"></i></div>
       <div class="flock-wrap" [style.transform]="par(1.05)"><div class="flock">
         @for (b of flock; track $index) {
           <i class="bird" [style.left.px]="b.x" [style.top.px]="b.y" [style.animation-delay.s]="b.d" [style.background-image]="'url(' + layers.birds + ')'"></i>

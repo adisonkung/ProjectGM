@@ -141,6 +141,68 @@ def extras():
         print(name, im.size, 'at', sl[1].start, sl[0].start)
 
 
+# whale parts (art px of sprite_sky_whale.webp, 1100×609): the tail + both pectoral fins swing on their own pivots,
+# the loose crystal shards trail on their own — body holes under the front fin are inpainted
+WHALE_TAIL_CUT = (325, 372)          # body fades in over x 325→350; the tail keeps everything left of 372 (drawn under)
+WHALE_FIN_FRONT = [(548, 352), (612, 326), (706, 318), (764, 338), (752, 392), (712, 452), (700, 540), (668, 609),
+                   (360, 609), (352, 486), (430, 420), (500, 388)]
+WHALE_FIN_BACK = [(772, 396), (918, 372), (936, 430), (900, 520), (812, 609), (740, 609), (776, 470)]
+
+
+def whale_parts():
+    import cv2
+    from scipy import ndimage
+    from PIL import ImageDraw
+    im = Image.open(os.path.join(OUT, 'sprite_sky_whale.webp')).convert('RGBA')
+    a = np.asarray(im).astype(np.float32)
+    rgb, al = a[..., :3], a[..., 3] / 255
+    H, W = al.shape
+    lab, n = ndimage.label(ndimage.binary_dilation(al > 0.08, iterations=2))
+    sizes = ndimage.sum(np.ones_like(al), lab, range(1, n + 1))
+    main = lab == (1 + int(np.argmax(sizes)))
+    shards = (~main) & (al > 0.02)
+
+    def poly(pts):
+        m = Image.new('L', (W, H), 0)
+        ImageDraw.Draw(m).polygon(pts, fill=255)
+        return np.asarray(m.filter(ImageFilter.GaussianBlur(1.5))).astype(np.float32) / 255
+
+    xx = np.arange(W)[None, :].repeat(H, 0)
+    c0, c1 = WHALE_TAIL_CUT
+    body_ramp = np.clip((xx - c0) / 25, 0, 1)
+    fin_f, fin_b = poly(WHALE_FIN_FRONT), poly(WHALE_FIN_BACK)
+    yy = np.arange(H)[:, None].astype(np.float32)
+    fin_b_cut = fin_b * np.clip((yy - 394) / 12, 0, 1)        # what the body gives up: below the belly line, feathered
+    fin_b = fin_b * (yy > 366)                                # the fin reaches up under the belly (hidden) → no gap when it swings
+    m_al = al * main
+    parts = {
+        'whale_tail': (rgb, m_al * (xx < c1)),
+        'whale_fin_front': (rgb, m_al * fin_f),
+        'whale_fin_back': (rgb, m_al * fin_b),
+        'whale_shards': (rgb, al * shards),
+    }
+    # body = main minus tail / fins; fill the belly under the front fin (it shows at the fin's edges when it swings)
+    body_al = m_al * body_ramp * (1 - fin_b_cut)
+    hole = (fin_f > 0.5) & (m_al > 0.5)
+    under = ndimage.binary_dilation(m_al > 0.5, iterations=0) & hole
+    belly = (np.arange(H)[:, None] < 420) & under            # body area the fin was covering
+    paint = cv2.inpaint(np.clip(rgb, 0, 255).astype(np.uint8), (hole.astype(np.uint8) * 255), 9, cv2.INPAINT_TELEA).astype(np.float32)
+    body_rgb = np.where(hole[..., None], paint, rgb)
+    body_al = np.where(belly, al * body_ramp, body_al * (1 - fin_f))
+    parts['whale_body'] = (body_rgb, body_al)
+    for name, (c, al_) in parts.items():
+        ys, xs = np.nonzero(al_ > 0.02)
+        box = (max(0, xs.min() - 2), max(0, ys.min() - 2), min(W, xs.max() + 3), min(H, ys.max() + 3))
+        out = Image.fromarray(np.dstack([np.clip(c, 0, 255), np.clip(al_ * 255, 0, 255)]).astype(np.uint8), 'RGBA').crop(box)
+        out.save(os.path.join(OUT, name + '.webp'), 'WEBP', quality=88, method=6)
+        print(name, 'left', box[0], 'top', box[1], 'size', out.size)
+
+
 if __name__ == '__main__':
-    main()
-    extras()
+    import sys
+    if '--whale' in sys.argv:
+        whale_parts()
+    else:
+        main()
+        extras()
+        whale_parts()

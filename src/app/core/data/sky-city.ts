@@ -79,14 +79,21 @@ export const SKY_FX = {
   templeHalo: pt(L.fx.templeHalo),
 };
 
-/** masks for code FX (half resolution, stretched over the art) */
-export const SKY_MASKS = { falls: `${SKY_CITY_DIR}/m_falls.png`, crystals: `${SKY_CITY_DIR}/m_crystals.png`, water: `${SKY_CITY_DIR}/m_water.png` };
+/** masks for code FX (half resolution, cropped to where the effect is; world px box) */
+export interface SkyMask { src: string; x: number; y: number; w: number; h: number }
+export const SKY_MASKS: Record<'falls' | 'crystals' | 'water', SkyMask> = (() => {
+  const m = (SKY_CITY_ART as unknown as { masks: Record<'falls' | 'crystals' | 'water', SkyMask> }).masks;
+  const at = (k: keyof typeof m) => ({ ...m[k], y: y(m[k].y) });
+  return { falls: at('falls'), crystals: at('crystals'), water: at('water') };
+})();
 /** painted sky layers (user art via tools/island/sky_city/bg_layers.py); clouds/wisps/far = procedural fallbacks */
 export const SKY_LAYERS = {
   sky: `${SKY_CITY_DIR}/bg_sky_dusk.webp`, bank: `${SKY_CITY_DIR}/bg_cloud_bank.webp`, sea: `${SKY_CITY_DIR}/bg_cloud_sea.webp`,
   mist: `${SKY_CITY_DIR}/fg_cloud_wisps.webp`, whale: `${SKY_CITY_DIR}/sprite_sky_whale.webp`,
   farIslands: `${SKY_CITY_DIR}/bg_far_islands.webp`, rays: `${SKY_CITY_DIR}/bg_god_rays.webp`, birds: `${SKY_CITY_DIR}/sheet_birds.webp`,
-  dragonBody: `${SKY_CITY_DIR}/dragon_body.webp`, dragonWing: `${SKY_CITY_DIR}/dragon_wing.webp`,
+  dragonBody: `${SKY_CITY_DIR}/dragon_body.webp`,
+  whaleBody: `${SKY_CITY_DIR}/whale_body.webp`, whaleTail: `${SKY_CITY_DIR}/whale_tail.webp`, whaleFinFront: `${SKY_CITY_DIR}/whale_fin_front.webp`,
+  whaleFinBack: `${SKY_CITY_DIR}/whale_fin_back.webp`, whaleShards: `${SKY_CITY_DIR}/whale_shards.webp`, dragonWing: `${SKY_CITY_DIR}/dragon_wing.webp`,
   clouds: `${SKY_CITY_DIR}/clouds.webp`, wisps: `${SKY_CITY_DIR}/wisps.webp`, far: `${SKY_CITY_DIR}/far_islands.webp`,
 };
 /** island heroes are drawn smaller here (the city is painted at a smaller scale than the battle sprites) */
