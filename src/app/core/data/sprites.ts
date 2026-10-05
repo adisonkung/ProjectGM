@@ -138,18 +138,39 @@ export const FX_SCALE = 1.5;
 export const PROJECTILE_SCALE = 1.3;
 
 export const SHEETS: Record<string, SheetDef> = {
+  // Aurel — Dawn Bastion (v2 art, tools/sprites/aurel_v2.py): same 220 × 132 cell / feet root as Bai Long, facing right.
+  // Damage frames from the art spec (1-based → 0-based here): attack F4 · Shield Bash F7 (damage + interrupt) ·
+  // Guardian Rush F8 (collision) · Bastion of Dawn F5 = max charge (held), F9 = shield slam (shield + taunt land).
+  // Character sheets carry only small local FX — the big VFX stay on the separate fx layer ('aurel-*').
   'hero-aurel.png': {
-    cols: 8,
-    rows: 8,
+    cols: 16, rows: 8, cellW: 220, cellH: 132, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
-      idle: { row: 0, frames: 8, seq: [1, 2, 5, 6, 7, 4] },
-      walk: { row: 1, frames: 8 },
-      hurt: { row: 2, frames: 8 },
-      attack: { row: 3, frames: 8, hit: 4 },
-      skill: { row: 4, frames: 8, hit: 3 },
-      skill2: { row: 5, frames: 8, hit: 3 },
-      ult: { row: 6, frames: 8, hit: 4 },
-      die: { row: 7, frames: 8 },
+      idle: { row: 0, frames: 6 },
+      walk: { row: 1, frames: 8, ms: 80 },
+      hurt: { row: 2, frames: 4 },
+      attack: { row: 3, frames: 7, ms: 95, events: { DAMAGE: 3, RECOVERY_START: 5 } },
+      die: { row: 4, frames: 6, ms: 120 },
+      // Shield Bash: 10 × 80 ms · F5 shield drawn back · F7 bash = damage + taunt
+      skill: {
+        row: 5, frames: 10, ms: 80,
+        events: { CAST_START: 0, ANTICIPATION_PEAK: 4, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 },
+        impact: { hitStopMs: 55, shakePx: 3, shakeMs: 140 },
+      },
+      // Guardian Rush: 12 × 75 ms · F4 launch · F8 shield collision = interrupt / knockback / stun
+      skill2: {
+        row: 6, frames: 12, ms: 75,
+        events: { CAST_START: 0, STRIKE_START: 3, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
+        impact: { hitStopMs: 70, shakePx: 4, shakeMs: 160 },
+      },
+      // Bastion of Dawn: 16 frames · F5 max charge (held) · F6 leap → F9 shield slam (held) = interrupt + shields + taunt
+      ult: {
+        row: 7, frames: 16, ms: 85,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        steps: [90, 90, 90, 100, 240, 110, 80, 70, 220, 110, 100, 90, 90, 90, 90, 90],
+        events: { CAST_START: 0, CHARGE_START: 2, CHARGE_PEAK: 4, STRIKE_START: 5, DAMAGE: 8, IMPACT: 8, RECOVERY_START: 12 },
+        impact: { hitStopMs: 90, shakePx: 6, shakeMs: 220, flashMs: 120 },
+      },
     },
     fx: { skill: 'aurel-defense', skill2: 'aurel-charge', ult: 'aurel-ult' },
     shieldFx: 'aurel-ward',

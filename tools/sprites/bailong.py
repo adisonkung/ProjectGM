@@ -168,6 +168,11 @@ def paste(sheet, fr, row, col, scale, root_shift=(0, 0)):
 def body_markers(hard, want):
     body = ndimage.binary_opening(hard, structure=np.ones((13, 13)))
     lab, n = ndimage.label(body)
+    k = 13
+    while n < want and k < 61:   # two bodies touching (shoulder to shield): erode harder until they part
+        k += 6
+        body = ndimage.binary_erosion(ndimage.binary_opening(hard, structure=np.ones((13, 13))), structure=np.ones((k - 12, k - 12)))
+        lab, n = ndimage.label(body)
     sizes = ndimage.sum(body, lab, range(1, n + 1))
     keep = sorted(range(n), key=lambda i: -sizes[i])[:want]
     keep = sorted(keep, key=lambda i: ndimage.center_of_mass(body, lab, i + 1)[1])
@@ -196,8 +201,9 @@ def clip_frames(im, band, want, mode='feet', soft=False, fixes=()):
     hard = a >= ALPHA_CUT
     markers, n = body_markers(hard, want)
     assert n == want, (band, n, want)
-    dist = ndimage.distance_transform_edt(hard)
-    lab = watershed(-dist, markers, mask=hard)
+    core = ndimage.binary_opening(hard, structure=np.ones((WS_OPEN, WS_OPEN))) | (markers > 0) if WS_OPEN else hard
+    dist = ndimage.distance_transform_edt(core)
+    lab = watershed(-dist, markers, mask=core)
     # strays not connected to any body (sparks, glow) → nearest labelled pixel
     keep = (a >= 24) if soft else hard
     _, (iy, ix) = ndimage.distance_transform_edt(lab == 0, return_indices=True)
@@ -239,6 +245,7 @@ def resize_rgba(img, w, h):
 
 
 SEAM_FADE = 14
+WS_OPEN = 0   # > 0: thin bridges (dust, glow wisps) between frames are opened away before the watershed
 DEBUG_STRIP = False
 SEAM_REACH = 26
 

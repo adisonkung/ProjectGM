@@ -259,7 +259,7 @@ describe('Tank (Aurel / Morgan)', () => {
     expect(alpha.casting).toBeNull();
     expect(alpha.castSkills[0].cd).toBeGreaterThan(11.5);
     expect(b.of('buff').some(x => x.buff === 'stun' && x.dst === alpha.id)).toBeTrue();
-    expect(b.of('cast').find(c => c.src === tank.id && c.kind === 'skill2')!.skill).toBe('พุ่งชนโล่');
+    expect(b.of('cast').find(c => c.src === tank.id && c.kind === 'skill2')!.skill).toBe('พุ่งพิทักษ์');
     b.run(3);
     expect(b.of('skillActivated').length).toBe(0);
     expect(alpha.buffs.some(x => x.def.id === 'alpha_howl_buff')).toBeFalse();

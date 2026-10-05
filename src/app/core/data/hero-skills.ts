@@ -200,7 +200,16 @@ const rename = (k: HeroKit, names: [string, string, string]): HeroKit => ({
 });
 
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
-  aurel: { id: 'aurel', cls: 'tank', identity: 'Tank · Taunt · Shield · Close-range Interrupt', kit: tank },
+  // ออเรล — Dawn Bastion (3★ Tank): ตัวเลข Tank baseline ทั้งหมด (id / rank table เดิม) แค่ชื่อท่าตามอาร์ตชุดใหม่
+  aurel: {
+    id: 'aurel', cls: 'tank', identity: 'Tank · Taunt · Shield · Close-range Interrupt',
+    kit: {
+      ...tank,
+      skill: { ...tank.skill, name: 'โล่กระแทก', label: 'Shield Bash' },
+      skill2: { ...tank.skill2, name: 'พุ่งพิทักษ์', label: 'Guardian Rush' },
+      ult: { ...tank.ult, name: 'ป้อมปราการรุ่งอรุณ', label: 'Bastion of Dawn' },
+    },
+  },
   morgan: {
     id: 'morgan', cls: 'tank', identity: 'Tank · Taunt · Shield · Close-range Interrupt (Aurel mechanics, dark visuals)',
     kit: rename(tank, ['ป้อมปราการมืด', 'โล่กระแทก', 'ระเบิดโล่ทมิฬ']),
