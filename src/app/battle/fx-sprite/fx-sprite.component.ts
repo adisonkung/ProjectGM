@@ -35,6 +35,9 @@ export class FxSpriteComponent {
   readonly pxToCell = PX_TO_CELL;
   readonly fxScale = FX_SCALE;
   private readonly host = inject(ElementRef);
+  private delay(): number {
+    return (this.def().delayMs ?? 0) / this.speed();
+  }
 
   constructor() {
     afterNextRender(() => {
@@ -48,7 +51,8 @@ export class FxSpriteComponent {
         ],
         // steps(n, jump-none) = n ค่า 0% … 100% ตรงกับ n เฟรมพอดี
         // (ถ้าใช้ n-1 ตำแหน่งจะคร่อมระหว่างเฟรม เห็นครึ่งเฟรมข้าง ๆ เป็นรอยตัดแนวตั้ง)
-        { duration: fxDuration(this.name(), this.speed()), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
+        // delayMs: hidden (base opacity 0) until it starts
+        { duration: fxDuration(this.name(), this.speed()) - this.delay(), delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
       );
       // release-and-vanish FX: the last (peak) frame stays and fades out over fadeOutMs instead of collapsing
       if (d.fadeOutMs) {
@@ -59,7 +63,7 @@ export class FxSpriteComponent {
             { backgroundPosition: `${pos((d.from ?? 0) + d.frames - 1)}% 0%`, opacity: 1, offset: 0 },
             { backgroundPosition: `${pos((d.from ?? 0) + d.frames - 1)}% 0%`, opacity: 0, offset: 1 },
           ],
-          { duration: total - play, delay: play, easing: 'ease-in', fill: 'none' },
+          { duration: total - this.delay() - play, delay: this.delay() + play, easing: 'ease-in', fill: 'none' },
         );
       }
     });
@@ -68,5 +72,5 @@ export class FxSpriteComponent {
 
 export function fxDuration(name: string, speed = 1): number {
   const d = FX[name];
-  return d ? (d.frames * d.frameMs + (d.fadeOutMs ?? 0)) / speed : 0;
+  return d ? ((d.delayMs ?? 0) + d.frames * d.frameMs + (d.fadeOutMs ?? 0)) / speed : 0;
 }

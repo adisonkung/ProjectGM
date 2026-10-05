@@ -30,15 +30,17 @@ IMPACT_CENTRES = [142, 391, 693, 1013, 1301, 1576, 1820, 2072]
 # per character frame (1-based): [(sheet, vfx frame 1-based, scale, anchor, dx, dy, opacity, layer)]
 #   anchor 'edge' = this frame's shield front edge · 'P' = F7 contact point (the wave keeps travelling from there)
 #   (dx, dy) source px from the anchor to the VFX's white core
+#   layer 'back' / 'front' = behind / over the character · 'impact' = the contact burst AFTER the bash (F8+): in the
+#   delivered combined sheet only — in the game it plays as its own FX on the target (fx-aurel-shield-bash-hit.png)
 PLAN = {
     1: [], 2: [], 3: [],
     4: [('force', 1, 0.55, 'edge', 6, 0, 0.85, 'back')],
     5: [('force', 2, 0.66, 'edge', 22, 0, 1.0, 'back')],
-    6: [('force', 3, 0.74, 'edge', 46, 0, 1.0, 'back'), ('impact', 1, 0.62, 'edge', 22, 0, 1.0, 'front')],
-    7: [('force', 5, 0.72, 'P', 72, 0, 1.0, 'back'), ('impact', 3, 0.78, 'P', 44, 0, 1.0, 'front')],
-    8: [('force', 6, 0.74, 'P', 92, 0, 1.0, 'front'), ('impact', 4, 0.78, 'P', 40, 0, 1.0, 'front')],
-    9: [('force', 7, 0.72, 'P', 96, 0, 0.95, 'front'), ('impact', 6, 0.72, 'P', 36, 0, 0.9, 'front')],
-    10: [('force', 9, 0.62, 'P', 112, 0, 0.7, 'front'), ('impact', 8, 0.62, 'P', 40, 0, 0.6, 'front')],
+    6: [('force', 4, 0.68, 'edge', 50, 0, 1.0, 'back')],
+    7: [('force', 5, 0.74, 'P', 78, 0, 1.0, 'front')],                       # main shield force AT the contact
+    8: [('force', 6, 0.74, 'P', 100, 0, 1.0, 'front'), ('impact', 3, 0.72, 'P', 60, 0, 1.0, 'impact')],
+    9: [('force', 7, 0.70, 'P', 118, 0, 0.9, 'front'), ('impact', 4, 0.70, 'P', 64, 0, 1.0, 'impact')],
+    10: [('force', 9, 0.60, 'P', 130, 0, 0.65, 'front'), ('impact', 6, 0.66, 'P', 66, 0, 0.7, 'impact')],
 }
 CANVAS = (980, 640)
 ROOT = (300, 520)
@@ -83,7 +85,7 @@ def place(canvas, fx, scale, at, opacity):
     canvas.alpha_composite(Image.fromarray(a), (round(at[0] - cx * scale), round(at[1] - cy * scale)))
 
 
-def combine(chars):
+def combine(chars, with_impact=False):
     fx = {'force': vfx_frames('bash_force', FORCE_CENTRES), 'impact': vfx_frames('bash_impact', IMPACT_CENTRES)}
     rel = []
     for fr in chars:
@@ -98,6 +100,8 @@ def combine(chars):
         back = Image.new('RGBA', CANVAS, (0, 0, 0, 0))
         front = Image.new('RGBA', CANVAS, (0, 0, 0, 0))
         for sheet, k, sc, anchor, dx, dy, op, layer in PLAN[i + 1]:
+            if layer == 'impact' and not with_impact:
+                continue
             base = rel[i] if anchor == 'edge' else P
             place(back if layer == 'back' else front, fx[sheet][k - 1], sc, (ROOT[0] + base[0] + dx, ROOT[1] + base[1] + dy), op)
         full = back.copy()
@@ -107,12 +111,35 @@ def combine(chars):
     return out
 
 
+# game FX: the 8-frame contact burst, cut at the character's pixel scale so its star sits at shield height when its
+# dust stands on the target's feet (FX scale 1/FX_SCALE → 1 strip px = 1 sheet px on the board)
+IMPACT_CUT = 0.25
+
+
+def impact_strip(out_dir):
+    strip, meta = B.cut_vfx('bash_impact', [(110, 640, IMPACT_CENTRES)], 'bottom', 1.0, min_alpha=48)
+    a = np.array(strip)
+    a[a[..., 3] < 128] = 0
+    a[a[..., 3] >= 128, 3] = 255
+    W, H, n = meta['w'], meta['h'], len(IMPACT_CENTRES)
+    w, h = round(W * IMPACT_CUT), round(H * IMPACT_CUT)
+    out = Image.new('RGBA', (w * n, h), (0, 0, 0, 0))
+    for k in range(n):
+        f = Image.fromarray(a[:, k * W:(k + 1) * W]).convert('RGBa').resize((w, h), Image.BOX).convert('RGBA')
+        f = np.array(f)
+        f[f[..., 3] < 128] = 0                 # crisp pixel edges after the area downscale (like the character)
+        f[f[..., 3] >= 128, 3] = 255
+        out.paste(Image.fromarray(f), (k * w, 0))
+    out.save(f'{out_dir}/fx-aurel-shield-bash-hit.png', optimize=True)
+    return {'frames': n, 'w': w, 'h': h, 'pivot': [0.5, round((H - 2) / H, 3)]}
+
+
 def main():
     import aurel_v2 as A
     src = sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/aurel'
     out_dir = sys.argv[2] if len(sys.argv) > 2 else '.'
     B.SRC = src
-    frames = combine(A.sheet_frames('bash', [5, 5], False))
+    frames = combine(A.sheet_frames('bash', [5, 5], False), with_impact=True)
     # uniform cells around the union of every frame, root at the same spot in every cell
     union = np.zeros(CANVAS[::-1], bool)
     for f in frames:

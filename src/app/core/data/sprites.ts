@@ -117,6 +117,8 @@ export interface FxDef {
   stripFrames?: number;
   /** release-and-vanish: after the last frame, hold it and fade out over this many ms (no collapse frames) */
   fadeOutMs?: number;
+  /** start this many ms after its trigger (hidden until then) — e.g. a contact burst that follows the bash pose */
+  delayMs?: number;
   /** size the frame to this many board cells wide (e.g. an area burst matching the skill's hit area), instead of w × scale */
   fitCells?: number;
   /** 'under' = drawn below the units (ground aura), default above them */
@@ -178,7 +180,8 @@ export const SHEETS: Record<string, SheetDef> = {
         impact: { hitStopMs: 90, shakePx: 6, shakeMs: 220, flashMs: 120 },
       },
     },
-    fx: { skill2: 'aurel-charge', ult: 'aurel-ult' },
+    // Shield Bash: main shield force baked into the clip (F4–F10) · contact burst on the target after the bash
+    fx: { skill: 'aurel-shield-bash-hit', skill2: 'aurel-charge', ult: 'aurel-ult' },
     shieldFx: 'aurel-ward',
   },
   'hero-shade.png': {
@@ -497,6 +500,12 @@ export const FX: Record<string, FxDef> = {
   // ฮีลที่เพื่อนได้รับจากลูมิน่า: แผ่นบทสวด ย่อลง
   'lumina-heal': { file: 'fx-lumina-prayer.png', frames: 8, w: 87, h: 98, frameMs: 60, at: 'self', dy: -12, scale: 0.6 },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
+  // Shield Bash contact burst (aurel_bash_vfx.impact_strip, same pixel scale as the sheet): on the hit target's feet,
+  // toward the attacker, starts after the held F7 contact pose (130 ms) → main force AT contact, impact AFTER it
+  'aurel-shield-bash-hit': {
+    file: 'fx-aurel-shield-bash-hit.png', frames: 8, w: 79, h: 84, frameMs: 55, at: 'target', orient: 'flip', on: 'impact',
+    perHit: 1, pivot: [0.5, 0.994], dx: -16, dy: 27.25, scale: 1 / 1.5, delayMs: 130, pixelated: true,
+  },
   'aurel-defense': { file: 'fx-aurel-defense.png', frames: 8, w: 112, h: 90, frameMs: 70, at: 'self', dx: 18, dy: -14, scale: 1.25 },
   'aurel-charge': { file: 'fx-aurel-charge.png', frames: 8, w: 131, h: 78, frameMs: 60, at: 'target', orient: 'flip', dx: -20, dy: -8, scale: 1.2 },
   'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 140, h: 131, frameMs: 80, at: 'target', orient: 'flip', dy: -14, on: 'cast' },
