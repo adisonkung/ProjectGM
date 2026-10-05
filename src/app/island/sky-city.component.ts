@@ -3,10 +3,11 @@ import {
 } from '@angular/core';
 import { BUILDING_BY_ID } from '../core/data/island-layout';
 import { PreloadService } from '../core/services/preload.service';
-import { SKY_ZOOM, SKY_BASE, SKY_FX, SKY_HERO_SCALE, SKY_LAYERS, SKY_MASKS, SKY_NODES, SKY_PAD, SKY_PLOTS, SKY_SPAWN, SKY_SPIRE, SKY_WORLD } from '../core/data/sky-city';
+import { SKY_ZOOM, SKY_BASE, SKY_FX, SKY_HERO_SCALE, SKY_MASKS, SKY_NODES, SKY_PAD, SKY_PLOTS, SKY_SPAWN, SKY_SPIRE, SKY_WORLD } from '../core/data/sky-city';
 import { IslandBuildingState, Vec2 } from '../core/models/island';
 import { unlockFloorOf } from '../core/rules/island';
 import { IslandHeroComponent, IslandHeroView } from './island-hero.component';
+import { SkyCamera, SkyCanvasRenderer } from './sky-canvas';
 
 /** spire look per tower visual stage (0 sealed … 5 conquered) — CSS filter on the spire overlay + which FX run */
 const SPIRE_STAGE = [
@@ -17,12 +18,6 @@ const SPIRE_STAGE = [
   { filter: 'brightness(1.06) saturate(1.15)', ring: true, glow: 1, aura: 0.7 },
   { filter: 'brightness(1.12) saturate(1.2) sepia(.38) hue-rotate(-12deg)', ring: true, glow: 1, aura: 1 },
 ];
-
-/** a few drifting motes / sparkles (deterministic layout) */
-const MOTES = Array.from({ length: 26 }, (_, i) => ({
-  x: (i * 977) % SKY_WORLD.w, y: 120 + ((i * 613) % (SKY_WORLD.h - 300)), s: 6 + (i % 4) * 3, d: 7 + (i % 5) * 2.3, delay: -(i * 1.37) % 9,
-}));
-const STARS = Array.from({ length: 34 }, (_, i) => ({ x: (i * 1237) % SKY_WORLD.w, y: 12 + ((i * 331) % 260), s: 2 + (i % 3), delay: -(i * 0.71) % 4 }));
 
 /**
  * Sky City scene — the image-based home island (data: core/data/sky-city.ts).
@@ -56,15 +51,14 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly spire = SKY_SPIRE;
   readonly fx = SKY_FX;
   readonly masks = SKY_MASKS;
-  readonly layers = SKY_LAYERS;
-  readonly motes = MOTES;
-  readonly stars = STARS;
-  /** a small V of birds (offsets inside the flock box, flap phase) */
-  readonly flock = [
-    { x: 0, y: 40, d: 0 }, { x: 90, y: 0, d: -0.21 }, { x: 95, y: 92, d: -0.4 }, { x: 185, y: -30, d: -0.13 }, { x: 200, y: 130, d: -0.55 },
-  ];
   readonly heroScale = SKY_HERO_SCALE;
   readonly vp = viewChild.required<ElementRef<HTMLElement>>('vp');
+  private readonly backCv = viewChild.required<ElementRef<HTMLCanvasElement>>('back');
+  private readonly frontCv = viewChild.required<ElementRef<HTMLCanvasElement>>('front');
+  private readonly worldEl = viewChild.required<ElementRef<HTMLElement>>('world');
+  private readonly uiWorldEl = viewChild.required<ElementRef<HTMLElement>>('uiWorld');
+  private readonly isleEl = viewChild.required<ElementRef<HTMLElement>>('isle');
+  private readonly isleUiEl = viewChild.required<ElementRef<HTMLElement>>('isleUi');
   private readonly zone = inject(NgZone);
   private resize?: ResizeObserver;
   private readonly preload = inject(PreloadService);
@@ -119,17 +113,6 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly panY = signal(0);
   private readonly vpW = signal(800);
   private readonly vpH = signal(450);
-  /** camera left edge in world px (parallax input) */
-  readonly scrollX = computed(() => this.panX() / this.k());
-
-  readonly transform = computed(() => {
-    const k = this.k(), f = this.focus();
-    const pan = `translate3d(${(-this.panX()).toFixed(1)}px, ${(-this.panY()).toFixed(1)}px, 0)`;
-    if (!f) return `${pan} scale(${k})`;
-    const z = 1.15;
-    return `${pan} translate(${k * f.x * (1 - z)}px, ${k * f.y * (1 - z)}px) scale(${k * z})`;
-  });
-
   constructor() {
     effect(() => {
       const f = this.focus();
@@ -139,6 +122,8 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.preload.warmCity().then(() => this.fxAuto && this.probeFps());
+    this.renderer = new SkyCanvasRenderer(src => this.preload.image(src));
+    if (typeof requestAnimationFrame !== 'undefined') this.zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(t => this.frame(t))));
     const el = this.vp().nativeElement;
     this.zone.runOutsideAngular(() => {
       this.resize = new ResizeObserver(() => this.zone.run(() => this.fit()));
@@ -147,30 +132,38 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
     });
     this.fit();
     this.panTo(SKY_NODES[SKY_SPAWN].x, SKY_NODES[SKY_SPAWN].y - 120, false);
+    // start with the whole sky under the app bar (top of the world just below it)
+    this.setPan(this.panX(), -this.topInset);
   }
 
   ngOnDestroy(): void {
     this.destroyed = true;
     this.resize?.disconnect();
     cancelAnimationFrame(this.tween);
+    cancelAnimationFrame(this.raf);
   }
 
   private fit(): void {
     const el = this.vp().nativeElement;
     const h = el.clientHeight || 540, w = el.clientWidth || 800;
+    // the floating app bar covers the top of the screen: fit the city below it (the sky canvas still fills behind the bar)
+    const top = typeof getComputedStyle === 'function' ? parseFloat(getComputedStyle(el).getPropertyValue('--ui-top')) || 0 : 0;
     const cx = (this.panX() + this.vpW() / 2) / this.k(), cy = (this.panY() + this.vpH() / 2) / this.k();
     const first = !this.fitted;
     this.fitted = true;
     this.vpW.set(w);
     this.vpH.set(h);
-    this.fitK.set(Math.max(h / this.H, w / this.W));
+    this.topInset = Math.min(top, h * 0.3);
+    this.fitK.set(Math.max((h - this.topInset) / this.H, w / this.W));
     if (!first) this.panTo(cx, cy, false);
   }
+  private topInset = 0;
   private fitted = false;
 
   private clampPan(x: number, y: number): [number, number] {
     const k = this.k();
-    return [Math.max(0, Math.min(this.W * k - this.vpW(), x)), Math.max(0, Math.min(this.H * k - this.vpH(), y))];
+    const y0 = -this.topInset;
+    return [Math.max(0, Math.min(this.W * k - this.vpW(), x)), Math.max(y0, Math.min(Math.max(y0, this.H * k - this.vpH()), y))];
   }
   private setPan(x: number, y: number): void {
     const [cx, cy] = this.clampPan(x, y);
@@ -275,9 +268,58 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   zi(y: number): number {
     return 10 + Math.round(y);
   }
-  /** parallax: a layer at depth p (0 = glued to the sky, 1 = moves with the island) */
-  par(p: number): string {
-    return `translateX(${this.scrollX() * (1 - p)}px)`;
+  // ---------------------------------------------------------------- render loop (one rAF drives everything that moves)
+  private renderer?: SkyCanvasRenderer;
+  private raf = 0;
+  private t0 = 0;
+  private lastT = 0;
+  /** focus zoom (1 → 1.15) and the world point it zooms around, eased toward the `focus` input */
+  private fz = 1;
+  private fp = { x: 0, y: 0 };
+  private lastWorldTf = '';
+  private lastBobTf = '';
+  private readonly still = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  private frame(now: number): void {
+    if (this.destroyed) return;
+    this.raf = requestAnimationFrame(x => this.frame(x));
+    if (!this.t0) this.t0 = now;
+    const dt = Math.min(0.1, Math.max(0, (now - (this.lastT || now)) / 1000));
+    this.lastT = now;
+    const t = this.still ? 0 : (now - this.t0) / 1000;
+
+    // camera: pan (signals, set by drag / wheel / panTo) × fit scale × eased focus zoom
+    const f = this.focus();
+    if (f) this.fp = f;
+    this.fz += ((f ? 1.15 : 1) - this.fz) * (1 - Math.exp(-dt * 4.5));
+    if (Math.abs(this.fz - (f ? 1.15 : 1)) < 0.0005) this.fz = f ? 1.15 : 1;
+    const k = this.k(), s = k * this.fz;
+    const tx = -this.panX() + k * this.fp.x * (1 - this.fz), ty = -this.panY() + k * this.fp.y * (1 - this.fz);
+    const worldTf = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${s.toFixed(5)})`;
+    if (worldTf !== this.lastWorldTf) {
+      this.lastWorldTf = worldTf;
+      this.worldEl().nativeElement.style.transform = worldTf;
+      this.uiWorldEl().nativeElement.style.transform = worldTf;
+    }
+    // the island bobs as one piece (driven here so the canvas FX on it stay glued)
+    const bob = this.still ? 0 : -7 * (1 - Math.cos((2 * Math.PI * t) / 9));
+    const bobTf = `translate3d(0, ${bob.toFixed(2)}px, 0)`;
+    if (bobTf !== this.lastBobTf) {
+      this.lastBobTf = bobTf;
+      this.isleEl().nativeElement.style.transform = bobTf;
+      this.isleUiEl().nativeElement.style.transform = bobTf;
+    }
+    if (!this.ready() || !this.renderer) return;
+    const back = this.backCv().nativeElement, front = this.frontCv().nativeElement;
+    const vw = this.vpW(), vh = this.vpH();
+    const dpr = this.lite() ? 1 : Math.min(2, (typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1);
+    const cw = Math.round(vw * dpr), ch = Math.round(vh * dpr);
+    for (const c of [back, front]) if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+    const cam: SkyCamera = { s, tx, ty, panX: this.panX(), k, vw, vh, dpr };
+    const bctx = back.getContext('2d'), fctx = front.getContext('2d');
+    if (!bctx || !fctx) return;
+    this.renderer.drawBack(bctx, cam, t, this.lite());
+    this.renderer.drawFront(fctx, cam, t, bob, this.lite());
   }
 }
 

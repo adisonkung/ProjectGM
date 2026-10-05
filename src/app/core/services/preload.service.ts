@@ -11,6 +11,23 @@ export class PreloadService {
   readonly progress = signal(0);
   readonly ready = signal(false);
   private readonly keep: HTMLImageElement[] = [];
+  private readonly loaded = new Map<string, HTMLImageElement>();
+
+  /** a decoded image of the city art (null until it has loaded) — the canvas renderer draws from these */
+  image(src: string): HTMLImageElement | null {
+    const hit = this.loaded.get(src);
+    if (hit) return hit;
+    if (typeof Image === 'undefined') return null;
+    // not part of the preload list (or not started yet): load it now, draw it once it is there
+    if (!this.keep.some(i => i.dataset['src'] === src)) {
+      const img = new Image();
+      img.dataset['src'] = src;
+      img.onload = () => this.loaded.set(src, img);
+      img.src = src;
+      this.keep.push(img);
+    }
+    return null;
+  }
   private started: Promise<void> | null = null;
 
   /** start (or join) the city preload; never rejects — a missing file just counts as done */
@@ -29,8 +46,10 @@ export class PreloadService {
       new Promise<void>(res => {
         const img = new Image();
         img.decoding = 'async';
+        img.dataset['src'] = src;
         this.keep.push(img);
         const fin = () => {
+          if (img.naturalWidth) this.loaded.set(src, img);
           this.progress.set(++done / urls.length);
           res();
         };
