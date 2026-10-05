@@ -5,14 +5,9 @@ import { finisherPlan, FinisherPlan, gradeStroke, Pt, slashPattern, SlashStroke,
 const INTRO_S = 0.7;
 /** grades stay on screen this long before the finisher */
 const OUTRO_S = 0.55;
-/** shadow figure (figure units 100 × 200, centre of the cuts at 50,110) */
-const FIG = {
-  head: 'M50 10 a17 17 0 1 0 0.1 0 Z',
-  body: 'M33 50 Q50 43 67 50 L73 98 L64 103 L61 138 L67 197 L54 197 L50 148 L46 197 L33 197 L39 138 L36 103 L27 98 Z',
-  armL: 'M34 53 L16 97 L23 101 L39 68 Z',
-  armR: 'M66 53 L86 88 L79 93 L61 68 Z',
-  blade: 'M80 91 L99 18 L102 20 L85 93 Z',
-};
+/** the user's crescent slash sheet (tools/sprites/blade_trace_fx.py → public/fx) */
+const SLASHES = Array.from({ length: 8 }, (_, i) => `fx/blade-slash-${i + 1}.webp`);
+const RING = 'fx/blade-fire-ring.webp';
 const SPARKS = [[-1, -0.6], [1, -0.8], [-0.7, 0.9], [0.9, 0.5], [0, -1]];
 const GRADE_TEXT: Record<SlashGrade, string> = { PERFECT: 'PERFECT!', GOOD: 'GOOD', OK: 'OK', MISS: 'MISS' };
 
@@ -48,40 +43,30 @@ const GRADE_TEXT: Record<SlashGrade, string> = { PERFECT: 'PERFECT!', GOOD: 'GOO
         <text class="grade" [class]="'grade ' + f.grade.toLowerCase()" [attr.x]="f.at.x" [attr.y]="f.at.y">{{ gradeText[f.grade] }}</text>
       }
       }
-      @if (phase() === 'finisher' && plan(); as p) {
-        <defs>
-          <clipPath id="st-top" clipPathUnits="userSpaceOnUse"><rect x="-300" y="-600" width="600" height="600" [attr.transform]="'translate(50 110) rotate(' + p.finalAngle + ')'" /></clipPath>
-          <clipPath id="st-bot" clipPathUnits="userSpaceOnUse"><rect x="-300" y="0" width="600" height="600" [attr.transform]="'translate(50 110) rotate(' + p.finalAngle + ')'" /></clipPath>
-        </defs>
-        <g [attr.transform]="figTransform()">
-          <ellipse class="fig-aura" cx="50" cy="110" rx="62" ry="104" />
-          <ellipse class="fig-shadow" cx="50" cy="199" rx="42" ry="7" />
-          <!-- the figure, drawn as two halves that part along the final cut -->
-          @for (half of halves; track half) {
-            <g class="half" [class]="'half ' + half" [attr.clip-path]="'url(#st-' + half + ')'" [style.animation-delay]="p.finalAt + 0.1 + 's'">
-              <g class="fig" [style.animation-iteration-count]="p.cuts.length" [style.animation-delay]="p.cuts[0].at + 's'">
-                <path [attr.d]="fig.head" /><path [attr.d]="fig.body" /><path [attr.d]="fig.armL" /><path [attr.d]="fig.armR" />
-                <path class="fig-blade" [attr.d]="fig.blade" />
-              </g>
-            </g>
-          }
-          @for (c of p.cuts; track $index) {
-            <g [attr.transform]="cutTransform(c.angle, c.offset)">
-              <line class="cut" [class]="'cut ' + c.grade.toLowerCase()" x1="-120" y1="0" x2="120" y2="0" [style.animation-delay]="c.at + 's, ' + (c.at + 0.1) + 's'" />
-              @if (c.grade !== 'MISS') {
-                @for (sp of sparks; track $index) {
-                  <circle class="spark" r="2.2" cx="0" cy="0" [style.--dx]="sp[0] * 34 + 'px'" [style.--dy]="sp[1] * 34 + 'px'" [style.animation-delay]="c.at + 0.04 + 's'" />
-                }
-              }
-            </g>
-          }
-          <g [attr.transform]="cutTransform(p.finalAngle, 0)">
-            <line class="cut final" x1="-160" y1="0" x2="160" y2="0" [style.animation-delay]="p.finalAt + 's, ' + (p.finalAt + 0.16) + 's'" />
-          </g>
-        </g>
-        <rect class="flash" x="0" y="0" [attr.width]="w()" [attr.height]="h()" [style.animation-delay]="p.finalAt + 's'" />
-      }
     </svg>
+    @if (phase() === 'finisher' && plan(); as p) {
+      <!-- finisher: the screen goes dark, the graded flurry of crescent slashes rips through the centre, a fire ring +
+           the final gold cut + white flash — then the damage lands -->
+      <div class="fin" [style.--end]="p.duration - 0.28 + 's'">
+        <div class="dark"></div>
+        <div class="shake" [style.animation-iteration-count]="p.cuts.length" [style.animation-delay]="p.cuts[0].at + 's'">
+          <i class="core-glow"></i>
+          @for (c of p.cuts; track $index) {
+            <img class="sl" [class]="'sl ' + c.grade.toLowerCase()" [src]="slashSrc($index)" alt="" draggable="false"
+                 [style.width.px]="size() * (c.grade === 'MISS' ? 0.7 : 1)" [style.--tf]="cutTf(c.angle, c.offset, $index)" [style.animation-delay]="c.at + 's'" />
+            @if (c.grade !== 'MISS') {
+              @for (sp of sparks; track $index) {
+                <i class="spark" [style.--dx]="sp[0] * size() * 0.32 + 'px'" [style.--dy]="sp[1] * size() * 0.32 + 'px'" [style.animation-delay]="c.at + 0.05 + 's'"></i>
+              }
+            }
+          }
+          <img class="ring" [src]="ring" alt="" draggable="false" [style.width.px]="size() * 2.6" [style.animation-delay]="p.finalAt + 's'" />
+          <img class="sl final" [src]="slashSrc(1)" alt="" draggable="false" [style.width.px]="size() * 1.7"
+               [style.--tf]="cutTf(p.finalAngle, 0, 1)" [style.animation-delay]="p.finalAt + 's'" />
+        </div>
+        <i class="flash" [style.animation-delay]="p.finalAt + 's'"></i>
+      </div>
+    }
     <div class="hud">
       <b>⚔ {{ def().name }}</b>
       @if (phase() === 'intro') { <span>ลากตามรอยดาบให้ทัน!</span> }
@@ -117,34 +102,36 @@ const GRADE_TEXT: Record<SlashGrade, string> = { PERFECT: 'PERFECT!', GOOD: 'GOO
     .timer { display: block; width: 180px; height: 6px; border-radius: 3px; background: #ffffff1a; overflow: hidden;
       em { display: block; height: 100%; background: linear-gradient(90deg, #ff5a4e, #ffe27a 40%, #7fe3ff); } }
     .sum { font-weight: 800; color: #ffe27a; }
-    .fig-shadow { fill: #000a; }
-    .fig-aura { fill: #5a3cc4; opacity: 0.22; filter: blur(14px); animation: aura 1.2s ease-in-out infinite alternate; }
-    @keyframes aura { to { opacity: 0.34; } }
-    .fig path { fill: #05030a; stroke: #7fe3ff55; stroke-width: 1.2; }
-    .fig .fig-blade { fill: #1a1428; stroke: #bff4ff88; }
-    .fig { filter: drop-shadow(0 0 6px #7a5cff88); animation: hitshake 0.085s linear forwards; transform-box: fill-box; transform-origin: 50% 60%; }
-    .half { animation: 0.6s cubic-bezier(.2,.7,.3,1) both; }
-    .half.top { animation-name: part-top; } .half.bot { animation-name: part-bot; }
-    .cut { stroke-linecap: round; stroke-width: 3.2; stroke: #fff; stroke-dasharray: 240; stroke-dashoffset: 240; opacity: 0;
-      filter: drop-shadow(0 0 4px #bff4ff); animation: cutdraw 0.1s linear forwards, cutfade 0.35s ease-out forwards; }
-    .cut.perfect { stroke: #fff6c8; filter: drop-shadow(0 0 5px #ffe27a); } .cut.good { stroke: #e9fbff; }
-    .cut.ok { stroke: #c9d6de; stroke-width: 2.2; } .cut.miss { stroke: #ff5a4e; stroke-width: 1.6; stroke-dasharray: 240; }
-    .cut.final { stroke: #ffe27a; stroke-width: 6; stroke-dasharray: 320; stroke-dashoffset: 320; filter: drop-shadow(0 0 10px #ffe27a); animation-duration: 0.16s, 0.5s; }
-    .spark { fill: #fff3b0; opacity: 0; animation: spark 0.3s ease-out forwards; }
-    .flash { fill: #fff; opacity: 0; pointer-events: none; animation: flashw 0.4s ease-out forwards; }
-    @keyframes cutdraw { from { stroke-dashoffset: 240; opacity: 1; } to { stroke-dashoffset: 0; opacity: 1; } }
-    @keyframes cutfade { from { opacity: 1; } to { opacity: 0; } }
+    .fin { position: absolute; inset: 0; pointer-events: none; overflow: hidden; animation: finOut 0.28s ease-in forwards; animation-delay: var(--end); }
+    .dark { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 52%, #0d0818f2, #000 70%); animation: in 0.16s ease-out both; }
+    .shake { position: absolute; inset: 0; animation: hitshake 0.085s linear; }
+    .core-glow { position: absolute; left: 50%; top: 52%; width: 46vmin; height: 46vmin; transform: translate(-50%, -50%); border-radius: 50%;
+      background: radial-gradient(circle, #7a5cff33, transparent 70%); animation: aura 0.6s ease-in-out infinite alternate; }
+    .sl { position: absolute; left: 50%; top: 52%; height: auto; opacity: 0; mix-blend-mode: screen; transform: var(--tf);
+      animation: slashIn 0.24s cubic-bezier(.15,.8,.3,1) forwards; }
+    .sl.perfect { filter: drop-shadow(0 0 10px #ffd34e) drop-shadow(0 0 22px #ff9a2e88) brightness(1.15); }
+    .sl.good { filter: drop-shadow(0 0 10px #7fe3ff) drop-shadow(0 0 20px #4aa8ff66); }
+    .sl.ok { filter: brightness(.75) drop-shadow(0 0 6px #c9d6de66); }
+    .sl.miss { filter: sepia(1) saturate(7) hue-rotate(-40deg) brightness(.85) drop-shadow(0 0 8px #ff3b2e); }
+    .sl.final { filter: sepia(.6) saturate(3) brightness(1.2) drop-shadow(0 0 16px #ffd34e) drop-shadow(0 0 40px #ff8a2e); animation-duration: 0.42s; }
+    .ring { position: absolute; left: 50%; top: 60%; height: auto; opacity: 0; mix-blend-mode: screen; animation: ringOut 0.6s ease-out forwards; }
+    .spark { position: absolute; left: 50%; top: 52%; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%; background: #fff3b0;
+      box-shadow: 0 0 6px #ffd34e; opacity: 0; animation: spark 0.32s ease-out forwards; }
+    .flash { position: absolute; inset: 0; background: #fff; opacity: 0; animation: flashw 0.4s ease-out forwards; }
+    @keyframes aura { from { opacity: 0.6; } to { opacity: 1; } }
+    @keyframes slashIn { 0% { opacity: 0; transform: var(--tf) scale(0.5) rotate(-14deg); } 25% { opacity: 1; }
+      60% { opacity: 1; transform: var(--tf) scale(1.06) rotate(4deg); } 100% { opacity: 0; transform: var(--tf) scale(1.14) rotate(8deg); } }
+    @keyframes ringOut { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.25); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); } }
     @keyframes spark { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(var(--dx), var(--dy)); opacity: 0; } }
-    @keyframes hitshake { 0% { transform: translate(-3px, 1px); filter: brightness(3) drop-shadow(0 0 8px #fff); } 50% { transform: translate(3px, -1px); } 100% { transform: translate(0, 0); filter: drop-shadow(0 0 6px #7a5cff88); } }
-    @keyframes part-top { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(26px, -22px) rotate(-6deg); opacity: 0; } }
-    @keyframes part-bot { from { transform: translate(0, 0); opacity: 1; } 30% { opacity: 1; } to { transform: translate(-14px, 16px) rotate(4deg); opacity: 0; } }
-    @keyframes flashw { from { opacity: 0.55; } to { opacity: 0; } }
+    @keyframes hitshake { 0% { transform: translate(-5px, 2px); } 50% { transform: translate(5px, -2px); } 100% { transform: translate(0, 0); } }
+    @keyframes flashw { from { opacity: 0.6; } to { opacity: 0; } }
+    @keyframes finOut { to { opacity: 0; } }
     @keyframes flow { to { stroke-dashoffset: -18; } }
     @keyframes pulse { to { opacity: 0.55; } }
     @keyframes cut { from { stroke-dasharray: 2000; stroke-dashoffset: 2000; opacity: 1; } 70% { opacity: 1; } to { stroke-dasharray: 2000; stroke-dashoffset: 0; opacity: 0.25; } }
     @keyframes pop { from { transform: translateY(6px); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(-14px); opacity: 0; } }
     @keyframes in { from { opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) { .core, .start, .slash, .grade, .fig, .spark { animation: none; } }
+    @media (prefers-reduced-motion: reduce) { .core, .start, .slash, .grade, .spark, .shake, .core-glow { animation: none; } }
   `,
 })
 export class SlashTraceComponent implements AfterViewInit, OnDestroy {
@@ -163,11 +150,10 @@ export class SlashTraceComponent implements AfterViewInit, OnDestroy {
   readonly trails = signal<SlashStroke[]>([]);
   readonly index = signal(0);
   readonly phase = signal<'intro' | 'play' | 'outro' | 'finisher'>('intro');
-  /** finisher: shadow figure cut by the graded flurry, then split — damage lands after it */
+  /** finisher: dark screen, a graded flurry of crescent slashes through the centre, a final gold cut — damage lands after it */
   readonly plan = signal<FinisherPlan | null>(null);
-  readonly fig = FIG;
   readonly sparks = SPARKS;
-  readonly halves = ['top', 'bot'] as const;
+  readonly ring = RING;
   /** fraction of the current trail's window left */
   readonly left = signal(1);
   readonly ink = signal<Pt[]>([]);
@@ -197,16 +183,21 @@ export class SlashTraceComponent implements AfterViewInit, OnDestroy {
     this.zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(t => this.frame(t))));
   }
 
-  /** figure units → field: centred, ~60 % of the field's height */
-  figTransform(): string {
-    const s = Math.min(this.h() * 0.62, this.w() * 0.5) / 200;
-    return `translate(${(this.w() * 0.5 - 50 * s).toFixed(1)} ${(this.h() * 0.54 - 110 * s).toFixed(1)}) scale(${s.toFixed(3)})`;
+  /** slash size (px): the flurry fills the middle of the field */
+  size(): number {
+    return Math.min(this.h() * 0.62, this.w() * 0.5);
   }
 
-  /** a cut line through the figure's centre, shifted sideways by `offset` */
-  cutTransform(angle: number, offset: number): string {
+  /** a different crescent per cut (mixed order) */
+  slashSrc(i: number): string {
+    return SLASHES[(i * 3 + 1) % SLASHES.length];
+  }
+
+  /** centre → shifted sideways by `offset` (plan units, ±25 of 100) → rotated; every other slash mirrored */
+  cutTf(angle: number, offset: number, i: number): string {
     const a = ((angle + 90) * Math.PI) / 180;
-    return `translate(${(50 + Math.cos(a) * offset).toFixed(1)} ${(110 + Math.sin(a) * offset).toFixed(1)}) rotate(${angle.toFixed(1)})`;
+    const d = (offset / 100) * this.size();
+    return `translate(-50%, -50%) translate(${(Math.cos(a) * d).toFixed(1)}px, ${(Math.sin(a) * d).toFixed(1)}px) rotate(${angle.toFixed(1)}deg) scaleX(${i % 2 ? -1 : 1})`;
   }
 
   ngOnDestroy(): void {

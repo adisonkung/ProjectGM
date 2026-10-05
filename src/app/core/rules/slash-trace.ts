@@ -114,19 +114,19 @@ function densify(pts: Pt[], step: number): Pt[] {
   return out;
 }
 
-// ---------------------------------------------------------------- finisher (shadow figure cut to pieces)
+// ---------------------------------------------------------------- finisher (dark screen, crescent slash flurry)
 export interface FinisherCut {
   grade: SlashGrade;
   /** degrees, 0 = horizontal */
   angle: number;
-  /** sideways offset from the figure's centre (figure units: 100 × 200 box) */
+  /** sideways offset from the screen centre (units of 1/100 slash size) */
   offset: number;
   /** seconds after the finisher starts */
   at: number;
 }
 export interface FinisherPlan {
   cuts: FinisherCut[];
-  /** the last big cut (gold) — the figure splits along it right after */
+  /** the last big cut (gold) + fire ring + white flash */
   finalAt: number;
   finalAngle: number;
   /** total length; damage lands after this */
