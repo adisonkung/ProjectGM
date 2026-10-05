@@ -1,5 +1,5 @@
 @if (sprite() && def()) {
-  <div #sheet class="sheet" [class.flip]="flip()" [style.background-image]="'url(sprites/' + sprite() + ')'" [style.background-size]="bgSize()" [style.aspect-ratio]="(def()?.cellW ?? 132) + ' / ' + (def()?.cellH ?? 100)" [style.width.%]="165 * (def()?.cellW ?? 132) / 132"></div>
+  <div #sheet class="sheet" [class.flip]="flip()" [class.pixelated]="!!def()?.pixelated" [style.background-image]="'url(sprites/' + sprite() + ')'" [style.background-size]="bgSize()" [style.aspect-ratio]="(def()?.cellW ?? 132) + ' / ' + (def()?.cellH ?? 100)" [style.width.%]="165 * (def()?.cellW ?? 132) / 132"></div>
 } @else if (mock()) {
   <!-- placeholder art (core/data/visuals.ts): shape + colours only, gameplay never reads it -->
   <div [class]="'mock ' + mock()!.shape" [class.ghost]="!!mock()!.ghost" [class.flip]="flip()"

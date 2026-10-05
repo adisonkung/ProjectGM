@@ -17,7 +17,10 @@ export type MonsterRole = string;
 export type DamageType = 'PHYSICAL' | 'MAGIC' | 'TRUE';
 
 /** Gameplay events that an animation clip can fire. Gameplay listens to these, never to frame indexes. */
-export type SemanticEvent = 'DAMAGE' | 'PROJECTILE_SPAWN' | 'CAST_START' | 'SKILL_ACTIVATE' | 'FX_START' | 'DEATH_COMPLETE';
+export type SemanticEvent =
+  | 'DAMAGE' | 'PROJECTILE_SPAWN' | 'CAST_START' | 'SKILL_ACTIVATE' | 'FX_START' | 'DEATH_COMPLETE'
+  /** hero skill clips (AnimDef.events): spawn the skill's VFX layer · contact feel (hit-stop / shake) · recovery · clip end */
+  | 'VFX_SPAWN' | 'IMPACT' | 'RECOVERY_START' | 'ANIMATION_END';
 
 export interface MonsterStats {
   maxHp: number;

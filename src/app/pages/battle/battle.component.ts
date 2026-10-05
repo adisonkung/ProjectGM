@@ -1,6 +1,6 @@
 import { itemName as itemNameOf } from '../../core/rules/equipment';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
-import { Component, computed, effect, HostListener, inject, isDevMode, OnDestroy, signal, untracked } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, inject, isDevMode, OnDestroy, signal, untracked, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TeamPresetsComponent } from '../../shared/team-presets.component';
 import { DUNGEON_TYPES } from '../dungeons/dungeons.component';
@@ -20,7 +20,8 @@ import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { hasStatus } from '../../battle/engine/buffs';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
-import { CLASS_PROJECTILE, FX, SHEETS, SkillKind } from '../../core/data/sprites';
+import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
+import { CLASS_PROJECTILE, FX, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
 import { Router } from '@angular/router';
@@ -444,8 +445,14 @@ export class BattleComponent implements OnDestroy {
     this.simReport.set(`จำลอง ${runs} รอบ: ชนะ ${Math.round((wins / runs) * 100)}% · เฉลี่ย ${(t / runs).toFixed(1)} วินาที`);
   }
 
+  /** board element (hit-stop / screen shake) */
+  private readonly boardEl = viewChild(BoardComponent, { read: ElementRef });
+  /** hit-stop: the engine holds until this real time (performance.now ms) — presentation only, game time just waits */
+  private hitStopUntil = 0;
+
   private tick(): void {
     if (this.paused()) return;
+    if (performance.now() < this.hitStopUntil) return;
     for (let i = 0; i < this.speed() && !this.engine.result; i++) this.engine.step(TICK);
     this.handleEvents(this.engine.drainEvents());
     this.time.set(this.engine.fightTime);
@@ -761,7 +768,7 @@ export class BattleComponent implements OnDestroy {
     const posOf = (id: number) => this.screenOf(unitOf(id));
     const set = (id: number, anim: AnimState['anim'], extra: Partial<AnimState> = {}) => (anims[id] = { anim, key: ++this.animKey, ...extra });
     /** เอฟเฟกต์ของสกิลนี้ เล่นตอนเริ่มท่าหรือตอนโดน ตามที่ตั้งไว้ใน FX */
-    const addFx = (src: number, dst: number | undefined, kind: SkillKind, when: 'cast' | 'impact') => {
+    const addFx = (src: number, dst: number | undefined, kind: SkillKind, when: 'cast' | 'impact' | 'vfx') => {
       const name = SHEETS[unitOf(src).sprite ?? '']?.fx?.[kind];
       const def = name ? FX[name] : undefined;
       if (!name || !def || (def.on ?? 'impact') !== when) return;
@@ -820,8 +827,16 @@ export class BattleComponent implements OnDestroy {
           addFx(e.src, e.dst, e.kind, 'cast');
           break;
         }
-        case 'impact':
+        case 'impact': {
           addFx(e.src, e.dst, e.kind, 'impact');
+          // contact feel authored on the clip (AnimDef.impact): hit-stop + small shake
+          const stop = playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(unitOf(e.src).sprite, e.kind));
+          if (stop) this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + stop);
+          break;
+        }
+        case 'animEvent':
+          // VFX_SPAWN of a hero clip: the skill's VFX layer (FX `on: 'vfx'`) at its anchor; a missing FX is a no-op
+          if (e.event === 'VFX_SPAWN' && e.kind) addFx(e.src, undefined, e.kind, 'vfx');
           break;
         case 'blink':
           // วาร์ป: ย้ายทันที + ค่อย ๆ ปรากฏ (ไม่ไถลข้ามสนาม)

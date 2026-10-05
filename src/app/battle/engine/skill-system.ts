@@ -8,7 +8,7 @@ export interface StatusApplyOptions {
   modifiers?: Partial<StatusModifiers>;
 }
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
-import { animTiming, SkillKind } from '../../core/data/sprites';
+import { animEvents, animTiming, SkillKind } from '../../core/data/sprites';
 import {
   AreaPattern, DamageKind, HeroKit, INTERRUPT_PRIORITY_RANK, InterruptPriority, SkillDefinition, SkillEffect, SkillSlot, SkillUseMode, TargetRule,
 } from '../../core/models/combat';
@@ -487,6 +487,15 @@ export class SkillSystem {
       this.h.emit({ type: 'cast', src: u.id, skill: s.name, kind: kind as SkillKind, dst: target.id });
       u.castLock = Math.max(u.castLock, tm.total, SKILL_LOCK);
     }
+    // semantic clip events (sheets that author `events`): presentation only — DAMAGE stays on tm.hit below and
+    // IMPACT fires where the hit really lands (land); a dead caster drops the rest (later). Events before the hit
+    // are queued now, the ones at / after it once the hit is queued (same-time order: DAMAGE → IMPACT → RECOVERY…)
+    const clipEvents = slot === 'attack' ? [] : animEvents(u.sprite, kind).filter(ev => ev.event !== 'DAMAGE' && ev.event !== 'IMPACT');
+    const queueClip = (before: boolean) => {
+      for (const ev of clipEvents.filter(x => (x.t < tm.hit) === before))
+        this.h.later(ev.t, u, () => this.h.emit({ type: 'animEvent', src: u.id, event: ev.event, name: `${s.id.toUpperCase()}_${ev.event}`, kind: kind as SkillKind }));
+    };
+    queueClip(true);
     if (target !== u && target.side !== u.side) u.targetId = target.id;
 
     const mv = s.movement;
@@ -505,7 +514,11 @@ export class SkillSystem {
     }
 
     const land = (primary: BattleUnit, at: Cell, skill = s) => {
-      if (slot !== 'attack') this.h.emit({ type: 'impact', src: u.id, dst: primary.alive ? primary.id : undefined, kind: kind as SkillKind });
+      if (slot !== 'attack') {
+        if (animEvents(u.sprite, kind).some(e => e.event === 'IMPACT'))
+          this.h.emit({ type: 'animEvent', src: u.id, event: 'IMPACT', name: `${s.id.toUpperCase()}_IMPACT`, kind: kind as SkillKind });
+        this.h.emit({ type: 'impact', src: u.id, dst: primary.alive ? primary.id : undefined, kind: kind as SkillKind });
+      }
       this.applyEffects(u, skill, slot, primary, at);
       if (mv?.type === 'DASH_THROUGH') this.dashThrough(u, primary, at);
     };
@@ -535,6 +548,7 @@ export class SkillSystem {
         });
       }
     });
+    queueClip(false);
   }
 
   /** run a skill's effects in order (primary may have died: areas centre on its last cell) */

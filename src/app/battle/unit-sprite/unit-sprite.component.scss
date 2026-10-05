@@ -16,6 +16,7 @@
   background-repeat: no-repeat;
   background-position: 0% 0%;
   &.flip { transform: translateX(-50%) scaleX(-1); }
+  &.pixelated { image-rendering: pixelated; }
 }
 
 .token {

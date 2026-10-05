@@ -26,6 +26,7 @@ const GAME_ROUTES: Routes = [
   // real runs (tower floor / farm dungeon, rewards) — the lab is the sandbox with balance tools, same screen
   { path: 'battle', loadComponent: () => import('./pages/battle/battle.component').then(m => m.BattleComponent), title: 'สนามรบ · Summon Tower' },
   { path: 'lab', loadComponent: () => import('./pages/battle/battle.component').then(m => m.BattleComponent), title: 'ห้องทดลองต่อสู้ · Summon Tower', data: { lab: true } },
+  { path: 'sprite-lab', loadComponent: () => import('./pages/sprite-lab/sprite-lab.component').then(m => m.SpriteLabComponent), title: 'ห้องทดสอบท่า · Summon Tower' },
   { path: '**', redirectTo: 'home' },
 ];
 

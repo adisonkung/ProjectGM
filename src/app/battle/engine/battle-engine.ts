@@ -55,7 +55,7 @@ export type BattleEvent =
   | { type: 'projectileHit'; pid: number; dst: number }
   | { type: 'projectileExpire'; pid: number }
   /** semantic animation event reached (DAMAGE, PROJECTILE_SPAWN, SKILL_ACTIVATE …) */
-  | { type: 'animEvent'; src: number; event: SemanticEvent; name: string }
+  | { type: 'animEvent'; src: number; event: SemanticEvent; name: string; kind?: SkillKind }
   /** melee hit event fired but the target had moved out of reach */
   | { type: 'miss'; src: number; dst: number }
   /** MIRROR STANCE: `src` (the stance holder) sent `amount` back to `dst` */

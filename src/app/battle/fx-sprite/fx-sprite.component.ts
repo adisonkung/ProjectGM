@@ -7,10 +7,12 @@ import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
   template: `<div #el class="fx" [style.background-image]="'url(sprites/' + def().file + ')'"
     [style.background-size]="def().frames * 100 + '% 100%'" [style.width.%]="def().w * pxToCell * (def().scale ?? 1) * fxScale"
     [style.aspect-ratio]="def().w + ' / ' + def().h" [style.left]="'calc(50% + ' + (def().dx ?? 0) * (flip() ? -1 : 1) + '%)'"
-    [style.top]="'calc(50% + ' + (def().dy ?? 0) + '%)'" [style.transform]="'translate(-50%, -50%) rotate(' + angle() + 'deg)' + (flip() ? ' scaleX(-1)' : '')"></div>`,
+    [style.top]="'calc(50% + ' + (def().dy ?? 0) + '%)'" [style.transform-origin]="origin()" [class.pixelated]="!!def().pixelated"
+    [style.transform]="'translate(' + -pivot()[0] * 100 + '%, ' + -pivot()[1] * 100 + '%) rotate(' + angle() + 'deg)' + (flip() ? ' scaleX(-1)' : '')"></div>`,
   styles: `
     :host { position: absolute; inset: 0; pointer-events: none; }
     .fx { position: absolute; background-repeat: no-repeat; opacity: 0; }
+    .pixelated { image-rendering: pixelated; }
   `,
 })
 export class FxSpriteComponent {
@@ -23,6 +25,9 @@ export class FxSpriteComponent {
 
   readonly el = viewChild.required<ElementRef<HTMLElement>>('el');
   readonly def = computed(() => FX[this.name()]);
+  /** anchor point inside the frame (default centre): sits on dx/dy, flip / rotate turn around it */
+  readonly pivot = computed(() => this.def().pivot ?? [0.5, 0.5]);
+  readonly origin = computed(() => `${this.pivot()[0] * 100}% ${this.pivot()[1] * 100}%`);
   readonly pxToCell = PX_TO_CELL;
   readonly fxScale = FX_SCALE;
 

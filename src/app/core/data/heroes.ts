@@ -30,6 +30,7 @@ export const HEROES: HeroTemplate[] = [
   { id: 'nox',      name: 'น็อกซ์',   cls: 'assassin', star: 3, sprite: 'hero-nox.png' },
   { id: 'velma',    name: 'เวลมา',    cls: 'mage',    star: 3, sprite: 'hero-velma.png' },
   { id: 'aurel',    name: 'ออเรล',    cls: 'tank',    star: 3, sprite: 'hero-aurel.png' },
+  { id: 'bailong',  name: 'ไป๋หลง',   cls: 'fighter', star: 3, sprite: 'hero-bailong.png' },
 ];
 
 export const HERO_BY_ID: Record<string, HeroTemplate> = Object.fromEntries(HEROES.map(h => [h.id, h]));

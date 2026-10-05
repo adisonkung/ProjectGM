@@ -206,6 +206,18 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
     kit: rename(tank, ['ป้อมปราการมืด', 'โล่กระแทก', 'ระเบิดโล่ทมิฬ']),
   },
   jin: { id: 'jin', cls: 'fighter', identity: 'Formation Cleave · Multi-target Melee DPS', kit: fighter },
+  // ไป๋หลง (ทวนมังกรขาว, 3★): ไม่มีค่าเดิม → ตัวเลข Fighter baseline ทั้งหมด (ไม่มีบาลานซ์ใหม่)
+  // Dragon Thrust = แทงทะลวงของคลาส (LINE_2 180 % / 120 %, cd 10, rank table เดิม) ย้ายมาเป็นสกิล 1 พร้อมภาพของเขาเอง
+  // สกิล 2 / ท่าไม้ตาย = ของคลาสชั่วคราว (ยังไม่ออกแบบ/ไม่มีภาพ — รอรีวิว Dragon Thrust ก่อน)
+  bailong: {
+    id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce (Skill 2 / Ultimate pending review)',
+    kit: {
+      ...fighter,
+      skill: { ...fighter.skill2, slot: 'skill', name: 'ทวนมังกรทะลวง', label: 'Dragon Thrust' },
+      skill2: { ...fighter.skill, slot: 'skill2', name: 'ทวนหมุนวน', label: 'Spinning Spear (placeholder)' },
+      ult: { ...fighter.ult, name: 'ทวนมังกรประหาร', label: 'Dragon Execution (placeholder)' },
+    },
+  },
   ragnar: {
     id: 'ragnar', cls: 'fighter', identity: 'Bruiser · Frontline Pressure · Self Rampage',
     kit: {

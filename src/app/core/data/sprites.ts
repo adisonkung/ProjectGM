@@ -4,7 +4,7 @@
  * เอฟเฟกต์ใช้สเกลพิกเซลเดียวกับตัวละคร (1 px ต้นฉบับ = 1.25% ของความกว้างช่องกระดาน)
  */
 
-import { AnimationConfig } from '../models/monster';
+import { AnimationConfig, SemanticEvent } from '../models/monster';
 import { MONSTERS, PROJECTILES } from './monsters';
 
 /** `cast` = a monster's cast clip, driven by the cast time (see AnimDef.castStart / activate) */
@@ -26,6 +26,21 @@ export interface AnimDef {
   /** ท่าร่าย (castDriven): เฟรม CAST_START / SKILL_ACTIVATE (0-based) — เฟรมระหว่างนั้นยืดให้พอดีเวลาร่าย */
   castStart?: number;
   activate?: number;
+  /**
+   * Semantic events of a hero clip, as 0-based frames of THIS row (data only — gameplay listens to the events,
+   * never to frame numbers): CAST_START, SKILL_ACTIVATE, VFX_SPAWN, PROJECTILE_SPAWN, DAMAGE (= `hit`), IMPACT,
+   * RECOVERY_START, ANIMATION_END (default = the clip length). The engine turns them into seconds with `animEvents()`.
+   */
+  events?: Partial<Record<SemanticEvent, number>>;
+  /** contact feel when this clip's skill lands (battle page + sprite lab): hit-stop + small screen shake */
+  impact?: ImpactFeel;
+}
+
+/** hit-stop (the whole board freezes for `hitStopMs` real ms) + a small screen shake */
+export interface ImpactFeel {
+  hitStopMs?: number;
+  shakePx?: number;
+  shakeMs?: number;
 }
 
 export interface SheetDef {
@@ -46,6 +61,8 @@ export interface SheetDef {
   cellW?: number;
   /** ท่าร่ายแยกตาม clip ของสกิล (มอนสเตอร์ที่มีหลายสกิล) — ไม่มี = ใช้ anims.cast */
   casts?: Record<string, AnimDef>;
+  /** nearest-neighbour rendering (pixel-art sheets) */
+  pixelated?: boolean;
 }
 
 export interface FxDef {
@@ -64,8 +81,15 @@ export interface FxDef {
   scale?: number;
   /** เอฟเฟกต์ที่เป้าหมาย: หมุนตามทิศ (ค่าเริ่มต้น) หรือแค่กลับซ้าย/ขวาตามทิศผู้ใช้ */
   orient?: 'rotate' | 'flip';
-  /** เริ่มเล่นตอนเริ่มท่า (cast) หรือตอนดาเมจเข้า (impact, ค่าเริ่มต้น) */
-  on?: 'cast' | 'impact';
+  /** เริ่มเล่นตอนเริ่มท่า (cast), ตอนดาเมจเข้า (impact, ค่าเริ่มต้น) หรือตอน event VFX_SPAWN ของท่า (vfx) */
+  on?: 'cast' | 'impact' | 'vfx';
+  /**
+   * จุดหมุน/จุดยึดของภาพ เป็นสัดส่วนของเฟรม [x, y] (ค่าเริ่มต้น [0.5, 0.5] = กลาง) — จุดนี้วางตรง anchor (dx/dy)
+   * และการกลับซ้าย-ขวา/หมุนทำรอบจุดนี้ (เช่น ลำมังกรของไป๋หลง = หางซ้ายกลาง [0.06, 0.5] เกาะปลายทวน)
+   */
+  pivot?: [number, number];
+  /** nearest-neighbour rendering (pixel-art FX) */
+  pixelated?: boolean;
   /** กระสุน: ทิศที่ภาพวาดชี้อยู่ (องศา, 0 = ขวา, 90 = ลง) — เฟรมสุดท้ายคือตอนกระทบ */
   angle0?: number;
   /** กระสุน: เอฟเฟกต์ที่เล่นเพิ่มตรงเป้าเมื่อกระทบ */
@@ -252,6 +276,29 @@ export const SHEETS: Record<string, SheetDef> = {
     projectile: { ult: 'velma-beam' },
   },
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
+  // ไป๋หลง (ทวนมังกรขาว) — tools/sprites/bailong.py จากภาพ 4 แผ่นของผู้ใช้ (แผ่นตัวละคร ≠ แผ่น VFX)
+  // ช่องกว้าง 200 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (100, 105) · หันขวา
+  // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10 (ภาพที่ 3)
+  'hero-bailong.png': {
+    cols: 10, rows: 6, cellW: 200, cellH: 120, pixelated: true,
+    anims: {
+      idle: { row: 0, frames: 6 },
+      walk: { row: 1, frames: 8, ms: 75 },
+      hurt: { row: 2, frames: 4 },
+      attack: { row: 3, frames: 6, events: { DAMAGE: 3, RECOVERY_START: 5 } },
+      die: { row: 4, frames: 7, ms: 110 },
+      // Dragon Thrust: 10 × 95 ms = 0.95 s · ตัวละครเล่นเอง ส่วนลำมังกรเป็น VFX แยกชั้น (FX 'bailong-dragon-thrust')
+      skill: {
+        row: 5, frames: 10, ms: 95,
+        events: { CAST_START: 0, SKILL_ACTIVATE: 4, VFX_SPAWN: 6, DAMAGE: 8, IMPACT: 8, RECOVERY_START: 8 },
+        impact: { hitStopMs: 50, shakePx: 3, shakeMs: 140 },
+      },
+      // สกิล 2 / ท่าไม้ตาย ยังไม่ทำภาพ (รอรีวิว Dragon Thrust) → เล่นท่าแทงทวนธรรมดา ไม่ใช้ท่า/ลำมังกรของสกิล 1
+      skill2: { row: 3, frames: 6, hit: 3 },
+      ult: { row: 3, frames: 6, hit: 3 },
+    },
+    fx: { skill: 'bailong-dragon-thrust' },
+  },
 };
 
 /** ชื่อ clip ในข้อมูลมอนสเตอร์ → ท่าของ unit-sprite */
@@ -366,6 +413,13 @@ export const FX: Record<string, FxDef> = {
   // ลูกธนูก็อบลิน (ตัดจากเฟรมปล่อยสายในแผ่นก็อบลินพลธนู, tools/sprites/monster_sheet.py) · 1 เฟรม หัวชี้ขวา
   'goblin-arrow': { file: 'fx-goblin-arrow.png', frames: 1, w: 39, h: 12, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
   'aurel-ult': { file: 'fx-aurel-ult.png', frames: 8, w: 123, h: 90, frameMs: 95, at: 'self', dy: -18, scale: 1.55 },
+  // ลำมังกรของ Dragon Thrust (ภาพที่ 4: 2 คอลัมน์ × 7 แถว อ่านซ้าย→ขวา ทีละแถว = 14 เฟรม) — ชั้น VFX แยกจากตัวละคร
+  // เกิดตอน event VFX_SPAWN ที่ปลายทวน (weaponTip ของเฟรม 6: +78 px หน้า root, สูง 43 px → dx 97.5 %, dy −26.5 %)
+  // pivot = หางมังกรซ้ายกลาง, พุ่งซ้าย→ขวา, กลับด้านตามผู้ใช้ · ไม่ถูกตัดด้วยกรอบตัวละคร (วาดบนชั้น fx ของกระดาน)
+  'bailong-dragon-thrust': {
+    file: 'fx-bailong-dragon-thrust.png', frames: 14, w: 401, h: 75, frameMs: 45, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.06, 0.493], dx: 97.5, dy: -26.5, scale: 0.45, pixelated: true,
+  },
 };
 
 /** กระสุนของสายระยะไกลที่ไม่มีแผ่น sprite (ศัตรู/ฮีโร่โทเคน) */
@@ -410,6 +464,31 @@ export function animTiming(sprite: string | undefined, anim: 'attack' | SkillKin
     return { ...t, move: t.hit / 2 };
   }
   const ms = (a.ms ?? FRAME_MS) / 1000;
-  const hit = (a.hit ?? Math.floor(a.frames / 2)) * ms;
-  return { total: a.frames * ms, hit, move: (a.move ?? 0) * ms };
+  const hit = (a.events?.DAMAGE ?? a.hit ?? Math.floor(a.frames / 2)) * ms;
+  return { total: (a.events?.ANIMATION_END ?? a.frames) * ms, hit, move: (a.move ?? 0) * ms };
 }
+
+/** the clip a sheet really plays for this action (ANIM_FALLBACK walked) */
+export function animOf(sprite: string | undefined, anim: SpriteAnim): AnimDef | undefined {
+  const sheet = sprite ? SHEETS[sprite] : undefined;
+  let name: SpriteAnim | null = anim;
+  while (sheet && name && !sheet.anims[name]) name = ANIM_FALLBACK[name];
+  return name ? sheet?.anims[name] : undefined;
+}
+
+/**
+ * Semantic events of a hero clip in seconds (speed ×1), sorted by time — [] when the clip has no `events`
+ * (every sheet without them keeps the old hit-frame timing). ANIMATION_END defaults to the clip length.
+ */
+export function animEvents(sprite: string | undefined, anim: 'attack' | SkillKind): { event: SemanticEvent; t: number; frame: number }[] {
+  const a = animOf(sprite, anim);
+  if (!a?.events) return [];
+  const ms = (a.ms ?? FRAME_MS) / 1000;
+  const ev: Partial<Record<SemanticEvent, number>> = { ANIMATION_END: a.frames, ...a.events };
+  return (Object.entries(ev) as [SemanticEvent, number][])
+    .map(([event, frame]) => ({ event, frame, t: frame * ms }))
+    .sort((x, y) => x.t - y.t);
+}
+
+/** hit-stop / shake of the clip a unit plays for this skill (none = no contact feel) */
+export const impactFeelOf = (sprite: string | undefined, anim: 'attack' | SkillKind): ImpactFeel | undefined => animOf(sprite, anim)?.impact;
