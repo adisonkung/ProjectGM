@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AccountService } from './core/services/account.service';
+import { PreloadService } from './core/services/preload.service';
 import { SaveService } from './core/services/save.service';
 import { IconComponent } from './shared/icon.component';
 
@@ -53,4 +54,9 @@ export class AppComponent {
 
   readonly gems = computed(() => this.save.state().gems.toLocaleString('en-US'));
   readonly gold = computed(() => this.save.state().gold.toLocaleString('en-US'));
+
+  constructor() {
+    // start decoding the island art right away (the home screen is the island)
+    inject(PreloadService).warmCity();
+  }
 }

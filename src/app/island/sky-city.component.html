@@ -1,4 +1,4 @@
-<div class="vp" #vp (pointerdown)="onPointerDown($event)" (wheel)="onWheel($event)">
+<div class="vp" #vp [class.loading]="!ready()" [class.lite]="lite()" (pointerdown)="onPointerDown($event)" (wheel)="onWheel($event)">
   <div class="stage" [style.width.px]="W * k()" [style.height.px]="H * k()">
     <div class="world" [style.width.px]="W" [style.height.px]="H" [style.transform]="transform()" [class.gold]="gold()" [class.focusing]="!!focus()">
 
@@ -31,6 +31,7 @@
 
       <!-- ── the island (bobs gently as one piece) ── -->
       <div class="isle">
+        <i class="isle-shadow" [style.top.px]="base.y + base.h * 0.62" [style.height.px]="base.h * 0.5"></i>
         <img class="base" [src]="base.src" alt="" draggable="false"
              [style.left.px]="base.x" [style.top.px]="base.y" [style.width.px]="base.w" [style.height.px]="base.h" />
 
@@ -144,7 +145,19 @@
   </div>
 </div>
 
-<div class="zoom" role="group" aria-label="ซูมแผนที่">
-  <button type="button" (click)="setZoom(zoom() * 1.25)" [disabled]="zoom() >= zoomMax" aria-label="ซูมเข้า">+</button>
-  <button type="button" (click)="setZoom(zoom() / 1.25)" [disabled]="zoom() <= zoomMin" aria-label="ซูมออก">−</button>
-</div>
+@if (zoomMax > zoomMin) {
+  <div class="zoom" role="group" aria-label="ซูมแผนที่">
+    <button type="button" (click)="setZoom(zoom() * 1.25)" [disabled]="zoom() >= zoomMax" aria-label="ซูมเข้า">+</button>
+    <button type="button" (click)="setZoom(zoom() / 1.25)" [disabled]="zoom() <= zoomMin" aria-label="ซูมออก">−</button>
+  </div>
+}
+<button type="button" class="fxq" (click)="toggleFx()" [attr.aria-pressed]="!lite()" [title]="lite() ? 'เอฟเฟกต์แบบประหยัด (ลื่นกว่า)' : 'เอฟเฟกต์เต็ม'">
+  ✦ {{ lite() ? 'ประหยัด' : 'เต็ม' }}
+</button>
+@if (!ready()) {
+  <div class="load" role="status" aria-live="polite">
+    <b>กำลังเตรียมเกาะ…</b>
+    <i class="bar"><em [style.width.%]="progress()"></em></i>
+    <small>{{ progress() }}%</small>
+  </div>
+}

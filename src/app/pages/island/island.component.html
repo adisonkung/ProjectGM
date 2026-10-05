@@ -1,5 +1,5 @@
 <section class="island">
-  <div class="stage">
+  <div class="stage" #stage [class.full]="isCity()">
     @if (isCity()) {
       <app-sky-city [buildings]="display()" [usable]="usableRuins()" [heroes]="heroViews()" [towerStage]="towerStage()"
                     [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()"
@@ -21,6 +21,9 @@
       </span>
     </div>
     <div class="hud tr">
+      @if (canFullscreen) {
+        <button type="button" class="note fs-btn" (click)="toggleFullscreen()" [attr.aria-label]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'" [title]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'">{{ isFull() ? '🗗' : '⛶' }}</button>
+      }
       <button type="button" class="note theme-btn" (click)="openThemes()" aria-label="เปลี่ยนธีมเกาะ" title="ธีมเกาะ"><app-icon name="palette" [size]="17" /></button>
       @if (readyCount()) {
         <a class="note" routerLink="/heroes" [attr.aria-label]="readyCount() + ' ฮีโร่พร้อมอัป'"><app-icon name="heroes" [size]="15" /><em>{{ readyCount() }}</em></a>

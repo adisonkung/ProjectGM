@@ -2,6 +2,7 @@ import {
   AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, input, NgZone, OnDestroy, output, signal, untracked, viewChild,
 } from '@angular/core';
 import { BUILDING_BY_ID } from '../core/data/island-layout';
+import { PreloadService } from '../core/services/preload.service';
 import { SKY_ZOOM, SKY_BASE, SKY_FX, SKY_HERO_SCALE, SKY_LAYERS, SKY_MASKS, SKY_NODES, SKY_PAD, SKY_PLOTS, SKY_SPAWN, SKY_SPIRE, SKY_WORLD } from '../core/data/sky-city';
 import { IslandBuildingState, Vec2 } from '../core/models/island';
 import { unlockFloorOf } from '../core/rules/island';
@@ -66,6 +67,13 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly vp = viewChild.required<ElementRef<HTMLElement>>('vp');
   private readonly zone = inject(NgZone);
   private resize?: ResizeObserver;
+  private readonly preload = inject(PreloadService);
+  /** all city art decoded → the map fades in (a loading card shows until then) */
+  readonly ready = this.preload.ready;
+  readonly progress = computed(() => Math.round(this.preload.progress() * 100));
+  /** effects quality: 'lite' drops the extra sky life (dragon, birds, motes, god rays, front mist) for slow GPUs */
+  readonly lite = signal(readFxPref() === 'lite');
+  private fxAuto = readFxPref() === null;
 
   /** fit-to-height scale × player zoom (the city is big: default zoom shows a district, pan in 2-D) */
   readonly fitK = signal(0.4);
@@ -121,6 +129,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.preload.warmCity().then(() => this.fxAuto && this.probeFps());
     const el = this.vp().nativeElement;
     this.zone.runOutsideAngular(() => {
       this.resize = new ResizeObserver(() => this.zone.run(() => this.fit()));
@@ -132,6 +141,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.resize?.disconnect();
   }
 
@@ -206,6 +216,30 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   tapHero(uid: number): void {
     if (!this.suppressClick) this.heroTap.emit(uid);
   }
+  /** a slow machine (median frame > 24 ms over ~1.5 s once the map is up) switches to lite effects by itself */
+  private probeFps(): void {
+    if (typeof requestAnimationFrame === 'undefined') return;
+    this.zone.runOutsideAngular(() => {
+      const t: number[] = [];
+      let last = 0;
+      const f = (now: number) => {
+        if (last) t.push(now - last);
+        last = now;
+        if (t.length < 90 && !this.destroyed) return void requestAnimationFrame(f);
+        t.sort((a, b) => a - b);
+        if (!this.destroyed && this.fxAuto && t.length >= 30 && t[t.length >> 1] > 24) this.zone.run(() => this.lite.set(true));
+      };
+      setTimeout(() => requestAnimationFrame(f), 800);
+    });
+  }
+  private destroyed = false;
+
+  toggleFx(): void {
+    this.fxAuto = false;
+    this.lite.update(v => !v);
+    writeFxPref(this.lite() ? 'lite' : 'full');
+  }
+
   /** depth by ground line (z-index must be an integer or the browser drops it) */
   zi(y: number): number {
     return 10 + Math.round(y);
@@ -213,5 +247,23 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   /** parallax: a layer at depth p (0 = glued to the sky, 1 = moves with the island) */
   par(p: number): string {
     return `translateX(${this.scrollX() * (1 - p)}px)`;
+  }
+}
+
+const FX_KEY = 'projectgm-city-fx';
+/** per-device effects preference (browser storage can be missing / blocked — then it is just not remembered) */
+function readFxPref(): 'lite' | 'full' | null {
+  try {
+    const v = localStorage.getItem(FX_KEY);
+    return v === 'lite' || v === 'full' ? v : null;
+  } catch {
+    return null;
+  }
+}
+function writeFxPref(v: 'lite' | 'full'): void {
+  try {
+    localStorage.setItem(FX_KEY, v);
+  } catch {
+    /* not remembered */
   }
 }

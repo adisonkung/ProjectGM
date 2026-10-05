@@ -25,14 +25,14 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .whale-x { position: absolute; left: 0; top: 40px; transform: translate3d(600px, 0, 0) scale(.6545); transform-origin: 0 0; animation: whaleX 95s linear infinite; will-change: transform; }
 .whale-y { animation: whaleY 13s ease-in-out infinite alternate; }
 .whale { position: relative; width: 1100px; height: 609px; transform-origin: 60% 50%; animation: whalePitch 7.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 22px #9b6bff77); opacity: .92;
+  opacity: .92;
   img { position: absolute; display: block; } }
 .w-tail { left: 0; top: 0; transform-origin: 345px 262px; animation: tailBeat 3.6s ease-in-out infinite; }
 .w-body { left: 324px; top: 71px; }
 .w-fin-front { left: 364px; top: 314px; transform-origin: 326px 31px; animation: finFront 3.6s ease-in-out infinite; animation-delay: -.5s; }
 .w-fin-back { left: 751px; top: 369px; transform-origin: 79px 31px; animation: finBack 3.6s ease-in-out infinite; animation-delay: -1.1s; }
 .w-shards { left: 0; top: 2px; animation: shards 5.4s ease-in-out infinite; }
-.whale-glow { position: absolute; left: 380px; top: 120px; width: 560px; height: 300px; border-radius: 50%; mix-blend-mode: screen;
+.whale-glow { position: absolute; left: 380px; top: 120px; width: 560px; height: 300px; border-radius: 50%;
   background: radial-gradient(ellipse, #b48cff55, transparent 70%); animation: crystal 4s ease-in-out infinite; }
 
 // dragon: body + two copies of the wing pivoting at the shoulder (art px: shoulder 763,173 · wing root 601,415)
@@ -40,29 +40,32 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .dragon { position: absolute; left: 0; top: 230px; width: 1009px; height: 432px; transform-origin: 0 0;
   animation: dragonFly 150s linear infinite; animation-delay: -60s;
   img { position: absolute; display: block; }
-  .body { left: 0; top: 0; width: 1009px; animation: dragonBob 3.2s ease-in-out infinite; filter: drop-shadow(0 0 18px #ffe7b066); }
+  .body { left: 0; top: 0; width: 1009px; animation: dragonBob 3.2s ease-in-out infinite; }
   .wing { left: 162px; top: -242px; width: 613px; transform-origin: 601px 415px; animation: flap 1.6s ease-in-out infinite; }
   .wing.far { left: 230px; top: -262px; filter: brightness(.72) saturate(.9); animation-delay: -.12s; }
 }
 // ---------------------------------------------------------------- island
 .isle { inset: 0; animation: bob 9s ease-in-out infinite; }
 .isle.ui { z-index: 200000; pointer-events: none; > * { pointer-events: auto; } }
-.base { z-index: 1; filter: drop-shadow(0 40px 60px #2a174c88); }
+.base { z-index: 1; }
+// soft shadow under the island: a plain gradient — a CSS drop-shadow on the 3740 px base was re-blurred every frame (the
+// isle bobs) and cost more than everything else on the map together
+.isle-shadow { z-index: 0; left: 6%; width: 88%; border-radius: 50%; background: radial-gradient(ellipse at 50% 40%, #2a174c88, #2a174c33 45%, transparent 70%); }
 
 // masked FX (masks = grey PNGs cut from the art; --m set from the template)
 .mfx { z-index: 2; pointer-events: none; overflow: hidden; mask-image: var(--m); -webkit-mask-image: var(--m);
   mask-size: 100% 100%; -webkit-mask-size: 100% 100%;
   > i { position: absolute; display: block; will-change: transform; } }
 // the pattern slides one period with a GPU transform (masked, cropped box) instead of repainting a background
-.falls { mix-blend-mode: screen; opacity: .85;
+.falls { opacity: .85;
   > i { left: 0; top: -120px; width: 100%; height: calc(100% + 120px); animation: fall .7s linear infinite;
     background: repeating-linear-gradient(180deg, transparent 0, #ffffff00 10px, #ffffffcc 22px, #dff4ff55 34px, transparent 52px, transparent 78px, #c8ecff88 92px, transparent 120px);
     background-size: 100% 120px; } }
-.water { mix-blend-mode: screen; opacity: .6;
+.water { opacity: .6;
   > i { left: -180px; top: 0; width: calc(100% + 180px); height: 100%; animation: ripple 3.2s linear infinite;
     background: repeating-linear-gradient(115deg, transparent 0, transparent 26px, #ffffff99 34px, transparent 46px, transparent 90px);
     background-size: 180px 180px; } }
-.crystals { mix-blend-mode: screen; animation: crystal 3.4s ease-in-out infinite;
+.crystals { animation: crystal 3.4s ease-in-out infinite;
   > i { inset: 0; background: radial-gradient(circle at 50% 50%, #e2cdff, #9b6bff 60%, #5ec8e0); } }
 
 .circle { z-index: 3; overflow: visible; opacity: .35; animation: spinFlat 30s linear infinite;
@@ -104,12 +107,12 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 :host ::ng-deep .hero .name { display: none; }
 
 .smoke { z-index: 100000; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, #e8def055, #c9bcd622 55%, transparent 72%);
-  filter: blur(9px); animation: smoke 6.5s ease-out infinite; }
-.fire { z-index: 99999; width: 180px; height: 180px; border-radius: 50%; mix-blend-mode: screen;
+  animation: smoke 6.5s ease-out infinite; }
+.fire { z-index: 99999; width: 180px; height: 180px; border-radius: 50%;
   background: radial-gradient(circle, #ffd27acc, #ff8a3a66 40%, transparent 70%); animation: flicker 1.3s ease-in-out infinite alternate; }
 .glint { z-index: 99999; width: 14px; height: 14px; background: radial-gradient(circle, #fff, #bfeaff 40%, transparent 70%);
   animation: glint 1.8s ease-in-out infinite; }
-.halo { z-index: 99999; width: 240px; height: 240px; border-radius: 50%; mix-blend-mode: screen;
+.halo { z-index: 99999; width: 240px; height: 240px; border-radius: 50%;
   background: radial-gradient(circle, #fff6d855, #f6dfa033 45%, transparent 70%); animation: tipPulse 4s ease-in-out infinite; }
 
 // ---------------------------------------------------------------- front
@@ -148,9 +151,9 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 @keyframes ripple { to { transform: translate3d(180px, 0, 0); } }
 @keyframes crystal { 0%, 100% { opacity: .25; } 50% { opacity: .85; } }
 @keyframes spinFlat { to { transform: rotate(0deg); } }
-@keyframes auraPulse { 50% { transform: scale(1.06); filter: brightness(1.25); } }
+@keyframes auraPulse { 0%, 100% { opacity: .8; } 50% { transform: scale(1.06); opacity: 1; } }
 @keyframes runes { to { stroke-dashoffset: -100; } }
-@keyframes tipPulse { 50% { transform: scale(1.18); filter: brightness(1.3); } }
+@keyframes tipPulse { 0%, 100% { opacity: .8; } 50% { transform: scale(1.18); opacity: 1; } }
 @keyframes riseMote { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(18px, -560px) scale(1.1); opacity: 0; } }
 @keyframes build {
   0% { clip-path: inset(100% 0 0 0); filter: brightness(3) saturate(0); transform: translateY(24px); }
@@ -174,3 +177,20 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) {
   .isle, .strip, .whale-x, .whale-y, .whale, .whale img, .mfx > i, .dragon, .dragon img, .flock, .bird, .godrays, .falls, .water, .crystals, .mote, .rise-mote, .smoke, .ring path { animation: none !important; }
 }
+
+// ---------------------------------------------------------------- loading · effects quality
+.vp { transition: opacity .5s ease; }
+.vp.loading { opacity: 0; * { animation-play-state: paused !important; } }
+.load { position: absolute; inset: 0; z-index: 6; display: grid; place-content: center; justify-items: center; gap: 10px;
+  background: radial-gradient(ellipse at 50% 60%, #3a2a78, #140e2a 70%); color: var(--gold-hi);
+  b { font: 700 18px var(--title); letter-spacing: .05em; text-shadow: 0 0 14px #9b6bff88; }
+  small { font: 600 12px var(--body); color: var(--muted); } }
+.bar { display: block; width: min(260px, 60vw); height: 6px; border-radius: 3px; background: #ffffff1a; overflow: hidden;
+  em { display: block; height: 100%; background: linear-gradient(90deg, #9b6bff, #f6dfa0); transition: width .2s; } }
+.fxq { position: absolute; left: 12px; bottom: 12px; z-index: 5; padding: 6px 12px; border-radius: 99px; border: 1px solid #d9b46488;
+  background: #0b0914cc; color: var(--gold-hi); font: 700 12px var(--title); cursor: pointer; box-shadow: 0 4px 12px #0008;
+  &:hover { border-color: var(--gold); } }
+.zoom { bottom: 52px; }
+// lite: keep the island, clouds, whale, water — drop the extra sky life
+.vp.lite { .dragon-path, .flock-wrap, .mote, .star, .godrays, .mist, .whale-glow, .rise-mote, .smoke, .glint { display: none; }
+  .circle, .mfx, .mfx > i { animation: none; } }

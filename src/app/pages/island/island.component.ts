@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, NgZone, OnDestroy, OnInit, signal, untracked } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, inject, NgZone, OnDestroy, OnInit, signal, untracked, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { BUILDING_BY_ID, ISLAND_BUILDINGS, PLOT_BY_ID } from '../../core/data/island-layout';
 import { ISLAND_THEMES, themeOf } from '../../core/data/island-themes';
@@ -55,6 +55,18 @@ export class IslandComponent implements OnInit, OnDestroy {
   private readonly zone = inject(NgZone);
 
   readonly island = this.isl.island;
+  /** browser full screen for the island view (desktop / Android; iPhone Safari has no element full screen) */
+  private readonly stageEl = viewChild<ElementRef<HTMLElement>>('stage');
+  readonly canFullscreen = typeof document !== 'undefined' && !!document.fullscreenEnabled;
+  readonly isFull = signal(false);
+  toggleFullscreen(): void {
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+    else void this.stageEl()?.nativeElement.requestFullscreen?.().catch(() => {});
+  }
+  @HostListener('document:fullscreenchange')
+  onFullscreenChange(): void {
+    this.isFull.set(!!document.fullscreenElement);
+  }
   readonly theme = computed(() => themeOf(this.island().themeId));
   /** cosmetic themes the player can switch between (visual only) */
   readonly themes = Object.values(ISLAND_THEMES);

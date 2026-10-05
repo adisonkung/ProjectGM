@@ -7,6 +7,9 @@
   box-shadow: 0 0 0 1px #d9b46422, 0 20px 50px #000c, 0 0 60px #9b6bff1a;
 }
 app-island-scene { position: absolute; inset: 0; }
+/* Sky City: edge-to-edge, as tall as the window allows (no zoom — the whole city is the view) */
+.stage.full { width: 100vw; margin-inline: calc(50% - 50vw); height: max(420px, calc(100dvh - 128px)); border-radius: 0; border-inline: 0; }
+.stage:fullscreen { width: 100vw; height: 100vh; margin: 0; border: 0; border-radius: 0; }
 
 .hud { position: absolute; z-index: 2; display: grid; gap: 6px; pointer-events: none; > * { pointer-events: auto; } }
 .tl { top: 10px; left: 10px; }
@@ -52,10 +55,12 @@ app-island-scene { position: absolute; inset: 0; }
 
 @media (max-width: 760px) {
   .stage { height: clamp(300px, 58vh, 500px); border-radius: 14px; }
+  .stage.full { height: max(360px, calc(100dvh - 190px)); border-radius: 0; }
 }
 .side { max-width: 720px; }
 
-.theme-btn { border: 1px solid #d9b46488; cursor: pointer; padding: 0; }
+.theme-btn, .fs-btn { border: 1px solid #d9b46488; cursor: pointer; padding: 0; }
+.fs-btn { font-size: 16px; line-height: 1; }
 .themes-sheet { max-height: calc(100% - 20px); overflow: auto;
   .tnote { font-size: 12px; color: var(--muted); } }
 .map-card { position: relative; width: 100%; display: grid; grid-template-columns: 160px 1fr; gap: 10px; align-items: center; padding: 6px; margin-bottom: 8px;

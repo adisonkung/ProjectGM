@@ -97,6 +97,16 @@ export const SKY_LAYERS = {
   clouds: `${SKY_CITY_DIR}/clouds.webp`, wisps: `${SKY_CITY_DIR}/wisps.webp`, far: `${SKY_CITY_DIR}/far_islands.webp`,
 };
 /** island heroes are drawn smaller here (the city is painted at a smaller scale than the battle sprites) */
-export const SKY_HERO_SCALE = 0.5;
-/** camera zoom over fit-to-height: the city is shown close up (heroes stay small next to the buildings) */
-export const SKY_ZOOM = { min: 1, start: 1.8, max: 2.8 };
+export const SKY_HERO_SCALE = 0.62;
+/** camera zoom over fit-to-height. Fixed at 1: the whole city fills a big screen (zooming in made the GPU
+ *  re-rasterize the huge layers at 2–3× and stutter); kept as a knob — min < max shows the +/− buttons again */
+export const SKY_ZOOM = { min: 1, start: 1, max: 1 };
+
+/** every image the city paints (preloaded + decoded at app start by PreloadService) */
+export const SKY_CITY_ASSETS: readonly string[] = [
+  SKY_BASE.src, SKY_SPIRE.src,
+  ...Object.values(SKY_PLOTS).flatMap(p => (p.art ? [p.art.src] : [])),
+  ...Object.values(SKY_MASKS).map(m => m.src),
+  ...(['sky', 'farIslands', 'bank', 'sea', 'mist', 'rays', 'birds', 'dragonBody', 'dragonWing',
+    'whaleBody', 'whaleTail', 'whaleFinFront', 'whaleFinBack', 'whaleShards'] as const).map(k => SKY_LAYERS[k]),
+];
