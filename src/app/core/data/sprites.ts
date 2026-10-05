@@ -345,21 +345,20 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 2, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 6, VFX_SPAWN: 6, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
         impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
       },
-      // Nine Dragon Sequence (v2 art, 4-hit combo): charge F1–F5 (peak hold) · F8 thrust → straight dragon ·
-      // F12 low stab → dragon pillar under the target · F13 rising sweep → crescent dragon · F16 overhead wind-up →
-      // F18 final lunge → nine dragons + burst · F20 ready. Events count steps (= sheet frames here).
+      // Nine Dragon Sequence (v2 art, 3 hits): charge F1–F5 (peak hold) · F8 thrust → straight dragon ·
+      // F12 low stab → dragon pillar under the target · (F13 / F14 rising sweep left out) F15 guard → F16 overhead
+      // wind-up → F18 final lunge → nine dragons + burst · F20 ready. Events count `seq` steps.
       ult: {
         row: 7, frames: 20, ms: 120,
-        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-        steps: [100, 100, 110, 110, 260, 90, 80, 180, 90, 90, 100, 170, 170, 110, 90, 250, 70, 260, 120, 110],
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17, 18, 19],
+        steps: [100, 100, 110, 110, 260, 90, 80, 180, 90, 90, 100, 200, 120, 250, 70, 260, 120, 110],
         events: {
-          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, STRIKE_START: [5, 9, 11, 16], FINAL_ANTICIPATION: 15,
-          DAMAGE: [7, 11, 12, 17], IMPACT: [7, 11, 12, 17], RECOVERY_START: 18,
+          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, STRIKE_START: [5, 9, 14], FINAL_ANTICIPATION: 13,
+          DAMAGE: [7, 11, 15], IMPACT: [7, 11, 15], RECOVERY_START: 16,
         },
         impact: [
           { hitStopMs: 25, shakePx: 2, shakeMs: 110 },
-          { hitStopMs: 30, shakePx: 3, shakeMs: 130 },
-          { hitStopMs: 38, shakePx: 4, shakeMs: 150 },
+          { hitStopMs: 35, shakePx: 4, shakeMs: 150 },
           { hitStopMs: 95, shakePx: 7, shakeMs: 220, flashMs: 140 },
         ],
       },
@@ -367,7 +366,7 @@ export const SHEETS: Record<string, SheetDef> = {
     fx: {
       skill: 'bailong-dragon-thrust',
       skill2: ['bailong-sweeping-moon', 'bailong-sweeping-moon-hit'],
-      ult: ['bailong-nine-dragon-charge', 'bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-crescent', 'bailong-nine-dragon-3', 'bailong-nine-dragon-impact'],
+      ult: ['bailong-nine-dragon-charge', 'bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3', 'bailong-nine-dragon-impact'],
     },
   },
 };
@@ -516,12 +515,7 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-nine-dragon-2.png', frames: 8, w: 267, h: 441, frameMs: 48, at: 'target', orient: 'flip',
     event: 'STRIKE_START', eventIndex: 1, pivot: [0.502, 0.85], dy: 27.25, fitCells: 2.6, pixelated: true,
   },
-  // จังหวะ 3: กวาดขึ้น → มังกรโค้งจากปลายทวน
-  'bailong-nine-dragon-crescent': {
-    file: 'fx-bailong-nine-dragon-crescent.png', frames: 8, w: 205, h: 194, frameMs: 43, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 2, anchor: 'ultTip2', pivot: [0.077, 0.5], scale: 0.9, pixelated: true,
-  },
-  // จังหวะ 4: เก้ามังกร ปล่อยตอนง้างสุดท้าย พีคตรงดาเมจ
+  // จังหวะ 3: เก้ามังกร ปล่อยตอนง้างสุดท้าย พีคตรงดาเมจ
   'bailong-nine-dragon-3': {
     file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 80, at: 'self', orient: 'flip',
     event: 'FINAL_ANTICIPATION', anchor: 'ultTip3', pivot: [0.068, 0.5], scale: 1.1, pixelated: true,
@@ -529,7 +523,7 @@ export const FX: Record<string, FxDef> = {
   // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
   'bailong-nine-dragon-impact': {
     file: 'fx-bailong-nine-dragon-impact.png', frames: 12, w: 202, h: 168, frameMs: 60, at: 'target', orient: 'flip', on: 'impact',
-    hitIndex: 3, pivot: [0.5, 0.988], dy: 27.25, fitCells: 3.4, scale: 0.78, pixelated: true,
+    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, fitCells: 3.4, scale: 0.78, pixelated: true,
   },
 };
 

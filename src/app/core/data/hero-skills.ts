@@ -209,8 +209,8 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
   // ไป๋หลง (ทวนมังกรขาว, 3★): ตัวเลข Fighter baseline ทั้งหมด (ไม่มีบาลานซ์ใหม่) — ภาพ/จังหวะอยู่ใน sprites.ts
   // · S1 Dragon Thrust = แทงทะลวงของคลาส (LINE_2 180 % / 120 %, cd 10, id/rank table เดิม) ย้ายมาช่อง 1
   // · S2 Sweeping Moon = ดาบหมุนวนของคลาส (ADJACENT_8 รอบตัว 170 % / 100 %, cd 5, รอโดน ≥ 2 ตัว) แค่เปลี่ยนชื่อ
-  // · Ult Nine Dragon Sequence = ดาบมังกรประหารของคลาส (range 2, ADJACENT_8 รอบเป้า 280 % / 140 %) แบ่งเป็น 4 จังหวะ
-  //   20 / 20 / 25 / 35 % (รวม = ค่าเดิม) ลงตาม DAMAGE ของท่า · จังหวะหลังยังลงที่จุดเดิมแม้เป้าตาย (เหมือนตีครั้งเดียว)
+  // · Ult Nine Dragon Sequence = ดาบมังกรประหารของคลาส (range 2, ADJACENT_8 รอบเป้า 280 % / 140 %) แบ่งเป็น 3 จังหวะ
+  //   25 / 30 / 45 % (รวม = ค่าเดิม) ลงตาม DAMAGE ของท่า · จังหวะหลังยังลงที่จุดเดิมแม้เป้าตาย (เหมือนตีครั้งเดียว)
   bailong: {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {
@@ -219,7 +219,7 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       skill2: { ...fighter.skill, slot: 'skill2', name: 'จันทร์กวาด', label: 'Sweeping Moon' },
       ult: {
         ...fighter.ult, name: 'ลำดับเก้ามังกร', label: 'Nine Dragon Sequence',
-        repeat: { count: 4, gap: 0.4, weights: [0.2, 0.2, 0.25, 0.35], keepAfterKill: true },
+        repeat: { count: 3, gap: 0.5, weights: [0.25, 0.3, 0.45], keepAfterKill: true },
       },
     },
   },
