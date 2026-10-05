@@ -165,7 +165,8 @@ export const SHEETS: Record<string, SheetDef> = {
         impact: { hitStopMs: 55, shakePx: 3, shakeMs: 140 },
       },
       // Guardian Rush: 0.95 s · crouch loaded (F4 held) → quick dash F5–F7 → F8 shield collision held =
-      // interrupt / knockback / stun → recover
+      // interrupt / knockback / stun → recover · VFX baked: rim F2–F3 · force wraps the shield F4–F7 (wake behind)
+      // · main max + impact peak F8 · aftershock F9 · fragments F10–F11 · clean F12
       skill2: {
         row: 6, frames: 12, ms: 75,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
@@ -182,8 +183,8 @@ export const SHEETS: Record<string, SheetDef> = {
         impact: { hitStopMs: 90, shakePx: 6, shakeMs: 220, flashMs: 120 },
       },
     },
-    // Shield Bash: main + impact VFX baked into the clip (aurel_bash_vfx.py) — no separate fx layer
-    fx: { skill2: 'aurel-charge', ult: 'aurel-ult' },
+    // Shield Bash / Guardian Rush: main + impact VFX baked into the clips (aurel_bash_vfx.py / aurel_rush_vfx.py)
+    fx: { ult: 'aurel-ult' },
     shieldFx: 'aurel-ward',
   },
   'hero-shade.png': {

@@ -27,6 +27,7 @@ from scipy import ndimage
 sys.path.insert(0, os.path.dirname(__file__))
 import bailong as B  # noqa: E402
 import aurel_bash_vfx as BV  # noqa: E402
+import aurel_rush_vfx as RV  # noqa: E402
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/aurel'
 OUT = sys.argv[2] if len(sys.argv) > 2 else 'public/sprites'
@@ -196,6 +197,8 @@ def main():
         frs = sheet_frames(file, counts, soft)
         if file == 'bash':   # Shield Bash: the supplied VFX strips placed on the clip (aurel_bash_vfx.py)
             frs = BV.combine(frs)
+        if file == 'rush':   # Guardian Rush: main VFX travels with Aurel + collision burst (aurel_rush_vfx.py)
+            frs = RV.combine(frs)
         sc = sc_base * body_h(groups['idle'][0]) / body_h(frs[0])
         rows.append((name, frs, sc))
         report['notes'].append(f'{file}: {len(frs)} frames, scale {sc:.3f}')
