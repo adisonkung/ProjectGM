@@ -101,6 +101,43 @@ def seam_labels(alpha, want, reach=44):
     return lab, near
 
 
+def torso_x(cell_a):
+    """x of the chest (20–55 % down the body, sword / shield rims opened away) in cell px — the feet-span centre
+    used as root swings with every stance change, the chest is what the eye tracks"""
+    m = ndimage.binary_opening(cell_a >= 128, structure=np.ones((5, 5)))
+    ys, xs = np.nonzero(m)
+    top, bot = ys.min(), ys.max()
+    band = (ys >= top + 0.2 * (bot - top)) & (ys <= top + 0.55 * (bot - top))
+    return float(np.median(xs[band]))
+
+
+# loops play in place: every frame's chest on the row mean. Actions keep their intended travel (a light
+# 1-2-1 smoothing of the chest path) but lose the frame-to-frame wobble of the AI drawings, and start / end on the
+# idle chest so idle → skill → idle does not jump.
+LOOPS = {'idle', 'walk', 'hurt'}
+MAX_SHIFT = 9
+
+
+def stabilise(tx):
+    home = float(np.mean(tx['idle']))
+    out = {}
+    for name, xs in tx.items():
+        xs = np.array(xs)
+        if name in LOOPS:
+            want = np.full_like(xs, home)
+        elif name == 'die':
+            want = xs.copy()
+            want[0] = home
+            want[1:] = np.convolve(np.r_[xs[0], xs, xs[-1]], [0.25, 0.5, 0.25], 'valid')[1:]
+        else:
+            p = np.r_[home, xs, home]
+            sm = np.convolve(np.r_[p[0], p, p[-1]], [0.25, 0.5, 0.25], 'valid')[1:-1]
+            want = sm
+            want[0] = want[-1] = home
+        out[name] = list(np.clip(want - xs, -MAX_SHIFT, MAX_SHIFT))
+    return out
+
+
 def body_h(fr):
     m = ndimage.binary_opening(fr['img'][..., 3] >= B.ALPHA_CUT, structure=np.ones((9, 9)))
     ys = np.nonzero(m)[0]
@@ -160,9 +197,22 @@ def main():
         report['notes'].append(f'{file}: {len(frs)} frames, scale {sc:.3f}')
     report['notes'].insert(0, f'base scale {sc_base:.3f}')
     cols = max(len(r[1]) for r in rows)
+    # pass 1: feet-root placement, only to measure where each frame's torso landed
+    probe = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * len(rows)), (0, 0, 0, 0))
+    for r, (name, frs, sc) in enumerate(rows):
+        for c, fr in enumerate(frs):
+            B.paste(probe, fr, r, c, sc)
+    pa = np.array(probe)[..., 3]
+    tx = {name: [torso_x(pa[r * B.CELL_H:(r + 1) * B.CELL_H, c * B.CELL_W:(c + 1) * B.CELL_W]) for c in range(len(frs))]
+          for r, (name, frs, _) in enumerate(rows)}
+    shifts = stabilise(tx)
+    report['torso_x'] = {k: [round(v, 1) for v in tx[k]] for k in tx}
+    report['shift_x'] = {k: [round(v, 1) for v in shifts[k]] for k in shifts}
+    # pass 2: the real atlas with the jitter taken out
     sheet = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * len(rows)), (0, 0, 0, 0))
     for r, (name, frs, sc) in enumerate(rows):
-        report['rows'][name] = {'row': r, 'frames': len(frs), 'clipped': [B.paste(sheet, fr, r, c, sc) for c, fr in enumerate(frs)]}
+        report['rows'][name] = {'row': r, 'frames': len(frs),
+                                'clipped': [B.paste(sheet, fr, r, c, sc, (shifts[name][c], 0)) for c, fr in enumerate(frs)]}
     sheet.save(f'{OUT}/hero-aurel.png', optimize=True)
     report['sheet'] = {'cols': cols, 'rows': len(rows), 'size': sheet.size}
 

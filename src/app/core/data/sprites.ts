@@ -151,15 +151,20 @@ export const SHEETS: Record<string, SheetDef> = {
       hurt: { row: 2, frames: 4 },
       attack: { row: 3, frames: 7, ms: 95, events: { DAMAGE: 3, RECOVERY_START: 5 } },
       die: { row: 4, frames: 6, ms: 120 },
-      // Shield Bash: 10 × 80 ms · F5 shield drawn back · F7 bash = damage + taunt
+      // Shield Bash: 0.84 s · wind-up held (F3) → fast swing F4–F6 → F7 bash held = damage + taunt → recover
       skill: {
         row: 5, frames: 10, ms: 80,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [80, 70, 110, 70, 60, 60, 130, 80, 90, 90],
         events: { CAST_START: 0, ANTICIPATION_PEAK: 4, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 },
         impact: { hitStopMs: 55, shakePx: 3, shakeMs: 140 },
       },
-      // Guardian Rush: 12 × 75 ms · F4 launch · F8 shield collision = interrupt / knockback / stun
+      // Guardian Rush: 0.95 s · crouch loaded (F4 held) → quick dash F5–F7 → F8 shield collision held =
+      // interrupt / knockback / stun → recover
       skill2: {
         row: 6, frames: 12, ms: 75,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        steps: [75, 70, 70, 110, 55, 55, 55, 140, 80, 75, 75, 90],
         events: { CAST_START: 0, STRIKE_START: 3, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
         impact: { hitStopMs: 70, shakePx: 4, shakeMs: 160 },
       },
