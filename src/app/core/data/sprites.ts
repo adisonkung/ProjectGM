@@ -145,7 +145,8 @@ export const SHEETS: Record<string, SheetDef> = {
   // Guardian Rush F8 (collision) · Bastion of Dawn F5 = max charge (held), F9 = shield slam (shield + taunt land).
   // Character sheets carry only small local FX — the big VFX stay on the separate fx layer ('aurel-*').
   'hero-aurel.png': {
-    cols: 16, rows: 8, cellW: 220, cellH: 132, pixelated: true,
+    // 260 wide (root at the centre, same pixel scale): room for the Shield Bash VFX in front of the shield
+    cols: 16, rows: 8, cellW: 260, cellH: 132, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -158,7 +159,8 @@ export const SHEETS: Record<string, SheetDef> = {
         row: 5, frames: 10, ms: 80,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         steps: [80, 70, 110, 70, 60, 60, 130, 80, 90, 90],
-        // VFX baked into the clip (tools/sprites/aurel_bash_vfx.py): gather F4–F5 · burst F6 · peak F7 · wave F8 · fade F9–F10
+        // VFX baked into the clip (aurel_bash_vfx.py): rim glow F2–F5 · main spawns F6 · main + impact peak F7 (contact)
+        // · main breaks + impact residue F8 · sparks F9 · clean F10
         events: { CAST_START: 0, ANTICIPATION_PEAK: 4, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 },
         impact: { hitStopMs: 55, shakePx: 3, shakeMs: 140 },
       },
@@ -180,8 +182,8 @@ export const SHEETS: Record<string, SheetDef> = {
         impact: { hitStopMs: 90, shakePx: 6, shakeMs: 220, flashMs: 120 },
       },
     },
-    // Shield Bash: main shield force baked into the clip (F4–F10) · contact burst on the target after the bash
-    fx: { skill: 'aurel-shield-bash-hit', skill2: 'aurel-charge', ult: 'aurel-ult' },
+    // Shield Bash: main + impact VFX baked into the clip (aurel_bash_vfx.py) — no separate fx layer
+    fx: { skill2: 'aurel-charge', ult: 'aurel-ult' },
     shieldFx: 'aurel-ward',
   },
   'hero-shade.png': {
@@ -500,12 +502,6 @@ export const FX: Record<string, FxDef> = {
   // ฮีลที่เพื่อนได้รับจากลูมิน่า: แผ่นบทสวด ย่อลง
   'lumina-heal': { file: 'fx-lumina-prayer.png', frames: 8, w: 87, h: 98, frameMs: 60, at: 'self', dy: -12, scale: 0.6 },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
-  // Shield Bash contact burst (aurel_bash_vfx.impact_strip, same pixel scale as the sheet): on the hit target's feet,
-  // toward the attacker, starts after the held F7 contact pose (130 ms) → main force AT contact, impact AFTER it
-  'aurel-shield-bash-hit': {
-    file: 'fx-aurel-shield-bash-hit.png', frames: 8, w: 79, h: 84, frameMs: 55, at: 'target', orient: 'flip', on: 'impact',
-    perHit: 1, pivot: [0.5, 0.994], dx: -16, dy: 27.25, scale: 1 / 1.5, delayMs: 130, pixelated: true,
-  },
   'aurel-defense': { file: 'fx-aurel-defense.png', frames: 8, w: 112, h: 90, frameMs: 70, at: 'self', dx: 18, dy: -14, scale: 1.25 },
   'aurel-charge': { file: 'fx-aurel-charge.png', frames: 8, w: 131, h: 78, frameMs: 60, at: 'target', orient: 'flip', dx: -20, dy: -8, scale: 1.2 },
   'shade-teleport': { file: 'fx-shade-teleport.png', frames: 8, w: 140, h: 131, frameMs: 80, at: 'target', orient: 'flip', dy: -14, on: 'cast' },

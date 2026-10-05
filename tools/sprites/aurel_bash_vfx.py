@@ -28,21 +28,25 @@ FORCE_CENTRES = [95, 280, 486, 707, 975, 1235, 1481, 1690, 1890, 2063]
 IMPACT_CENTRES = [142, 391, 693, 1013, 1301, 1576, 1820, 2072]
 
 # per character frame (1-based): [(sheet, vfx frame 1-based, scale, anchor, dx, dy, opacity, layer)]
-#   anchor 'edge' = this frame's shield front edge · 'P' = F7 contact point (the wave keeps travelling from there)
-#   (dx, dy) source px from the anchor to the VFX's white core
-#   layer 'back' / 'front' = behind / over the character · 'impact' = the contact burst AFTER the bash (F8+): in the
-#   delivered combined sheet only — in the game it plays as its own FX on the target (fx-aurel-shield-bash-hit.png)
+#   anchor 'edge' = this frame's shield front edge (main VFX stays attached to the shield) · 'P' = F7 contact point
+#   (dx, dy) source px from the anchor to the VFX's white core · all layers in front of the character, impact over main
+# Final visual reference spec: main VFX = holy force from the shield (grows F4–F6, strongest F7, breaks F8–F9);
+# impact VFX = the collision only (peak F7 slightly in front of the shield, residual F8) · reach ≈ 1 hero width
 PLAN = {
-    1: [], 2: [], 3: [],
-    4: [('force', 1, 0.55, 'edge', 6, 0, 0.85, 'back')],
-    5: [('force', 2, 0.66, 'edge', 22, 0, 1.0, 'back')],
-    6: [('force', 4, 0.68, 'edge', 50, 0, 1.0, 'back')],
-    7: [('force', 5, 0.74, 'P', 78, 0, 1.0, 'front')],                       # main shield force AT the contact
-    8: [('force', 6, 0.74, 'P', 100, 0, 1.0, 'front'), ('impact', 3, 0.72, 'P', 60, 0, 1.0, 'impact')],
-    9: [('force', 7, 0.70, 'P', 118, 0, 0.9, 'front'), ('impact', 4, 0.70, 'P', 64, 0, 1.0, 'impact')],
-    10: [('force', 9, 0.60, 'P', 130, 0, 0.65, 'front'), ('impact', 6, 0.66, 'P', 66, 0, 0.7, 'impact')],
+    1: [],
+    2: [('force', 1, 0.12, 'edge', 2, 0, 0.6, 'front')],                       # 1–2 faint pixels at the rim
+    3: [('force', 1, 0.2, 'edge', 2, 0, 0.7, 'front')],                        # tiny rim glow
+    4: [('force', 1, 0.38, 'edge', 4, 0, 1.0, 'front')],                       # energy compressing on the front edge
+    5: [('force', 2, 0.5, 'edge', 14, 0, 1.0, 'front')],                       # brighter, short streak, close
+    6: [('force', 3, 0.8, 'edge', 42, 0, 1.0, 'front')],                       # main VFX spawns (early growth)
+    7: [('force', 5, 0.95, 'edge', 92, -20, 1.0, 'front'),                      # CONTACT: main strongest
+        ('impact', 3, 0.8, 'P', 165, 0, 1.0, 'front')],                        #   + impact peak where the enemy is
+    8: [('force', 6, 0.9, 'edge', 110, 0, 1.0, 'front'),                       # main breaking apart
+        ('impact', 5, 0.66, 'P', 165, 0, 0.9, 'front')],                       #   residual impact (decaying)
+    9: [('force', 9, 0.7, 'edge', 80, 0, 0.8, 'front')],                       # few fading sparks
+    10: [('force', 10, 0.5, 'edge', 60, 0, 0.45, 'front')],                    # 1–2 residual pixels
 }
-CANVAS = (980, 640)
+CANVAS = (1100, 700)
 ROOT = (300, 520)
 
 
@@ -100,10 +104,9 @@ def combine(chars, with_impact=False):
         back = Image.new('RGBA', CANVAS, (0, 0, 0, 0))
         front = Image.new('RGBA', CANVAS, (0, 0, 0, 0))
         for sheet, k, sc, anchor, dx, dy, op, layer in PLAN[i + 1]:
-            if layer == 'impact' and not with_impact:
-                continue
             base = rel[i] if anchor == 'edge' else P
-            place(back if layer == 'back' else front, fx[sheet][k - 1], sc, (ROOT[0] + base[0] + dx, ROOT[1] + base[1] + dy), op)
+            place(back if layer == 'back' else front, fx[sheet][k - 1], sc,
+                  (ROOT[0] + base[0] + dx, ROOT[1] + base[1] + dy), op)
         full = back.copy()
         full.alpha_composite(char)
         full.alpha_composite(front)

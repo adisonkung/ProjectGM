@@ -5,8 +5,8 @@ import { animEvents, animTiming, clipClock, SHEETS } from '../../core/data/sprit
 describe('Aurel — Dawn Bastion (v2 art)', () => {
   const sheet = SHEETS['hero-aurel.png'];
 
-  it('16 × 8 atlas, 220 × 132 cells, pixel art, rows idle 6 · walk 8 · hurt 4 · attack 7 · die 6 · 10 · 12 · 16', () => {
-    expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH, sheet.pixelated]).toEqual([16, 8, 220, 132, true]);
+  it('16 × 8 atlas, 260 × 132 cells, pixel art, rows idle 6 · walk 8 · hurt 4 · attack 7 · die 6 · 10 · 12 · 16', () => {
+    expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH, sheet.pixelated]).toEqual([16, 8, 260, 132, true]);
     const a = sheet.anims;
     const rows = ['idle', 'walk', 'hurt', 'attack', 'die', 'skill', 'skill2', 'ult'] as const;
     expect(rows.map(k => a[k]!.row)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);

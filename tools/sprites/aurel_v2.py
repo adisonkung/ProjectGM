@@ -32,8 +32,9 @@ SRC = sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/aurel'
 OUT = sys.argv[2] if len(sys.argv) > 2 else 'public/sprites'
 POUT = sys.argv[3] if len(sys.argv) > 3 else 'public/portraits'
 B.SRC = SRC
-B.CELL_W, B.CELL_H, B.FOOT = 220, 132, 15
-B.ROOT_X, B.ROOT_Y = 110, 117
+# cell 260 wide (root kept at the centre): room for the Shield Bash VFX in front of the shield
+B.CELL_W, B.CELL_H, B.FOOT = 260, 132, 15
+B.ROOT_X, B.ROOT_Y = 130, 117
 # body height of the base idle on screen (px): Aurel is a tank — a touch taller than Bai Long (≈ 75)
 IDLE_BODY = 78
 SEAM_FADE = 18
