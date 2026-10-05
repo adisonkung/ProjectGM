@@ -240,7 +240,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   tapHero(uid: number): void {
     if (!this.suppressClick) this.heroTap.emit(uid);
   }
-  /** a slow machine (median frame > 24 ms over ~1.5 s once the map is up) switches to lite effects by itself */
+  /** a slow machine (median frame > 30 ms over ~2 s, measured 3.5 s after the map is up) switches to lite effects by itself */
   private probeFps(): void {
     if (typeof requestAnimationFrame === 'undefined') return;
     this.zone.runOutsideAngular(() => {
@@ -249,11 +249,12 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
       const f = (now: number) => {
         if (last) t.push(now - last);
         last = now;
-        if (t.length < 90 && !this.destroyed) return void requestAnimationFrame(f);
+        if (t.length < 120 && !this.destroyed) return void requestAnimationFrame(f);
         t.sort((a, b) => a - b);
-        if (!this.destroyed && this.fxAuto && t.length >= 30 && t[t.length >> 1] > 24) this.zone.run(() => this.lite.set(true));
+        if (!this.destroyed && this.fxAuto && t.length >= 60 && t[t.length >> 1] > 30) this.zone.run(() => this.lite.set(true));
       };
-      setTimeout(() => requestAnimationFrame(f), 800);
+      // measure after the start-up work (decode, first canvas draws, hero sprites) has settled
+      setTimeout(() => requestAnimationFrame(f), 3500);
     });
   }
   private destroyed = false;
