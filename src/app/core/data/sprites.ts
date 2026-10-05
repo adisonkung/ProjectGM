@@ -150,14 +150,14 @@ export const SHEETS: Record<string, SheetDef> = {
   },
   'hero-lumina.png': {
     cols: 8,
-    rows: 7,
+    rows: 8,
     cellH: 120,
     anims: {
       idle: { row: 0, frames: 8, seq: [0, 1, 5, 3, 7, 2, 4, 6] },
       walk: { row: 1, frames: 8 },
       hurt: { row: 2, frames: 8 },
-      // ไม่มีแถวท่าตาย: ใช้ท่าโดนตี (หลับตาทรุด) ค้างไว้
-      die: { row: 2, frames: 8 },
+      // ท่าตาย: สร้างจากท่าโดนตีของเธอเอง (tools/sprites/lumina_death.py) — ทรุด → ล้มหงาย → นอนนิ่ง จางลง + ละอองแสง
+      die: { row: 7, frames: 8 },
       attack: { row: 3, frames: 7, hit: 2 },
       skill: { row: 4, frames: 8, hit: 4 },
       skill2: { row: 5, frames: 8, hit: 4 },

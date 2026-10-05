@@ -133,3 +133,10 @@ main { margin-top: 18px; }
   .app.immersive .bar { top: 6px; width: calc(100% - 12px); }
   .app.immersive .menu { backdrop-filter: none; }
 }
+
+// phone in landscape, in a fight: no app chrome at all (the battle screen takes the whole display)
+@media (orientation: landscape) and (max-height: 500px) {
+  .app.fight { padding: 0; max-width: none; }
+  .app.fight .bar { display: none; }
+  .app.fight main { margin-top: 0; }
+}

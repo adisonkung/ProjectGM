@@ -173,6 +173,19 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
     .compact .int { font-size: 8px; top: 1px; right: 1px; padding: 0 2px; }
     .compact .cd { font-size: 11px; }
     @media (max-width: 480px) { .card { width: 62px; } .frame { width: 62px; height: 62px; } .cd { font-size: 10px; } }
+    /* phone in landscape: party + AUTO + special in one slim row under the lanes */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .compact { gap: 4px; flex-wrap: nowrap; }
+      .compact .card { column-gap: 3px; row-gap: 1px; padding: 2px; border-radius: 7px; grid-template-columns: 38px 60px;
+        grid-template-rows: auto auto 1fr auto auto; grid-template-areas: 'frame skills' 'frame modes' 'frame .' 'frame hp' 'frame mana'; }
+      .compact .frame { width: 38px; height: 38px; border-radius: 7px; }
+      .compact .name, .compact .intent { display: none; }
+      .compact .mode { font-size: 7px; padding: 0; }
+      .compact .hp, .compact .mana { height: 3px; }
+      .compact .key { display: none; }
+      .compact .ult { font-size: 7px; padding: 0 3px; }
+      .compact .cd { font-size: 9px; }
+    }
     @media (prefers-reduced-motion: reduce) { .ready .frame::before, .ready .frame { animation: none; } }
   `,
 })

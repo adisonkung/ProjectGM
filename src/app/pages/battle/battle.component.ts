@@ -219,6 +219,46 @@ export class BattleComponent implements OnDestroy {
   ngOnDestroy(): void {
     clearInterval(this.timer);
     this.endTimers.forEach(clearTimeout);
+    this.portraitMq?.removeEventListener('change', this.onOrientation);
+    this.releaseLandscape();
+  }
+
+  // ---------------------------------------------------------------- phones: the fight is played in landscape
+  /** a phone held upright (touch screen, narrow portrait) — the field is unplayably small; the fight pauses behind a "rotate" card */
+  private readonly portraitMq = typeof matchMedia === 'function' ? matchMedia('(orientation: portrait) and (max-width: 700px) and (pointer: coarse)') : null;
+  readonly portraitPhone = signal(!!this.portraitMq?.matches);
+  private rotatePaused = false;
+  private readonly onOrientation = () => {
+    this.portraitPhone.set(!!this.portraitMq?.matches);
+    if (this.portraitPhone()) {
+      if (this.running() && !this.paused()) {
+        this.paused.set(true);
+        this.rotatePaused = true;
+      }
+    } else if (this.rotatePaused) {
+      this.rotatePaused = false;
+      if (!this.menuOpen()) this.paused.set(false);
+    }
+  };
+  private readonly _orientationWatch = this.portraitMq?.addEventListener('change', this.onOrientation);
+
+  /** Android (Chrome): full screen + lock to landscape for the fight. iOS / desktop: not supported → nothing happens */
+  private lockLandscape(): void {
+    const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+    if (!coarse || typeof document === 'undefined' || Math.min(screen.width, screen.height) > 700) return;
+    const lock = () => (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> })?.lock?.('landscape').catch(() => {});
+    const el = document.documentElement;
+    if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen({ navigationUI: 'hide' }).then(lock, () => {});
+    else lock();
+  }
+  private releaseLandscape(): void {
+    if (typeof document === 'undefined') return;
+    try {
+      (screen.orientation as ScreenOrientation & { unlock?: () => void })?.unlock?.();
+    } catch {
+      /* not locked */
+    }
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
   }
 
   selectFloor(n: number): void {
@@ -270,6 +310,11 @@ export class BattleComponent implements OnDestroy {
     if (this.result()) this.prepare();
     if (!this.engine.alive(PLAYER_TEAM).length) return;
     this.running.set(true);
+    this.lockLandscape();
+    if (this.portraitPhone()) {
+      this.paused.set(true);
+      this.rotatePaused = true;
+    }
     this.timer = setInterval(() => this.tick(), TICK * 1000);
   }
 

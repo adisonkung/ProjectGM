@@ -91,6 +91,8 @@
   display: grid;
   gap: 2px;
   z-index: 2;
+  // units sharing a cell: each one's bars sit one step higher so they never cover each other
+  transform: translateY(calc(var(--stack, 0) * -10px));
 }
 
 .bar {

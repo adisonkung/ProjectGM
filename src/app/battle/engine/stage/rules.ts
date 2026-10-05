@@ -14,6 +14,9 @@ export interface StageBattleRules {
   waveClearPause: number;
   /** target time for a normal regroup; heroes walk fast enough to arrive in about this long */
   regroupDuration: number;
+  /** regroup never ends sooner than this, so a party already standing on its anchors still visibly settles
+   *  (an instant regroup made the next wave pop in with a jerk) */
+  minRegroupDuration: number;
   /** hard cap — one stuck hero never blocks the next wave */
   maxRegroupDuration: number;
   /** a hero is "ready" within this distance of its anchor (cells) */
@@ -48,6 +51,7 @@ export const STORY_RULES: StageBattleRules = {
   advanceSpeed: 2,
   waveClearPause: 0.75,
   regroupDuration: 2,
+  minRegroupDuration: 0.6,
   maxRegroupDuration: 3,
   regroupTolerance: 0.4,
   waveStartDuration: 1,

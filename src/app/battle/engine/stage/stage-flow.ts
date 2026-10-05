@@ -516,7 +516,7 @@ export class StageFlow {
     // readiness ignores dead heroes: only the living (and reviving) must reach their anchors
     const notReady = heroes.filter(h => !this.regroupReady.has(h.id)).map(h => h.id);
     const timedOut = this.phaseTime >= this.rules.maxRegroupDuration;
-    if (!notReady.length || timedOut) {
+    if ((!notReady.length && this.phaseTime >= this.rules.minRegroupDuration) || timedOut) {
       this.host.emit({ type: 'REGROUP_COMPLETED', timedOut: notReady.length > 0, notReady });
       this.readyNextWave();
     }

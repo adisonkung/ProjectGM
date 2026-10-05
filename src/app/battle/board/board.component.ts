@@ -184,7 +184,7 @@ export class BoardComponent {
 
   /**
    * ตัวที่ยืนช่องเดียวกัน: เลื่อนให้เหลื่อมกันเป็นชั้น ๆ (ซ้าย-ขวา และสูง-ต่ำสลับกัน)
-   * คืน [dx%, dy%, ลำดับชั้น] ตาม id
+   * คืน [dx%, dy%, ลำดับชั้น, ลำดับในกอง (ยกหลอดเลือดขึ้นทีละชั้นไม่ให้ทับกัน)] ตาม id
    */
   readonly spread = computed(() => {
     const groups = new Map<number, UnitView[]>();
@@ -193,17 +193,17 @@ export class BoardComponent {
       const k = Math.round(u.r) * 1000 + Math.round(u.c);
       groups.set(k, [...(groups.get(k) ?? []), u]);
     }
-    const out = new Map<number, [number, number, number]>();
+    const out = new Map<number, [number, number, number, number]>();
     for (const list of groups.values()) {
       const n = list.length;
       list.forEach((u, i) => {
         if (n === 1) {
-          out.set(u.id, [0, 0, 0]);
+          out.set(u.id, [0, 0, 0, 0]);
           return;
         }
         const dx = (i - (n - 1) / 2) * (56 / n);
         const dy = i % 2 ? -10 : 6;
-        out.set(u.id, [dx, dy, dy > 0 ? 2 : 1]);
+        out.set(u.id, [dx, dy, dy > 0 ? 2 : 1, i]);
       });
     }
     return out;
@@ -216,6 +216,11 @@ export class BoardComponent {
   unitPos(u: UnitView): string {
     const [dx, dy] = this.spread().get(u.id) ?? [0, 0];
     return this.pos(u.r, u.c, dx, dy);
+  }
+
+  /** caster standing in the outer columns: its cast bar hugs the inside of the field */
+  edgeOf(u: UnitView): 'l' | 'r' | '' {
+    return u.c < 1 ? 'l' : u.c > this.cols - 2 ? 'r' : '';
   }
 
   /** ตัวที่อยู่ต่ำกว่า (ใกล้จอ) วาดทับตัวที่อยู่สูงกว่า */

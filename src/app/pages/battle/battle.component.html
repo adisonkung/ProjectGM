@@ -13,7 +13,7 @@
                 [disabled]="running()" (click)="selectFloor(s.floor)">{{ s.floor }}</button>
       }
     </div>
-  } @else {
+  } @else if (placing()) {
     <header class="run-head gm-panel">
       <a class="gm-btn small ghost back" [routerLink]="backLink()" [attr.aria-label]="mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย'"><app-icon name="back" [size]="14" /></a>
       <div class="run-title">
@@ -78,28 +78,29 @@
           <button type="button" class="hud-btn" (click)="openMenu()" [disabled]="!running()" aria-label="ตั้งค่า / หยุดชั่วคราว" title="ตั้งค่า"><app-icon name="gear" [size]="18" /></button>
         </div>
 
-        <!-- player special skill (not a hero skill): charges during combat, opens the Blade Trace mini-game -->
-        <button type="button" class="special" [class.ready]="specialReady()" [disabled]="!specialReady()" (click)="useSpecial()"
-                [style.--charge]="specialCharge()" [attr.aria-label]="specialDef.name + (specialReady() ? ' พร้อมใช้' : ' ชาร์จ ' + (specialCharge() * 100).toFixed(0) + '%')"
-                [title]="specialDef.description">
-          <span class="sp-ring"></span>
-          <span class="sp-icon">⚔</span>
-          <small>{{ specialReady() ? specialDef.name : (specialCharge() * 100).toFixed(0) + '%' }}</small>
-        </button>
         @if (specialFlash()) { <div class="special-flash" aria-hidden="true"><i></i><i></i><i></i><i></i></div> }
         @if (tracing()) { <app-slash-trace [def]="specialDef" [seed]="traceSeed()" (done)="specialDone($event)" /> }
 
-        <!-- free strip under the lanes (inside the field): party bottom-left, AUTO right of the last hero -->
+        <!-- free strip under the lanes (inside the field): party, then AUTO and the special skill — one row -->
         <app-party-bar class="party-in" [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
           <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
+          <!-- player special skill (not a hero skill): charges during combat, opens the Blade Trace mini-game -->
+          <button type="button" class="special" [class.ready]="specialReady()" [disabled]="!specialReady()" (click)="useSpecial()"
+                  [style.--charge]="specialCharge()" [attr.aria-label]="specialDef.name + (specialReady() ? ' พร้อมใช้' : ' ชาร์จ ' + (specialCharge() * 100).toFixed(0) + '%')"
+                  [title]="specialDef.description">
+            <span class="sp-ring"></span>
+            <span class="sp-icon">⚔</span>
+            <small>{{ specialReady() ? specialDef.name : (specialCharge() * 100).toFixed(0) + '%' }}</small>
+          </button>
         </app-party-bar>
         @if (focusCard(); as f) {
+          <!-- one compact line in the scenery band (top-left) — never over the lanes -->
           <div class="focus-card" [class.on]="f.isFocus" role="group" aria-label="เป้าหมาย">
-            <span class="fc-name">{{ f.isFocus ? '🎯 FOCUS · ' : '' }}{{ f.name }}</span>
-            <span class="fc-hp"><i [style.width.%]="f.hpPct"></i></span>
-            <small>HP {{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · ตีอยู่ {{ focusCount().on }}/{{ focusCount().total }} }@if (f.isFocus && debug() && !focusSafe()) { · FOCUS TARGET OUT OF SAFE RANGE }</small>
+            <span class="fc-name">{{ f.isFocus ? '🎯 ' : '' }}{{ f.name }}</span>
+            <span class="fc-hp" [attr.title]="'HP ' + f.hpPct.toFixed(0) + '%'"><i [style.width.%]="f.hpPct"></i></span>
+            <small>{{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · {{ focusCount().on }}/{{ focusCount().total }} }@if (f.isFocus && debug() && !focusSafe()) { · OUT OF SAFE RANGE }</small>
             @if (f.isFocus) {
-              <button type="button" (click)="cancelFocus()">✕ ยกเลิกโฟกัส</button>
+              <button type="button" (click)="cancelFocus()" aria-label="ยกเลิกโฟกัส" title="ยกเลิกโฟกัส">✕</button>
             } @else {
               <button type="button" class="go" (click)="setFocus(f.id)">🎯 FOCUS</button>
             }
@@ -117,6 +118,11 @@
           </div>
         }
       </div>
+
+      @if (portraitPhone()) {
+        <!-- phone held upright: the fight waits (paused) until it is turned sideways -->
+        <div class="rotate-hint" role="alert"><span class="ph" aria-hidden="true">📱</span><b>หมุนโทรศัพท์เป็นแนวนอน</b><small>เกมหยุดรอไว้ — หมุนจอแล้วสู้ต่อได้ทันที</small></div>
+      }
 
       <!-- settings popup (fight paused) -->
       @if (menuOpen()) {

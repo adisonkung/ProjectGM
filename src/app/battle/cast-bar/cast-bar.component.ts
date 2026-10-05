@@ -14,6 +14,7 @@ export interface CastView {
 /** แถบร่ายสกิลของศัตรูเหนือหัว: ⚠ ชื่อ + แถบ + วินาทีที่เหลือ (ตัดไม่ได้ = กรอบแดง UNINTERRUPTIBLE) */
 @Component({
   selector: 'app-cast-bar',
+  host: { '[class.edge-l]': "edge() === 'l'", '[class.edge-r]': "edge() === 'r'" },
   template: `
     <div class="cast" [class.hard]="!cast().interruptible" role="status">
       <b>⚠ {{ cast().label }}</b>
@@ -28,6 +29,9 @@ export interface CastView {
   `,
   styles: `
     :host { position: absolute; left: 50%; bottom: 112%; transform: translateX(-50%); z-index: 5; pointer-events: none; }
+    /* a caster at the very edge of the field: anchor the box inside the field instead of centring it (text was cut) */
+    :host(.edge-l) { left: 0; transform: none; }
+    :host(.edge-r) { left: auto; right: 0; transform: none; }
     .cast {
       display: grid; justify-items: center; gap: 2px; padding: 3px 6px 2px; border-radius: 6px;
       background: #0d1220e6; border: 1px solid var(--gold); box-shadow: 0 0 10px #f0b54a66;
@@ -45,4 +49,6 @@ export interface CastView {
 })
 export class CastBarComponent {
   readonly cast = input.required<CastView>();
+  /** 'l' / 'r' when the unit stands in the first / last columns of the screen */
+  readonly edge = input<'l' | 'r' | ''>('');
 }
