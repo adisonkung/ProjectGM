@@ -336,6 +336,7 @@ STRIKE_STRIPS = {
     'ult_strike1': ('fx-bailong-nine-dragon-1.png', 0.62),
     'ult_strike2': ('fx-bailong-nine-dragon-2.png', 0.62, 'ground'),
     'ult_strike3': ('fx-bailong-nine-dragon-3.png', 0.62),
+    'ult_strike2_v1': ('fx-bailong-nine-dragon-crescent.png', 0.62),
 }
 
 
