@@ -63,10 +63,10 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
     const a = sheet.anims;
     expect([a.idle!.frames, a.walk!.frames, a.hurt!.frames, a.attack!.frames, a.die!.frames, a.skill!.frames]).toEqual([6, 8, 4, 6, 7, 10]);
     expect(new Set(Object.values(a).map(x => x!.row)).size).toBe(8);
-    expect(sheet.cols).toBe(20);
+    expect(sheet.cols).toBe(19);
     expect(sheet.rows).toBe(8);
     expect(sheet.cellW).toBe(220);
-    expect(sheet.cellH).toBe(132);
+    expect(sheet.cellH).toBe(170);
     expect(sheet.pixelated).toBeTrue();
   });
 
@@ -118,7 +118,7 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
     expect(new Set(rows).size).toBe(3);
     expect(fxNames(SPRITE, 'skill2')).not.toContain(FX_NAME);
     expect(fxNames(SPRITE, 'ult')).not.toContain(FX_NAME);
-    expect([sheet.anims.skill2!.frames, sheet.anims.ult!.frames]).toEqual([12, 20]);
+    expect([sheet.anims.skill2!.frames, sheet.anims.ult!.frames]).toEqual([12, 19]);
   });
 
   it('every other sheet keeps the old hit-frame timing (no events authored — Bai Long and Aurel v2 only)', () => {
@@ -268,49 +268,37 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
   const ev = () => animEvents(SPRITE, 'ult');
   const at = (n: string, i = 0) => ev().find(x => x.event === n && x.index === i)!;
 
-  it('20-frame dance with held key poses, 2.0–2.7 s; charge peak F5 · hits F8 / F13 / F18 · final anticipation F16', () => {
+  it('v3 19-frame dance, 2.0–2.7 s: thrust F5 · sweep F7 · ground contact F17 · overhead gather F14', () => {
     const tm = animTiming(SPRITE, 'ult');
     expect(tm.total).toBeGreaterThanOrEqual(2.0);
     expect(tm.total).toBeLessThanOrEqual(2.7);
-    expect(at('CHARGE_PEAK').art! + 1).toBe(5);
-    expect([0, 1, 2].map(i => at('DAMAGE', i).art! + 1)).toEqual([8, 13, 18]);
-    expect(at('FINAL_ANTICIPATION').art! + 1).toBe(16);
+    expect([0, 1, 2].map(i => at('DAMAGE', i).art! + 1)).toEqual([5, 7, 17]);
+    expect(at('FINAL_ANTICIPATION').art! + 1).toBe(14);
     expect(tm.hits.length).toBe(3);
     const ult = SHEETS[SPRITE].anims.ult!;
     expect(ult.seq!.length).toBe(ult.steps!.length);
-    for (const i of [0, 1, 2]) expect(at('STRIKE_START', i).t).toBeLessThan(at('DAMAGE', i).t);
-    expect(at('STRIKE_START', 1).t).toBeGreaterThan(at('DAMAGE', 0).t);
+    for (const i of [0, 1]) expect(at('STRIKE_START', i).t).toBeLessThan(at('DAMAGE', i).t);
   });
 
-  it('charge VFX: around the body/root, under the units, starts on CHARGE_START and is gone before the hit', () => {
-    expect(fxFor(SPRITE, 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['bailong-nine-dragon-charge']);
-    const c = FX['bailong-nine-dragon-charge'];
-    expect([c.at, c.anchor, c.layer]).toEqual(['self', 'ultimateChargeOrigin', 'under']);
-    expect(at('CHARGE_START').t + (c.frames * c.frameMs) / 1000).toBeLessThan(at('DAMAGE', 0).t);
-  });
-
-  it('main VFX: strikes 1–2 = two segments of the old 28-frame sheet, strike 3 = the nine-dragon strip; each peaks on its hit', () => {
-    const seg = (trig: any) => fxFor(SPRITE, 'ult', trig);
-    expect(seg({ on: 'event', event: 'STRIKE_START', index: 0 })).toEqual(['bailong-nine-dragon-1']);
-    expect(seg({ on: 'event', event: 'STRIKE_START', index: 1 })).toEqual(['bailong-nine-dragon-2']);
-    expect(seg({ on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual(['bailong-nine-dragon-3']);
-    const [p1, p2, p3] = ['bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3'].map(n => FX[n]);
-    expect(p1.file).toBe(p2.file);
-    expect(p1.from! + p1.frames).toBe(p2.from!);
-    const peaks = [
-      at('STRIKE_START', 0).t + (4 * p1.frameMs) / 1000, // ring + arrow frame
-      at('STRIKE_START', 1).t + (3 * p2.frameMs) / 1000, // biggest curling dragon
-      at('FINAL_ANTICIPATION').t + (4 * p3.frameMs) / 1000, // nine dragons peak
-    ];
-    peaks.forEach((t, i) => expect(Math.abs(t - at('DAMAGE', i).t)).toBeLessThan(0.06));
-    expect(p3.frames).toBe(8);
-    expect(FX['bailong-nine-dragon-impact'].fitCells!).toBeGreaterThanOrEqual(3);
+  it('dragon VFX phases: hint (thrust) · emerge (sweep) · ascent (leap, under) · coil (air) · dive on the target before contact', () => {
+    const one = (trig: any) => fxFor(SPRITE, 'ult', trig);
+    expect(one({ on: 'event', event: 'STRIKE_START', index: 0 })).toEqual(['bl3-hint']);
+    expect(one({ on: 'event', event: 'STRIKE_START', index: 1 })).toEqual(['bl3-emerge']);
+    expect(one({ on: 'event', event: 'STRIKE_START', index: 2 })).toEqual(['bl3-ascent']);
+    expect(one({ on: 'event', event: 'VFX_SPAWN', index: 0 })).toEqual(['bl3-coil']);
+    expect(one({ on: 'event', event: 'VFX_SPAWN', index: 1 })).toEqual(['bl3-dive']);
+    expect(FX['bl3-ascent'].layer).toBe('under');
+    const d = FX['bl3-dive'];
+    expect(d.at).toBe('target');
+    // the dive finishes as the spear lands (within one held contact pose)
+    const end = at('VFX_SPAWN', 1).t + (d.frames * d.frameMs) / 1000;
+    expect(Math.abs(end - at('DAMAGE', 2).t)).toBeLessThan(0.1);
   });
 
   it('final impact FX only on the last hit; hit-stop / shake escalate (+ flash on the last)', () => {
     expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 0 })).toEqual([]);
     expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 1 })).toEqual([]);
-    expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 2 })).toEqual(['bailong-nine-dragon-impact']);
+    expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 2 })).toEqual(['bl3-impact', 'bl3-residual']);
     const f = [0, 1, 2].map(i => impactFeelOf(SPRITE, 'ult', i)!);
     expect(f[0].hitStopMs!).toBeGreaterThanOrEqual(20);
     expect(f[2].hitStopMs!).toBeGreaterThanOrEqual(80);

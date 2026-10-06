@@ -41,7 +41,9 @@ from skimage.segmentation import watershed
 SRC = sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/bailong'
 OUT = sys.argv[2] if len(sys.argv) > 2 else 'public/sprites'
 
-CELL_W, CELL_H, FOOT = 220, 132, 15        # wide cell: the spear may overflow the 132 px body cell
+# wide cell: the spear may overflow the 132 px body cell · 170 tall (feet 15 px above the bottom as before — the sprite is
+# bottom-anchored on the board, so nothing moves): room for the v3 ultimate's leap / airborne frames
+CELL_W, CELL_H, FOOT = 220, 170, 15
 ROOT_X, ROOT_Y = CELL_W // 2, CELL_H - FOOT
 BASE_SCALE = 0.396                          # base sheet: +10 % over the first pass (user, 2026-10-05) — body ≈ Jin / Shade on screen
 ALPHA_CUT = 96                              # below = the soft dark halo of the AI render → transparent
@@ -239,6 +241,39 @@ def clip_frames(im, band, want, mode='feet', soft=False, fixes=()):
     return fr
 
 
+ULT_CHAR, ULT_COUNTS = 'ult_char_v3', [9, 10]
+# clips whose rows hold airborne frames: {file: [row indices]} — those rows share one ground line (the lowest foot
+# of the row's last, standing frame), every frame keeps its drawn height above it; x = torso − the row's mean
+# torso → feet offset (feet of a frame in the air say nothing about where the body is)
+AIRBORNE_ROWS = {'ult_char_v3': [1]}
+
+
+def ground_airborne(frs, counts, rows):
+    out, i = [], 0
+    for r, n in enumerate(counts):
+        part = frs[i:i + n]
+        i += n
+        if r not in rows:
+            out += part
+            continue
+        def torso(fr):
+            m = ndimage.binary_opening(fr['img'][..., 3] >= ALPHA_CUT, structure=np.ones((13, 13)))
+            ys, xs = np.nonzero(m)
+            top, bot = ys.min(), ys.max()
+            band = (ys > top + 0.2 * (bot - top)) & (ys < top + 0.55 * (bot - top))
+            return float(np.median(xs[band])), float(bot)
+        ground = max(fr['box'][1] + fr['root'][1] for fr in part[-2:])        # band px of the standing frames' feet
+        offs = [fr['root'][0] - torso(fr)[0] for fr in (part[0], part[-1])]
+        dx = float(np.mean(offs))
+        for k, fr in enumerate(part):
+            tx, bot = torso(fr)
+            foot_band = fr['box'][1] + fr['root'][1]
+            airborne = foot_band < ground - 12
+            rx = tx + dx if airborne else fr['root'][0]
+            out.append({**fr, 'root': (rx, ground - fr['box'][1])})
+    return out
+
+
 def resize_rgba(img, w, h):
     """area downscale with premultiplied alpha (no dark fringe on translucent glow)"""
     return img.convert('RGBa').resize((w, h), Image.BOX).convert('RGBA')
@@ -342,6 +377,14 @@ VFX_SHEETS = {
         (0, 380, [165, 510, 865, 1240]),
         (380, 770, [225, 590, 945, 1280]),
         (770, 1086, [210, 560, 900, 1260])]),
+    # ult v3 dragon set (one strip per phase, 2172 × 724, transparent): frame centres read off each strip
+    'v3_hint': ('fx-bailong-v3-hint.png', 'left', 0.5, [(0, 724, [185, 510, 847, 1216, 1607, 1977])]),
+    'v3_emerge': ('fx-bailong-v3-emerge.png', 'left', 0.5, [(0, 724, [119, 364, 624, 890, 1162, 1428, 1710, 2009])]),
+    'v3_ascent': ('fx-bailong-v3-ascent.png', 'bottom', 0.5, [(0, 724, [129, 399, 678, 951, 1225, 1503, 1776, 2053])]),
+    'v3_core': ('fx-bailong-v3-core.png', 'center', 0.5, [(0, 724, [109, 293, 462, 619, 825, 983, 1157, 1347, 1531, 1721, 1884, 2058])]),
+    'v3_dive': ('fx-bailong-v3-dive.png', 'bottom', 0.5, [(0, 724, [137, 416, 703, 977, 1244, 1518, 1788, 2050])]),
+    'v3_impact': ('fx-bailong-v3-impact.png', 'bottom', 0.5, [(0, 724, [81, 272, 494, 722, 983, 1260, 1499, 1694, 1895, 2074])]),
+    'v3_residual': ('fx-bailong-v3-residual.png', 'center', 0.5, [(0, 724, [223, 619, 999, 1363, 1716, 2031])]),
 }
 
 
@@ -450,7 +493,9 @@ def main():
     # Skill 2 / Ultimate character clips: same root, same on-screen size as the base sheet (body height of the
     # ready stance matched to the base idle) — the spectacle comes from the VFX layers, never a bigger hero
     import os
-    for name, file, counts, soft in [('skill2', 'sweep_char', [6, 6], False), ('ult', 'ult_char', [5, 5, 5, 5], False)]:
+    # ult v3 (2026-10): 19-frame dance on two rows (9 + 10; the generator drew 19 of the 20 asked) — leap / air / dive
+    # frames keep their drawn height above the row's ground line (AIRBORNE_ROWS), so the jump reads in the cell
+    for name, file, counts, soft in [('skill2', 'sweep_char', [6, 6], False), ('ult', ULT_CHAR, ULT_COUNTS, False)]:
         if not os.path.exists(f'{SRC}/{file}.png'):
             continue
         cim, _ = load(file)
@@ -487,6 +532,8 @@ def main():
                 ys = np.nonzero(keep.any(1))[0]
                 frs += clip_frames(part, (int(ys.min()), int(ys.max()) + 1), want, 'feet', soft, CLIP_FIXES.get(file, ()))
             report['notes'].append(f'{file}: rows touch, split at y={cuts}')
+        if file in AIRBORNE_ROWS:
+            frs = ground_airborne(frs, counts, AIRBORNE_ROWS[file])
         sc = BASE_SCALE * body_h(base_fr['idle'][0]) / body_h(frs[0])
         report['notes'].append(f'{file}: {len(frs)} frames, scale {sc:.3f}')
         rows.append((name, frs, sc))

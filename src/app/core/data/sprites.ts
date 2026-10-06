@@ -350,7 +350,8 @@ export const SHEETS: Record<string, SheetDef> = {
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
   'hero-bailong.png': {
-    cols: 20, rows: 8, cellW: 220, cellH: 132, pixelated: true,
+    // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
+    cols: 19, rows: 8, cellW: 220, cellH: 170, pixelated: true,
     // % of a board cell from the cell centre (feet = +27.25 %: sheet bottom 4 % + 15 px × 1.25 %) — x mirrors with facing
     anchors: {
       feet: [0, 27.25],
@@ -360,10 +361,10 @@ export const SHEETS: Record<string, SheetDef> = {
       skillOrigin: [33, -21],
       ultimateChargeOrigin: [0, 27.25],
       ultimateForwardOrigin: [150, -21],
-      // spear tip on the three Nine Dragon hit poses (v2 art F8 / F13 / F18) — each strike's dragon starts here
-      ultTip1: [117.5, -20.25],
-      ultTip2: [86.25, -47.75],
-      ultTip3: [121.25, -5.25],
+      // v3 ult: spear tip on the thrust (F5) / sweep (F7) poses — the dragon's tail starts there · airborne body (F11–F14)
+      ultTip1: [78.75, -29],
+      ultTip2: [55, -24],
+      ultAir: [8, -58],
     },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -383,28 +384,29 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 2, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 6, VFX_SPAWN: 6, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
         impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
       },
-      // Nine Dragon Sequence (v2 art, 3-strike dance): all 20 frames, key poses held — charge F1–F5 (peak hold) ·
-      // F8 thrust (dragon 1) · F13 rising sweep (curling dragons) · F16 overhead wind-up → F18 final lunge
-      // (nine dragons + burst) · F20 ready. Events count `seq` steps (= sheet frames).
+      // Nine Dragon Sequence (v3 art, 19 frames, 2 rows 9 + 10): ready → low dash F3–F4 → THRUST F5 (hit 1) → sweep F7
+      // (hit 2) → leap F10 → air F11–F14 (overhead gather F14) → dive F15–F16 → GROUND CONTACT F17 (hit 3) → recover
+      // · dragons on the board fx layer: hint (thrust) · emerge (sweep) · ascent (leap) · coil (air) · dive / impact /
+      // residual on the target. Damage 25 / 30 / 45 % (kit repeat weights).
       ult: {
-        row: 7, frames: 20, ms: 120,
-        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-        steps: [100, 100, 110, 110, 260, 100, 80, 200, 100, 100, 110, 80, 200, 110, 100, 260, 70, 260, 120, 110],
+        row: 7, frames: 19, ms: 120,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+        steps: [90, 90, 140, 80, 200, 100, 180, 100, 90, 140, 90, 90, 90, 200, 80, 120, 260, 120, 120],
         events: {
-          CAST_START: 0, CHARGE_START: 0, CHARGE_PEAK: 4, STRIKE_START: [5, 10, 16], FINAL_ANTICIPATION: 15,
-          DAMAGE: [7, 12, 17], IMPACT: [7, 12, 17], RECOVERY_START: 18,
+          CAST_START: 0, CHARGE_START: 1, ANTICIPATION_PEAK: 2, STRIKE_START: [3, 5, 9], VFX_SPAWN: [11, 14],
+          FINAL_ANTICIPATION: 13, DAMAGE: [4, 6, 16], IMPACT: [4, 6, 16], RECOVERY_START: 17,
         },
         impact: [
-          { hitStopMs: 25, shakePx: 2, shakeMs: 110 },
-          { hitStopMs: 35, shakePx: 4, shakeMs: 150 },
-          { hitStopMs: 95, shakePx: 7, shakeMs: 220, flashMs: 140 },
+          { hitStopMs: 30, shakePx: 2, shakeMs: 110 },
+          { hitStopMs: 40, shakePx: 4, shakeMs: 150 },
+          { hitStopMs: 100, shakePx: 7, shakeMs: 240, flashMs: 140 },
         ],
       },
     },
     fx: {
       skill: 'bailong-dragon-thrust',
       skill2: ['bailong-sweeping-moon', 'bailong-sweeping-moon-hit'],
-      ult: ['bailong-nine-dragon-charge', 'bailong-nine-dragon-1', 'bailong-nine-dragon-2', 'bailong-nine-dragon-3', 'bailong-nine-dragon-impact'],
+      ult: ['bl3-hint', 'bl3-emerge', 'bl3-ascent', 'bl3-coil', 'bl3-dive', 'bl3-impact', 'bl3-residual'],
     },
   },
 };
@@ -563,6 +565,41 @@ export const FX: Record<string, FxDef> = {
   'bailong-nine-dragon-3': {
     file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 82, at: 'self', orient: 'flip',
     event: 'FINAL_ANTICIPATION', anchor: 'ultTip3', pivot: [0.068, 0.5], scale: 1.1, pixelated: true,
+  },
+  // ---- Bai Long ult v3 dragons (bailong.py VFX_SHEETS 'v3_*', strips cut at 0.5 of the 2172 × 724 sources) ----
+  // thrust: thin dragon launches from the spear tip forward (tail = left pivot)
+  'bl3-hint': {
+    file: 'fx-bailong-v3-hint.png', frames: 6, w: 174, h: 238, frameMs: 45, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultTip1', pivot: [0.011, 0.5], dy: -6, scale: 0.34, pixelated: true,
+  },
+  // sweep: swirl unfurls into the S dragon ahead of the sweep
+  'bl3-emerge': {
+    file: 'fx-bailong-v3-emerge.png', frames: 8, w: 144, h: 205, frameMs: 50, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultTip2', pivot: [0.014, 0.5], scale: 0.4, pixelated: true,
+  },
+  // leap: dragon spirals up from his feet, under the unit
+  'bl3-ascent': {
+    file: 'fx-bailong-v3-ascent.png', frames: 8, w: 116, h: 308, frameMs: 55, at: 'self', orient: 'flip',
+    event: 'STRIKE_START', eventIndex: 2, anchor: 'feet', pivot: [0.5, 0.994], scale: 0.36, layer: 'under', pixelated: true,
+  },
+  // air: the dragon coils around the airborne body
+  'bl3-coil': {
+    file: 'fx-bailong-v3-core.png', frames: 12, w: 100, h: 130, frameMs: 45, at: 'self', orient: 'flip',
+    event: 'VFX_SPAWN', eventIndex: 0, anchor: 'ultAir', scale: 0.52, layer: 'under', pixelated: true,
+  },
+  // dive: dragon plunges head-first onto the target, lands with the spear (F15 → F17)
+  'bl3-dive': {
+    file: 'fx-bailong-v3-dive.png', frames: 8, w: 112, h: 334, frameMs: 30, at: 'target', orient: 'flip',
+    event: 'VFX_SPAWN', eventIndex: 1, pivot: [0.5, 0.994], dy: 27.25, scale: 0.34, pixelated: true,
+  },
+  // final hit: roaring dragon pillar on the target (only the 3rd strike) + scattering residue after it
+  'bl3-impact': {
+    file: 'fx-bailong-v3-impact.png', frames: 10, w: 145, h: 354, frameMs: 55, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 2, perHit: 1, pivot: [0.5, 0.994], dy: 27.25, scale: 0.36, pixelated: true,
+  },
+  'bl3-residual': {
+    file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 2, dy: -30, scale: 0.3, delayMs: 420, pixelated: true,
   },
   // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
   'bailong-nine-dragon-impact': {
