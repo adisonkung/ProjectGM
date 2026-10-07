@@ -189,14 +189,14 @@ export const SHEETS: Record<string, SheetDef> = {
       // Ult Mountain Seal Bastion — Timeline Sync Sheet (tools/sprites/yuezheng_ult.py, 60 FPS T000–T131 = 2.20 s):
       // A guard C01–C03 · B shield raise C04–C06 · C charge from T040 (C06 → C07 overhead at T056, held to T095;
       // charge VFX peak T068–T078) · E descent C08–C10 T096–T099 · F GROUND CONTACT C11 T100 = master sync (interrupt +
-      // shields + taunt, impact VFX) · G bastion T106 / full T116 · field loop from T118 · H recovery C14 T122
+      // shields + taunt, impact VFX held to T130) · G impact sustain + field rise · field loop from T118 · H recovery C14 T122
       ult: {
         row: 7, frames: 16, ms: 90,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
         steps: [133,  83,  83,  133,  133,  367,  667,  17,  33,  17,  167,  100,  100,  67,  50,  50],
         events: {
           CAST_START: 0, CHARGE_START: 5.273, CHARGE_PEAK: 6.3, STRIKE_START: 7, DAMAGE: 10, IMPACT: 10,
-          VFX_SPAWN: 10.6, RECOVERY_START: 13,
+          RECOVERY_START: 13,
         },
         impact: { hitStopMs: 0, shakePx: 10, shakeMs: 200, flashMs: 120 },
       },
@@ -204,7 +204,7 @@ export const SHEETS: Record<string, SheetDef> = {
     fx: {
       skill: ['yz-s1-main', 'yz-s1-impact'],
       skill2: ['yz-s2-main', 'yz-s2-impact'],
-      ult: ['yz-ult-charge', 'yz-ult-impact', 'yz-ult-main-back', 'yz-ult-main-front', 'yz-ult-field-back', 'yz-ult-field-front'],
+      ult: ['yz-ult-charge', 'yz-ult-impact', 'yz-ult-field-back', 'yz-ult-field-front'],
     },
   },
   'hero-bailong.png': {
@@ -432,39 +432,30 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.501, 0.7375], dx: -25, dy: 27.25, scale: 1 / 1.5, pixelated: true,
   },
   // Yue Zheng Ult Mountain Seal Bastion (tools/sprites/yuezheng_ult.py): painted VFX with soft alpha (not pixelated),
-  // baked in sync-sheet order at 30 FPS, atlas px, pivot = Yue Zheng's feet (the bastion / impact are placed on the
-  // shield contact point G inside the tile) · charge from CHARGE_START behind him · impact on the hit (T100) · bastion
-  // on VFX_SPAWN (T106), split at the near ground ring (back under the units / ring over) · field loop 18 frames after
-  // the hit (T118), 10 × 83 ms × 4 = 3.3 s ≈ the taunt, then fades — the FX stays where it spawned (world position)
+  // baked in sync-sheet order at 30 FPS, atlas px, pivot = Yue Zheng's feet · charge (2.7 body heights) from
+  // CHARGE_START behind him · impact on the hit (T100), placed 14 px ahead of the shield contact point G and held to
+  // T130 (replaces the old Main/bastion sheet) · field loop centred on his feet 18 frames after the hit (T118), split at
+  // the near ground ring (back under the units / ring over), 10 × 83 ms × 4 = 3.3 s ≈ the taunt, then fades —
+  // the FX stays where it spawned (world position)
   'yz-ult-charge': {
-    file: 'fx-yuezheng-ult-charge.png', frames: 26, w: 133, h: 185, frameMs: 33.33, at: 'self', orient: 'flip',
+    file: 'fx-yuezheng-ult-charge.png', frames: 26, w: 156, h: 216, frameMs: 33.33, at: 'self', orient: 'flip',
     event: 'CHARGE_START', layer: 'under',
-    pivot: [0.4496, 0.9751], dx: 0, dy: 27.25, scale: 1 / 1.5,
+    pivot: [0.45, 0.9796], dx: 0, dy: 27.25, scale: 1 / 1.5,
   },
   'yz-ult-impact': {
-    file: 'fx-yuezheng-ult-impact.png', frames: 10, w: 141, h: 154, frameMs: 33.33, at: 'self', orient: 'flip',
+    file: 'fx-yuezheng-ult-impact.png', frames: 16, w: 141, h: 154, frameMs: 33.33, at: 'self', orient: 'flip',
     on: 'impact',
-    pivot: [0.3048, 0.9828], dx: 0, dy: 27.25, scale: 1 / 1.5,
-  },
-  'yz-ult-main-back': {
-    file: 'fx-yuezheng-ult-main-back.png', frames: 13, w: 216, h: 246, frameMs: 33.33, at: 'self', orient: 'flip',
-    on: 'vfx', layer: 'under',
-    pivot: [0.3727, 0.978], dx: 0, dy: 27.25, scale: 1 / 1.5,
-  },
-  'yz-ult-main-front': {
-    file: 'fx-yuezheng-ult-main-front.png', frames: 13, w: 216, h: 246, frameMs: 33.33, at: 'self', orient: 'flip',
-    on: 'vfx',
-    pivot: [0.3727, 0.978], dx: 0, dy: 27.25, scale: 1 / 1.5,
+    pivot: [0.2056, 0.9828], dx: 0, dy: 27.25, scale: 1 / 1.5,
   },
   'yz-ult-field-back': {
     file: 'fx-yuezheng-ult-field-back.png', frames: 10, w: 210, h: 274, frameMs: 83.33, at: 'self', orient: 'flip',
     on: 'impact', layer: 'under', delayMs: 300, repeat: 4, fadeOutMs: 400,
-    pivot: [0.3557, 0.9741], dx: 0, dy: 27.25, scale: 1 / 1.5,
+    pivot: [0.489, 0.9741], dx: 0, dy: 27.25, scale: 1 / 1.5,
   },
   'yz-ult-field-front': {
     file: 'fx-yuezheng-ult-field-front.png', frames: 10, w: 210, h: 274, frameMs: 83.33, at: 'self', orient: 'flip',
     on: 'impact', delayMs: 300, repeat: 4, fadeOutMs: 400,
-    pivot: [0.3557, 0.9741], dx: 0, dy: 27.25, scale: 1 / 1.5,
+    pivot: [0.489, 0.9741], dx: 0, dy: 27.25, scale: 1 / 1.5,
   },
   'bl3-residual': {
     file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'self', orient: 'flip', on: 'impact',
