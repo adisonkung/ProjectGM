@@ -109,6 +109,9 @@ describe('Yue Zheng (3★ Tank, full sheet)', () => {
       expect(rest).toEqual(base);
     }
     expect([k.skill.label, k.skill2.label, k.ult.label]).toEqual(['Iron Wall Taunt', 'Tiger Gate Ram', 'Mountain Seal Bastion']);
-    expect(HERO_ART['yuezheng'].s1).toBeUndefined();
+    expect(HERO_ART['yuezheng']).toEqual({
+      portrait: 'portraits/yuezheng.webp', s1: 'skills/yuezheng-s1.webp', s2: 'skills/yuezheng-s2.webp',
+      ult: 'skills/yuezheng-ult.webp', banner: 'banners/yuezheng.webp',
+    });
   });
 });

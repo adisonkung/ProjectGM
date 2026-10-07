@@ -8,6 +8,7 @@ Sources (art/incoming/yuezheng, not committed):
   base.png       idle 6 · walk 8 · hurt 4 · attack 7 · die 6 (on #FF00FF)
   s1_char.png    Skill 1 Iron Wall Taunt, 10 frames in one row (character only, no VFX)
   reference.png  turnaround + weapons + palette; the face close-up (bottom right) becomes the portrait
+                 (only while art/portrait.png is missing — the painted UI art replaces it)
 
 Atlas: cols = longest row × 8 rows (skill rows reserved, empty for now), cell 260 × 170, root (feet) at (130, 155),
 facing right — same cell / root as Aurel v2 (the big shield needs the width).
@@ -83,6 +84,10 @@ def main():
     sheet.save(f'{OUT}/hero-yuezheng.png', optimize=True)
     report['sheet'] = {'cols': cols, 'rows': ATLAS_ROWS, 'size': sheet.size}
 
+    # the user's painted portrait (art/portrait.png → public/portraits/yuezheng.webp, done by hand) wins over the crop
+    if os.path.exists(f'{SRC}/art/portrait.png'):
+        print(json.dumps(report, indent=1))
+        return
     # portrait: face close-up, magenta keyed, on a navy → bronze backdrop (the shield's colours)
     ref, _ = B.load('reference')
     x0, y0, x1, y1 = FACE

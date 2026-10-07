@@ -22,8 +22,8 @@ const art = (id: string): HeroArt => ({
 export const HERO_ART: Record<string, HeroArt> = {
   // ไป๋หลง: ภาพจากผู้ใช้ 2026-10 (art/incoming/bailong/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
   bailong: { ...art('bailong'), banner: 'banners/bailong.webp' },
-  // เยว่เจิ้ง: รูปโปรไฟล์ชั่วคราวจากหน้าใน reference (tools/sprites/yuezheng.py) — ไอคอนสกิลยังไม่มี (ใช้สัญลักษณ์แทน)
-  yuezheng: { portrait: 'portraits/yuezheng.webp' },
+  // เยว่เจิ้ง: ภาพจากผู้ใช้ 2026-10 (art/incoming/yuezheng/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
+  yuezheng: { ...art('yuezheng'), banner: 'banners/yuezheng.webp' },
 };
 
 export const heroArt = (heroId?: string): HeroArt | undefined => (heroId ? HERO_ART[heroId] : undefined);
