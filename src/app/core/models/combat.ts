@@ -89,12 +89,14 @@ export interface StatusEffectDefinition {
  * ADJACENT_8    centre cell + the 8 around it (3×3)
  * CROSS_1       centre + up / down / forward / behind
  * LINE_2/LINE_3 primary + the next 1 / 2 cells behind it along the attack direction
+ * FRONT_CELL    every unit in the cell in front of the caster (ground-targeted: stacked units all hit)
+ * FRONT_3X3     3 × 3 centred on the cell in front of the caster (front cell = primary multiplier)
  * FRONT_ARC     short cone in front of the caster: 1–2 columns ahead, ±1 lane
  * RADIUS_2/3    within 2 / 3 cells of the centre
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';

@@ -11,6 +11,6 @@
   "files": [
     "tools/simulate.ts",
     "tools/dev/trace.ts",
-    "tools/dev/balance.ts", "tools/dev/economy.ts", "tools/dev/gear-economy.ts", "tools/dev/skill-economy.ts", "tools/dev/account-economy.ts"
+    "tools/dev/balance.ts", "tools/dev/economy.ts", "tools/dev/gear-economy.ts", "tools/dev/skill-economy.ts", "tools/dev/account-economy.ts", "tools/dev/bailong-ult-sim.ts"
   ]
 }

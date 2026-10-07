@@ -34,6 +34,16 @@ function direction(from: Cell, to: Cell, facing: 1 | -1): { dc: number; dr: numb
  * AreaResolver — standardized AoE shapes on the logical grid (8-direction distance).
  * The primary target (when inside the area) is always first; each unit appears once (no double hits).
  */
+/**
+ * the cell directly in front of the caster (toward the primary target, else the enemy side) — ground-targeted
+ * areas (FRONT_CELL / FRONT_3X3) are anchored here, not on a unit, so stacked units never move the effect
+ */
+export function frontCell<T extends AreaUnit>(caster: T, primary: T | null, candidates: T[]): Cell {
+  const facing: 1 | -1 = candidates.some(c => c.pos.c > caster.pos.c) || !candidates.length ? 1 : -1;
+  const dc = primary ? direction(caster.pos, primary.pos, facing).dc : facing;
+  return { r: caster.pos.r, c: caster.pos.c + dc };
+}
+
 export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
   const { pattern, caster, primary, candidates } = q;
   const centerCell = (q.center ?? 'TARGET') === 'SELF' || !primary ? caster.pos : primary.pos;
@@ -59,6 +69,18 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
     case 'ALL_ENEMIES':
       hit = [...candidates];
       break;
+    case 'FRONT_CELL': {
+      // every unit standing in the cell in front of the caster (any number of stacked units)
+      const f = frontCell(caster, primary, candidates);
+      hit = candidates.filter(u => u.pos.r === f.r && u.pos.c === f.c);
+      break;
+    }
+    case 'FRONT_3X3': {
+      // 3 × 3 centred on the cell in front of the caster
+      const f = frontCell(caster, primary, candidates);
+      hit = candidates.filter(u => distance(u.pos, f) <= 1);
+      break;
+    }
     case 'FRONT_ARC': {
       // short cone in front of the caster: its own column (sides / stacked foes) up to 2 columns ahead, within ±1 lane
       const dir = primary ? direction(caster.pos, primary.pos, facing).dc : facing;
