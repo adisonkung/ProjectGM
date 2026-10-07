@@ -48,10 +48,10 @@ describe('Roster remodel — Bai Long lead + new heroes', () => {
 });
 
 /** Yue Zheng — Iron Mountain Bastion (remodel #2): base sheet only, Tank baseline kit with the character's names */
-describe('Yue Zheng (3★ Tank, base sheet + S1 + S2)', () => {
-  it('12 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 7 (damage F4) · die 6 · S1 Iron Wall Taunt 10 · S2 Tiger Gate Ram 12', () => {
+describe('Yue Zheng (3★ Tank, full sheet)', () => {
+  it('16 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 7 (damage F4) · die 6 · S1 10 · S2 12 · Ult Mountain Seal Bastion 16', () => {
     const sh = SHEETS['hero-yuezheng.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([12, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([16, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 4], [3, 7], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
@@ -76,7 +76,10 @@ describe('Yue Zheng (3★ Tank, base sheet + S1 + S2)', () => {
     expect(c2.at(9) * 60).toBeCloseTo(44, 0);
     expect(fxFor('hero-yuezheng.png', 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['yz-s2-main']);
     expect(fxFor('hero-yuezheng.png', 'skill2', { on: 'impact' })).toEqual(['yz-s2-impact']);
-    expect(a.ult).toBeUndefined();
+    // Ult Mountain Seal Bastion: F11 ground contact = the master sync frame (damage / interrupt / shields / taunt)
+    expect([a.ult!.row, a.ult!.frames]).toEqual([7, 16]);
+    expect(a.ult!.events).toEqual(jasmine.objectContaining({ CHARGE_PEAK: 6, STRIKE_START: 7, DAMAGE: 10, IMPACT: 10, RECOVERY_START: 13 }));
+    expect(animTiming('hero-yuezheng.png', 'ult').hit).toBeCloseTo(clipClock(a.ult!).at(10), 6);
     expect(HERO_BY_ID['yuezheng']).toEqual(jasmine.objectContaining({ cls: 'tank', star: 3, sprite: 'hero-yuezheng.png' }));
   });
 

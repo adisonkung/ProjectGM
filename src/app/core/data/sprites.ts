@@ -146,10 +146,10 @@ export const SHEETS: Record<string, SheetDef> = {
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
   // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet + S1 (row 5) + S2 (row 6)
-  // — the ult falls back (ANIM_FALLBACK ult → skill) until its sheet arrives in row 7. Cell 260 × 170 like Aurel v2
+  // + ult (row 7). Cell 260 × 170 like Aurel v2
   // (the tower shield needs the width), feet 15 px above the cell bottom, idle body 78 px.
   'hero-yuezheng.png': {
-    cols: 12, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 16, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -183,6 +183,17 @@ export const SHEETS: Record<string, SheetDef> = {
           CAST_START: 0, ANTICIPATION_PEAK: 3, STRIKE_START: 4, VFX_SPAWN: 4, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9,
         },
         impact: { hitStopMs: 0, shakePx: 7, shakeMs: 130 },
+      },
+      // Ult Mountain Seal Bastion (character only, VFX to come): guard → widen / lower F2–F3 → shield lifts F4–F6 →
+      // F7 shield overhead (held — the loaded pose of the art) → F8–F10 the drive down (short steps, one continuous
+      // compression: the art plants the shield from F8) → F11 GROUND CONTACT = master sync frame (damage + interrupt +
+      // shields + taunt, held) → follow-through F12 → braced behind the planted shield F13 → recover F14–F16 · 1.57 s
+      ult: {
+        row: 7, frames: 16, ms: 90,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        steps: [90, 80, 80, 70, 70, 80, 220, 50, 45, 45, 180, 120, 160, 90, 90, 100],
+        events: { CAST_START: 0, CHARGE_START: 3, CHARGE_PEAK: 6, STRIKE_START: 7, DAMAGE: 10, IMPACT: 10, RECOVERY_START: 13 },
+        impact: { hitStopMs: 90, shakePx: 6, shakeMs: 220, flashMs: 120 },
       },
     },
     fx: { skill: ['yz-s1-main', 'yz-s1-impact'], skill2: ['yz-s2-main', 'yz-s2-impact'] },
