@@ -137,14 +137,12 @@ describe('Bai Long — balance unchanged (fighter baseline)', () => {
     expect(s('bailong')).toEqual(s('jin'));
   });
 
-  it('Dragon Thrust = the fighter line thrust numbers (LINE_2 180 % / 120 %, cd 10, same rank table id)', () => {
-    expect(kit.skill.effects).toEqual(fighter.skill2.effects);
+  it('Dragon Thrust: ground [main][main] — the 2 cells ahead at 180 %, cd 10, same rank table id', () => {
+    expect(kit.skill.effects).toEqual([{ type: 'DAMAGE', area: 'FRONT_LINE_2', primary: 1.8 }]);
     expect(kit.skill.cooldown).toBe(fighter.skill2.cooldown);
     expect(kit.skill.id).toBe(fighter.skill2.id);
     expect(kit.skill.slot).toBe('skill');
     expect(kit.attack).toBe(fighter.attack);
-    expect(kit.ult.effects).toEqual(fighter.ult.effects);
-    expect(kit.ult.range).toBe(fighter.ult.range);
   });
 });
 
@@ -252,12 +250,12 @@ describe('Bai Long — Sweeping Moon (Skill 2) visuals', () => {
     expect(imp.hits.sort()).toEqual([...new Set(dmg.map(d => (d as any).dst))].sort());
   });
 
-  it('kit = fighter Spinning Sword numbers, only renamed', () => {
+  it('kit: ground column in front (up / front / down) at 170 %, cd / id / AI tier of the fighter Spinning Sword', () => {
     const k = HERO_DEFINITIONS['bailong'].kit.skill2;
     const f = CLASS_KITS.fighter.skill;
-    expect(k.effects).toEqual(f.effects);
+    expect(k.effects).toEqual([{ type: 'DAMAGE', area: 'FRONT_COLUMN_3', primary: 1.7 }]);
     expect([k.id, k.cooldown, k.target]).toEqual([f.id, f.cooldown, f.target]);
-    expect(k.ai).toEqual(f.ai);
+    expect(k.ai!.tier).toBe(f.ai!.tier);
     expect(k.label).toBe('Sweeping Moon');
   });
 });
@@ -289,7 +287,7 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     expect(one({ on: 'event', event: 'VFX_SPAWN', index: 1 })).toEqual(['bl3-dive']);
     expect(FX['bl3-ascent'].layer).toBe('under');
     const d = FX['bl3-dive'];
-    expect(d.at).toBe('target');
+    expect([d.at, d.dx]).toEqual(['self', 100]); // ground-targeted: the cell in front
     // the dive finishes as the spear lands (within one held contact pose)
     const end = at('VFX_SPAWN', 1).t + (d.frames * d.frameMs) / 1000;
     expect(Math.abs(end - at('DAMAGE', 2).t)).toBeLessThan(0.1);
@@ -307,11 +305,10 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     expect(f[2].flashMs!).toBeGreaterThan(0);
   });
 
-  it('balance: same targeting / range / area as the class ult; 3 weights sum to 1 (total multiplier unchanged)', () => {
+  it('balance: ground cross — front cell 280 %, splash 140 % above / below / one further; 3 weights sum to 1', () => {
     const k = HERO_DEFINITIONS['bailong'].kit.ult;
-    const f = CLASS_KITS.fighter.ult;
-    expect(k.effects).toEqual(f.effects);
-    expect([k.id, k.range, k.target]).toEqual([f.id, f.range, f.target]);
+    expect(k.effects).toEqual([{ type: 'DAMAGE', area: 'FRONT_CROSS', primary: 2.8, secondary: 1.4 }]);
+    expect([k.id, k.range]).toEqual([CLASS_KITS.fighter.ult.id, 1]);
     const w = k.repeat!.weights!;
     expect(w.length).toBe(3);
     expect(w.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9);

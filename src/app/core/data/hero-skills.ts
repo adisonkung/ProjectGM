@@ -224,10 +224,22 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {
       ...fighter,
-      skill: { ...fighter.skill2, slot: 'skill', name: 'ทวนมังกรทะลวง', label: 'Dragon Thrust' },
-      skill2: { ...fighter.skill, slot: 'skill2', name: 'จันทร์กวาด', label: 'Sweeping Moon' },
+      // ground-targeted areas (2026-10, user): fixed cells in front of Bai Long — every unit standing there is hit
+      // (stacked units included), the VFX lands on the cell, never on a unit · multipliers = the class values
+      // S1 [main][main] — the 2 cells straight ahead, 180 % both
+      skill: {
+        ...fighter.skill2, slot: 'skill', name: 'ทวนมังกรทะลวง', label: 'Dragon Thrust', range: 1,
+        effects: [{ type: 'DAMAGE', area: 'FRONT_LINE_2', primary: 1.8 }], ai: { tier: 'NORMAL', minTargets: 1 },
+      },
+      // S2 the column in front (up / front / down), 170 % all
+      skill2: {
+        ...fighter.skill, slot: 'skill2', name: 'จันทร์กวาด', label: 'Sweeping Moon', range: 1,
+        effects: [{ type: 'DAMAGE', area: 'FRONT_COLUMN_3', primary: 1.7 }], ai: { tier: 'HIGH_VALUE', minTargets: 2 },
+      },
+      // Ult: front cell 280 % (main), splash 140 % above / below it and one cell further — 3 strikes 25 / 30 / 45 %
       ult: {
-        ...fighter.ult, name: 'ลำดับเก้ามังกร', label: 'Nine Dragon Sequence',
+        ...fighter.ult, name: 'ลำดับเก้ามังกร', label: 'Nine Dragon Sequence', range: 1,
+        effects: [{ type: 'DAMAGE', area: 'FRONT_CROSS', primary: 2.8, secondary: 1.4 }], ai: { tier: 'NORMAL', minTargets: 1 },
         repeat: { count: 3, gap: 0.5, weights: [0.25, 0.3, 0.45], keepAfterKill: true },
       },
     },

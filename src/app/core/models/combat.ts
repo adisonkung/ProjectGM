@@ -91,12 +91,15 @@ export interface StatusEffectDefinition {
  * LINE_2/LINE_3 primary + the next 1 / 2 cells behind it along the attack direction
  * FRONT_CELL    every unit in the cell in front of the caster (ground-targeted: stacked units all hit)
  * FRONT_3X3     3 × 3 centred on the cell in front of the caster (front cell = primary multiplier)
+ * FRONT_LINE_2  ground: the 2 cells straight ahead, both main
+ * FRONT_COLUMN_3 ground: the column in front (lane −1 / 0 / +1), all main
+ * FRONT_CROSS   ground: main in front, splash above / below it and one cell further
  * FRONT_ARC     short cone in front of the caster: 1–2 columns ahead, ±1 lane
  * RADIUS_2/3    within 2 / 3 cells of the centre
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';

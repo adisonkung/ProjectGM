@@ -13,7 +13,7 @@ import {
   AreaPattern, DamageKind, HeroKit, INTERRUPT_PRIORITY_RANK, InterruptPriority, SkillDefinition, SkillEffect, SkillSlot, SkillUseMode, TargetRule,
 } from '../../core/models/combat';
 import { Cell } from '../../core/models/unit';
-import { frontCell, resolveArea } from './area';
+import { GROUND_SHAPES, groundCell, resolveArea } from './area';
 import type { BattleEvent, BattleUnit } from './battle-engine';
 import { effectiveAttack } from './damage-resolver';
 import { distance } from './grid';
@@ -584,8 +584,8 @@ export class SkillSystem {
           for (const f of targets) {
             if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
             // ground-targeted areas: everyone in the front cell takes the primary multiplier (no unit is "the" target)
-            const fc = e.area === 'FRONT_CELL' || e.area === 'FRONT_3X3' ? frontCell(u, p, foes) : null;
-            const main = fc ? f.pos.r === fc.r && f.pos.c === fc.c : f === primary;
+            const g = groundCell(e.area, u, p, foes, f);
+            const main = GROUND_SHAPES[e.area] ? g === true : f === primary;
             let mul = main ? e.primary : (e.secondary ?? (e.area === 'SINGLE' ? 0 : e.primary));
             if (mul <= 0) continue;
             mul *= rankPower(u, slot);

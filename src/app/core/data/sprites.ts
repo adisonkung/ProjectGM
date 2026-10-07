@@ -587,19 +587,20 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-v3-core.png', frames: 12, w: 100, h: 130, frameMs: 45, at: 'self', orient: 'flip',
     event: 'VFX_SPAWN', eventIndex: 0, anchor: 'ultAir', scale: 0.52, layer: 'under', pixelated: true,
   },
-  // dive: dragon plunges head-first onto the target, lands with the spear (F15 → F17)
+  // ground-targeted (the ult hits fixed cells): dive / impact / residual land on the cell in front (dx 100 % = 1 cell)
+  // dive: dragon plunges head-first onto the front cell, lands with the spear (F15 → F17)
   'bl3-dive': {
-    file: 'fx-bailong-v3-dive.png', frames: 8, w: 112, h: 334, frameMs: 30, at: 'target', orient: 'flip',
-    event: 'VFX_SPAWN', eventIndex: 1, pivot: [0.5, 0.994], dy: 27.25, scale: 0.34, pixelated: true,
+    file: 'fx-bailong-v3-dive.png', frames: 8, w: 112, h: 334, frameMs: 30, at: 'self', orient: 'flip',
+    event: 'VFX_SPAWN', eventIndex: 1, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.34, pixelated: true,
   },
   // final hit: roaring dragon pillar on the target (only the 3rd strike) + scattering residue after it
   'bl3-impact': {
-    file: 'fx-bailong-v3-impact.png', frames: 10, w: 145, h: 354, frameMs: 55, at: 'target', orient: 'flip', on: 'impact',
-    hitIndex: 2, perHit: 1, pivot: [0.5, 0.994], dy: 27.25, scale: 0.36, pixelated: true,
+    file: 'fx-bailong-v3-impact.png', frames: 10, w: 145, h: 354, frameMs: 55, at: 'self', orient: 'flip', on: 'impact',
+    hitIndex: 2, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.36, pixelated: true,
   },
   'bl3-residual': {
-    file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'target', orient: 'flip', on: 'impact',
-    hitIndex: 2, dy: -30, scale: 0.3, delayMs: 420, pixelated: true,
+    file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'self', orient: 'flip', on: 'impact',
+    hitIndex: 2, dx: 100, dy: -30, scale: 0.3, delayMs: 420, pixelated: true,
   },
   // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
   'bailong-nine-dragon-impact': {
