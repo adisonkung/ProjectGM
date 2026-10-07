@@ -52,11 +52,14 @@ export class FxSpriteComponent {
         // steps(n, jump-none) = n ค่า 0% … 100% ตรงกับ n เฟรมพอดี
         // (ถ้าใช้ n-1 ตำแหน่งจะคร่อมระหว่างเฟรม เห็นครึ่งเฟรมข้าง ๆ เป็นรอยตัดแนวตั้ง)
         // delayMs: hidden (base opacity 0) until it starts
-        { duration: fxDuration(this.name(), this.speed()) - this.delay(), delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
+        // repeat > 1 = a looping field: the strip plays `repeat` times back to back (then the optional fade-out)
+        (d.repeat ?? 1) > 1
+          ? { duration: (d.frames * d.frameMs) / this.speed(), iterations: d.repeat, delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' }
+          : { duration: fxDuration(this.name(), this.speed()) - this.delay(), delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
       );
       // release-and-vanish FX: the last (peak) frame stays and fades out over fadeOutMs instead of collapsing
       if (d.fadeOutMs) {
-        const play = (d.frames * d.frameMs) / this.speed();
+        const play = (d.frames * d.frameMs * (d.repeat ?? 1)) / this.speed();
         const total = fxDuration(this.name(), this.speed());
         this.el().nativeElement.animate(
           [
@@ -72,5 +75,5 @@ export class FxSpriteComponent {
 
 export function fxDuration(name: string, speed = 1): number {
   const d = FX[name];
-  return d ? ((d.delayMs ?? 0) + d.frames * d.frameMs + (d.fadeOutMs ?? 0)) / speed : 0;
+  return d ? ((d.delayMs ?? 0) + d.frames * d.frameMs * (d.repeat ?? 1) + (d.fadeOutMs ?? 0)) / speed : 0;
 }

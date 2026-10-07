@@ -2,7 +2,8 @@ import { SHIPPED_HERO_IDS, SHIPPED_STARTER_BENCH, SHIPPED_STARTER_TEAM } from '.
 import { HERO_ART } from './hero-art';
 import { CLASS_KITS, kitOf } from './hero-skills';
 import { HERO_BY_ID } from './heroes';
-import { animTiming, clipClock, fxFor, SHEETS } from './sprites';
+import { animEvents, animTiming, clipClock, FX, fxFor, SHEETS } from './sprites';
+import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { dropRemovedHeroes, prepare } from '../services/save.service';
 import { GameState } from '../models/game-state';
 import { newGameState } from './starter';
@@ -78,8 +79,22 @@ describe('Yue Zheng (3★ Tank, full sheet)', () => {
     expect(fxFor('hero-yuezheng.png', 'skill2', { on: 'impact' })).toEqual(['yz-s2-impact']);
     // Ult Mountain Seal Bastion: F11 ground contact = the master sync frame (damage / interrupt / shields / taunt)
     expect([a.ult!.row, a.ult!.frames]).toEqual([7, 16]);
-    expect(a.ult!.events).toEqual(jasmine.objectContaining({ CHARGE_PEAK: 6, STRIKE_START: 7, DAMAGE: 10, IMPACT: 10, RECOVERY_START: 13 }));
-    expect(animTiming('hero-yuezheng.png', 'ult').hit).toBeCloseTo(clipClock(a.ult!).at(10), 6);
+    expect(a.ult!.events).toEqual(jasmine.objectContaining({ STRIKE_START: 7, DAMAGE: 10, IMPACT: 10, RECOVERY_START: 13 }));
+    const cu = clipClock(a.ult!);
+    // sync sheet: 2.20 s · charge T040 · descent T096 · ground contact T100 · bastion T106 · recovery T122
+    expect(cu.total * 60).toBeCloseTo(132, 0);
+    expect(animTiming('hero-yuezheng.png', 'ult').hit * 60).toBeCloseTo(100, 0);
+    const ev = (e: string) => animEvents('hero-yuezheng.png', 'ult').find(x => x.event === e)!.t * 60;
+    expect(ev('CHARGE_START')).toBeCloseTo(40, 0);
+    expect(ev('STRIKE_START')).toBeCloseTo(96, 0);
+    expect(ev('VFX_SPAWN')).toBeCloseTo(106, 0);
+    expect(ev('RECOVERY_START')).toBeCloseTo(122, 0);
+    expect(fxFor('hero-yuezheng.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['yz-ult-charge']);
+    expect(fxFor('hero-yuezheng.png', 'ult', { on: 'impact' })).toEqual(['yz-ult-impact', 'yz-ult-field-back', 'yz-ult-field-front']);
+    expect(fxFor('hero-yuezheng.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['yz-ult-main-back', 'yz-ult-main-front']);
+    // the field loops as long as the taunt lasts (≈ 3 s), 18 frames after the hit
+    expect(fxDuration('yz-ult-field-back')).toBeGreaterThan(3000);
+    expect(FX['yz-ult-field-back'].delayMs! * 60 / 1000).toBeCloseTo(18, 0);
     expect(HERO_BY_ID['yuezheng']).toEqual(jasmine.objectContaining({ cls: 'tank', star: 3, sprite: 'hero-yuezheng.png' }));
   });
 

@@ -188,7 +188,8 @@ y = 0
 H_TITLE, H_THUMB = 96, TH_H + 70
 layout = {}
 y = H_TITLE + H_THUMB
-for key, h in [('ruler', 44), ('phase', 34), ('event', 150), ('char', 54), ('travel', 64), ('height', 72)] + \
+LANES = 9 if len(EVENTS) > 16 else 5
+for key, h in [('ruler', 44), ('phase', 34), ('event', LANES * 28 + 10), ('char', 54), ('travel', 64), ('height', 72)] + \
         [(t[0], 34) for t in TRACKS] + [('shake', 46), ('legend', 250)]:
     layout[key] = (y, h)
     y += h + (6 if key not in ('legend',) else 0)
@@ -235,16 +236,21 @@ for a, b, pid, name, col in PHASES:
 
 # events: marker + staggered label
 yy, hh = layout['event']
+lane_end = [-1e9] * LANES
 for i, (t, ev, _) in enumerate(EVENTS):
     hit = 'DAMAGE' in ev
     col = (255, 90, 90) if hit else (250, 210, 90) if ev.startswith(('STRIKE', 'FINAL', 'ANTICIPATION')) else (160, 200, 255)
     x = xs(t) + CW // 2
-    lane = i % 5
+    label = f'T{t:03d} {ev}'
+    lw = d.textlength(label, font=f(13, hit))
+    if M:   # greedy lanes: the first lane whose last label ends before this one starts
+        lane = next((k for k in range(LANES) if lane_end[k] < x - 2), min(range(LANES), key=lambda k: lane_end[k]))
+        lane_end[lane] = x + 4 + lw
+    else:
+        lane = i % LANES
     ly = yy + 6 + lane * 28
     d.line([(x, ly + 10), (x, yy + hh)], fill=col + (200,), width=3 if hit else 1)
     d.polygon([(x - 6, yy + hh - 10), (x + 6, yy + hh - 10), (x, yy + hh)], fill=col)
-    label = f'T{t:03d} {ev}'
-    lw = d.textlength(label, font=f(13, hit))
     d.text((x + 4 if x + 4 + lw < W - 10 else x - 4 - lw, ly), label, font=f(13, hit), fill=col)
 
 # character holds
@@ -423,7 +429,7 @@ gi = 0
 for i, (a, b, c) in enumerate(CHAR):
     r = i + 2
     game = ''
-    if c != 5 or M:
+    if (c != 5 or M) and gi < len(GAME_STEP_MS):
         game = GAME_STEP_MS[gi]
         gi += 1
     ws.append([f'C{c:02d}', POSE[c][0], a, b, f'=D{r}-C{r}+1', f'=E{r}*1000/60', game, POSE[c][1], POSE[c][2]])
