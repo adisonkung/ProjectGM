@@ -142,9 +142,9 @@ for f, (a, b) in enumerate([(18, 19), (20, 21), (22, 23), (24, 25), (26, 27), (2
 IMP_PLAN = {32: 1, 33: 2, 34: 4, 35: 4, 36: 4, 37: 5, 38: 5, 39: 5, 40: 6, 41: 6, 42: 6, 43: 7, 44: 7, 45: 7, 46: 8, 47: 8, 48: 8}
 IMP_A = {t: 1.0 if t < 46 else [0.75, 0.5, 0.25][t - 46] for t in IMP_PLAN}
 # impact f3 is skipped: f2 → f4 at the peak (T034) keeps the burst sharp at 60 FPS
-WAVE_LEAD = 4          # px the crescent's front sits ahead of the shield face
+WAVE_LEAD = 18         # px the crescent's front sits ahead of the shield face
 SHAKE = {32: (4, 0), 33: (-5, 2), 34: (6, -2), 35: (-7, 2), 36: (8, -3), 37: (-5, 2), 38: (3, -1), 39: (-1, 0)}
-CONTACT = FRONT[8][0] - ROOT[0] + 10   # contact point x (from the feet) on the collision pose, before travel
+CONTACT = FRONT[8][0] - ROOT[0] + 18   # contact point x (from the feet) on the collision pose, before travel
 
 
 def scaled(fr, s, alpha=1.0):
@@ -268,7 +268,7 @@ for t in it:
 gi = bake(imp_tiles, 'fx-yuezheng-s2-impact')
 _, fy8 = FRONT[8]
 # on the target: the contact side is ~0.35 cell toward Yue Zheng, at the shield's height
-gi.update({'dx': -35, 'dy': 27.25})   # pivot = the contact x at feet level (tiles are placed relative to the feet)
+gi.update({'dx': -25, 'dy': 27.25})   # pivot = the contact x at feet level (tiles are placed relative to the feet)
 game_fx = {'main': gm, 'impact': gi}
 
 # ------------------------------------------------------------------ timeline JSON + sheet meta
@@ -340,7 +340,7 @@ meta = {
         f'Main VFX: ขอบหน้าของคลื่นอยู่หน้าโล่ {WAVE_LEAD} px ทุกเฟรม (เลื่อนไปกับตัว) · วาดทับหน้าตัวละครทั้งคลื่น · ขนาด 1.2 เท่าความสูงตัวตอนชน',
         'Impact VFX: เกิดที่จุดสัมผัสศัตรู T032 (หน้าโล่ของท่าชน) และอยู่กับที่ระหว่างดันผ่าน · สูงสุด T034',
         'ในเกม: DAMAGE / INTERRUPT / STUN ที่ step 7 (T032) · สั่น 7 px 130 ms ไม่มี hit-stop · การย้ายช่อง CHARGE ของเอนจินเกิดตอนเริ่มท่า',
-        'แผ่น FX ในเกมเรียงตามไทม์ไลน์ 30 FPS · main ยึดเท้า (ไม่รวมระยะพุ่ง) · impact เล่นที่เป้า ฝั่งที่ชน (ถอยมา 0.35 ช่อง)',
+        'แผ่น FX ในเกมเรียงตามไทม์ไลน์ 30 FPS · main ยึดเท้า (ไม่รวมระยะพุ่ง) · impact เล่นที่เป้า ฝั่งที่ชน (ถอยมา 0.25 ช่อง)',
     ],
 }
 json.dump({'fps': FPS, 'frames': N, 'canvas': [W, H], 'upscale': UP, 'ground': GROUND,

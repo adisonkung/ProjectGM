@@ -402,14 +402,14 @@ export const FX: Record<string, FxDef> = {
   },
   // Yue Zheng S2 Tiger Gate Ram (tools/sprites/yuezheng_s2.py), sync-sheet order at 30 FPS, atlas px: the shield wave
   // rides with Yue Zheng in front of him (pivot = feet; the engine's CHARGE relocation happens at cast start) · the
-  // collision burst plays on the target, on the side Yue Zheng hits from (−0.35 cell)
+  // collision burst plays on the target, on the side Yue Zheng hits from (−0.25 cell)
   'yz-s2-main': {
     file: 'fx-yuezheng-s2-main.png', frames: 15, w: 119, h: 96, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
-    pivot: [0.4695, 0.7271], dx: 0, dy: 27.25, scale: 1 / 1.5, pixelated: true,
+    pivot: [0.3519, 0.7271], dx: 0, dy: 27.25, scale: 1 / 1.5, pixelated: true,
   },
   'yz-s2-impact': {
     file: 'fx-yuezheng-s2-impact.png', frames: 9, w: 96, h: 92, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
-    pivot: [0.501, 0.7375], dx: -35, dy: 27.25, scale: 1 / 1.5, pixelated: true,
+    pivot: [0.501, 0.7375], dx: -25, dy: 27.25, scale: 1 / 1.5, pixelated: true,
   },
   'bl3-residual': {
     file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'self', orient: 'flip', on: 'impact',
