@@ -172,8 +172,6 @@ export const SKILL_PRIORITY_BY_CLASS: Record<HeroClass, HeroSkillPriority> = {
   healer: { critical: 'skill2', important: 'skill', secondary: 'ult' },
 };
 export const SKILL_PRIORITY_BY_HERO: Record<string, HeroSkillPriority> = {
-  ragnar: { critical: 'skill', important: 'skill2', secondary: 'ult' },
-  corvin: { critical: 'skill', important: 'ult', secondary: 'skill2' },
 };
 
 /**

@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { hasStatus } from './buffs';
 import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';

@@ -1,3 +1,5 @@
+// balance reference = the pre-remodel roster (test fixture) until the remodelled heroes exist
+import '../../src/testing/legacy-roster';
 /**
  * Bai Long — target-locked areas (old) vs ground-targeted cells in front (new), normal battles.
  *   npm run bailong-ult-sim -- [runs=40] [level=10]

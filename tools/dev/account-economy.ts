@@ -1,3 +1,5 @@
+// balance reference = the pre-remodel roster (test fixture) until the remodelled heroes exist
+import '../../src/testing/legacy-roster';
 /**
  * FULL PATCH 1 ACCOUNT ECONOMY — one player journey with every progression system at once, using the real rules:
  * Hero Level (potions / Training) + Breakthrough (Ascension stones) + Equipment (Hunt drops, crafting, upgrades,

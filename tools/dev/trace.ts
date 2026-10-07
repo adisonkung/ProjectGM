@@ -1,3 +1,5 @@
+// balance reference = the pre-remodel roster (test fixture) until the remodelled heroes exist
+import '../../src/testing/legacy-roster';
 /** Debug: print a battle's event log for one floor. npm run trace -- <floor|farm id> [seed] [level|rec] [tactical] [--tune=hp,atk,def] */
 import { BattleEngine } from '../../src/app/battle/engine/battle-engine';
 import { ENEMIES } from '../../src/app/core/data/enemies';

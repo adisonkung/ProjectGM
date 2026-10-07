@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { ascensionBossFor, ascensionDuel, FARM_BY_ID, FARM_DUNGEONS } from '../../core/data/economy';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { ASCENSION_TIER_SCALE, DUNGEON_MONSTERS, DUNGEON_ROLE_MAP, variantId } from '../../core/data/monsters-dungeon';

@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { BLADE_TRACE } from '../../core/data/special-skills';
 import { StageDef } from '../../core/models/stage';

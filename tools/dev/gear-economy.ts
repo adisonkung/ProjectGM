@@ -1,3 +1,5 @@
+// balance reference = the pre-remodel roster (test fixture) until the remodelled heroes exist
+import '../../src/testing/legacy-roster';
 /**
  * Equipment farming model (Equipment spec §84–85): a 5-hero core team farms Equipment Hunt with the real reward code
  * (completeFarmRun → drops / fragments / ore / gold), crafts the missing pieces deterministically, dismantles what it

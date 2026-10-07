@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';

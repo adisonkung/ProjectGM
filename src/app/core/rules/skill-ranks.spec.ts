@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { FARM_BY_ID, FARM_DUNGEONS, DAILY_BONUS, ITEMS } from '../data/economy';
 import { HERO_DEFINITIONS, kitOf } from '../data/hero-skills';
 import { MONSTER_SKILLS, MONSTERS } from '../data/monsters';

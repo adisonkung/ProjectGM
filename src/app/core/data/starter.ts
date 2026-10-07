@@ -4,8 +4,8 @@ import { autoPlace, defaultPresets } from '../rules/team';
 import { newIsland } from '../rules/island';
 
 /** ทีมเริ่มต้น (ลงสนาม) และฮีโร่ที่มีให้ตั้งแต่เริ่มแต่อยู่ม้านั่ง */
-export const STARTER_TEAM = ['aurel', 'jin', 'shade', 'sylvie', 'lumina'];
-export const STARTER_BENCH = ['morgan', 'ragnar', 'nox', 'velma', 'corvin', 'bailong'];
+export const STARTER_TEAM = ['bailong'];
+export const STARTER_BENCH: string[] = [];
 
 /** เซฟเก่า: เพิ่มฮีโร่เริ่มต้นที่ยังไม่มี (ไว้ม้านั่ง ไม่แตะทีมที่จัดไว้) */
 export function addMissingStarters(s: GameState): GameState {

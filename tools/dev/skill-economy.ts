@@ -1,3 +1,5 @@
+// balance reference = the pre-remodel roster (test fixture) until the remodelled heroes exist
+import '../../src/testing/legacy-roster';
 /**
  * Skill Upgrade farming model (Skill Upgrade spec): the 5-hero core team farms Skill Trials with the real reward code
  * (completeFarmRun → tomes / fragments / gold) and upgrades with the real rule (upgradeSkill) in priority order:

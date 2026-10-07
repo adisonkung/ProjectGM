@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { FARM_BY_ID, FARM_DUNGEONS } from '../../core/data/economy';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { newGameState } from '../../core/data/starter';

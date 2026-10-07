@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { BREAKTHROUGHS, DAILY_BONUS, EXP_TO_NEXT, FARM_BY_ID, FARM_DUNGEONS, ITEMS, TOWER_REWARDS, TRAINING_SLOTS } from '../data/economy';
 import { HERO_5STAR_LV1 } from '../data/classes';
 import { HERO_BY_ID } from '../data/heroes';

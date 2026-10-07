@@ -190,36 +190,10 @@ const healer: HeroKit = {
 
 export const CLASS_KITS: Record<HeroClass, HeroKit> = { tank, fighter, assassin, archer, mage, healer };
 
-// ------------------------------------------------------------------ 5★ heroes
-
-const rename = (k: HeroKit, names: [string, string, string]): HeroKit => ({
-  ...k,
-  skill: { ...k.skill, name: names[0] },
-  skill2: { ...k.skill2, name: names[1] },
-  ult: { ...k.ult, name: names[2] },
-});
+// ------------------------------------------------------------------ heroes with their own kit
 
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
-  // ออเรล — Dawn Bastion (3★ Tank): ตัวเลข Tank baseline ทั้งหมด (id / rank table เดิม) แค่ชื่อท่าตามอาร์ตชุดใหม่
-  aurel: {
-    id: 'aurel', cls: 'tank', identity: 'Tank · Taunt · Shield · Close-range Interrupt',
-    kit: {
-      ...tank,
-      skill: { ...tank.skill, name: 'โล่กระแทก', label: 'Shield Bash' },
-      skill2: { ...tank.skill2, name: 'พุ่งพิทักษ์', label: 'Guardian Rush' },
-      ult: { ...tank.ult, name: 'ป้อมปราการรุ่งอรุณ', label: 'Bastion of Dawn' },
-    },
-  },
-  morgan: {
-    id: 'morgan', cls: 'tank', identity: 'Tank · Taunt · Shield · Close-range Interrupt (Aurel mechanics, dark visuals)',
-    kit: rename(tank, ['ป้อมปราการมืด', 'โล่กระแทก', 'ระเบิดโล่ทมิฬ']),
-  },
-  jin: { id: 'jin', cls: 'fighter', identity: 'Formation Cleave · Multi-target Melee DPS', kit: fighter },
-  // ไป๋หลง (ทวนมังกรขาว, 3★): ตัวเลข Fighter baseline ทั้งหมด (ไม่มีบาลานซ์ใหม่) — ภาพ/จังหวะอยู่ใน sprites.ts
-  // · S1 Dragon Thrust = แทงทะลวงของคลาส (LINE_2 180 % / 120 %, cd 10, id/rank table เดิม) ย้ายมาช่อง 1
-  // · S2 Sweeping Moon = ดาบหมุนวนของคลาส (ADJACENT_8 รอบตัว 170 % / 100 %, cd 5, รอโดน ≥ 2 ตัว) แค่เปลี่ยนชื่อ
-  // · Ult Nine Dragon Sequence = ดาบมังกรประหารของคลาส (range 2, ADJACENT_8 รอบเป้า 280 % / 140 %) แบ่งเป็น 3 จังหวะ
-  //   25 / 30 / 45 % (รวม = ค่าเดิม) ลงตาม DAMAGE ของท่า · จังหวะหลังยังลงที่จุดเดิมแม้เป้าตาย (เหมือนตีครั้งเดียว)
+  // 2026-10 remodel: Bai Long is the only hero (the template the remodelled roster follows) — the old roster was removed
   bailong: {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {
@@ -242,88 +216,6 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
         effects: [{ type: 'DAMAGE', area: 'FRONT_CROSS', primary: 2.8, secondary: 1.4 }], ai: { tier: 'NORMAL', minTargets: 1 },
         repeat: { count: 3, gap: 0.5, weights: [0.25, 0.3, 0.45], keepAfterKill: true },
       },
-    },
-  },
-  ragnar: {
-    id: 'ragnar', cls: 'fighter', identity: 'Bruiser · Frontline Pressure · Self Rampage',
-    kit: {
-      attack: meleeAttack,
-      skill: {
-        id: 'axe_storm', name: 'พายุขวาน', label: 'Axe Storm', slot: 'skill', cooldown: 5, target: 'CURRENT',
-        effects: [
-          { type: 'DAMAGE', area: 'FRONT_ARC', center: 'SELF', primary: 1.5, secondary: 1.5 },
-          { type: 'APPLY_STATUS', status: 'axe_frenzy', to: 'SELF', minHits: 2 },
-        ],
-        ai: { tier: 'NORMAL' },
-      },
-      skill2: {
-        id: 'blood_rage', name: 'โทสะเลือด', label: 'Blood Rage', slot: 'skill2', cooldown: 10, target: 'CURRENT',
-        effects: [
-          { type: 'DAMAGE', area: 'SINGLE', primary: 1.5 },
-          { type: 'APPLY_STATUS', status: 'blood_rage', to: 'SELF' },
-        ],
-        ai: { tier: 'NORMAL' },
-      },
-      ult: {
-        id: 'lava_axe_crash', name: 'ขวานถล่มลาวา', label: 'Lava Axe Crash', slot: 'ult', range: 2, target: 'NEAREST_ENEMY',
-        effects: [{ type: 'DAMAGE', area: 'LINE_3', primary: 2.4, secondary: 1.6 }],
-        ai: { tier: 'NORMAL' },
-      },
-    },
-  },
-  shade: { id: 'shade', cls: 'assassin', identity: 'Priority Target · Poison · Guaranteed-Crit Execution', kit: assassin },
-  nox: {
-    id: 'nox', cls: 'assassin', identity: 'Backline Dive · Mobility · Low-HP Execution',
-    kit: {
-      attack: meleeAttack,
-      skill: {
-        id: 'vanish_into_shadow', name: 'หายวับในเงา', label: 'Vanish into Shadow', slot: 'skill', cooldown: 6, range: Infinity,
-        target: 'FARTHEST_BACKROW', fallback: ['LOWEST_HP_ENEMY'], movement: { type: 'BLINK_BEHIND' },
-        effects: [
-          { type: 'DAMAGE', area: 'SINGLE', primary: 1.8 },
-          { type: 'APPLY_STATUS', status: 'shadow_evasion', to: 'SELF' },
-        ],
-        ai: { tier: 'NORMAL' },
-      },
-      skill2: {
-        id: 'ghost_dash', name: 'พุ่งผี', label: 'Ghost Dash', slot: 'skill2', cooldown: 12, target: 'CURRENT',
-        movement: { type: 'DASH_THROUGH' },
-        effects: [{ type: 'DAMAGE', area: 'LINE_2', primary: 1.7, secondary: 1.2 }],
-        ai: { tier: 'NORMAL' },
-      },
-      ult: {
-        id: 'soul_reap', name: 'เก็บเกี่ยววิญญาณ', label: 'Soul Reap', slot: 'ult', range: 4, target: 'LOWEST_HP_ENEMY',
-        movement: { type: 'BLINK_BEHIND' },
-        effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 3.2, executeBonus: { hpBelow: 0.35, mul: 1.35 } }],
-        ai: { tier: 'NORMAL' },
-      },
-    },
-  },
-  sylvie: { id: 'sylvie', cls: 'archer', identity: 'Physical Ranged DPS · Projectiles · Long-range Interrupt', kit: archer },
-  velma: { id: 'velma', cls: 'mage', identity: 'Magic AoE · Root / Movement Control · Burst', kit: mage },
-  lumina: { id: 'lumina', cls: 'healer', identity: 'Burst Healing · Emergency Healing · Resurrection', kit: healer },
-  corvin: {
-    id: 'corvin', cls: 'healer', identity: 'Healing-over-Time · Poison Support · Resurrection',
-    kit: {
-      ...healer,
-      skill: {
-        id: 'healing_mist', name: 'หมอกเยียวยา', label: 'Healing Mist', slot: 'skill', cooldown: 8, target: 'SELF',
-        effects: [
-          { type: 'HEAL', area: 'RADIUS_2', center: 'SELF', atk: 0.7 },
-          { type: 'APPLY_STATUS', status: 'healing_mist', to: 'AREA', area: 'RADIUS_2', center: 'SELF', team: 'ALLY' },
-        ],
-        // high priority when ≥ 2 allies are below 55%; also the emergency heal (skill 2 is offensive)
-        ai: { tier: 'HEAL', allyHpBelow: 0.55, alliesBelowCount: 2, emergencyHpBelow: 0.35, countArea: 'RADIUS_2' },
-      },
-      skill2: {
-        id: 'poison_cloud', name: 'เมฆพิษ', label: 'Poison Cloud', slot: 'skill2', cooldown: 15, target: 'CURRENT',
-        effects: [
-          { type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 1.1, secondary: 1.1, damageType: 'MAGIC' },
-          { type: 'APPLY_STATUS', status: 'poison', to: 'HIT' },
-        ],
-        ai: { tier: 'NORMAL' },
-      },
-      ult: resurrection('spirit_wings', 'ปีกวิญญาณคืนชีพ', 'Spirit Wings Resurrection'),
     },
   },
 };

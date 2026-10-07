@@ -1,3 +1,5 @@
+// balance reference = the pre-remodel roster (test fixture) until the remodelled heroes exist
+import '../../src/testing/legacy-roster';
 /**
  * Balance sweep: AUTO bot vs TACTICAL bot (tools/dev/policy.ts), heroes at the stage's recommended level (or a fixed one).
  * Mechanic exposure first (did the boss / casters get time to act?), then win rate, decision metrics and power snapshots.

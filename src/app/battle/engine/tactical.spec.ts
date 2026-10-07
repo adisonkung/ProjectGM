@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';

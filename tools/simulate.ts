@@ -1,3 +1,5 @@
+// balance reference = the pre-remodel roster (test fixture) until the remodelled heroes exist
+import '../src/testing/legacy-roster';
 /**
  * จำลองการต่อสู้แบบไม่แสดงผล เพื่อดูอัตราชนะของทีมเริ่มต้นในแต่ละชั้น
  * รัน: npm run sim   (หรือ npm run sim -- 500 เพื่อกำหนดจำนวนรอบ)

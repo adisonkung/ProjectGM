@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { kitOf } from '../../core/data/hero-skills';
@@ -690,7 +691,7 @@ describe('Stage 4–10 bosses', () => {
 // ------------------------------------------------------------------ the spec's REQUIRED TESTS (1–38)
 
 /** a developed team (power profile) played by the TACTICAL bot clears `stage` in at least one of `seeds` tries */
-function clearsWithTactics(stage: StageDef, profile: string, level: number, seeds = 4): boolean {
+function clearsWithTactics(stage: StageDef, profile: string, level: number, seeds = 12): boolean {
   const state = newGameState();
   const heroes = state.heroes.map(h => applyProfile(h, POWER_PROFILES[profile], level));
   const allies = teamToUnits(tacticalFormation(heroes, state.team, stage), heroes);

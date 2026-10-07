@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_KITS, HERO_DEFINITIONS, kitOf } from '../../core/data/hero-skills';
@@ -121,9 +122,9 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
     expect([sheet.anims.skill2!.frames, sheet.anims.ult!.frames]).toEqual([12, 19]);
   });
 
-  it('every other sheet keeps the old hit-frame timing (no events authored — Bai Long and Aurel v2 only)', () => {
+  it('every other sheet keeps the old hit-frame timing (no events authored — only Bai Long)', () => {
     const withEvents = Object.entries(SHEETS).filter(([, d]) => Object.values(d.anims).some(a => a?.events)).map(([k]) => k);
-    expect(withEvents.sort()).toEqual(['hero-aurel.png', SPRITE].sort());
+    expect(withEvents).toEqual([SPRITE]);
   });
 });
 

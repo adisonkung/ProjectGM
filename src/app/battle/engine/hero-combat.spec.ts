@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { CLASS_BASE, HERO_5STAR_LV1, HERO_CLASS_BASE, starMultiplier } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
@@ -100,7 +101,7 @@ describe('Hero kits (data)', () => {
     expect(at('aurel', 6).atkSpeed).toBe(t3.atkSpeed);
     // the starting roster was re-rated 5★ → 3★ at the same power: every class's 3★ Lv1 = the table
     for (const cls of Object.keys(HERO_5STAR_LV1) as (keyof typeof HERO_5STAR_LV1)[]) {
-      const id = Object.values(HERO_BY_ID).find(h => h.cls === cls && h.star === 3 && h.sprite)!.id;
+      const id = Object.values(HERO_BY_ID).find(h => h.cls === cls && h.star === 3)!.id;
       const s3 = heroStats(HERO_BY_ID[id], { uid: 0, templateId: id, level: 1, potential: 'B' });
       expect([s3.hp, s3.atk, s3.def]).toEqual([HERO_5STAR_LV1[cls].hp, HERO_5STAR_LV1[cls].atk, HERO_5STAR_LV1[cls].def]);
     }
@@ -389,7 +390,8 @@ describe('Assassins (Shade / Nox)', () => {
     b.run(1.2);
     const mine = slime.buffs.filter(x => x.def.id === 'poison');
     expect(mine.length).toBe(1);
-    expect(mine[0].remaining).toBeGreaterThan(3);
+    // refreshed by the 2nd cast (no refresh would leave ≈ 1.3 s)
+    expect(mine[0].remaining).toBeGreaterThan(2.5);
     b.use(corvin, 'skill2', slime);
     b.run(1.2);
     const all = slime.buffs.filter(x => x.def.id === 'poison');

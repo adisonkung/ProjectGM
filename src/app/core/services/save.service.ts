@@ -6,6 +6,7 @@ import { GameState } from '../models/game-state';
 import { migrateHeroProgress } from '../rules/leveling';
 import { normalizeIsland } from '../rules/island';
 import { makeEnvelope, SaveEnvelope } from '../rules/account';
+import { HERO_BY_ID } from '../data/heroes';
 
 const KEY = 'projectgm-save-v1';
 /** the save that an import replaced (one-step undo) */
@@ -32,13 +33,34 @@ export function migrate(raw: unknown): GameState | null {
     rewardCarry: s.rewardCarry ?? {},
     teamPresets: normalizePresets(s.teamPresets),
   } as GameState;
-  out.heroes = (out.heroes ?? []).map(h => {
+  out.heroes = out.heroes ?? [];
+  dropRemovedHeroes(out);
+  out.heroes = out.heroes.map(h => {
     // `equipment` = provisional v5 field · `injury` = removed injury system (heroes are never locked out now)
     const { equipment: _legacy, injury: _injury, ...rest } = h as typeof h & { equipment?: unknown; injury?: unknown };
     return migrateHeroProgress(rest);
   });
   out.island = normalizeIsland(s.island, out);
   return out;
+}
+
+/**
+ * Heroes whose template no longer exists (2026-10 roster remodel: everyone but Bai Long was removed) leave the save:
+ * their equipped items go back to the bag, and the team / Training Slots / Hero Memory forget them. Team presets and
+ * the island main hero already drop unknown uids on their own. An emptied team is re-placed with the heroes left.
+ */
+export function dropRemovedHeroes(s: GameState): void {
+  const all = s.heroes ?? [];
+  const keep = all.filter(h => !!HERO_BY_ID[h.templateId]);
+  if (keep.length === all.length) return;
+  const gone = all.filter(h => !HERO_BY_ID[h.templateId]);
+  const back = gone.flatMap(h => Object.values(h.gear ?? {})).filter(Boolean).map(i => ({ ...i!, equippedHeroId: null }));
+  const uids = new Set(keep.map(h => h.uid));
+  s.heroes = keep;
+  s.equipment = [...(s.equipment ?? []), ...back];
+  s.team = (s.team ?? []).filter(t => uids.has(t.uid));
+  s.trainingSlots = (s.trainingSlots ?? []).filter(u => uids.has(u));
+  if (s.heroMemory) s.heroMemory = Object.fromEntries(Object.entries(s.heroMemory).filter(([id]) => !!HERO_BY_ID[id]));
 }
 
 /** migrate + the load-time repairs (used for the local save and for imported saves) */
@@ -50,13 +72,19 @@ export function prepare(raw: unknown): GameState | null {
     return null;
   }
   if (!s) return null;
-  // กระดานเปลี่ยนขนาด (3 เลน x ลึก 6): ตำแหน่งเก่าที่หลุดขอบ ให้จัดทีมใหม่อัตโนมัติ
   if (!Array.isArray(s.heroes) || !Array.isArray(s.team)) return null;
+  const hadHeroes = s.heroes.length;
+  s = addMissingStarters(s);
+  // กระดานเปลี่ยนขนาด (3 เลน x ลึก 6): ตำแหน่งเก่าที่หลุดขอบ ให้จัดทีมใหม่อัตโนมัติ
   if (s.team.some(t => !validLocal(t))) {
     const inTeam = new Set(s.team.map(t => t.uid));
     s.team = autoPlace(s.heroes.filter(h => inTeam.has(h.uid)));
   }
-  return addMissingStarters(s);
+  // the whole team was removed (roster remodel) → field the heroes left
+  if (!s.team.length && s.heroes.length) s.team = autoPlace(s.heroes);
+  // starters were added after the island was normalised → give it a main hero again
+  if (s.heroes.length !== hadHeroes && s.island) s.island = normalizeIsland(s.island, s);
+  return s;
 }
 
 /** เก็บสถานะเกมทั้งหมดไว้ใน signal เดียว และบันทึกลง localStorage อัตโนมัติ */

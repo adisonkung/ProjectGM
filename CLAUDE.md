@@ -4,6 +4,7 @@
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
 ## กฎที่ล็อกไว้
+- **Roster remodel (2026-10):** ตัวละครเก่าทั้งหมดถูกลบออกจากเกม (ทั้ง 10 ตัวที่มีอาร์ต + 18 ตัวไม่มีอาร์ต: template, kit, sprite sheet, FX, portrait, ไอคอน) — **ไป๋หลงเป็นฮีโร่ตัวเดียว** (ทีมเริ่มต้น = `['bailong']`) และเป็นต้นแบบของตัวละครชุดใหม่ (ท่อภาพ semantic event + ground-targeted area + FX แยกชั้น) · กาชา: ดาวที่ยังไม่มีฮีโร่ สุ่มจากทั้ง roster แทน · เซฟเก่า: `dropRemovedHeroes()` (save.service) ถอดฮีโร่ที่ไม่มี template — ของที่สวมกลับกระเป๋า, ทีม/Training Slot/Hero Memory ลืมตัวนั้น, ทีมว่าง → จัดตัวที่เหลือ, ไป๋หลงถูกเติมให้ · **เทสต์/ซิม** ใช้ roster เก่าผ่าน fixture `src/testing/legacy-roster.ts` (import แล้วจะลงทะเบียนฮีโร่เก่าแบบไม่มี sprite + kit + ทีมเริ่มต้นเก่า เพื่อคงการทดสอบกลไกคลาส tank/healer/assassin … ที่เอนจินยังรองรับ) — โค้ดแอปห้าม import · `SHIPPED_*` ใน fixture = ของที่เกมส่งจริง (`core/data/roster-remodel.spec.ts`) · เครื่องมือ sprite ของตัวเก่า (tools/sprites/aurel_*.py, jin.py …) ยังเก็บไว้เป็นตัวอย่างท่อภาพ
 - ไม่มีตายถาวร และไม่มีบาดเจ็บ (ระบบบาดเจ็บถูกถอดออกในเฟส 3 — ฮีโร่ที่ล้มลงสนามรอบต่อไปได้ทันที, เซฟเก่าลบค่า `injury` ตอนโหลด)
 - เงื่อนไขชนะใน Demo: กำจัดศัตรู (eliminate) และเอาตัวรอด (survive)
 - ช่องสี่เหลี่ยม ระยะแบบ 8 ทิศ (แนวทแยง = 1 ช่อง)

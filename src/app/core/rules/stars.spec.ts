@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { starMultiplier } from '../data/classes';
 import { TOWER_REWARDS, FARM_BY_ID } from '../data/economy';
 import { HEROES, HERO_BY_ID } from '../data/heroes';

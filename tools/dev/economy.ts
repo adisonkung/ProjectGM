@@ -1,3 +1,5 @@
+// balance reference = the pre-remodel roster (test fixture) until the remodelled heroes exist
+import '../../src/testing/legacy-roster';
 /**
  * Patch 1 progression-speed model (rebalance spec: claude/patch1-rebalance-spec.md) — a core team of 5 heroes playing
  * with the real reward code (completeFarmRun / completeTowerRun / breakthrough / potions). Every farm run is a win

@@ -1,3 +1,4 @@
+import '../../testing/legacy-roster';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { newGameState } from '../core/data/starter';

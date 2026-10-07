@@ -100,24 +100,26 @@ export function pull(s: GameState, n: 1 | 10, rng: () => number = Math.random): 
     const needFloor = n === 10 && i === n - 1 && !results.some(r => r.star >= GACHA.multiFloor);
     const star = rollRarity(rng, pity, needFloor ? GACHA.multiFloor : 1);
     pity = star >= 3 ? 0 : pity + 1;
-    const pool = HEROES.filter(t => t.star === star);
+    // a rarity with no hero (e.g. during the roster remodel) falls back to the whole roster
+    const byStar = HEROES.filter(t => t.star === star);
+    const pool = byStar.length ? byStar : HEROES;
     const t = pool[Math.floor(rng() * pool.length)];
     const owned = state.heroes.find(h => h.templateId === t.id);
     if (!owned) {
       const potential = pickWeighted(rng, GACHA.potential) as Potential;
       const hero: OwnedHero = { uid: state.nextUid, templateId: t.id, level: 1, potential, exp: 0, breakthroughTier: 0 };
       state = { ...state, nextUid: state.nextUid + 1, heroes: [...state.heroes, hero] };
-      results.push({ templateId: t.id, star, isNew: true, memory: 0, universal: 0, uid: hero.uid });
+      results.push({ templateId: t.id, star: t.star, isNew: true, memory: 0, universal: 0, uid: hero.uid });
       continue;
     }
     const mem = DUPLICATE_MEMORY[t.star] ?? 0;
     if (heroStar(owned) >= MAX_STAR) {
       const u = Math.floor(mem * MAXED_DUPLICATE_TO_UNIVERSAL);
       state.inventory[UNIVERSAL_MEMORY] = (state.inventory[UNIVERSAL_MEMORY] ?? 0) + u;
-      results.push({ templateId: t.id, star, isNew: false, memory: 0, universal: u, uid: owned.uid });
+      results.push({ templateId: t.id, star: t.star, isNew: false, memory: 0, universal: u, uid: owned.uid });
     } else {
       state.heroMemory![t.id] = (state.heroMemory![t.id] ?? 0) + mem;
-      results.push({ templateId: t.id, star, isNew: false, memory: mem, universal: 0, uid: owned.uid });
+      results.push({ templateId: t.id, star: t.star, isNew: false, memory: mem, universal: 0, uid: owned.uid });
     }
   }
   return { state: { ...state, pity }, results };

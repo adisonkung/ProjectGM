@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { TestBed } from '@angular/core/testing';
 import { newGameState } from '../data/starter';
 import { SaveService } from './save.service';

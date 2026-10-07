@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { ENEMIES } from '../data/enemies';
 import { FARM_BY_ID, FARM_DUNGEONS, DAILY_BONUS } from '../data/economy';
 import {

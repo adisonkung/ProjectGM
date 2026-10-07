@@ -19,16 +19,6 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
-  aurel: art('aurel'),
-  shade: art('shade'),
-  jin: art('jin'),
-  sylvie: art('sylvie'),
-  lumina: art('lumina'),
-  ragnar: art('ragnar'),
-  corvin: art('corvin'),
-  nox: art('nox'),
-  velma: art('velma'),
-  morgan: art('morgan'),
   // ไป๋หลง: ภาพจากผู้ใช้ 2026-10 (art/incoming/bailong/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
   bailong: { ...art('bailong'), banner: 'banners/bailong.webp' },
 };

@@ -1,3 +1,4 @@
+import '../../../testing/legacy-roster';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router, UrlTree } from '@angular/router';
 import { islandNamedGuard, welcomeGuard } from '../../app.routes';

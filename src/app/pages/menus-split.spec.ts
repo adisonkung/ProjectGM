@@ -1,3 +1,4 @@
+import '../../testing/legacy-roster';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
