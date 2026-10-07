@@ -74,7 +74,7 @@ describe('Yue Zheng (3★ Tank, base sheet + S1 + S2)', () => {
     expect(c2.at(4) * 60).toBeCloseTo(18, 0);
     expect(animTiming('hero-yuezheng.png', 'skill2').hit * 60).toBeCloseTo(32, 0);
     expect(c2.at(9) * 60).toBeCloseTo(44, 0);
-    expect(fxFor('hero-yuezheng.png', 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['yz-s2-main-back', 'yz-s2-main-front']);
+    expect(fxFor('hero-yuezheng.png', 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['yz-s2-main']);
     expect(fxFor('hero-yuezheng.png', 'skill2', { on: 'impact' })).toEqual(['yz-s2-impact']);
     expect(a.ult).toBeUndefined();
     expect(HERO_BY_ID['yuezheng']).toEqual(jasmine.objectContaining({ cls: 'tank', star: 3, sprite: 'hero-yuezheng.png' }));

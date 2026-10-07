@@ -185,7 +185,7 @@ export const SHEETS: Record<string, SheetDef> = {
         impact: { hitStopMs: 0, shakePx: 7, shakeMs: 130 },
       },
     },
-    fx: { skill: ['yz-s1-main', 'yz-s1-impact'], skill2: ['yz-s2-main-back', 'yz-s2-main-front', 'yz-s2-impact'] },
+    fx: { skill: ['yz-s1-main', 'yz-s1-impact'], skill2: ['yz-s2-main', 'yz-s2-impact'] },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -401,20 +401,15 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.5008, 0.4949], dx: 71.25, dy: -9.62, scale: 1 / 1.5, pixelated: true,
   },
   // Yue Zheng S2 Tiger Gate Ram (tools/sprites/yuezheng_s2.py), sync-sheet order at 30 FPS, atlas px: the shield wave
-  // rides with Yue Zheng (pivot = feet; the engine's CHARGE relocation happens at cast start), split at the shield face
-  // — the trail behind him under the units, the crescent over · the collision burst plays on the target, on the side
-  // Yue Zheng hits from (−0.35 cell)
-  'yz-s2-main-back': {
-    file: 'fx-yuezheng-s2-main-back.png', frames: 15, w: 101, h: 80, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx', layer: 'under',
-    pivot: [0.3686, 0.775], dx: 0, dy: 27.25, scale: 1 / 1.5, pixelated: true,
-  },
-  'yz-s2-main-front': {
-    file: 'fx-yuezheng-s2-main-front.png', frames: 15, w: 101, h: 80, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
-    pivot: [0.3686, 0.775], dx: 0, dy: 27.25, scale: 1 / 1.5, pixelated: true,
+  // rides with Yue Zheng in front of him (pivot = feet; the engine's CHARGE relocation happens at cast start) · the
+  // collision burst plays on the target, on the side Yue Zheng hits from (−0.35 cell)
+  'yz-s2-main': {
+    file: 'fx-yuezheng-s2-main.png', frames: 15, w: 119, h: 96, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.4695, 0.7271], dx: 0, dy: 27.25, scale: 1 / 1.5, pixelated: true,
   },
   'yz-s2-impact': {
-    file: 'fx-yuezheng-s2-impact.png', frames: 9, w: 80, h: 76, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
-    pivot: [0.4988, 0.7901], dx: -35, dy: 27.25, scale: 1 / 1.5, pixelated: true,
+    file: 'fx-yuezheng-s2-impact.png', frames: 9, w: 96, h: 92, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
+    pivot: [0.501, 0.7375], dx: -35, dy: 27.25, scale: 1 / 1.5, pixelated: true,
   },
   'bl3-residual': {
     file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'self', orient: 'flip', on: 'impact',

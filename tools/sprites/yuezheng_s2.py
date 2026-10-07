@@ -12,8 +12,7 @@ Timeline (user spec 2026-10, 60 FPS, T000–T051 = 0.87 s):
   Damage / interrupt / stun / impact spawn T032 at the contact point, impact peak T034, shake peak T036.
 
 Outputs: <out>/yuezheng_s2_preview_60fps.mp4 · _50fps.gif · _contact.png · yuezheng_s2_timeline.json
-  public/sprites/fx-yuezheng-s2-main-back.png / -main-front.png (the wave split at the shield face: the trail behind
-  Yue Zheng goes under the units) and fx-yuezheng-s2-impact.png — sync-sheet order at 30 FPS, atlas px.
+  public/sprites/fx-yuezheng-s2-main.png (the whole wave in front of Yue Zheng — user 2026-10) and fx-yuezheng-s2-impact.png — sync-sheet order at 30 FPS, atlas px.
   In game the CHARGE relocation happens at cast start (engine), so the main wave is baked relative to Yue Zheng's
   feet without the travel (it rides with him); the impact plays on the target, at the contact side.
 
@@ -130,8 +129,9 @@ def rows_h(fr):
     return ys.max() - ys.min()
 
 
-# the collision wave (main f8) ≈ 1.0 × body height · the impact peak (f4) ≈ 0.95 × body height (rubble included)
-SC = {'main': 1.0 * BODY / rows_h(MAIN[7]), 'impact': 0.95 * BODY / rows_h(IMPACT[3])}
+# the collision wave (main f8) ≈ 1.2 × body height · the impact peak (f4) ≈ 1.15 × body height (rubble included)
+# (+20 % after review: "ขยายสกิลให้ใหญ่ขึ้นนิดนึง")
+SC = {'main': 1.2 * BODY / rows_h(MAIN[7]), 'impact': 1.15 * BODY / rows_h(IMPACT[3])}
 
 MAIN_PLAN, MAIN_A = {}, {}
 for f, (a, b) in enumerate([(18, 19), (20, 21), (22, 23), (24, 25), (26, 27), (28, 29), (30, 31), (32, 34), (35, 37),
@@ -167,15 +167,6 @@ def main_place(t):
     return a, (fx - ROOT[0] + WAVE_LEAD - front, fy - ROOT[1] - cy), fx - ROOT[0]
 
 
-def split(a, x0, face):
-    """back = the part behind the shield face (trail over Yue Zheng's body → under the units), front = the rest"""
-    b, f = a.copy(), a.copy()
-    cut_x = int(round(face - 6 - x0))
-    b[:, max(cut_x, 0):, 3] = 0
-    f[:, :max(cut_x, 0), 3] = 0
-    return b, f
-
-
 def imp_place(t):
     a, cx, cy, _ = scaled(IMPACT[IMP_PLAN[t] - 1], SC['impact'], IMP_A[t])
     _, fy = FRONT[8]
@@ -209,10 +200,9 @@ def frame(t):
     back = front = None
     if t in MAIN_PLAN:
         a, (ox, oy), face = main_place(t)
-        b, f = split(a, ox, face)
         pos = (round(rx + ox), round(GROUND + oy))
-        back, front = (Image.fromarray(b), pos), (Image.fromarray(f), pos)
-        LOG.append({'T': t, 'track': 'main', 'frame': MAIN_PLAN[t], 'x': pos[0], 'y': pos[1], 'opacity': MAIN_A[t], 'split': 'trail behind'})
+        front = (Image.fromarray(a), pos)          # the whole wave in front of the character
+        LOG.append({'T': t, 'track': 'main', 'frame': MAIN_PLAN[t], 'x': pos[0], 'y': pos[1], 'opacity': MAIN_A[t], 'split': 'front'})
     if back:
         img.alpha_composite(*back)
     img.alpha_composite(Image.fromarray(pose(char_at(t))), (round(rx) - ROOT[0], GROUND - ROOT[1]))
@@ -268,15 +258,8 @@ def bake(tiles, name):
 
 
 ts = sorted(MAIN_PLAN)[::2]
-backs, fronts = [], []
-for t in ts:
-    a, (ox, oy), face = main_place(t)
-    b, f = split(a, ox, face)
-    backs.append((b, (ox, oy)))
-    fronts.append((f, (ox, oy)))
-gm = {'back': bake(backs, 'fx-yuezheng-s2-main-back'), 'front': bake(fronts, 'fx-yuezheng-s2-main-front')}
-for k in gm:   # pivot = the feet: board offset = feet anchor
-    gm[k].update({'dx': 0, 'dy': 27.25})
+gm = bake([main_place(t)[:2] for t in ts], 'fx-yuezheng-s2-main')
+gm.update({'dx': 0, 'dy': 27.25})   # pivot = the feet: board offset = feet anchor
 it = sorted(IMP_PLAN)[::2]
 imp_tiles = []
 for t in it:
@@ -286,7 +269,7 @@ gi = bake(imp_tiles, 'fx-yuezheng-s2-impact')
 _, fy8 = FRONT[8]
 # on the target: the contact side is ~0.35 cell toward Yue Zheng, at the shield's height
 gi.update({'dx': -35, 'dy': 27.25})   # pivot = the contact x at feet level (tiles are placed relative to the feet)
-game_fx = {'main-back': gm['back'], 'main-front': gm['front'], 'impact': gi}
+game_fx = {'main': gm, 'impact': gi}
 
 # ------------------------------------------------------------------ timeline JSON + sheet meta
 pf = []
@@ -337,8 +320,8 @@ meta = {
                [38, 'PUSH_THROUGH', 'C09 · ดันต่อ +8 px แล้วหยุด'],
                [44, 'RECOVERY_START', 'C10 · เบรก'],
                [51, 'ANIMATION_END', 'C12 · กลับ idle']],
-    'tracks': [['main', 'L3 Main VFX  shield wave', [120, 220, 210], 's2_vfx.png 12 fr → fx-yuezheng-s2-main-back / -front',
-                'trail behind the shield face = under units · crescent = over', f'front of the crescent on the shield face + {WAVE_LEAD} px, rides with the rush',
+    'tracks': [['main', 'L3 Main VFX  shield wave', [120, 220, 210], 's2_vfx.png 12 fr → fx-yuezheng-s2-main',
+                'front of the character (whole wave)', f'front of the crescent on the shield face + {WAVE_LEAD} px, rides with the rush',
                 'f1–f7 grow T018–T031 · f8 max at the collision T032–T034 · f9–f12 dissolve to T046'],
                ['impact', 'L4 Impact VFX  collision', [240, 210, 120], 's2_impact.png 8 fr → fx-yuezheng-s2-impact', 'front',
                 'enemy-contact point (shield face of C08 at the collision), stays put during the push',
@@ -346,7 +329,7 @@ meta = {
                ['gameplay', 'L6 Gameplay  hit · interrupt · stun', [230, 90, 90], 'engine', '-',
                 'primary target', 'T032 damage + interrupt + knockback 1 cell + stun 0.8 s (continues past the clip)']],
     'trackNames': {'main': 'คลื่นหน้าโล่', 'impact': 'ระเบิดชน', 'gameplay': 'ดาเมจ / ตัดร่าย / สตัน'},
-    'layers': [[1, 'ตัวละคร (L1)'], [2, 'Root X พุ่งไปหน้า (L2)'], [3, 'Main VFX: หางหลังตัว / คลื่นหน้าตัว (L3)'],
+    'layers': [[1, 'ตัวละคร (L1)'], [2, 'Root X พุ่งไปหน้า (L2)'], [3, 'Main VFX หน้าตัวละคร (L3)'],
                [4, 'Impact VFX หน้าสุด (L4)'], [5, 'สั่นกล้อง 5–8 px (L5)'], [6, 'จังหวะเกมเพลย์ (L6)']],
     'shake': {str(k): list(v) for k, v in SHAKE.items()},
     'thumbs': [0, 8, 14, 18, 25, 30, 32, 34, 36, 40, 44, 51],
@@ -354,7 +337,7 @@ meta = {
     'travelLabel': 'L2 Root X (px, 80 = 1 ช่อง)', 'heightLabel': 'Y movement (px)',
     'notes': [
         'Root X: 0 จนถึง T018 > เร่งเร็ว (ease-in) > 72 px (0.9 ช่อง) ตอนชน T032 > ดันผ่านถึง 80 px T038 แล้วหยุด · Y = 0 (ขยับแค่ตามท่า)',
-        f'Main VFX: ขอบหน้าของคลื่นอยู่หน้าโล่ {WAVE_LEAD} px ทุกเฟรม (เลื่อนไปกับตัว) · ส่วนหางหลังหน้าโล่วาดใต้ตัวละคร ส่วนคลื่นวาดทับ',
+        f'Main VFX: ขอบหน้าของคลื่นอยู่หน้าโล่ {WAVE_LEAD} px ทุกเฟรม (เลื่อนไปกับตัว) · วาดทับหน้าตัวละครทั้งคลื่น · ขนาด 1.2 เท่าความสูงตัวตอนชน',
         'Impact VFX: เกิดที่จุดสัมผัสศัตรู T032 (หน้าโล่ของท่าชน) และอยู่กับที่ระหว่างดันผ่าน · สูงสุด T034',
         'ในเกม: DAMAGE / INTERRUPT / STUN ที่ step 7 (T032) · สั่น 7 px 130 ms ไม่มี hit-stop · การย้ายช่อง CHARGE ของเอนจินเกิดตอนเริ่มท่า',
         'แผ่น FX ในเกมเรียงตามไทม์ไลน์ 30 FPS · main ยึดเท้า (ไม่รวมระยะพุ่ง) · impact เล่นที่เป้า ฝั่งที่ชน (ถอยมา 0.35 ช่อง)',
