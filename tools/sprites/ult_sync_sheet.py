@@ -266,11 +266,13 @@ def curve(key, vals, vmax, col, unit):
     last = None
     for t, v in enumerate(vals):
         r = round(v)
-        if r != last and (t in (0, N - 1) or r in (14, 18, 22, 30, 58, 64) and last is not None):
+        keyed = t in KEY_TS if M else (r in (14, 18, 22, 30, 58, 64) and last is not None)
+        if r != last and (t in (0, N - 1) or keyed):
             d.text((pts[t][0] - 6, pts[t][1] - 18), f'{r}', font=f(12, True), fill=col)
         last = r
 
 
+KEY_TS = {k for k, _ in D['rootTracks']['travel'] + D['rootTracks']['height']}
 curve('travel', travel, max(32, max(travel) + 2), (120, 200, 255), 'px')
 curve('height', height, max(66, max(height) + 2), (255, 200, 110), 'px')
 
@@ -301,9 +303,11 @@ for t in range(N):
     sx, sy = shake(t)
     amp = max(abs(sx), abs(sy))
     if amp:
-        d.rectangle([xs(t) + 2, mid - amp * 5, xs(t + 1) - 2, mid + amp * 5], fill=(255, 110, 110, 220))
-        if t in (33, 115, 119, 121) or (SHAKE_TAB is not None and t == min(SHAKE_TAB)):
-            d.text((xs(t) + 1, yy + 1), f'{amp}px', font=f(11), fill=DIM)
+        k = min(5, (hh / 2 - 3) / max(max(max(abs(a), abs(b)) for a, b in (shake(x) for x in range(N))), 1))
+        d.rectangle([xs(t) + 2, mid - amp * k, xs(t + 1) - 2, mid + amp * k], fill=(255, 110, 110, 220))
+        peak = SHAKE_TAB is not None and amp == max(max(abs(a), abs(b)) for a, b in SHAKE_TAB.values())
+        if t in (33, 115, 119, 121) and SHAKE_TAB is None or peak:
+            d.text((xs(t + 1) + 3, yy + 1), f'{amp}px', font=f(12, True), fill=(255, 140, 140))
 
 # legend
 yy, hh = layout['legend']

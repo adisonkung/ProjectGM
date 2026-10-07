@@ -67,9 +67,15 @@ describe('Yue Zheng (3★ Tank, base sheet + S1 + S2)', () => {
     expect(Math.max(...a.skill!.steps!)).toBe(a.skill!.steps![6]);
     // S2 Tiger Gate Ram: collision F8 (held) = damage / interrupt, the charge move starts on the first step F5
     expect([a.skill2!.row, a.skill2!.frames, a.skill2!.move]).toEqual([6, 12, 4]);
-    expect(a.skill2!.events).toEqual(jasmine.objectContaining({ ANTICIPATION_PEAK: 3, STRIKE_START: 4, DAMAGE: 7, RECOVERY_START: 9 }));
-    expect(animTiming('hero-yuezheng.png', 'skill2').hit).toBeCloseTo(clipClock(a.skill2!).at(7), 6);
-    expect(Math.max(...a.skill2!.steps!)).toBe(a.skill2!.steps![7]);
+    // sync sheet: rush + main VFX T018, collision (damage / interrupt / stun / impact) T032, recovery T044, 0.87 s
+    expect(a.skill2!.events).toEqual(jasmine.objectContaining({ ANTICIPATION_PEAK: 3, STRIKE_START: 4, VFX_SPAWN: 4, DAMAGE: 7, RECOVERY_START: 9 }));
+    const c2 = clipClock(a.skill2!);
+    expect(c2.total * 60).toBeCloseTo(52, 0);
+    expect(c2.at(4) * 60).toBeCloseTo(18, 0);
+    expect(animTiming('hero-yuezheng.png', 'skill2').hit * 60).toBeCloseTo(32, 0);
+    expect(c2.at(9) * 60).toBeCloseTo(44, 0);
+    expect(fxFor('hero-yuezheng.png', 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['yz-s2-main-back', 'yz-s2-main-front']);
+    expect(fxFor('hero-yuezheng.png', 'skill2', { on: 'impact' })).toEqual(['yz-s2-impact']);
     expect(a.ult).toBeUndefined();
     expect(HERO_BY_ID['yuezheng']).toEqual(jasmine.objectContaining({ cls: 'tank', star: 3, sprite: 'hero-yuezheng.png' }));
   });

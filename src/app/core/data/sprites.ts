@@ -171,18 +171,21 @@ export const SHEETS: Record<string, SheetDef> = {
         },
         impact: { hitStopMs: 0, shakePx: 2, shakeMs: 50 },
       },
-      // S2 Tiger Gate Ram (character only, no VFX yet): guard → sink behind the shield F2–F3 → rear leg loaded F4
-      // (held) → explosive step F5 (the CHARGE move starts here) → shield-led acceleration F6–F7 → F8 collision held =
-      // damage + interrupt + knockback + stun → push-through F9 → brake F10 → rise F11–F12 · 0.95 s
+      // S2 Tiger Gate Ram — Timeline Sync Sheet (tools/sprites/yuezheng_s2.py, 60 FPS T000–T051 = 0.87 s):
+      // A ready C01–C02 · B load C03–C04 (C04 = anticipation T014) · C charge C05–C07 from T018 (rush + main VFX) ·
+      // D collision C08 held T032–T037 = damage + interrupt + knockback + stun, impact at the contact point ·
+      // E push-through C09 · F recovery C10–C12 from T044 · shake up to 8 px peaking T036, no hit-stop
       skill2: {
         row: 6, frames: 12, ms: 80, move: 4,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        steps: [75, 70, 70, 120, 55, 55, 55, 140, 80, 75, 70, 85],
-        events: { CAST_START: 0, ANTICIPATION_PEAK: 3, STRIKE_START: 4, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
-        impact: { hitStopMs: 70, shakePx: 4, shakeMs: 160 },
+        steps: [67, 67, 100, 67, 67, 50, 117, 100, 100, 50, 50, 32],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 3, STRIKE_START: 4, VFX_SPAWN: 4, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9,
+        },
+        impact: { hitStopMs: 0, shakePx: 7, shakeMs: 130 },
       },
     },
-    fx: { skill: ['yz-s1-main', 'yz-s1-impact'] },
+    fx: { skill: ['yz-s1-main', 'yz-s1-impact'], skill2: ['yz-s2-main-back', 'yz-s2-main-front', 'yz-s2-impact'] },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -396,6 +399,22 @@ export const FX: Record<string, FxDef> = {
   'yz-s1-impact': {
     file: 'fx-yuezheng-s1-impact.png', frames: 11, w: 70, h: 69, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
     pivot: [0.5008, 0.4949], dx: 71.25, dy: -9.62, scale: 1 / 1.5, pixelated: true,
+  },
+  // Yue Zheng S2 Tiger Gate Ram (tools/sprites/yuezheng_s2.py), sync-sheet order at 30 FPS, atlas px: the shield wave
+  // rides with Yue Zheng (pivot = feet; the engine's CHARGE relocation happens at cast start), split at the shield face
+  // — the trail behind him under the units, the crescent over · the collision burst plays on the target, on the side
+  // Yue Zheng hits from (−0.35 cell)
+  'yz-s2-main-back': {
+    file: 'fx-yuezheng-s2-main-back.png', frames: 15, w: 101, h: 80, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx', layer: 'under',
+    pivot: [0.3686, 0.775], dx: 0, dy: 27.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'yz-s2-main-front': {
+    file: 'fx-yuezheng-s2-main-front.png', frames: 15, w: 101, h: 80, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.3686, 0.775], dx: 0, dy: 27.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'yz-s2-impact': {
+    file: 'fx-yuezheng-s2-impact.png', frames: 9, w: 80, h: 76, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
+    pivot: [0.4988, 0.7901], dx: -35, dy: 27.25, scale: 1 / 1.5, pixelated: true,
   },
   'bl3-residual': {
     file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'self', orient: 'flip', on: 'impact',
