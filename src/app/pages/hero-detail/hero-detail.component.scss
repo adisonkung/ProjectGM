@@ -9,6 +9,15 @@
     radial-gradient(ellipse 50% 90% at 0% 50%, color-mix(in srgb, var(--rc) 22%, transparent), transparent 70%),
     radial-gradient(ellipse 60% 80% at 100% 0%, #9b6bff22, transparent 70%),
     var(--panel-bg);
+  // key art: the character stands on the right of the image — darkened toward the left so name / stats stay readable
+  &.has-banner {
+    min-height: 220px;
+    background:
+      linear-gradient(90deg, #0b0f1cf2 0%, #0b0f1cd9 34%, #0b0f1c66 62%, #0b0f1c99 100%),
+      var(--banner) center 28% / cover no-repeat,
+      var(--panel-bg);
+    .level { background: #0b0f1ca8; border-radius: 12px; padding: 10px 12px; }
+  }
   &.r1 { --rc: var(--r1); } &.r2 { --rc: var(--r2); } &.r3 { --rc: var(--r3); } &.r4 { --rc: var(--r4); }
 }
 .art { filter: drop-shadow(0 0 18px color-mix(in srgb, var(--rc) 40%, transparent)); }

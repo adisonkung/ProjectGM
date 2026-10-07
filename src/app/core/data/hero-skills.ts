@@ -234,7 +234,7 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       // S2 the column in front (up / front / down), 170 % all
       skill2: {
         ...fighter.skill, slot: 'skill2', name: 'จันทร์กวาด', label: 'Sweeping Moon', range: 1,
-        effects: [{ type: 'DAMAGE', area: 'FRONT_COLUMN_3', primary: 1.7 }], ai: { tier: 'HIGH_VALUE', minTargets: 2 },
+        effects: [{ type: 'DAMAGE', area: 'FRONT_COLUMN_3', primary: 1.7 }], ai: { tier: 'HIGH_VALUE', minTargets: 1 },
       },
       // Ult: front cell 280 % (main), splash 140 % above / below it and one cell further — 3 strikes 25 / 30 / 45 %
       ult: {

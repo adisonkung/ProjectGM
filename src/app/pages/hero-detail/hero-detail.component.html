@@ -13,7 +13,7 @@
     </nav>
 
     <!-- hero banner -->
-    <header class="hero gm-panel glow r{{ star() }}">
+    <header class="hero gm-panel glow r{{ star() }}" [class.has-banner]="!!banner()" [style.--banner]="banner() ? 'url(' + banner() + ')' : null">
       <div class="art"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="168" /></div>
       <div class="who">
         <span class="gm-class">{{ className(tp.cls) }} · #{{ h.uid }}</span>

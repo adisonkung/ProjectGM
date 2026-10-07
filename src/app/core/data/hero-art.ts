@@ -7,6 +7,8 @@ export interface HeroArt {
   s1: string;
   s2: string;
   ult: string;
+  /** wide key art behind the hero-detail header (optional) */
+  banner?: string;
 }
 
 const art = (id: string): HeroArt => ({
@@ -27,6 +29,8 @@ export const HERO_ART: Record<string, HeroArt> = {
   nox: art('nox'),
   velma: art('velma'),
   morgan: art('morgan'),
+  // ไป๋หลง: ภาพจากผู้ใช้ 2026-10 (art/incoming/bailong/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
+  bailong: { ...art('bailong'), banner: 'banners/bailong.webp' },
 };
 
 export const heroArt = (heroId?: string): HeroArt | undefined => (heroId ? HERO_ART[heroId] : undefined);

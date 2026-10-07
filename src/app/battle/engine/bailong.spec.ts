@@ -256,6 +256,7 @@ describe('Bai Long — Sweeping Moon (Skill 2) visuals', () => {
     expect(k.effects).toEqual([{ type: 'DAMAGE', area: 'FRONT_COLUMN_3', primary: 1.7 }]);
     expect([k.id, k.cooldown, k.target]).toEqual([f.id, f.cooldown, f.target]);
     expect(k.ai!.tier).toBe(f.ai!.tier);
+    expect(k.ai!.minTargets).toBe(1); // like S1 / ult: one enemy in the area is enough
     expect(k.label).toBe('Sweeping Moon');
   });
 });

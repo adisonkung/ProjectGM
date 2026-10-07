@@ -107,6 +107,9 @@ export class HeroDetailComponent {
     return (Object.keys(tot) as EquipStat[]).filter(s => tot[s] && !core.includes(s)).map(s => this.fmt(s, tot[s]));
   });
 
+  /** wide key art behind the header (heroes that have one) */
+  readonly banner = computed(() => heroArt(this.t()?.id)?.banner);
+
   readonly skills = computed(() => {
     const h = this.hero(), t = this.t();
     if (!h || !t) return [];
