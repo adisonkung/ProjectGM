@@ -30,7 +30,7 @@ SCR = sys.argv[1]
 OUT = sys.argv[2]
 TAG = sys.argv[3] if len(sys.argv) > 3 else ''          # output name suffix, e.g. _v2
 FPS, N = 60, 147
-W, H, UP = 400, 300, 3                         # canvas in sheet px, upscaled ×3 nearest
+W, H, UP = 460, 300, 3                         # canvas in sheet px, upscaled ×3 nearest
 GROUND, X0 = 250, 140                          # Bai Long's root (feet) on the canvas
 CELL_W, CELL_H = 220, 170
 
@@ -117,7 +117,7 @@ FX = {
     'final': strip('public/sprites/fx-bailong-v3-final.png', 12),
 }
 # strip px → sheet px (game FX scale × FX_SCALE 1.5)
-SC = {'hint': .5, 'emerge': .6, 'ascent': .6, 'coilA': .8, 'core': .82, 'dive': .5, 'impact': .55, 'residual': .45, 'charge': .55, 'final': .7}
+SC = {'hint': .5, 'emerge': .6, 'ascent': .6, 'coilA': .8, 'core': .82, 'dive': .5, 'impact': .55, 'residual': .45, 'charge': .72, 'final': .9}
 
 
 def scaled(a, s, sx=None):
@@ -200,7 +200,9 @@ def frame(t):
     center = (ox + p['torso'][0], oy + p['torso'][1])
     ptip18 = POSES[18]
     _, _, gx18, gy18 = placement(113)
-    G = (gx18 + ptip18['tip'][0], GROUND)
+    # final burst one board cell (80 sheet px = 100 %) in front of the spear's contact point
+    CELL_PX = 80
+    G = (gx18 + ptip18['tip'][0] + CELL_PX, GROUND)
 
     def put(name, k, at, how, alpha=1.0, mode='none', layer_b=3, layer_f=5, s_mul=1.0, sx=None, prep=None, hold=False):
         a = FX[name][k]
