@@ -1,4 +1,5 @@
-"""Timeline Sync Sheet of an ultimate preview (reference for new characters) — Bai Long Nine Dragon Sequence, Preview v3.
+"""Timeline Sync Sheet of a skill preview — Bai Long Nine Dragon Sequence (Preview v3) by default; a timeline JSON
+with a `sheet` block (phases / poses / events / tracks / layers / notes, e.g. tools/sprites/yuezheng_s1.py) draws any skill.
 
 Reads the preview's timeline JSON (bailong_ult_preview.py) + its MP4 and writes:
   <out>/ult_sync_sheet_v3.png    X-sheet: key-frame thumbnails · phases · events · character holds · root travel / height
@@ -107,8 +108,42 @@ EVENTS = [  # T, game event, note
 LAYERS = [(1, 'ฉากหลัง'), (2, 'ออร่าพื้น + ครึ่งไกลของวง'), (3, 'มังกรส่วนหลังตัว'), (4, 'ตัวละคร + อาวุธ'),
           (5, 'มังกรส่วนหน้า (เว้นหน้าและปลายอาวุธ)'), (6, 'ประกายปลายอาวุธ / จุดสัมผัส / ครึ่งใกล้ของวง')]
 
+TITLE = 'Timeline Sync Sheet — Ultimate (Preview v3)  ·  Bai Long · Nine Dragon Sequence'
+SUBTITLE = f'60 FPS · {N} frames (T000–T{N - 1:03d}) = {N / FPS:.2f} s · 1 column = 1 frame (16.7 ms) · ใช้เป็นแม่แบบจังหวะของ Ultimate ตัวละครใหม่'
+HITS = {30: 'HIT 1', 45: 'HIT 2', 113: 'HIT 3'}
+KEYS = [0, 15, 30, 45, 55, 70, 91, 100, 108, 113, 117, 120, 128, 146]
+TRAVEL_LABEL, HEIGHT_LABEL = 'พุ่งไปหน้า (px, 80 = 1 ช่อง)', 'ความสูงลอย (px)'
+NOTES = [
+    'แถบสีในแถว VFX = ช่วงที่เอฟเฟกต์อยู่บนจอ · ความเข้ม = opacity (จาง = fade-in/out) · ตัวเลข = เฟรมของแผ่น VFX ที่เริ่มแสดงตรงนั้น',
+    'กรอบแดงในแถวตัวละคร = เฟรมที่ดาเมจเข้า (Hit 1 T030 · Hit 2 T045 · Hit 3 T113) · C05 ใช้ภาพเดียวกับ C04 (ค้างระหว่างพุ่ง)',
+    'ตัวละครวาดอยู่กลางช่องทุกเฟรม — การพุ่ง/การลอยมาจากเส้น "พุ่งไปหน้า" และ "ความสูงลอย" (smoothstep ระหว่างคีย์)',
+    'ส่งไม้ต่อ VFX: charge > hint > emerge > ascent > coil > core > dive > final > residual (ซ้อนกัน 2–6 เฟรมเสมอ ไม่มีช่วงว่าง)',
+    'final impact วางที่ G = จุดอาวุธแตะพื้น + 1 ช่อง (80 px) = ช่อง main ของพื้นที่ดาเมจ FRONT_CROSS · dive ต้องหายก่อน T112',
+]
+NAME = 'ult_sync_sheet_v3'
+SHAKE_TAB = None
+# a timeline JSON with a 'sheet' block (any skill, any hero) replaces the Bai Long tables above
+M = D.get('sheet')
+if M:
+    TITLE, SUBTITLE, NAME = M['title'], M['subtitle'], M.get('name', NAME)
+    PHASES = [(a, b, pid, name, tuple(col)) for a, b, pid, name, col, _ in M['phases']]
+    PHASE_TH = {pid: th for _, _, pid, _, _, th in M['phases']}
+    POSE = {int(k): tuple(v) for k, v in M['poses'].items()}
+    GAME_STEP_MS = M['gameSteps']
+    TRACKS = [(k, label, tuple(col), src, layers, anchor, note) for k, label, col, src, layers, anchor, note in M['tracks']]
+    TRACK_TH = M['trackNames']
+    EVENTS = [tuple(e) for e in M['events']]
+    LAYERS = [tuple(x) for x in M['layers']]
+    HITS = {t: 'HIT' for t in M['hits']}
+    KEYS = M['thumbs']
+    TRAVEL_LABEL, HEIGHT_LABEL = M['travelLabel'], M['heightLabel']
+    NOTES = M['notes']
+    SHAKE_TAB = {int(k): tuple(v) for k, v in M['shake'].items()}
+
 
 def shake(t):
+    if SHAKE_TAB is not None:
+        return SHAKE_TAB.get(t, (0, 0))
     if 33 <= t <= 36:
         return [(1, 0), (-1, 1), (1, -1), (0, 0)][t - 33]
     if 115 <= t <= 122:
@@ -129,19 +164,20 @@ for v in D['vfx']:
 CHAR = [(c['from'], c['to'], int(c['char'][1:])) for c in D['characterTiming']]
 travel = [p['root'][0] - X0 for p in PF]
 height = [G - p['root'][1] for p in PF]
-hits = {30: 'HIT 1', 45: 'HIT 2', 113: 'HIT 3'}
+hits = HITS
 
 # ------------------------------------------------------------------ thumbnails from the MP4
-KEYS = [0, 15, 30, 45, 55, 70, 91, 100, 108, 113, 117, 120, 128, 146]
 tmp = tempfile.mkdtemp()
 subprocess.run(['ffmpeg', '-v', 'error', '-i', MP4, f'{tmp}/f%03d.png'], check=True)
 thumbs = {t: Image.open(f'{tmp}/f{t + 1:03d}.png').convert('RGB') for t in KEYS}
+if M and M.get('thumbCrop'):          # small characters: zoom the thumbnails on the action
+    thumbs = {t: im.crop(tuple(M['thumbCrop'])) for t, im in thumbs.items()}
 
 # ------------------------------------------------------------------ X-sheet PNG
 FONT = '/usr/share/fonts/opentype/tlwg/Loma.otf'
 FONTB = '/usr/share/fonts/opentype/tlwg/Loma-Bold.otf'
 f = lambda s, b=False: ImageFont.truetype(FONTB if b else FONT, s)
-CW, LX = 13, 300                      # px per timeline frame · label column width
+CW, LX = max(13, 1700 // N), 300                      # px per timeline frame · label column width
 W = LX + N * CW + 40
 BG, INK, DIM, GRID = (16, 18, 28), (232, 234, 242), (140, 146, 165), (44, 48, 66)
 xs = lambda t: LX + t * CW            # left edge of frame t
@@ -160,9 +196,8 @@ H = y + 20
 img = Image.new('RGB', (W, H), BG)
 d = ImageDraw.Draw(img, 'RGBA')
 
-d.text((24, 18), 'Timeline Sync Sheet — Ultimate (Preview v3)  ·  Bai Long · Nine Dragon Sequence', font=f(30, True), fill=INK)
-d.text((24, 58), f'60 FPS · {N} frames (T000–T{N - 1:03d}) = {N / FPS:.2f} s · 1 column = 1 frame (16.7 ms) · '
-       'ใช้เป็นแม่แบบจังหวะของ Ultimate ตัวละครใหม่', font=f(18), fill=DIM)
+d.text((24, 18), TITLE, font=f(30, True), fill=INK)
+d.text((24, 58), SUBTITLE, font=f(18), fill=DIM)
 
 # thumbnails, spread evenly, leader line to their frame
 ty = H_TITLE + 6
@@ -182,12 +217,13 @@ y0, y1 = layout['ruler'][0], layout['shake'][0] + layout['shake'][1]
 for t in range(N + 1):
     col = (70, 76, 100) if t % 10 == 0 else GRID if t % 5 == 0 else (28, 31, 44)
     d.line([(xs(t), y0 + 20), (xs(t), y1)], fill=col, width=1)
-for t in range(0, N, 10):
+STEP_LBL = 10 if CW < 20 else 5
+for t in range(0, N, STEP_LBL):
     d.text((xs(t) + 2, y0 + 2), f'T{t:03d}', font=f(13, True), fill=INK)
     d.text((xs(t) + 2, y0 + 22), f'{t / FPS:.2f}s', font=f(11), fill=DIM)
 for key, label in [('ruler', 'เวลา (T @60fps)'), ('phase', 'ช่วง (Phase)'), ('event', 'Events / จังหวะโดน'),
-                   ('char', 'ท่าตัวละคร C## / เฟรมเกม F##'), ('travel', 'พุ่งไปหน้า (px, 80 = 1 ช่อง)'),
-                   ('height', 'ความสูงลอย (px)'), ('shake', 'สั่นกล้อง (px)')]:
+                   ('char', 'ท่าตัวละคร C## / เฟรมเกม F##'), ('travel', TRAVEL_LABEL),
+                   ('height', HEIGHT_LABEL), ('shake', 'สั่นกล้อง (px)')]:
     yy, hh = layout[key]
     d.text((16, yy + hh // 2 - 11), label, font=f(17, True), fill=INK)
 
@@ -235,8 +271,8 @@ def curve(key, vals, vmax, col, unit):
         last = r
 
 
-curve('travel', travel, 32, (120, 200, 255), 'px')
-curve('height', height, 66, (255, 200, 110), 'px')
+curve('travel', travel, max(32, max(travel) + 2), (120, 200, 255), 'px')
+curve('height', height, max(66, max(height) + 2), (255, 200, 110), 'px')
 
 # VFX tracks: cell shade = opacity · frame number where it changes · layer tag
 for key, label, col, src, layers, anchor, note in TRACKS:
@@ -266,19 +302,13 @@ for t in range(N):
     amp = max(abs(sx), abs(sy))
     if amp:
         d.rectangle([xs(t) + 2, mid - amp * 5, xs(t + 1) - 2, mid + amp * 5], fill=(255, 110, 110, 220))
-        if t in (33, 115, 119, 121):
+        if t in (33, 115, 119, 121) or (SHAKE_TAB is not None and t == min(SHAKE_TAB)):
             d.text((xs(t) + 1, yy + 1), f'{amp}px', font=f(11), fill=DIM)
 
 # legend
 yy, hh = layout['legend']
-d.text((24, yy + 6), 'อ่านยังไง', font=f(20, True), fill=INK)
-lines = [
-    'แถบสีในแถว VFX = ช่วงที่เอฟเฟกต์อยู่บนจอ · ความเข้ม = opacity (จาง = fade-in/out) · ตัวเลข = เฟรมของแผ่น VFX ที่เริ่มแสดงตรงนั้น',
-    'กรอบแดงในแถวตัวละคร = เฟรมที่ดาเมจเข้า (Hit 1 T030 · Hit 2 T045 · Hit 3 T113) · C05 ใช้ภาพเดียวกับ C04 (ค้างระหว่างพุ่ง)',
-    'ตัวละครวาดอยู่กลางช่องทุกเฟรม — การพุ่ง/การลอยมาจากเส้น "พุ่งไปหน้า" และ "ความสูงลอย" (smoothstep ระหว่างคีย์)',
-    'ส่งไม้ต่อ VFX: charge > hint > emerge > ascent > coil > core > dive > final > residual (ซ้อนกัน 2–6 เฟรมเสมอ ไม่มีช่วงว่าง)',
-    'final impact วางที่ G = จุดอาวุธแตะพื้น + 1 ช่อง (80 px) = ช่อง main ของพื้นที่ดาเมจ FRONT_CROSS · dive ต้องหายก่อน T112',
-]
+d.text((24, yy + 6), 'อ่านยังไง' if not M else 'Implementation notes', font=f(20, True), fill=INK)
+lines = NOTES
 for i, s in enumerate(lines):
     d.text((24, yy + 42 + i * 26), '• ' + s, font=f(15), fill=INK)
 lx = 24
@@ -291,7 +321,7 @@ for n, name in LAYERS:
     lx += d.textlength(s, font=f(14)) + 26
 
 os.makedirs(OUT, exist_ok=True)
-img.save(f'{OUT}/ult_sync_sheet_v3.png', optimize=True)
+img.save(f'{OUT}/{NAME}.png', optimize=True)
 
 # ------------------------------------------------------------------ workbook
 from openpyxl import Workbook
@@ -322,7 +352,7 @@ def header(ws, cols, widths):
 ws = wb.active
 ws.title = 'Read Me'
 ws.column_dimensions['A'].width = 120
-for r, s in enumerate([
+README = M['readme'] if M and 'readme' in M else [
     'Timeline Sync Sheet — Ultimate (Preview v3) · Bai Long · Nine Dragon Sequence',
     '',
     'ใช้เป็นแม่แบบจังหวะของ Ultimate ตัวละครใหม่: 60 FPS, 147 เฟรม (T000–T146) = 2.45 วินาที',
@@ -334,7 +364,8 @@ for r, s in enumerate([
     'opacity: 1 = เต็ม · การแบ่งชั้น (split): lower = ครึ่งไกลหลังตัว/ครึ่งใกล้หน้าตัว · head40 = หัว 40 % หน้าตัว ลำตัว 60 % หลังตัว · '
     'tip = ปลายแสงอยู่หน้า · band = ลำตัวพาดผ่าน · head-bottom = หัวด้านล่างอยู่หน้า · front = หน้าสุด',
     'ที่มา: bailong_ult_v3_timeline.json + tools/sprites/bailong_ult_preview.py (preview v3) · ไฟล์นี้สร้างจาก tools/sprites/ult_sync_sheet.py',
-], 1):
+]
+for r, s in enumerate(README, 1):
     c = ws.cell(row=r, column=1, value=s)
     c.font = Font(name=AR, bold=(r == 1), size=14 if r == 1 else 11)
     c.alignment = Alignment(wrap_text=True, vertical='top')
@@ -388,7 +419,7 @@ gi = 0
 for i, (a, b, c) in enumerate(CHAR):
     r = i + 2
     game = ''
-    if c != 5:
+    if c != 5 or M:
         game = GAME_STEP_MS[gi]
         gi += 1
     ws.append([f'C{c:02d}', POSE[c][0], a, b, f'=D{r}-C{r}+1', f'=E{r}*1000/60', game, POSE[c][1], POSE[c][2]])
@@ -402,7 +433,7 @@ ws.cell(row=n, column=5, value=f'=SUM(E2:E{n - 1})').font = Font(name=AR, bold=T
 ws.cell(row=n, column=6, value=f'=SUM(F2:F{n - 1})').font = Font(name=AR, bold=True)
 ws.cell(row=n, column=7, value=f'=SUM(G2:G{n - 1})').font = Font(name=AR, bold=True)
 ws.cell(row=n, column=6).number_format = '0'
-ws.cell(row=n + 1, column=1, value='Game ms = ความยาวของเฟรมนั้นในเกม (SHEETS hero-bailong.png ult.steps) — C05 ไม่มีในเกม (รวมอยู่ใน F4)').font = Font(name=AR, italic=True, size=9)
+ws.cell(row=n + 1, column=1, value=M.get('gameNote', 'Game ms = ความยาวของเฟรมนั้นในเกม') if M else 'Game ms = ความยาวของเฟรมนั้นในเกม (SHEETS hero-bailong.png ult.steps) — C05 ไม่มีในเกม (รวมอยู่ใน F4)').font = Font(name=AR, italic=True, size=9)
 
 # VFX tracks
 ws = wb.create_sheet('VFX Tracks')
@@ -449,5 +480,5 @@ ws.append([])
 ws.append(['', 'หน้าตัวละครกับปลายอาวุธถูกเว้นออกจาก L5 ทุกเฟรม (เอฟเฟกต์ไม่บังหน้า/ปลายอาวุธ)'])
 ws.cell(row=ws.max_row, column=2).font = Font(name=AR, italic=True)
 
-wb.save(f'{OUT}/ult_sync_sheet_v3.xlsx')
+wb.save(f'{OUT}/{NAME}.xlsx')
 print('ok', img.size)

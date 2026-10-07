@@ -158,17 +158,21 @@ export const SHEETS: Record<string, SheetDef> = {
       // ready → raise the dao (F2–F3) → slash extended F4 = damage → recover to the shield stance
       attack: { row: 3, frames: 7, ms: 95, events: { DAMAGE: 3, RECOVERY_START: 5 } },
       die: { row: 4, frames: 6, ms: 120 },
-      // S1 Iron Wall Taunt (character only, no VFX by design — the shield movement is the skill): guard → settle F2–F4
-      // → deep brace F5 (held) → shield thrust forward F6 = activation (taunt + guard land) → hold the pressure F7 →
-      // recoil F8 → back to guard F9–F10 · heavy: brace / thrust / hold are the long steps · 1.14 s
+      // S1 Iron Wall Taunt — Timeline Sync Sheet (tools/sprites/yuezheng_s1.py, 60 FPS T000–T059 = 1.00 s):
+      // A ready / brace C01–C02 · B anticipation C03–C05 (C05 held T020–T025) · C activation C06 held T026–T035 —
+      // main VFX spawns T026, taunt + damage reduction T030 (DAMAGE at step 5.4) · D hold C07 T036–T047 · E recovery
+      // C08–C10 from T048 · feet planted, no travel · shake 2 px, no hit-stop
       skill: {
-        row: 5, frames: 10, ms: 95,
+        row: 5, frames: 10, ms: 100,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        steps: [90, 80, 80, 90, 170, 140, 200, 90, 90, 110],
-        events: { CAST_START: 0, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 5, DAMAGE: 5, IMPACT: 5, RECOVERY_START: 7 },
-        impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
+        steps: [100, 100, 83, 50, 100, 167, 200, 67, 67, 66],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 5, VFX_SPAWN: 5, DAMAGE: 5.4, IMPACT: 5.4, RECOVERY_START: 7,
+        },
+        impact: { hitStopMs: 0, shakePx: 2, shakeMs: 50 },
       },
     },
+    fx: { skill: ['yz-s1-main', 'yz-s1-impact'] },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -370,6 +374,18 @@ export const FX: Record<string, FxDef> = {
   'bl3-impact': {
     file: 'fx-bailong-v3-impact.png', frames: 10, w: 145, h: 354, frameMs: 55, at: 'self', orient: 'flip', on: 'impact',
     hitIndex: 2, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.36, pixelated: true,
+  },
+  // Yue Zheng S1 Iron Wall Taunt (tools/sprites/yuezheng_s1.py): both tracks baked in sync-sheet order at 30 FPS
+  // (every 2nd timeline frame), atlas px (scale 1 / FX_SCALE) · main = Mountain Seal wall, pivot = shield front of the
+  // activation pose (stable): grows T026–T031, shimmers through the hold, breaks at recovery · impact = taunt pressure
+  // 14 px in front of the shield, peak T032 — not enemy damage
+  'yz-s1-main': {
+    file: 'fx-yuezheng-s1-main.png', frames: 17, w: 79, h: 101, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.496, 0.4975], dx: 53.75, dy: -9.62, scale: 1 / 1.5, pixelated: true,
+  },
+  'yz-s1-impact': {
+    file: 'fx-yuezheng-s1-impact.png', frames: 11, w: 70, h: 69, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.5008, 0.4949], dx: 71.25, dy: -9.62, scale: 1 / 1.5, pixelated: true,
   },
   'bl3-residual': {
     file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'self', orient: 'flip', on: 'impact',
