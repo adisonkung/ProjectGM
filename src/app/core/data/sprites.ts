@@ -145,11 +145,11 @@ export const SHEETS: Record<string, SheetDef> = {
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
-  // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet + S1 (row 5) — S2 / ult
-  // fall back (ANIM_FALLBACK skill2 → skill, ult → skill) until their sheets arrive in rows 6–7. Cell 260 × 170 like Aurel v2
+  // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet + S1 (row 5) + S2 (row 6)
+  // — the ult falls back (ANIM_FALLBACK ult → skill) until its sheet arrives in row 7. Cell 260 × 170 like Aurel v2
   // (the tower shield needs the width), feet 15 px above the cell bottom, idle body 78 px.
   'hero-yuezheng.png': {
-    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 12, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -170,6 +170,16 @@ export const SHEETS: Record<string, SheetDef> = {
           CAST_START: 0, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 5, VFX_SPAWN: 5, DAMAGE: 5.4, IMPACT: 5.4, RECOVERY_START: 7,
         },
         impact: { hitStopMs: 0, shakePx: 2, shakeMs: 50 },
+      },
+      // S2 Tiger Gate Ram (character only, no VFX yet): guard → sink behind the shield F2–F3 → rear leg loaded F4
+      // (held) → explosive step F5 (the CHARGE move starts here) → shield-led acceleration F6–F7 → F8 collision held =
+      // damage + interrupt + knockback + stun → push-through F9 → brake F10 → rise F11–F12 · 0.95 s
+      skill2: {
+        row: 6, frames: 12, ms: 80, move: 4,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        steps: [75, 70, 70, 120, 55, 55, 55, 140, 80, 75, 70, 85],
+        events: { CAST_START: 0, ANTICIPATION_PEAK: 3, STRIKE_START: 4, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
+        impact: { hitStopMs: 70, shakePx: 4, shakeMs: 160 },
       },
     },
     fx: { skill: ['yz-s1-main', 'yz-s1-impact'] },

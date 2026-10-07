@@ -48,10 +48,10 @@ describe('Roster remodel — Bai Long lead + new heroes', () => {
 });
 
 /** Yue Zheng — Iron Mountain Bastion (remodel #2): base sheet only, Tank baseline kit with the character's names */
-describe('Yue Zheng (3★ Tank, base sheet + S1)', () => {
-  it('10 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 7 (damage F4) · die 6 · S1 Iron Wall Taunt 10 on the sync sheet', () => {
+describe('Yue Zheng (3★ Tank, base sheet + S1 + S2)', () => {
+  it('12 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 7 (damage F4) · die 6 · S1 Iron Wall Taunt 10 · S2 Tiger Gate Ram 12', () => {
     const sh = SHEETS['hero-yuezheng.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([12, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 4], [3, 7], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
@@ -65,7 +65,12 @@ describe('Yue Zheng (3★ Tank, base sheet + S1)', () => {
     expect(clk.at(7) * 60).toBeCloseTo(48, 0);
     expect(fxFor('hero-yuezheng.png', 'skill', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['yz-s1-main', 'yz-s1-impact']);
     expect(Math.max(...a.skill!.steps!)).toBe(a.skill!.steps![6]);
-    expect(a.skill2).toBeUndefined();
+    // S2 Tiger Gate Ram: collision F8 (held) = damage / interrupt, the charge move starts on the first step F5
+    expect([a.skill2!.row, a.skill2!.frames, a.skill2!.move]).toEqual([6, 12, 4]);
+    expect(a.skill2!.events).toEqual(jasmine.objectContaining({ ANTICIPATION_PEAK: 3, STRIKE_START: 4, DAMAGE: 7, RECOVERY_START: 9 }));
+    expect(animTiming('hero-yuezheng.png', 'skill2').hit).toBeCloseTo(clipClock(a.skill2!).at(7), 6);
+    expect(Math.max(...a.skill2!.steps!)).toBe(a.skill2!.steps![7]);
+    expect(a.ult).toBeUndefined();
     expect(HERO_BY_ID['yuezheng']).toEqual(jasmine.objectContaining({ cls: 'tank', star: 3, sprite: 'hero-yuezheng.png' }));
   });
 

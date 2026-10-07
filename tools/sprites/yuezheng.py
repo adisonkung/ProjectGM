@@ -41,6 +41,7 @@ BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
 SKILL_ROWS = [  # (anim, file, frames per source row) — rows 5, 6, 7
     ('skill', 's1_char', [10]),
+    ('skill2', 's2_char', [12]),
 ]
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px
 FACE = (1362, 572, 1640, 868)
