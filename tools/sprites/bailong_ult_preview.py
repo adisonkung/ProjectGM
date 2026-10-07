@@ -28,6 +28,7 @@ from scipy import ndimage
 
 SCR = sys.argv[1]
 OUT = sys.argv[2]
+TAG = sys.argv[3] if len(sys.argv) > 3 else ''          # output name suffix, e.g. _v2
 FPS, N = 60, 147
 W, H, UP = 400, 300, 3                         # canvas in sheet px, upscaled ×3 nearest
 GROUND, X0 = 250, 140                          # Bai Long's root (feet) on the canvas
@@ -111,9 +112,12 @@ FX = {
     'dive': strip('public/sprites/fx-bailong-v3-dive.png', 8),
     'impact': strip('public/sprites/fx-bailong-v3-impact.png', 10),
     'residual': strip('public/sprites/fx-bailong-v3-residual.png', 6),
+    # v2 start / end (user sheets 2026-10-07): ground charge (10) · final ground impact with debris + ring (12)
+    'charge': strip('public/sprites/fx-bailong-v3-charge.png', 10),
+    'final': strip('public/sprites/fx-bailong-v3-final.png', 12),
 }
 # strip px → sheet px (game FX scale × FX_SCALE 1.5)
-SC = {'hint': .5, 'emerge': .6, 'ascent': .6, 'coilA': .8, 'core': .82, 'dive': .5, 'impact': .55, 'residual': .45}
+SC = {'hint': .5, 'emerge': .6, 'ascent': .6, 'coilA': .8, 'core': .82, 'dive': .5, 'impact': .55, 'residual': .45, 'charge': .55, 'final': .7}
 
 
 def scaled(a, s, sx=None):
@@ -142,6 +146,8 @@ def split(a, mode):
         f = yy > y0 + .86 * (y1 - y0)
     elif mode == 'head-bottom':   # dive: head is at the bottom
         f = yy > y0 + .8 * (y1 - y0)
+    elif mode == 'lower':         # ground burst: near ring half + near debris (lower 40 %) in front
+        f = yy > y0 + .6 * (y1 - y0)
     elif mode == 'front':
         f = np.ones((h, w), bool)
     else:
@@ -223,11 +229,13 @@ def frame(t):
         EVENTS.append({'T': t, 'track': name, 'frame': k + 1, 'x': round(px), 'y': round(py), 'opacity': round(alpha, 2),
                        'split': mode})
 
-    # Charge T000–T024: ground aura under the feet (impact f1, small) + sparse qi behind (residual f6)
-    a = env(t, 0, 30, fin=14, fout=6)
-    if a:
-        put('impact', 0, (center[0], GROUND + 2), 'bottom', a * .75, 'none', layer_b=2, s_mul=.75)
-        put('residual', 5, (center[0] - 6, center[1]), 'core', a * .6, 'none')
+    # Charge T000–T024 (v2): ground charge sheet under his feet — wisps → rings + pillar (f1–f6) during C01–C02,
+    # then f9–f10 (the energy shoots up into the spear) as the dash starts; f7–f8 (dragon head) skipped: no full
+    # dragon silhouette during the charge
+    if t <= 24:
+        k = idx(t, 0, 14, 6) if t <= 14 else (8 if t <= 19 else 9)
+        a = env(t, 0, 24, fin=4, fout=5)
+        put('charge', k, (center[0] + 2, GROUND + 3), 'bottom', a, 'lower', layer_b=2, layer_f=6)
     # Dash / Thrust: hint from T025 on the spear tip (tail on the tip, flash end in front), hit-stop T033–T035
     a = env(t, 25, 46, fin=3, fout=4)
     if a:
@@ -258,34 +266,19 @@ def frame(t):
     a = env(t, 101, 111, fin=2, fout=5)
     if a:
         put('dive', idx(t, 101, 109, 8), (tip[0], tip[1] + 6), 'headdown', a, 'head-bottom')
-    # Final impact (no intact dragon): T113 flash · T115 core · T117 column · T120 shockwave
-    if 113 <= t <= 114:
-        put('impact', 1, (G[0], G[1] + 2), 'bottom', 1, 'front', layer_f=6, s_mul=.6)
-    if 115 <= t <= 117:
-        put('impact', 2, (G[0], G[1] + 2), 'bottom', 1, 'base', layer_b=3, layer_f=6, s_mul=.8)
-    a = env(t, 117, 132, fout=6)
-    if a:
-        k = [3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9, 9][t - 117]
-        put('impact', k, (G[0], G[1] + 2), 'bottom', a, 'base', layer_b=3, layer_f=6,
-            prep=(lambda q: fade_top(q, .5)) if k in (3, 4, 5, 6) else None)
-    a = env(t, 120, 130, fout=5)
-    if a:
-        u = (t - 120) / 10
-        ring = FX['impact'][4]
-        x0, x1, y0, y1 = bbox(ring)
-        band = ring[int(y1 - .16 * (y1 - y0)):y1 + 1].copy()          # the ground ring at the column's base
-        FX['_ring'] = [band]
-        SC['_ring'] = .55
-        put('_ring', 0, (G[0], G[1] + 3), 'bottom', a * (1 - .5 * u), 'none', layer_b=2, s_mul=1, sx=.55 * (1 + 1.4 * u))
-        # near half in front
-        bb = scaled(band, .55, .55 * (1 + 1.4 * u))
-        bb[: bb.shape[0] // 2, ..., 3] = 0
-        bb[..., 3] = (bb[..., 3] * a * (1 - .5 * u)).astype(np.uint8)
-        L[6].alpha_composite(Image.fromarray(bb), (round(G[0] - bb.shape[1] / 2), round(G[1] + 3 - bb.shape[0])))
+    # Final impact (v2): user's ground-impact sheet on the contact point G — T113 flash f1 · T115 core f2 ·
+    # T117 column rising f3–f4 · T120 ring f5 (far half behind, near half + near debris in front) · debris f6–f8 ·
+    # decay f9–f12 into the residual
+    FIN = {113: 0, 114: 0, 115: 1, 116: 1, 117: 2, 118: 3, 119: 3, 120: 4, 121: 4, 122: 4, 123: 5, 124: 5, 125: 6,
+           126: 6, 127: 7, 128: 7, 129: 8, 130: 8, 131: 8, 132: 9, 133: 9, 134: 9, 135: 10, 136: 10, 137: 10,
+           138: 11, 139: 11, 140: 11}
+    if t in FIN:
+        a = 1.0 if t <= 131 else max(0.0, 1 - (t - 131) / 10)
+        put('final', FIN[t], (G[0], G[1] + 3), 'bottom', a, 'lower', layer_b=3, layer_f=6)
     # Residual T131–T146: faint contour + sparks behind him, fading to zero
-    a = env(t, 129, 146, fin=3) * max(0, 1 - (t - 129) / 18)
+    a = env(t, 132, 146, fin=4) * max(0, 1 - (t - 132) / 15)
     if a > .02:
-        put('residual', idx(t, 129, 146, 6, 2, 5), (G[0] - 6, GROUND - 40), 'core', a * .8, 'none')
+        put('residual', idx(t, 132, 146, 6, 2, 5), (G[0] - 6, GROUND - 40), 'core', a * .8, 'none')
 
     # protect the face and the spear tip on layer 5 (front dragon)
     l5 = np.array(L[5])
@@ -346,10 +339,10 @@ def main():
     for i, f in enumerate(frames):
         f.save(f'{d}/f{i:03d}.png')
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '60', '-i', f'{d}/f%03d.png', '-c:v', 'libx264',
-                    '-pix_fmt', 'yuv420p', '-crf', '14', f'{OUT}/bailong_ult_preview_60fps.mp4'], check=True)
+                    '-pix_fmt', 'yuv420p', '-crf', '14', f'{OUT}/bailong_ult_preview{TAG}_60fps.mp4'], check=True)
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '60', '-i', f'{d}/f%03d.png', '-vf',
                     'fps=50,scale=800:-1:flags=neighbor,split[a][b];[a]palettegen=max_colors=200[p];[b][p]paletteuse=dither=none',
-                    '-loop', '0', f'{OUT}/bailong_ult_preview_50fps.gif'], check=True)
+                    '-loop', '0', f'{OUT}/bailong_ult_preview{TAG}_50fps.gif'], check=True)
     keys = [0, 14, 25, 33, 40, 50, 55, 62, 70, 80, 90, 98, 104, 110, 113, 115, 117, 120, 125, 131, 138, 146]
     cw, ch = 400, 250
     sheet_ = Image.new('RGB', (cw * 6, ch * 4), (0, 0, 0))
@@ -358,13 +351,13 @@ def main():
     for i, t in enumerate(keys[:24]):
         sheet_.paste(frames[t].resize((cw, ch), Image.NEAREST), ((i % 6) * cw, (i // 6) * ch))
         dr.text(((i % 6) * cw + 6, (i // 6) * ch + 4), f'T{t:03d} {track[t]["char"]}', fill=(255, 255, 255))
-    sheet_.save(f'{OUT}/bailong_ult_preview_contact.png')
+    sheet_.save(f'{OUT}/bailong_ult_preview{TAG}_contact.png')
     json.dump({'fps': 60, 'frames': N, 'canvas': [W, H], 'upscale': UP, 'ground': GROUND,
                'layers': ['1 background', '2 ground aura + far ring', '3 dragon behind', '4 Bai Long + spear',
                           '5 dragon front (face + spear tip masked out)', '6 tip flash / contact / near ring'],
                'characterTiming': [{'from': a, 'to': b, 'char': f'C{c:02d}', 'drawnFrame': DRAWN[c - 1]} for a, b, c in CHAR_T],
                'rootTracks': {'travel': TRAVEL, 'height': HEIGHT}, 'scales': SC | {'_ring': .55},
-               'perFrame': track, 'vfx': EVENTS}, open(f'{OUT}/bailong_ult_timeline.json', 'w'), indent=1, default=float)
+               'perFrame': track, 'vfx': EVENTS}, open(f'{OUT}/bailong_ult{TAG}_timeline.json', 'w'), indent=1, default=float)
 
 
 if __name__ == '__main__':
