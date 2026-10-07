@@ -29,7 +29,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
         <a routerLink="/heroes">← กลับ</a>
         <h1>ห้องทดสอบท่า · {{ heroName() }}</h1>
         <select [value]="heroId()" (change)="heroId.set($any($event.target).value); reset()">
-          @for (h of spriteHeroes; track h.id) { <option [value]="h.id">{{ h.name }} ({{ h.id }})</option> }
+          @for (h of spriteHeroes; track h.id) { <option [value]="h.id" [selected]="h.id === heroId()">{{ h.name }} ({{ h.id }})</option> }
         </select>
       </header>
 

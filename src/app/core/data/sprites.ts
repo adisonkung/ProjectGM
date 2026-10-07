@@ -145,11 +145,11 @@ export const SHEETS: Record<string, SheetDef> = {
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
-  // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet only for now — the skills
-  // fall back to the attack clip (ANIM_FALLBACK) until s1 / s2 / ult arrive in rows 5–7. Cell 260 × 170 like Aurel v2
+  // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet + S1 (row 5) — S2 / ult
+  // fall back (ANIM_FALLBACK skill2 → skill, ult → skill) until their sheets arrive in rows 6–7. Cell 260 × 170 like Aurel v2
   // (the tower shield needs the width), feet 15 px above the cell bottom, idle body 78 px.
   'hero-yuezheng.png': {
-    cols: 8, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -158,6 +158,16 @@ export const SHEETS: Record<string, SheetDef> = {
       // ready → raise the dao (F2–F3) → slash extended F4 = damage → recover to the shield stance
       attack: { row: 3, frames: 7, ms: 95, events: { DAMAGE: 3, RECOVERY_START: 5 } },
       die: { row: 4, frames: 6, ms: 120 },
+      // S1 Iron Wall Taunt (character only, no VFX by design — the shield movement is the skill): guard → settle F2–F4
+      // → deep brace F5 (held) → shield thrust forward F6 = activation (taunt + guard land) → hold the pressure F7 →
+      // recoil F8 → back to guard F9–F10 · heavy: brace / thrust / hold are the long steps · 1.14 s
+      skill: {
+        row: 5, frames: 10, ms: 95,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [90, 80, 80, 90, 170, 140, 200, 90, 90, 110],
+        events: { CAST_START: 0, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 5, DAMAGE: 5, IMPACT: 5, RECOVERY_START: 7 },
+        impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
+      },
     },
   },
   'hero-bailong.png': {

@@ -6,6 +6,7 @@ per-row watershed split seeded on the bodies, feet root from the body mask, ches
 
 Sources (art/incoming/yuezheng, not committed):
   base.png       idle 6 · walk 8 · hurt 4 · attack 7 · die 6 (on #FF00FF)
+  s1_char.png    Skill 1 Iron Wall Taunt, 10 frames in one row (character only, no VFX)
   reference.png  turnaround + weapons + palette; the face close-up (bottom right) becomes the portrait
 
 Atlas: cols = longest row × 8 rows (skill rows reserved, empty for now), cell 260 × 170, root (feet) at (130, 155),
@@ -37,7 +38,10 @@ B.SRC = SRC          # aurel_v2 sets its own source dir on import
 IDLE_BODY = 78
 BASE_COUNTS = [6, 8, 4, 7, 6]
 BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
-ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult reserved
+ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
+SKILL_ROWS = [  # (anim, file, frames per source row) — rows 5, 6, 7
+    ('skill', 's1_char', [10]),
+]
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px
 FACE = (1362, 572, 1640, 868)
 
@@ -52,6 +56,14 @@ def main():
     sc = IDLE_BODY / A.body_h(groups['idle'][0])
     report['notes'].append(f'base scale {sc:.3f}')
     rows = [(n, groups[n], sc) for n in BASE_NAMES]
+    # skill rows that have arrived (character only — VFX sheets come separately): same on-screen body as the idle
+    for name, file, counts in SKILL_ROWS:
+        if not os.path.exists(f'{SRC}/{file}.png'):
+            continue
+        frs = A.sheet_frames(file, counts, False)
+        s = sc * A.body_h(groups['idle'][0]) / A.body_h(frs[0])
+        rows.append((name, frs, s))
+        report['notes'].append(f'{file}: {len(frs)} frames, scale {s:.3f}')
     cols = max(len(r[1]) for r in rows)
     probe = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * len(rows)), (0, 0, 0, 0))
     for r, (name, frs, s) in enumerate(rows):

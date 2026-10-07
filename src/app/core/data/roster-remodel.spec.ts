@@ -2,7 +2,7 @@ import { SHIPPED_HERO_IDS, SHIPPED_STARTER_BENCH, SHIPPED_STARTER_TEAM } from '.
 import { HERO_ART } from './hero-art';
 import { CLASS_KITS, kitOf } from './hero-skills';
 import { HERO_BY_ID } from './heroes';
-import { SHEETS } from './sprites';
+import { animTiming, clipClock, SHEETS } from './sprites';
 import { dropRemovedHeroes, prepare } from '../services/save.service';
 import { GameState } from '../models/game-state';
 import { newGameState } from './starter';
@@ -48,14 +48,19 @@ describe('Roster remodel — Bai Long lead + new heroes', () => {
 });
 
 /** Yue Zheng — Iron Mountain Bastion (remodel #2): base sheet only, Tank baseline kit with the character's names */
-describe('Yue Zheng (3★ Tank, base sheet)', () => {
-  it('8 × 8 atlas 260 × 170 (skill rows reserved): idle 6 · walk 8 · hurt 4 · attack 7 (damage F4) · die 6', () => {
+describe('Yue Zheng (3★ Tank, base sheet + S1)', () => {
+  it('10 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 7 (damage F4) · die 6 · S1 Iron Wall Taunt 10 (activation F6)', () => {
     const sh = SHEETS['hero-yuezheng.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([8, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 4], [3, 7], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
-    expect(a.skill).toBeUndefined();
+    expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
+    // taunt + guard land on the shield thrust (F6), after the held brace (F5); the hold F7 is the longest step
+    expect(a.skill!.events).toEqual(jasmine.objectContaining({ ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 5, DAMAGE: 5, RECOVERY_START: 7 }));
+    expect(animTiming('hero-yuezheng.png', 'skill').hit).toBeCloseTo(clipClock(a.skill!).at(5), 6);
+    expect(Math.max(...a.skill!.steps!)).toBe(a.skill!.steps![6]);
+    expect(a.skill2).toBeUndefined();
     expect(HERO_BY_ID['yuezheng']).toEqual(jasmine.objectContaining({ cls: 'tank', star: 3, sprite: 'hero-yuezheng.png' }));
   });
 
