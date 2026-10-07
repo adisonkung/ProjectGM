@@ -145,6 +145,21 @@ export const SHEETS: Record<string, SheetDef> = {
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
+  // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet only for now — the skills
+  // fall back to the attack clip (ANIM_FALLBACK) until s1 / s2 / ult arrive in rows 5–7. Cell 260 × 170 like Aurel v2
+  // (the tower shield needs the width), feet 15 px above the cell bottom, idle body 78 px.
+  'hero-yuezheng.png': {
+    cols: 8, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
+    anims: {
+      idle: { row: 0, frames: 6 },
+      walk: { row: 1, frames: 8, ms: 80 },
+      hurt: { row: 2, frames: 4 },
+      // ready → raise the dao (F2–F3) → slash extended F4 = damage → recover to the shield stance
+      attack: { row: 3, frames: 7, ms: 95, events: { DAMAGE: 3, RECOVERY_START: 5 } },
+      die: { row: 4, frames: 6, ms: 120 },
+    },
+  },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
     cols: 19, rows: 8, cellW: 220, cellH: 170, pixelated: true,

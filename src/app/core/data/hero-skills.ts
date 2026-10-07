@@ -194,6 +194,17 @@ export const CLASS_KITS: Record<HeroClass, HeroKit> = { tank, fighter, assassin,
 
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
   // 2026-10 remodel: Bai Long is the only hero (the template the remodelled roster follows) — the old roster was removed
+  // เยว่เจิ้ง (Iron Mountain Bastion, 3★ Tank, remodel #2): Tank baseline numbers (ids / rank tables unchanged) —
+  // only the names follow the character · Stone Guardian Lion / Mountain Seal Qi visuals come with the skill art
+  yuezheng: {
+    id: 'yuezheng', cls: 'tank', identity: 'Tank · Taunt · Shield Ram Interrupt · Mountain Seal Zone',
+    kit: {
+      ...tank,
+      skill: { ...tank.skill, name: 'กำแพงเหล็กยั่วยุ', label: 'Iron Wall Taunt' },
+      skill2: { ...tank.skill2, name: 'โล่พยัคฆ์ทลายประตู', label: 'Tiger Gate Ram' },
+      ult: { ...tank.ult, name: 'ป้อมผนึกภูผา', label: 'Mountain Seal Bastion' },
+    },
+  },
   bailong: {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {

@@ -37,13 +37,13 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
               <button type="button" class="sk" [class.cooling]="u.alive && cd > 0" [style.--p]="sweep(cd, max)" [disabled]="!u.alive || cd > 0"
                       (click)="skill.emit({ id: u.id, slot: k === 's1' ? 'skill' : 'skill2' })"
                       [attr.title]="(k === 's1' ? 'สกิล 1' : 'สกิล 2') + ' (' + modeName(mode) + ')' + (cd > 0 ? ' คูลดาวน์ ' + secs(cd) + ' วิ' : ' พร้อม — แตะเพื่อใช้ทันที')">
-                @if (art) { <img [src]="art[k]" alt="" draggable="false" /> } @else { <b>{{ k === 's1' ? 'S1' : 'S2' }}</b> }
+                @if (art?.[k]) { <img [src]="art![k]" alt="" draggable="false" /> } @else { <b>{{ k === 's1' ? 'S1' : 'S2' }}</b> }
                 @if (u.alive && cd > 0) { <span class="cd">{{ secs(cd) }}</span> }
               </button>
             }
             <button type="button" class="sk ultk" [class.on]="ready" [disabled]="!ready" (click)="ult.emit(u.id)"
                     [style.--g]="u.alive ? u.manaPct : 0" [attr.title]="ready ? 'ท่าไม้ตายพร้อม' : 'เกจ ' + pct(u.manaPct) + '%'">
-              @if (art) { <img [src]="art.ult" alt="" draggable="false" /> } @else { <b>ULT</b> }
+              @if (art?.ult) { <img [src]="art!.ult" alt="" draggable="false" /> } @else { <b>ULT</b> }
               @if (!ready) { <span class="fill"></span> }
             </button>
           </span>

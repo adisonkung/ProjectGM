@@ -122,9 +122,9 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
     expect([sheet.anims.skill2!.frames, sheet.anims.ult!.frames]).toEqual([12, 19]);
   });
 
-  it('every other sheet keeps the old hit-frame timing (no events authored — only Bai Long)', () => {
+  it('every other sheet keeps the old hit-frame timing (events authored only on the remodelled heroes)', () => {
     const withEvents = Object.entries(SHEETS).filter(([, d]) => Object.values(d.anims).some(a => a?.events)).map(([k]) => k);
-    expect(withEvents).toEqual([SPRITE]);
+    expect(withEvents.sort()).toEqual([SPRITE, 'hero-yuezheng.png'].sort());
   });
 });
 

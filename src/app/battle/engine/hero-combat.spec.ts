@@ -141,14 +141,14 @@ describe('Hero kits (data)', () => {
     expect(HERO_DEFINITIONS['morgan'].kit.ult.name).not.toBe(HERO_DEFINITIONS['aurel'].kit.ult.name);
   });
 
-  it('only Tank S2 / Tank ult / Sylvie S2 / Sylvie ult carry interrupt', () => {
+  it('only Tank S2 / Tank ult (Aurel · Morgan · Yue Zheng) / Sylvie S2 / Sylvie ult carry interrupt', () => {
     const carriers: string[] = [];
     for (const [id, d] of Object.entries(HERO_DEFINITIONS)) {
       for (const slot of ['attack', 'skill', 'skill2', 'ult'] as const) {
         if (d.kit[slot].effects.some(x => x.type === 'INTERRUPT' || (x.type === 'DAMAGE' && x.interrupt))) carriers.push(`${id}.${slot}`);
       }
     }
-    expect(carriers.sort()).toEqual(['aurel.skill2', 'aurel.ult', 'morgan.skill2', 'morgan.ult', 'sylvie.skill2', 'sylvie.ult']);
+    expect(carriers.sort()).toEqual(['aurel.skill2', 'aurel.ult', 'morgan.skill2', 'morgan.ult', 'sylvie.skill2', 'sylvie.ult', 'yuezheng.skill2', 'yuezheng.ult']);
   });
 });
 
