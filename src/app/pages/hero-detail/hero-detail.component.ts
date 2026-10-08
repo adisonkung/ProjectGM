@@ -109,6 +109,8 @@ export class HeroDetailComponent {
 
   /** wide key art behind the header (heroes that have one) */
   readonly banner = computed(() => heroArt(this.t()?.id)?.banner);
+  /** lower half of the page in two tabs so the key art keeps the screen: growth (stars / stats / level) · kit (skills / gear) */
+  readonly tab = signal<'grow' | 'kit'>('grow');
 
   readonly skills = computed(() => {
     const h = this.hero(), t = this.t();

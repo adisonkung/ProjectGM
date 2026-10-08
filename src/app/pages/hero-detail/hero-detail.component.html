@@ -12,8 +12,40 @@
       }
     </nav>
 
-    <!-- hero banner -->
-    <header class="hero gm-panel glow r{{ star() }}" [class.has-banner]="!!banner()" [style.--banner]="banner() ? 'url(' + banner() + ')' : null">
+    <!-- hero banner: with key art the whole image is shown (16:9, nothing cropped) and the info sits on a strip under it -->
+    @if (banner(); as bn) {
+      <header class="show gm-panel glow r{{ star() }}">
+        <img class="key" [src]="bn" [alt]="tp.name" />
+        <div class="plate">
+          <div class="who">
+            <span class="gm-class">{{ className(tp.cls) }} · #{{ h.uid }}</span>
+            <h1 class="gm-title">{{ tp.name }}</h1>
+            <span class="gm-stars big" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">{{ stars(star()) }}<span class="dim">{{ '☆'.repeat(MAX_STAR - star()) }}</span></span>
+          </div>
+          <div class="power"><app-icon name="flame" [size]="16" /><span>พลังรบ</span><b>{{ power() }}</b></div>
+          <div class="level">
+            <div class="lvnum"><small>LV</small><b>{{ p.level }}</b><small>/ {{ p.levelCap }}</small></div>
+            @if (p.state === 'MAX') {
+              <span class="gm-chip gold">เลเวลสูงสุด</span>
+            } @else {
+              <div class="gm-bar gold"><i [style.width.%]="pct(p.exp, p.expToNext)"></i></div>
+              <small class="exp">EXP {{ p.exp }} / {{ p.expToNext }}</small>
+            }
+          </div>
+          <div class="chips">
+            @if (inTeam()) { <span class="gm-chip gold"><app-icon name="team" [size]="12" /> อยู่ในทีม</span> }
+            <span class="gm-chip">ศักยภาพ {{ h.potential }}</span>
+            <span class="gm-chip">BT {{ h.breakthroughTier ?? 0 }}/3</span>
+            @if (isMain()) {
+              <span class="gm-chip arcane"><app-icon name="crown" [size]="12" /> ฮีโร่หลัก</span>
+            } @else {
+              <button type="button" class="gm-btn small arcane" (click)="setMain()"><app-icon name="crown" [size]="12" /> ตั้งเป็นฮีโร่หลัก</button>
+            }
+          </div>
+        </div>
+      </header>
+    } @else {
+    <header class="hero gm-panel glow r{{ star() }}">
       <div class="art"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="168" /></div>
       <div class="who">
         <span class="gm-class">{{ className(tp.cls) }} · #{{ h.uid }}</span>
@@ -41,9 +73,16 @@
         }
       </div>
     </header>
+    }
 
     @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
 
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" [attr.aria-selected]="tab() === 'grow'" [class.on]="tab() === 'grow'" (click)="tab.set('grow')"><app-icon name="star" [size]="15" /> พัฒนา · ค่าพลัง</button>
+      <button type="button" role="tab" [attr.aria-selected]="tab() === 'kit'" [class.on]="tab() === 'kit'" (click)="tab.set('kit')"><app-icon name="bolt" [size]="15" /> สกิล · อุปกรณ์</button>
+    </div>
+
+    @if (tab() === 'grow') {
     <!-- star development: Hero Memory (duplicates) + Universal Memory (gameplay) → up to 6★ -->
     @if (starView(); as sv) {
       <section class="gm-panel stars-panel">
@@ -70,7 +109,7 @@
             <li [class.on]="st.reached"><b>{{ st.n }}★</b> +{{ st.gain }}% ค่าพลัง · {{ st.perk }}<small> · {{ st.visual }}</small></li>
           }
         </ul>
-        <small class="hint">Hero Memory ได้จากการอัญเชิญซ้ำ · Universal Memory ได้จากเคลียร์หอคอยครั้งแรกและ Ascension · ขนาดตัวละครไม่เปลี่ยน</small>
+        <small class="hint">Hero Memory ได้จากการอัญเชิญซ้ำ · Universal Memory ได้จากเคลียร์หอคอยครั้งแรกและ Ascension</small>
       </section>
     }
 
@@ -141,6 +180,7 @@
       </section>
     </div>
 
+    } @else {
     <!-- skills -->
     <section class="gm-panel skills">
       <h2 class="gm-h2">สกิล <small class="gold">ทอง {{ gold() }}</small></h2>
@@ -211,6 +251,7 @@
       </div>
       <a class="gm-btn" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }"><app-icon name="armory" [size]="15" /> จัดการอุปกรณ์</a>
     </section>
+    }
   </section>
 } @else {
   <section class="placeholder">

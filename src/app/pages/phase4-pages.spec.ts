@@ -1,3 +1,4 @@
+import { heroArt } from '../core/data/hero-art';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
@@ -21,7 +22,7 @@ describe('Phase 4 pages', () => {
     expect(el.querySelectorAll('.card').length).toBe(heroes.filter(h => HERO_BY_ID[h.templateId].cls === 'tank').length);
   });
 
-  it('hero detail: shows the hero from the route, its three skills and three gear slots', async () => {
+  it('hero detail: key art + the hero from the route, its three skills and three gear slots on the second tab', async () => {
     await TestBed.configureTestingModule({
       imports: [HeroDetailComponent],
       providers: [provideRouter([]), { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ uid: '1' })) } }],
@@ -31,6 +32,11 @@ describe('Phase 4 pages', () => {
     const el: HTMLElement = f.nativeElement;
     const h = TestBed.inject(SaveService).state().heroes[0];
     expect(el.querySelector('h1')!.textContent).toContain(HERO_BY_ID[h.templateId].name);
+    // the full key art is shown when the hero has one; skills / gear live on the second tab
+    expect(el.querySelectorAll('.show img.key').length).toBe(heroArt(h.templateId)?.banner ? 1 : 0);
+    expect(el.querySelectorAll('.skill').length).toBe(0);
+    f.componentInstance.tab.set('kit');
+    f.detectChanges();
     expect(el.querySelectorAll('.skill').length).toBe(3);
     expect(el.querySelectorAll('.gear-list > div').length).toBe(3);
   });

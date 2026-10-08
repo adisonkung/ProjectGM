@@ -1,7 +1,36 @@
 .detail { display: grid; gap: 14px; }
 .crumbs { display: flex; justify-content: space-between; align-items: center; .step { display: flex; gap: 6px; } }
 
-// banner
+// key art header: the whole banner (16:9, never cropped) with the info on a plate under it
+.show {
+  --rc: var(--r5);
+  padding: 0; gap: 0; overflow: hidden;
+  &.r1 { --rc: var(--r1); } &.r2 { --rc: var(--r2); } &.r3 { --rc: var(--r3); } &.r4 { --rc: var(--r4); } &.r6 { --rc: var(--r6); }
+  .key { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: #05070d; }
+  .plate {
+    display: grid; grid-template-columns: 1fr auto minmax(170px, 220px); grid-template-areas: 'who power level' 'chips chips chips';
+    gap: 8px 18px; align-items: center; padding: 12px 18px 14px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--rc) 14%, #0b0f1c) 0%, #0b0f1c 100%);
+    border-top: 1px solid color-mix(in srgb, var(--rc) 55%, transparent);
+  }
+  .who { grid-area: who; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px;
+    .gm-class { flex-basis: 100%; }
+    h1 { font-size: 30px; margin: 0; } }
+  .power { grid-area: power; margin: 0; b { font-size: 24px; } }
+  .level { grid-area: level; min-width: 0; justify-items: stretch; gap: 4px;
+    .lvnum { justify-content: flex-end; b { font-size: 30px; } }
+    .exp { text-align: right; } }
+  .chips { grid-area: chips; margin: 0; }
+}
+// two tabs under the header
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; border-radius: 14px; background: #0000004d; border: 1px solid var(--line);
+  button { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 8px; border: 0; border-radius: 10px; cursor: pointer;
+    background: transparent; color: var(--muted); font: 700 14px var(--title); letter-spacing: 0.02em;
+    &:hover { color: var(--text); background: #ffffff08; }
+    &.on { color: var(--gold-hi); background: linear-gradient(180deg, #d9b4642a, #d9b46410); box-shadow: inset 0 0 0 1px #d9b46488, 0 0 14px #d9b46422; } }
+}
+
+// banner (heroes without key art)
 .hero {
   --rc: var(--r5);
   display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center; padding: 18px 20px; overflow: hidden;
@@ -9,15 +38,6 @@
     radial-gradient(ellipse 50% 90% at 0% 50%, color-mix(in srgb, var(--rc) 22%, transparent), transparent 70%),
     radial-gradient(ellipse 60% 80% at 100% 0%, #9b6bff22, transparent 70%),
     var(--panel-bg);
-  // key art: the character stands on the right of the image — darkened toward the left so name / stats stay readable
-  &.has-banner {
-    min-height: 220px;
-    background:
-      linear-gradient(90deg, #0b0f1cf2 0%, #0b0f1cd9 34%, #0b0f1c66 62%, #0b0f1c99 100%),
-      var(--banner) center 28% / cover no-repeat,
-      var(--panel-bg);
-    .level { background: #0b0f1ca8; border-radius: 12px; padding: 10px 12px; }
-  }
   &.r1 { --rc: var(--r1); } &.r2 { --rc: var(--r2); } &.r3 { --rc: var(--r3); } &.r4 { --rc: var(--r4); }
 }
 .art { filter: drop-shadow(0 0 18px color-mix(in srgb, var(--rc) 40%, transparent)); }
@@ -119,6 +139,9 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-nu
   .skill-list, .gear-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
+  .show .plate { grid-template-columns: 1fr auto; grid-template-areas: 'who power' 'level level' 'chips chips'; padding: 10px 12px 12px; gap: 8px 12px;
+    .who h1 { font-size: 24px; }
+    .level { grid-template-columns: auto 1fr auto; align-items: center; .lvnum b { font-size: 24px; } } }
   .hero { grid-template-columns: auto 1fr; padding: 14px; gap: 12px;
     .art { width: 112px; height: 112px; }
     .art ::ng-deep .frame { width: 100% !important; height: 100% !important; } }
@@ -127,7 +150,7 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-nu
 }
 
 .gm-stars .dim { color: #ffffff26; text-shadow: none; }
-.stars-panel { display: grid; gap: 10px; margin-top: 12px;
+.stars-panel { display: grid; gap: 10px;
   h2 small { font: 500 12px var(--body); color: var(--muted); margin-left: 6px; }
   .star-row { display: flex; gap: 6px; font-size: 26px; line-height: 1;
     .st { color: #ffffff1c; }
