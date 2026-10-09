@@ -14,7 +14,7 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
   selector: 'app-field',
   template: `
     @if (img(); as g) {
-      <div class="layers" [style.--shift]="shift()" [style.--dur]="duration() + 'ms'">
+      <div class="layers" [style.--shift]="live() ? null : shift()" [style.--dur]="live() ? '0ms' : duration() + 'ms'">
         <div class="img" [style.height.%]="g.cut * 100" [style.background-image]="g.url" [style.background-size]="g.size"
              [style.background-position]="'calc(var(--shift) * var(--screen) * -0.4) ' + g.y"></div>
         <div class="img" [style.top.%]="g.cut * 100" [style.bottom]="0" [style.background-image]="g.url" [style.background-size]="g.size"
@@ -23,9 +23,9 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
       </div>
       <!-- free strip under the lanes: the image's bottom band again, darkened into a tray -->
       <div class="foot" [style.background-image]="g.url" [style.background-size]="g.size"
-           [style.background-position]="'calc(' + shift() + ' * var(--cell) * -1) 100%'"></div>
+           [style.background-position]="'calc(var(--shift, ' + shift() + ') * var(--cell) * -1) 100%'"></div>
     } @else {
-    <div class="layers" [style.--shift]="shift()" [style.--dur]="duration() + 'ms'">
+    <div class="layers" [style.--shift]="live() ? null : shift()" [style.--dur]="live() ? '0ms' : duration() + 'ms'">
       <div class="sky" [style.height.%]="skyPct"></div>
       <div class="hills" [style.height.%]="skyPct"></div>
       <div class="trees" [style.height.%]="skyPct"></div>
@@ -113,6 +113,8 @@ export class FieldComponent {
   readonly scroll = input(0);
   /** tween time between two scroll values (ms) — one engine snapshot */
   readonly duration = input(0);
+  /** battle: the board writes --shift every display frame (interpolated camera) — no binding, no transition */
+  readonly live = input(false);
   /** ภาพพื้นหลังของด่าน (ไม่มี = วาดฉากด้วย CSS) */
   readonly bg = input<BackgroundDef | null | undefined>(null);
 

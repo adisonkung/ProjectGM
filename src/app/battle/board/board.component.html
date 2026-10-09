@@ -1,5 +1,5 @@
 <div class="board" [style.--spd]="speed()" [style.--tick]="tickMs() + 'ms'" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 16 คอลัมน์ ฝั่งเราซ้าย โซนกลาง 4 คอลัมน์ ศัตรูขวา">
-  <app-field [scroll]="scroll()" [duration]="tickMs()" [bg]="background()" />
+  <app-field [scroll]="scroll()" [duration]="tickMs()" [bg]="background()" [live]="!!alpha()" />
 
   @if (world(); as w) {
     <div class="dbg-world" aria-hidden="true">

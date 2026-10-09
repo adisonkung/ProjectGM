@@ -43,7 +43,7 @@
     <div class="arena" [class.paused]="paused()">
       <div class="screen" [class.boss]="!!bossBar()">
         <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
-                   [scroll]="scroll()" [tickMs]="tickMs" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
+                   [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
 
         <!-- top HUD (scenery rows only — never over the lanes' units) -->
         <div class="hud-top">

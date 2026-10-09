@@ -16,6 +16,7 @@ import { projectileLife } from '../../battle/projectile/projectile.component';
 import { ENEMY_ZONE_START, SCENERY_ROWS, SIDE_DEPTH } from '../../battle/engine/grid';
 import { BattlePhase } from '../../battle/engine/stage/types';
 import { PartyBarComponent } from '../../battle/party-bar/party-bar.component';
+import { DEV_FLAGS } from '../../core/data/dev-flags';
 import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { hasStatus } from '../../battle/engine/buffs';
 import { PlacementComponent } from '../../battle/placement/placement.component';
@@ -201,8 +202,10 @@ export class BattleComponent implements OnDestroy {
     this.raf = 0;
   }
   private readonly frame = (now: number): void => {
-    // a hidden tab / long frame: never fast-forward more than a few ticks at once
-    this.acc += Math.min(now - this.lastFrame, 4 * TICK * 1000);
+    // a hidden tab / long frame: never fast-forward more than a few ticks at once · paused / hit-stop: time stands
+    // still (the board holds its in-between position instead of drifting to the next snapshot)
+    const frozen = this.paused() || now < this.hitStopUntil;
+    if (!frozen) this.acc += Math.min(now - this.lastFrame, 4 * TICK * 1000);
     this.lastFrame = now;
     const step = TICK * 1000;
     if (this.acc >= step) {
@@ -215,6 +218,9 @@ export class BattleComponent implements OnDestroy {
     }
     if (this.raf) this.raf = requestAnimationFrame(this.frame);
   };
+  /** engine steps so far (board: a new snapshot pair starts) · how far the display is into the next step (0–1) */
+  readonly simTick = signal(0);
+  readonly alpha = (): number => (this.raf ? Math.min(1, Math.max(0, this.acc / (TICK * 1000))) : 1);
   /** movement → walk cycle: last world position seen per tick and the tick until which the unit counts as moving */
   private lastPos = new Map<number, [number, number]>();
   private movingUntil = new Map<number, number>();
@@ -337,6 +343,8 @@ export class BattleComponent implements OnDestroy {
     this.projectiles.set([]);
     this.anims.set({});
     this.engine = createBattle({ allies: this.team.units(), stage: this.stage(), autoUlt: this.autoUlt() });
+    // testing a new hero: ultimate ready from the first second (core/data/dev-flags.ts)
+    if (DEV_FLAGS.fullUltAtStart) for (const u of this.engine.units) if (isPlayerUnit(u)) u.mana = u.maxMana;
     this.outcome.set(null);
     this.modeHud.set(modeStatus(this.engine));
     this.time.set(0);
@@ -504,6 +512,7 @@ export class BattleComponent implements OnDestroy {
     if (performance.now() < this.hitStopUntil) return;
     for (let i = 0; i < this.speed() && !this.engine.result; i++) this.engine.step(TICK);
     this.trackMovement();
+    this.simTick.update(n => n + 1);
     this.handleEvents(this.engine.drainEvents());
     this.time.set(this.engine.fightTime);
     this.phase.set(this.engine.phase);

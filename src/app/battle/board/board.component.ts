@@ -216,23 +216,32 @@ export class BoardComponent {
   });
 
   // ---------------------------------------------------------------- smooth unit motion
+  /** battle: engine step counter (a new snapshot pair) — with `alpha`, positions are interpolated by game time */
+  readonly tick = input<number | undefined>(undefined);
+  /** battle: how far the display is between the last two engine steps (0–1), read every frame */
+  readonly alpha = input<(() => number) | undefined>(undefined);
   /**
-   * Units are moved by a requestAnimationFrame loop, not by a CSS transition per snapshot: every snapshot the tween
-   * restarts from where the unit is *drawn now* toward its new position over the measured snapshot interval, so the
-   * motion is continuous even when a tick lands a frame late (the old 50 ms transition finished early → stop, jump).
+   * Units (and the camera) are moved by a requestAnimationFrame loop, never by a CSS transition per snapshot.
+   * Battle (tick + alpha given): fixed-timestep interpolation — previous step → last step at alpha, i.e. exactly where
+   * the game is at this display frame, independent of when change detection ran — then a short exponential follow
+   * (τ 55 ms) that irons out the engine's own unevenness (a step ending mid-tick, re-targets). Elsewhere (sprite lab):
+   * tween from the drawn position to the new one over the measured snapshot interval.
    * Positions are in % of a cell (the same numbers as `pos()`).
    */
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  /** per unit tween of the cell position: from → to, started at t0, lasting dur ms (linear) */
-  private readonly tw = new Map<number, { from: [number, number]; to: [number, number]; t0: number; dur: number }>();
+  /** per unit: last two snapshot positions (prev → cur), the drawn position, and the tween start (no-alpha mode) */
+  private readonly st = new Map<number, { prev: [number, number]; cur: [number, number]; draw: [number, number]; t0: number; from: [number, number] }>();
   /** stacking offset on a shared cell (spread): eased separately toward its target, so re-stacking never jerks the walk */
   private readonly off = new Map<number, { cur: [number, number]; to: [number, number] }>();
   private readonly drawn = new Map<number, string>();
   /** first position of each unit (static template binding → no flash at 0,0 before the loop writes it) */
   private readonly spawnAt = new Map<number, string>();
+  /** camera (scroll) the same way: prev → cur by alpha, followed */
+  private cam = { prev: 0, cur: 0, draw: 0, init: false };
+  private lastTick?: number;
   private lastSnap = 0;
   private lastFrame = 0;
-  /** measured ms between snapshots (EMA) — the tween length */
+  /** measured ms between snapshots (EMA) — the tween length without alpha */
   private gap = 50;
   private raf = 0;
 
@@ -240,7 +249,9 @@ export class BoardComponent {
     effect(() => {
       const us = this.units();
       const sp = this.spread();
-      untracked(() => this.retarget(us, sp));
+      const tk = this.tick();
+      const sc = this.scroll();
+      untracked(() => this.retarget(us, sp, tk, sc));
     });
     const zone = inject(NgZone);
     afterNextRender(() => zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(this.frame))));
@@ -252,19 +263,21 @@ export class BoardComponent {
     return [u.c * 100, (u.r + SCENERY_ROWS) * 100];
   }
 
-  private at(id: number, now: number): [number, number] | undefined {
-    const w = this.tw.get(id);
-    if (!w) return undefined;
-    const k = Math.min(1, Math.max(0, (now - w.t0) / w.dur));
-    return [w.from[0] + (w.to[0] - w.from[0]) * k, w.from[1] + (w.to[1] - w.from[1]) * k];
-  }
-
-  private retarget(us: UnitView[], sp: Map<number, [number, number, number, number]>): void {
+  private retarget(us: UnitView[], sp: Map<number, [number, number, number, number]>, tk: number | undefined, scroll: number): void {
     const now = performance.now();
     const dt = now - this.lastSnap;
-    // only real tick-to-tick gaps feed the estimate (extra snapshots from taps / pauses are ignored)
     if (dt > 25 && dt < 200) this.gap = Math.min(110, Math.max(this.tickMs(), this.gap * 0.8 + dt * 0.2));
     this.lastSnap = now;
+    // a new engine step: what was "current" becomes "previous" (extra snapshots inside a step only update current)
+    const stepped = tk !== undefined && tk !== this.lastTick;
+    this.lastTick = tk;
+    if (stepped) {
+      for (const s of this.st.values()) s.prev = s.cur;
+      this.cam.prev = this.cam.cur;
+    }
+    if (!this.cam.init) this.cam = { prev: scroll, cur: scroll, draw: scroll, init: true };
+    this.cam.cur = scroll;
+    if (Math.abs(this.cam.cur - this.cam.draw) > 3) this.cam = { prev: scroll, cur: scroll, draw: scroll, init: true };
     const live = new Set<number>();
     for (const u of us) {
       live.add(u.id);
@@ -274,35 +287,57 @@ export class BoardComponent {
       if (o) o.to = [ox, oy];
       else this.off.set(u.id, { cur: [ox, oy], to: [ox, oy] });
       if (!this.spawnAt.has(u.id)) this.spawnAt.set(u.id, `translate(${t[0] + ox}%, ${t[1] + oy}%)`);
-      const old = this.tw.get(u.id);
-      if (old && old.to[0] === t[0] && old.to[1] === t[1]) continue; // same cell position: keep the running tween
-      const cur = this.at(u.id, now);
-      // blink / teleport / first sight: jump · otherwise one snapshot interval, linear → continuous walking speed
-      if (!cur || u.blink || Math.abs(t[0] - cur[0]) > 250 || Math.abs(t[1] - cur[1]) > 250) {
-        this.tw.set(u.id, { from: t, to: t, t0: now, dur: 1 });
+      const s = this.st.get(u.id);
+      // blink / teleport / first sight: jump
+      if (!s || u.blink || Math.abs(t[0] - s.draw[0]) > 250 || Math.abs(t[1] - s.draw[1]) > 250) {
+        this.st.set(u.id, { prev: t, cur: t, draw: t, t0: now, from: t });
         this.off.get(u.id)!.cur = [ox, oy];
-      } else this.tw.set(u.id, { from: cur, to: t, t0: now, dur: this.gap });
+        continue;
+      }
+      if (s.cur[0] !== t[0] || s.cur[1] !== t[1]) {
+        s.from = [...s.draw];
+        s.t0 = now;
+      }
+      s.cur = t;
     }
-    for (const id of [...this.tw.keys()]) if (!live.has(id)) (this.tw.delete(id), this.off.delete(id), this.drawn.delete(id));
+    for (const id of [...this.st.keys()]) if (!live.has(id)) (this.st.delete(id), this.off.delete(id), this.drawn.delete(id));
   }
 
   private readonly frame = (): void => {
     const now = performance.now();
     const dt = Math.min(100, now - (this.lastFrame || now));
     this.lastFrame = now;
+    const alphaFn = this.alpha();
+    const a = alphaFn ? alphaFn() : 0;
+    const follow = 1 - Math.exp(-dt / 55);
     const ease = 1 - Math.exp(-dt / 90);
     const els = this.host.nativeElement.querySelectorAll<HTMLElement>('.unit[data-uid]');
     for (const el of Array.from(els)) {
       const id = Number(el.dataset['uid']);
-      const p = this.at(id, now);
-      if (!p) continue;
+      const s = this.st.get(id);
+      if (!s) continue;
+      if (alphaFn) {
+        const tx = s.prev[0] + (s.cur[0] - s.prev[0]) * a;
+        const ty = s.prev[1] + (s.cur[1] - s.prev[1]) * a;
+        s.draw = [s.draw[0] + (tx - s.draw[0]) * follow, s.draw[1] + (ty - s.draw[1]) * follow];
+      } else {
+        const k = Math.min(1, Math.max(0, (now - s.t0) / this.gap));
+        s.draw = [s.from[0] + (s.cur[0] - s.from[0]) * k, s.from[1] + (s.cur[1] - s.from[1]) * k];
+      }
       const o = this.off.get(id);
       if (o) o.cur = [o.cur[0] + (o.to[0] - o.cur[0]) * ease, o.cur[1] + (o.to[1] - o.cur[1]) * ease];
-      const tf = `translate(${(p[0] + (o?.cur[0] ?? 0)).toFixed(2)}%, ${(p[1] + (o?.cur[1] ?? 0)).toFixed(2)}%)`;
+      const tf = `translate(${(s.draw[0] + (o?.cur[0] ?? 0)).toFixed(2)}%, ${(s.draw[1] + (o?.cur[1] ?? 0)).toFixed(2)}%)`;
       if (this.drawn.get(id) !== tf || el.style.transform !== tf) {
         el.style.transform = tf;
         this.drawn.set(id, tf);
       }
+    }
+    // camera: background parallax reads --shift from the board (FieldComponent [live])
+    if (alphaFn) {
+      const c = this.cam.prev + (this.cam.cur - this.cam.prev) * a;
+      this.cam.draw += (c - this.cam.draw) * follow;
+      const v = this.cam.draw.toFixed(4);
+      if (this.host.nativeElement.style.getPropertyValue('--shift') !== v) this.host.nativeElement.style.setProperty('--shift', v);
     }
     this.raf = requestAnimationFrame(this.frame);
   };
