@@ -1,6 +1,6 @@
 import { itemName as itemNameOf } from '../../core/rules/equipment';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
-import { Component, computed, effect, ElementRef, HostListener, inject, isDevMode, OnDestroy, signal, untracked, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, inject, isDevMode, NgZone, OnDestroy, signal, untracked, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TeamPresetsComponent } from '../../shared/team-presets.component';
 import { DUNGEON_TYPES } from '../dungeons/dungeons.component';
@@ -181,14 +181,62 @@ export class BattleComponent implements OnDestroy {
   readonly timeLeft = computed(() => Math.max(0, Math.ceil(this.stage().timeLimit - this.time())));
 
   private engine!: BattleEngine;
-  private timer?: ReturnType<typeof setInterval>;
+  /**
+   * Game loop on requestAnimationFrame with a fixed 50 ms step (accumulator): ticks land on display frames at an even
+   * cadence (setInterval drifted against the frames → units stopped and jumped). The loop runs outside Angular; only
+   * frames that actually step the engine enter the zone (change detection ~20×/s as before). Board tweens between ticks.
+   */
+  private raf = 0;
+  private lastFrame = 0;
+  private acc = 0;
+  private readonly zone = inject(NgZone);
+  private startLoop(): void {
+    this.stopLoop();
+    this.acc = 0;
+    this.lastFrame = performance.now();
+    this.zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(this.frame)));
+  }
+  private stopLoop(): void {
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.raf = 0;
+  }
+  private readonly frame = (now: number): void => {
+    // a hidden tab / long frame: never fast-forward more than a few ticks at once
+    this.acc += Math.min(now - this.lastFrame, 4 * TICK * 1000);
+    this.lastFrame = now;
+    const step = TICK * 1000;
+    if (this.acc >= step) {
+      this.zone.run(() => {
+        while (this.acc >= step && this.raf) {
+          this.acc -= step;
+          this.tick();
+        }
+      });
+    }
+    if (this.raf) this.raf = requestAnimationFrame(this.frame);
+  };
+  /** movement → walk cycle: last world position seen per tick and the tick until which the unit counts as moving */
+  private lastPos = new Map<number, [number, number]>();
+  private movingUntil = new Map<number, number>();
+  private tickNo = 0;
+  private trackMovement(): void {
+    this.tickNo++;
+    for (const u of this.engine.units) {
+      const prev = this.lastPos.get(u.id);
+      this.lastPos.set(u.id, [u.x, u.y]);
+      // ~0.2 cell/s or faster = walking · 3 ticks of grace so a stop-and-go between cells keeps the cycle running
+      if (prev && Math.hypot(u.x - prev[0], u.y - prev[1]) > 0.01) this.movingUntil.set(u.id, this.tickNo + 3);
+    }
+  }
+  private isMoving(u: BattleUnit): boolean {
+    return u.alive && (this.movingUntil.get(u.id) ?? 0) > this.tickNo;
+  }
   private floatId = 0;
   /** ทิศที่แต่ละตัวหันอยู่ (true = ซ้าย) คงไว้เมื่อเป้าอยู่คอลัมน์เดียวกัน */
   private facing = new Map<number, boolean>();
   /** ตัวที่เพิ่งวาร์ป: ปิดการเลื่อนตัวบนจอชั่วครู่ (เวลาเอนจินที่หมดผล) */
   private blinkUntil = new Map<number, number>();
   private animKey = 0;
-  private walkTick = 0;
   private bannerTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
@@ -218,7 +266,7 @@ export class BattleComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    clearInterval(this.timer);
+    this.stopLoop();
     this.endTimers.forEach(clearTimeout);
     this.portraitMq?.removeEventListener('change', this.onOrientation);
     this.releaseLandscape();
@@ -271,7 +319,7 @@ export class BattleComponent implements OnDestroy {
 
   /** สร้างการต่อสู้ใหม่และแสดงตำแหน่งเริ่มต้น */
   prepare(): void {
-    clearInterval(this.timer);
+    this.stopLoop();
     this.endTimers.forEach(clearTimeout);
     this.endTimers = [];
     this.ending.set(false);
@@ -298,7 +346,8 @@ export class BattleComponent implements OnDestroy {
     this.scroll.set(this.engine.cameraX);
     this.summary.set(null);
     this.banner.set(null);
-    this.lastX.clear();
+    this.lastPos.clear();
+    this.movingUntil.clear();
     this.selectedId.set(null);
     this.focusId.set(null);
     this.facing.clear();
@@ -316,7 +365,7 @@ export class BattleComponent implements OnDestroy {
       this.paused.set(true);
       this.rotatePaused = true;
     }
-    this.timer = setInterval(() => this.tick(), TICK * 1000);
+    this.startLoop();
   }
 
   /** แตะรูปตัวละคร (หรือกดปุ่ม 1–5): ใช้ท่าไม้ตายเมื่อเกจเต็ม */
@@ -454,16 +503,15 @@ export class BattleComponent implements OnDestroy {
     if (this.paused()) return;
     if (performance.now() < this.hitStopUntil) return;
     for (let i = 0; i < this.speed() && !this.engine.result; i++) this.engine.step(TICK);
+    this.trackMovement();
     this.handleEvents(this.engine.drainEvents());
     this.time.set(this.engine.fightTime);
     this.phase.set(this.engine.phase);
     this.scroll.set(this.engine.cameraX);
-    // outside combat (advance / regroup / enemies walking in): play the walk cycle for whoever is moving
-    if (this.engine.phase !== BattlePhase.COMBAT && ++this.walkTick % 8 === 0) this.marchAnim();
     this.snapshot();
     this.modeHud.set(modeStatus(this.engine));
     if (this.engine.result) {
-      clearInterval(this.timer);
+      this.stopLoop();
       this.finishSoon();
     }
   }
@@ -600,6 +648,7 @@ export class BattleComponent implements OnDestroy {
         onFocus: isPlayerUnit(u) && e.focusTargetId != null && u.targetId === e.focusTargetId,
         elite: u.elite,
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
+        moving: this.isMoving(u),
         buffed: u.buffs.some(b => (b.def.modifiers.attackMultiplier ?? 1) > 1),
         icon: u.monster ? MONSTERS[u.monster.definitionId]?.animation.tokenIcon : undefined,
         mock: u.sprite ? undefined : mockVisualOf(u.monster ? MONSTERS[u.monster.definitionId]?.visual : undefined),
@@ -650,19 +699,10 @@ export class BattleComponent implements OnDestroy {
   /** units whose last cast was interrupted (debug label) */
   private interrupted = new Set<number>();
 
-  /** last world x seen by the walk animation / facing (movement detection outside combat) */
-  private lastX = new Map<number, number>();
+  /** last world x seen by the facing (movement direction outside combat) */
   private lastFacingX = new Map<number, number>();
 
-  private marchAnim(): void {
-    const anims = { ...this.anims() };
-    for (const u of this.engine.units) {
-      const moved = Math.abs(u.x - (this.lastX.get(u.id) ?? u.x)) > 0.02;
-      this.lastX.set(u.id, u.x);
-      if (u.alive && u.visible && moved) anims[u.id] = { anim: 'walk', key: ++this.animKey };
-    }
-    this.anims.set(anims);
-  }
+
 
   /** debug overlay in screen cells: anchors (both formations), neutral zone, advance target, regroup radius */
   private buildWorldDebug(): WorldDebug {

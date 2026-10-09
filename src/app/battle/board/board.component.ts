@@ -1,6 +1,6 @@
 import { MockVisual } from '../../core/data/visuals';
 import { BackgroundDef } from '../../core/data/backgrounds';
-import { Component, computed, input, output } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, input, NgZone, output, untracked } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
@@ -59,6 +59,8 @@ export interface UnitView {
   /** monster: elite rank / seconds per step (movement tween) / buffed / token icon */
   elite?: boolean;
   moveSec?: number;
+  /** walking right now (battle: from the position change per tick) — drives the looping walk cycle; unset = legacy one-shot walk */
+  moving?: boolean;
   buffed?: boolean;
   icon?: string;
   /** hero AI use modes per slot (party bar chips) */
@@ -212,6 +214,103 @@ export class BoardComponent {
     }
     return out;
   });
+
+  // ---------------------------------------------------------------- smooth unit motion
+  /**
+   * Units are moved by a requestAnimationFrame loop, not by a CSS transition per snapshot: every snapshot the tween
+   * restarts from where the unit is *drawn now* toward its new position over the measured snapshot interval, so the
+   * motion is continuous even when a tick lands a frame late (the old 50 ms transition finished early → stop, jump).
+   * Positions are in % of a cell (the same numbers as `pos()`).
+   */
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  /** per unit tween of the cell position: from → to, started at t0, lasting dur ms (linear) */
+  private readonly tw = new Map<number, { from: [number, number]; to: [number, number]; t0: number; dur: number }>();
+  /** stacking offset on a shared cell (spread): eased separately toward its target, so re-stacking never jerks the walk */
+  private readonly off = new Map<number, { cur: [number, number]; to: [number, number] }>();
+  private readonly drawn = new Map<number, string>();
+  /** first position of each unit (static template binding → no flash at 0,0 before the loop writes it) */
+  private readonly spawnAt = new Map<number, string>();
+  private lastSnap = 0;
+  private lastFrame = 0;
+  /** measured ms between snapshots (EMA) — the tween length */
+  private gap = 50;
+  private raf = 0;
+
+  constructor() {
+    effect(() => {
+      const us = this.units();
+      const sp = this.spread();
+      untracked(() => this.retarget(us, sp));
+    });
+    const zone = inject(NgZone);
+    afterNextRender(() => zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(this.frame))));
+    inject(DestroyRef).onDestroy(() => cancelAnimationFrame(this.raf));
+  }
+
+  /** cell position in % of a cell (what `pos()` writes) */
+  private base(u: UnitView): [number, number] {
+    return [u.c * 100, (u.r + SCENERY_ROWS) * 100];
+  }
+
+  private at(id: number, now: number): [number, number] | undefined {
+    const w = this.tw.get(id);
+    if (!w) return undefined;
+    const k = Math.min(1, Math.max(0, (now - w.t0) / w.dur));
+    return [w.from[0] + (w.to[0] - w.from[0]) * k, w.from[1] + (w.to[1] - w.from[1]) * k];
+  }
+
+  private retarget(us: UnitView[], sp: Map<number, [number, number, number, number]>): void {
+    const now = performance.now();
+    const dt = now - this.lastSnap;
+    // only real tick-to-tick gaps feed the estimate (extra snapshots from taps / pauses are ignored)
+    if (dt > 25 && dt < 200) this.gap = Math.min(110, Math.max(this.tickMs(), this.gap * 0.8 + dt * 0.2));
+    this.lastSnap = now;
+    const live = new Set<number>();
+    for (const u of us) {
+      live.add(u.id);
+      const t = this.base(u);
+      const [ox, oy] = sp.get(u.id) ?? [0, 0];
+      const o = this.off.get(u.id);
+      if (o) o.to = [ox, oy];
+      else this.off.set(u.id, { cur: [ox, oy], to: [ox, oy] });
+      if (!this.spawnAt.has(u.id)) this.spawnAt.set(u.id, `translate(${t[0] + ox}%, ${t[1] + oy}%)`);
+      const old = this.tw.get(u.id);
+      if (old && old.to[0] === t[0] && old.to[1] === t[1]) continue; // same cell position: keep the running tween
+      const cur = this.at(u.id, now);
+      // blink / teleport / first sight: jump · otherwise one snapshot interval, linear → continuous walking speed
+      if (!cur || u.blink || Math.abs(t[0] - cur[0]) > 250 || Math.abs(t[1] - cur[1]) > 250) {
+        this.tw.set(u.id, { from: t, to: t, t0: now, dur: 1 });
+        this.off.get(u.id)!.cur = [ox, oy];
+      } else this.tw.set(u.id, { from: cur, to: t, t0: now, dur: this.gap });
+    }
+    for (const id of [...this.tw.keys()]) if (!live.has(id)) (this.tw.delete(id), this.off.delete(id), this.drawn.delete(id));
+  }
+
+  private readonly frame = (): void => {
+    const now = performance.now();
+    const dt = Math.min(100, now - (this.lastFrame || now));
+    this.lastFrame = now;
+    const ease = 1 - Math.exp(-dt / 90);
+    const els = this.host.nativeElement.querySelectorAll<HTMLElement>('.unit[data-uid]');
+    for (const el of Array.from(els)) {
+      const id = Number(el.dataset['uid']);
+      const p = this.at(id, now);
+      if (!p) continue;
+      const o = this.off.get(id);
+      if (o) o.cur = [o.cur[0] + (o.to[0] - o.cur[0]) * ease, o.cur[1] + (o.to[1] - o.cur[1]) * ease];
+      const tf = `translate(${(p[0] + (o?.cur[0] ?? 0)).toFixed(2)}%, ${(p[1] + (o?.cur[1] ?? 0)).toFixed(2)}%)`;
+      if (this.drawn.get(id) !== tf || el.style.transform !== tf) {
+        el.style.transform = tf;
+        this.drawn.set(id, tf);
+      }
+    }
+    this.raf = requestAnimationFrame(this.frame);
+  };
+
+  /** template: the position a unit first appeared at (afterwards the frame loop owns `transform`) */
+  spawnPos(u: UnitView): string {
+    return this.spawnAt.get(u.id) ?? this.unitPos(u);
+  }
 
   pos(r: number, c: number, dx = 0, dy = 0): string {
     return `translate(${c * 100 + dx}%, ${(r + SCENERY_ROWS) * 100 + dy}%)`;

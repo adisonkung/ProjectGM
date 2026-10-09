@@ -521,7 +521,10 @@ export class BattleEngine {
       const ty = u.pos.r;
       const d = Math.hypot(tx - u.x, ty - u.y);
       if (d < 1e-4) continue;
-      const step = Math.min(d, Math.max(u.moveSpeed, 1.5) * 1.15 * dt);
+      // cruise at the unit's own step rate (one cell per step interval) so the body is still travelling when the next
+      // logical step arrives — the old ×1.15 got there early and stood still for a moment every cell (stop-and-go).
+      // Falls behind by more than a cell (diagonals, knock-ups) → catches up proportionally.
+      const step = Math.min(d, Math.max(u.moveSpeed, 1) * Math.max(1, d) * dt);
       u.x += ((tx - u.x) / d) * step;
       u.y += ((ty - u.y) / d) * step;
     }

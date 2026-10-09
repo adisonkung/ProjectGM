@@ -49,6 +49,11 @@ export class UnitSpriteComponent {
   readonly castClip = input<string | undefined>();
   /** เล่นทับท่าที่กำลังเล่นอยู่ (เช่น ถูกตัดร่าย → ท่าโดนตีทันที) */
   readonly force = input(false);
+  /**
+   * กำลังเดินอยู่ไหม (หน้า battle คิดจากตำแหน่งที่เปลี่ยนทุก tick): กำหนดค่า = ท่าเดินวนต่อเนื่องตราบที่ยังเดิน
+   * (ไม่เริ่มรอบใหม่ทุกก้าว) แล้วกลับท่ายืนตอนหยุด · ท่าโจมตี/สกิลจบระหว่างเดิน → เดินต่อ · ไม่กำหนด = ท่าเดินแบบเล่นรอบเดียว (sprite lab)
+   */
+  readonly moving = input<boolean | undefined>(undefined);
 
   readonly sheet = viewChild<ElementRef<HTMLElement>>('sheet');
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);
@@ -76,11 +81,39 @@ export class UnitSpriteComponent {
         this.move(def, name);
       });
     });
+    // start / stop the walk loop with the movement (only when the parent drives `moving`)
+    effect(() => {
+      const m = this.moving();
+      const el = this.sheet()?.nativeElement;
+      const def = this.def();
+      untracked(() => {
+        if (m === undefined || !el || !def) return;
+        if (m && this.currentName === 'idle') this.play(el, def, 'walk');
+        else if (!m && this.currentName === 'walk') this.play(el, def, 'idle');
+        if (m && !def.anims.walk) this.bob(true);
+        else if (!m) this.bob(false);
+      });
+    });
+  }
+
+  /** sheets without a walk row: bounce the whole body while moving (looping) */
+  private bobbing = false;
+  private bob(on: boolean): void {
+    if (on === this.bobbing || typeof this.host.nativeElement.animate !== 'function') return;
+    this.bobbing = on;
+    this.motion?.cancel();
+    if (on) this.motion = this.host.nativeElement.animate(MOTION.walk!.frames, { duration: MOTION.walk!.ms / this.speed(), iterations: Infinity });
+  }
+
+  /** what to fall back to when an action clip ends */
+  private rest(): SpriteAnim {
+    return this.moving() ? 'walk' : 'idle';
   }
 
   /** ขยับทั้งตัวเมื่อแผ่นไม่มีท่านั้น (ไม่มีแผ่นเลย = ใช้ทุกท่า, มีแผ่น = เฉพาะท่าเดิน) */
   private move(def: SheetDef | undefined, name: SpriteAnim): void {
     if (def?.anims[name] || (def && name !== 'walk')) return;
+    if (name === 'walk' && this.moving() !== undefined) return; // movement-driven bounce (bob)
     const m = MOTION[name];
     if (!m || typeof this.host.nativeElement.animate !== 'function') return;
     this.motion?.cancel();
@@ -94,6 +127,10 @@ export class UnitSpriteComponent {
     if (!name) return;
 
     const busy = this.current?.playState === 'running';
+    // movement-driven walk: never restart the cycle on every step, and no walk while standing still
+    if (name === 'walk' && this.moving() !== undefined) {
+      if (!this.moving() || (this.currentName === 'walk' && busy)) return;
+    }
     if (!this.force() && LOW.includes(name) && name !== 'idle' && busy && !LOW.includes(this.currentName)) return;
     // ไม่ขยับอีกหลังตาย (ยกเว้นรีเซ็ตกลับท่ายืน)
     if (this.currentName === 'die' && name !== 'die' && name !== 'idle') return;
@@ -103,6 +140,7 @@ export class UnitSpriteComponent {
     const x = (i: number) => (i / (def.cols - 1)) * 100;
     const hold = name === 'die';
     const loop = name === 'idle';
+    const walkLoop = name === 'walk' && this.moving() !== undefined;
     const frames = hold ? a.frames - 1 : a.frames;
 
     this.current?.cancel();
@@ -124,11 +162,11 @@ export class UnitSpriteComponent {
       {
         duration: (a.frames * (a.ms ?? FRAME_MS)) / this.speed(),
         easing: `steps(${frames})`,
-        iterations: 1,
+        iterations: walkLoop ? Infinity : 1,
         fill: hold ? 'forwards' : 'none',
       },
     );
-    if (!hold) this.current.onfinish = () => this.play(el, def, 'idle');
+    if (!hold && !walkLoop) this.current.onfinish = () => this.play(el, def, this.rest());
   }
 
   /**
@@ -155,7 +193,7 @@ export class UnitSpriteComponent {
     const k: Keyframe[] = steps.map(s => ({ offset: s.t / t, easing: 'steps(1, end)', backgroundPosition: `${x(s.f)}% ${y}%` }));
     k.push({ offset: 1, backgroundPosition: `${x(a.frames - 1)}% ${y}%` });
     this.current = el.animate(k, { duration: total, iterations: 1 });
-    this.current.onfinish = () => this.play(el, def, 'idle');
+    this.current.onfinish = () => this.play(el, def, this.rest());
   }
 
   /** choreographed action clip (AnimDef.seq + steps): each key pose held for its own time, then back to idle */
@@ -169,7 +207,7 @@ export class UnitSpriteComponent {
     });
     k.push({ offset: 1, backgroundPosition: `${x(seq[seq.length - 1])}% ${y}%` });
     this.current = el.animate(k, { duration: total / this.speed(), iterations: 1, fill: hold ? 'forwards' : 'none' });
-    if (!hold) this.current.onfinish = () => this.play(el, def, 'idle');
+    if (!hold) this.current.onfinish = () => this.play(el, def, this.rest());
   }
 
   private playIdle(el: HTMLElement, order: number[], ms: number, x: (i: number) => number, y: number): void {
