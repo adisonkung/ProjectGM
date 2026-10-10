@@ -103,11 +103,13 @@ ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their 
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
     ('skill', 's1_char', [10]),
     ('skill2', 's2_char', [10]),
+    ('ult', 'ult_char', [8, 8]),
 ]
 # Phantom Step F7: the extended big blade floats free and ends near F8's hair → the seeding hands it to F8
 B.CLIP_FIXES['s2_char'] = [(1300, 398, 1397, 427, 6, 'all')]
-# rows with an airborne pose (Phantom Step F6 leap): every frame keeps its drawn height above the row's common ground
-COMMON_GROUND = {'skill2'}
+# rows with an airborne pose (Phantom Step F6 leap, Thousand Petal leap / dive = 2nd source row): every frame of that
+# source row keeps its drawn height above the row's common ground — (first, last + 1) frame ranges per anim
+COMMON_GROUND = {'skill2': [(0, 10)], 'ult': [(8, 16)]}
 # baked root motion (atlas px, + = forward) per pose, from the skill's Timeline Sync Sheet (tools/sprites/moye_s1.py):
 # Orchid Sever steps in ~12 px for the two cuts and gives half of it back in the recovery — never a dash
 ROOT_SHIFT = {'skill': [0, 0, 0, 3, 9, 12, 12, 11, 8, 6],
@@ -140,9 +142,9 @@ def main():
         frs = A.sheet_frames(file, counts, False)
         for fr in frs:
             drop_strays(fr)
-        if name in COMMON_GROUND:
-            g = max(fr['root'][1] for fr in frs)
-            for fr in frs:
+        for a0, a1 in COMMON_GROUND.get(name, []):
+            g = max(fr['root'][1] for fr in frs[a0:a1])
+            for fr in frs[a0:a1]:
                 fr['root'] = (fr['root'][0], g)
         s = sc * A.body_h(groups['idle'][0]) / A.body_h(frs[0])
         rows.append((name, frs, s))

@@ -70,6 +70,8 @@ export class UnitSpriteComponent {
   private motion?: Animation;
   /** runtime opacity curve of the playing clip (AnimDef.opacity) */
   private fade?: Animation;
+  /** runtime root motion of the playing clip (AnimDef.root) */
+  private lift?: Animation;
   private currentName: SpriteAnim = 'idle';
 
   constructor() {
@@ -148,6 +150,8 @@ export class UnitSpriteComponent {
     this.current?.cancel();
     this.fade?.cancel();
     this.fade = undefined;
+    this.lift?.cancel();
+    this.lift = undefined;
     this.currentName = name;
     if (name === 'cast' && a.castStart != null && a.activate != null) {
       this.playCast(el, def, a, x, y);
@@ -160,6 +164,7 @@ export class UnitSpriteComponent {
     if (a.seq && a.steps) {
       this.playSteps(el, def, a.seq, a.steps, x, y, hold);
       if (a.opacity?.length) this.playFade(el, a.steps, a.opacity);
+      if (a.root?.length) this.playRoot(el, def, a.steps, a.root);
       return;
     }
     this.current = el.animate(
@@ -213,6 +218,29 @@ export class UnitSpriteComponent {
     k.push({ offset: 1, backgroundPosition: `${x(seq[seq.length - 1])}% ${y}%` });
     this.current = el.animate(k, { duration: total / this.speed(), iterations: 1, fill: hold ? 'forwards' : 'none' });
     if (!hold) this.current.onfinish = () => this.play(el, def, this.rest());
+  }
+
+  /** step position (fractions ok) → ms from the clip start, and the clip length */
+  private stepClock(steps: number[]): { at: (i: number) => number; total: number } {
+    const starts = [0];
+    for (const ms of steps) starts.push(starts[starts.length - 1] + ms);
+    const total = starts[starts.length - 1];
+    const at = (i: number) => {
+      const k = Math.min(Math.max(Math.floor(i), 0), steps.length);
+      return Math.min(total, starts[k] + (k < steps.length ? (i - k) * steps[k] : 0));
+    };
+    return { at, total };
+  }
+
+  /** AnimDef.root: [step, dx, dy] atlas px → `translate` of the sheet (outside its flip transform → dx mirrored here) */
+  private playRoot(el: HTMLElement, def: SheetDef, steps: number[], keys: [number, number, number][]): void {
+    const { at, total } = this.stepClock(steps);
+    const sx = this.flip() ? -1 : 1;
+    const tr = (dx: number, dy: number) => `${((sx * dx) / (def.cellW ?? 132)) * 100}% ${(dy / (def.cellH ?? 100)) * 100}%`;
+    const k = keys.map(([i, dx, dy]) => ({ offset: at(i) / total, translate: tr(dx, dy) })).sort((p, q) => p.offset - q.offset);
+    if (k[0].offset > 0) k.unshift({ offset: 0, translate: k[0].translate });
+    if (k[k.length - 1].offset < 1) k.push({ offset: 1, translate: k[k.length - 1].translate });
+    this.lift = el.animate(k, { duration: total / this.speed(), iterations: 1 });
   }
 
   /** AnimDef.opacity: [step, opacity] keys → one opacity animation over the clip (steps = same clock as the frames) */

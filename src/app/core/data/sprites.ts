@@ -46,6 +46,12 @@ export interface AnimDef {
    * board's own blink-in fade — the clip draws it.
    */
   opacity?: [number, number][];
+  /**
+   * runtime root motion of the character while this clip plays: [step, dx, dy] keys in atlas px (dx = forward along
+   * the facing, dy = down, so a leap is negative), linear between keys (sample a curve densely for a smooth arc).
+   * Moves the drawn sprite only — the unit's cell / the engine never see it (e.g. Thousand Petal leap + dive).
+   */
+  root?: [number, number, number][];
 }
 
 /** hit-stop (the whole board freezes for `hitStopMs` real ms) + a small screen shake */
@@ -217,7 +223,7 @@ export const SHEETS: Record<string, SheetDef> = {
   // the attack clip until their sheets arrive in rows 6–7. Cell 260 × 170 like Yue Zheng (the big blade overhead /
   // extended), feet 15 px above the cell bottom, idle body 74 px · walk = a run (flight frames keep their height)
   'hero-moye.png': {
-    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 16, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -255,10 +261,30 @@ export const SHEETS: Record<string, SheetDef> = {
         opacity: [[0, 1], [2.5, 1], [3, 0.8], [3.5, 0.45], [4, 0.12], [5.333, 0.08], [5.417, 0.2], [5.667, 0.55], [5.833, 0.8], [6, 1]],
         impact: { hitStopMs: 50, shakePx: 5, shakeMs: 70 },
       },
+      // Ult Thousand Petal Execution — Timeline Sync Sheet (tools/sprites/moye_ult.py, 60 FPS T000–T125 = 2.10 s):
+      // lock C01–C02 (T008) · vanish C03 (T012, blink T024) · reappear C04 (T028) · slash 1 C05 big blade T032 ·
+      // slash 2 C06 small blade T048 · slash 3 C07 T064 · load C08 · leap C09 (T072) · airborne C10 (T080) · aerial
+      // raise C11 (T088) · descent C12–C13 (T096) · FINAL HIT C14 T104 (critical) · land T110 · recovery C15–C16 (T118).
+      // Root X (6–24 px between hits) + the leap / dive arc (−62 px at T094) + the vanish are runtime (`root`, `opacity`).
+      ult: {
+        row: 7, frames: 16, ms: 80,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        steps: [100, 100, 267, 33, 233, 233, 133, 100, 133, 133, 133, 67, 67, 233, 67, 68],
+        move: 2.75,
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 1.333, VANISH_START: 2, VFX_SPAWN: 2.25, REAPPEAR_START: 3,
+          STRIKE_START: [4, 5, 6, 11], DAMAGE: [4.143, 5.286, 6.75, 13], IMPACT: [4.143, 5.286, 6.75, 13],
+          CHARGE_START: 9, FINAL_ANTICIPATION: 10, RECOVERY_START: 14,
+        },
+        opacity: [[0.0, 1], [1.833, 1], [2.0, 0.7], [2.125, 0.3], [2.25, 0.08], [2.688, 0.05], [2.75, 0.25], [2.875, 0.6], [3.0, 1], [16.0, 1]],
+        root: [[0.0, 0.0, 0.0], [0.333, 0.0, 0.0], [0.667, 0.0, 0.0], [1.0, 0.0, 0.0], [1.333, 0.0, 0.0], [1.667, 0.0, 0.0], [2.0, 0.0, 0.0], [2.125, 0.0, 0.0], [2.25, 0.0, 0.0], [2.375, 0.0, 0.0], [2.5, 0.0, 0.0], [2.625, 0.0, 0.0], [2.75, 0.0, 0.0], [2.875, 0.0, 0.0], [3.0, 0.0, 0.0], [4.0, 3.0, 0.0], [4.143, 6.0, 0.0], [4.286, 5.9, 0.0], [4.429, 5.5, 0.0], [4.571, 5.0, 0.0], [4.714, 4.5, 0.0], [4.857, 4.1, 0.0], [5.0, 4.0, 0.0], [5.143, 7.0, 0.0], [5.286, 10.0, 0.0], [5.429, 9.8, 0.0], [5.571, 9.3, 0.0], [5.714, 8.7, 0.0], [5.857, 8.2, 0.0], [6.0, 8.0, 0.0], [6.25, 10.1, 0.0], [6.5, 13.9, 0.0], [6.75, 16.0, 0.0], [7.0, 15.4, 0.0], [7.333, 14.0, 0.0], [7.667, 12.6, 0.0], [8.0, 12.0, 0.0], [8.25, 12.1, -3.3], [8.5, 12.3, -10.5], [8.75, 12.6, -18.0], [9.0, 13.0, -24.5], [9.25, 13.4, -31.2], [9.5, 13.7, -38.0], [9.75, 13.9, -45.6], [10.0, 14.0, -52.0], [10.25, 14.0, -56.6], [10.5, 14.0, -60.4], [10.75, 14.0, -62.0], [11.0, 14.0, -61.0], [11.5, 16.0, -49.9], [12.0, 18.0, -32.0], [12.5, 21.0, -12.2], [13.0, 24.0, 0.0], [13.143, 23.5, 0.0], [13.286, 22.5, 0.0], [13.429, 22.0, 0.0], [13.571, 20.4, 0.0], [13.714, 17.0, 0.0], [13.857, 13.6, 0.0], [14.0, 12.0, 0.0], [14.5, 9.6, 0.0], [15.0, 4.7, 0.0], [15.5, 0.7, 0.0], [16.0, 0.0, 0.0]],
+        impact: [{ hitStopMs: 33, shakePx: 2, shakeMs: 50 }, { hitStopMs: 33, shakePx: 2, shakeMs: 50 }, { hitStopMs: 50, shakePx: 3, shakeMs: 60 }, { hitStopMs: 100, shakePx: 9, shakeMs: 200 }],
+      },
     },
     fx: {
       skill: ['my-s1-main', 'my-s1-impact1', 'my-s1-impact2'],
       skill2: ['my-s2-main', 'my-s2-reappear', 'my-s2-impact'],
+      ult: ['my-ult-trail', 'my-ult-arc1', 'my-ult-arc2', 'my-ult-arc3', 'my-ult-aura', 'my-ult-descent', 'my-ult-impact', 'my-ult-residual'],
     },
   },
   'hero-bailong.png': {
@@ -510,6 +536,42 @@ export const FX: Record<string, FxDef> = {
   'my-s2-impact': {
     file: 'fx-moye-s2-impact.png', frames: 8, w: 91, h: 91, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
     pivot: [0.5167, 0.4989], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
+  },
+  // Mo Ye Ult Thousand Petal Execution (tools/sprites/moye_ult.py), 30 FPS strips in timeline order: vanish trail at
+  // her origin (VFX_SPAWN T016) · slash arcs on the target per STRIKE_START (T030 / T046 / T060, arc 2 mirrored) ·
+  // petal vortex around her at the top of the leap (CHARGE_START = AIRBORNE T080, grows to the dive) · descending
+  // crescent over the target (T096) · final impact on the target's ground contact (T104) · residual from T114 (no damage)
+  'my-ult-trail': {
+    file: 'fx-moye-ult-trail.png', frames: 6, w: 132, h: 58, frameMs: 33.33, at: 'self', on: 'vfx', layer: 'under',
+    pivot: [0.0076, 0.5637], dx: 5.0, dy: -20.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-ult-arc1': {
+    file: 'fx-moye-ult-arc1.png', frames: 5, w: 115, h: 82, frameMs: 33.33, at: 'target', orient: 'flip', event: 'STRIKE_START', eventIndex: 0,
+    pivot: [0.5354, 0.5593], dx: -7.5, dy: -22.75, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-ult-arc2': {
+    file: 'fx-moye-ult-arc2.png', frames: 4, w: 116, h: 87, frameMs: 33.33, at: 'target', orient: 'flip', event: 'STRIKE_START', eventIndex: 1, delayMs: 33,
+    pivot: [0.5336, 0.4577], dx: -7.5, dy: -22.75, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-ult-arc3': {
+    file: 'fx-moye-ult-arc3.png', frames: 5, w: 124, h: 83, frameMs: 33.33, at: 'target', orient: 'flip', event: 'STRIKE_START', eventIndex: 2, delayMs: 33,
+    pivot: [0.5352, 0.5082], dx: -7.5, dy: -22.75, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-ult-aura': {
+    file: 'fx-moye-ult-aura.png', frames: 10, w: 124, h: 74, frameMs: 33.33, at: 'self', event: 'CHARGE_START', layer: 'under',
+    pivot: [0.5, 0.5], dx: 17.5, dy: -85.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-ult-descent': {
+    file: 'fx-moye-ult-descent.png', frames: 6, w: 88, h: 125, frameMs: 33.33, at: 'target', orient: 'flip', event: 'STRIKE_START', eventIndex: 3,
+    pivot: [0.4593, 0.536], dx: -27.5, dy: -45.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-ult-impact': {
+    file: 'fx-moye-ult-impact.png', frames: 7, w: 151, h: 152, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 3,
+    pivot: [0.5499, 0.9868], dx: -12.5, dy: 27.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-ult-residual': {
+    file: 'fx-moye-ult-residual.png', frames: 15, w: 120, h: 78, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 3, delayMs: 167,
+    pivot: [0.5, 0.5], dx: -10.0, dy: -10.25, scale: 1 / 1.5, pixelated: true,
   },
   'yz-s2-impact': {
     file: 'fx-yuezheng-s2-impact.png', frames: 9, w: 96, h: 92, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',

@@ -184,11 +184,14 @@ xs = lambda t: LX + t * CW            # left edge of frame t
 
 rows = []                             # (key, height)
 TH_W, TH_H = 150, 98
+if M and len(M['thumbs']) > 1:            # many preview moments: shrink so they don't overlap
+    TH_W = min(TH_W, int((N * max(13, 1700 // N)) / len(M['thumbs'])) - 6)
+    TH_H = round(TH_W * 98 / 150)
 y = 0
 H_TITLE, H_THUMB = 96, TH_H + 70
 layout = {}
 y = H_TITLE + H_THUMB
-LANES = 9 if len(EVENTS) > 16 else 5
+LANES = (M or {}).get('lanes') or (9 if len(EVENTS) > 16 else 5)
 for key, h in [('ruler', 44), ('phase', 34), ('event', LANES * 28 + 10), ('char', 54), ('travel', 64), ('height', 72)] + \
         [(t[0], 34) for t in TRACKS] + [('shake', 46), ('legend', 250)]:
     layout[key] = (y, h)

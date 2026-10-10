@@ -224,7 +224,8 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
       ult: {
         ...assassin.ult, name: 'ประหารพันกลีบ', label: 'Thousand Petal Execution',
-        repeat: { count: 5, gap: 0.16, weights: [0.1, 0.1, 0.12, 0.13, 0.55] },
+        // Timeline Sync Sheet: 3 slashes + the final descending execution (T032 / T048 / T064 / T104), final hit heaviest
+        repeat: { count: 4, gap: 0.16, weights: [0.15, 0.15, 0.2, 0.5] },
       },
     },
   },

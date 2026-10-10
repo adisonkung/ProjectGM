@@ -118,15 +118,15 @@ describe('Yue Zheng (3★ Tank, full sheet)', () => {
 
 /** Mo Ye — Shadow Orchid Blade (remodel #3): base sheet only, Assassin class ids / numbers arranged to her skills */
 describe('Mo Ye (3★ Assassin, base sheet)', () => {
-  it('10 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 8 (damage F4) · die 7 · S1 Orchid Sever 10 · S2 Phantom Step 10', () => {
+  it('10 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 8 (damage F4) · die 7 · S1 Orchid Sever 10 · S2 Phantom Step 10 · Ult Thousand Petal Execution 16', () => {
     const sh = SHEETS['hero-moye.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([16, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 4], [3, 8], [4, 7]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
     expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
     expect([a.skill2!.row, a.skill2!.frames]).toEqual([6, 10]);
-    expect(a.ult).toBeUndefined();
+    expect([a.ult!.row, a.ult!.frames]).toEqual([7, 16]);
     expect(HERO_BY_ID['moye']).toEqual(jasmine.objectContaining({ name: 'โม่เย่', cls: 'assassin', star: 3, sprite: 'hero-moye.png' }));
     expect(HERO_ART['moye']).toEqual({ portrait: 'portraits/moye.webp' });
   });
@@ -143,7 +143,8 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
     expect(k.skill.effects).toEqual(c.skill.effects);
     expect(k.skill2.movement).toEqual({ type: 'BLINK_BEHIND' });
     expect(k.skill2.effects.some(e => e.type === 'APPLY_STATUS')).toBeFalse();
-    expect(k.ult.repeat!.count).toBe(5);
+    expect(k.ult.repeat!.count).toBe(4);
+    expect(k.ult.repeat!.weights).toEqual([0.15, 0.15, 0.2, 0.5]);
     expect(k.ult.repeat!.weights!.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
     expect(k.ult.effects).toEqual(c.ult.effects);
   });
@@ -197,5 +198,41 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
     expect(FX['my-s2-main'].pivot![0]).toBeLessThan(0.05);
     expect(FX['my-s2-impact'].h).toBeGreaterThan(FX['my-s1-impact2'].h);
     expect(fxDuration('my-s2-main', 1)).toBeLessThan((35 - 10) * (1000 / 60) + 40);
+  });
+
+  it('Ult Thousand Petal Execution on its Timeline Sync Sheet: 2.10 s, blink T024 · hits T032 / T048 / T064 · FINAL T104 heaviest', () => {
+    const clip = SHEETS['hero-moye.png'].anims.ult!;
+    const c = clipClock(clip);
+    expect(c.total * 60).toBeCloseTo(126, 0);
+    const ev = (e: string) => animEvents('hero-moye.png', 'ult').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    expect(ev('ANTICIPATION_PEAK')).toEqual([8]);
+    expect(ev('VANISH_START')).toEqual([12]);
+    expect(ev('VFX_SPAWN')).toEqual([16]);
+    expect(ev('REAPPEAR_START')).toEqual([28]);
+    expect(ev('STRIKE_START')).toEqual([30, 44, 58, 96]);
+    expect(ev('DAMAGE')).toEqual([32, 48, 64, 104]);
+    expect(ev('CHARGE_START')).toEqual([80]);
+    expect(ev('FINAL_ANTICIPATION')).toEqual([88]);
+    expect(ev('RECOVERY_START')).toEqual([118]);
+    const tm = animTiming('hero-moye.png', 'ult');
+    expect(tm.move * 60).toBeCloseTo(24, 0);
+    expect(tm.hits.length).toBe(kitOf('moye', 'assassin').ult.repeat!.count);
+    // runtime root: leap peak about −62 px around T094, back on the ground for the final hit, nothing left at the end
+    const at = (t: number) => clip.root!.reduce((best, k) => (Math.abs(c.at(k[0]) * 60 - t) < Math.abs(c.at(best[0]) * 60 - t) ? k : best));
+    expect(at(94)[2]).toBeLessThanOrEqual(-58);
+    expect(at(104)[2]).toBe(0);
+    expect(clip.root![clip.root!.length - 1].slice(1)).toEqual([0, 0]);
+    expect(Math.max(...clip.root!.map(k => k[1]))).toBeLessThanOrEqual(24);
+    // final hit pauses / shakes the most
+    const imp = clip.impact as { hitStopMs: number; shakePx: number }[];
+    expect(imp.length).toBe(4);
+    expect(imp[3].hitStopMs).toBeGreaterThan(Math.max(...imp.slice(0, 3).map(i => i.hitStopMs)));
+    expect(imp[3].shakePx).toBeGreaterThanOrEqual(8);
+    expect(fxFor('hero-moye.png', 'ult', { on: 'impact', hit: 3 }).sort()).toEqual(['my-ult-impact', 'my-ult-residual']);
+    expect(fxFor('hero-moye.png', 'ult', { on: 'impact', hit: 0 })).toEqual([]);
+    expect(fxFor('hero-moye.png', 'ult', { on: 'event', event: 'STRIKE_START', index: 3 })).toEqual(['my-ult-descent']);
+    expect(fxFor('hero-moye.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['my-ult-aura']);
+    expect(FX['my-ult-impact'].w).toBeGreaterThan(FX['my-s2-impact'].w);
+    expect(FX['my-ult-residual'].delayMs).toBeCloseTo(167, -1);
   });
 });
