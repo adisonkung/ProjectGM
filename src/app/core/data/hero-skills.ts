@@ -205,6 +205,29 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       ult: { ...tank.ult, name: 'ป้อมผนึกภูผา', label: 'Mountain Seal Bastion' },
     },
   },
+  // โม่เย่ (Mo Ye — Shadow Orchid Blade, 3★ Assassin, remodel #3): Shadow / Crimson Petal Qi · class ids + numbers
+  // (rank tables apply) arranged to her skills until the skill sheets arrive: S1 Orchid Sever = the class S1 damage
+  // as two quick cuts on her current target (no blink) · S2 Phantom Step = the reposition: blink behind the focus /
+  // weakest + one strike · Ult Thousand Petal Execution = the class execution (blink to the weakest, guaranteed crit)
+  // split into a flurry + the final hit (55 %)
+  moye: {
+    id: 'moye', cls: 'assassin', identity: 'Assassin · Single-target Burst · Phantom Reposition · Execution Finisher',
+    kit: {
+      ...assassin,
+      skill: {
+        ...assassin.skill, name: 'ฟันกล้วยไม้', label: 'Orchid Sever', target: 'CURRENT', range: 1, movement: undefined,
+        repeat: { count: 2, gap: 0.18, weights: [0.45, 0.55] },
+      },
+      skill2: {
+        ...assassin.skill2, name: 'ก้าวเงามายา', label: 'Phantom Step', target: 'FOCUS_OR_LOWEST_HP', range: Infinity,
+        movement: { type: 'BLINK_BEHIND' }, effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 2.0 }],
+      },
+      ult: {
+        ...assassin.ult, name: 'ประหารพันกลีบ', label: 'Thousand Petal Execution',
+        repeat: { count: 5, gap: 0.16, weights: [0.1, 0.1, 0.12, 0.13, 0.55] },
+      },
+    },
+  },
   bailong: {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {

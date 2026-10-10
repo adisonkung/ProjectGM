@@ -10,12 +10,12 @@ import { newGameState } from './starter';
 
 /** 2026-10 roster remodel: the old roster left the game — Bai Long is the only hero and the template for the new ones */
 describe('Roster remodel — Bai Long lead + new heroes', () => {
-  it('ships only the remodelled heroes (Bai Long + Yue Zheng) as the starter team; no old hero sheet / art is left', () => {
-    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng']);
-    expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng']);
+  it('ships only the remodelled heroes (Bai Long + Yue Zheng + Mo Ye) as the starter team; no old hero sheet / art is left', () => {
+    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye']);
+    expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye']);
     expect(SHIPPED_STARTER_BENCH).toEqual([]);
-    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-yuezheng.png']);
-    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'yuezheng']);
+    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-moye.png', 'hero-yuezheng.png']);
+    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'moye', 'yuezheng']);
   });
 
   it('an old save drops heroes whose template is gone: gear back to the bag, team / slots / memory forget them', () => {
@@ -113,5 +113,36 @@ describe('Yue Zheng (3★ Tank, full sheet)', () => {
       portrait: 'portraits/yuezheng.webp', s1: 'skills/yuezheng-s1.webp', s2: 'skills/yuezheng-s2.webp',
       ult: 'skills/yuezheng-ult.webp', banner: 'banners/yuezheng.webp',
     });
+  });
+});
+
+/** Mo Ye — Shadow Orchid Blade (remodel #3): base sheet only, Assassin class ids / numbers arranged to her skills */
+describe('Mo Ye (3★ Assassin, base sheet)', () => {
+  it('8 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 8 (damage F4) · die 7, skill rows reserved', () => {
+    const sh = SHEETS['hero-moye.png'];
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([8, 8, 260, 170]);
+    const a = sh.anims;
+    expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 4], [3, 8], [4, 7]]);
+    expect(a.attack!.events!.DAMAGE).toBe(3);
+    expect(a.skill).toBeUndefined();
+    expect(HERO_BY_ID['moye']).toEqual(jasmine.objectContaining({ name: 'โม่เย่', cls: 'assassin', star: 3, sprite: 'hero-moye.png' }));
+    expect(HERO_ART['moye']).toEqual({ portrait: 'portraits/moye.webp' });
+  });
+
+  it('Orchid Sever = 2 cuts on the current target · Phantom Step = blink behind + strike · Thousand Petal Execution = flurry + final hit', () => {
+    const k = kitOf('moye', 'assassin');
+    const c = CLASS_KITS.assassin;
+    expect([k.skill.label, k.skill2.label, k.ult.label]).toEqual(['Orchid Sever', 'Phantom Step', 'Thousand Petal Execution']);
+    // class ids + cooldowns → the skill rank tables / costs apply unchanged
+    expect([k.skill.id, k.skill2.id, k.ult.id]).toEqual([c.skill.id, c.skill2.id, c.ult.id]);
+    expect([k.skill.cooldown, k.skill2.cooldown]).toEqual([c.skill.cooldown, c.skill2.cooldown]);
+    expect(k.skill.movement).toBeUndefined();
+    expect(k.skill.repeat!.count).toBe(2);
+    expect(k.skill.effects).toEqual(c.skill.effects);
+    expect(k.skill2.movement).toEqual({ type: 'BLINK_BEHIND' });
+    expect(k.skill2.effects.some(e => e.type === 'APPLY_STATUS')).toBeFalse();
+    expect(k.ult.repeat!.count).toBe(5);
+    expect(k.ult.repeat!.weights!.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
+    expect(k.ult.effects).toEqual(c.ult.effects);
   });
 });

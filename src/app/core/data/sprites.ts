@@ -207,6 +207,21 @@ export const SHEETS: Record<string, SheetDef> = {
       ult: ['yz-ult-charge', 'yz-ult-impact', 'yz-ult-field-back', 'yz-ult-field-front'],
     },
   },
+  // Mo Ye — Shadow Orchid Blade (remodel #3, tools/sprites/moye.py): base sheet only for now — the skills fall back
+  // to the attack clip until s1 / s2 / ult arrive in rows 5–7. Cell 260 × 170 like Yue Zheng (the big blade overhead /
+  // extended), feet 15 px above the cell bottom, idle body 74 px · walk = a run (flight frames keep their height)
+  'hero-moye.png': {
+    cols: 8, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
+    anims: {
+      idle: { row: 0, frames: 6 },
+      walk: { row: 1, frames: 8, ms: 70 },
+      hurt: { row: 2, frames: 4 },
+      // ready → step in → big blade raised F3 → cut extended F4 = damage → small-blade follow-through F5–F7 → guard F8
+      attack: { row: 3, frames: 8, ms: 80, events: { DAMAGE: 3, RECOVERY_START: 6 } },
+      die: { row: 4, frames: 7, ms: 120 },
+    },
+  },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
     cols: 19, rows: 8, cellW: 220, cellH: 170, pixelated: true,

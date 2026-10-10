@@ -4,7 +4,7 @@ import { autoPlace, defaultPresets } from '../rules/team';
 import { newIsland } from '../rules/island';
 
 /** ทีมเริ่มต้น (ลงสนาม) และฮีโร่ที่มีให้ตั้งแต่เริ่มแต่อยู่ม้านั่ง */
-export const STARTER_TEAM = ['bailong', 'yuezheng'];
+export const STARTER_TEAM = ['bailong', 'yuezheng', 'moye'];
 export const STARTER_BENCH: string[] = [];
 
 /** เซฟเก่า: เพิ่มฮีโร่เริ่มต้นที่ยังไม่มี (ไว้ม้านั่ง ไม่แตะทีมที่จัดไว้) */
