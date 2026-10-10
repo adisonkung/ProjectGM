@@ -128,7 +128,7 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
     expect([a.skill2!.row, a.skill2!.frames]).toEqual([6, 10]);
     expect([a.ult!.row, a.ult!.frames]).toEqual([7, 16]);
     expect(HERO_BY_ID['moye']).toEqual(jasmine.objectContaining({ name: 'โม่เย่', cls: 'assassin', star: 3, sprite: 'hero-moye.png' }));
-    expect(HERO_ART['moye']).toEqual({ portrait: 'portraits/moye.webp' });
+    expect(HERO_ART['moye']).toEqual(jasmine.objectContaining({ portrait: 'portraits/moye.webp', banner: 'banners/moye.webp' }));
   });
 
   it('Orchid Sever = 2 cuts on the current target · Phantom Step = blink behind + strike · Thousand Petal Execution = flurry + final hit', () => {
