@@ -40,6 +40,12 @@ export interface AnimDef {
   events?: Partial<Record<SemanticEvent, number | number[]>>;
   /** contact feel when this clip's skill lands (battle page + sprite lab): hit-stop + screen shake — a list = per hit */
   impact?: ImpactFeel | ImpactFeel[];
+  /**
+   * runtime opacity of the character while this clip plays: [step (fractions ok, same unit as `events`), opacity 0–1]
+   * keys, linear between them (e.g. Phantom Step vanishing / reappearing). A blink inside such a clip skips the
+   * board's own blink-in fade — the clip draws it.
+   */
+  opacity?: [number, number][];
 }
 
 /** hit-stop (the whole board freezes for `hitStopMs` real ms) + a small screen shake */
@@ -233,9 +239,26 @@ export const SHEETS: Record<string, SheetDef> = {
         },
         impact: [{ hitStopMs: 17, shakePx: 2, shakeMs: 50 }, { hitStopMs: 33, shakePx: 3, shakeMs: 50 }],
       },
+      // S2 Phantom Step — Timeline Sync Sheet (tools/sprites/moye_s2.py, 60 FPS T000–T057 ≈ 0.97 s): ready C01–C02 ·
+      // crouch C03 (T006) · push-off C04 = VANISH_START T008 · low dash C05 (0–15 % opacity) · airborne C06 — the engine's
+      // blink moves her at T025 (`move`) · REAPPEAR T028 → full T032 on the landing crouch C03 · wind-up C04 (T036) ·
+      // big-blade lunge C07 = damage T040 · flourish C08 = recovery T046 · C09–C10. Opacity is runtime (`opacity`).
+      skill2: {
+        row: 6, frames: 10, ms: 80,
+        seq: [0, 1, 2, 3, 4, 5, 2, 3, 6, 7, 8, 9],
+        steps: [67, 33, 33, 67, 133, 200, 67, 50, 117, 83, 67, 50],
+        move: 5.417,
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 2, VANISH_START: 3, VFX_SPAWN: 3.5, REAPPEAR_START: 5.667,
+          STRIKE_START: 7, DAMAGE: 8.143, IMPACT: 8.143, RECOVERY_START: 9,
+        },
+        opacity: [[0, 1], [2.5, 1], [3, 0.8], [3.5, 0.45], [4, 0.12], [5.333, 0.08], [5.417, 0.2], [5.667, 0.55], [5.833, 0.8], [6, 1]],
+        impact: { hitStopMs: 50, shakePx: 5, shakeMs: 70 },
+      },
     },
     fx: {
       skill: ['my-s1-main', 'my-s1-impact1', 'my-s1-impact2'],
+      skill2: ['my-s2-main', 'my-s2-reappear', 'my-s2-impact'],
     },
   },
   'hero-bailong.png': {
@@ -472,6 +495,21 @@ export const FX: Record<string, FxDef> = {
   'my-s1-impact2': {
     file: 'fx-moye-s1-impact2.png', frames: 7, w: 51, h: 61, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 1, delayMs: 17, pivot: [0.5389, 0.5016], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
+  },
+  // Mo Ye S2 Phantom Step (tools/sprites/moye_s2.py), 30 FPS strips in timeline order: the dash trail at her ORIGIN
+  // (VFX_SPAWN T010, pivot = left-centre on her body, stretched 2 tiles along the path, gone by T035) · the shadow /
+  // petal cluster where she comes back (REAPPEAR_START T028, after the blink) · the X burst on the target (T040, peak T042)
+  'my-s2-main': {
+    file: 'fx-moye-s2-main.png', frames: 13, w: 168, h: 80, frameMs: 33.33, at: 'self', on: 'vfx', layer: 'under',
+    pivot: [0.006, 0.4981], dx: 5, dy: -20.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-s2-reappear': {
+    file: 'fx-moye-s2-reappear.png', frames: 3, w: 72, h: 43, frameMs: 33.33, at: 'self', event: 'REAPPEAR_START',
+    pivot: [0.5, 0.4186], dx: 5, dy: -22.75, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-s2-impact': {
+    file: 'fx-moye-s2-impact.png', frames: 8, w: 91, h: 91, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
+    pivot: [0.5167, 0.4989], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
   },
   'yz-s2-impact': {
     file: 'fx-yuezheng-s2-impact.png', frames: 9, w: 96, h: 92, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',

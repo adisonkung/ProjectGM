@@ -102,10 +102,18 @@ BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
     ('skill', 's1_char', [10]),
+    ('skill2', 's2_char', [10]),
 ]
+# Phantom Step F7: the extended big blade floats free and ends near F8's hair → the seeding hands it to F8
+B.CLIP_FIXES['s2_char'] = [(1300, 398, 1397, 427, 6, 'all')]
+# rows with an airborne pose (Phantom Step F6 leap): every frame keeps its drawn height above the row's common ground
+COMMON_GROUND = {'skill2'}
 # baked root motion (atlas px, + = forward) per pose, from the skill's Timeline Sync Sheet (tools/sprites/moye_s1.py):
 # Orchid Sever steps in ~12 px for the two cuts and gives half of it back in the recovery — never a dash
-ROOT_SHIFT = {'skill': [0, 0, 0, 3, 9, 12, 12, 11, 8, 6]}
+ROOT_SHIFT = {'skill': [0, 0, 0, 3, 9, 12, 12, 11, 8, 6],
+              # Phantom Step (tools/sprites/moye_s2.py): F4/F5 a small push-off before she vanishes (the real travel is
+              # the engine's blink) · F6 airborne at the destination · F7–F10 the strike lunge, half given back
+              'skill2': [0, 0, 0, 4, 10, 0, 10, 8, 5, 4]}
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px
 FACE = (1240, 528, 1640, 912)
 
@@ -132,6 +140,10 @@ def main():
         frs = A.sheet_frames(file, counts, False)
         for fr in frs:
             drop_strays(fr)
+        if name in COMMON_GROUND:
+            g = max(fr['root'][1] for fr in frs)
+            for fr in frs:
+                fr['root'] = (fr['root'][0], g)
         s = sc * A.body_h(groups['idle'][0]) / A.body_h(frs[0])
         rows.append((name, frs, s))
         report['notes'].append(f'{file}: {len(frs)} frames, scale {s:.3f}')

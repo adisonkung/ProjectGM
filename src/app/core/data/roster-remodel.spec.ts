@@ -118,14 +118,15 @@ describe('Yue Zheng (3★ Tank, full sheet)', () => {
 
 /** Mo Ye — Shadow Orchid Blade (remodel #3): base sheet only, Assassin class ids / numbers arranged to her skills */
 describe('Mo Ye (3★ Assassin, base sheet)', () => {
-  it('10 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 8 (damage F4) · die 7 · S1 Orchid Sever 10', () => {
+  it('10 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 8 (damage F4) · die 7 · S1 Orchid Sever 10 · S2 Phantom Step 10', () => {
     const sh = SHEETS['hero-moye.png'];
     expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 4], [3, 8], [4, 7]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
     expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
-    expect(a.skill2).toBeUndefined();
+    expect([a.skill2!.row, a.skill2!.frames]).toEqual([6, 10]);
+    expect(a.ult).toBeUndefined();
     expect(HERO_BY_ID['moye']).toEqual(jasmine.objectContaining({ name: 'โม่เย่', cls: 'assassin', star: 3, sprite: 'hero-moye.png' }));
     expect(HERO_ART['moye']).toEqual({ portrait: 'portraits/moye.webp' });
   });
@@ -162,5 +163,39 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
     expect(fxFor('hero-moye.png', 'skill', { on: 'impact', hit: 1 })).toEqual(['my-s1-impact2']);
     expect(['my-s1-main', 'my-s1-impact1', 'my-s1-impact2'].every(k => FX[k].at === 'target')).toBeTrue();
     expect(FX['my-s1-impact2'].h).toBeGreaterThan(FX['my-s1-impact1'].h);
+  });
+
+  it('S2 Phantom Step on its Timeline Sync Sheet: 0.97 s, vanish T008 · blink T025 · reappear T028 · strike damage T040, opacity runtime', () => {
+    const clip = SHEETS['hero-moye.png'].anims.skill2!;
+    const c = clipClock(clip);
+    expect(c.total * 60).toBeCloseTo(58, 0);
+    const ev = (e: string) => animEvents('hero-moye.png', 'skill2').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    expect(ev('CAST_START')).toEqual([0]);
+    expect(ev('ANTICIPATION_PEAK')).toEqual([6]);
+    expect(ev('VANISH_START')).toEqual([8]);
+    expect(ev('VFX_SPAWN')).toEqual([10]);
+    expect(ev('REAPPEAR_START')).toEqual([28]);
+    expect(ev('STRIKE_START')).toEqual([36]);
+    expect(ev('DAMAGE')).toEqual([40]);
+    expect(ev('RECOVERY_START')).toEqual([46]);
+    const tm = animTiming('hero-moye.png', 'skill2');
+    expect(tm.move * 60).toBeCloseTo(25, 0);          // the engine's BLINK_BEHIND relocation
+    expect(tm.hit * 60).toBeCloseTo(40, 0);
+    // opacity keys (step → %): 100 → 80 T008 → 45 T010 → ≤ 15 while travelling → 20 T025 → 55 T028 → 80 T030 → 100 T032
+    const op = (t: number) => {
+      const k = clip.opacity!.map(([s, o]) => [c.at(s) * 60, o]);
+      for (let i = 0; i < k.length - 1; i++) if (k[i][0] <= t && t <= k[i + 1][0]) return k[i][1] + ((k[i + 1][1] - k[i][1]) * (t - k[i][0])) / (k[i + 1][0] - k[i][0] || 1);
+      return k[k.length - 1][1];
+    };
+    expect([0, 8, 10, 25, 28, 30, 32, 50].map(t => Math.round(op(t) * 100))).toEqual([100, 80, 45, 20, 55, 80, 100, 100]);
+    for (let t = 12; t <= 24; t++) expect(op(t)).toBeLessThanOrEqual(0.15);
+    // trail at her origin from VFX_SPAWN · cluster where she comes back · X burst on the target, bigger than S1's
+    expect(fxFor('hero-moye.png', 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['my-s2-main']);
+    expect(fxFor('hero-moye.png', 'skill2', { on: 'event', event: 'REAPPEAR_START' })).toEqual(['my-s2-reappear']);
+    expect(fxFor('hero-moye.png', 'skill2', { on: 'impact' })).toEqual(['my-s2-impact']);
+    expect([FX['my-s2-main'].at, FX['my-s2-reappear'].at, FX['my-s2-impact'].at]).toEqual(['self', 'self', 'target']);
+    expect(FX['my-s2-main'].pivot![0]).toBeLessThan(0.05);
+    expect(FX['my-s2-impact'].h).toBeGreaterThan(FX['my-s1-impact2'].h);
+    expect(fxDuration('my-s2-main', 1)).toBeLessThan((35 - 10) * (1000 / 60) + 40);
   });
 });

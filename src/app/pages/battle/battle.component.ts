@@ -22,7 +22,7 @@ import { hasStatus } from '../../battle/engine/buffs';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
-import { CLASS_PROJECTILE, FX, fxFor, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
+import { animOf, CLASS_PROJECTILE, FX, fxFor, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
 import { Router } from '@angular/router';
@@ -242,6 +242,8 @@ export class BattleComponent implements OnDestroy {
   private facing = new Map<number, boolean>();
   /** ตัวที่เพิ่งวาร์ป: ปิดการเลื่อนตัวบนจอชั่วครู่ (เวลาเอนจินที่หมดผล) */
   private blinkUntil = new Map<number, number>();
+  /** units whose current blink fades through its clip's own opacity curve */
+  private ownFade = new Set<number>();
   private animKey = 0;
   private bannerTimer?: ReturnType<typeof setTimeout>;
 
@@ -360,6 +362,7 @@ export class BattleComponent implements OnDestroy {
     this.focusId.set(null);
     this.facing.clear();
     this.blinkUntil.clear();
+    this.ownFade.clear();
     this.snapshot();
   }
 
@@ -645,6 +648,7 @@ export class BattleComponent implements OnDestroy {
         boss: u.boss,
         flip: this.facing.get(u.id),
         blink: (this.blinkUntil.get(u.id) ?? 0) > this.engine.time,
+        blinkFade: !this.ownFade.has(u.id),
         queued: u.ultQueued,
         focused: u.id === e.focusTargetId,
         selected: u.id === this.selectedId(),
@@ -899,6 +903,9 @@ export class BattleComponent implements OnDestroy {
         case 'blink':
           // วาร์ป: ย้ายทันที + ค่อย ๆ ปรากฏ (ไม่ไถลข้ามสนาม)
           this.blinkUntil.set(e.src, this.engine.time + 0.3);
+          // a clip that draws its own vanish / reappear (AnimDef.opacity) → no board blink-in fade on top of it
+          if (animOf(unitOf(e.src).sprite, anims[e.src]?.anim ?? 'idle')?.opacity) this.ownFade.add(e.src);
+          else this.ownFade.delete(e.src);
           break;
         case 'damage': {
           if (!e.poison && e.hurt !== false && anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');

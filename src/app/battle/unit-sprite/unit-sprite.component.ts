@@ -68,6 +68,8 @@ export class UnitSpriteComponent {
   /** เริ่มท่ายืนคนละจังหวะ ทุกตัวจะได้ไม่หายใจพร้อมกัน */
   private readonly phase = Math.random();
   private motion?: Animation;
+  /** runtime opacity curve of the playing clip (AnimDef.opacity) */
+  private fade?: Animation;
   private currentName: SpriteAnim = 'idle';
 
   constructor() {
@@ -144,6 +146,8 @@ export class UnitSpriteComponent {
     const frames = hold ? a.frames - 1 : a.frames;
 
     this.current?.cancel();
+    this.fade?.cancel();
+    this.fade = undefined;
     this.currentName = name;
     if (name === 'cast' && a.castStart != null && a.activate != null) {
       this.playCast(el, def, a, x, y);
@@ -155,6 +159,7 @@ export class UnitSpriteComponent {
     }
     if (a.seq && a.steps) {
       this.playSteps(el, def, a.seq, a.steps, x, y, hold);
+      if (a.opacity?.length) this.playFade(el, a.steps, a.opacity);
       return;
     }
     this.current = el.animate(
@@ -208,6 +213,21 @@ export class UnitSpriteComponent {
     k.push({ offset: 1, backgroundPosition: `${x(seq[seq.length - 1])}% ${y}%` });
     this.current = el.animate(k, { duration: total / this.speed(), iterations: 1, fill: hold ? 'forwards' : 'none' });
     if (!hold) this.current.onfinish = () => this.play(el, def, this.rest());
+  }
+
+  /** AnimDef.opacity: [step, opacity] keys → one opacity animation over the clip (steps = same clock as the frames) */
+  private playFade(el: HTMLElement, steps: number[], keys: [number, number][]): void {
+    const starts = [0];
+    for (const ms of steps) starts.push(starts[starts.length - 1] + ms);
+    const total = starts[starts.length - 1];
+    const at = (i: number) => {
+      const k = Math.min(Math.max(Math.floor(i), 0), steps.length);
+      return Math.min(total, starts[k] + (k < steps.length ? (i - k) * steps[k] : 0));
+    };
+    const k = keys.map(([i, o]) => ({ offset: at(i) / total, opacity: o })).sort((p, q) => p.offset - q.offset);
+    if (k[0].offset > 0) k.unshift({ offset: 0, opacity: k[0].opacity });
+    if (k[k.length - 1].offset < 1) k.push({ offset: 1, opacity: k[k.length - 1].opacity });
+    this.fade = el.animate(k, { duration: total / this.speed(), iterations: 1 });
   }
 
   private playIdle(el: HTMLElement, order: number[], ms: number, x: (i: number) => number, y: number): void {

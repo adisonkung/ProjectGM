@@ -89,6 +89,8 @@ export class SpriteLabComponent implements OnDestroy {
   readonly faceLeft = signal(false);
   readonly showAnchors = signal(false);
   readonly last = signal<Action>('idle');
+  /** blink clips (AnimDef.move): columns the hero is relocated by until the clip ends · own-fade = clip opacity */
+  readonly blinked = signal<{ dc: number; ownFade: boolean } | null>(null);
   readonly anims = signal<Partial<Record<number, AnimState>>>({});
   readonly fx = signal<FxView[]>([]);
   readonly floats = signal<FloatText[]>([]);
@@ -105,8 +107,10 @@ export class SpriteLabComponent implements OnDestroy {
     const left = this.faceLeft();
     const base = { hpPct: 100, manaPct: 0, shieldPct: 0, alive: true, taunt: false };
     const hc = left ? 8 : 5;
+    const b = this.blinked();
     return [
-      { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc, sprite: h.sprite, star: h.star, heroId: h.id, flip: left },
+      { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left,
+        blink: !!b, blinkFade: !b?.ownFade },
       ...DUMMY_IDS.map((id, i) => ({
         ...base, id, side: 'enemy' as const, name: 'หุ่นฝึก', cls: 'tank' as const, r: 1, c: left ? hc - 1 - i : hc + 1 + i, sprite: DUMMY_SPRITE, flip: !left,
       })),
@@ -140,6 +144,7 @@ export class SpriteLabComponent implements OnDestroy {
 
   reset(): void {
     this.clear();
+    this.blinked.set(null);
     this.fx.set([]);
     this.set(HERO_ID, 'idle');
     DUMMY_IDS.forEach(id => this.set(id, 'idle'));
@@ -161,6 +166,14 @@ export class SpriteLabComponent implements OnDestroy {
     const len = clk ? clk.total : 0.5;
     this.note(0, `${a} start · ${clip?.steps ? `${clk!.count} key poses (choreographed)` : `${clip?.frames ?? '?'} frames × ${clip?.ms ?? FRAME_MS} ms`} = ${len.toFixed(2)} s`);
 
+    if (this.blinked()) this.blinked.set(null);
+    const kitSkill = a === 'skill' || a === 'skill2' || a === 'ult' ? kitOf(this.hero().id, this.hero().cls)[a] : undefined;
+    if (clip?.move != null && kitSkill?.movement?.type === 'BLINK_BEHIND') {
+      // blink skill: stand on the front dummy's cell (the back dummy is the target) from the clip's `move`, back after it
+      const mt = clk!.at(clip.move);
+      this.at(mt, () => (this.blinked.set({ dc: 1, ownFade: !!clip.opacity }), this.note(mt, 'blink → 1 cell ahead (BLINK_BEHIND)')));
+      this.at(len + 0.4, () => this.blinked.set(null));
+    }
     if (a === 'attack' || a === 'skill' || a === 'skill2' || a === 'ult') {
       const events = animEvents(sprite, a);
       const tm = animTiming(sprite, a);

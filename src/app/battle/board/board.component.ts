@@ -36,6 +36,8 @@ export interface UnitView {
   flip?: boolean;
   /** เพิ่งวาร์ป: ย้ายทันทีไม่ต้องเลื่อน แล้วค่อย ๆ ปรากฏ */
   blink?: boolean;
+  /** false = the clip fades the unit itself (AnimDef.opacity): no blink-in fade from the board */
+  blinkFade?: boolean;
   /** ผู้เล่นกดท่าไม้ตายแล้ว รอจังหวะร่าย */
   queued?: boolean;
   /** ศัตรูกำลังร่ายสกิล (แถบร่าย) */

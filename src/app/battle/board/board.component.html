@@ -22,7 +22,7 @@
 
   @for (u of units(); track u.id) {
     <div class="unit" [class.dead]="!u.alive && !u.reviving" [class.reviving]="!!u.reviving" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
-         [class.taunt]="u.taunt" [class.blink]="!!u.blink" [class.elite]="!!u.elite" [class.buffed]="!!u.buffed && u.alive" [class.untargetable]="!!u.untargetable && u.alive" [class.broken]="!!u.broken && u.alive" [class.enraged]="!!u.enraged && u.alive" [class.aura5]="u.alive && u.side !== 'enemy' && u.star === 5" [class.aura6]="u.alive && u.side !== 'enemy' && (u.star ?? 0) >= 6"
+         [class.taunt]="u.taunt" [class.blink]="!!u.blink && u.blinkFade !== false" [class.elite]="!!u.elite" [class.buffed]="!!u.buffed && u.alive" [class.untargetable]="!!u.untargetable && u.alive" [class.broken]="!!u.broken && u.alive" [class.enraged]="!!u.enraged && u.alive" [class.aura5]="u.alive && u.side !== 'enemy' && u.star === 5" [class.aura6]="u.alive && u.side !== 'enemy' && (u.star ?? 0) >= 6"
          [style.--step]="(u.moveSec ?? 0.6) + 's'" [style.--stack]="spread().get(u.id)?.[3] ?? 0" [attr.data-uid]="u.id" [style.transform]="spawnPos(u)" [style.z-index]="unitZ(u)"
          [class.pickable]="u.side === 'enemy' && u.alive" [attr.title]="u.side === 'enemy' ? u.name + ' — แตะเพื่อเลือก, แตะซ้ำเพื่อโฟกัส' : u.name" [attr.data-name]="u.name" (click)="u.side === 'enemy' && u.alive && pick.emit(u.id)">
       @if (u.alive && (u.focused || u.selected)) { <app-focus-mark [focused]="!!u.focused" /> }

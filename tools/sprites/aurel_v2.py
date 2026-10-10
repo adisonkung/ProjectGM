@@ -187,7 +187,7 @@ def sheet_frames(file, counts, soft):
             glow = al < 235
             al[glow] = (al[glow] * (t * t * (3 - 2 * t))[glow]).astype(np.uint8)
             B.watershed = lambda _e, _m, mask, lab=lab, al=al: lab * (al > 0)
-        out += B.clip_frames(im, band, want, 'feet', soft)
+        out += B.clip_frames(im, band, want, 'feet', soft, B.CLIP_FIXES.get(file, ()))
         B.watershed = ws
     B.body_markers, B.WS_OPEN = _markers, 0
     return out

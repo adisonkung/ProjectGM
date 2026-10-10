@@ -22,7 +22,9 @@ export type SemanticEvent =
   /** hero skill clips (AnimDef.events): spawn the skill's VFX layer · contact feel (hit-stop / shake) · recovery · clip end */
   | 'VFX_SPAWN' | 'IMPACT' | 'RECOVERY_START' | 'ANIMATION_END'
   /** longer hero clips: wind-up peak · charge (ultimate preparation) · start of each strike of a multi-hit skill · last wind-up */
-  | 'ANTICIPATION_PEAK' | 'CHARGE_START' | 'CHARGE_PEAK' | 'STRIKE_START' | 'FINAL_ANTICIPATION';
+  | 'ANTICIPATION_PEAK' | 'CHARGE_START' | 'CHARGE_PEAK' | 'STRIKE_START' | 'FINAL_ANTICIPATION'
+  /** blink skills: the caster starts to fade out · comes back at the destination (FX layers bound to them) */
+  | 'VANISH_START' | 'REAPPEAR_START';
 
 export interface MonsterStats {
   maxHp: number;
