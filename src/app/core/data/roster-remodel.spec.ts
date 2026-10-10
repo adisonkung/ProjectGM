@@ -118,13 +118,14 @@ describe('Yue Zheng (3★ Tank, full sheet)', () => {
 
 /** Mo Ye — Shadow Orchid Blade (remodel #3): base sheet only, Assassin class ids / numbers arranged to her skills */
 describe('Mo Ye (3★ Assassin, base sheet)', () => {
-  it('8 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 8 (damage F4) · die 7, skill rows reserved', () => {
+  it('10 × 8 atlas 260 × 170: idle 6 · walk 8 · hurt 4 · attack 8 (damage F4) · die 7 · S1 Orchid Sever 10', () => {
     const sh = SHEETS['hero-moye.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([8, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 4], [3, 8], [4, 7]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
-    expect(a.skill).toBeUndefined();
+    expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
+    expect(a.skill2).toBeUndefined();
     expect(HERO_BY_ID['moye']).toEqual(jasmine.objectContaining({ name: 'โม่เย่', cls: 'assassin', star: 3, sprite: 'hero-moye.png' }));
     expect(HERO_ART['moye']).toEqual({ portrait: 'portraits/moye.webp' });
   });
@@ -144,5 +145,22 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
     expect(k.ult.repeat!.count).toBe(5);
     expect(k.ult.repeat!.weights!.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
     expect(k.ult.effects).toEqual(c.ult.effects);
+  });
+
+  it('S1 Orchid Sever on its Timeline Sync Sheet: 0.80 s, hit 1 T012 (big blade) · hit 2 T024 (small blade), FX on the target per hit', () => {
+    const c = clipClock(SHEETS['hero-moye.png'].anims.skill!);
+    expect(c.total * 60).toBeCloseTo(48, 0);
+    const ev = (e: string) => animEvents('hero-moye.png', 'skill').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    expect(ev('DAMAGE')).toEqual([12, 24]);
+    expect(ev('ANTICIPATION_PEAK')).toEqual([6]);
+    expect(ev('STRIKE_START')).toEqual([8, 20]);
+    expect(ev('RECOVERY_START')).toEqual([40]);
+    expect(animTiming('hero-moye.png', 'skill').hit * 60).toBeCloseTo(12, 0);
+    // the kit's two cuts land on the clip's two DAMAGE events
+    expect(kitOf('moye', 'assassin').skill.repeat!.count).toBe(2);
+    expect(fxFor('hero-moye.png', 'skill', { on: 'impact', hit: 0 }).sort()).toEqual(['my-s1-impact1', 'my-s1-main']);
+    expect(fxFor('hero-moye.png', 'skill', { on: 'impact', hit: 1 })).toEqual(['my-s1-impact2']);
+    expect(['my-s1-main', 'my-s1-impact1', 'my-s1-impact2'].every(k => FX[k].at === 'target')).toBeTrue();
+    expect(FX['my-s1-impact2'].h).toBeGreaterThan(FX['my-s1-impact1'].h);
   });
 });

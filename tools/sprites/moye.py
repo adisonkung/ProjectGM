@@ -6,6 +6,7 @@ per-row watershed split seeded on the bodies, feet root from the body mask, ches
 
 Sources (art/incoming/moye, not committed):
   base.png       idle 6 · walk 8 · hurt 4 · attack 8 · die 7 (on #FF00FF) — big blade right hand, small blade left
+  s1_char.png    Skill 1 Orchid Sever, 10 frames in one row (character only — VFX come from moye_s1.py)
   reference.png  turnaround + both blades + palette; the face close-up (bottom right) becomes the portrait
                  (only while art/portrait.png is missing — painted UI art replaces it)
 
@@ -39,42 +40,72 @@ from scipy import ndimage  # noqa: E402
 
 def cluster_markers(hard, want):
     """Mo Ye's dark robe + hair break into several blobs per figure once opened (legs / blades / ponytail apart) and
-    two neighbours can touch through a blade: seed each frame with every chunky blob whose x-centre falls in its
-    cluster (1-D k-means on the blob centres, weighted by size) instead of 'the `want` biggest blobs'."""
-    body = ndimage.binary_opening(hard, structure=np.ones((9, 9)))
-    lab, n = ndimage.label(body)
-    if n == 0:
-        return np.zeros(hard.shape, np.int32), 0
-    sizes = ndimage.sum(body, lab, range(1, n + 1))
-    keep = [i for i in range(n) if sizes[i] >= 250]
-    cx = np.array([ndimage.center_of_mass(body, lab, i + 1)[1] for i in keep])
-    w = np.array([sizes[i] for i in keep])
-    # init: the frame centres if the figures were evenly spread over the occupied width
+    two neighbours can touch through a blade or a lunging leg: seed each frame with every chunky blob whose x-centre
+    falls in its cluster (1-D k-means on the blob centres, weighted by size) — opened harder until every frame has
+    its own seed."""
     xs = np.nonzero(hard.any(0))[0]
     lo, hi = xs.min(), xs.max()
-    cent = lo + (np.arange(want) + 0.5) * (hi - lo) / want
-    for _ in range(50):
-        a = np.argmin(np.abs(cx[:, None] - cent[None, :]), 1)
-        new = np.array([np.average(cx[a == k], weights=w[a == k]) if (a == k).any() else cent[k] for k in range(want)])
-        if np.allclose(new, cent):
+    best = None
+    for k in (9, 15, 21, 27, 33, 39):
+        body = ndimage.binary_opening(hard, structure=np.ones((k, k)))
+        lab, n = ndimage.label(body)
+        if n == 0:
             break
-        cent = new
-    a = np.argmin(np.abs(cx[:, None] - cent[None, :]), 1)
-    markers = np.zeros(hard.shape, np.int32)
-    for j, i in enumerate(keep):
-        markers[lab == i + 1] = a[j] + 1
-    return markers, len(set(a.tolist()))
+        sizes = ndimage.sum(body, lab, range(1, n + 1))
+        keep = [i for i in range(n) if sizes[i] >= 250]
+        cx = np.array([ndimage.center_of_mass(body, lab, i + 1)[1] for i in keep])
+        w = np.array([sizes[i] for i in keep])
+        cent = lo + (np.arange(want) + 0.5) * (hi - lo) / want
+        for _ in range(50):
+            a = np.argmin(np.abs(cx[:, None] - cent[None, :]), 1)
+            new = np.array([np.average(cx[a == j], weights=w[a == j]) if (a == j).any() else cent[j] for j in range(want)])
+            if np.allclose(new, cent):
+                break
+            cent = new
+        a = np.argmin(np.abs(cx[:, None] - cent[None, :]), 1)
+        if len(set(a.tolist())) < want:   # a cluster emptied: evenly spaced figures → fixed even centres
+            cent = lo + (np.arange(want) + 0.5) * (hi - lo) / want
+            a = np.argmin(np.abs(cx[:, None] - cent[None, :]), 1)
+        # a seed blob must not span two frames: its width ≤ 1.2 × the frame spacing
+        spacing = (hi - lo) / want
+        wide = any((np.ptp(np.nonzero((lab == i + 1).any(0))[0]) > 1.2 * spacing) for i in keep)
+        markers = np.zeros(hard.shape, np.int32)
+        for j, i in enumerate(keep):
+            markers[lab == i + 1] = a[j] + 1
+        best = (markers, len(set(a.tolist())))
+        if best[1] == want and not wide:
+            return best
+    return best
+
+
+def drop_strays(fr, reach=4):
+    """a neighbour's blade tip the watershed handed to this frame: keep only what touches the main figure (within
+    `reach` px) — a held blade is always connected to its hand"""
+    a = fr['img'][..., 3] > 0
+    lab, n = ndimage.label(a)
+    if n < 2:
+        return
+    sizes = ndimage.sum(a, lab, range(1, n + 1))
+    main = lab == 1 + int(np.argmax(sizes))
+    near = ndimage.binary_dilation(main, iterations=reach)
+    keep = np.isin(lab, [i + 1 for i in range(n) if (near & (lab == i + 1)).any()])
+    fr['img'][~keep] = 0
 
 
 A._markers = cluster_markers
+A.grid_markers = cluster_markers   # skill rows: the same seeding (blades cross into the neighbour frames)
 
 # body height of the base idle on screen (px) — Bai Long ≈ 75, Yue Zheng 78 · Mo Ye a touch slimmer / shorter
 IDLE_BODY = 74
 BASE_COUNTS = [6, 8, 4, 8, 7]
 BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
-SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 when the skill sheets arrive
+SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
+    ('skill', 's1_char', [10]),
 ]
+# baked root motion (atlas px, + = forward) per pose, from the skill's Timeline Sync Sheet (tools/sprites/moye_s1.py):
+# Orchid Sever steps in ~12 px for the two cuts and gives half of it back in the recovery — never a dash
+ROOT_SHIFT = {'skill': [0, 0, 0, 3, 9, 12, 12, 11, 8, 6]}
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px
 FACE = (1240, 528, 1640, 912)
 
@@ -99,6 +130,8 @@ def main():
         if not os.path.exists(f'{SRC}/{file}.png'):
             continue
         frs = A.sheet_frames(file, counts, False)
+        for fr in frs:
+            drop_strays(fr)
         s = sc * A.body_h(groups['idle'][0]) / A.body_h(frs[0])
         rows.append((name, frs, s))
         report['notes'].append(f'{file}: {len(frs)} frames, scale {s:.3f}')
@@ -115,7 +148,8 @@ def main():
     sheet = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * ATLAS_ROWS), (0, 0, 0, 0))
     for r, (name, frs, s) in enumerate(rows):
         report['rows'][name] = {'row': r, 'frames': len(frs),
-                                'clipped': [B.paste(sheet, fr, r, c, s, (shifts[name][c], 0)) for c, fr in enumerate(frs)]}
+                                'clipped': [B.paste(sheet, fr, r, c, s, (shifts[name][c] + ROOT_SHIFT.get(name, [0] * 99)[c], 0))
+                                            for c, fr in enumerate(frs)]}
     sheet.save(f'{OUT}/hero-moye.png', optimize=True)
     report['sheet'] = {'cols': cols, 'rows': ATLAS_ROWS, 'size': sheet.size}
 

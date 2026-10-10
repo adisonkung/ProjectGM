@@ -207,11 +207,11 @@ export const SHEETS: Record<string, SheetDef> = {
       ult: ['yz-ult-charge', 'yz-ult-impact', 'yz-ult-field-back', 'yz-ult-field-front'],
     },
   },
-  // Mo Ye — Shadow Orchid Blade (remodel #3, tools/sprites/moye.py): base sheet only for now — the skills fall back
-  // to the attack clip until s1 / s2 / ult arrive in rows 5–7. Cell 260 × 170 like Yue Zheng (the big blade overhead /
+  // Mo Ye — Shadow Orchid Blade (remodel #3, tools/sprites/moye.py): base sheet + S1 (row 5) — S2 / Ult fall back to
+  // the attack clip until their sheets arrive in rows 6–7. Cell 260 × 170 like Yue Zheng (the big blade overhead /
   // extended), feet 15 px above the cell bottom, idle body 74 px · walk = a run (flight frames keep their height)
   'hero-moye.png': {
-    cols: 8, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -220,6 +220,22 @@ export const SHEETS: Record<string, SheetDef> = {
       // ready → step in → big blade raised F3 → cut extended F4 = damage → small-blade follow-through F5–F7 → guard F8
       attack: { row: 3, frames: 8, ms: 80, events: { DAMAGE: 3, RECOVERY_START: 6 } },
       die: { row: 4, frames: 7, ms: 120 },
+      // S1 Orchid Sever — Timeline Sync Sheet (tools/sprites/moye_s1.py, 60 FPS T000–T047 = 0.80 s): ready C01–C02 ·
+      // big blade raised C03 (T006) · step-in C04 (T008) · big-blade cut C05 = hit 1 T012 · twist C06 (T020) ·
+      // small-blade cut C07 = hit 2 T024 · follow-through C08 (T032) · recovery C09–C10 (T040) · root +12 px baked
+      skill: {
+        row: 5, frames: 10, ms: 80,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [67, 33, 33, 50, 117, 83, 150, 133, 67, 67],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 2, STRIKE_START: [3, 5.4], VFX_SPAWN: 4.143,
+          DAMAGE: [4.143, 6.111], IMPACT: [4.143, 6.111], RECOVERY_START: 8,
+        },
+        impact: [{ hitStopMs: 17, shakePx: 2, shakeMs: 50 }, { hitStopMs: 33, shakePx: 3, shakeMs: 50 }],
+      },
+    },
+    fx: {
+      skill: ['my-s1-main', 'my-s1-impact1', 'my-s1-impact2'],
     },
   },
   'hero-bailong.png': {
@@ -441,6 +457,21 @@ export const FX: Record<string, FxDef> = {
   'yz-s2-main': {
     file: 'fx-yuezheng-s2-main.png', frames: 15, w: 119, h: 96, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
     pivot: [0.3519, 0.7271], dx: 0, dy: 27.25, scale: 1 / 1.5, pixelated: true,
+  },
+  // Mo Ye S1 Orchid Sever (tools/sprites/moye_s1.py): tracks baked in sync-sheet order at 30 FPS, atlas px, on the
+  // TARGET (dx toward Mo Ye): main = the cut on the enemy's body centre from hit 1 (crescent of the big blade → the
+  // crossing slash peaks with hit 2) · impact per hit at the blade contact (hit 1 small, hit 2 stronger)
+  'my-s1-main': {
+    file: 'fx-moye-s1-main.png', frames: 13, w: 67, h: 87, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 0, pivot: [0.6658, 0.5006], dx: -7.5, dy: -22.75, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-s1-impact1': {
+    file: 'fx-moye-s1-impact1.png', frames: 4, w: 36, h: 43, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 0, delayMs: 33, pivot: [0.5336, 0.4965], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'my-s1-impact2': {
+    file: 'fx-moye-s1-impact2.png', frames: 7, w: 51, h: 61, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 1, delayMs: 17, pivot: [0.5389, 0.5016], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
   },
   'yz-s2-impact': {
     file: 'fx-yuezheng-s2-impact.png', frames: 9, w: 96, h: 92, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',

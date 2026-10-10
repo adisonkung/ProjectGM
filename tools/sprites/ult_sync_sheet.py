@@ -211,6 +211,11 @@ for i, t in enumerate(KEYS):
     ph = phase_of(t)
     d.rectangle([tx - 1, ty - 1, tx + TH_W, ty + TH_H], outline=ph[4], width=2)
     d.text((tx + 4, ty + TH_H + 4), f'T{t:03d}  C{next(c for a, b, c in CHAR if a <= t <= b):02d}', font=f(15, True), fill=INK)
+    if M and M.get('thumbLabels') and str(t) in M['thumbLabels']:   # named preview moments (READY / HIT 1 …)
+        tag = M['thumbLabels'][str(t)]
+        tw = d.textlength(tag, font=f(13, True))
+        d.rectangle([tx + 3, ty + 3, tx + 11 + tw, ty + 22], fill=(10, 10, 16, 200))
+        d.text((tx + 7, ty + 5), tag, font=f(13, True), fill=ph[4])
     d.line([(tx + TH_W // 2, ty + TH_H + 26), (xs(t) + CW // 2, ruler_y)], fill=ph[4] + (170,), width=2)
 
 # grid + ruler
@@ -237,21 +242,24 @@ for a, b, pid, name, col in PHASES:
 # events: marker + staggered label
 yy, hh = layout['event']
 lane_end = [-1e9] * LANES
+lane_spans = [[] for _ in range(LANES)]
 for i, (t, ev, _) in enumerate(EVENTS):
     hit = 'DAMAGE' in ev
     col = (255, 90, 90) if hit else (250, 210, 90) if ev.startswith(('STRIKE', 'FINAL', 'ANTICIPATION')) else (160, 200, 255)
     x = xs(t) + CW // 2
     label = f'T{t:03d} {ev}'
     lw = d.textlength(label, font=f(13, hit))
-    if M:   # greedy lanes: the first lane whose last label ends before this one starts
-        lane = next((k for k in range(LANES) if lane_end[k] < x - 2), min(range(LANES), key=lambda k: lane_end[k]))
-        lane_end[lane] = x + 4 + lw
+    lx = x + 4 if x + 4 + lw < W - 10 else x - 4 - lw     # labels near the right edge are drawn to the left
+    if M:   # greedy lanes: the first lane where this label's span overlaps nothing already placed
+        free = [k for k in range(LANES) if all(lx > b + 6 or lx + lw < a - 6 for a, b in lane_spans[k])]
+        lane = free[0] if free else min(range(LANES), key=lambda k: len(lane_spans[k]))
+        lane_spans[lane].append((lx, lx + lw))
     else:
         lane = i % LANES
     ly = yy + 6 + lane * 28
     d.line([(x, ly + 10), (x, yy + hh)], fill=col + (200,), width=3 if hit else 1)
     d.polygon([(x - 6, yy + hh - 10), (x + 6, yy + hh - 10), (x, yy + hh)], fill=col)
-    d.text((x + 4 if x + 4 + lw < W - 10 else x - 4 - lw, ly), label, font=f(13, hit), fill=col)
+    d.text((lx, ly), label, font=f(13, hit), fill=col)
 
 # character holds
 yy, hh = layout['char']
