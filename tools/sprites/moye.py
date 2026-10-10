@@ -1,4 +1,4 @@
-"""Yue Zheng — Iron Mountain Bastion (3★ Tank, remodel roster #2) → hero-moye.png + portrait.
+"""Mo Ye — Shadow Orchid Blade (3★ Assassin, remodel roster #3) → hero-moye.png + portrait.
 
 First batch = base sheet only (skills use the Assassin class kit and fall back to the attack clip until s1/s2/ult arrive).
 Same import pipeline as Bai Long / Aurel v2 (tools/sprites/bailong.py + aurel_v2.py helpers): magenta key, halo cut,

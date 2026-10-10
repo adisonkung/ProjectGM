@@ -229,6 +229,31 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
     },
   },
+  // ถังซวิ่น (Tang Xun — Whispering Blade, 3★ ranged hidden-weapon specialist, remodel #4): Wind / Jade · Whispering
+  // Blade Qi · throwing knives (no bow) · Archer class ids + cooldowns (rank tables apply), effects arranged to his
+  // skills until the skill sheets arrive: S1 Piercing Fang = knife through a 1×3 line, first target hardest ·
+  // S2 Severing Chain = the anti-cast throw (interrupt + break; the 3-throw chain arrives with its sheet) ·
+  // Ult Heaven-Snaring Blade Array = focused on the focus / weakest target with a small ring around it (no full-screen AoE)
+  tangxun: {
+    id: 'tangxun', cls: 'archer', identity: 'Hidden Weapons · Line Pierce · Anti-cast · Marked-target Blade Array',
+    kit: {
+      ...archer,
+      skill: {
+        ...archer.skill, name: 'เขี้ยวทะลวง', label: 'Piercing Fang', target: 'CURRENT', delivery: 'PROJECTILE', repeat: undefined,
+        effects: [{ type: 'DAMAGE', area: 'LINE_3', primary: 2.4, secondary: 1.2 }],
+      },
+      skill2: {
+        ...archer.skill2, name: 'โซ่ตัดเงา', label: 'Severing Chain', target: 'CASTING_INTERRUPTIBLE', fallback: ['CURRENT'],
+        delivery: 'PROJECTILE',
+        effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 1.6, interrupt: true, breakPower: 40 }],
+      },
+      ult: {
+        ...archer.ult, name: 'ค่ายมีดตาข่ายสวรรค์', label: 'Heaven-Snaring Blade Array', target: 'FOCUS_OR_LOWEST_HP', range: Infinity,
+        delivery: 'SKY',
+        effects: [{ type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 3.0, secondary: 1.0, interrupt: true, breakPower: 60 }],
+      },
+    },
+  },
   bailong: {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {

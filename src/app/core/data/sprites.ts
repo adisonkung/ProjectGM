@@ -287,6 +287,21 @@ export const SHEETS: Record<string, SheetDef> = {
       ult: ['my-ult-trail', 'my-ult-arc1', 'my-ult-arc2', 'my-ult-arc3', 'my-ult-aura', 'my-ult-descent', 'my-ult-impact', 'my-ult-residual'],
     },
   },
+  // ถังซวิ่น — Whispering Blade (remodel #4, tools/sprites/tangxun.py): base sheet · cell 260 × 170, root (130, 155),
+  // idle body 78 px · rows 5–7 reserved for S1 / S2 / Ult · the knife in flight is the projectile (fx-tangxun-knife)
+  'hero-tangxun.png': {
+    cols: 8, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    anims: {
+      idle: { row: 0, frames: 6 },
+      walk: { row: 1, frames: 8, ms: 70 },
+      hurt: { row: 2, frames: 3, ms: 110 },
+      // ready → draw F2 → wind-up F3 → arm extended F4 → release F5 (the knife leaves = projectile spawns) → recover F6–F8
+      attack: { row: 3, frames: 8, ms: 80, events: { DAMAGE: 4, RECOVERY_START: 6 } },
+      die: { row: 4, frames: 6, ms: 130 },
+    },
+    projectile: { attack: 'tangxun-knife', skill: 'tangxun-knife', skill2: 'tangxun-knife', ult: 'tangxun-knife' },
+  },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
     cols: 19, rows: 8, cellW: 220, cellH: 170, pixelated: true,
@@ -414,6 +429,8 @@ export const FX: Record<string, FxDef> = {
   'rune-orb': { file: 'fx-rune-orb.png', frames: 1, w: 14, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
   'chalk-bolt': { file: 'fx-chalk-bolt.png', frames: 1, w: 14, h: 8, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
   'arrow-normal': { file: 'fx-arrow-normal.png', frames: 6, w: 92, h: 52, frameMs: 60, at: 'target', angle0: 0, scale: 0.7 },
+  // Tang Xun's throwing knife (reference sheet, tools/sprites/tangxun.py) — points right, 1 frame (no impact frame)
+  'tangxun-knife': { file: 'fx-tangxun-knife.png', frames: 1, w: 28, h: 4, frameMs: 60, at: 'target', angle0: 0, scale: 0.9, pixelated: true },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
   // Alpha Howl (tools/sprites/fx_alpha_howl.py จากแผ่น 8 เฟรมของผู้ใช้): frame 5 = FX PEAK = SKILL_ACTIVATE,
   // started early by the engine's 'fx' event · wave origin sits at the wolf's raised mouth and travels forward

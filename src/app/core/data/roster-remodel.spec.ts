@@ -10,12 +10,12 @@ import { newGameState } from './starter';
 
 /** 2026-10 roster remodel: the old roster left the game — Bai Long is the only hero and the template for the new ones */
 describe('Roster remodel — Bai Long lead + new heroes', () => {
-  it('ships only the remodelled heroes (Bai Long + Yue Zheng + Mo Ye) as the starter team; no old hero sheet / art is left', () => {
-    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye']);
-    expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye']);
+  it('ships only the remodelled heroes (Bai Long + Yue Zheng + Mo Ye + Tang Xun) as the starter team; no old hero sheet / art is left', () => {
+    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun']);
+    expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun']);
     expect(SHIPPED_STARTER_BENCH).toEqual([]);
-    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-moye.png', 'hero-yuezheng.png']);
-    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'moye', 'yuezheng']);
+    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-moye.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
+    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'moye', 'tangxun', 'yuezheng']);
   });
 
   it('an old save drops heroes whose template is gone: gear back to the bag, team / slots / memory forget them', () => {
@@ -234,5 +234,38 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
     expect(fxFor('hero-moye.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['my-ult-aura']);
     expect(FX['my-ult-impact'].w).toBeGreaterThan(FX['my-s2-impact'].w);
     expect(FX['my-ult-residual'].delayMs).toBeCloseTo(167, -1);
+  });
+});
+
+/** Tang Xun — Whispering Blade (remodel #4): base sheet only, Archer class ids arranged to his hidden-weapon skills */
+describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
+  it('8 × 8 atlas 260 × 170: idle 6 · run 8 · hurt 3 · throw 8 (release F5) · die 6 · knife projectile, no bow', () => {
+    const sh = SHEETS['hero-tangxun.png'];
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([8, 8, 260, 170]);
+    const a = sh.anims;
+    expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 3], [3, 8], [4, 6]]);
+    expect(a.attack!.events!.DAMAGE).toBe(4);
+    expect(a.skill).toBeUndefined();
+    expect(sh.projectile!.attack).toBe('tangxun-knife');
+    expect(FX['tangxun-knife'].angle0).toBe(0);
+    expect(HERO_BY_ID['tangxun']).toEqual(jasmine.objectContaining({ name: 'ถังซวิ่น', cls: 'archer', star: 3, sprite: 'hero-tangxun.png' }));
+    expect(HERO_ART['tangxun']).toEqual({ portrait: 'portraits/tangxun.webp' });
+  });
+
+  it('Piercing Fang = 1×3 line, first target hardest · Severing Chain = anti-cast · Blade Array = focused, not full-screen', () => {
+    const k = kitOf('tangxun', 'archer');
+    const c = CLASS_KITS.archer;
+    expect([k.skill.label, k.skill2.label, k.ult.label]).toEqual(['Piercing Fang', 'Severing Chain', 'Heaven-Snaring Blade Array']);
+    expect([k.skill.id, k.skill2.id, k.ult.id]).toEqual([c.skill.id, c.skill2.id, c.ult.id]);
+    expect([k.skill.cooldown, k.skill2.cooldown]).toEqual([c.skill.cooldown, c.skill2.cooldown]);
+    const s1 = k.skill.effects[0] as { area: string; primary: number; secondary: number };
+    expect(s1.area).toBe('LINE_3');
+    expect(s1.primary).toBeGreaterThan(s1.secondary);
+    const s2 = k.skill2.effects[0] as { interrupt?: boolean; area: string };
+    expect(s2.interrupt).toBeTrue();
+    expect(k.skill2.target).toBe('CASTING_INTERRUPTIBLE');
+    const u = k.ult.effects[0] as { area: string };
+    expect(u.area).not.toBe('ALL_ENEMIES');
+    expect(k.ult.target).toBe('FOCUS_OR_LOWEST_HP');
   });
 });
