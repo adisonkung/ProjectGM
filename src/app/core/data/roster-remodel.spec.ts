@@ -358,7 +358,10 @@ describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
     expect(sh.projectile!.attack).toBe('linxue-lotus');
     expect(FX['linxue-lotus'].noRotate).toBeTrue();
     expect(HERO_BY_ID['linxue']).toEqual(jasmine.objectContaining({ name: 'หลินเสวี่ย', cls: 'healer', star: 3, sprite: 'hero-linxue.png' }));
-    expect(HERO_ART['linxue']).toEqual(jasmine.objectContaining({ portrait: 'portraits/linxue.webp' }));
+    expect(HERO_ART['linxue']).toEqual(jasmine.objectContaining({
+      portrait: 'portraits/linxue.webp', s1: 'skills/linxue-s1.webp', s2: 'skills/linxue-s2.webp', ult: 'skills/linxue-ult.webp',
+      banner: 'banners/linxue.webp',
+    }));
   });
 
   it('Lotus Prayer = targeted heal + splash · Spirit Mend = heal + cleanse 1 + Qi Guard · Returning Spring Rite = team heal + cleanse + revive', () => {

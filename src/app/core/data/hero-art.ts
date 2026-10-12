@@ -28,8 +28,8 @@ export const HERO_ART: Record<string, HeroArt> = {
   moye: { ...art('moye'), banner: 'banners/moye.webp' },
   // ถังซวิ่น: ภาพจากผู้ใช้ 2026-10 (art/incoming/tangxun/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
   tangxun: { ...art('tangxun'), banner: 'banners/tangxun.webp' },
-  // หลินเสวี่ย: รูปโปรไฟล์ครอปจากภาพอ้างอิงของผู้ใช้ (tools/sprites/linxue.py) · ไอคอนสกิล / แบนเนอร์ยังไม่มา
-  linxue: { portrait: 'portraits/linxue.webp' },
+  // หลินเสวี่ย: ภาพจากผู้ใช้ 2026-10 (art/incoming/linxue/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
+  linxue: { ...art('linxue'), banner: 'banners/linxue.webp' },
 };
 
 export const heroArt = (heroId?: string): HeroArt | undefined => (heroId ? HERO_ART[heroId] : undefined);
