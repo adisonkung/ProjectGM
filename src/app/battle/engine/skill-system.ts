@@ -42,6 +42,8 @@ export interface SkillHost {
   interrupt(src: BattleUnit, dst: BattleUnit, breakPower?: number): void;
   knockback(src: BattleUnit, dst: BattleUnit, cells: number): void;
   shield(src: BattleUnit, dst: BattleUnit, amount: number, duration: number): void;
+  /** remove up to `count` debuffs from `dst` (newest first); returns how many were removed */
+  cleanse(src: BattleUnit, dst: BattleUnit, count: number): number;
   revive(src: BattleUnit, dead: BattleUnit, hpPct: number): boolean;
   /** a free cell next to `at`, away from `from` (null = nobody can land there) */
   freeCellNear(at: Cell, from: Cell): Cell | null;
@@ -629,7 +631,10 @@ export class SkillSystem {
           const allies = this.h.allies(u);
           const targets =
             e.area === 'PRIMARY' ? (primary.alive && primary.side === u.side ? [primary] : [])
-              : resolveArea({ pattern: e.area, caster: u, primary: u, center: e.center ?? 'SELF', candidates: allies });
+              : resolveArea({
+                pattern: e.area, caster: u, primary: e.center === 'TARGET' && primary.alive && primary.side === u.side ? primary : u,
+                center: e.center ?? 'SELF', candidates: allies,
+              }).filter(a => !(e.skipPrimary && a === primary));
           const boost = rankPower(u, slot) * (u.mods?.healing ?? 1);
           for (const a of targets) this.h.heal(a, (effectiveAttack(u) * e.atk + a.maxHp * (e.maxHpPct ?? 0)) * boost, u);
           if (slot === 'attack' && targets.length) this.h.basicGauge(u);
@@ -659,8 +664,13 @@ export class SkillSystem {
         case 'KNOCKBACK':
           if (primary.alive && primary !== u) this.h.knockback(u, primary, e.cells);
           break;
+        case 'CLEANSE': {
+          const targets = e.to === 'PRIMARY' ? (primary.alive && primary.side === u.side ? [primary] : []) : this.h.allies(u);
+          for (const a of targets) this.h.cleanse(u, a, e.count ?? Infinity);
+          break;
+        }
         case 'SHIELD':
-          for (const a of this.h.allies(u)) {
+          for (const a of e.to === 'PRIMARY' ? (primary.alive && primary.side === u.side ? [primary] : []) : this.h.allies(u)) {
             this.h.shield(u, a, Math.round(u.maxHp * (a === u ? e.selfPct : e.allyPct) * rankPower(u, slot) * (u.mods?.shieldPower ?? 1)), e.duration);
           }
           break;

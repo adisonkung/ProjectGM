@@ -32,6 +32,7 @@ export class ProjectileComponent {
   readonly pxToCell = PX_TO_CELL;
   readonly projScale = PROJECTILE_SCALE;
   readonly rot = computed(() => {
+    if (this.def().noRotate) return 0;
     const a = this.from(), b = this.to();
     return (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI - (this.def().angle0 ?? 0);
   });

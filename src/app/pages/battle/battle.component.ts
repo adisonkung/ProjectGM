@@ -922,6 +922,11 @@ export class BattleComponent implements OnDestroy {
           if (e.src !== e.dst && ward && FX[ward]) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name: ward, angle: 0 });
           break;
         }
+        case 'cleanse': {
+          const p = posOf(e.dst);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'ชำระล้าง', kind: 'shield' });
+          break;
+        }
         case 'projectile': {
           const src = unitOf(e.src);
           const name = SHEETS[src.sprite ?? '']?.projectile?.[e.kind] ?? CLASS_PROJECTILE[src.cls];

@@ -64,6 +64,8 @@ export type BattleEvent =
   | { type: 'revive'; src: number; dst: number; amount: number }
   /** ได้โล่ (src = ผู้ให้) */
   | { type: 'shield'; src: number; dst: number; amount: number }
+  /** ล้างดีบัฟ */
+  | { type: 'cleanse'; src: number; dst: number; count: number }
   | { type: 'death'; dst: number }
   | { type: 'spawn'; dst: number }
   /** ศัตรูเริ่มร่ายสกิล (มีแถบร่าย) */
@@ -1815,6 +1817,16 @@ export class BattleEngine {
       (f.includes('taunted') && immune.includes('TAUNT'));
   }
 
+  /** dispel up to `count` debuffs (not buffs, not untargetable seals), newest first */
+  private cleanse(src: BattleUnit, dst: BattleUnit, count: number): number {
+    if (!dst.alive) return 0;
+    const ids = [...new Set(dst.buffs.filter(b => !b.def.buff && !(b.def.flags ?? []).includes('untargetable')).map(b => b.def.id))].reverse();
+    const gone = ids.slice(0, count);
+    for (const id of gone) this.removeStatus(dst, id);
+    if (gone.length) this.events.push({ type: 'cleanse', src: src.id, dst: dst.id, count: gone.length });
+    return gone.length;
+  }
+
   private removeStatus(u: BattleUnit, id: string): void {
     if (!hasStatus(u, id)) return;
     u.buffs = u.buffs.filter(b => b.def.id !== id);
@@ -1984,6 +1996,7 @@ export class BattleEngine {
         dst.shieldTime = duration;
         self.events.push({ type: 'shield', src: src.id, dst: dst.id, amount });
       },
+      cleanse: (src, dst, count) => self.cleanse(src, dst, count),
       revive: (src, dead, hpPct) =>
         self.reviveHero({ unitId: dead.id, reviveHpPercent: hpPct, sourceUnitId: src.id, sourceId: `ult:${src.heroId ?? src.cls}`, countsTowardLimit: true }).ok,
       freeCellNear: (at, from) => self.freeCellNear(at, from),

@@ -139,6 +139,8 @@ export interface FxDef {
   layer?: 'under' | 'over';
   /** กระสุน: ทิศที่ภาพวาดชี้อยู่ (องศา, 0 = ขวา, 90 = ลง) — เฟรมสุดท้ายคือตอนกระทบ */
   angle0?: number;
+  /** กระสุน: ไม่หมุนตามทิศที่บิน (ดอกบัวลอยตั้งตรงเสมอ) */
+  noRotate?: boolean;
   /** กระสุน: เอฟเฟกต์ที่เล่นเพิ่มตรงเป้าเมื่อกระทบ */
   hitFx?: string;
   /**
@@ -355,6 +357,20 @@ export const SHEETS: Record<string, SheetDef> = {
       ult: ['tx-ult-charge', 'tx-ult-surround', 'tx-ult-main', 'tx-ult-spark0', 'tx-ult-spark1', 'tx-ult-spark2', 'tx-ult-spark3', 'tx-ult-impact', 'tx-ult-shock', 'tx-ult-residual'],
     },
   },
+  'hero-linxue.png': {
+    // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — skill rows 5–7 reserved
+    cols: 6, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    anims: {
+      idle: { row: 0, frames: 3, ms: 180 },
+      walk: { row: 1, frames: 6, ms: 90 },
+      hurt: { row: 2, frames: 3, ms: 110 },
+      // raise staff F1–F3 → lotus released F4 (projectile) → recover F5–F6
+      attack: { row: 3, frames: 6, ms: 85, events: { DAMAGE: 3, RECOVERY_START: 4 } },
+      die: { row: 4, frames: 5, ms: 140 },
+    },
+    projectile: { attack: 'linxue-lotus' },
+  },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
     cols: 19, rows: 8, cellW: 220, cellH: 170, pixelated: true,
@@ -559,6 +575,7 @@ export const FX: Record<string, FxDef> = {
   },
   // Tang Xun's throwing knife (reference sheet, tools/sprites/tangxun.py) — points right, 1 frame (no impact frame)
   'tangxun-knife': { file: 'fx-tangxun-knife.png', frames: 1, w: 28, h: 4, frameMs: 60, at: 'target', angle0: 0, scale: 0.9, pixelated: true },
+  'linxue-lotus': { file: 'fx-linxue-lotus.png', frames: 1, w: 22, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.3, noRotate: true, pixelated: true },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
   // Alpha Howl (tools/sprites/fx_alpha_howl.py จากแผ่น 8 เฟรมของผู้ใช้): frame 5 = FX PEAK = SKILL_ACTIVATE,
   // started early by the engine's 'fx' event · wave origin sits at the wolf's raised mouth and travels forward

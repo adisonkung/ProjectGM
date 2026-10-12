@@ -10,12 +10,12 @@ import { newGameState } from './starter';
 
 /** 2026-10 roster remodel: the old roster left the game — Bai Long is the only hero and the template for the new ones */
 describe('Roster remodel — Bai Long lead + new heroes', () => {
-  it('ships only the remodelled heroes (Bai Long + Yue Zheng + Mo Ye + Tang Xun) as the starter team; no old hero sheet / art is left', () => {
-    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun']);
-    expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun']);
+  it('ships only the remodelled heroes (Bai Long + Yue Zheng + Mo Ye + Tang Xun + Lin Xue) as the starter team; no old hero sheet / art is left', () => {
+    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue']);
+    expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue']);
     expect(SHIPPED_STARTER_BENCH).toEqual([]);
-    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-moye.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
-    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'moye', 'tangxun', 'yuezheng']);
+    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-linxue.png', 'hero-moye.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
+    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'linxue', 'moye', 'tangxun', 'yuezheng']);
   });
 
   it('an old save drops heroes whose template is gone: gear back to the bag, team / slots / memory forget them', () => {
@@ -342,5 +342,34 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     const imp = clip.impact as { hitStopMs?: number; shakePx?: number }[];
     expect(imp.map(i => i.hitStopMs)).toEqual([17, 17, 17, 17, 100]);
     expect(imp[4].shakePx).toBe(8);
+  });
+});
+
+/** Lin Xue — Lotus Spirit Physician (remodel #5): base sheet only, Healer class ids arranged to her skills */
+describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
+  it('6 × 8 atlas 260 × 170: idle 3 · walk 6 · hurt 3 · cast 6 (lotus released F4) · die 5 · upright lotus projectile', () => {
+    const sh = SHEETS['hero-linxue.png'];
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([6, 8, 260, 170]);
+    const a = sh.anims;
+    expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 3], [1, 6], [2, 3], [3, 6], [4, 5]]);
+    expect(a.attack!.events!.DAMAGE).toBe(3);
+    expect(a.skill).toBeUndefined();
+    expect(sh.projectile!.attack).toBe('linxue-lotus');
+    expect(FX['linxue-lotus'].noRotate).toBeTrue();
+    expect(HERO_BY_ID['linxue']).toEqual(jasmine.objectContaining({ name: 'หลินเสวี่ย', cls: 'healer', star: 3, sprite: 'hero-linxue.png' }));
+    expect(HERO_ART['linxue']).toEqual(jasmine.objectContaining({ portrait: 'portraits/linxue.webp' }));
+  });
+
+  it('Lotus Prayer = targeted heal + splash · Spirit Mend = heal + cleanse 1 + Qi Guard · Returning Spring Rite = team heal + cleanse + revive', () => {
+    const k = kitOf('linxue', 'healer');
+    const c = CLASS_KITS.healer;
+    expect([k.skill.label, k.skill2.label, k.ult.label]).toEqual(['Lotus Prayer', 'Spirit Mend', 'Returning Spring Rite']);
+    expect([k.skill.id, k.skill2.id, k.ult.id]).toEqual([c.skill.id, c.skill2.id, c.ult.id]);
+    expect([k.skill.cooldown, k.skill2.cooldown]).toEqual([c.skill.cooldown, c.skill2.cooldown]);
+    expect(k.skill.target).toBe('LOWEST_HP_ALLY');
+    expect(k.skill2.effects.map(e => e.type)).toEqual(['HEAL', 'CLEANSE', 'SHIELD']);
+    expect(k.skill2.effects).toContain(jasmine.objectContaining({ type: 'CLEANSE', to: 'PRIMARY', count: 1 }));
+    expect(k.ult.effects.map(e => e.type)).toEqual(['HEAL', 'CLEANSE', 'REVIVE']);
+    expect(k.healBolt).toEqual(c.healBolt);
   });
 });

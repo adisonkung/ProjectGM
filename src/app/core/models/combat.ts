@@ -167,8 +167,13 @@ export type SkillEffectCore =
        */
       pierceDelays?: number[];
     }
-  /** heal allies: atk × sourceAtk + maxHpPct × recipient max HP */
-  | { type: 'HEAL'; area: AreaPattern | 'PRIMARY'; center?: AreaCenter; atk: number; maxHpPct?: number }
+  /**
+   * heal allies: atk × sourceAtk + maxHpPct × recipient max HP. `center: 'TARGET'` centres the area on the primary
+   * (an ally), `skipPrimary` leaves the primary out (splash part of a targeted heal)
+   */
+  | { type: 'HEAL'; area: AreaPattern | 'PRIMARY'; center?: AreaCenter; atk: number; maxHpPct?: number; skipPrimary?: boolean }
+  /** remove up to `count` debuffs (newest first; untargetable seals excluded) from the primary ally or every living ally */
+  | { type: 'CLEANSE'; to: 'PRIMARY' | 'ALL_ALLIES'; count?: number }
   /** apply a status to: the units hit by the previous DAMAGE ('HIT'), the caster, the primary, or an area */
   | {
       type: 'APPLY_STATUS'; status: string; to: 'HIT' | 'SELF' | 'PRIMARY' | 'AREA';
@@ -185,8 +190,11 @@ export type SkillEffectCore =
   | { type: 'INTERRUPT'; area: AreaPattern; center?: AreaCenter; breakPower?: number }
   /** push the primary target back (away from the caster) */
   | { type: 'KNOCKBACK'; cells: number }
-  /** absorb shields: caster gets selfPct, every other living ally allyPct (of the CASTER's max HP) */
-  | { type: 'SHIELD'; selfPct: number; allyPct: number; duration: number }
+  /**
+   * absorb shields: caster gets selfPct, every other living ally allyPct (of the CASTER's max HP);
+   * `to: 'PRIMARY'` shields only the primary ally (allyPct, or selfPct when it is the caster)
+   */
+  | { type: 'SHIELD'; selfPct: number; allyPct: number; duration: number; to?: 'PRIMARY' }
   /** revive one dead ally (party revive limit applies) */
   | { type: 'REVIVE'; hpPct: number; count: number };
 

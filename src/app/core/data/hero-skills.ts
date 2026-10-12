@@ -273,6 +273,40 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
     },
   },
+  // หลินเสวี่ย (Lin Xue — Lotus Spirit Physician, 3★ Healer / Support, remodel #5): Nature / Water / Jade · Lotus Spring
+  // Qi · Lotus Staff · Healer class ids + cooldowns (rank tables apply), effects arranged to her skills until the skill
+  // sheets arrive: S1 Lotus Prayer = heal the lowest-HP ally + a light heal around it · S2 Spirit Mend = strong
+  // emergency heal + cleanse 1 debuff + a short Qi Guard shield · Ult Returning Spring Rite = team heal + cleanse
+  // every debuff + revive 1 fallen ally
+  linxue: {
+    id: 'linxue', cls: 'healer', identity: 'Healer · Targeted Heal · Cleanse · Qi Guard · Team Revival',
+    kit: {
+      ...healer,
+      attack: { ...healer.attack, id: 'light_bolt', name: 'บัววิญญาณ', label: 'Spirit Lotus' },
+      skill: {
+        ...healer.skill, name: 'บทสวดบัวสวรรค์', label: 'Lotus Prayer', target: 'LOWEST_HP_ALLY',
+        // the lotus blooms on the weakest ally (100 % ATK + 8 % max HP), its petals touch the allies around it (40 % + 3 %)
+        effects: [
+          { type: 'HEAL', area: 'PRIMARY', atk: 1, maxHpPct: 0.08 },
+          { type: 'HEAL', area: 'ADJACENT_8', center: 'TARGET', atk: 0.4, maxHpPct: 0.03, skipPrimary: true },
+        ],
+        ai: { tier: 'HEAL', allyHpBelow: 0.8 },
+      },
+      skill2: {
+        ...healer.skill2, name: 'ประสานวิญญาณ', label: 'Spirit Mend',
+        // emergency heal (class numbers) + the newest debuff washed off + Qi Guard (12 % of her max HP, 4 s)
+        effects: [
+          { type: 'HEAL', area: 'PRIMARY', atk: 2.2, maxHpPct: 0.1 },
+          { type: 'CLEANSE', to: 'PRIMARY', count: 1 },
+          { type: 'SHIELD', to: 'PRIMARY', selfPct: 0.12, allyPct: 0.12, duration: 4 },
+        ],
+      },
+      ult: {
+        ...healer.ult, name: 'พิธีคืนวสันต์', label: 'Returning Spring Rite',
+        effects: [...healer.ult.effects.slice(0, 1), { type: 'CLEANSE', to: 'ALL_ALLIES' }, ...healer.ult.effects.slice(1)],
+      },
+    },
+  },
   bailong: {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {
