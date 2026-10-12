@@ -931,7 +931,15 @@ export class BattleComponent implements OnDestroy {
           // ตกจากฟ้า: เริ่มเหนือเป้า 3 ช่อง เยื้องมาทางฝั่งผู้ยิง
           const dir = isPlayerUnit(src) ? -1 : 1;
           const from = e.sky ? { x: to.x + dir * 1.2, y: to.y - 3.2 } : { x: p.c, y: p.r + SCENERY_ROWS };
-          const pv: ProjectileView = { id: ++this.floatId, name, from, to, flight: e.flight * 1000 };
+          // piercing blade: keeps flying past the target at the same speed (visual only — damage already timed)
+          let end = to, flight = e.flight * 1000;
+          const over = FX[name].overshoot;
+          if (over && !e.sky) {
+            const len = Math.hypot(to.x - from.x, to.y - from.y) || 1;
+            end = { x: to.x + ((to.x - from.x) / len) * over, y: to.y + ((to.y - from.y) / len) * over };
+            flight *= (len + over) / len;
+          }
+          const pv: ProjectileView = { id: ++this.floatId, name, from, to: end, flight };
           const sp = this.speed();
           this.projectiles.update(l => [...l, pv]);
           setTimeout(() => this.projectiles.update(l => l.filter(x => x.id !== pv.id)), projectileLife(pv.flight, sp));

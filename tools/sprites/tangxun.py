@@ -120,7 +120,9 @@ IDLE_BODY = 78
 BASE_COUNTS = [6, 8, 3, 8, 6]
 BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
-SKILL_ROWS: list = []   # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
+SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
+    ('skill', 's1_char', [10]),
+]
 COMMON_GROUND: dict = {}
 ROOT_SHIFT: dict = {}
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px

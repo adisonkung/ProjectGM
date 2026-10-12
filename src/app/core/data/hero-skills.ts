@@ -240,7 +240,8 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       ...archer,
       skill: {
         ...archer.skill, name: 'เขี้ยวทะลวง', label: 'Piercing Fang', target: 'CURRENT', delivery: 'PROJECTILE', repeat: undefined,
-        effects: [{ type: 'DAMAGE', area: 'LINE_3', primary: 2.4, secondary: 1.2 }],
+        // one blade through the line: the units behind take their hit when it gets there (T034 / T036 on the sync sheet)
+        effects: [{ type: 'DAMAGE', area: 'LINE_3', primary: 2.4, secondary: 1.2, pierceDelays: [0.067, 0.1] }],
       },
       skill2: {
         ...archer.skill2, name: 'โซ่ตัดเงา', label: 'Severing Chain', target: 'CASTING_INTERRUPTIBLE', fallback: ['CURRENT'],

@@ -152,6 +152,11 @@ export type SkillEffect =
       interrupt?: boolean;
       /** Break Gauge damage dealt to a breakable cast (e.g. Forest Oblivion) by this hit */
       breakPower?: number;
+      /**
+       * line pierce (LINE_2 / LINE_3): the n-th unit behind the primary is hit this many seconds after it (one entry per
+       * unit, the last repeats) — the same blade reaching it — with its own `impact` event (index n) for FX / feel
+       */
+      pierceDelays?: number[];
     }
   /** heal allies: atk × sourceAtk + maxHpPct × recipient max HP */
   | { type: 'HEAL'; area: AreaPattern | 'PRIMARY'; center?: AreaCenter; atk: number; maxHpPct?: number }

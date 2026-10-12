@@ -141,6 +141,11 @@ export interface FxDef {
   angle0?: number;
   /** กระสุน: เอฟเฟกต์ที่เล่นเพิ่มตรงเป้าเมื่อกระทบ */
   hitFx?: string;
+  /**
+   * กระสุน: บินเลยเป้าไปอีกกี่ช่องด้วยความเร็วเดิม (ภาพเท่านั้น — ดาเมจยังลงตอนถึงเป้า) เช่นมีดทะลวงแนว
+   * ที่ทะลุไปหาตัวหลัง · เฟรมสุดท้าย (จาง) แสดงที่ปลายทาง
+   */
+  overshoot?: number;
 }
 
 /** เวลาต่อเฟรมปกติ และของท่ายืน (ช้ากว่า ไม่เร่งตามความเร็วการต่อสู้) */
@@ -290,7 +295,7 @@ export const SHEETS: Record<string, SheetDef> = {
   // ถังซวิ่น — Whispering Blade (remodel #4, tools/sprites/tangxun.py): base sheet · cell 260 × 170, root (130, 155),
   // idle body 78 px · rows 5–7 reserved for S1 / S2 / Ult · the knife in flight is the projectile (fx-tangxun-knife)
   'hero-tangxun.png': {
-    cols: 8, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -299,8 +304,22 @@ export const SHEETS: Record<string, SheetDef> = {
       // ready → draw F2 → wind-up F3 → arm extended F4 → release F5 (the knife leaves = projectile spawns) → recover F6–F8
       attack: { row: 3, frames: 8, ms: 80, events: { DAMAGE: 4, RECOVERY_START: 6 } },
       die: { row: 4, frames: 6, ms: 130 },
+      // S1 Piercing Fang — Timeline Sync Sheet (tools/sprites/tangxun_s1.py, 60 FPS T000–T045 ≈ 0.77 s): ready C01 ·
+      // draw C02–C03 (T007) · elbow back C04 = anticipation T012 · throw C05 (T016) · release C06 = DAMAGE (the projectile
+      // leaves the fingertip) T019 · arm held C07 while the one blade pierces the line (T030 / T034 / T036) · C08–C10 ·
+      // root ≤ 6 px (runtime) · the blade = projectile fx 'tx-s1-fang' with overshoot (keeps flying through the line)
+      skill: {
+        row: 5, frames: 10, ms: 80,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [117, 50, 33, 67, 50, 83, 233, 50, 50, 34],
+        events: { CAST_START: 0, ANTICIPATION_PEAK: 3, STRIKE_START: 4, DAMAGE: 5, RECOVERY_START: 8 },
+        root: [[0.0, 0.0, 0], [0.429, 0.0, 0], [0.857, 0.0, 0], [1.667, 0.0, 0], [3.0, 0.0, 0], [3.75, 0.0, 0], [4.0, 0.0, 0], [4.667, 2.2, 0], [5.0, 3.0, 0], [5.4, 3.7, 0], [6.0, 5.0, 0], [6.214, 4.9, 0], [6.429, 4.6, 0], [6.643, 4.3, 0], [6.857, 4.1, 0], [7.0, 4.0, 0], [7.333, 3.8, 0], [8.333, 1.6, 0], [10.0, 0.0, 0]],
+        // target 1: 2-frame hit-stop + 3 px · pierced targets 2 / 3: no hit-stop, 1 px
+        impact: [{ hitStopMs: 33, shakePx: 3, shakeMs: 50 }, { shakePx: 1, shakeMs: 40 }, { shakePx: 1, shakeMs: 40 }],
+      },
     },
-    projectile: { attack: 'tangxun-knife', skill: 'tangxun-knife', skill2: 'tangxun-knife', ult: 'tangxun-knife' },
+    projectile: { attack: 'tangxun-knife', skill: 'tx-s1-fang', skill2: 'tangxun-knife', ult: 'tangxun-knife' },
+    fx: { skill: ['tx-s1-impact1', 'tx-s1-impact2', 'tx-s1-impact3'] },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -429,6 +448,22 @@ export const FX: Record<string, FxDef> = {
   'rune-orb': { file: 'fx-rune-orb.png', frames: 1, w: 14, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
   'chalk-bolt': { file: 'fx-chalk-bolt.png', frames: 1, w: 14, h: 8, frameMs: 60, at: 'target', angle0: 0, scale: 1.1 },
   'arrow-normal': { file: 'fx-arrow-normal.png', frames: 6, w: 92, h: 52, frameMs: 60, at: 'target', angle0: 0, scale: 0.7 },
+  // Tang Xun S1 Piercing Fang (tools/sprites/tangxun_s1.py): the ONE flying blade = projectile sprite (tip on the frame
+  // centre, 8 frames: release flash → blade + narrow jade trail → wind ring → fade) flying past the target (`overshoot`)
+  // · impact on each pierced unit at its contact point: target 1 full, 2 / 3 smaller + fainter (hitIndex 1 / 2)
+  'tx-s1-fang': { file: 'fx-tangxun-s1-fang.png', frames: 8, w: 188, h: 26, frameMs: 33, at: 'target', angle0: 0, scale: 1 / 1.3, overshoot: 2.2, pixelated: true },
+  'tx-s1-impact1': {
+    file: 'fx-tangxun-s1-impact1.png', frames: 4, w: 72, h: 49, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 0, delayMs: 17,
+    pivot: [0.4998, 0.5018], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'tx-s1-impact2': {
+    file: 'fx-tangxun-s1-impact2.png', frames: 3, w: 48, h: 33, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 1, delayMs: 17,
+    pivot: [0.4946, 0.4949], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'tx-s1-impact3': {
+    file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 2, delayMs: 17,
+    pivot: [0.4998, 0.4921], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
+  },
   // Tang Xun's throwing knife (reference sheet, tools/sprites/tangxun.py) — points right, 1 frame (no impact frame)
   'tangxun-knife': { file: 'fx-tangxun-knife.png', frames: 1, w: 28, h: 4, frameMs: 60, at: 'target', angle0: 0, scale: 0.9, pixelated: true },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },

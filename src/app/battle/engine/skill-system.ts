@@ -581,7 +581,20 @@ export class SkillSystem {
           const p = focusOf(primary);
           const targets = e.area === 'ALL_ENEMIES' ? foes : resolveArea({ pattern: e.area, caster: u, primary: p, center: e.center, candidates: foes });
           hits = [];
-          for (const f of targets) {
+          for (const [k, f] of targets.entries()) {
+            // the pierced units further down the line: hit when the blade gets there (own impact event, index k)
+            if (k > 0 && e.pierceDelays?.length && f !== primary) {
+              const delay = e.pierceDelays[Math.min(k - 1, e.pierceDelays.length - 1)];
+              const mul = (e.secondary ?? e.primary) * rankPower(u, slot);
+              this.h.later(delay, u, () => {
+                if (!f.alive) return;
+                if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
+                const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);
+                const ok = this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot });
+                if (slot !== 'attack') this.h.emit({ type: 'impact', src: u.id, dst: f.id, kind: slot as SkillKind, index: k, hits: ok ? [f.id] : [] });
+              });
+              continue;
+            }
             if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
             // ground-targeted areas: everyone in the front cell takes the primary multiplier (no unit is "the" target)
             const g = groundCell(e.area, u, p, foes, f);
