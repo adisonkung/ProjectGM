@@ -81,7 +81,8 @@ GRID_SHEETS = {
     # the robes / hair of neighbouring idle poses touch → split by the sheet's own cells too
     'base': [(51, 214, [373, 607, 841]), (245, 406, [373, 607, 841, 1070, 1299]), (436, 595, [373, 607, 841]),
              (623, 780, [364, 603, 820, 1052, 1289]), (809, 965, [373, 600, 852, 1133])],
-    's2_char': [(52, 418, [359, 718, 1061, 1422]), (465, 797, [398, 750, 1097, 1432])],
+    # S2 v2 (roster proportions, plain 5 × 2 grid, no captions; the chibi sheet = s2_char_raw_chibi.png)
+    's2_char': [(2, 470, [337, 671, 1002, 1335]), (472, 940, [337, 671, 1002, 1335])],
     # Ult Returning Spring Rite: 10 + 11 cells (the sheet repeats the "16. Recover 3" caption → 21 poses)
     'ult_char': [(55, 461, [162, 321, 503, 684, 864, 1037, 1220, 1402, 1574]),
                  (493, 804, [182, 369, 560, 735, 885, 1034, 1180, 1327, 1475, 1617])],
@@ -102,7 +103,7 @@ def clean_grid(name, rows, pad=4, edge=7):
 
 B.load = load_dark
 
-CELL_SPLIT = {'base', 'ult_char'}   # frames = the sheet's own cells (no watershed: neighbours' staffs / ribbons cross)
+CELL_SPLIT = {'base', 's2_char', 'ult_char'}   # frames = the sheet's own cells (no watershed: neighbours' staffs / ribbons cross)
 
 
 def grid_frames(file, counts):
