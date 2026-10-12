@@ -516,12 +516,12 @@ export const FX: Record<string, FxDef> = {
   // charge around him (CHARGE_START T018, behind, ends streaming toward the target) · the array at the locked target's
   // feet (VFX_SPAWN T040 → fades T124–T129) · small jade sparks on the 4 minor cuts · impact (hit 5, peak T133) · residual (T140)
   'tx-ult-charge': {
-    file: 'fx-tangxun-ult-charge.png', frames: 15, w: 306, h: 151, frameMs: 33.33, at: 'self', orient: 'flip', event: 'CHARGE_START', layer: 'under',
+    file: 'fx-tangxun-ult-charge.png', frames: 18, w: 306, h: 151, frameMs: 33.33, at: 'self', orient: 'flip', event: 'CHARGE_START', layer: 'under',
     pivot: [0.2523, 0.7998], dy: 27.25, scale: 1 / 1.5,
   },
   'tx-ult-main': {
-    file: 'fx-tangxun-ult-main.png', frames: 40, w: 161, h: 173, frameMs: 33.33, at: 'target', orient: 'flip', on: 'vfx', delayMs: 167,
-    pivot: [0.5025, 0.7909], dy: 24.75, scale: 1 / 1.5,
+    file: 'fx-tangxun-ult-main.png', frames: 37, w: 162, h: 175, frameMs: 33.33, at: 'target', orient: 'flip', on: 'vfx', delayMs: 267,
+    pivot: [0.4994, 0.7819], dy: 24.75, scale: 1 / 1.5,
   },
   'tx-ult-spark0': {
     file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 0,
@@ -539,10 +539,10 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 3,
     dx: 12.5, dy: -32.75, scale: 1 / 1.5, pixelated: true,
   },
-  // the 8 thrown blades (S2 single-blade art) fly in from Tang Xun's side and ring the target T040–T055 (60 FPS) — the
-  // storm / array ('tx-ult-main') forms only after they surround it (+167 ms) · jade ground shockwave from T130
+  // the 8 thrown blades (S2 single-blade art) fly in from Tang Xun's side and ring the target T040–T065 (60 FPS, landing T052) — the
+  // storm / array ('tx-ult-main') forms only after they surround it (+267 ms = T056, frames cross-fade) · jade ground shockwave from T130
   'tx-ult-surround': {
-    file: 'fx-tangxun-ult-surround.png', frames: 16, w: 333, h: 154, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',
+    file: 'fx-tangxun-ult-surround.png', frames: 26, w: 333, h: 154, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',
     pivot: [0.6667, 0.5649], dy: -22.75, scale: 1 / 1.5,
   },
   'tx-ult-shock': {
