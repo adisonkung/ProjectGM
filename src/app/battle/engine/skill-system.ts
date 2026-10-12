@@ -74,6 +74,19 @@ export const rankOf = (p: InterruptPriority) => INTERRUPT_PRIORITY_RANK[p];
 /** an interrupt commitment is trusted this long (a missed / cancelled attempt frees the cast again) */
 export const COMMIT_WINDOW = 1.5;
 
+/**
+ * hit i (0-based) of a multi-hit skill: `repeat.weights[i]` scales its DAMAGE multipliers, effects with `onHits` run only
+ * on those hits (e.g. Severing Chain: interrupt + Open Wound on throw 3)
+ */
+export function repeatHit(s: SkillDefinition, i: number): SkillDefinition {
+  const w = s.repeat?.weights?.[i];
+  const gated = s.effects.some(e => e.onHits);
+  if (w == null && !gated) return s;
+  const effects = gated ? s.effects.filter(e => !e.onHits || e.onHits.includes(i)) : s.effects;
+  if (w == null) return { ...s, effects };
+  return { ...s, effects: effects.map(e => (e.type === 'DAMAGE' ? { ...e, primary: e.primary * w, ...(e.secondary != null ? { secondary: e.secondary * w } : {}) } : e)) };
+}
+
 /** interrupt / break power a skill brings (0 = none) */
 export function interruptPowerOf(s: SkillDefinition, u?: BattleUnit, slot?: SkillSlot): { interrupts: boolean; breakPower: number } {
   let interrupts = false;
@@ -529,11 +542,7 @@ export class SkillSystem {
     const shots = s.repeat?.count ?? 1;
     const clipHits = shots > 1 && tm.hits.length === shots;
     const offsetOf = (i: number) => (clipHits ? tm.hits[i] - tm.hits[0] : i * (s.repeat?.gap ?? 0));
-    const weighted = (i: number): SkillDefinition => {
-      const w = s.repeat?.weights?.[i];
-      if (w == null) return s;
-      return { ...s, effects: s.effects.map(e => (e.type === 'DAMAGE' ? { ...e, primary: e.primary * w, ...(e.secondary != null ? { secondary: e.secondary * w } : {}) } : e)) };
-    };
+    const weighted = (i: number) => repeatHit(s, i);
 
     this.h.later(tm.hit, u, () => {
       const delivery = s.delivery ?? 'INSTANT';

@@ -295,7 +295,7 @@ export const SHEETS: Record<string, SheetDef> = {
   // ถังซวิ่น — Whispering Blade (remodel #4, tools/sprites/tangxun.py): base sheet · cell 260 × 170, root (130, 155),
   // idle body 78 px · rows 5–7 reserved for S1 / S2 / Ult · the knife in flight is the projectile (fx-tangxun-knife)
   'hero-tangxun.png': {
-    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 16, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -317,9 +317,22 @@ export const SHEETS: Record<string, SheetDef> = {
         // target 1: 2-frame hit-stop + 3 px · pierced targets 2 / 3: no hit-stop, 1 px
         impact: [{ hitStopMs: 33, shakePx: 3, shakeMs: 50 }, { shakePx: 1, shakeMs: 40 }, { shakePx: 1, shakeMs: 40 }],
       },
+      // S2 Severing Chain — Timeline Sync Sheet (tools/sprites/tangxun_s2.py, 60 FPS T000–T071 = 1.20 s): ready C01 ·
+      // prepare C02 (T006) · three throws of ONE blade each: throw C03 (T010) → release C05 (T014) · C07 (T026) → C09 (T030) ·
+      // C11 (T040) → C13 (T045) = the three DAMAGE events (the engine fires one projectile 'tx-s2-blade' per throw) ·
+      // finish C14 (T056) · recovery C15 (T064) · root ≤ 10 px (runtime) · hits T020 / T036 / T052 (in game: flight time)
+      skill2: {
+        row: 6, frames: 16, ms: 75,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        steps: [100, 67, 50, 17, 83, 117, 50, 17, 83, 83, 50, 33, 183, 133, 67, 67],
+        events: { CAST_START: 0, ANTICIPATION_PEAK: 1.0, STRIKE_START: [2.0, 6.0, 10.0], DAMAGE: [4.0, 8.0, 12.0], RECOVERY_START: 14.0 },
+        root: [[0.0, 0.0, 0], [0.667, 0.0, 0], [1.5, 0.0, 0], [2.0, 0.0, 0], [2.667, 1.5, 0], [4.0, 3.0, 0], [4.4, 2.8, 0], [5.143, 2.2, 0], [5.429, 2.0, 0], [5.714, 2.0, 0], [6.0, 2.0, 0], [6.667, 3.5, 0], [8.0, 5.0, 0], [8.4, 4.8, 0], [9.2, 4.2, 0], [9.6, 4.0, 0], [10.0, 4.0, 0], [11.5, 7.6, 0], [12.0, 8.0, 0], [12.273, 8.8, 0], [12.636, 10.0, 0], [13.0, 9.5, 0], [13.5, 9.0, 0], [14.0, 6.0, 0], [15.0, 2.4, 0], [16.0, 0.0, 0]],
+        // hit-stop 1 / 1 / 3 frames · shake 1 / 1 / 4 px (throw 3 = interrupt + Open Wound)
+        impact: [{ hitStopMs: 17, shakePx: 1, shakeMs: 40 }, { hitStopMs: 17, shakePx: 1, shakeMs: 50 }, { hitStopMs: 50, shakePx: 4, shakeMs: 90 }],
+      },
     },
-    projectile: { attack: 'tangxun-knife', skill: 'tx-s1-fang', skill2: 'tangxun-knife', ult: 'tangxun-knife' },
-    fx: { skill: ['tx-s1-impact1', 'tx-s1-impact2', 'tx-s1-impact3'] },
+    projectile: { attack: 'tangxun-knife', skill: 'tx-s1-fang', skill2: 'tx-s2-blade', ult: 'tangxun-knife' },
+    fx: { skill: ['tx-s1-impact1', 'tx-s1-impact2', 'tx-s1-impact3'], skill2: ['tx-s2-impact1', 'tx-s2-impact2', 'tx-s2-impact3'] },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -463,6 +476,20 @@ export const FX: Record<string, FxDef> = {
   'tx-s1-impact3': {
     file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 2, delayMs: 17,
     pivot: [0.4998, 0.4921], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
+  },
+  // Tang Xun S2 Severing Chain: ONE blade per throw (spawned three times) — f1 spawn sparkle … f7 trail · f8 contact sparkle
+  'tx-s2-blade': { file: 'fx-tangxun-s2-blade.png', frames: 8, w: 152, h: 36, frameMs: 33, at: 'target', angle0: 0, scale: 1 / 1.3, pixelated: true },
+  'tx-s2-impact1': {
+    file: 'fx-tangxun-s2-impact1.png', frames: 5, w: 43, h: 93, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 0,
+    pivot: [0.6409, 0.5355], dx: -12.5, dy: -27.75, scale: 1 / 1.5,
+  },
+  'tx-s2-impact2': {
+    file: 'fx-tangxun-s2-impact2.png', frames: 5, w: 49, h: 105, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 1,
+    pivot: [0.6302, 0.5324], dx: -12.5, dy: -27.75, scale: 1 / 1.5,
+  },
+  'tx-s2-impact3': {
+    file: 'fx-tangxun-s2-impact3.png', frames: 6, w: 54, h: 116, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 2,
+    pivot: [0.6333, 0.5345], dx: -12.5, dy: -27.75, scale: 1 / 1.5,
   },
   // Tang Xun's throwing knife (reference sheet, tools/sprites/tangxun.py) — points right, 1 frame (no impact frame)
   'tangxun-knife': { file: 'fx-tangxun-knife.png', frames: 1, w: 28, h: 4, frameMs: 60, at: 'target', angle0: 0, scale: 0.9, pixelated: true },

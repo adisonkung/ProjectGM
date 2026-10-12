@@ -246,7 +246,14 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       skill2: {
         ...archer.skill2, name: 'โซ่ตัดเงา', label: 'Severing Chain', target: 'CASTING_INTERRUPTIBLE', fallback: ['CURRENT'],
         delivery: 'PROJECTILE',
-        effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 1.6, interrupt: true, breakPower: 40 }],
+        // three throws of the same single blade (clip DAMAGE events = spawns T014 / T030 / T045), 25 / 30 / 45 % of the
+        // total · the interrupt (Break 40) and the Open Wound mark ride on throw 3 only
+        repeat: { count: 3, gap: 0.26, weights: [0.25, 0.3, 0.45] },
+        effects: [
+          { type: 'DAMAGE', area: 'SINGLE', primary: 1.6 },
+          { type: 'INTERRUPT', area: 'SINGLE', breakPower: 40, onHits: [2] },
+          { type: 'APPLY_STATUS', status: 'open_wound', to: 'HIT', onHits: [2] },
+        ],
       },
       ult: {
         ...archer.ult, name: 'ค่ายมีดตาข่ายสวรรค์', label: 'Heaven-Snaring Blade Array', target: 'FOCUS_OR_LOWEST_HP', range: Infinity,

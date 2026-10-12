@@ -139,7 +139,14 @@ export type TargetRule =
   | 'LOWEST_HP_ENEMY' | 'LOWEST_HP_ALLY' | 'SELF';
 
 /** Effects run in order at the skill's hit moment (or on projectile arrival) */
-export type SkillEffect =
+export type SkillEffect = SkillEffectCore & {
+  /**
+   * multi-hit skills (`repeat`): this effect only runs on these hit indices (0-based) — e.g. Severing Chain interrupts
+   * and marks on throw 3 only; absent = every hit
+   */
+  onHits?: number[];
+};
+export type SkillEffectCore =
   /** damage the units of `area`; the primary target takes `primary`, the others `secondary` (never both) */
   | {
       type: 'DAMAGE'; area: AreaPattern; center?: AreaCenter; primary: number; secondary?: number;

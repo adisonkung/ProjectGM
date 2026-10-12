@@ -79,6 +79,11 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     id: 'broken', name: 'BROKEN', duration: 3, stackPolicy: 'REFRESH_DURATION', bossValid: true,
     modifiers: { damageTakenMultiplier: 1.25 }, flags: ['broken'],
   },
+  /** Tang Xun Severing Chain (throw 3): the severed wound — takes +10 % damage */
+  open_wound: {
+    id: 'open_wound', name: 'แผลเปิด', duration: 5, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { damageTakenMultiplier: 1.1 },
+  },
   healing_reduction: {
     id: 'healing_reduction', name: 'ฮีลลดลง', duration: 6, stackPolicy: 'REFRESH_DURATION',
     modifiers: { healingReceivedMultiplier: 0.5 },

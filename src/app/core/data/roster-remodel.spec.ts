@@ -239,14 +239,15 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
 
 /** Tang Xun — Whispering Blade (remodel #4): base sheet only, Archer class ids arranged to his hidden-weapon skills */
 describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
-  it('10 × 8 atlas 260 × 170: idle 6 · run 8 · hurt 3 · throw 8 (release F5) · die 6 · S1 10 · knife projectile, no bow', () => {
+  it('16 × 8 atlas 260 × 170: idle 6 · run 8 · hurt 3 · throw 8 (release F5) · die 6 · S1 10 · S2 16 · knife projectile, no bow', () => {
     const sh = SHEETS['hero-tangxun.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([16, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 3], [3, 8], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(4);
     expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
-    expect(a.skill2).toBeUndefined();
+    expect([a.skill2!.row, a.skill2!.frames]).toEqual([6, 16]);
+    expect(a.ult).toBeUndefined();
     expect(sh.projectile!.attack).toBe('tangxun-knife');
     expect(FX['tangxun-knife'].angle0).toBe(0);
     expect(HERO_BY_ID['tangxun']).toEqual(jasmine.objectContaining({ name: 'ถังซวิ่น', cls: 'archer', star: 3, sprite: 'hero-tangxun.png' }));
@@ -262,8 +263,7 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     const s1 = k.skill.effects[0] as { area: string; primary: number; secondary: number };
     expect(s1.area).toBe('LINE_3');
     expect(s1.primary).toBeGreaterThan(s1.secondary);
-    const s2 = k.skill2.effects[0] as { interrupt?: boolean; area: string };
-    expect(s2.interrupt).toBeTrue();
+    expect(k.skill2.effects.some(e => e.type === 'INTERRUPT')).toBeTrue();
     expect(k.skill2.target).toBe('CASTING_INTERRUPTIBLE');
     const u = k.ult.effects[0] as { area: string };
     expect(u.area).not.toBe('ALL_ENEMIES');
@@ -290,5 +290,28 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     const imp = clip.impact as { hitStopMs?: number }[];
     expect(imp[0].hitStopMs).toBeCloseTo(33, 0);
     expect(imp.slice(1).every(i => !i.hitStopMs)).toBeTrue();
+  });
+
+  it('S2 Severing Chain on its Timeline Sync Sheet: 1.20 s, one blade spawned 3× (T014 / T030 / T045), 25 / 30 / 45 %, interrupt + Open Wound on throw 3', () => {
+    const clip = SHEETS['hero-tangxun.png'].anims.skill2!;
+    expect(clipClock(clip).total * 60).toBeCloseTo(72, 0);
+    const ev = (e: string) => animEvents('hero-tangxun.png', 'skill2').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    expect(ev('ANTICIPATION_PEAK')).toEqual([6]);
+    expect(ev('STRIKE_START')).toEqual([10, 26, 40]);
+    expect(ev('DAMAGE')).toEqual([14, 30, 45]);
+    expect(ev('RECOVERY_START')).toEqual([64]);
+    expect(Math.max(...clip.root!.map(k => Math.abs(k[1])))).toBeLessThanOrEqual(10);
+    expect(SHEETS['hero-tangxun.png'].projectile!.skill2).toBe('tx-s2-blade');
+    const s2 = kitOf('tangxun', 'archer').skill2;
+    expect(s2.repeat).toEqual(jasmine.objectContaining({ count: 3, weights: [0.25, 0.3, 0.45] }));
+    expect(s2.delivery).toBe('PROJECTILE');
+    const gated = s2.effects.filter(e => e.onHits);
+    expect(gated.map(e => e.type).sort()).toEqual(['APPLY_STATUS', 'INTERRUPT']);
+    expect(gated.every(e => e.onHits!.join() === '2')).toBeTrue();
+    expect(s2.effects.find(e => e.type === 'DAMAGE')!.onHits).toBeUndefined();
+    for (const i of [0, 1, 2]) expect(fxFor('hero-tangxun.png', 'skill2', { on: 'impact', hit: i })).toEqual([`tx-s2-impact${i + 1}`]);
+    expect(FX['tx-s2-impact1'].h).toBeLessThan(FX['tx-s2-impact2'].h);
+    expect(FX['tx-s2-impact2'].h).toBeLessThan(FX['tx-s2-impact3'].h);
+    expect((clip.impact as { hitStopMs?: number; shakePx?: number }[]).map(i => [i.hitStopMs, i.shakePx])).toEqual([[17, 1], [17, 1], [50, 4]]);
   });
 });

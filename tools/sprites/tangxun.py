@@ -122,6 +122,7 @@ BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
     ('skill', 's1_char', [10]),
+    ('skill2', 's2_char', [8, 8]),
 ]
 COMMON_GROUND: dict = {}
 ROOT_SHIFT: dict = {}
