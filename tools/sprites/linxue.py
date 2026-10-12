@@ -77,6 +77,9 @@ def clean_base():
 # interiors → <name>.png on flat magenta. rows = (y0, y1, divider x's) in source px
 GRID_SHEETS = {
     's2_char': [(52, 418, [359, 718, 1061, 1422]), (465, 797, [398, 750, 1097, 1432])],
+    # Ult Returning Spring Rite: 10 + 11 cells (the sheet repeats the "16. Recover 3" caption → 21 poses)
+    'ult_char': [(55, 461, [162, 321, 503, 684, 864, 1037, 1220, 1402, 1574]),
+                 (493, 804, [182, 369, 560, 735, 885, 1034, 1180, 1327, 1475, 1617])],
 }
 
 
@@ -93,6 +96,28 @@ def clean_grid(name, rows, pad=4, edge=7):
 
 
 B.load = load_dark
+
+CELL_SPLIT = {'ult_char'}   # frames = the sheet's own cells (no watershed: neighbours' staffs / ribbons cross)
+
+
+def grid_frames(file, counts):
+    """one frame per captioned cell: every pixel belongs to the cell it was drawn in"""
+    im, _ = B.load(file)
+    hard = im[..., 3] >= B.ALPHA_CUT
+    out = []
+    bm, ws = B.body_markers, B.watershed
+    for (y0, y1, divs), want in zip(GRID_SHEETS[file], counts):
+        ys = np.nonzero(hard[y0:y1].any(1))[0]
+        band = (y0 + int(ys.min()), y0 + int(ys.max()) + 1)
+        bins = np.digitize(np.arange(im.shape[1]), divs) + 1
+        full = np.broadcast_to(bins[None, :], (band[1] - band[0], im.shape[1]))
+        B.body_markers = lambda h, n, full=full: (np.where(h, full, 0), n)
+        B.watershed = lambda _e, _m, mask=None, full=full: np.where(mask, full, 0)
+        out += B.clip_frames(im, band, want, 'feet', False)
+    B.body_markers, B.watershed = bm, ws
+    for fr in out:
+        drop_strays(fr, reach=6)      # a neighbour's ribbon tip / sparkle that crossed the cell edge
+    return out
 
 
 def cluster_markers(hard, want):
@@ -160,10 +185,13 @@ BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
     ('skill', 's1_char', [10]),   # S1 Lotus Prayer: ready → eyes closed prayer → staff raised (lotus glows) → palm out
-    ('skill2', 's2_char', [5, 5]),   # S2 Spirit Mend: ready → raise staff → channel → gather → release (staff out) → recover
+    ('skill2', 's2_char', [5, 5]),
+    ('ult', 'ult_char', [10, 11]),   # Ult Returning Spring Rite: ready → prayer → invoke → channel ×5 → release → recover
+   # S2 Spirit Mend: ready → raise staff → channel → gather → release (staff out) → recover
 ]
 COMMON_GROUND: dict = {}
-HEAD_LOCK = {'skill', 'skill2'}
+HEAD_LOCK = {'skill', 'skill2', 'ult'}
+HEAD_LOCK_MAX = {'ult': 4}
 SPECK = 20          # px — smaller loose islands on the skill rows are key leftovers
 ROOT_SHIFT: dict = {}
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px
@@ -211,7 +239,7 @@ def main():
     for name, file, counts in SKILL_ROWS:
         if not os.path.exists(f'{SRC}/{file}.png'):
             continue
-        frs = A.sheet_frames(file, counts, False)
+        frs = grid_frames(file, counts) if file in CELL_SPLIT else A.sheet_frames(file, counts, False)
         for a0, a1 in COMMON_GROUND.get(name, []):
             g = max(fr['root'][1] for fr in frs[a0:a1])
             for fr in frs[a0:a1]:
@@ -239,7 +267,8 @@ def main():
             top = np.nonzero(cell.any(1))[0].min()
             hx.append(np.nonzero(cell[top + 10:top + 26])[1].mean())
         ref = float(np.mean(hx))
-        shifts[name] = [ref - h for h in hx]
+        lim = HEAD_LOCK_MAX.get(name, 99)    # a lean is a pose, not drift: never slide the feet more than this
+        shifts[name] = [float(np.clip(ref - h, -lim, lim)) for h in hx]
     report['shift_x'] = {k: [round(v, 1) for v in shifts[k]] for k in shifts}
     sheet = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * ATLAS_ROWS), (0, 0, 0, 0))
     for r, (name, frs, s) in enumerate(rows):

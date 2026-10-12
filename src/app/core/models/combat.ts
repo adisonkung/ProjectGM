@@ -196,7 +196,11 @@ export type SkillEffectCore =
    */
   | { type: 'SHIELD'; selfPct: number; allyPct: number; duration: number; to?: 'PRIMARY' }
   /** revive one dead ally (party revive limit applies) */
-  | { type: 'REVIVE'; hpPct: number; count: number };
+  /**
+   * revive dead allies (party revive limit applies) · `delay` (s): the ally is chosen NOW (listed in this hit's impact
+   * `hits` → revival cue FX at its body) and comes back `delay` later (the sync sheet's REVIVE_APPLY)
+   */
+  | { type: 'REVIVE'; hpPct: number; count: number; delay?: number };
 
 /** Positioning part of a skill (happens at the animation's move frame) */
 export type SkillMovement =

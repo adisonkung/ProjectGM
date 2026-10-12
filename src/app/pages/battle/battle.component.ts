@@ -830,6 +830,15 @@ export class BattleComponent implements OnDestroy {
         const at = def.at === 'target'
           ? (def.perHit ? [...new Set([dst, ...(hits ?? [])].filter((x): x is number => x != null && !(def.exceptPrimary && x === dst) && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit) : dst != null ? [dst] : [src])
           : [src];
+        if (def.at === 'allies') {
+          // team field: the centre of the caster's living formation (lanes / columns averaged), never rotated
+          const team = this.engine.units.filter(u => u.side === unitOf(src).side && u.alive).map(u => posOf(u.id));
+          const r = team.reduce((s, q) => s + q.r, 0) / Math.max(1, team.length);
+          const c = team.reduce((s, q) => s + q.c, 0) / Math.max(1, team.length);
+          fx.push({ id: ++this.floatId, r: team.length ? r : p.r, c: team.length ? c : p.c, name, angle: 0, flip: !!this.facing.get(src),
+            offset: fxOffset(name), under: def.layer === 'under' });
+          continue;
+        }
         for (const id of at) {
           const q = id === src ? p : posOf(id);
           const rotate = q !== p && def.orient !== 'flip';

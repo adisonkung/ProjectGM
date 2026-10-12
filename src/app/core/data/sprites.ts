@@ -98,7 +98,8 @@ export interface FxDef {
   h: number;
   frameMs: number;
   /** เล่นที่ตัวผู้ใช้ หรือที่เป้าหมาย (หมุนตามทิศที่พุ่งไป) */
-  at: 'self' | 'target';
+  /** 'allies' = centre of the caster's living team formation (team-wide field, e.g. a healer's ritual) */
+  at: 'self' | 'target' | 'allies';
   /** เลื่อนจากกลางช่อง เป็น % ของช่อง (+x ขวา, +y ลง) */
   dx?: number;
   dy?: number;
@@ -361,7 +362,7 @@ export const SHEETS: Record<string, SheetDef> = {
   },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
-    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 21, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 3, ms: 180 },
@@ -399,9 +400,25 @@ export const SHEETS: Record<string, SheetDef> = {
         },
         root: [[0.0, 0.0, 0], [3.0, 0.0, 0], [3.333, 0.8, 0], [4.0, 3.0, 0], [4.25, 4.0, 0], [5.944, 4.0, 0], [6.0, 3.7, 0], [7.5, 1.0, 0], [8.5, 0.5, 0], [10.0, 0.0, 0]],
       },
+      // Ult Returning Spring Rite — production Timeline Sync Sheet (tools/sprites/linxue_ult.py, 60 FPS T000–T143 = 2.40 s):
+      // ready C01 · eyes close C02 (T008) · raise staff C03 (T016, charge VFX T018) · invoke C04 · channel C05–C09
+      // (build T030, high T044, peak T052) · release C10 (T060) · follow-through C11 = ULTIMATE_RELEASE T064, Main VFX on
+      // the formation T070 · C12: TEAM HEAL T092, TEAM CLEANSE T104 · C13: revival light on the chosen ally T114 → REVIVE
+      // T118 (REVIVE delay), blessing T124 · recovery C14–C21 (T134) · root <= 2 px · no hit-stop / shake
+      ult: {
+        row: 7, frames: 21, ms: 115,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        steps: [133, 133, 100, 133, 100, 133, 67, 100, 100, 67, 400, 367, 400, 33, 17, 17, 33, 17, 17, 17, 16],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 1.0, CHARGE_START: 2.333, CHARGE_PEAK: 7.667,
+          FINAL_ANTICIPATION: 9.0, SKILL_ACTIVATE: 10.0, VFX_SPAWN: 10.25,
+          DAMAGE: [11.182, 11.727, 12.167], RECOVERY_START: 13.0,
+        },
+        root: [[0.0, 0.0, 0], [1.5, 0.0, 0], [3.25, 0.0, 0], [5.0, 0.0, 0], [7.0, 0.0, 0], [9.0, 0.0, 0], [10.0, 2.0, 0], [10.333, 2.0, 0], [10.833, 2.0, 0], [11.364, 2.0, 0], [11.909, 2.0, 0], [12.417, 2.0, 0], [12.917, 2.0, 0], [12.958, 2.0, 0], [21.0, 0.0, 0]],
+      },
     },
     projectile: { attack: 'linxue-lotus' },
-    fx: { skill: ['lx-s1-bloom', 'lx-s1-splash'], skill2: ['lx-s2-main', 'lx-s2-guard'] },
+    fx: { skill: ['lx-s1-bloom', 'lx-s1-splash'], skill2: ['lx-s2-main', 'lx-s2-guard'], ult: ['lx-ult-charge', 'lx-ult-main', 'lx-ult-revive'] },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -631,6 +648,23 @@ export const FX: Record<string, FxDef> = {
   'lx-s2-guard': {
     file: 'fx-linxue-s2-guard.png', frames: 30, w: 126, h: 127, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 2, delayMs: 167, repeat: 7, fadeOutMs: 300, pivot: [0.5006, 0.9198], dy: 27.25, scale: 1 / 1.5,
+  },
+  // Lin Xue Ult Returning Spring Rite (tools/sprites/linxue_ult.py, 60 FPS): the Charge VFX around her feet (wide, low;
+  // T018 → peak T052 → drains T064–T073) · the Main VFX = the ritual field on the centre of the living allied formation
+  // (`at: 'allies'`, T070–T143: spring → lotus → team blessing / heal wave → cleanse sweep → revival light → peak aura →
+  // fade; baked at half resolution, scale ×2) · the revival cue = the Main VFX revival light, localized on the dead ally
+  // the REVIVE beat picked (T114 → peak on the revive T118 → gone T125) · no impact VFX, no per-ally heal pulse
+  'lx-ult-charge': {
+    file: 'fx-linxue-ult-charge.png', frames: 56, w: 123, h: 112, frameMs: 16.67, at: 'self', orient: 'flip', event: 'CHARGE_START',
+    layer: 'under', pivot: [0.5053, 0.8963], dx: 5, dy: 27.25, scale: 1 / 1.5,
+  },
+  'lx-ult-main': {
+    file: 'fx-linxue-ult-main.png', frames: 74, w: 151, h: 129, frameMs: 16.67, at: 'allies', orient: 'flip', on: 'vfx',
+    layer: 'under', pivot: [0.5029, 0.8979], dy: 27.25, scale: 2 / 1.5,
+  },
+  'lx-ult-revive': {
+    file: 'fx-linxue-ult-revive.png', frames: 12, w: 90, h: 80, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 2, perHit: 1, exceptPrimary: true, pivot: [0.4968, 0.8935], dy: 27.25, scale: 1 / 1.5,
   },
   'linxue-lotus': { file: 'fx-linxue-lotus.png', frames: 1, w: 22, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.3, noRotate: true, pixelated: true },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },

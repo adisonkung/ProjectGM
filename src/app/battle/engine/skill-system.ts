@@ -45,6 +45,8 @@ export interface SkillHost {
   /** remove up to `count` debuffs from `dst` (newest first); returns how many were removed */
   cleanse(src: BattleUnit, dst: BattleUnit, count: number): number;
   revive(src: BattleUnit, dead: BattleUnit, hpPct: number): boolean;
+  /** would `revive` succeed right now (stage running, revives allowed, still dead, party limit left)? */
+  canRevive?(dead: BattleUnit): boolean;
   /** a free cell next to `at`, away from `from` (null = nobody can land there) */
   freeCellNear(at: Cell, from: Cell): Cell | null;
   /** teleport / dash the unit to a cell (dash = fast visible slide, teleport = instant) */
@@ -682,6 +684,13 @@ export class SkillSystem {
           }
           break;
         case 'REVIVE': {
+          if (e.delay) {
+            // REVIVE_TARGET slot: pick now (runtime rule = the host's dead-ally order), revive after the cue
+            const picks = this.h.deadAllies(u).filter(d => this.h.canRevive?.(d) ?? true).slice(0, e.count);
+            for (const d of picks) if (!this.healed.includes(d)) this.healed.push(d);
+            if (picks.length) this.h.later(e.delay, u, () => picks.forEach(d => this.h.revive(u, d, e.hpPct)));
+            break;
+          }
           let n = 0;
           for (const d of this.h.deadAllies(u)) {
             if (n >= e.count) break;

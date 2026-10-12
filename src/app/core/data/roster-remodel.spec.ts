@@ -346,14 +346,15 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
 
 /** Lin Xue — Lotus Spirit Physician (remodel #5): base sheet only, Healer class ids arranged to her skills */
 describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
-  it('10 × 8 atlas 260 × 170: idle 3 · walk 6 · hurt 3 · cast 6 (lotus released F4) · die 5 · S1 10 · S2 10 · upright lotus projectile', () => {
+  it('21 × 8 atlas 260 × 170: idle 3 · walk 6 · hurt 3 · cast 6 (lotus released F4) · die 5 · S1 10 · S2 10 · Ult 21 · upright lotus projectile', () => {
     const sh = SHEETS['hero-linxue.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([21, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 3], [1, 6], [2, 3], [3, 6], [4, 5]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
     expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
     expect([a.skill2!.row, a.skill2!.frames]).toEqual([6, 10]);
+    expect([a.ult!.row, a.ult!.frames]).toEqual([7, 21]);
     expect(sh.projectile!.attack).toBe('linxue-lotus');
     expect(FX['linxue-lotus'].noRotate).toBeTrue();
     expect(HERO_BY_ID['linxue']).toEqual(jasmine.objectContaining({ name: 'หลินเสวี่ย', cls: 'healer', star: 3, sprite: 'hero-linxue.png' }));
@@ -370,6 +371,7 @@ describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
     expect(k.skill2.effects.map(e => e.type)).toEqual(['CLEANSE', 'HEAL', 'SHIELD']);
     expect(k.skill2.effects).toContain(jasmine.objectContaining({ type: 'CLEANSE', to: 'PRIMARY', count: 1 }));
     expect(k.ult.effects.map(e => e.type)).toEqual(['HEAL', 'CLEANSE', 'REVIVE']);
+    expect(k.ult.effects.map(e => e.onHits)).toEqual([[0], [1], [2]]);
     expect(k.healBolt).toEqual(c.healBolt);
   });
 
@@ -423,5 +425,34 @@ describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
     const k = kitOf('linxue', 'healer').skill2;
     expect(k.repeat!.count).toBe(3);
     expect(k.effects.map(e => [e.type, e.onHits])).toEqual([['CLEANSE', [0]], ['HEAL', [1]], ['SHIELD', [2]]]);
+  });
+
+  it('Ult Returning Spring Rite on its production Timeline Sync Sheet: 144 frames, charge T018, field on the team T070, heal T092 > cleanse T104 > revival T114 / T118', () => {
+    const clip = SHEETS['hero-linxue.png'].anims.ult!;
+    expect(clipClock(clip).total * 60).toBeCloseTo(144, 0);
+    const ev = (e: string) => animEvents('hero-linxue.png', 'ult').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    expect(ev('CHARGE_START')).toEqual([18]);
+    expect(ev('CHARGE_PEAK')).toEqual([52]);
+    expect(ev('FINAL_ANTICIPATION')).toEqual([60]);
+    expect(ev('SKILL_ACTIVATE')).toEqual([64]);
+    expect(ev('VFX_SPAWN')).toEqual([70]);
+    expect(ev('DAMAGE')).toEqual([92, 104, 114]);
+    expect(ev('RECOVERY_START')).toEqual([134]);
+    expect(Math.max(...clip.root!.map(k => Math.abs(k[1])))).toBeLessThanOrEqual(4);
+    expect(clip.impact).toBeUndefined();
+    expect(fxFor('hero-linxue.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['lx-ult-charge']);
+    expect(FX['lx-ult-charge'].at).toBe('self');
+    expect(fxFor('hero-linxue.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['lx-ult-main']);
+    expect(FX['lx-ult-main'].at).toBe('allies');
+    // no impact VFX / per-ally heal pulse on the heal / cleanse beats — only the localized revival cue
+    expect(fxFor('hero-linxue.png', 'ult', { on: 'impact', hit: 0 })).toEqual([]);
+    expect(fxFor('hero-linxue.png', 'ult', { on: 'impact', hit: 1 })).toEqual([]);
+    expect(fxFor('hero-linxue.png', 'ult', { on: 'impact', hit: 2 })).toEqual(['lx-ult-revive']);
+    expect(FX['lx-ult-revive'].exceptPrimary).toBeTrue();
+    // charge drains by T073 (4 frames over the field) · field ends on the clip end T143
+    expect(18 + FX['lx-ult-charge'].frames).toBe(74);
+    expect(70 + FX['lx-ult-main'].frames).toBe(144);
+    const rev = kitOf('linxue', 'healer').ult.effects[2] as { delay?: number };
+    expect(Math.round(rev.delay! * 60)).toBe(4);
   });
 });

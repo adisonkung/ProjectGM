@@ -19,7 +19,7 @@ import { BattleMetrics } from './metrics';
 import { isRanged, Positioning, SAFE_DANGER } from './positioning';
 import { FormationRuntime } from './stage/formation';
 import {
-  getActiveBattlefieldHeroes, getAliveHeroes, getAllPartyHeroes, getDeadHiddenHeroes, getDeadVisibleHeroes, PLAYER_TEAM,
+  getActiveBattlefieldHeroes, getAliveHeroes, getAllPartyHeroes, getDeadHiddenHeroes, getDeadVisibleHeroes, isDead, PLAYER_TEAM,
 } from './stage/party';
 import { resolveRules, StageBattleRules } from './stage/rules';
 import { StageFlow, StageHost } from './stage/stage-flow';
@@ -1997,6 +1997,8 @@ export class BattleEngine {
         self.events.push({ type: 'shield', src: src.id, dst: dst.id, amount });
       },
       cleanse: (src, dst, count) => self.cleanse(src, dst, count),
+      canRevive: dead =>
+        !self.flow.outcome && self.flow.rules.allowRevive && isDead(dead) && self.flow.limitedRevives < self.flow.rules.partyReviveLimit,
       revive: (src, dead, hpPct) =>
         self.reviveHero({ unitId: dead.id, reviveHpPercent: hpPct, sourceUnitId: src.id, sourceId: `ult:${src.heroId ?? src.cls}`, countsTowardLimit: true }).ok,
       freeCellNear: (at, from) => self.freeCellNear(at, from),

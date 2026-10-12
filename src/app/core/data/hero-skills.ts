@@ -307,7 +307,14 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
       ult: {
         ...healer.ult, name: 'พิธีคืนวสันต์', label: 'Returning Spring Rite',
-        effects: [...healer.ult.effects.slice(0, 1), { type: 'CLEANSE', to: 'ALL_ALLIES' }, ...healer.ult.effects.slice(1)],
+        // production sync sheet — three beats on the clip's DAMAGE events: team heal (class numbers) T092 → cleanse every
+        // ally T104 → revival T114: the dead ally is chosen now (cue FX on it) and comes back 4 frames later (T118)
+        repeat: { count: 3, gap: 0.2 },
+        effects: [
+          { type: 'HEAL', area: 'ALL_ALLIES', atk: 1.5, maxHpPct: 0.15, onHits: [0] },
+          { type: 'CLEANSE', to: 'ALL_ALLIES', onHits: [1] },
+          { type: 'REVIVE', hpPct: 0.4, count: 1, delay: 4 / 60, onHits: [2] },
+        ],
       },
     },
   },
