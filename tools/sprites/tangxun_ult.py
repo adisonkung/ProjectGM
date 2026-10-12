@@ -183,18 +183,20 @@ SC['residual'] = SC['impact']
 
 # ------------------------------------------------------------------ plans: T → (frame 1-based, alpha, scale mul)
 CHARGE_PLAN = {}
-for t0, f in [(18, 1), (21, 2), (24, 3), (28, 4), (31, 5), (34, 6), (36, 7), (38, 8), (40, 9), (42, 10), (45, 11), (48, 12),
-              (51, 13)]:
+# user 2026-10: charge done → the blades are THROWN at T040 (charge f11–f13 stream out of his hand) → they fly in and
+# surround the target (SURROUND) → only then the storm / array (MAIN) forms → minor cuts → explosion
+for t0, f in [(18, 1), (21, 2), (24, 3), (27, 4), (30, 5), (33, 6), (35, 7), (37, 8), (38, 9), (39, 10), (40, 11), (42, 12),
+              (44, 13)]:
     for t in range(t0, t0 + 3):
         CHARGE_PLAN.setdefault(t, f)
 for t in list(CHARGE_PLAN):
-    CHARGE_PLAN[t] = (CHARGE_PLAN[t], 1.0 if t < 42 else max(0.3, 1 - (t - 41) * 0.055), 1.0)
-MAIN_KEYS = [(40, 1), (43, 2), (48, 3), (54, 4), (60, 5), (68, 6), (80, 7), (86, 8), (96, 9), (104, 10), (112, 11),
+    CHARGE_PLAN[t] = (CHARGE_PLAN[t], 1.0 if t < 43 else max(0.25, 1 - (t - 42) * 0.18), 1.0)
+MAIN_KEYS = [(50, 1), (52, 2), (55, 3), (58, 4), (62, 5), (68, 6), (80, 7), (86, 8), (96, 9), (104, 10), (112, 11),
              (120, 12), (130, None)]
 MAIN_PLAN = {}
 for (t0, f), (t1, _) in zip(MAIN_KEYS, MAIN_KEYS[1:]):
     for t in range(t0, t1):
-        a = 1.0 if t < 124 else [0.85, 0.7, 0.55, 0.4, 0.3, 0.2][t - 124]
+        a = (min(1.0, 0.35 + 0.16 * (t - 50)) if t < 124 else [0.85, 0.7, 0.55, 0.4, 0.3, 0.2][t - 124])
         MAIN_PLAN[t] = (f, a, 1.0)
 IMP_KEYS = [(130, 1, 0.8), (131, 1, 0.88), (132, 1, 0.95), (133, 1, 1.0), (134, 1, 1.0), (135, 2, 1.0), (136, 2, 1.0),
             (137, 3, 1.0), (138, 4, 1.0), (139, 5, 1.0)]
@@ -247,26 +249,55 @@ def tile(fr, s, alpha=1.0, glow=None):
     return a, px, py
 
 
-# ---- final convergence: 8 blades (the S2 single-blade art) spiral in from the array onto the target, T124–T129
+# ---- surround: 8 blades (the S2 single-blade art) thrown at T040 fly in from Tang Xun's side, fan out and take a ring
+# around the target (T047), orbit pointing inward while the storm forms (MAIN from T050), fade by T056
 BLADE = np.array(Image.open('public/sprites/fx-tangxun-s2-blade.png').convert('RGBA'))
 BLADE = BLADE[:, 4 * (BLADE.shape[1] // 8):5 * (BLADE.shape[1] // 8)]      # f5: blade + jade trail, tip at the centre
-CONV_R = {124: 74, 125: 66, 126: 56, 127: 42, 128: 27, 129: 12}
-CONV_SPIN = {124: 0, 125: 9, 126: 20, 127: 34, 128: 50, 129: 68}
+SUR_T0, SUR_ARRIVE, SUR_END = 40, 47, 56
+SUR_FROM = (-175, -4)                   # launch point relative to the target centre (Tang Xun's hand, in front of him)
+SUR_RING = 64                           # ring radius (x), ellipse 0.55
+SUR_PLAN = list(range(SUR_T0, SUR_END))
 
 
-def converge_tile(t):
-    R = 90
-    img = Image.new('RGBA', (2 * R + 60, 2 * R + 60), (0, 0, 0, 0))
-    c = img.width / 2
+def _ring(k, t):
+    spin = 0 if t <= SUR_ARRIVE else 11 * (t - SUR_ARRIVE)
+    th = np.radians(k * 45 + 22.5 + spin)
+    return th, np.array([SUR_RING * np.cos(th), SUR_RING * np.sin(th) * 0.55])
+
+
+def _blade_pos(k, t):
+    """(position, angle) of blade k at T (relative to the target centre)"""
+    th, ring = _ring(k, t)
+    if t >= SUR_ARRIVE:
+        inward = np.degrees(np.arctan2(np.sin(th) * 0.55, -np.cos(th)))
+        return ring, inward
+    u = (t - SUR_T0) / (SUR_ARRIVE - SUR_T0)
+    e = 1 - (1 - u) ** 2                                   # ease-out flight
+    p0 = np.array(SUR_FROM, float) + np.array([0, (k - 3.5) * 2])
+    ctrl = (p0 + ring) / 2 + np.array([0, -38 + (k % 4) * 14])  # fan: each blade on its own arc
+    pos = (1 - e) ** 2 * p0 + 2 * (1 - e) * e * ctrl + e ** 2 * ring
+    d = 2 * (1 - e) * (ctrl - p0) + 2 * e * (ring - ctrl)  # velocity → blade direction (PIL rotates CCW, y down)
+    ang = np.degrees(np.arctan2(-d[1], d[0]))
+    if u > 0.7:                                            # turn to face the target as it settles
+        inward = np.degrees(np.arctan2(np.sin(th) * 0.55, -np.cos(th)))
+        k2 = (u - 0.7) / 0.3
+        ang = ang + ((inward - ang + 180) % 360 - 180) * k2
+    return pos, ang
+
+
+def surround_tile(t):
+    x0, x1, y0, y1 = SUR_FROM[0] - 40, SUR_RING + 40, -80, 60
+    img = Image.new('RGBA', (x1 - x0, y1 - y0), (0, 0, 0, 0))
     b = Image.fromarray(BLADE)
+    alpha = 1.0 if t < 52 else max(0.0, 1 - (t - 51) * 0.22)
     for k in range(8):
-        th = np.radians(k * 45 + CONV_SPIN[t])
-        x, y = c + CONV_R[t] * np.cos(th), c + CONV_R[t] * np.sin(th) * 0.55
-        ang = np.degrees(np.arctan2(np.sin(th) * 0.55, -np.cos(th)))      # point at the centre (PIL rotates CCW)
+        pos, ang = _blade_pos(k, t)
         r = b.rotate(ang, Image.BICUBIC, expand=True)
-        img.alpha_composite(r, (round(x - r.width / 2), round(y - r.height / 2)))
+        a = np.array(r)
+        a[..., 3] = (a[..., 3] * alpha).astype(np.uint8)
+        img.alpha_composite(Image.fromarray(a), (round(pos[0] - x0 - r.width / 2), round(pos[1] - y0 - r.height / 2)))
     a, pad = bloom(np.array(img), 2, 0.6)
-    return a, c + pad, c + pad
+    return a, -x0 + pad, -y0 + pad
 
 
 # ---- jade shockwave ring on the ground under the target, T130–T141 (under the units)
@@ -285,7 +316,6 @@ def shock_tile(t):
     return a, cx + pad, cy + pad
 
 
-CONV_PLAN = sorted(CONV_R)
 SHOCK_PLAN = list(range(FINAL, FINAL + 12))
 
 
@@ -308,9 +338,9 @@ def tracks_at(t):
         f, a, m = IMP_PLAN[t]
         img, px, py = tile(IMPACT[f - 1], SC['impact'] * m, a, GLOW['impact'])
         out.append(('impact', f, img, px, py, (TX, TCY), a, 'over'))
-    if t in CONV_R:
-        img, px, py = converge_tile(t)
-        out.append(('converge', t - 123, img, px, py, (TX, TCY), 1.0, 'over'))
+    if t in SUR_PLAN:
+        img, px, py = surround_tile(t)
+        out.append(('surround', t - SUR_T0 + 1, img, px, py, (TX, TCY), 1.0, 'over'))
     if t in SHOCK_PLAN:
         img, px, py = shock_tile(t)
         out.append(('shock', t - FINAL + 1, img, px, py, (TX, GROUND - 2), 1.0, 'under'))
@@ -402,7 +432,7 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '60', '-i', f'{tmp}
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '60', '-i', f'{tmp}/f%03d.png', '-vf',
                 'fps=30,scale=645:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=200[p];[b][p]paletteuse=dither=bayer',
                 '-loop', '0', f'{OUT}/tangxun_ult_preview_30fps.gif'], check=True)
-KEYS = [0, 24, 36, 48, 72, 80, 96, 108, 120, 125, 127, 129, 130, 131, 133, 136, 140, 146, 104, 116]
+KEYS = [0, 24, 36, 40, 42, 44, 46, 48, 50, 53, 56, 62, 80, 96, 108, 120, 128, 130, 133, 140]
 KEYS = sorted(KEYS)
 cw, ch = 430, 200
 sheet = Image.new('RGB', (cw * 4, ch * 5))
@@ -438,12 +468,13 @@ def bake_tiles(name, tiles, frame_ms=2000 / 60):
 
 game_fx = {
     'charge': {**bake('charge', CHARGE_PLAN, SC['charge'], CHARGE, sorted(CHARGE_PLAN), GLOW['charge']), 'dy': 27.25},
-    'main': {**bake('main', MAIN_PLAN, SC['main'], MAIN, sorted(MAIN_PLAN), GLOW['main']), 'dy': round(27.25 - 2 * 1.25, 2)},
+    'main': {**bake('main', MAIN_PLAN, SC['main'], MAIN, sorted(MAIN_PLAN), GLOW['main']), 'dy': round(27.25 - 2 * 1.25, 2),
+             'delayMs': round((min(MAIN_PLAN) - 40) * 1000 / FPS)},
     'impact': {**bake('impact', IMP_PLAN, SC['impact'], IMPACT, sorted(IMP_PLAN), GLOW['impact']), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2)},
     'residual': {**bake('residual', RES_PLAN, SC['residual'], RESIDUAL, sorted(RES_PLAN), GLOW['residual']), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2),
                  'delayMs': round((140 - FINAL) * 1000 / FPS)},
-    # 60 FPS strip (6 frames T124–T129) — the blades must visibly travel in
-    'converge': {**bake_tiles('converge', [converge_tile(t) for t in CONV_PLAN], 1000 / 60), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2)},
+    # 60 FPS strip (16 frames T040–T055) — the thrown blades must visibly travel in
+    'surround': {**bake_tiles('surround', [surround_tile(t) for t in SUR_PLAN], 1000 / 60), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2)},
     'shock': {**bake_tiles('shock', [shock_tile(t) for t in SHOCK_PLAN[::2]]), 'dy': round(27.25 - 2 * 1.25, 2)},
 }
 steps = [round((b - a + 1) * 1000 / FPS) for a, b, _ in CHAR]
@@ -489,7 +520,7 @@ meta = {
     'gameSteps': steps,
     'hits': HITS + [FINAL],
     'events': [[0, 'CAST_START', 'C01'], [10, 'PREPARE_ARRAY', 'C02'], [18, 'CHARGE_VFX_START', 'C03'], [28, 'CHARGE_BUILD', ''],
-               [36, 'CHARGE_PEAK', ''], [40, 'MAIN_VFX_SPAWN', 'C04 ปล่อยค่าย'], [48, 'ARRAY_FORMED', ''], [60, 'ORBIT_START', 'C06'],
+               [36, 'CHARGE_PEAK', ''], [40, 'MAIN_VFX_SPAWN', 'C04 ปามีด 8 เล่ม'], [47, 'BLADES_SURROUND', 'มีดล้อมเป้า'], [50, 'ARRAY_FORMED', 'พายุค่ายมีดก่อตัว'], [60, 'ORBIT_START', 'C06'],
                [68, 'TARGET_SCAN', ''], [74, 'MARK_PRIORITY_CHECK', 'แผลเปิดก่อน'], [80, 'TARGET_LOCK', 'C08'],
                [84, 'ARRAY_COMPRESSION_START', 'C09'], [96, 'ARRAY_TIGHT', ''], [104, 'CONVERGENCE_START', 'C11'],
                [108, 'MULTI_HIT_1', '10 %'], [112, 'MULTI_HIT_2', '10 %'], [116, 'MULTI_HIT_3', '10 %'], [120, 'MULTI_HIT_4', '15 %'],
@@ -498,17 +529,18 @@ meta = {
                [146, 'RECOVERY_START', 'C17'], [149, 'ANIMATION_END', '']],
     'lanes': 9,
     'tracks': [['charge', 'L3 Ultimate Charge VFX', [150, 120, 210], 'fx-tangxun-ult-charge (ult_charge.png 13 fr)', 'L3 · หลังตัว',
-                'เท้าถังซวิ่น (วงพื้น)', 'T018 ไอลม → มีดโผล่ → วงหมุน T036 peak → T045 มีดพุ่งออกไปทางเป้า → จางถึง T053'],
+                'เท้าถังซวิ่น (วงพื้น)', 'T018 ไอลม → มีดโผล่ → วงหมุน T036 peak → T040 ปามีดออกไปทางเป้า → จางถึง T046'],
+               ['surround', 'L3b Blade Surround', [140, 255, 215], 'fx-tangxun-ult-surround (มีด S2 × 8, 60 FPS)', 'L4 · หน้า',
+                'กลางตัวเป้า (ปล่อยจากฝั่งถังซวิ่น)', 'T040 ปามีด 8 เล่ม → บินโค้งกระจาย → T047 ล้อมเป้าเป็นวง → หมุน → จาง T052–T055'],
                ['main', 'L4 Ultimate Main VFX', [80, 200, 150], 'fx-tangxun-ult-main (ult_main.png 12 fr)', 'L4 · หน้า',
-                'ตราบนพื้นใต้เป้า', 'T040 ตรา → T048 ค่ายก่อตัว → T080 เสาล็อก → T096 บีบแน่น → จาง T124–T129'],
+                'ตราบนพื้นใต้เป้า', 'T050 ตรา (หลังมีดล้อมเป้า) → T055 ค่ายก่อตัว → T080 เสาล็อก → T096 บีบแน่น → จาง T124–T129'],
                ['mark', 'L5 Target / Mark State', [240, 150, 220], 'TargetRule FOCUS → MARKED (open_wound)', '-', '-',
                 'T068 สแกน · T074 เช็กแผลเปิด · T080 ล็อก'],
                ['spark', 'L6 Minor Hit Events', [120, 230, 200], 'fx-tangxun-s1-impact3 (ประกายหยกเล็ก ใช้ซ้ำ)', 'L6 · หน้า',
                 'จุดบนตัวเป้า 4 จุด', 'T108 / T112 / T116 / T120 = 10 / 10 / 10 / 15 %'],
                ['minor', 'L6b Minor Damage', [230, 160, 90], 'engine (repeat 5)', '-', '-', 'ตัดร่าย Break 60 ที่ครั้งแรก'],
                ['final', 'L7 Final Damage', [230, 90, 90], 'engine', '-', '-', 'T130 = 55 % คริแน่นอน + รอบตัว 8 ช่อง'],
-               ['converge', 'L7b Blade Convergence', [140, 255, 215], 'fx-tangxun-ult-converge (มีด S2 × 8, 60 FPS)', 'L7 · หน้า',
-                'กลางตัวเป้า', 'T124 มีด 8 เล่มหมุนเกลียวเข้าหาเป้า → T129 ถึงกลางตัว'],
+
                ['impact', 'L8 Ultimate Impact VFX', [255, 200, 140], 'fx-tangxun-ult-impact (ult_impact.png แถว 1, 5 fr) + bloom', 'L8 · หน้าสุด',
                 'กลางตัวเป้า', 'T130 → peak T133 (2.0 ตัว) → T139'],
                ['shock', 'L8b Shockwave', [120, 240, 190], 'fx-tangxun-ult-shock (วงพื้นหยก)', 'L8 · ใต้ตัว',
@@ -517,23 +549,23 @@ meta = {
                 'กลางตัวเป้า', 'T140 → T157 ไม่มีดาเมจ'],
                ['hitstop', 'L10 Hitstop', [255, 255, 255], 'AnimDef.impact', '-', '-', 'ครั้งย่อย 1 เฟรม · ปิดฉาก 6 เฟรม']],
     'trackNames': {'charge': 'ชาร์จ', 'main': 'ค่ายมีด', 'mark': 'สแกน / ล็อก', 'spark': 'ประกายย่อย', 'minor': 'ดาเมจย่อย',
-                   'final': 'ดาเมจปิด', 'converge': 'มีดรวมศูนย์', 'shock': 'คลื่นพื้น', 'impact': 'ระเบิด', 'residual': 'เศษค่าย', 'hitstop': 'หยุดเฟรม'},
+                   'final': 'ดาเมจปิด', 'surround': 'มีดล้อมเป้า', 'shock': 'คลื่นพื้น', 'impact': 'ระเบิด', 'residual': 'เศษค่าย', 'hitstop': 'หยุดเฟรม'},
     'layers': [[1, 'ตัวละคร (L1)'], [2, 'Root X (L2)'], [3, 'ชาร์จ (L3)'], [4, 'ค่ายมีด (L4)'], [5, 'ล็อกเป้า (L5)'],
                [6, 'ดาเมจย่อย (L6)'], [7, 'ดาเมจปิด (L7)'], [8, 'Impact (L8)'], [9, 'Residual (L9)'], [10, 'Hitstop (L10)'],
                [11, 'สั่นกล้อง (L11)'], [12, 'ซูม (L12)']],
     'shake': {str(k): list(v) for k, v in SHAKE.items()},
-    'thumbs': [0, 36, 48, 80, 96, 108, 127, 133, 140, 146],
-    'thumbLabels': {0: 'READY', 36: 'CHARGE PEAK', 48: 'ARRAY', 80: 'LOCK', 96: 'TIGHT', 108: 'HIT 1', 127: 'CONVERGE',
+    'thumbs': [0, 36, 44, 50, 80, 96, 108, 133, 140, 146],
+    'thumbLabels': {0: 'READY', 36: 'CHARGE PEAK', 44: 'BLADES THROWN', 50: 'SURROUND', 80: 'LOCK', 96: 'TIGHT', 108: 'HIT 1', 128: 'ALIGN',
                     133: 'IMPACT PEAK', 140: 'RESIDUAL', 146: 'RECOVERY'},
     'thumbCrop': [20 * UP, 40 * UP, 420 * UP, 185 * UP],
     'travelLabel': 'L2 Root X (px) — ไม่เกิน 12 px ยืนที่เดิม', 'heightLabel': 'Y movement (px) — ยืนพื้น',
     'notes': [
         'ถังซวิ่นยืนที่เดิมตลอด (root ไม่เกิน 12 px) ไม่เข้าระยะประชิด — พลังมาจากค่ายมีด ไม่ใช่การเคลื่อนที่',
-        'Charge รอบตัว (หลังตัวละคร) จางลงตั้งแต่ T042 ตอน Main เกิดที่เป้า T040 — ไม่ทึบเต็มพร้อมกันนาน',
+        'ลำดับ: ชาร์จเสร็จ T036 > ปามีดออก T040 > มีด 8 เล่มบินไปล้อมเป้า T047 > พายุค่ายมีดก่อตัว T050 > บีบ > ฟันย่อย > ระเบิด T130',
         'เลือกเป้า: โฟกัสของผู้เล่น แล้ว แผลเปิด (Open Wound จาก S2) แล้ว แถวหลัง แล้ว ผู้ร่าย แล้ว เป้าปัจจุบัน',
         'ครั้งย่อย T108 / T112 / T116 / T120 = 10 / 10 / 10 / 15 % ใช้ประกายหยกเล็ก ไม่ใช้ Impact ใหญ่ · hit-stop 1 เฟรม สั่น 1-2 px',
         'ปิดฉาก T130 = 55 % คริแน่นอน + รอบตัว 8 ช่อง · Impact 2.0 ตัว peak T133 · hit-stop 6 เฟรม สั่น 8 px แฟลช 180 ms · ไม่ระเบิดทั้งสนาม',
-        'อลังการขึ้น: ทุกชั้นภาพวาดมี bloom หยก · ค่ายมีด 1.95 ตัว · T124–T129 มีด 8 เล่มหมุนเกลียวรวมเข้าเป้า · T130 คลื่นพื้นหยกขยาย ~3 ช่อง',
+        'อลังการขึ้น: ทุกชั้นภาพวาดมี bloom หยก · ค่ายมีด 1.95 ตัว · T040 ปามีด 8 เล่มบินไปล้อมเป้า (T047) ก่อนพายุค่ายมีดก่อตัว (T050) · T130 คลื่นพื้นหยกขยาย ~3 ช่อง',
         'Residual T140 ไม่มีดาเมจ · ซูม 4 % T124 ถึง T133 กลับ T140 (preview เท่านั้น)',
         'VFX เป็นภาพวาด: alpha / สีแยกจากพื้น magenta, ย่อแบบเนียน ไม่ pixelated',
     ],

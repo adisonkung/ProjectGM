@@ -352,7 +352,7 @@ export const SHEETS: Record<string, SheetDef> = {
     fx: {
       skill: ['tx-s1-impact1', 'tx-s1-impact2', 'tx-s1-impact3'],
       skill2: ['tx-s2-impact1', 'tx-s2-impact2', 'tx-s2-impact3'],
-      ult: ['tx-ult-charge', 'tx-ult-main', 'tx-ult-spark0', 'tx-ult-spark1', 'tx-ult-spark2', 'tx-ult-spark3', 'tx-ult-converge', 'tx-ult-impact', 'tx-ult-shock', 'tx-ult-residual'],
+      ult: ['tx-ult-charge', 'tx-ult-surround', 'tx-ult-main', 'tx-ult-spark0', 'tx-ult-spark1', 'tx-ult-spark2', 'tx-ult-spark3', 'tx-ult-impact', 'tx-ult-shock', 'tx-ult-residual'],
     },
   },
   'hero-bailong.png': {
@@ -516,11 +516,11 @@ export const FX: Record<string, FxDef> = {
   // charge around him (CHARGE_START T018, behind, ends streaming toward the target) · the array at the locked target's
   // feet (VFX_SPAWN T040 → fades T124–T129) · small jade sparks on the 4 minor cuts · impact (hit 5, peak T133) · residual (T140)
   'tx-ult-charge': {
-    file: 'fx-tangxun-ult-charge.png', frames: 18, w: 306, h: 151, frameMs: 33.33, at: 'self', orient: 'flip', event: 'CHARGE_START', layer: 'under',
+    file: 'fx-tangxun-ult-charge.png', frames: 15, w: 306, h: 151, frameMs: 33.33, at: 'self', orient: 'flip', event: 'CHARGE_START', layer: 'under',
     pivot: [0.2523, 0.7998], dy: 27.25, scale: 1 / 1.5,
   },
   'tx-ult-main': {
-    file: 'fx-tangxun-ult-main.png', frames: 45, w: 161, h: 173, frameMs: 33.33, at: 'target', orient: 'flip', on: 'vfx',
+    file: 'fx-tangxun-ult-main.png', frames: 40, w: 161, h: 173, frameMs: 33.33, at: 'target', orient: 'flip', on: 'vfx', delayMs: 167,
     pivot: [0.5025, 0.7909], dy: 24.75, scale: 1 / 1.5,
   },
   'tx-ult-spark0': {
@@ -539,10 +539,11 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 3,
     dx: 12.5, dy: -32.75, scale: 1 / 1.5, pixelated: true,
   },
-  // "more spectacular" pass: 8 blades spiral in onto the target T124–T129 (60 FPS strip) · jade ground shockwave from T130
-  'tx-ult-converge': {
-    file: 'fx-tangxun-ult-converge.png', frames: 6, w: 254, h: 254, frameMs: 16.67, at: 'target', orient: 'flip', event: 'FINAL_ANTICIPATION',
-    pivot: [0.5, 0.5], dy: -22.75, scale: 1 / 1.5,
+  // the 8 thrown blades (S2 single-blade art) fly in from Tang Xun's side and ring the target T040–T055 (60 FPS) — the
+  // storm / array ('tx-ult-main') forms only after they surround it (+167 ms) · jade ground shockwave from T130
+  'tx-ult-surround': {
+    file: 'fx-tangxun-ult-surround.png', frames: 16, w: 333, h: 154, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',
+    pivot: [0.6667, 0.5649], dy: -22.75, scale: 1 / 1.5,
   },
   'tx-ult-shock': {
     file: 'fx-tangxun-ult-shock.png', frames: 6, w: 296, h: 115, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 4, layer: 'under',

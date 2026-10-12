@@ -332,9 +332,11 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     const fin = ult.effects.find(e => e.onHits?.includes(4))! as { guaranteedCrit?: boolean; area: string };
     expect([fin.area, fin.guaranteedCrit]).toEqual(['ADJACENT_8', true]);
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['tx-ult-charge']);
-    expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['tx-ult-main']);
+    // blades thrown at T040 surround the target first; the array storm follows after they land
+    expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['tx-ult-surround', 'tx-ult-main']);
+    expect(FX['tx-ult-main'].delayMs).toBeGreaterThan(100);
     for (const i of [0, 1, 2, 3]) expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: i })).toEqual([`tx-ult-spark${i}`]);
-    expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual(['tx-ult-converge']);
+    expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual([]);
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: 4 })).toEqual(['tx-ult-impact', 'tx-ult-shock', 'tx-ult-residual']);
     expect(FX['tx-ult-residual'].delayMs).toBeCloseTo(167, -1);
     const imp = clip.impact as { hitStopMs?: number; shakePx?: number }[];
