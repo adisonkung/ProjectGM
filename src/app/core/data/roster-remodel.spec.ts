@@ -373,22 +373,28 @@ describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
     expect(k.healBolt).toEqual(c.healBolt);
   });
 
-  it('S1 Lotus Prayer on its Timeline Sync Sheet: 1.00 s, release T035 (bloom on the ally), heal T043 at the bloom peak, splash lotus on the neighbours only', () => {
+  it('S1 Lotus Prayer on its production Timeline Sync Sheet: 45 frames, burst T024, primary heal T025, splash heal T031, recovery T036', () => {
     const clip = SHEETS['hero-linxue.png'].anims.skill!;
-    expect(clipClock(clip).total * 60).toBeCloseTo(60, 0);
+    expect(clipClock(clip).total * 60).toBeCloseTo(45, 0);
     const ev = (e: string) => animEvents('hero-linxue.png', 'skill').filter(x => x.event === e).map(x => Math.round(x.t * 60));
-    expect(ev('ANTICIPATION_PEAK')).toEqual([18]);
-    expect(ev('CHARGE_PEAK')).toEqual([30]);
-    expect(ev('VFX_SPAWN')).toEqual([35]);
-    expect(ev('DAMAGE')).toEqual([43]);
-    expect(ev('RECOVERY_START')).toEqual([47]);
-    expect(clip.root).toBeUndefined();
+    expect(ev('ANTICIPATION_PEAK')).toEqual([14]);
+    expect(ev('STRIKE_START')).toEqual([18]);
+    expect(ev('SKILL_ACTIVATE')).toEqual([22]);
+    expect(ev('VFX_SPAWN')).toEqual([24]);
+    expect(ev('DAMAGE')).toEqual([25, 31]);
+    expect(ev('RECOVERY_START')).toEqual([36]);
+    expect(Math.max(...clip.root!.map(k => Math.abs(k[1])))).toBeLessThanOrEqual(4);
     expect(clip.impact).toBeUndefined();
     expect(fxFor('hero-linxue.png', 'skill', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['lx-s1-bloom']);
-    expect(fxFor('hero-linxue.png', 'skill', { on: 'impact', hit: 0 })).toEqual(['lx-s1-splash']);
+    expect(fxFor('hero-linxue.png', 'skill', { on: 'impact', hit: 0 })).toEqual([]);
+    expect(fxFor('hero-linxue.png', 'skill', { on: 'impact', hit: 1 })).toEqual(['lx-s1-splash']);
     expect(FX['lx-s1-splash'].exceptPrimary).toBeTrue();
-    expect(FX['lx-s1-splash'].w).toBeLessThan(FX['lx-s1-bloom'].w);
-    // the bloom reaches its peak (strip frame 5 of 12 at 30 FPS) on the heal
-    expect(Math.round((35 / 60 + 4 * FX['lx-s1-bloom'].frameMs / 1000) * 60)).toBe(43);
+    // nearby copy = 65 % of the primary burst
+    expect(FX['lx-s1-splash'].w / FX['lx-s1-bloom'].w).toBeLessThan(0.7);
+    // the burst peaks (strip frame 4 at 60 FPS: spawn T024 → T027) two frames after the primary heal
+    expect(24 + Math.round(3 * FX['lx-s1-bloom'].frameMs / (1000 / 60))).toBe(27);
+    const k = kitOf('linxue', 'healer').skill;
+    expect(k.repeat!.count).toBe(2);
+    expect(k.effects.map(e => e.onHits)).toEqual([[0], [1]]);
   });
 });

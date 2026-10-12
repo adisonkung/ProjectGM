@@ -89,17 +89,20 @@ describe('Lin Xue kit in the engine (HEAL around a target · CLEANSE · SHIELD t
     expect(tx.life).toBe('REVIVING');
   });
 
-  it('Lotus Prayer cast: the heal lands on the clip DAMAGE (T043) and its impact lists the healed allies (splash lotus FX)', () => {
+  it('Lotus Prayer cast: primary heal on DAMAGE #1 (T025), the allies around it on DAMAGE #2 (T031) — each impact lists who it healed', () => {
     const b = battle();
     const [lx, bl, yz, tx] = ['linxue', 'bailong', 'yuezheng', 'tangxun'].map(b.hero);
     b.log.length = 0;
     b.e.skills.use(lx, 'skill', b.e.skills.kit(lx).skill, bl);
-    b.run(1.2);
-    const imp = b.log.find(ev => ev.type === 'impact' && ev.src === lx.id) as { dst?: number; hits: number[] } | undefined;
-    expect(imp).toBeDefined();
-    expect(imp!.dst).toBe(bl.id);
-    expect(imp!.hits).toContain(bl.id);
-    expect(imp!.hits).toContain(yz.id);
-    expect(imp!.hits).not.toContain(tx.id);
+    b.run(1.0);
+    const imps = b.log.filter(ev => ev.type === 'impact' && ev.src === lx.id) as { dst?: number; index: number; hits: number[] }[];
+    expect(imps.length).toBe(2);
+    expect(imps[0].dst).toBe(bl.id);
+    expect(imps[0].hits).toEqual([bl.id]);
+    expect(imps[1].hits).toContain(yz.id);
+    expect(imps[1].hits).not.toContain(bl.id);
+    expect(imps[1].hits).not.toContain(tx.id);
+    const heals = b.log.filter(ev => ev.type === 'heal' && ev.src === lx.id) as { dst: number }[];
+    expect(heals[0].dst).toBe(bl.id);
   });
 });

@@ -285,10 +285,12 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       attack: { ...healer.attack, id: 'light_bolt', name: 'บัววิญญาณ', label: 'Spirit Lotus' },
       skill: {
         ...healer.skill, name: 'บทสวดบัวสวรรค์', label: 'Lotus Prayer', target: 'LOWEST_HP_ALLY',
-        // the lotus blooms on the weakest ally (100 % ATK + 8 % max HP), its petals touch the allies around it (40 % + 3 %)
+        // production sync sheet: the Heal Burst heals the weakest ally first (T025, 100 % ATK + 8 % max HP), then the
+        // allies around it (T031, 40 % + 3 %) — two beats on the clip's DAMAGE events
+        repeat: { count: 2, gap: 0.1, keepAfterKill: true },
         effects: [
-          { type: 'HEAL', area: 'PRIMARY', atk: 1, maxHpPct: 0.08 },
-          { type: 'HEAL', area: 'ADJACENT_8', center: 'TARGET', atk: 0.4, maxHpPct: 0.03, skipPrimary: true },
+          { type: 'HEAL', area: 'PRIMARY', atk: 1, maxHpPct: 0.08, onHits: [0] },
+          { type: 'HEAL', area: 'ADJACENT_8', center: 'TARGET', atk: 0.4, maxHpPct: 0.03, skipPrimary: true, onHits: [1] },
         ],
         ai: { tier: 'HEAL', allyHpBelow: 0.8 },
       },

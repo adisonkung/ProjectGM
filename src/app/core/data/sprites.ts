@@ -370,18 +370,19 @@ export const SHEETS: Record<string, SheetDef> = {
       // raise staff F1–F3 → lotus released F4 (projectile) → recover F5–F6
       attack: { row: 3, frames: 6, ms: 85, events: { DAMAGE: 3, RECOVERY_START: 4 } },
       die: { row: 4, frames: 5, ms: 140 },
-      // S1 Lotus Prayer — Timeline Sync Sheet (tools/sprites/linxue_s1.py, 60 FPS T000–T059 = 1.00 s): ready C01 ·
-      // eyes-closed prayer C02–C04 (peak T018) · staff raised, the lotus head glows C05–C06 (T023 / peak T030) · palm out
-      // C07 = SKILL_ACTIVATE + VFX_SPAWN T035 (the bloom opens on the ally) · hold C08, heal T043 at the bloom peak ·
-      // recovery C09 (T047) · C10 · root 0 (stationary cast) · no hit-stop / shake (a heal)
+      // S1 Lotus Prayer — production Timeline Sync Sheet (tools/sprites/linxue_s1.py, 60 FPS T000–T044 ≈ 0.75 s):
+      // target / ready C01 (find lowest-HP ally T002, lock T006) · prayer C02–C04 (T008, peak T014) · release C05–C07
+      // (T018, staff / hand release point T022) · hold C08: Heal Burst spawns on the primary T024 → PRIMARY HEAL T025 →
+      // peak T027 → nearby check T030 → SPLASH HEAL T031 · recovery C09 (T036) · C10 · root ≤ 2 px · no shake / zoom
       skill: {
-        row: 5, frames: 10, ms: 100,
+        row: 5, frames: 10, ms: 75,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        steps: [83, 100, 100, 100, 100, 100, 67, 133, 100, 117],
+        steps: [117, 50, 67, 67, 33, 33, 33, 200, 83, 67],
         events: {
-          CAST_START: 0, ANTICIPATION_PEAK: 3.167, CHARGE_START: 4.0, CHARGE_PEAK: 5.167, SKILL_ACTIVATE: 6.0, VFX_SPAWN: 6.0,
-          DAMAGE: 7.5, RECOVERY_START: 8.0,
+          CAST_START: 0, ANTICIPATION_PEAK: 3.0, STRIKE_START: 4.0, SKILL_ACTIVATE: 6.0, VFX_SPAWN: 7.0,
+          DAMAGE: [7.083, 7.583], RECOVERY_START: 8.0,
         },
+        root: [[0.0, 0.0, 0], [4.0, 0.0, 0], [5.0, 1.0, 0], [6.0, 2.0, 0], [7.917, 2.0, 0], [8.0, 1.9, 0], [8.8, 0.8, 0], [10.0, 0.0, 0]],
       },
     },
     projectile: { attack: 'linxue-lotus' },
@@ -593,13 +594,16 @@ export const FX: Record<string, FxDef> = {
   'tangxun-knife': { file: 'fx-tangxun-knife.png', frames: 1, w: 28, h: 4, frameMs: 60, at: 'target', angle0: 0, scale: 0.9, pixelated: true },
   // Lin Xue S1 Lotus Prayer (tools/sprites/linxue_s1.py): the bloom on the healed ally (spark → bud → peak at the heal →
   // petals scatter, 12 fr 30 FPS from VFX_SPAWN) · the same lotus at 55 % on each ally the splash heal reached
+  // Lin Xue S1 Lotus Prayer (tools/sprites/linxue_s1.py, 60 FPS strips): the Heal Burst on the primary at 100 % (spawn
+  // T024 → peak T027 → petals → gone T043) · the same asset from the bud (f3) at 65 % scale / 60 % opacity on each
+  // ally the splash heal reached (hit 1 = T031), never on the primary
   'lx-s1-bloom': {
-    file: 'fx-linxue-s1-bloom.png', frames: 12, w: 86, h: 99, frameMs: 33.33, at: 'target', orient: 'flip', on: 'vfx',
+    file: 'fx-linxue-s1-bloom.png', frames: 20, w: 86, h: 99, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',
     pivot: [0.5082, 0.5021], dy: -22.75, scale: 1 / 1.5,
   },
   'lx-s1-splash': {
-    file: 'fx-linxue-s1-splash.png', frames: 7, w: 48, h: 55, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
-    perHit: 8, exceptPrimary: true, pivot: [0.5102, 0.5052], dy: -17.75, scale: 1 / 1.5,
+    file: 'fx-linxue-s1-splash.png', frames: 12, w: 57, h: 65, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 1, perHit: 8, exceptPrimary: true, pivot: [0.5045, 0.5024], dy: -17.75, scale: 1 / 1.5,
   },
   'linxue-lotus': { file: 'fx-linxue-lotus.png', frames: 1, w: 22, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.3, noRotate: true, pixelated: true },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
