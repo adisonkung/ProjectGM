@@ -251,7 +251,7 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     expect(sh.projectile!.attack).toBe('tangxun-knife');
     expect(FX['tangxun-knife'].angle0).toBe(0);
     expect(HERO_BY_ID['tangxun']).toEqual(jasmine.objectContaining({ name: 'ถังซวิ่น', cls: 'archer', star: 3, sprite: 'hero-tangxun.png' }));
-    expect(HERO_ART['tangxun']).toEqual({ portrait: 'portraits/tangxun.webp' });
+    expect(HERO_ART['tangxun']).toEqual(jasmine.objectContaining({ portrait: 'portraits/tangxun.webp', banner: 'banners/tangxun.webp' }));
   });
 
   it('Piercing Fang = 1×3 line, first target hardest · Severing Chain = anti-cast · Blade Array = focused, not full-screen', () => {
