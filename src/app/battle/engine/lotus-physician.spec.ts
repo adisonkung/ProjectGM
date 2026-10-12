@@ -88,4 +88,18 @@ describe('Lin Xue kit in the engine (HEAL around a target · CLEANSE · SHIELD t
     expect(hasStatus(yz, 'silence')).toBeFalse();
     expect(tx.life).toBe('REVIVING');
   });
+
+  it('Lotus Prayer cast: the heal lands on the clip DAMAGE (T043) and its impact lists the healed allies (splash lotus FX)', () => {
+    const b = battle();
+    const [lx, bl, yz, tx] = ['linxue', 'bailong', 'yuezheng', 'tangxun'].map(b.hero);
+    b.log.length = 0;
+    b.e.skills.use(lx, 'skill', b.e.skills.kit(lx).skill, bl);
+    b.run(1.2);
+    const imp = b.log.find(ev => ev.type === 'impact' && ev.src === lx.id) as { dst?: number; hits: number[] } | undefined;
+    expect(imp).toBeDefined();
+    expect(imp!.dst).toBe(bl.id);
+    expect(imp!.hits).toContain(bl.id);
+    expect(imp!.hits).toContain(yz.id);
+    expect(imp!.hits).not.toContain(tx.id);
+  });
 });

@@ -140,8 +140,11 @@ BASE_COUNTS = [3, 6, 3, 6, 5]
 BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
+    ('skill', 's1_char', [10]),   # S1 Lotus Prayer: ready → eyes closed prayer → staff raised (lotus glows) → palm out
 ]
 COMMON_GROUND: dict = {}
+HEAD_LOCK = {'skill'}
+SPECK = 20          # px — smaller loose islands on the skill rows are key leftovers
 ROOT_SHIFT: dict = {}
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px
 FACE = (980, 560, 1446, 1084)
@@ -202,12 +205,33 @@ def main():
     tx = {name: [A.torso_x(pa[r * B.CELL_H:(r + 1) * B.CELL_H, c * B.CELL_W:(c + 1) * B.CELL_W]) for c in range(len(frs))]
           for r, (name, frs, _) in enumerate(rows)}
     shifts = A.stabilise(tx)
+    # a stationary cast: the torso stabiliser follows the reaching arm / raised staff → lock the HEAD instead
+    # (left of the staff, the hair band just under the bun) so she stays planted while the arms move
+    for r, (name, frs, _) in enumerate(rows):
+        if name not in HEAD_LOCK:
+            continue
+        hx = []
+        for c in range(len(frs)):
+            cell = pa[r * B.CELL_H:(r + 1) * B.CELL_H, c * B.CELL_W:(c + 1) * B.CELL_W][:, :B.ROOT_X + 12] > 0
+            top = np.nonzero(cell.any(1))[0].min()
+            hx.append(np.nonzero(cell[top + 10:top + 26])[1].mean())
+        ref = float(np.mean(hx))
+        shifts[name] = [ref - h for h in hx]
     report['shift_x'] = {k: [round(v, 1) for v in shifts[k]] for k in shifts}
     sheet = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * ATLAS_ROWS), (0, 0, 0, 0))
     for r, (name, frs, s) in enumerate(rows):
         report['rows'][name] = {'row': r, 'frames': len(frs),
                                 'clipped': [B.paste(sheet, fr, r, c, s, (shifts[name][c] + ROOT_SHIFT.get(name, [0] * 99)[c], 0))
                                             for c, fr in enumerate(frs)]}
+    # sheer ribbons over the magenta key break into loose pink specks: drop tiny islands on the skill rows
+    arr = np.array(sheet)
+    for r in range(len(BASE_NAMES), len(rows)):
+        band = arr[r * B.CELL_H:(r + 1) * B.CELL_H]
+        lab, n = ndimage.label(band[..., 3] > 0, np.ones((3, 3)))
+        if n:
+            size = ndimage.sum(np.ones(lab.shape), lab, range(1, n + 1))
+            band[np.isin(lab, 1 + np.nonzero(size < SPECK)[0])] = 0
+    sheet = Image.fromarray(arr)
     sheet.save(f'{OUT}/hero-linxue.png', optimize=True)
     report['lotus'] = lotus_projectile()
     report['sheet'] = {'cols': cols, 'rows': ATLAS_ROWS, 'size': sheet.size}

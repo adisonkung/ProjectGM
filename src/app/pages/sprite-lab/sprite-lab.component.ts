@@ -212,7 +212,7 @@ export class SpriteLabComponent implements OnDestroy {
     const me = units[0];
     for (const name of names) {
       const def = FX[name];
-      const at = def.at === 'target' ? (trig.on === 'event' ? DUMMY_IDS.slice(0, 1) : hits).slice(0, def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
+      const at = def.at === 'target' ? (trig.on === 'event' ? DUMMY_IDS.slice(0, 1) : hits).slice(def.exceptPrimary ? 1 : 0).slice(0, def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
       for (const u of at) {
         const f: FxView = { id: ++this.id, r: u.r, c: u.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under' };
         this.fx.update(l => [...l, f]);

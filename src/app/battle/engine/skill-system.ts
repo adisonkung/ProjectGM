@@ -123,6 +123,9 @@ export type SkillPick = { slot: SkillSlot; skill: SkillDefinition; target: Battl
  * All numbers come from SkillDefinitions (core/data/hero-skills.ts); nothing here names a hero.
  */
 export class SkillSystem {
+  /** allies the last applyEffects healed (impact `hits` of a heal-only skill) */
+  private healed: BattleUnit[] = [];
+
   constructor(private readonly h: SkillHost) {}
 
   kit(u: BattleUnit): HeroKit {
@@ -540,10 +543,12 @@ export class SkillSystem {
     const land = (primary: BattleUnit, at: Cell, skill = s, index = 0) => {
       const dst = primary.alive ? primary.id : undefined;
       const hits = this.applyEffects(u, skill, slot, primary, at);
+      // a heal-only hit has no damaged units: its impact lists the allies it healed (per-ally heal FX)
+      const shown = hits.length ? hits : this.healed;
       if (slot !== 'attack') {
         // contact presentation after the effects resolved: which units this hit really damaged (impact FX per target)
         if (authoredImpact) this.h.emit({ type: 'animEvent', src: u.id, event: 'IMPACT', name: `${s.id.toUpperCase()}_IMPACT`, kind: kind as SkillKind, index });
-        this.h.emit({ type: 'impact', src: u.id, dst, kind: kind as SkillKind, index, hits: hits.map(f => f.id) });
+        this.h.emit({ type: 'impact', src: u.id, dst, kind: kind as SkillKind, index, hits: shown.map(f => f.id) });
       }
       if (mv?.type === 'DASH_THROUGH') this.dashThrough(u, primary, at);
     };
@@ -592,6 +597,7 @@ export class SkillSystem {
     const focusOf = (p: BattleUnit) => (p.alive || p === u ? p : ghost);
     let hits: BattleUnit[] = [];
     const damaged = new Set<BattleUnit>();
+    this.healed = [];
     for (const e of s.effects) {
       switch (e.type) {
         case 'DAMAGE': {
@@ -636,6 +642,7 @@ export class SkillSystem {
                 center: e.center ?? 'SELF', candidates: allies,
               }).filter(a => !(e.skipPrimary && a === primary));
           const boost = rankPower(u, slot) * (u.mods?.healing ?? 1);
+          for (const a of targets) if (!this.healed.includes(a)) this.healed.push(a);
           for (const a of targets) this.h.heal(a, (effectiveAttack(u) * e.atk + a.maxHp * (e.maxHpPct ?? 0)) * boost, u);
           if (slot === 'attack' && targets.length) this.h.basicGauge(u);
           break;

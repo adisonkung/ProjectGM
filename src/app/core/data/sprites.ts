@@ -122,6 +122,8 @@ export interface FxDef {
   hitIndex?: number;
   /** on 'impact' at 'target': one copy on each unit the hit damaged, at most this many (primary first) */
   perHit?: number;
+  /** with perHit: leave the primary out (e.g. the light splash heal around the healed ally — the primary has its own FX) */
+  exceptPrimary?: boolean;
   /** placed on the owner's named anchor (SheetDef.anchors) + dx/dy */
   anchor?: string;
   /** a segment of a longer strip: first frame + total frames in the file (`frames` = this segment's length) */
@@ -358,8 +360,8 @@ export const SHEETS: Record<string, SheetDef> = {
     },
   },
   'hero-linxue.png': {
-    // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — skill rows 5–7 reserved
-    cols: 6, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
+    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 3, ms: 180 },
@@ -368,8 +370,22 @@ export const SHEETS: Record<string, SheetDef> = {
       // raise staff F1–F3 → lotus released F4 (projectile) → recover F5–F6
       attack: { row: 3, frames: 6, ms: 85, events: { DAMAGE: 3, RECOVERY_START: 4 } },
       die: { row: 4, frames: 5, ms: 140 },
+      // S1 Lotus Prayer — Timeline Sync Sheet (tools/sprites/linxue_s1.py, 60 FPS T000–T059 = 1.00 s): ready C01 ·
+      // eyes-closed prayer C02–C04 (peak T018) · staff raised, the lotus head glows C05–C06 (T023 / peak T030) · palm out
+      // C07 = SKILL_ACTIVATE + VFX_SPAWN T035 (the bloom opens on the ally) · hold C08, heal T043 at the bloom peak ·
+      // recovery C09 (T047) · C10 · root 0 (stationary cast) · no hit-stop / shake (a heal)
+      skill: {
+        row: 5, frames: 10, ms: 100,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [83, 100, 100, 100, 100, 100, 67, 133, 100, 117],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 3.167, CHARGE_START: 4.0, CHARGE_PEAK: 5.167, SKILL_ACTIVATE: 6.0, VFX_SPAWN: 6.0,
+          DAMAGE: 7.5, RECOVERY_START: 8.0,
+        },
+      },
     },
     projectile: { attack: 'linxue-lotus' },
+    fx: { skill: ['lx-s1-bloom', 'lx-s1-splash'] },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -575,6 +591,16 @@ export const FX: Record<string, FxDef> = {
   },
   // Tang Xun's throwing knife (reference sheet, tools/sprites/tangxun.py) — points right, 1 frame (no impact frame)
   'tangxun-knife': { file: 'fx-tangxun-knife.png', frames: 1, w: 28, h: 4, frameMs: 60, at: 'target', angle0: 0, scale: 0.9, pixelated: true },
+  // Lin Xue S1 Lotus Prayer (tools/sprites/linxue_s1.py): the bloom on the healed ally (spark → bud → peak at the heal →
+  // petals scatter, 12 fr 30 FPS from VFX_SPAWN) · the same lotus at 55 % on each ally the splash heal reached
+  'lx-s1-bloom': {
+    file: 'fx-linxue-s1-bloom.png', frames: 12, w: 86, h: 99, frameMs: 33.33, at: 'target', orient: 'flip', on: 'vfx',
+    pivot: [0.5082, 0.5021], dy: -22.75, scale: 1 / 1.5,
+  },
+  'lx-s1-splash': {
+    file: 'fx-linxue-s1-splash.png', frames: 7, w: 48, h: 55, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
+    perHit: 8, exceptPrimary: true, pivot: [0.5102, 0.5052], dy: -17.75, scale: 1 / 1.5,
+  },
   'linxue-lotus': { file: 'fx-linxue-lotus.png', frames: 1, w: 22, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.3, noRotate: true, pixelated: true },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
   // Alpha Howl (tools/sprites/fx_alpha_howl.py จากแผ่น 8 เฟรมของผู้ใช้): frame 5 = FX PEAK = SKILL_ACTIVATE,

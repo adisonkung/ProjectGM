@@ -347,13 +347,13 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
 
 /** Lin Xue — Lotus Spirit Physician (remodel #5): base sheet only, Healer class ids arranged to her skills */
 describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
-  it('6 × 8 atlas 260 × 170: idle 3 · walk 6 · hurt 3 · cast 6 (lotus released F4) · die 5 · upright lotus projectile', () => {
+  it('10 × 8 atlas 260 × 170: idle 3 · walk 6 · hurt 3 · cast 6 (lotus released F4) · die 5 · S1 10 · upright lotus projectile', () => {
     const sh = SHEETS['hero-linxue.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([6, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 3], [1, 6], [2, 3], [3, 6], [4, 5]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
-    expect(a.skill).toBeUndefined();
+    expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
     expect(sh.projectile!.attack).toBe('linxue-lotus');
     expect(FX['linxue-lotus'].noRotate).toBeTrue();
     expect(HERO_BY_ID['linxue']).toEqual(jasmine.objectContaining({ name: 'หลินเสวี่ย', cls: 'healer', star: 3, sprite: 'hero-linxue.png' }));
@@ -371,5 +371,24 @@ describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
     expect(k.skill2.effects).toContain(jasmine.objectContaining({ type: 'CLEANSE', to: 'PRIMARY', count: 1 }));
     expect(k.ult.effects.map(e => e.type)).toEqual(['HEAL', 'CLEANSE', 'REVIVE']);
     expect(k.healBolt).toEqual(c.healBolt);
+  });
+
+  it('S1 Lotus Prayer on its Timeline Sync Sheet: 1.00 s, release T035 (bloom on the ally), heal T043 at the bloom peak, splash lotus on the neighbours only', () => {
+    const clip = SHEETS['hero-linxue.png'].anims.skill!;
+    expect(clipClock(clip).total * 60).toBeCloseTo(60, 0);
+    const ev = (e: string) => animEvents('hero-linxue.png', 'skill').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    expect(ev('ANTICIPATION_PEAK')).toEqual([18]);
+    expect(ev('CHARGE_PEAK')).toEqual([30]);
+    expect(ev('VFX_SPAWN')).toEqual([35]);
+    expect(ev('DAMAGE')).toEqual([43]);
+    expect(ev('RECOVERY_START')).toEqual([47]);
+    expect(clip.root).toBeUndefined();
+    expect(clip.impact).toBeUndefined();
+    expect(fxFor('hero-linxue.png', 'skill', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['lx-s1-bloom']);
+    expect(fxFor('hero-linxue.png', 'skill', { on: 'impact', hit: 0 })).toEqual(['lx-s1-splash']);
+    expect(FX['lx-s1-splash'].exceptPrimary).toBeTrue();
+    expect(FX['lx-s1-splash'].w).toBeLessThan(FX['lx-s1-bloom'].w);
+    // the bloom reaches its peak (strip frame 5 of 12 at 30 FPS) on the heal
+    expect(Math.round((35 / 60 + 4 * FX['lx-s1-bloom'].frameMs / 1000) * 60)).toBe(43);
   });
 });

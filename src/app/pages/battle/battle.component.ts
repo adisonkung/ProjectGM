@@ -828,7 +828,7 @@ export class BattleComponent implements OnDestroy {
         const p = posOf(src);
         // contact FX on every unit the hit damaged (capped, primary first) — or the primary only
         const at = def.at === 'target'
-          ? (def.perHit ? [...new Set([dst, ...(hits ?? [])].filter((x): x is number => x != null && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit) : dst != null ? [dst] : [src])
+          ? (def.perHit ? [...new Set([dst, ...(hits ?? [])].filter((x): x is number => x != null && !(def.exceptPrimary && x === dst) && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit) : dst != null ? [dst] : [src])
           : [src];
         for (const id of at) {
           const q = id === src ? p : posOf(id);
