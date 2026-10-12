@@ -29,6 +29,7 @@ from scipy import ndimage
 
 sys.path.insert(0, os.path.dirname(__file__))
 import bailong as B  # noqa: E402
+from jade import jadeify  # noqa: E402
 
 B.SRC = 'art/incoming/tangxun'
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/tmp/tangxun_s2'
@@ -132,6 +133,7 @@ def load_vfx(name, thr=80):
     r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
     spill = (b > g + 30) & (r > g + 30)
     out[..., 0] = np.where(spill, np.minimum(r, g + 20), r).astype(np.uint8)
+    out[..., :3] = jadeify(out[..., :3])   # Tang Xun's jade palette (tools/sprites/jade.py)
     return out
 
 
@@ -177,7 +179,7 @@ def cut_impact():
         x0, x1 = divs[i] + 4, divs[i + 1] - 3
         y0, y1 = 150, 720
         fr = np.zeros((y1 - y0, x1 - x0, 4), np.uint8)
-        fr[..., :3] = col[y0:y1, x0:x1].astype(np.uint8)
+        fr[..., :3] = jadeify(col[y0:y1, x0:x1])
         fr[..., 3] = (al[y0:y1, x0:x1] * 255).astype(np.uint8)
         # fade the 6 px next to the cut so no divider residue / straight edge shows
         e = np.minimum(np.arange(x1 - x0), np.arange(x1 - x0)[::-1])

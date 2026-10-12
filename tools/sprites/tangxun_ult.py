@@ -33,6 +33,7 @@ from scipy import ndimage
 
 sys.path.insert(0, os.path.dirname(__file__))
 import bailong as B  # noqa: E402
+from jade import jadeify  # noqa: E402
 
 B.SRC = 'art/incoming/tangxun'
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/tmp/tangxun_ult'
@@ -117,7 +118,7 @@ def unmix(name):
     al = np.where(al < 0.1, 0, al)
     col = np.clip((rgb - (1 - al[..., None]) * bg) / np.maximum(al[..., None], 1e-3), 0, 255)
     out = np.zeros(rgb.shape[:2] + (4,), np.uint8)
-    out[..., :3] = col.astype(np.uint8)
+    out[..., :3] = jadeify(col)   # Tang Xun's jade palette (tools/sprites/jade.py)
     out[..., 3] = (al * 255).astype(np.uint8)
     return out
 

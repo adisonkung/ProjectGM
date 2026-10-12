@@ -29,6 +29,7 @@ from scipy import ndimage
 
 sys.path.insert(0, os.path.dirname(__file__))
 import bailong as B  # noqa: E402
+from jade import jadeify  # noqa: E402
 
 B.SRC = 'art/incoming/tangxun'
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/tmp/tangxun_s1'
@@ -120,6 +121,7 @@ def load_vfx(name, thr=80):
     r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
     spill = (b > g + 30) & (r > g + 30)                     # magenta fringe on the jade / white edges
     out[..., 0] = np.where(spill, np.minimum(r, g + 20), r).astype(np.uint8)
+    out[..., :3] = jadeify(out[..., :3])   # Tang Xun's jade palette (tools/sprites/jade.py)
     return out
 
 
