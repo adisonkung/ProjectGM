@@ -125,7 +125,6 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 4], [3, 8], [4, 7]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
     expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
-    expect([a.skill2!.row, a.skill2!.frames]).toEqual([6, 10]);
     expect([a.ult!.row, a.ult!.frames]).toEqual([7, 16]);
     expect(HERO_BY_ID['moye']).toEqual(jasmine.objectContaining({ name: 'โม่เย่', cls: 'assassin', star: 3, sprite: 'hero-moye.png' }));
     expect(HERO_ART['moye']).toEqual(jasmine.objectContaining({ portrait: 'portraits/moye.webp', banner: 'banners/moye.webp' }));
@@ -347,13 +346,14 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
 
 /** Lin Xue — Lotus Spirit Physician (remodel #5): base sheet only, Healer class ids arranged to her skills */
 describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
-  it('10 × 8 atlas 260 × 170: idle 3 · walk 6 · hurt 3 · cast 6 (lotus released F4) · die 5 · S1 10 · upright lotus projectile', () => {
+  it('10 × 8 atlas 260 × 170: idle 3 · walk 6 · hurt 3 · cast 6 (lotus released F4) · die 5 · S1 10 · S2 10 · upright lotus projectile', () => {
     const sh = SHEETS['hero-linxue.png'];
     expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 3], [1, 6], [2, 3], [3, 6], [4, 5]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
     expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
+    expect([a.skill2!.row, a.skill2!.frames]).toEqual([6, 10]);
     expect(sh.projectile!.attack).toBe('linxue-lotus');
     expect(FX['linxue-lotus'].noRotate).toBeTrue();
     expect(HERO_BY_ID['linxue']).toEqual(jasmine.objectContaining({ name: 'หลินเสวี่ย', cls: 'healer', star: 3, sprite: 'hero-linxue.png' }));
@@ -367,7 +367,7 @@ describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
     expect([k.skill.id, k.skill2.id, k.ult.id]).toEqual([c.skill.id, c.skill2.id, c.ult.id]);
     expect([k.skill.cooldown, k.skill2.cooldown]).toEqual([c.skill.cooldown, c.skill2.cooldown]);
     expect(k.skill.target).toBe('LOWEST_HP_ALLY');
-    expect(k.skill2.effects.map(e => e.type)).toEqual(['HEAL', 'CLEANSE', 'SHIELD']);
+    expect(k.skill2.effects.map(e => e.type)).toEqual(['CLEANSE', 'HEAL', 'SHIELD']);
     expect(k.skill2.effects).toContain(jasmine.objectContaining({ type: 'CLEANSE', to: 'PRIMARY', count: 1 }));
     expect(k.ult.effects.map(e => e.type)).toEqual(['HEAL', 'CLEANSE', 'REVIVE']);
     expect(k.healBolt).toEqual(c.healBolt);
@@ -396,5 +396,32 @@ describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
     const k = kitOf('linxue', 'healer').skill;
     expect(k.repeat!.count).toBe(2);
     expect(k.effects.map(e => e.onHits)).toEqual([[0], [1]]);
+  });
+
+  it('S2 Spirit Mend on its production Timeline Sync Sheet: 63 frames, Main VFX on the ally T020, cleanse T030 > heal T038 > Qi Guard T048, no impact VFX', () => {
+    const clip = SHEETS['hero-linxue.png'].anims.skill2!;
+    expect(clipClock(clip).total * 60).toBeCloseTo(63, 0);
+    const ev = (e: string) => animEvents('hero-linxue.png', 'skill2').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    expect(ev('STRIKE_START')).toEqual([10]);
+    expect(ev('ANTICIPATION_PEAK')).toEqual([17]);
+    expect(ev('VFX_SPAWN')).toEqual([20]);
+    expect(ev('DAMAGE')).toEqual([30, 38, 48]);
+    expect(ev('RECOVERY_START')).toEqual([54]);
+    expect(Math.max(...clip.root!.map(k => Math.abs(k[1])))).toBeLessThanOrEqual(6);
+    expect(clip.impact).toBeUndefined();
+    expect(fxFor('hero-linxue.png', 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['lx-s2-main']);
+    expect(FX['lx-s2-main'].at).toBe('target');
+    // no impact VFX on the cleanse / heal beats — only the persistent guard shell when the Qi Guard lands
+    expect(fxFor('hero-linxue.png', 'skill2', { on: 'impact', hit: 0 })).toEqual([]);
+    expect(fxFor('hero-linxue.png', 'skill2', { on: 'impact', hit: 1 })).toEqual([]);
+    expect(fxFor('hero-linxue.png', 'skill2', { on: 'impact', hit: 2 })).toEqual(['lx-s2-guard']);
+    // the Main VFX runs T020–T067; the guard shell starts T058 and covers the 4 s Qi Guard
+    expect(FX['lx-s2-main'].frames).toBe(48);
+    const g = FX['lx-s2-guard'];
+    expect(48 + Math.round(g.delayMs! / (1000 / 60))).toBe(58);
+    expect((g.delayMs! + g.frames * g.frameMs * g.repeat! + g.fadeOutMs!) / 1000).toBeCloseTo(4, 0);
+    const k = kitOf('linxue', 'healer').skill2;
+    expect(k.repeat!.count).toBe(3);
+    expect(k.effects.map(e => [e.type, e.onHits])).toEqual([['CLEANSE', [0]], ['HEAL', [1]], ['SHIELD', [2]]]);
   });
 });

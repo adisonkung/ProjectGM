@@ -105,4 +105,19 @@ describe('Lin Xue kit in the engine (HEAL around a target · CLEANSE · SHIELD t
     const heals = b.log.filter(ev => ev.type === 'heal' && ev.src === lx.id) as { dst: number }[];
     expect(heals[0].dst).toBe(bl.id);
   });
+
+  it('Spirit Mend cast: cleanse on DAMAGE #1 (T030), emergency heal on #2 (T038), Qi Guard on #3 (T048) — in that order', () => {
+    const b = battle();
+    const [lx, bl] = ['linxue', 'bailong'].map(b.hero);
+    applyBuff(bl, STATUS_EFFECTS['poison'], 0, { duration: 9 });
+    b.log.length = 0;
+    b.e.skills.use(lx, 'skill2', b.e.skills.kit(lx).skill2, bl);
+    b.run(1.2);
+    const order = b.log
+      .filter(ev => (ev.type === 'cleanse' || ev.type === 'heal' || ev.type === 'shield') && 'dst' in ev && ev.dst === bl.id && (ev as { src?: number }).src === lx.id)
+      .map(ev => ev.type);
+    expect(order).toEqual(['cleanse', 'heal', 'shield']);
+    expect(hasStatus(bl, 'poison')).toBeFalse();
+    expect(bl.shield).toBeGreaterThan(0);
+  });
 });

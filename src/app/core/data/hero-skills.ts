@@ -296,11 +296,13 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
       skill2: {
         ...healer.skill2, name: 'ประสานวิญญาณ', label: 'Spirit Mend',
-        // emergency heal (class numbers) + the newest debuff washed off + Qi Guard (12 % of her max HP, 4 s)
+        // production sync sheet — three beats on the clip's DAMAGE events: cleanse the newest debuff (T030) → emergency
+        // heal, class numbers (T038) → Qi Guard = 12 % of her max HP for 4 s (T048)
+        repeat: { count: 3, gap: 0.12 },
         effects: [
-          { type: 'HEAL', area: 'PRIMARY', atk: 2.2, maxHpPct: 0.1 },
-          { type: 'CLEANSE', to: 'PRIMARY', count: 1 },
-          { type: 'SHIELD', to: 'PRIMARY', selfPct: 0.12, allyPct: 0.12, duration: 4 },
+          { type: 'CLEANSE', to: 'PRIMARY', count: 1, onHits: [0] },
+          { type: 'HEAL', area: 'PRIMARY', atk: 2.2, maxHpPct: 0.1, onHits: [1] },
+          { type: 'SHIELD', to: 'PRIMARY', selfPct: 0.12, allyPct: 0.12, duration: 4, onHits: [2] },
         ],
       },
       ult: {

@@ -384,9 +384,24 @@ export const SHEETS: Record<string, SheetDef> = {
         },
         root: [[0.0, 0.0, 0], [4.0, 0.0, 0], [5.0, 1.0, 0], [6.0, 2.0, 0], [7.917, 2.0, 0], [8.0, 1.9, 0], [8.8, 0.8, 0], [10.0, 0.0, 0]],
       },
+      // S2 Spirit Mend — production Timeline Sync Sheet (tools/sprites/linxue_s2.py, 60 FPS T000–T062 = 1.05 s):
+      // ready C01 (select T003, lock T008) · raise staff C02 (cast T010) · channel C03 · gather C04 (peak T017) · release
+      // C05 = Main VFX spawns ON the ally T020 (seal T024, sweep T028) → CLEANSE T030 · follow-through C06: heal burst
+      // T036 → EMERGENCY HEAL T038 → Qi Guard forms T044 → QI GUARD T048 → stabilise T052 · recovery C07 (T054) – C10 ·
+      // root <= 4 px · no impact VFX, no shake / zoom
+      skill2: {
+        row: 6, frames: 10, ms: 105,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [150, 67, 67, 50, 267, 300, 50, 33, 33, 33],
+        events: {
+          CAST_START: 0, STRIKE_START: 1.25, ANTICIPATION_PEAK: 3.0, SKILL_ACTIVATE: 4.0, VFX_SPAWN: 4.0,
+          DAMAGE: [4.625, 5.111, 5.667], RECOVERY_START: 6.0,
+        },
+        root: [[0.0, 0.0, 0], [3.0, 0.0, 0], [3.333, 0.8, 0], [4.0, 3.0, 0], [4.25, 4.0, 0], [5.944, 4.0, 0], [6.0, 3.7, 0], [7.5, 1.0, 0], [8.5, 0.5, 0], [10.0, 0.0, 0]],
+      },
     },
     projectile: { attack: 'linxue-lotus' },
-    fx: { skill: ['lx-s1-bloom', 'lx-s1-splash'] },
+    fx: { skill: ['lx-s1-bloom', 'lx-s1-splash'], skill2: ['lx-s2-main', 'lx-s2-guard'] },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -604,6 +619,18 @@ export const FX: Record<string, FxDef> = {
   'lx-s1-splash': {
     file: 'fx-linxue-s1-splash.png', frames: 12, w: 57, h: 65, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 1, perHit: 8, exceptPrimary: true, pivot: [0.5045, 0.5024], dy: -17.75, scale: 1 / 1.5,
+  },
+  // Lin Xue S2 Spirit Mend (tools/sprites/linxue_s2.py, 60 FPS): the whole revised Main VFX on the ally's feet (seal >
+  // sweep > lock > heal burst > Qi Guard dome > stabilise > residual > fade, T020–T067, cross-faded holds) — no impact
+  // VFX · then the runtime Qi Guard shell: the stabilised dome at 35–48 % breathing every 0.5 s from T058 for the
+  // rest of the 4 s guard (repeat 7 + fade) instead of keeping the Main VFX alive
+  'lx-s2-main': {
+    file: 'fx-linxue-s2-main.png', frames: 48, w: 131, h: 132, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',
+    pivot: [0.5016, 0.9218], dy: 27.25, scale: 1 / 1.5,
+  },
+  'lx-s2-guard': {
+    file: 'fx-linxue-s2-guard.png', frames: 30, w: 126, h: 127, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 2, delayMs: 167, repeat: 7, fadeOutMs: 300, pivot: [0.5006, 0.9198], dy: 27.25, scale: 1 / 1.5,
   },
   'linxue-lotus': { file: 'fx-linxue-lotus.png', frames: 1, w: 22, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.3, noRotate: true, pixelated: true },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },

@@ -73,6 +73,25 @@ def clean_base():
     Image.fromarray(out.astype(np.uint8)).save(f'{SRC}/base.png')
 
 
+# labelled skill sheets (title bar, a caption bar under every cell, thin pink cell dividers): keep only the cell
+# interiors → <name>.png on flat magenta. rows = (y0, y1, divider x's) in source px
+GRID_SHEETS = {
+    's2_char': [(52, 418, [359, 718, 1061, 1422]), (465, 797, [398, 750, 1097, 1432])],
+}
+
+
+def clean_grid(name, rows, pad=4, edge=7):
+    raw = np.array(Image.open(f'{SRC}/{name}_raw.png').convert('RGB'))
+    out = np.zeros_like(raw)
+    out[...] = (245, 3, 246)
+    w = raw.shape[1]
+    for y0, y1, divs in rows:
+        xs = [edge] + divs + [w - edge]
+        for a, b in zip(xs, xs[1:]):
+            out[y0 + pad:y1 - pad, a + pad:b - pad] = raw[y0 + pad:y1 - pad, a + pad:b - pad]
+    Image.fromarray(out).save(f'{SRC}/{name}.png')
+
+
 B.load = load_dark
 
 
@@ -141,9 +160,10 @@ BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
     ('skill', 's1_char', [10]),   # S1 Lotus Prayer: ready → eyes closed prayer → staff raised (lotus glows) → palm out
+    ('skill2', 's2_char', [5, 5]),   # S2 Spirit Mend: ready → raise staff → channel → gather → release (staff out) → recover
 ]
 COMMON_GROUND: dict = {}
-HEAD_LOCK = {'skill'}
+HEAD_LOCK = {'skill', 'skill2'}
 SPECK = 20          # px — smaller loose islands on the skill rows are key leftovers
 ROOT_SHIFT: dict = {}
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px
@@ -170,6 +190,9 @@ def lotus_projectile():
 
 def main():
     clean_base()
+    for name, rows in GRID_SHEETS.items():
+        if os.path.exists(f'{SRC}/{name}_raw.png'):
+            clean_grid(name, rows)
     report = {'notes': [], 'rows': {}}
     base = A.sheet_frames('base', BASE_COUNTS, False)
     groups, i = {}, 0
