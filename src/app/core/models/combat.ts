@@ -132,11 +132,13 @@ export type DamageKind = 'PHYSICAL' | 'MAGIC' | 'TRUE';
  * FARTHEST_BACKROW        the farthest back-row enemy that can be blinked to, else the lowest HP% enemy
  * LOWEST_HP_ENEMY         the lowest HP% enemy (ignores focus)
  * LOWEST_HP_ALLY          the lowest HP% living ally
+ * FOCUS                   the player's focus target if valid (nothing else)
+ * MARKED                  an enemy in range carrying the skill's `markStatus` (lowest HP% first) — e.g. Open Wound
  * SELF                    the caster
  */
 export type TargetRule =
   | 'CURRENT' | 'NEAREST_ENEMY' | 'CASTING_INTERRUPTIBLE' | 'CLUSTER' | 'FOCUS_OR_LOWEST_HP' | 'FARTHEST_BACKROW'
-  | 'LOWEST_HP_ENEMY' | 'LOWEST_HP_ALLY' | 'SELF';
+  | 'LOWEST_HP_ENEMY' | 'LOWEST_HP_ALLY' | 'FOCUS' | 'MARKED' | 'SELF';
 
 /** Effects run in order at the skill's hit moment (or on projectile arrival) */
 export type SkillEffect = SkillEffectCore & {
@@ -235,6 +237,8 @@ export interface SkillDefinition {
   target: TargetRule;
   /** fallback rules tried in order when `target` finds nobody (e.g. caster → cluster → current) */
   fallback?: TargetRule[];
+  /** the status the MARKED target rule looks for (e.g. 'open_wound') */
+  markStatus?: string;
   movement?: SkillMovement;
   /** default AI use mode (heroes may override per slot) — AUTO when omitted */
   useMode?: SkillUseMode;

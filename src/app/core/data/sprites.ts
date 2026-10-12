@@ -295,7 +295,7 @@ export const SHEETS: Record<string, SheetDef> = {
   // ถังซวิ่น — Whispering Blade (remodel #4, tools/sprites/tangxun.py): base sheet · cell 260 × 170, root (130, 155),
   // idle body 78 px · rows 5–7 reserved for S1 / S2 / Ult · the knife in flight is the projectile (fx-tangxun-knife)
   'hero-tangxun.png': {
-    cols: 16, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 17, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 6 },
@@ -330,9 +330,30 @@ export const SHEETS: Record<string, SheetDef> = {
         // hit-stop 1 / 1 / 3 frames · shake 1 / 1 / 4 px (throw 3 = interrupt + Open Wound)
         impact: [{ hitStopMs: 17, shakePx: 1, shakeMs: 40 }, { hitStopMs: 17, shakePx: 1, shakeMs: 50 }, { hitStopMs: 50, shakePx: 4, shakeMs: 90 }],
       },
+      // Ult Heaven-Snaring Blade Array — Timeline Sync Sheet (tools/sprites/tangxun_ult.py, 60 FPS T000–T149 = 2.50 s):
+      // ready C01 · draw C02 (T010) · arms spread C03 = charge T018–T039 (peak T036) · release signal C04 = VFX_SPAWN
+      // T040 (the array forms at the locked target) · control C05 · raised hand / light hop C06–C08 (scan T068, lock
+      // T080) · command C09–C10 (compression) · guide C11–C13 = 4 minor cuts T108 / T112 / T116 / T120 · gather C14
+      // (T124) · decisive command C15 (T128) = finisher T130 · settle C16 · recovery C17 (T146) · root ≤ 12 px
+      ult: {
+        row: 7, frames: 17, ms: 100,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        steps: [167, 133, 367, 200, 133, 133, 167, 100, 200, 133, 133, 133, 67, 67, 200, 100, 67],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 1.0, CHARGE_START: 2.0, CHARGE_PEAK: 2.818, VFX_SPAWN: 3.0,
+          FINAL_ANTICIPATION: 13.0, STRIKE_START: 14.0, DAMAGE: [10.5, 11.0, 11.5, 12.0, 14.167], IMPACT: [10.5, 11.0, 11.5, 12.0, 14.167], RECOVERY_START: 16.0,
+        },
+        root: [[0.0, 0.0, 0], [0.6, 0.0, 0], [1.25, 0.0, 0], [2.0, 0.0, 0], [2.273, 0.0, 0], [2.545, 0.0, 0], [2.818, 0.0, 0], [3.0, 0.0, 0], [3.167, 2.0, 0], [3.333, 4.0, 0], [3.667, 3.0, 0], [4.0, 2.0, 0], [4.25, 1.7, 0], [5.0, 0.0, 0], [5.75, 0.0, 0], [6.4, 0.0, 0], [7.0, 0.0, 0], [8.0, 0.0, 0], [8.333, 5.0, 0], [8.5, 5.0, 0], [9.0, 4.5, 0], [9.75, 4.0, 0], [10.0, 4.0, 0], [10.5, 3.8, 0], [11.25, 3.0, 0], [12.0, 2.2, 0], [13.0, 2.0, 0], [13.5, 5.0, 0], [14.0, 8.0, 0], [14.333, 12.0, 0], [14.833, 10.3, 0], [15.0, 10.0, 0], [15.667, 6.3, 0], [16.0, 5.0, 0], [17.0, 0.0, 0]],
+        // minor cuts: 1-frame hit-stop, 1–2 px · finisher: 6 frames, 8 px + flash
+        impact: [{ hitStopMs: 17, shakePx: 1, shakeMs: 40 }, { hitStopMs: 17, shakePx: 1, shakeMs: 40 }, { hitStopMs: 17, shakePx: 1, shakeMs: 40 }, { hitStopMs: 17, shakePx: 2, shakeMs: 50 }, { hitStopMs: 100, shakePx: 8, shakeMs: 220, flashMs: 120 }],
+      },
     },
-    projectile: { attack: 'tangxun-knife', skill: 'tx-s1-fang', skill2: 'tx-s2-blade', ult: 'tangxun-knife' },
-    fx: { skill: ['tx-s1-impact1', 'tx-s1-impact2', 'tx-s1-impact3'], skill2: ['tx-s2-impact1', 'tx-s2-impact2', 'tx-s2-impact3'] },
+    projectile: { attack: 'tangxun-knife', skill: 'tx-s1-fang', skill2: 'tx-s2-blade' },
+    fx: {
+      skill: ['tx-s1-impact1', 'tx-s1-impact2', 'tx-s1-impact3'],
+      skill2: ['tx-s2-impact1', 'tx-s2-impact2', 'tx-s2-impact3'],
+      ult: ['tx-ult-charge', 'tx-ult-main', 'tx-ult-spark0', 'tx-ult-spark1', 'tx-ult-spark2', 'tx-ult-spark3', 'tx-ult-impact', 'tx-ult-residual'],
+    },
   },
   'hero-bailong.png': {
     // 220 × 170 (feet 15 px above the cell bottom as before — bottom-anchored, nothing moves): room for the v3 ult leap
@@ -490,6 +511,41 @@ export const FX: Record<string, FxDef> = {
   'tx-s2-impact3': {
     file: 'fx-tangxun-s2-impact3.png', frames: 6, w: 54, h: 116, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 2,
     pivot: [0.6333, 0.5345], dx: -12.5, dy: -27.75, scale: 1 / 1.5,
+  },
+  // Tang Xun Ult Heaven-Snaring Blade Array (painted VFX, 30 FPS strips in timeline order — not pixelated):
+  // charge around him (CHARGE_START T018, behind, ends streaming toward the target) · the array at the locked target's
+  // feet (VFX_SPAWN T040 → fades T124–T129) · small jade sparks on the 4 minor cuts · impact (hit 5, peak T133) · residual (T140)
+  'tx-ult-charge': {
+    file: 'fx-tangxun-ult-charge.png', frames: 18, w: 244, h: 113, frameMs: 33.33, at: 'self', orient: 'flip', event: 'CHARGE_START', layer: 'under',
+    pivot: [0.2365, 0.8359], dy: 27.25, scale: 1 / 1.5,
+  },
+  'tx-ult-main': {
+    file: 'fx-tangxun-ult-main.png', frames: 45, w: 118, h: 128, frameMs: 33.33, at: 'target', orient: 'flip', on: 'vfx',
+    pivot: [0.5015, 0.8208], dy: 24.75, scale: 1 / 1.5,
+  },
+  'tx-ult-spark0': {
+    file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 0,
+    dx: -12.5, dy: -40.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'tx-ult-spark1': {
+    file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 1,
+    dx: 7.5, dy: -55.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'tx-ult-spark2': {
+    file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 2,
+    dx: -5.0, dy: -20.25, scale: 1 / 1.5, pixelated: true,
+  },
+  'tx-ult-spark3': {
+    file: 'fx-tangxun-s1-impact3.png', frames: 3, w: 37, h: 26, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 3,
+    dx: 12.5, dy: -32.75, scale: 1 / 1.5, pixelated: true,
+  },
+  'tx-ult-impact': {
+    file: 'fx-tangxun-ult-impact.png', frames: 5, w: 138, h: 81, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 4,
+    pivot: [0.5028, 0.4966], dy: -22.75, scale: 1 / 1.5,
+  },
+  'tx-ult-residual': {
+    file: 'fx-tangxun-ult-residual.png', frames: 9, w: 107, h: 69, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 4,
+    delayMs: 167, pivot: [0.4998, 0.4985], dy: -22.75, scale: 1 / 1.5,
   },
   // Tang Xun's throwing knife (reference sheet, tools/sprites/tangxun.py) — points right, 1 frame (no impact frame)
   'tangxun-knife': { file: 'fx-tangxun-knife.png', frames: 1, w: 28, h: 4, frameMs: 60, at: 'target', angle0: 0, scale: 0.9, pixelated: true },

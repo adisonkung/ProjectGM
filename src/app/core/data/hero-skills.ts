@@ -256,9 +256,20 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
         ],
       },
       ult: {
-        ...archer.ult, name: 'ค่ายมีดตาข่ายสวรรค์', label: 'Heaven-Snaring Blade Array', target: 'FOCUS_OR_LOWEST_HP', range: Infinity,
-        delivery: 'SKY',
-        effects: [{ type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 3.0, secondary: 1.0, interrupt: true, breakPower: 60 }],
+        ...archer.ult, name: 'ค่ายมีดตาข่ายสวรรค์', label: 'Heaven-Snaring Blade Array', range: Infinity,
+        // lock priority (T068 scan → T074 mark check → T080 lock): the player's focus → Open Wound (S2) → back line →
+        // a caster → the current target
+        target: 'FOCUS', fallback: ['MARKED', 'FARTHEST_BACKROW', 'CASTING_INTERRUPTIBLE', 'CURRENT', 'LOWEST_HP_ENEMY'],
+        markStatus: 'open_wound',
+        // the array cuts the locked target 4 × (T108 / T112 / T116 / T120) then converges (T130): 10/10/10/15/55 % of
+        // 300 % — minor cuts single-target (the first interrupts, Break 60), the finisher always crits + 100 % around it
+        delivery: 'INSTANT',
+        repeat: { count: 5, gap: 0.07, weights: [0.1, 0.1, 0.1, 0.15, 0.55], keepAfterKill: true },
+        effects: [
+          { type: 'DAMAGE', area: 'SINGLE', primary: 3.0, onHits: [0, 1, 2, 3] },
+          { type: 'INTERRUPT', area: 'SINGLE', breakPower: 60, onHits: [0] },
+          { type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 3.0, secondary: 1.82, guaranteedCrit: true, onHits: [4] },
+        ],
       },
     },
   },

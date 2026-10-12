@@ -239,15 +239,15 @@ describe('Mo Ye (3★ Assassin, base sheet)', () => {
 
 /** Tang Xun — Whispering Blade (remodel #4): base sheet only, Archer class ids arranged to his hidden-weapon skills */
 describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
-  it('16 × 8 atlas 260 × 170: idle 6 · run 8 · hurt 3 · throw 8 (release F5) · die 6 · S1 10 · S2 16 · knife projectile, no bow', () => {
+  it('17 × 8 atlas 260 × 170: idle 6 · run 8 · hurt 3 · throw 8 (release F5) · die 6 · S1 10 · S2 16 · Ult 17 · knife projectile, no bow', () => {
     const sh = SHEETS['hero-tangxun.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([16, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([17, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 6], [1, 8], [2, 3], [3, 8], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(4);
     expect([a.skill!.row, a.skill!.frames]).toEqual([5, 10]);
     expect([a.skill2!.row, a.skill2!.frames]).toEqual([6, 16]);
-    expect(a.ult).toBeUndefined();
+    expect([a.ult!.row, a.ult!.frames]).toEqual([7, 17]);
     expect(sh.projectile!.attack).toBe('tangxun-knife');
     expect(FX['tangxun-knife'].angle0).toBe(0);
     expect(HERO_BY_ID['tangxun']).toEqual(jasmine.objectContaining({ name: 'ถังซวิ่น', cls: 'archer', star: 3, sprite: 'hero-tangxun.png' }));
@@ -265,9 +265,8 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     expect(s1.primary).toBeGreaterThan(s1.secondary);
     expect(k.skill2.effects.some(e => e.type === 'INTERRUPT')).toBeTrue();
     expect(k.skill2.target).toBe('CASTING_INTERRUPTIBLE');
-    const u = k.ult.effects[0] as { area: string };
-    expect(u.area).not.toBe('ALL_ENEMIES');
-    expect(k.ult.target).toBe('FOCUS_OR_LOWEST_HP');
+    expect(k.ult.effects.every(e => e.type !== 'DAMAGE' || e.area !== 'ALL_ENEMIES')).toBeTrue();
+    expect([k.ult.target, ...(k.ult.fallback ?? [])].slice(0, 2)).toEqual(['FOCUS', 'MARKED']);
   });
 
   it('S1 Piercing Fang on its Timeline Sync Sheet: 0.77 s, release T019, one blade (projectile + overshoot), hits T030 / T034 / T036', () => {
@@ -313,5 +312,32 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     expect(FX['tx-s2-impact1'].h).toBeLessThan(FX['tx-s2-impact2'].h);
     expect(FX['tx-s2-impact2'].h).toBeLessThan(FX['tx-s2-impact3'].h);
     expect((clip.impact as { hitStopMs?: number; shakePx?: number }[]).map(i => [i.hitStopMs, i.shakePx])).toEqual([[17, 1], [17, 1], [50, 4]]);
+  });
+
+  it('Ult Heaven-Snaring Blade Array on its Timeline Sync Sheet: 2.50 s, charge T018, array T040, cuts T108–T120, finisher T130 (55 %, crit), residual T140', () => {
+    const clip = SHEETS['hero-tangxun.png'].anims.ult!;
+    expect(clipClock(clip).total * 60).toBeCloseTo(150, 0);
+    const ev = (e: string) => animEvents('hero-tangxun.png', 'ult').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    expect(ev('CHARGE_START')).toEqual([18]);
+    expect(ev('CHARGE_PEAK')).toEqual([36]);
+    expect(ev('VFX_SPAWN')).toEqual([40]);
+    expect(ev('FINAL_ANTICIPATION')).toEqual([124]);
+    expect(ev('DAMAGE')).toEqual([108, 112, 116, 120, 130]);
+    expect(ev('RECOVERY_START')).toEqual([146]);
+    expect(Math.max(...clip.root!.map(k => Math.abs(k[1])))).toBeLessThanOrEqual(12);
+    const ult = kitOf('tangxun', 'archer').ult;
+    expect(ult.delivery).toBe('INSTANT');
+    expect(ult.repeat).toEqual(jasmine.objectContaining({ count: 5, weights: [0.1, 0.1, 0.1, 0.15, 0.55] }));
+    expect(ult.markStatus).toBe('open_wound');
+    const fin = ult.effects.find(e => e.onHits?.includes(4))! as { guaranteedCrit?: boolean; area: string };
+    expect([fin.area, fin.guaranteedCrit]).toEqual(['ADJACENT_8', true]);
+    expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['tx-ult-charge']);
+    expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['tx-ult-main']);
+    for (const i of [0, 1, 2, 3]) expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: i })).toEqual([`tx-ult-spark${i}`]);
+    expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: 4 })).toEqual(['tx-ult-impact', 'tx-ult-residual']);
+    expect(FX['tx-ult-residual'].delayMs).toBeCloseTo(167, -1);
+    const imp = clip.impact as { hitStopMs?: number; shakePx?: number }[];
+    expect(imp.map(i => i.hitStopMs)).toEqual([17, 17, 17, 17, 100]);
+    expect(imp[4].shakePx).toBe(8);
   });
 });

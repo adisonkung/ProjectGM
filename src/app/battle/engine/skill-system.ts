@@ -172,6 +172,13 @@ export class SkillSystem {
         return foes.filter(t => inRange(t) && landable(t)).sort(byHp)[0] ?? null;
       case 'LOWEST_HP_ALLY':
         return this.h.allies(u).filter(inRange).sort(byHp)[0] ?? null;
+      case 'FOCUS': {
+        const focus = this.h.focus(u);
+        return focus && focus.alive && inRange(focus) && landable(focus) ? focus : null;
+      }
+      case 'MARKED':
+        if (!s.markStatus) return null;
+        return foes.filter(t => inRange(t) && t.buffs.some(b => b.def.id === s.markStatus)).sort(byHp)[0] ?? null;
     }
   }
 

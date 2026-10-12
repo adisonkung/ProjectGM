@@ -123,8 +123,10 @@ ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their 
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
     ('skill', 's1_char', [10]),
     ('skill2', 's2_char', [8, 8]),
+    ('ult', 'ult_char', [9, 8]),
 ]
-COMMON_GROUND: dict = {}
+# frame ranges that keep their drawn height above the range's common ground (the ult's raised-arm hop F6–F8)
+COMMON_GROUND: dict = {'ult': [(4, 9)]}
 ROOT_SHIFT: dict = {}
 # face close-up of the reference sheet (x0, y0, x1, y1) in source px
 FACE = (1040, 572, 1422, 1056)
