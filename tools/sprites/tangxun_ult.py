@@ -173,10 +173,12 @@ def size(fr, thr=60):
     return xs.max() - xs.min() + 1, ys.max() - ys.min() + 1
 
 
-# sizes (game px): charge peak (f7) ≈ 1.35 body tall around Tang Xun · array at its widest (main f9) ≈ 1.6 body tall ·
-# impact f1 ≈ 1.75 body (spec 1.5–2 character heights) wide · residual at the impact's scale
-SC = {'charge': 1.35 * BODY / size(CHARGE[6])[1], 'main': 1.6 * BODY / size(MAIN[8])[1],
-      'impact': 1.75 * BODY / size(IMPACT[0])[0]}
+# sizes (game px) — "more spectacular" pass (user 2026-10): charge peak (f7) ≈ 1.6 body tall around Tang Xun · array at
+# its widest (main f9) ≈ 1.95 body tall · impact f1 = 2.0 body wide (top of the spec's 1.5–2 character heights) ·
+# residual at the impact's scale · every painted layer gets a soft jade bloom (GLOW)
+SC = {'charge': 1.6 * BODY / size(CHARGE[6])[1], 'main': 1.95 * BODY / size(MAIN[8])[1],
+      'impact': 2.0 * BODY / size(IMPACT[0])[0]}
+GLOW = {'charge': (3, 0.45), 'main': (3, 0.6), 'impact': (4, 0.85), 'residual': (2, 0.4)}
 SC['residual'] = SC['impact']
 
 # ------------------------------------------------------------------ plans: T → (frame 1-based, alpha, scale mul)
@@ -218,12 +220,73 @@ def zoom_at(t):
     return 1.0
 
 
-def tile(fr, s, alpha=1.0):
+def bloom(a, rad, strength, col=(150, 255, 205)):
+    """soft jade glow under the bright parts of a painted tile (padded by 3 × rad) → (rgba, pad)"""
+    pad = rad * 3
+    big = np.pad(a, ((pad, pad), (pad, pad), (0, 0)))
+    luma = big[..., :3].astype(float).mean(-1) / 255
+    w = big[..., 3] / 255 * luma ** 2
+    g = np.clip(ndimage.gaussian_filter(w, rad) * strength * 2.2, 0, 1)
+    glow = np.zeros_like(big)
+    glow[..., 0], glow[..., 1], glow[..., 2] = col
+    glow[..., 3] = (g * 255).astype(np.uint8)
+    out = Image.fromarray(glow)
+    out.alpha_composite(Image.fromarray(big))
+    return np.array(out), pad
+
+
+def tile(fr, s, alpha=1.0, glow=None):
     img = Image.fromarray(fr['img'])
     img = img.resize((max(1, round(img.width * s)), max(1, round(img.height * s))), Image.LANCZOS)
     a = np.array(img)
+    px, py = fr['px'] * s, fr['py'] * s
+    if glow:
+        a, pad = bloom(a, *glow)
+        px, py = px + pad, py + pad
     a[..., 3] = (a[..., 3].astype(float) * alpha).astype(np.uint8)
-    return a, fr['px'] * s, fr['py'] * s
+    return a, px, py
+
+
+# ---- final convergence: 8 blades (the S2 single-blade art) spiral in from the array onto the target, T124–T129
+BLADE = np.array(Image.open('public/sprites/fx-tangxun-s2-blade.png').convert('RGBA'))
+BLADE = BLADE[:, 4 * (BLADE.shape[1] // 8):5 * (BLADE.shape[1] // 8)]      # f5: blade + jade trail, tip at the centre
+CONV_R = {124: 74, 125: 66, 126: 56, 127: 42, 128: 27, 129: 12}
+CONV_SPIN = {124: 0, 125: 9, 126: 20, 127: 34, 128: 50, 129: 68}
+
+
+def converge_tile(t):
+    R = 90
+    img = Image.new('RGBA', (2 * R + 60, 2 * R + 60), (0, 0, 0, 0))
+    c = img.width / 2
+    b = Image.fromarray(BLADE)
+    for k in range(8):
+        th = np.radians(k * 45 + CONV_SPIN[t])
+        x, y = c + CONV_R[t] * np.cos(th), c + CONV_R[t] * np.sin(th) * 0.55
+        ang = np.degrees(np.arctan2(np.sin(th) * 0.55, -np.cos(th)))      # point at the centre (PIL rotates CCW)
+        r = b.rotate(ang, Image.BICUBIC, expand=True)
+        img.alpha_composite(r, (round(x - r.width / 2), round(y - r.height / 2)))
+    a, pad = bloom(np.array(img), 2, 0.6)
+    return a, c + pad, c + pad
+
+
+# ---- jade shockwave ring on the ground under the target, T130–T141 (under the units)
+def shock_tile(t):
+    k = (t - FINAL) / 11
+    rx = 22 + 108 * (1 - (1 - k) ** 2)
+    ry = rx * 0.3
+    W2, H2 = int(2 * rx + 24), int(2 * ry + 24)
+    img = Image.new('RGBA', (W2, H2), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = W2 / 2, H2 / 2
+    al = int(255 * (1 - k) ** 1.2)
+    d.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), outline=(120, 240, 190, al), width=max(1, round(4 * (1 - k)) + 1))
+    d.ellipse((cx - rx + 3, cy - ry + 1, cx + rx - 3, cy + ry - 1), outline=(235, 255, 245, al // 2), width=1)
+    a, pad = bloom(np.array(img), 2, 0.7)
+    return a, cx + pad, cy + pad
+
+
+CONV_PLAN = sorted(CONV_R)
+SHOCK_PLAN = list(range(FINAL, FINAL + 12))
 
 
 def tracks_at(t):
@@ -232,22 +295,28 @@ def tracks_at(t):
     feet = (X0 + root_x(t), GROUND)
     if t in CHARGE_PLAN:
         f, a, m = CHARGE_PLAN[t]
-        img, px, py = tile(CHARGE[f - 1], SC['charge'] * m, a)
+        img, px, py = tile(CHARGE[f - 1], SC['charge'] * m, a, GLOW['charge'])
         out.append(('charge', f, img, px, py, feet, a, 'under'))
     if t in MAIN_PLAN:
         f, a, m = MAIN_PLAN[t]
-        img, px, py = tile(MAIN[f - 1], SC['main'] * m, a)
+        img, px, py = tile(MAIN[f - 1], SC['main'] * m, a, GLOW['main'])
         out.append(('main', f, img, px, py, (TX, GROUND - 2), a, 'over'))
     for i, k in SPARK_PLAN.get(t, []):
         img = spark[:, k * SPARK_W:(k + 1) * SPARK_W]
         out.append(('spark', i + 1, img, SPARK_W / 2, img.shape[0] / 2, (TX + SPARK_AT[i][0], TCY + SPARK_AT[i][1]), 1.0, 'over'))
     if t in IMP_PLAN:
         f, a, m = IMP_PLAN[t]
-        img, px, py = tile(IMPACT[f - 1], SC['impact'] * m, a)
+        img, px, py = tile(IMPACT[f - 1], SC['impact'] * m, a, GLOW['impact'])
         out.append(('impact', f, img, px, py, (TX, TCY), a, 'over'))
+    if t in CONV_R:
+        img, px, py = converge_tile(t)
+        out.append(('converge', t - 123, img, px, py, (TX, TCY), 1.0, 'over'))
+    if t in SHOCK_PLAN:
+        img, px, py = shock_tile(t)
+        out.append(('shock', t - FINAL + 1, img, px, py, (TX, GROUND - 2), 1.0, 'under'))
     if t in RES_PLAN:
         f, a, m = RES_PLAN[t]
-        img, px, py = tile(RESIDUAL[f - 1], SC['residual'] * m, a)
+        img, px, py = tile(RESIDUAL[f - 1], SC['residual'] * m, a, GLOW['residual'])
         out.append(('residual', f, img, px, py, (TX, TCY), a, 'over'))
     return out
 
@@ -333,7 +402,7 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '60', '-i', f'{tmp}
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '60', '-i', f'{tmp}/f%03d.png', '-vf',
                 'fps=30,scale=645:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=200[p];[b][p]paletteuse=dither=bayer',
                 '-loop', '0', f'{OUT}/tangxun_ult_preview_30fps.gif'], check=True)
-KEYS = [0, 10, 24, 36, 40, 48, 60, 72, 80, 96, 108, 120, 128, 130, 133, 140, 146, 149, 104, 116]
+KEYS = [0, 24, 36, 48, 72, 80, 96, 108, 120, 125, 127, 129, 130, 131, 133, 136, 140, 146, 104, 116]
 KEYS = sorted(KEYS)
 cw, ch = 430, 200
 sheet = Image.new('RGB', (cw * 4, ch * 5))
@@ -345,12 +414,16 @@ sheet.save(f'{OUT}/tangxun_ult_preview_contact.png')
 
 
 # ------------------------------------------------------------------ in-game strips (30 FPS timeline order)
-def bake(name, plan, scale, frames_src, ts):
+def bake(name, plan, scale, frames_src, ts, glow=None):
     """frames = the plan at every 2nd T in `ts` · common pivot box · returns FxDef numbers (px of this preview scale)"""
     tiles = []
     for t in ts[::2]:
         f, a, m = plan[t]
-        tiles.append(tile(frames_src[f - 1], scale * m, a))
+        tiles.append(tile(frames_src[f - 1], scale * m, a, glow))
+    return bake_tiles(name, tiles)
+
+
+def bake_tiles(name, tiles, frame_ms=2000 / 60):
     l = max(px for _, px, _ in tiles)
     r = max(a.shape[1] - px for a, px, _ in tiles)
     u = max(py for _, _, py in tiles)
@@ -360,15 +433,18 @@ def bake(name, plan, scale, frames_src, ts):
     for k, (a, px, py) in enumerate(tiles):
         out.alpha_composite(Image.fromarray(a), (k * w + round(l - px) + 1, round(u - py) + 1))
     out.save(f'public/sprites/fx-tangxun-ult-{name}.png', optimize=True)
-    return {'frames': len(tiles), 'w': w, 'h': h, 'frameMs': round(2000 / 60, 2), 'pivot': [round((l + 1) / w, 4), round((u + 1) / h, 4)]}
+    return {'frames': len(tiles), 'w': w, 'h': h, 'frameMs': round(frame_ms, 2), 'pivot': [round((l + 1) / w, 4), round((u + 1) / h, 4)]}
 
 
 game_fx = {
-    'charge': {**bake('charge', CHARGE_PLAN, SC['charge'], CHARGE, sorted(CHARGE_PLAN)), 'dy': 27.25},
-    'main': {**bake('main', MAIN_PLAN, SC['main'], MAIN, sorted(MAIN_PLAN)), 'dy': round(27.25 - 2 * 1.25, 2)},
-    'impact': {**bake('impact', IMP_PLAN, SC['impact'], IMPACT, sorted(IMP_PLAN)), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2)},
-    'residual': {**bake('residual', RES_PLAN, SC['residual'], RESIDUAL, sorted(RES_PLAN)), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2),
+    'charge': {**bake('charge', CHARGE_PLAN, SC['charge'], CHARGE, sorted(CHARGE_PLAN), GLOW['charge']), 'dy': 27.25},
+    'main': {**bake('main', MAIN_PLAN, SC['main'], MAIN, sorted(MAIN_PLAN), GLOW['main']), 'dy': round(27.25 - 2 * 1.25, 2)},
+    'impact': {**bake('impact', IMP_PLAN, SC['impact'], IMPACT, sorted(IMP_PLAN), GLOW['impact']), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2)},
+    'residual': {**bake('residual', RES_PLAN, SC['residual'], RESIDUAL, sorted(RES_PLAN), GLOW['residual']), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2),
                  'delayMs': round((140 - FINAL) * 1000 / FPS)},
+    # 60 FPS strip (6 frames T124–T129) — the blades must visibly travel in
+    'converge': {**bake_tiles('converge', [converge_tile(t) for t in CONV_PLAN], 1000 / 60), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2)},
+    'shock': {**bake_tiles('shock', [shock_tile(t) for t in SHOCK_PLAN[::2]]), 'dy': round(27.25 - 2 * 1.25, 2)},
 }
 steps = [round((b - a + 1) * 1000 / FPS) for a, b, _ in CHAR]
 steps[-1] += round(N * 1000 / FPS) - sum(steps)
@@ -380,7 +456,7 @@ game = {'steps': steps,
         'root': [[sx(t), round(root_x(t), 1), 0] for t in sorted({k[0] for k in ROOT_KEYS} | set(range(0, N, 6)) | {N - 1})],
         'weights': WEIGHTS,
         'impact': [{'hitStopMs': 17, 'shakePx': 1, 'shakeMs': 40}] * 3 + [{'hitStopMs': 17, 'shakePx': 2, 'shakeMs': 50},
-                                                                          {'hitStopMs': 100, 'shakePx': 8, 'shakeMs': 220, 'flashMs': 120}]}
+                                                                          {'hitStopMs': 100, 'shakePx': 8, 'shakeMs': 240, 'flashMs': 180}]}
 
 # ------------------------------------------------------------------ timeline JSON (+ sync-sheet meta)
 pf = []
@@ -431,19 +507,23 @@ meta = {
                 'จุดบนตัวเป้า 4 จุด', 'T108 / T112 / T116 / T120 = 10 / 10 / 10 / 15 %'],
                ['minor', 'L6b Minor Damage', [230, 160, 90], 'engine (repeat 5)', '-', '-', 'ตัดร่าย Break 60 ที่ครั้งแรก'],
                ['final', 'L7 Final Damage', [230, 90, 90], 'engine', '-', '-', 'T130 = 55 % คริแน่นอน + รอบตัว 8 ช่อง'],
-               ['impact', 'L8 Ultimate Impact VFX', [255, 200, 140], 'fx-tangxun-ult-impact (ult_impact.png แถว 1, 5 fr)', 'L8 · หน้าสุด',
-                'กลางตัวเป้า', 'T130 → peak T133 (1.75 ตัว) → T139'],
+               ['converge', 'L7b Blade Convergence', [140, 255, 215], 'fx-tangxun-ult-converge (มีด S2 × 8, 60 FPS)', 'L7 · หน้า',
+                'กลางตัวเป้า', 'T124 มีด 8 เล่มหมุนเกลียวเข้าหาเป้า → T129 ถึงกลางตัว'],
+               ['impact', 'L8 Ultimate Impact VFX', [255, 200, 140], 'fx-tangxun-ult-impact (ult_impact.png แถว 1, 5 fr) + bloom', 'L8 · หน้าสุด',
+                'กลางตัวเป้า', 'T130 → peak T133 (2.0 ตัว) → T139'],
+               ['shock', 'L8b Shockwave', [120, 240, 190], 'fx-tangxun-ult-shock (วงพื้นหยก)', 'L8 · ใต้ตัว',
+                'พื้นใต้เป้า', 'T130 → T141 ขยายถึง ~3 ช่อง แล้วจาง'],
                ['residual', 'L9 Residual FX', [170, 130, 200], 'fx-tangxun-ult-residual (ult_impact.png แถว 2, 6 fr)', 'L9 · หน้า',
                 'กลางตัวเป้า', 'T140 → T157 ไม่มีดาเมจ'],
                ['hitstop', 'L10 Hitstop', [255, 255, 255], 'AnimDef.impact', '-', '-', 'ครั้งย่อย 1 เฟรม · ปิดฉาก 6 เฟรม']],
     'trackNames': {'charge': 'ชาร์จ', 'main': 'ค่ายมีด', 'mark': 'สแกน / ล็อก', 'spark': 'ประกายย่อย', 'minor': 'ดาเมจย่อย',
-                   'final': 'ดาเมจปิด', 'impact': 'ระเบิด', 'residual': 'เศษค่าย', 'hitstop': 'หยุดเฟรม'},
+                   'final': 'ดาเมจปิด', 'converge': 'มีดรวมศูนย์', 'shock': 'คลื่นพื้น', 'impact': 'ระเบิด', 'residual': 'เศษค่าย', 'hitstop': 'หยุดเฟรม'},
     'layers': [[1, 'ตัวละคร (L1)'], [2, 'Root X (L2)'], [3, 'ชาร์จ (L3)'], [4, 'ค่ายมีด (L4)'], [5, 'ล็อกเป้า (L5)'],
                [6, 'ดาเมจย่อย (L6)'], [7, 'ดาเมจปิด (L7)'], [8, 'Impact (L8)'], [9, 'Residual (L9)'], [10, 'Hitstop (L10)'],
                [11, 'สั่นกล้อง (L11)'], [12, 'ซูม (L12)']],
     'shake': {str(k): list(v) for k, v in SHAKE.items()},
-    'thumbs': [0, 36, 48, 80, 96, 108, 128, 133, 140, 146],
-    'thumbLabels': {0: 'READY', 36: 'CHARGE PEAK', 48: 'ARRAY', 80: 'LOCK', 96: 'TIGHT', 108: 'HIT 1', 128: 'ALIGN',
+    'thumbs': [0, 36, 48, 80, 96, 108, 127, 133, 140, 146],
+    'thumbLabels': {0: 'READY', 36: 'CHARGE PEAK', 48: 'ARRAY', 80: 'LOCK', 96: 'TIGHT', 108: 'HIT 1', 127: 'CONVERGE',
                     133: 'IMPACT PEAK', 140: 'RESIDUAL', 146: 'RECOVERY'},
     'thumbCrop': [20 * UP, 40 * UP, 420 * UP, 185 * UP],
     'travelLabel': 'L2 Root X (px) — ไม่เกิน 12 px ยืนที่เดิม', 'heightLabel': 'Y movement (px) — ยืนพื้น',
@@ -452,7 +532,8 @@ meta = {
         'Charge รอบตัว (หลังตัวละคร) จางลงตั้งแต่ T042 ตอน Main เกิดที่เป้า T040 — ไม่ทึบเต็มพร้อมกันนาน',
         'เลือกเป้า: โฟกัสของผู้เล่น แล้ว แผลเปิด (Open Wound จาก S2) แล้ว แถวหลัง แล้ว ผู้ร่าย แล้ว เป้าปัจจุบัน',
         'ครั้งย่อย T108 / T112 / T116 / T120 = 10 / 10 / 10 / 15 % ใช้ประกายหยกเล็ก ไม่ใช้ Impact ใหญ่ · hit-stop 1 เฟรม สั่น 1-2 px',
-        'ปิดฉาก T130 = 55 % คริแน่นอน + รอบตัว 8 ช่อง · Impact 1.75 ตัว peak T133 · hit-stop 6 เฟรม สั่น 8 px · ไม่ระเบิดทั้งสนาม',
+        'ปิดฉาก T130 = 55 % คริแน่นอน + รอบตัว 8 ช่อง · Impact 2.0 ตัว peak T133 · hit-stop 6 เฟรม สั่น 8 px แฟลช 180 ms · ไม่ระเบิดทั้งสนาม',
+        'อลังการขึ้น: ทุกชั้นภาพวาดมี bloom หยก · ค่ายมีด 1.95 ตัว · T124–T129 มีด 8 เล่มหมุนเกลียวรวมเข้าเป้า · T130 คลื่นพื้นหยกขยาย ~3 ช่อง',
         'Residual T140 ไม่มีดาเมจ · ซูม 4 % T124 ถึง T133 กลับ T140 (preview เท่านั้น)',
         'VFX เป็นภาพวาด: alpha / สีแยกจากพื้น magenta, ย่อแบบเนียน ไม่ pixelated',
     ],

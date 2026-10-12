@@ -334,7 +334,8 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['tx-ult-charge']);
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['tx-ult-main']);
     for (const i of [0, 1, 2, 3]) expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: i })).toEqual([`tx-ult-spark${i}`]);
-    expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: 4 })).toEqual(['tx-ult-impact', 'tx-ult-residual']);
+    expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual(['tx-ult-converge']);
+    expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: 4 })).toEqual(['tx-ult-impact', 'tx-ult-shock', 'tx-ult-residual']);
     expect(FX['tx-ult-residual'].delayMs).toBeCloseTo(167, -1);
     const imp = clip.impact as { hitStopMs?: number; shakePx?: number }[];
     expect(imp.map(i => i.hitStopMs)).toEqual([17, 17, 17, 17, 100]);
