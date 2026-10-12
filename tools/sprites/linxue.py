@@ -5,7 +5,8 @@ First batch = base sheet only (skills use the Healer class ids and fall back to 
 Same import pipeline as Tang Xun (tools/sprites/tangxun.py: bailong.py + aurel_v2.py helpers, k-means body seeds).
 
 Sources (art/incoming/linxue, not committed):
-  base_raw.png   labelled sheet "Lin Xue — Base Combat Sprite Sheet": idle 3 (titled 4) · move 6 · hurt 3 · attack 6 ·
+  base_raw.png   labelled sheet "Lin Xue — Base Combat Sprite Sheet" (v2, ~4.5 heads like the rest of the roster — the
+                 first chibi sheet is kept as base_raw_chibi.png): idle 3 (titled 4) · move 6 · hurt 3 · attack 6 ·
                  death 5 on #FF00FF with a title bar, a dark row-label column, cell grid lines and "r-f" captions →
                  clean_base() keeps only the sprite bands (grid-line pixels keyed) → base.png
   reference.png  turnaround + staff parts + palette; the face close-up (bottom right) becomes the portrait
@@ -51,7 +52,7 @@ def load_dark(name):
 
 
 # sprite bands of the labelled sheet (rows between the cell top line and the caption line) and the label column edge
-SHEET_BANDS = [(51, 214), (246, 412), (444, 607), (639, 800), (831, 980)]
+SHEET_BANDS = [(51, 214), (245, 406), (436, 595), (623, 780), (809, 965)]
 LABEL_X = 147
 
 
@@ -76,6 +77,10 @@ def clean_base():
 # labelled skill sheets (title bar, a caption bar under every cell, thin pink cell dividers): keep only the cell
 # interiors → <name>.png on flat magenta. rows = (y0, y1, divider x's) in source px
 GRID_SHEETS = {
+    # base v2 (2026-10, ~4.5-head proportions like the other heroes; the first chibi sheet = base_raw_chibi.png):
+    # the robes / hair of neighbouring idle poses touch → split by the sheet's own cells too
+    'base': [(51, 214, [373, 607, 841]), (245, 406, [373, 607, 841, 1070, 1299]), (436, 595, [373, 607, 841]),
+             (623, 780, [364, 603, 820, 1052, 1289]), (809, 965, [373, 600, 852, 1133])],
     's2_char': [(52, 418, [359, 718, 1061, 1422]), (465, 797, [398, 750, 1097, 1432])],
     # Ult Returning Spring Rite: 10 + 11 cells (the sheet repeats the "16. Recover 3" caption → 21 poses)
     'ult_char': [(55, 461, [162, 321, 503, 684, 864, 1037, 1220, 1402, 1574]),
@@ -97,7 +102,7 @@ def clean_grid(name, rows, pad=4, edge=7):
 
 B.load = load_dark
 
-CELL_SPLIT = {'ult_char'}   # frames = the sheet's own cells (no watershed: neighbours' staffs / ribbons cross)
+CELL_SPLIT = {'base', 'ult_char'}   # frames = the sheet's own cells (no watershed: neighbours' staffs / ribbons cross)
 
 
 def grid_frames(file, counts):
@@ -178,7 +183,7 @@ A._markers = cluster_markers
 A.grid_markers = cluster_markers   # skill rows: the same seeding (blades cross into the neighbour frames)
 
 # height of the base idle on screen (px, the lotus staff head included) — Bai Long ≈ 75, Yue Zheng 78, Mo Ye 74,
-# Tang Xun 78 · Lin Xue is small; her staff tops her head
+# Tang Xun 78 · Lin Xue v2 base: 82 px with the lotus staff head, width / area ≈ Yue Zheng (hair + sleeves)
 IDLE_BODY = 80
 BASE_COUNTS = [3, 6, 3, 6, 5]
 BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
@@ -219,10 +224,10 @@ def lotus_projectile():
 def main():
     clean_base()
     for name, rows in GRID_SHEETS.items():
-        if os.path.exists(f'{SRC}/{name}_raw.png'):
+        if name != 'base' and os.path.exists(f'{SRC}/{name}_raw.png'):
             clean_grid(name, rows)
     report = {'notes': [], 'rows': {}}
-    base = A.sheet_frames('base', BASE_COUNTS, False)
+    base = grid_frames('base', BASE_COUNTS)
     groups, i = {}, 0
     for name, n in zip(BASE_NAMES, BASE_COUNTS):
         groups[name] = base[i:i + n]
