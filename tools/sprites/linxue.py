@@ -84,9 +84,14 @@ GRID_SHEETS = {
     # S2 v2 (roster proportions, plain 5 × 2 grid, no captions; the chibi sheet = s2_char_raw_chibi.png)
     's2_char': [(2, 470, [337, 671, 1002, 1335]), (472, 940, [337, 671, 1002, 1335])],
     # Ult Returning Spring Rite: 10 + 11 cells (the sheet repeats the "16. Recover 3" caption → 21 poses)
-    'ult_char': [(55, 461, [162, 321, 503, 684, 864, 1037, 1220, 1402, 1574]),
-                 (493, 804, [182, 369, 560, 735, 885, 1034, 1180, 1327, 1475, 1617])],
+    # Ult v2 (roster proportions, same 10 + 11 captioned cells as the chibi sheet = ult_char_raw_chibi.png)
+    'ult_char': [(55, 428, [162, 321, 503, 684, 864, 1038, 1219, 1401, 1575]),
+                 (460, 781, [183, 369, 561, 729, 883, 1035, 1183, 1330, 1477, 1617])],
 }
+# pixels drawn across a cell divider: (x0, y0, x1, y1, cell label within the row — 1 = first cell) are copied raw
+# and handed to that cell's frame (Ult "11. Follow Through 1": the lotus head of the outstretched staff pokes into
+# cell 12 — without this frame 11 loses its lotus and frame 12 gets a stray one)
+GRID_FIX = {'ult_char': [(179, 515, 236, 640, 1)]}
 
 
 def clean_grid(name, rows, pad=4, edge=7):
@@ -98,6 +103,8 @@ def clean_grid(name, rows, pad=4, edge=7):
         xs = [edge] + divs + [w - edge]
         for a, b in zip(xs, xs[1:]):
             out[y0 + pad:y1 - pad, a + pad:b - pad] = raw[y0 + pad:y1 - pad, a + pad:b - pad]
+    for x0, y0, x1, y1, _ in GRID_FIX.get(name, []):
+        out[y0:y1, x0:x1] = raw[y0:y1, x0:x1]
     Image.fromarray(out).save(f'{SRC}/{name}.png')
 
 
@@ -117,6 +124,10 @@ def grid_frames(file, counts):
         band = (y0 + int(ys.min()), y0 + int(ys.max()) + 1)
         bins = np.digitize(np.arange(im.shape[1]), divs) + 1
         full = np.broadcast_to(bins[None, :], (band[1] - band[0], im.shape[1]))
+        for x0, fy0, x1, fy1, lab in GRID_FIX.get(file, []):
+            if y0 <= fy0 < y1:
+                full = full.copy()
+                full[max(0, fy0 - band[0]):fy1 - band[0], x0:x1] = lab
         B.body_markers = lambda h, n, full=full: (np.where(h, full, 0), n)
         B.watershed = lambda _e, _m, mask=None, full=full: np.where(mask, full, 0)
         out += B.clip_frames(im, band, want, 'feet', False)
@@ -270,8 +281,9 @@ def main():
         hx = []
         for c in range(len(frs)):
             cell = pa[r * B.CELL_H:(r + 1) * B.CELL_H, c * B.CELL_W:(c + 1) * B.CELL_W][:, :B.ROOT_X + 12] > 0
-            top = np.nonzero(cell.any(1))[0].min()
-            hx.append(np.nonzero(cell[top + 10:top + 26])[1].mean())
+            top = np.nonzero(cell.sum(1) >= 4)[0].min()      # ≥ 4 px: a loose ribbon tip / glow speck is not the head
+            band = np.nonzero(cell[top + 10:top + 26])[1]
+            hx.append(band.mean() if band.size else np.nonzero(cell)[1].mean())
         ref = float(np.mean(hx))
         lim = HEAD_LOCK_MAX.get(name, 99)    # a lean is a pose, not drift: never slide the feet more than this
         shifts[name] = [float(np.clip(ref - h, -lim, lim)) for h in hx]
