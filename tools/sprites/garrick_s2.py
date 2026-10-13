@@ -87,7 +87,10 @@ def contact_dx():
 
 
 CONTACT_DX = contact_dx()
-CX = X0 + CONTACT_DX                    # hammer contact point on the preview ground
+# the swing arc + first burst read too close to his body at the bare contact point (user 2026-10): the Main VFX sits
+# MAIN_PUSH px further ahead of the hammer contact
+MAIN_PUSH = 20
+CX = X0 + CONTACT_DX + MAIN_PUSH        # Main VFX anchor on the preview ground
 
 ENEMY = np.array(Image.open('public/sprites/enemy-goblin-fighter.png').convert('RGBA'))[0:100, 0:132][:, ::-1]
 ENEMY_ROOT = (132 - 66, 86)
@@ -318,7 +321,7 @@ def bake(name, tiles, frame_ms=1000 / 60):
 
 
 game_fx = {
-    'main': {**bake('main', [tile(MAIN[MAIN_PLAN[t] - 1], SC['main']) for t in sorted(MAIN_PLAN)]), 'dx': round(CONTACT_DX * 1.25, 2)},
+    'main': {**bake('main', [tile(MAIN[MAIN_PLAN[t] - 1], SC['main']) for t in sorted(MAIN_PLAN)]), 'dx': round((CONTACT_DX + MAIN_PUSH) * 1.25, 2)},
     'impact': bake('impact', [tile(IMPACT[IMPACT_PLAN[t] - 1], SC['impact']) for t in sorted(IMPACT_PLAN)]),
     'shock': bake('shock', [tile(IMPACT[IMPACT_PLAN[t] - 1], SC['shock'], SHOCK_ALPHA) for t in sorted(IMPACT_PLAN) if IMPACT_PLAN[t] <= 6]),
 }
@@ -361,7 +364,7 @@ meta = {
     'tracks': [['contact', 'L2 Hammer Contact / Weapon Anchor', [235, 220, 170], f'จุดหัวค้อนแตะพื้น (+{CONTACT_DX:.0f} px หน้าเท้า)', '-',
                 'หัวค้อน / จุดสัมผัส', 'F24 ค้อนเริ่มฟาด > F31 แตะพื้น (contact)'],
                ['main', 'L3 Skill 2 Main VFX', [245, 200, 110], 'fx-garrick-s2-main (s2_vfx.png 10 fr)', 'L3 · หน้าตัวละคร',
-                'จุดหัวค้อนแตะพื้น', 'F24 ฝุ่น > F26–F30 รอยเหวี่ยง > F31 หินแตก peak > F34 วงกระแทก > จาง F53'],
+                f'หน้าจุดหัวค้อนแตะพื้น +{MAIN_PUSH} px', 'F24 ฝุ่น > F26–F30 รอยเหวี่ยง > F31 หินแตก peak > F34 วงกระแทก > จาง F53'],
                ['impact', 'L4 Skill 2 Impact VFX', [255, 150, 90], 'fx-garrick-s2-impact (s2_impact.png 8 fr)', 'L4 · หน้า',
                 'เท้าเป้าหลัก', 'F31 ปะทุ > F33 peak (ค้างถึง F36) > วงฝุ่น > จาง F52'],
                ['damage', 'L5 Primary Target Damage', [235, 95, 70], 'DAMAGE FRONT_T3 main 180 %', '-', 'ช่องหน้าตัว (ทุกตัวในช่อง)',
@@ -387,7 +390,7 @@ meta = {
         'แทงก์เกราะหนัก: ยืนที่เดิม (root 0) ไม่พุ่ง ไม่กระโดด — ถ่ายน้ำหนัก > ง้างค้อนหลัง > เหนือหัว > ฟาดลงช่องหน้าตัว',
         'ค้อนชิ้นเดียวแข็ง: ด้าม/หัว/ตำแหน่งมือตามภาพที่อนุมัติ ไม่ยืดไม่บิด · ภาพตัวละครกับ VFX แยกกันตอน runtime',
         'F31 = DAMAGE + BREAK 70 + KNOCKBACK 1 ช่อง + IMPACT VFX + Shock เลนบน/ล่าง (60 %) ลงพร้อมกัน',
-        'Main VFX ยึดจุดหัวค้อนแตะพื้น (หน้าเท้า) · Impact VFX ยึดเท้าเป้าหลัก · Shock = impact ย่อ 55 % / 60 % บนศัตรูเลนข้าง',
+        f'Main VFX ยึดหน้าจุดหัวค้อนแตะพื้น {MAIN_PUSH} px (= {CONTACT_DX + MAIN_PUSH:.0f} px หน้าเท้า) · Impact VFX ยึดเท้าเป้าหลัก · Shock = impact ย่อ 55 % / 60 % บนศัตรูเลนข้าง',
         f'Hitstop {HITSTOP_MS} ms + สั่นกล้อง {SHAKE_PX} px {SHAKE_MS} ms ที่ F31 (ไม่นับรวมใน 0.90 วิ) · ไม่มีซูม',
         'พรีวิว: เลนบนมีศัตรูสีหม่นเหลื่อม -14 px, เลนล่าง (+14 px) ว่าง — shock ยังแสดงจุดที่ลง · ผลักถอย = ไถล 1 ช่อง F31–F40 (บนกระดานจริงเลื่อนตามเอนจิน)',
     ],

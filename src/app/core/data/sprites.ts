@@ -680,12 +680,12 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-garrick-s1-aura.png', frames: 8, w: 100, h: 91, frameMs: 93.75, at: 'self', orient: 'flip', on: 'impact',
     hitIndex: 0, repeat: 4, fadeOutMs: 300, pivot: [0.4963, 0.7614], dy: 27.25, scale: 1 / 1.5,
   },
-  // Garrick S2 Hammerfall (tools/sprites/garrick_s2.py, 60 FPS): the Main VFX at the hammer's ground contact (+30 px
-  // in front of his feet, F24 dust → swing arc → STONE BURST F31 → shock ring → fades F53, over him) · the Impact VFX
+  // Garrick S2 Hammerfall (tools/sprites/garrick_s2.py, 60 FPS): the Main VFX 20 px ahead of the hammer's ground contact
+  // (+50 px in front of his feet — user: the swing + first burst read too close to him; F24 dust → swing arc → STONE BURST F31 → shock ring → fades F53, over him) · the Impact VFX
   // at the primary's feet (F31 → peak F33 → dust ring F52) · the shock = the impact at 55 % / 60 % on every other unit hit
   'gr-s2-main': {
     file: 'fx-garrick-s2-main.png', frames: 30, w: 141, h: 113, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
-    pivot: [0.4526, 0.8015], dx: 37.5, dy: 27.25, scale: 1 / 1.5,
+    pivot: [0.4526, 0.8015], dx: 62.5, dy: 27.25, scale: 1 / 1.5,
   },
   'gr-s2-impact': {
     file: 'fx-garrick-s2-impact.png', frames: 22, w: 99, h: 131, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
