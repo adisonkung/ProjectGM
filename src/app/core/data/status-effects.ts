@@ -84,6 +84,26 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     id: 'open_wound', name: 'แผลเปิด', duration: 5, stackPolicy: 'REFRESH_DURATION',
     modifiers: { damageTakenMultiplier: 1.1 },
   },
+  /** Garrick Brace for Impact: the first foe to land a hit during the stance is staggered (taunt_guard carries the DR) */
+  brace_counter: {
+    id: 'brace_counter', name: 'ตั้งรับสวนกลับ', duration: 3, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: {}, counterStatus: { status: 'stagger', duration: 0.6 },
+  },
+  /** STAGGER: a short stun from a counter (bosses resist unless boss-valid) */
+  stagger: {
+    id: 'stagger', name: 'เซ', duration: 0.6, stackPolicy: 'REFRESH_DURATION',
+    modifiers: {}, flags: ['stun'],
+  },
+  /** Garrick Hold the Gate (allies): −15 % damage taken, 25 % of what is left is taken by Garrick instead */
+  gate_ward: {
+    id: 'gate_ward', name: 'ประตูเหล็ก', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0.85 }, damageTransfer: 0.25,
+  },
+  /** Garrick Hold the Gate (self): planted — −20 % damage taken, no stun / root / knockback */
+  gate_stance: {
+    id: 'gate_stance', name: 'ยืนหยัด', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0.8 }, flags: ['unstoppable'],
+  },
   healing_reduction: {
     id: 'healing_reduction', name: 'ฮีลลดลง', duration: 6, stackPolicy: 'REFRESH_DURATION',
     modifiers: { healingReceivedMultiplier: 0.5 },

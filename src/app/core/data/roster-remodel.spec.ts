@@ -10,12 +10,12 @@ import { newGameState } from './starter';
 
 /** 2026-10 roster remodel: the old roster left the game — Bai Long is the only hero and the template for the new ones */
 describe('Roster remodel — Bai Long lead + new heroes', () => {
-  it('ships only the remodelled heroes (Bai Long + Yue Zheng + Mo Ye + Tang Xun + Lin Xue) as the starter team; no old hero sheet / art is left', () => {
-    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue']);
+  it('ships only the remodelled heroes (Bai Long + Yue Zheng + Mo Ye + Tang Xun + Lin Xue) as the starter team (+ Garrick on the bench); no old hero sheet / art is left', () => {
+    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick']);
     expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue']);
-    expect(SHIPPED_STARTER_BENCH).toEqual([]);
-    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-linxue.png', 'hero-moye.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
-    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'linxue', 'moye', 'tangxun', 'yuezheng']);
+    expect(SHIPPED_STARTER_BENCH).toEqual(['garrick']);
+    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-garrick.png', 'hero-linxue.png', 'hero-moye.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
+    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'garrick', 'linxue', 'moye', 'tangxun', 'yuezheng']);
   });
 
   it('an old save drops heroes whose template is gone: gear back to the bag, team / slots / memory forget them', () => {

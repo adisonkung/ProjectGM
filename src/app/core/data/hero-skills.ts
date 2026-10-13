@@ -318,6 +318,43 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
     },
   },
+  // การ์ริก (Garrick Stoneward — The Iron Bell, 3★ Tank / Frontline Control, remodel #6): Earth / Steel / Guardian ·
+  // Iron Bastion (Golden Lion = his crest, not a summon) · two-handed warhammer · Classic Western fantasy knight ·
+  // Tank class ids + cooldowns (rank tables apply), effects arranged to his kit until the skill sheets arrive:
+  // S1 Brace for Impact = self guard (class DR taunt_guard) + taunt the foes in front + the first foe to land a hit
+  // is staggered · S2 Hammerfall = heavy slam on the cell in front (splash above / below), high Break, small knockback
+  // · Ult Hold the Gate = taunt nearby + team −15 % damage taken + 25 % of the allies' damage intercepted by him +
+  // stagger resistance (no immortality, no direct healing)
+  garrick: {
+    id: 'garrick', cls: 'tank', identity: 'Tank · Counter Stance · Hammer Break · Team Damage Interception',
+    kit: {
+      ...tank,
+      skill: {
+        ...tank.skill, name: 'ตั้งรับแรงปะทะ', label: 'Brace for Impact',
+        effects: [
+          { type: 'APPLY_STATUS', status: 'taunted', to: 'AREA', area: 'FRONT_ARC', center: 'SELF', team: 'ENEMY' },
+          { type: 'APPLY_STATUS', status: 'taunt_guard', to: 'SELF' },
+          { type: 'APPLY_STATUS', status: 'brace_counter', to: 'SELF' },
+        ],
+      },
+      skill2: {
+        ...tank.skill2, name: 'ค้อนถล่มปฐพี', label: 'Hammerfall', range: 1, movement: undefined,
+        // no charge: he plants and slams the cell in front (every unit standing there), the lanes above / below take splash
+        effects: [
+          { type: 'DAMAGE', area: 'FRONT_T3', primary: 1.8, secondary: 0.6, interrupt: true, breakPower: 70 },
+          { type: 'KNOCKBACK', cells: 1 },
+        ],
+      },
+      ult: {
+        ...tank.ult, name: 'ยืนหยัดเฝ้าประตู', label: 'Hold the Gate',
+        effects: [
+          { type: 'APPLY_STATUS', status: 'taunted', to: 'AREA', area: 'RADIUS_2', center: 'SELF', team: 'ENEMY' },
+          { type: 'APPLY_STATUS', status: 'gate_ward', to: 'AREA', area: 'ALL_ALLIES', team: 'ALLY' },
+          { type: 'APPLY_STATUS', status: 'gate_stance', to: 'SELF' },
+        ],
+      },
+    },
+  },
   bailong: {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {

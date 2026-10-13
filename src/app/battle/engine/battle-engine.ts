@@ -60,6 +60,8 @@ export type BattleEvent =
   | { type: 'miss'; src: number; dst: number }
   /** MIRROR STANCE: `src` (the stance holder) sent `amount` back to `dst` */
   | { type: 'reflect'; src: number; dst: number; amount: number }
+  /** a counter stance fired: `dst` (the attacker) gets `status` */
+  | { type: 'counter'; src: number; dst: number; status: string }
   /** ฟื้นคืนชีพ */
   | { type: 'revive'; src: number; dst: number; amount: number }
   /** ได้โล่ (src = ผู้ให้) */
@@ -1332,6 +1334,7 @@ export class BattleEngine {
    */
   /** push `dst` straight back along its row, away from `src` (stops at an occupied / off-board cell) */
   private knockback(src: BattleUnit, dst: BattleUnit, cells: number): void {
+    if (hasFlag(dst, 'unstoppable')) return;
     this.breakStances(dst);
     if (dst.monster && this.monsterDefs[dst.monster.definitionId]?.immune?.includes('KNOCKBACK')) return;
     for (let i = 0; i < cells; i++) {
@@ -1783,6 +1786,8 @@ export class BattleEngine {
       if (Number.isFinite(base)) duration = base * (1 - resist);
     }
     const r = applyBuff(dst, def, src.id, { magnitude: effectiveAttack(src) * (opts?.potency ?? 1), duration });
+    // a (re)applied counter stance is armed again
+    if (def.counterStatus) for (const b of dst.buffs) if (b.def.id === def.id) b.counterUsed = false;
     // a stun breaks stances (Mirror Stance)
     if (def.flags?.includes('stun')) this.breakStances(dst);
     this.metrics.statusApplied[def.id] = (this.metrics.statusApplied[def.id] ?? 0) + 1;
@@ -1810,6 +1815,8 @@ export class BattleEngine {
 
   /** boss immunities (definition `immune`): STUN (unless the status is boss-valid, e.g. BROKEN) / ROOT / TAUNT */
   private resists(dst: BattleUnit, def: import('../../core/models/combat').StatusEffectDefinition): boolean {
+    // stagger resistance (Garrick Hold the Gate): no stun / root while UNSTOPPABLE
+    if (hasFlag(dst, 'unstoppable') && (def.flags ?? []).some(f => f === 'stun' || f === 'root')) return true;
     const immune = dst.monster ? this.monsterDefs[dst.monster.definitionId]?.immune : undefined;
     if (!immune?.length || def.bossValid) return false;
     const f = def.flags ?? [];
@@ -2063,6 +2070,15 @@ export class BattleEngine {
       this.events.push({ type: 'reflect', src: dst.id, dst: src.id, amount: back });
       this.applyDamage(src, back, false, false, dst, true);
     }
+    // COUNTER STANCE (Brace for Impact): the first direct hit from a foe staggers the attacker
+    if (!poison && !noTransfer && src && src.alive && src !== dst && src.side !== dst.side && amount + blocked > 0 && dst.hp > 0) {
+      const c = dst.buffs.find(b => b.def.counterStatus && !b.counterUsed);
+      if (c) {
+        c.counterUsed = true;
+        this.events.push({ type: 'counter', src: dst.id, dst: src.id, status: c.def.counterStatus!.status });
+        this.applyStatus(src, c.def.counterStatus!.status, dst, c.def.counterStatus!.duration);
+      }
+    }
     const hurt = !poison && dst.hp > 0 && (dst.monster ? this.monsterAI.onHit(dst) : true);
     this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked, hurt, ...(poison ? { poison } : {}) });
     if (dst.hp <= 0) {
@@ -2158,7 +2174,7 @@ export class BattleEngine {
           baseDamage: p.damage, damageType: def.damageType, sourceId: p.sourceId,
         });
         this.events.push({ type: 'projectileHit', pid: p.id, dst: hit.id });
-        this.applyDamage(hit, res.amount, false);
+        this.applyDamage(hit, res.amount, false, false, this.units.find(v => v.id === p.attackerId));
         continue;
       }
       if (p.age >= def.maxLifetime || p.x < -1 || p.x > BOARD_COLS || p.y < -1 || p.y > LANES) {

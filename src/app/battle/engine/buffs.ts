@@ -17,6 +17,8 @@ export interface ActiveBuff {
   magnitude: number;
   /** DoT / HoT: time until the next tick */
   tickTimer: number;
+  /** counterStatus already spent for this application */
+  counterUsed?: boolean;
 }
 
 export interface Buffable {

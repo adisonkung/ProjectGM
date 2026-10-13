@@ -45,7 +45,9 @@ export type StatusFlag =
   /** BROKEN: cannot attack or cast (Break Gauge result) */
   | 'broken'
   /** SILENCE: heroes cannot use skills / ultimates (basic attacks still allowed) */
-  | 'silence';
+  | 'silence'
+  /** UNSTOPPABLE (stagger resistance): stun / root / knockback do not land */
+  | 'unstoppable';
 
 /** Periodic effect: every `interval` s deal / heal `perSecond × sourceAtk × interval` (snapshot at application) */
 export interface StatusTick {
@@ -76,6 +78,9 @@ export interface StatusEffectDefinition {
   damageTransfer?: number;
   /** control statuses (stun / root / taunt) only land on bosses when true */
   bossValid?: boolean;
+  /** COUNTER (Garrick Brace for Impact): the first direct hit from a foe while this status is up puts `status` on the
+   *  attacker (once per application — a refresh re-arms it) */
+  counterStatus?: { status: string; duration?: number };
   /** stance statuses (Mirror Stance) end at once when the unit is stunned or knocked back */
   endOnControl?: boolean;
   /** DoT / HoT ticks can't crit; they ignore DEF (direct damage) — documented, always true for now */
@@ -94,12 +99,13 @@ export interface StatusEffectDefinition {
  * FRONT_LINE_2  ground: the 2 cells straight ahead, both main
  * FRONT_COLUMN_3 ground: the column in front (lane −1 / 0 / +1), all main
  * FRONT_CROSS   ground: main in front, splash above / below it and one cell further
+ * FRONT_T3      ground: main in front, splash on the cells above / below it
  * FRONT_ARC     short cone in front of the caster: 1–2 columns ahead, ±1 lane
  * RADIUS_2/3    within 2 / 3 cells of the centre
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';
