@@ -384,8 +384,21 @@ export const SHEETS: Record<string, SheetDef> = {
           RECOVERY_START: 8.0,
         },
       },
+      // S2 Hammerfall — production Timeline Sync Sheet (tools/sprites/garrick_s2.py, 60 FPS F00–F53 = 0.90 s): ready /
+      // weight shift C01–C02 · heavy wind-up C03–C05 (ANTICIPATION START F10) · ATTACK RELEASE F24 (C06, Main VFX at the
+      // hammer's contact point) · DAMAGE + BREAK 70 + KNOCKBACK + IMPACT F31 (C07, hammer head on the ground) ·
+      // RECOVERY F37 (C08–C10) · root 0 · hit-stop 50 ms + shake 4 px
+      skill2: {
+        row: 6, frames: 10, ms: 90,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [83, 83, 100, 67, 67, 117, 100, 100, 83, 100],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 2.0, STRIKE_START: 5.0, VFX_SPAWN: 5.0, DAMAGE: 6.0, IMPACT: 6.0, RECOVERY_START: 7.0,
+        },
+        impact: { hitStopMs: 50, shakePx: 4, shakeMs: 120 },
+      },
     },
-    fx: { skill: ['gr-s1-main', 'gr-s1-aura'] },
+    fx: { skill: ['gr-s1-main', 'gr-s1-aura'], skill2: ['gr-s2-main', 'gr-s2-impact', 'gr-s2-shock'] },
   },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
@@ -666,6 +679,21 @@ export const FX: Record<string, FxDef> = {
   'gr-s1-aura': {
     file: 'fx-garrick-s1-aura.png', frames: 8, w: 100, h: 91, frameMs: 93.75, at: 'self', orient: 'flip', on: 'impact',
     hitIndex: 0, repeat: 4, fadeOutMs: 300, pivot: [0.4963, 0.7614], dy: 27.25, scale: 1 / 1.5,
+  },
+  // Garrick S2 Hammerfall (tools/sprites/garrick_s2.py, 60 FPS): the Main VFX at the hammer's ground contact (+30 px
+  // in front of his feet, F24 dust → swing arc → STONE BURST F31 → shock ring → fades F53, over him) · the Impact VFX
+  // at the primary's feet (F31 → peak F33 → dust ring F52) · the shock = the impact at 55 % / 60 % on every other unit hit
+  'gr-s2-main': {
+    file: 'fx-garrick-s2-main.png', frames: 30, w: 141, h: 113, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.4526, 0.8015], dx: 37.5, dy: 27.25, scale: 1 / 1.5,
+  },
+  'gr-s2-impact': {
+    file: 'fx-garrick-s2-impact.png', frames: 22, w: 99, h: 131, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 0, pivot: [0.5089, 0.8149], dy: 27.25, scale: 1 / 1.5,
+  },
+  'gr-s2-shock': {
+    file: 'fx-garrick-s2-shock.png', frames: 15, w: 55, h: 73, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 0, perHit: 6, exceptPrimary: true, pivot: [0.512, 0.8104], dy: 27.25, scale: 1 / 1.5,
   },
   'lx-s1-bloom': {
     file: 'fx-linxue-s1-bloom.png', frames: 20, w: 86, h: 99, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',

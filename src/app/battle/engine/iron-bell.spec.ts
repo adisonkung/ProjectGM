@@ -39,6 +39,21 @@ describe('Garrick (3★ Tank, base sheet + kit)', () => {
     expect(aura.layer).toBeUndefined();
   });
 
+  it('S2 Hammerfall sync sheet: 0.90 s clip, release F24, damage + break + knockback + impact F31, recovery F37', () => {
+    const ev = animEvents('hero-garrick.png', 'skill2');
+    const at = (k: string) => ev.find(e => e.event === k)!.t;
+    const a = SHEETS['hero-garrick.png'].anims.skill2!;
+    expect(a.row).toBe(6);
+    expect(a.steps!.reduce((x, y) => x + y, 0)).toBe(900);
+    expect(Math.abs(at('ANTICIPATION_PEAK') - 10 / 60)).toBeLessThan(0.01);
+    expect(Math.abs(at('STRIKE_START') - 24 / 60)).toBeLessThan(0.01);
+    expect(Math.abs(at('DAMAGE') - 31 / 60)).toBeLessThan(0.01);
+    expect(Math.abs(at('RECOVERY_START') - 37 / 60)).toBeLessThan(0.01);
+    expect(fxFor('hero-garrick.png', 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['gr-s2-main']);
+    expect(fxFor('hero-garrick.png', 'skill2', { on: 'impact', hit: 0 })).toEqual(['gr-s2-impact', 'gr-s2-shock']);
+    expect(FX['gr-s2-shock']).toEqual(jasmine.objectContaining({ exceptPrimary: true }));
+  });
+
   it('Brace for Impact / Hammerfall / Hold the Gate keep the Tank class ids + cooldowns', () => {
     const k = kitOf('garrick', 'tank');
     const c = CLASS_KITS.tank;
