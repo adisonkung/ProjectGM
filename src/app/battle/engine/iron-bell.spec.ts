@@ -2,7 +2,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_KITS, kitOf } from '../../core/data/hero-skills';
 import { HERO_ART } from '../../core/data/hero-art';
-import { SHEETS } from '../../core/data/sprites';
+import { animEvents, FX, fxFor, SHEETS } from '../../core/data/sprites';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { OwnedHero } from '../../core/models/hero';
 import { EnemyPlacement, StageDef } from '../../core/models/stage';
@@ -20,9 +20,22 @@ describe('Garrick (3★ Tank, base sheet + kit)', () => {
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 5], [1, 7], [2, 4], [3, 7], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(4);
-    expect(a.skill).toBeUndefined();
+    expect(a.skill!.row).toBe(5);
     expect(HERO_BY_ID['garrick']).toEqual(jasmine.objectContaining({ name: 'การ์ริก', cls: 'tank', star: 3, sprite: 'hero-garrick.png' }));
     expect(HERO_ART['garrick']).toEqual(jasmine.objectContaining({ portrait: 'portraits/garrick.webp' }));
+  });
+
+  it('S1 Brace for Impact sync sheet: 1.10 s clip, brace start F18, activation (DR + taunt + counter) F30, aura loops 3 s', () => {
+    const ev = animEvents('hero-garrick.png', 'skill');
+    const at = (k: string) => ev.find(e => e.event === k)!.t;
+    expect(SHEETS['hero-garrick.png'].anims.skill!.steps!.reduce((x, y) => x + y, 0)).toBe(1100);
+    expect(Math.abs(at('STRIKE_START') - 18 / 60)).toBeLessThan(0.01);
+    expect(Math.abs(at('DAMAGE') - 30 / 60)).toBeLessThan(0.01);
+    expect(Math.abs(at('VFX_SPAWN') - 20 / 60)).toBeLessThan(0.01);
+    expect(fxFor('hero-garrick.png', 'skill', { on: 'event', event: 'VFX_SPAWN' }).map(f => FX[f].layer ?? 'over')).toEqual(['under', 'over']);
+    const aura = FX['gr-s1-aura-back'];
+    expect(aura.frames * aura.frameMs * aura.repeat!).toBe(3000);
+    expect(fxFor('hero-garrick.png', 'skill', { on: 'impact', hit: 0 }).length).toBe(2);
   });
 
   it('Brace for Impact / Hammerfall / Hold the Gate keep the Tank class ids + cooldowns', () => {

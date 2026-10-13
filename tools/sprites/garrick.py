@@ -132,11 +132,12 @@ BASE_COUNTS = [5, 7, 4, 7, 6]
 BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
-    ('skill', 's1_char', [10]),
+    ('skill', 's1_char', [5, 5]),     # S1 Brace for Impact: ready → lower → grip → lift hammer → plant → brace ×4 → settle
     ('skill2', 's2_char', [10]),
     ('ult', 'ult_char', [10, 10]),
 ]
 COMMON_GROUND: dict = {}
+SHIFT_MAX = {'skill': 3}
 # base rows cut by fixed x-slots instead of blob seeds: name → (y0, y1, dividers) in source px
 # attack: the overhead swing poses F2–F5 touch each other end to end (hammer head ↔ cape)
 CELL_ROWS = {'attack': (600, 826, [215, 410, 585, 765, 1010, 1290])}
@@ -188,6 +189,11 @@ def main():
     tx = {name: [A.torso_x(pa[r * B.CELL_H:(r + 1) * B.CELL_H, c * B.CELL_W:(c + 1) * B.CELL_W]) for c in range(len(frs))]
           for r, (name, frs, _) in enumerate(rows)}
     shifts = A.stabilise(tx)
+    # a planted cast (S1 brace): the torso stabiliser chases the hammer / widening stance → the feet may slide at most
+    # SHIFT_MAX px so he stays planted
+    for name, lim in SHIFT_MAX.items():
+        if name in shifts:
+            shifts[name] = [float(np.clip(v, -lim, lim)) for v in shifts[name]]
     report['shift_x'] = {k: [round(v, 1) for v in shifts[k]] for k in shifts}
     sheet = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * ATLAS_ROWS), (0, 0, 0, 0))
     for r, (name, frs, s) in enumerate(rows):

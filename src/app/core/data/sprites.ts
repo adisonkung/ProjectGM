@@ -371,7 +371,21 @@ export const SHEETS: Record<string, SheetDef> = {
       // ready F1 → wind back F2 → hammer overhead F3–F4 → slam into the ground F5 (spark) → follow-through F6–F7
       attack: { row: 3, frames: 7, ms: 85, events: { DAMAGE: 4, RECOVERY_START: 5 } },
       die: { row: 4, frames: 6, ms: 140 },
+      // S1 Brace for Impact — production Timeline Sync Sheet (tools/sprites/garrick_s1.py, 60 FPS F00–F65 = 1.10 s):
+      // preparation C01–C03 (lowers his centre of gravity) · guard activation C04–C06 (BRACE START F18, Main VFX rises
+      // F20, hammer planted F27) · SKILL ACTIVATION F30 = DR + taunt + counter armed + Guard Aura loop (C07–C08) ·
+      // settle C09–C10 (F50 → cast complete F65) · the aura keeps looping for the 3 s guard · root 0 · no shake
+      skill: {
+        row: 5, frames: 10, ms: 110,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [100, 100, 100, 83, 67, 50, 133, 200, 133, 134],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 2.0, STRIKE_START: 3.0, VFX_SPAWN: 3.4, SKILL_ACTIVATE: 6.0, DAMAGE: 6.0,
+          RECOVERY_START: 8.0,
+        },
+      },
     },
+    fx: { skill: ['gr-s1-main-back', 'gr-s1-main-front', 'gr-s1-aura-back', 'gr-s1-aura-front'] },
   },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
@@ -642,6 +656,25 @@ export const FX: Record<string, FxDef> = {
   // Lin Xue S1 Lotus Prayer (tools/sprites/linxue_s1.py, 60 FPS strips): the Heal Burst on the primary at 100 % (spawn
   // T024 → peak T027 → petals → gone T043) · the same asset from the bud (f3) at 65 % scale / 60 % opacity on each
   // ally the splash heal reached (hit 1 = T031), never on the primary
+  // Garrick S1 Brace for Impact (tools/sprites/garrick_s1.py): the Main VFX once at his feet (F20 rune ring → F30 peak
+  // crystal guard + golden sword crest → breaks → fades F53), dome / sword behind him, the ring's near half in front ·
+  // the Guard Aura from the activation (F30): 8 frames × 93.75 ms, 4 loops = the 3 s guard, then fades
+  'gr-s1-main-back': {
+    file: 'fx-garrick-s1-main-back.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
+    layer: 'under', pivot: [0.4945, 0.6589], dy: 27.25, scale: 1 / 1.5,
+  },
+  'gr-s1-main-front': {
+    file: 'fx-garrick-s1-main-front.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.4945, 0.6589], dy: 27.25, scale: 1 / 1.5,
+  },
+  'gr-s1-aura-back': {
+    file: 'fx-garrick-s1-aura-back.png', frames: 8, w: 100, h: 91, frameMs: 93.75, at: 'self', orient: 'flip', on: 'impact',
+    hitIndex: 0, layer: 'under', repeat: 4, fadeOutMs: 300, pivot: [0.4963, 0.7614], dy: 27.25, scale: 1 / 1.5,
+  },
+  'gr-s1-aura-front': {
+    file: 'fx-garrick-s1-aura-front.png', frames: 8, w: 100, h: 91, frameMs: 93.75, at: 'self', orient: 'flip', on: 'impact',
+    hitIndex: 0, repeat: 4, fadeOutMs: 300, pivot: [0.4963, 0.7614], dy: 27.25, scale: 1 / 1.5,
+  },
   'lx-s1-bloom': {
     file: 'fx-linxue-s1-bloom.png', frames: 20, w: 86, h: 99, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',
     pivot: [0.5082, 0.5021], dy: -22.75, scale: 1 / 1.5,
