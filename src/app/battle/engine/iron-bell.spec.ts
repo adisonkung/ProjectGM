@@ -22,7 +22,10 @@ describe('Garrick (3★ Tank, base sheet + kit)', () => {
     expect(a.attack!.events!.DAMAGE).toBe(4);
     expect(a.skill!.row).toBe(5);
     expect(HERO_BY_ID['garrick']).toEqual(jasmine.objectContaining({ name: 'การ์ริก', cls: 'tank', star: 3, sprite: 'hero-garrick.png' }));
-    expect(HERO_ART['garrick']).toEqual(jasmine.objectContaining({ portrait: 'portraits/garrick.webp' }));
+    expect(HERO_ART['garrick']).toEqual(jasmine.objectContaining({
+      portrait: 'portraits/garrick.webp', s1: 'skills/garrick-s1.webp', s2: 'skills/garrick-s2.webp', ult: 'skills/garrick-ult.webp',
+      banner: 'banners/garrick.webp',
+    }));
   });
 
   it('S1 Brace for Impact sync sheet: 1.10 s clip, brace start F18, activation (DR + taunt + counter) F30, aura loops 3 s', () => {
