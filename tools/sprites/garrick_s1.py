@@ -13,8 +13,8 @@ Production timeline (user spec 2026-10, 60 FPS, 66 frames F00–F65 = 1.10 s):
   Guard Aura loop starts) · D character settle F50–F65 (CAST COMPLETE F65; the aura keeps looping on its own).
   First-hit stagger = runtime (the first qualifying foe hit during the stance), never a fixed animation frame.
 
-In game: the kit's effects land on the clip's DAMAGE event (F30) · `gr-s1-main-back/-front` = on vfx at his feet (back half
-under him, front half of the ring over him) · `gr-s1-aura-back/-front` = on impact at his feet, 4 loops × 0.75 s =
+In game: the kit's effects land on the clip's DAMAGE event (F30) · `gr-s1-main` = on vfx at his feet, drawn IN FRONT of him
+(user 2026-10: the skill reads over the hero) · `gr-s1-aura` = on impact at his feet, also in front, 4 loops × 0.75 s =
 the 3 s guard (taunt_guard / brace_counter) then fades.
 
 Usage: python3 tools/sprites/garrick_s1.py <out dir>
@@ -177,14 +177,12 @@ def tile(fr, s, alpha=1.0, part=None):
 def tracks_at(t):
     out = []
     if t in MAIN_PLAN:
-        for part in ('back', 'front'):
-            a, px, py = tile(MAIN[MAIN_PLAN[t] - 1], SC['main'], 1.0, part)
-            out.append(('main', MAIN_PLAN[t], a, px, py, part))
+        a, px, py = tile(MAIN[MAIN_PLAN[t] - 1], SC['main'])
+        out.append(('main', MAIN_PLAN[t], a, px, py, 'front'))
     f = aura_frame(t)
     if f:
-        for part in ('back', 'front'):
-            a, px, py = tile(AURA[f - 1], SC['aura'], aura_alpha(t), part)
-            out.append(('aura', f, a, px, py, part))
+        a, px, py = tile(AURA[f - 1], SC['aura'], aura_alpha(t))
+        out.append(('aura', f, a, px, py, 'front'))
     return out
 
 
@@ -237,17 +235,14 @@ def frame(t, log=True):
         dr.ellipse([cx - r, cy - r, cx + r, cy + r], outline=(255, 210, 90))
         dr.text((EX - 12, GROUND - 98), 'STAGGER', fill=(255, 210, 90))
     tr = tracks_at(t)
-    for key, f, a, px, py, part in tr:
-        if part == 'back':
-            x, y = put(img, a, px, py, (X0, GROUND))
-            if log:
-                LOG.append({'T': t, 'track': key, 'frame': f, 'x': x, 'y': y, 'opacity': round(aura_alpha(t) if key == 'aura' else 1, 2),
-                            'split': 'back', 'part': key})
     c = char_at(t)
     img.alpha_composite(Image.fromarray(pose(c)), (X0 - ROOT[0], GROUND - ROOT[1]))
+    # the whole skill VFX is drawn IN FRONT of Garrick (user 2026-10) — the dome is see-through, he still reads
     for key, f, a, px, py, part in tr:
-        if part == 'front':
-            put(img, a, px, py, (X0, GROUND))
+        x, y = put(img, a, px, py, (X0, GROUND))
+        if log:
+            LOG.append({'T': t, 'track': key, 'frame': f, 'x': x, 'y': y, 'opacity': round(aura_alpha(t) if key == 'aura' else 1, 2),
+                        'split': 'front', 'part': key})
     if log:
         if t == BRACE_T:
             ev(t, 'events', 1)
@@ -300,9 +295,8 @@ def bake(name, tiles, frame_ms=1000 / 60):
 
 
 game_fx = {}
-for part in ('back', 'front'):
-    game_fx[f'main-{part}'] = bake(f'main-{part}', [tile(MAIN[MAIN_PLAN[t] - 1], SC['main'], 1.0, part) for t in sorted(MAIN_PLAN)])
-    game_fx[f'aura-{part}'] = bake(f'aura-{part}', [tile(AURA[k], SC['aura'], 1.0, part) for k in range(8)], AURA_MS)
+game_fx['main'] = bake('main', [tile(MAIN[MAIN_PLAN[t] - 1], SC['main']) for t in sorted(MAIN_PLAN)])
+game_fx['aura'] = bake('aura', [tile(AURA[k], SC['aura']) for k in range(8)], AURA_MS)
 steps = [round((b - a + 1) * 1000 / FPS) for a, b, _ in CHAR]
 steps[-1] += round(N * 1000 / FPS) - sum(steps)
 game = {'steps': steps,
@@ -337,10 +331,10 @@ meta = {
                [50, 'CHARACTER_SETTLE', 'C09'], [54, 'MAIN_VFX_END', 'f10 จางหมด'],
                [HIT_T, 'FIRST_HIT_STAGGER (dynamic)', 'ตัวอย่าง — runtime'], [END_T, 'CHARACTER CAST COMPLETE', 'C10']],
     'lanes': 7,
-    'tracks': [['main', 'L2 Skill 1 Main VFX', [235, 200, 110], 'fx-garrick-s1-main-back / -front (s1_vfx.png 10 fr)',
-                'L2 · หลัง (โดม) / หน้า (ขอบวง)', 'เท้าการ์ริก (กลางวงพื้น)', 'F20 วงรูน > F28 ปีกการ์ด > F30 peak > แตก > จาง F53'],
-               ['aura', 'L3 Guard Aura Loop', [150, 190, 255], 'fx-garrick-s1-aura-back / -front (s1_aura.png 8 fr)',
-                'L3 · หลัง / หน้า', 'เท้าการ์ริก', 'F30 เริ่ม · 93.75 ms/เฟรม = 0.75 วิ/รอบ · วนตามบัฟ 3 วิ (4 รอบ) แล้วจาง'],
+    'tracks': [['main', 'L2 Skill 1 Main VFX', [235, 200, 110], 'fx-garrick-s1-main (s1_vfx.png 10 fr)',
+                'L2 · หน้าตัวละคร', 'เท้าการ์ริก (กลางวงพื้น)', 'F20 วงรูน > F28 ปีกการ์ด > F30 peak > แตก > จาง F53'],
+               ['aura', 'L3 Guard Aura Loop', [150, 190, 255], 'fx-garrick-s1-aura (s1_aura.png 8 fr)',
+                'L3 · หน้าตัวละคร', 'เท้าการ์ริก', 'F30 เริ่ม · 93.75 ms/เฟรม = 0.75 วิ/รอบ · วนตามบัฟ 3 วิ (4 รอบ) แล้วจาง'],
                ['taunt', 'L4 Taunt Activation', [255, 150, 90], 'APPLY_STATUS taunted · FRONT_ARC', '-', 'ศัตรูด้านหน้า',
                 'F30 ยั่วยุ 3 วิ'],
                ['dr', 'L5 Damage Reduction Buff', [120, 200, 255], 'taunt_guard (DR 40 %) 3 วิ', '-', 'ตัวการ์ริก',
@@ -362,7 +356,7 @@ meta = {
     'notes': [
         'สกิลป้องกัน ไม่ใช่ท่าโจมตี: การ์ริกยืนที่เดิม (root 0) หันขวา ไม่กระโดด ไม่หมุน — ย่อ > ปักค้อน > ตั้งการ์ด',
         'F30 = จุดเดียวที่ระบบทำงาน: ลดดาเมจ (taunt_guard) + ยั่วยุศัตรูด้านหน้า + ติดอาวุธ counter + เริ่ม Guard Aura',
-        'Main VFX ครั้งเดียว (F20–F53) ยึดเท้า: ครึ่งบน (โดม/ดาบ) อยู่หลังตัว ขอบวงครึ่งหน้าอยู่หน้าตัว — ตัวละครยังอ่านออก',
+        'Main VFX ครั้งเดียว (F20–F53) ยึดเท้า วาดหน้าตัวละครทั้งชิ้น — โดมโปร่ง ตัวละครยังอ่านออก · Guard Aura ก็อยู่หน้าตัว',
         'Guard Aura = บัฟที่คงอยู่ แยกจากท่าร่าย: วนต่อหลังจบท่า (F65) จนครบ 3 วิของบัฟ แล้วจาง',
         'Stagger ไม่ผูกกับเฟรม: ศัตรูตัวแรกที่ตีโดนระหว่างตั้งรับ = เซ 0.6 วิ ครั้งเดียวต่อการร่าย (ตัวอย่างในพรีวิว F56)',
         'Stagger FX ยังไม่มี asset แยก — runtime แสดงป้ายลอย "เซ" ที่ศัตรู · ไม่มีสั่นกล้อง/ซูม/hit-stop',

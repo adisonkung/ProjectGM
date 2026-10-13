@@ -32,10 +32,11 @@ describe('Garrick (3★ Tank, base sheet + kit)', () => {
     expect(Math.abs(at('STRIKE_START') - 18 / 60)).toBeLessThan(0.01);
     expect(Math.abs(at('DAMAGE') - 30 / 60)).toBeLessThan(0.01);
     expect(Math.abs(at('VFX_SPAWN') - 20 / 60)).toBeLessThan(0.01);
-    expect(fxFor('hero-garrick.png', 'skill', { on: 'event', event: 'VFX_SPAWN' }).map(f => FX[f].layer ?? 'over')).toEqual(['under', 'over']);
-    const aura = FX['gr-s1-aura-back'];
+    expect(fxFor('hero-garrick.png', 'skill', { on: 'event', event: 'VFX_SPAWN' }).map(f => FX[f].layer ?? 'over')).toEqual(['over']);
+    const aura = FX['gr-s1-aura'];
     expect(aura.frames * aura.frameMs * aura.repeat!).toBe(3000);
-    expect(fxFor('hero-garrick.png', 'skill', { on: 'impact', hit: 0 }).length).toBe(2);
+    expect(fxFor('hero-garrick.png', 'skill', { on: 'impact', hit: 0 })).toEqual(['gr-s1-aura']);
+    expect(aura.layer).toBeUndefined();
   });
 
   it('Brace for Impact / Hammerfall / Hold the Gate keep the Tank class ids + cooldowns', () => {

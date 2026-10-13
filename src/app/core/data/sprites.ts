@@ -385,7 +385,7 @@ export const SHEETS: Record<string, SheetDef> = {
         },
       },
     },
-    fx: { skill: ['gr-s1-main-back', 'gr-s1-main-front', 'gr-s1-aura-back', 'gr-s1-aura-front'] },
+    fx: { skill: ['gr-s1-main', 'gr-s1-aura'] },
   },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
@@ -657,22 +657,14 @@ export const FX: Record<string, FxDef> = {
   // T024 → peak T027 → petals → gone T043) · the same asset from the bud (f3) at 65 % scale / 60 % opacity on each
   // ally the splash heal reached (hit 1 = T031), never on the primary
   // Garrick S1 Brace for Impact (tools/sprites/garrick_s1.py): the Main VFX once at his feet (F20 rune ring → F30 peak
-  // crystal guard + golden sword crest → breaks → fades F53), dome / sword behind him, the ring's near half in front ·
-  // the Guard Aura from the activation (F30): 8 frames × 93.75 ms, 4 loops = the 3 s guard, then fades
-  'gr-s1-main-back': {
-    file: 'fx-garrick-s1-main-back.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
-    layer: 'under', pivot: [0.4945, 0.6589], dy: 27.25, scale: 1 / 1.5,
-  },
-  'gr-s1-main-front': {
-    file: 'fx-garrick-s1-main-front.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
+  // crystal guard + golden sword crest → breaks → fades F53) · the Guard Aura from the activation (F30): 8 frames ×
+  // 93.75 ms, 4 loops = the 3 s guard, then fades · both drawn IN FRONT of him (user 2026-10; the dome is see-through)
+  'gr-s1-main': {
+    file: 'fx-garrick-s1-main.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
     pivot: [0.4945, 0.6589], dy: 27.25, scale: 1 / 1.5,
   },
-  'gr-s1-aura-back': {
-    file: 'fx-garrick-s1-aura-back.png', frames: 8, w: 100, h: 91, frameMs: 93.75, at: 'self', orient: 'flip', on: 'impact',
-    hitIndex: 0, layer: 'under', repeat: 4, fadeOutMs: 300, pivot: [0.4963, 0.7614], dy: 27.25, scale: 1 / 1.5,
-  },
-  'gr-s1-aura-front': {
-    file: 'fx-garrick-s1-aura-front.png', frames: 8, w: 100, h: 91, frameMs: 93.75, at: 'self', orient: 'flip', on: 'impact',
+  'gr-s1-aura': {
+    file: 'fx-garrick-s1-aura.png', frames: 8, w: 100, h: 91, frameMs: 93.75, at: 'self', orient: 'flip', on: 'impact',
     hitIndex: 0, repeat: 4, fadeOutMs: 300, pivot: [0.4963, 0.7614], dy: 27.25, scale: 1 / 1.5,
   },
   'lx-s1-bloom': {
