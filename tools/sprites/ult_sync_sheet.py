@@ -153,7 +153,8 @@ def shake(t):
 
 
 def phase_of(t):
-    return next(p for p in PHASES if p[0] <= t <= p[1])
+    # a preview moment past the clip (e.g. a buff expiring seconds later) takes the last phase's colour
+    return next((p for p in PHASES if p[0] <= t <= p[1]), PHASES[-1])
 
 
 PF = D['perFrame']
@@ -213,13 +214,14 @@ for i, t in enumerate(KEYS):
     img.paste(im, (tx, ty))
     ph = phase_of(t)
     d.rectangle([tx - 1, ty - 1, tx + TH_W, ty + TH_H], outline=ph[4], width=2)
-    d.text((tx + 4, ty + TH_H + 4), f'T{t:03d}  C{next(c for a, b, c in CHAR if a <= t <= b):02d}', font=f(15, True), fill=INK)
+    cap = (M or {}).get('thumbCaptions', {}).get(str(t)) or f'T{t:03d}  C{next((c for a, b, c in CHAR if a <= t <= b), CHAR[-1][2]):02d}'
+    d.text((tx + 4, ty + TH_H + 4), cap, font=f(15, True), fill=INK)
     if M and M.get('thumbLabels') and str(t) in M['thumbLabels']:   # named preview moments (READY / HIT 1 …)
         tag = M['thumbLabels'][str(t)]
         tw = d.textlength(tag, font=f(13, True))
         d.rectangle([tx + 3, ty + 3, tx + 11 + tw, ty + 22], fill=(10, 10, 16, 200))
         d.text((tx + 7, ty + 5), tag, font=f(13, True), fill=ph[4])
-    d.line([(tx + TH_W // 2, ty + TH_H + 26), (xs(t) + CW // 2, ruler_y)], fill=ph[4] + (170,), width=2)
+    d.line([(tx + TH_W // 2, ty + TH_H + 26), (xs(min(t, N - 1)) + CW // 2, ruler_y)], fill=ph[4] + (170,), width=2)
 
 # grid + ruler
 y0, y1 = layout['ruler'][0], layout['shake'][0] + layout['shake'][1]

@@ -362,7 +362,7 @@ export const SHEETS: Record<string, SheetDef> = {
   },
   'hero-garrick.png': {
     // Garrick Stoneward (The Iron Bell) base rows from the user's sheet (tools/sprites/garrick.py) — skill rows 5–7 reserved
-    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 14, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5, ms: 170 },
@@ -397,8 +397,25 @@ export const SHEETS: Record<string, SheetDef> = {
         },
         impact: { hitStopMs: 50, shakePx: 4, shakeMs: 120 },
       },
+      // Ult Hold the Gate — production Timeline Sync Sheet (tools/sprites/garrick_ult.py, 60 FPS F00–F95 = 1.60 s):
+      // resolve C01–C03 · bastion summoning C04–C06 (ULTIMATE CAST START F18, Main VFX) · FORTRESS MANIFESTATION F36
+      // (C07–C08) · ULTIMATE ACTIVATION F48 = team DR + interception + taunt + stagger resistance (C09–C10) · settle
+      // C11–C12 (Main → Aura F60) · recovery C13–C14 (F78 → F95) · the 6 s buff + aura outlive the clip · root 0
+      ult: {
+        row: 7, frames: 14, ms: 115,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+        steps: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 150, 150, 150, 150],
+        events: {
+          CAST_START: 0, CHARGE_START: 3.0, VFX_SPAWN: 3.0, CHARGE_PEAK: 6.0, SKILL_ACTIVATE: 8.0, DAMAGE: 8.0,
+          RECOVERY_START: 12.0,
+        },
+        impact: { hitStopMs: 60, shakePx: 2, shakeMs: 120 },
+      },
     },
-    fx: { skill: ['gr-s1-main', 'gr-s1-aura'], skill2: ['gr-s2-main', 'gr-s2-impact', 'gr-s2-shock'] },
+    fx: {
+      skill: ['gr-s1-main', 'gr-s1-aura'], skill2: ['gr-s2-main', 'gr-s2-impact', 'gr-s2-shock'],
+      ult: ['gr-ult-main', 'gr-ult-aura'],
+    },
   },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
@@ -694,6 +711,17 @@ export const FX: Record<string, FxDef> = {
   'gr-s2-shock': {
     file: 'fx-garrick-s2-shock.png', frames: 15, w: 55, h: 73, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 0, perHit: 6, exceptPrimary: true, pivot: [0.512, 0.8104], dy: 27.25, scale: 1 / 1.5,
+  },
+  // Garrick Ult Hold the Gate (tools/sprites/garrick_ult.py): the lion fortress once at his feet (F18 seal → F36 gates →
+  // F48 full fortress → recedes → gone F78, 30 FPS) · the lighter persistent aura from F60 (activation + 200 ms) for the
+  // 6 s buff (125 ms steps: seal → gates rise → breathe → sink) · both BEHIND him — he stands inside the bastion
+  'gr-ult-main': {
+    file: 'fx-garrick-ult-main.png', frames: 30, w: 202, h: 203, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
+    layer: 'under', pivot: [0.5185, 0.8322], dy: 27.25, scale: 1 / 1.5,
+  },
+  'gr-ult-aura': {
+    file: 'fx-garrick-ult-aura.png', frames: 46, w: 139, h: 146, frameMs: 125, at: 'self', orient: 'flip', on: 'impact',
+    hitIndex: 0, layer: 'under', delayMs: 200, fadeOutMs: 300, pivot: [0.4979, 0.767], dy: 27.25, scale: 1 / 1.5,
   },
   'lx-s1-bloom': {
     file: 'fx-linxue-s1-bloom.png', frames: 20, w: 86, h: 99, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',

@@ -14,9 +14,9 @@ import { applyBuff, hasStatus } from './buffs';
 
 /** Garrick Stoneward — The Iron Bell (remodel #6): counter stance · hammer slam · team damage interception */
 describe('Garrick (3★ Tank, base sheet + kit)', () => {
-  it('7 × 8 atlas 260 × 170: idle 5 · walk 7 · hurt 4 · hammer slam 7 (damage F5) · die 6 · on the starter bench', () => {
+  it('14 × 8 atlas 260 × 170: idle 5 · walk 7 · hurt 4 · hammer slam 7 (damage F5) · die 6 · on the starter bench', () => {
     const sh = SHEETS['hero-garrick.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([7, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([14, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 5], [1, 7], [2, 4], [3, 7], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(4);
@@ -52,6 +52,24 @@ describe('Garrick (3★ Tank, base sheet + kit)', () => {
     expect(fxFor('hero-garrick.png', 'skill2', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['gr-s2-main']);
     expect(fxFor('hero-garrick.png', 'skill2', { on: 'impact', hit: 0 })).toEqual(['gr-s2-impact', 'gr-s2-shock']);
     expect(FX['gr-s2-shock']).toEqual(jasmine.objectContaining({ exceptPrimary: true }));
+  });
+
+  it('Ult Hold the Gate sync sheet: 1.60 s clip, cast start F18, activation F48, recovery F78 · aura covers the 6 s buff', () => {
+    const ev = animEvents('hero-garrick.png', 'ult');
+    const at = (k: string) => ev.find(e => e.event === k)!.t;
+    const a = SHEETS['hero-garrick.png'].anims.ult!;
+    expect([a.row, a.frames]).toEqual([7, 14]);
+    expect(a.steps!.reduce((x, y) => x + y, 0)).toBe(1600);
+    expect(Math.abs(at('VFX_SPAWN') - 18 / 60)).toBeLessThan(0.01);
+    expect(Math.abs(at('CHARGE_PEAK') - 36 / 60)).toBeLessThan(0.01);
+    expect(Math.abs(at('DAMAGE') - 48 / 60)).toBeLessThan(0.01);
+    expect(Math.abs(at('RECOVERY_START') - 78 / 60)).toBeLessThan(0.01);
+    expect(fxFor('hero-garrick.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['gr-ult-main']);
+    expect(fxFor('hero-garrick.png', 'ult', { on: 'impact', hit: 0 })).toEqual(['gr-ult-aura']);
+    const aura = FX['gr-ult-aura'];
+    const lasts = aura.delayMs! + aura.frames * aura.frameMs;
+    expect(Math.abs(lasts - STATUS_EFFECTS['gate_ward'].duration * 1000)).toBeLessThan(150);
+    expect([FX['gr-ult-main'].layer, aura.layer]).toEqual(['under', 'under']);
   });
 
   it('Brace for Impact / Hammerfall / Hold the Gate keep the Tank class ids + cooldowns', () => {
