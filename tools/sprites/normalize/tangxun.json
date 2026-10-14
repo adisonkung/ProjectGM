@@ -1,0 +1,80 @@
+{
+  "id": "tangxun",
+  "source": {
+    "type": "atlas",
+    "file": "public/sprites/hero-tangxun.png",
+    "cell": [
+      260,
+      170
+    ]
+  },
+  "canvas": {
+    "cell": [
+      260,
+      170
+    ],
+    "pivot": [
+      130,
+      155
+    ]
+  },
+  "reference": {
+    "anim": "idle",
+    "frame": 0
+  },
+  "metric": "edge",
+  "anims": {
+    "idle": {
+      "row": 0,
+      "frames": 6,
+      "ms": 150,
+      "scale": "auto"
+    },
+    "walk": {
+      "row": 1,
+      "frames": 8,
+      "ms": 70,
+      "scale": "auto"
+    },
+    "hurt": {
+      "row": 2,
+      "frames": 3,
+      "ms": 110,
+      "scale": "auto"
+    },
+    "attack": {
+      "row": 3,
+      "frames": 8,
+      "ms": 80,
+      "scale": "auto"
+    },
+    "die": {
+      "row": 4,
+      "frames": 6,
+      "ms": 130,
+      "scale": "follow"
+    },
+    "skill": {
+      "row": 5,
+      "frames": 10,
+      "ms": 80,
+      "scale": "auto"
+    },
+    "skill2": {
+      "row": 6,
+      "frames": 16,
+      "ms": 75,
+      "scale": "auto"
+    },
+    "ult": {
+      "row": 7,
+      "frames": 17,
+      "ms": 100,
+      "scale": "auto"
+    }
+  },
+  "output": {
+    "dir": "art/normalized/tangxun",
+    "atlas": "public/sprites/hero-tangxun.png"
+  }
+}

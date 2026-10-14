@@ -46,3 +46,6 @@ Thumbs.db
 
 # Claude patch drop folder (local only)
 /Claude outputs/
+
+# sprite normalization outputs (tools/sprites/normalize.py) — regenerated, not committed
+/art/normalized/

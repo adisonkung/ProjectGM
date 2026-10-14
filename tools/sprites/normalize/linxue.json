@@ -1,0 +1,80 @@
+{
+  "id": "linxue",
+  "source": {
+    "type": "atlas",
+    "file": "public/sprites/hero-linxue.png",
+    "cell": [
+      260,
+      170
+    ]
+  },
+  "canvas": {
+    "cell": [
+      260,
+      170
+    ],
+    "pivot": [
+      130,
+      155
+    ]
+  },
+  "reference": {
+    "anim": "idle",
+    "frame": 0
+  },
+  "metric": "edge",
+  "anims": {
+    "idle": {
+      "row": 0,
+      "frames": 3,
+      "ms": 180,
+      "scale": "auto"
+    },
+    "walk": {
+      "row": 1,
+      "frames": 6,
+      "ms": 90,
+      "scale": "auto"
+    },
+    "hurt": {
+      "row": 2,
+      "frames": 3,
+      "ms": 110,
+      "scale": "auto"
+    },
+    "attack": {
+      "row": 3,
+      "frames": 6,
+      "ms": 85,
+      "scale": "auto"
+    },
+    "die": {
+      "row": 4,
+      "frames": 5,
+      "ms": 140,
+      "scale": "follow"
+    },
+    "skill": {
+      "row": 5,
+      "frames": 10,
+      "ms": 75,
+      "scale": "auto"
+    },
+    "skill2": {
+      "row": 6,
+      "frames": 10,
+      "ms": 105,
+      "scale": "auto"
+    },
+    "ult": {
+      "row": 7,
+      "frames": 21,
+      "ms": 115,
+      "scale": "auto"
+    }
+  },
+  "output": {
+    "dir": "art/normalized/linxue",
+    "atlas": "public/sprites/hero-linxue.png"
+  }
+}

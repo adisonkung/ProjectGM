@@ -1,0 +1,80 @@
+{
+  "id": "yuezheng",
+  "source": {
+    "type": "atlas",
+    "file": "public/sprites/hero-yuezheng.png",
+    "cell": [
+      260,
+      170
+    ]
+  },
+  "canvas": {
+    "cell": [
+      260,
+      170
+    ],
+    "pivot": [
+      130,
+      155
+    ]
+  },
+  "reference": {
+    "anim": "idle",
+    "frame": 0
+  },
+  "metric": "edge",
+  "anims": {
+    "idle": {
+      "row": 0,
+      "frames": 6,
+      "ms": 150,
+      "scale": "auto"
+    },
+    "walk": {
+      "row": 1,
+      "frames": 8,
+      "ms": 80,
+      "scale": "auto"
+    },
+    "hurt": {
+      "row": 2,
+      "frames": 4,
+      "ms": 90,
+      "scale": "auto"
+    },
+    "attack": {
+      "row": 3,
+      "frames": 7,
+      "ms": 95,
+      "scale": "auto"
+    },
+    "die": {
+      "row": 4,
+      "frames": 6,
+      "ms": 120,
+      "scale": "follow"
+    },
+    "skill": {
+      "row": 5,
+      "frames": 10,
+      "ms": 100,
+      "scale": "auto"
+    },
+    "skill2": {
+      "row": 6,
+      "frames": 12,
+      "ms": 80,
+      "scale": "auto"
+    },
+    "ult": {
+      "row": 7,
+      "frames": 16,
+      "ms": 90,
+      "scale": "auto"
+    }
+  },
+  "output": {
+    "dir": "art/normalized/yuezheng",
+    "atlas": "public/sprites/hero-yuezheng.png"
+  }
+}
