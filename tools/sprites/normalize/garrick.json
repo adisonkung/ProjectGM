@@ -58,19 +58,19 @@
       "row": 5,
       "frames": 10,
       "ms": 110,
-      "scale": "auto"
+      "scale": 1.0
     },
     "skill2": {
       "row": 6,
       "frames": 10,
       "ms": 90,
-      "scale": "auto"
+      "scale": 1.0
     },
     "ult": {
       "row": 7,
       "frames": 14,
       "ms": 115,
-      "scale": "auto"
+      "scale": 1.2
     }
   },
   "output": {
