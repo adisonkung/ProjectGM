@@ -43,3 +43,6 @@ Thumbs.db
 
 # user source art (AI originals) — kept out of git, processed by tools/* into public/
 /art/incoming/
+
+# Claude patch drop folder (local only)
+/Claude outputs/
