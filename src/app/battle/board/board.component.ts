@@ -63,6 +63,8 @@ export interface UnitView {
   moveSec?: number;
   /** walking right now (battle: from the position change per tick) — drives the looping walk cycle; unset = legacy one-shot walk */
   moving?: boolean;
+  /** ground speed while walking (cells / game s) — scales the walk cycle (AnimDef.pace) */
+  pace?: number;
   buffed?: boolean;
   icon?: string;
   /** hero AI use modes per slot (party bar chips) */

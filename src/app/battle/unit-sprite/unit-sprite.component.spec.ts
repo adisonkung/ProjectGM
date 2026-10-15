@@ -29,4 +29,25 @@ describe('UnitSpriteComponent', () => {
     fixture.detectChanges();
     expect(spy).toHaveBeenCalled();
   });
+
+  it('walk cycle follows the ground speed: pace / AnimDef.pace, clamped, updated without restarting', () => {
+    fixture.componentRef.setInput('sprite', 'hero-garrick.png');                  // walk drawn for 2.2 cells/s
+    fixture.componentRef.setInput('moving', true);
+    fixture.componentRef.setInput('pace', 2.2);
+    fixture.detectChanges();
+    const sheet = fixture.nativeElement.querySelector('.sheet') as HTMLElement;
+    const walk = () => sheet.getAnimations()[0];
+    const first = walk();
+    expect(first.playbackRate).toBeCloseTo(1, 2);
+    fixture.componentRef.setInput('pace', 1.5);                                  // his combat walk: legs slow down
+    fixture.detectChanges();
+    expect(walk()).toBe(first);
+    expect(walk().playbackRate).toBeCloseTo(1.5 / 2.2, 2);
+    fixture.componentRef.setInput('pace', 0.2);
+    fixture.detectChanges();
+    expect(walk().playbackRate).toBeCloseTo(0.55, 2);
+    fixture.componentRef.setInput('pace', 9);
+    fixture.detectChanges();
+    expect(walk().playbackRate).toBeCloseTo(1.7, 2);
+  });
 });

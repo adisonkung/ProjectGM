@@ -54,6 +54,8 @@ export class UnitSpriteComponent {
    * (ไม่เริ่มรอบใหม่ทุกก้าว) แล้วกลับท่ายืนตอนหยุด · ท่าโจมตี/สกิลจบระหว่างเดิน → เดินต่อ · ไม่กำหนด = ท่าเดินแบบเล่นรอบเดียว (sprite lab)
    */
   readonly moving = input<boolean | undefined>(undefined);
+  /** ground speed while walking (cells / game s): the walk cycle plays at pace / AnimDef.pace (feet keep up with the ground) */
+  readonly pace = input<number | undefined>(undefined);
 
   readonly sheet = viewChild<ElementRef<HTMLElement>>('sheet');
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);
@@ -85,6 +87,11 @@ export class UnitSpriteComponent {
         this.move(def, name);
       });
     });
+    // the walk cycle follows the ground speed (smoothly, no restart)
+    effect(() => {
+      this.pace();
+      untracked(() => this.syncWalkRate());
+    });
     // start / stop the walk loop with the movement (only when the parent drives `moving`)
     effect(() => {
       const m = this.moving();
@@ -98,6 +105,19 @@ export class UnitSpriteComponent {
         else if (!m) this.bob(false);
       });
     });
+  }
+
+  /** walk loop rate = real ground speed / the pace the cycle was drawn for (clamped: never frozen, never a blur) */
+  private walkRate(): number {
+    const p = this.pace();
+    const ref = this.def()?.anims.walk?.pace;
+    return ref == null || p == null || p <= 0 ? 1 : Math.min(1.7, Math.max(0.55, p / ref));
+  }
+  private syncWalkRate(): void {
+    if (this.currentName !== 'walk' || this.moving() === undefined || !this.current) return;
+    const r = this.walkRate();
+    // setting playbackRate keeps the current time: the cycle continues from the same pose, only faster / slower
+    if (Math.abs(this.current.playbackRate - r) > 0.03) this.current.playbackRate = r;
   }
 
   /** sheets without a walk row: bounce the whole body while moving (looping) */
@@ -176,6 +196,7 @@ export class UnitSpriteComponent {
         fill: hold ? 'forwards' : 'none',
       },
     );
+    if (walkLoop) this.current.playbackRate = this.walkRate();
     if (!hold && !walkLoop) this.current.onfinish = () => this.play(el, def, this.rest());
   }
 

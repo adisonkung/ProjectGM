@@ -224,14 +224,23 @@ export class BattleComponent implements OnDestroy {
   /** movement → walk cycle: last world position seen per tick and the tick until which the unit counts as moving */
   private lastPos = new Map<number, [number, number]>();
   private movingUntil = new Map<number, number>();
+  /** smoothed ground speed (cells / game s) while walking — the walk cycle runs at pace / AnimDef.pace */
+  private paces = new Map<number, number>();
   private tickNo = 0;
   private trackMovement(): void {
     this.tickNo++;
     for (const u of this.engine.units) {
       const prev = this.lastPos.get(u.id);
       this.lastPos.set(u.id, [u.x, u.y]);
+      const d = prev ? Math.hypot(u.x - prev[0], u.y - prev[1]) : 0;
       // ~0.2 cell/s or faster = walking · 3 ticks of grace so a stop-and-go between cells keeps the cycle running
-      if (prev && Math.hypot(u.x - prev[0], u.y - prev[1]) > 0.01) this.movingUntil.set(u.id, this.tickNo + 3);
+      if (d > 0.01) {
+        this.movingUntil.set(u.id, this.tickNo + 3);
+        // a blink / knock-back jump is not walking: keep the pace it had
+        const v = d / TICK;
+        const p = this.paces.get(u.id);
+        if (v <= 6) this.paces.set(u.id, p == null ? v : p + (v - p) * 0.35);
+      }
     }
   }
   private isMoving(u: BattleUnit): boolean {
@@ -358,6 +367,7 @@ export class BattleComponent implements OnDestroy {
     this.banner.set(null);
     this.lastPos.clear();
     this.movingUntil.clear();
+    this.paces.clear();
     this.selectedId.set(null);
     this.focusId.set(null);
     this.facing.clear();
@@ -662,6 +672,7 @@ export class BattleComponent implements OnDestroy {
         elite: u.elite,
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
         moving: this.isMoving(u),
+        pace: this.paces.get(u.id),
         buffed: u.buffs.some(b => (b.def.modifiers.attackMultiplier ?? 1) > 1),
         icon: u.monster ? MONSTERS[u.monster.definitionId]?.animation.tokenIcon : undefined,
         mock: u.sprite ? undefined : mockVisualOf(u.monster ? MONSTERS[u.monster.definitionId]?.visual : undefined),

@@ -17,6 +17,11 @@ export interface AnimDef {
   frames: number;
   /** เวลาต่อเฟรม (ms) ค่าเริ่มต้น FRAME_MS (ท่ายืน IDLE_FRAME_MS) */
   ms?: number;
+  /**
+   * walk row: the ground speed (board cells / s) the drawn cycle matches at its `ms` — the battle board scales the cycle
+   * by the unit's real speed / pace so the feet keep up with the ground (no moonwalk, no skating). None = fixed rate.
+   */
+  pace?: number;
   /** เฟรมที่ดาเมจเข้า (ตัวเลขดาเมจ/เอฟเฟกต์ที่เป้าขึ้นตรงนี้) */
   hit?: number;
   /** เฟรมที่ตัวละครย้ายตำแหน่ง (วาร์ป) */
@@ -188,7 +193,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
-      walk: { row: 1, frames: 8, ms: 80 },
+      walk: { row: 1, frames: 8, ms: 80, pace: 2.0 },
       hurt: { row: 2, frames: 4 },
       // ready → raise the dao (F2–F3) → slash extended F4 = damage → recover to the shield stance
       attack: { row: 3, frames: 7, ms: 95, events: { DAMAGE: 3, RECOVERY_START: 5 } },
@@ -248,7 +253,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
-      walk: { row: 1, frames: 8, ms: 70 },
+      walk: { row: 1, frames: 8, ms: 70, pace: 1.5 },
       hurt: { row: 2, frames: 4 },
       // ready → step in → big blade raised F3 → cut extended F4 = damage → small-blade follow-through F5–F7 → guard F8
       attack: { row: 3, frames: 8, ms: 80, events: { DAMAGE: 3, RECOVERY_START: 6 } },
@@ -315,7 +320,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 6 },
-      walk: { row: 1, frames: 8, ms: 70 },
+      walk: { row: 1, frames: 8, ms: 70, pace: 1.6 },
       hurt: { row: 2, frames: 3, ms: 110 },
       // ready → draw F2 → wind-up F3 → arm extended F4 → release F5 (the knife leaves = projectile spawns) → recover F6–F8
       attack: { row: 3, frames: 8, ms: 80, events: { DAMAGE: 4, RECOVERY_START: 6 } },
@@ -377,7 +382,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5, ms: 170 },
-      walk: { row: 1, frames: 7, ms: 95 },
+      walk: { row: 1, frames: 7, ms: 95, pace: 2.2 },
       hurt: { row: 2, frames: 4, ms: 100 },
       // ready F1 → wind back F2 → hammer overhead F3–F4 → slam into the ground F5 (spark) → follow-through F6–F7
       attack: { row: 3, frames: 7, ms: 85, events: { DAMAGE: 4, RECOVERY_START: 5 } },
@@ -435,7 +440,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5, ms: 170 },
-      walk: { row: 1, frames: 7, ms: 85 },
+      walk: { row: 1, frames: 7, ms: 85, pace: 2.3 },
       hurt: { row: 2, frames: 4, ms: 100 },
       // ready F1 → sword raised F2 → overhead cut F3 (arc) → forward thrust F4 (arc = contact) → extended F5 → recover F6–F7
       attack: { row: 3, frames: 7, ms: 80, events: { DAMAGE: 3, RECOVERY_START: 5 } },
@@ -497,7 +502,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 3, ms: 180 },
-      walk: { row: 1, frames: 6, ms: 90 },
+      walk: { row: 1, frames: 6, ms: 90, pace: 2.2 },
       hurt: { row: 2, frames: 3, ms: 110 },
       // raise staff F1–F3 → lotus released F4 (projectile) → recover F5–F6
       attack: { row: 3, frames: 6, ms: 85, events: { DAMAGE: 3, RECOVERY_START: 4 } },
@@ -570,7 +575,7 @@ export const SHEETS: Record<string, SheetDef> = {
     },
     anims: {
       idle: { row: 0, frames: 6 },
-      walk: { row: 1, frames: 8, ms: 75 },
+      walk: { row: 1, frames: 8, ms: 75, pace: 1.9 },
       hurt: { row: 2, frames: 4 },
       attack: { row: 3, frames: 6, events: { DAMAGE: 3, RECOVERY_START: 5 } },
       die: { row: 4, frames: 7, ms: 110 },
