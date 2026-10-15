@@ -441,8 +441,22 @@ export const SHEETS: Record<string, SheetDef> = {
         },
         impact: { hitStopMs: 0, shakePx: 2, shakeMs: 90 },
       },
+      // S2 Relentless Cross — kael_timeline_v2 skill_2 (tools/sprites/kael_s2.py, 14 frames 2 × 7, 12 FPS provisional =
+      // 1.17 s): RELEASE_HORIZONTAL F4 (main 1) · HIT_1 horizontal cut F5 · FOLLOW_THROUGH F6 (F4–F6 blade redrawn as
+      // a horizontal sweep, kael_s2_edit.py) · RELEASE_RISING F9 (main 2) · HIT_2 rising reverse diagonal F10 ·
+      // RECOVERY F13 — two DAMAGE events = kit repeat 2 (each hit index resolves once)
+      skill2: {
+        row: 6, frames: 14, ms: 83,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+        steps: [83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 83, 88],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 2, STRIKE_START: [3, 8], VFX_SPAWN: [3, 8], DAMAGE: [4, 9], IMPACT: [4, 9],
+          RECOVERY_START: 12,
+        },
+        impact: [{ hitStopMs: 0, shakePx: 2, shakeMs: 80 }, { hitStopMs: 0, shakePx: 3, shakeMs: 110 }],
+      },
     },
-    fx: { skill: ['kl-s1-main', 'kl-s1-impact'] },
+    fx: { skill: ['kl-s1-main', 'kl-s1-impact'], skill2: ['kl-s2-main1', 'kl-s2-main2', 'kl-s2-impact1', 'kl-s2-impact2'] },
   },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
@@ -725,6 +739,28 @@ export const FX: Record<string, FxDef> = {
   'kl-s1-impact': {
     file: 'fx-kael-s1-impact.png', frames: 22, w: 113, h: 91, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 0, pivot: [0.4665, 0.9731], dx: -12.5, dy: 27.25, scale: 1 / 1.5,
+  },
+  // Kael S2 Relentless Cross (tools/sprites/kael_s2.py, 60 FPS strips): main 1 = horizontal arc at blade height F4 → peak
+  // on hit 1 · main 2 = rising diagonal arc F9 → peak on hit 2 · impact 1 / 2 at the target's contact side
+  'kl-s2-main1': {
+    file: 'fx-kael-s2-main1.png', frames: 17, w: 131, h: 48, frameMs: 16.67, at: 'self', orient: 'flip',
+    event: 'VFX_SPAWN', eventIndex: 0, dx: 65, dy: -10.25, scale: 1 / 1.5,
+    pivot: [0.5196, 0.9542],
+  },
+  'kl-s2-main2': {
+    file: 'fx-kael-s2-main2.png', frames: 17, w: 103, h: 82, frameMs: 16.67, at: 'self', orient: 'flip',
+    event: 'VFX_SPAWN', eventIndex: 1, dx: 65, dy: 27.25, scale: 1 / 1.5,
+    pivot: [0.5801, 1.286],
+  },
+  'kl-s2-impact1': {
+    file: 'fx-kael-s2-impact1.png', frames: 16, w: 85, h: 69, frameMs: 16.67, at: 'target', orient: 'flip',
+    on: 'impact', hitIndex: 0, dx: -12.5, dy: 27.25, scale: 1 / 1.5,
+    pivot: [0.45, 0.968],
+  },
+  'kl-s2-impact2': {
+    file: 'fx-kael-s2-impact2.png', frames: 16, w: 90, h: 80, frameMs: 16.67, at: 'target', orient: 'flip',
+    on: 'impact', hitIndex: 1, dx: -12.5, dy: 27.25, scale: 1 / 1.5,
+    pivot: [0.4819, 1.2349],
   },
   'gr-s1-main': {
     file: 'fx-garrick-s1-main.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',

@@ -38,6 +38,21 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     expect(kitOf('kael', 'fighter').skill.repeat).toBeUndefined();
   });
 
+  it('S2 Relentless Cross (timeline v2): 14 frames 2 × 7, hits F5 / F10 = kit repeat 2, main + impact VFX per hit', () => {
+    const a = SHEETS['hero-kael.png'].anims.skill2!;
+    expect([a.row, a.frames]).toEqual([6, 14]);
+    expect(a.steps!.reduce((x, y) => x + y, 0)).toBe(1167);
+    const ev = animEvents('hero-kael.png', 'skill2');
+    const at = (k: string) => ev.filter(e => e.event === k).map(e => Math.round(e.t * 1000));
+    expect(at('DAMAGE')).toEqual([332, 747]);
+    expect(at('VFX_SPAWN')).toEqual([249, 664]);
+    expect(kitOf('kael', 'fighter').skill2.repeat!.count).toBe(2);
+    expect(fxFor('hero-kael.png', 'skill2', { on: 'event', event: 'VFX_SPAWN', index: 0 })).toEqual(['kl-s2-main1']);
+    expect(fxFor('hero-kael.png', 'skill2', { on: 'event', event: 'VFX_SPAWN', index: 1 })).toEqual(['kl-s2-main2']);
+    expect(fxFor('hero-kael.png', 'skill2', { on: 'impact', hit: 0 })).toEqual(['kl-s2-impact1']);
+    expect(fxFor('hero-kael.png', 'skill2', { on: 'impact', hit: 1 })).toEqual(['kl-s2-impact2']);
+  });
+
   it('Sundering Edge / Relentless Cross / Ashen Rupture keep the Fighter ids + cooldowns (Bai Long slot order), no interrupt', () => {
     const k = kitOf('kael', 'fighter');
     const c = CLASS_KITS.fighter;

@@ -194,11 +194,12 @@ SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as 
     ('ult', 'ult_char', [5, 5]),      # Ult Ashen Rupture: gather → sword overhead → one forward cut → sword wave
 ]
 # skills are integrated one at a time after the user approves the previous one (2026-10) — rows 5 / 6 / 7 stay in place
-ENABLED = {'skill'}
+ENABLED = {'skill', 'skill2'}
 # one size correction per skill clip on top of the idle-height match (README: one factor per clip, never per frame):
 # S1's first pose is a crouched ready stance, so matching its height to the standing idle drew him ~13 % too big —
-# measured against the base attack's matching ready pose (height 80 vs 69 px, SIFT median ≈ 1.12)
-CLIP_SCALE = {'skill': 0.885}
+# measured against the base attack's matching ready pose (height 80 vs 69 px, SIFT median ≈ 1.12) · S2: its ready
+# stance has bent knees yet stood as tall as the idle → ~8 % big (SIFT vs S1 ≈ 1.07–1.11, vs idle ≈ 1.0–1.04)
+CLIP_SCALE = {'skill': 0.885, 'skill2': 0.92}
 COMMON_GROUND: dict = {}
 SHIFT_MAX = {'skill': 3, 'skill2': 4, 'ult': 4}
 # base rows cut by fixed x-slots instead of blob seeds: name → (y0, y1, dividers) in source px
@@ -249,6 +250,9 @@ def main():
         frs = A.sheet_frames(file, counts, False)
         for fr in frs:
             drop_strays(fr)
+        if name == 'skill2':      # F4–F6 redrawn as a horizontal cut (user 2026-10) — derived frames, source untouched
+            import kael_s2_edit
+            frs = kael_s2_edit.apply(frs)
         for a0, a1 in COMMON_GROUND.get(name, []):
             g = max(fr['root'][1] for fr in frs[a0:a1])
             for fr in frs[a0:a1]:
@@ -261,7 +265,7 @@ def main():
     probe = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * len(rows)), (0, 0, 0, 0))
     for r, (name, frs, s) in enumerate(rows):
         for c, fr in enumerate(frs):
-            B.paste(probe, fr, r, c, s)
+            A.paste_frame(probe, fr, r, c, s, (0, 0))
     pa = np.array(probe)[..., 3]
     tx = {name: [A.torso_x(pa[r * B.CELL_H:(r + 1) * B.CELL_H, c * B.CELL_W:(c + 1) * B.CELL_W]) for c in range(len(frs))]
           for r, (name, frs, _) in enumerate(rows)}
@@ -277,7 +281,7 @@ def main():
     sheet = Image.new('RGBA', (B.CELL_W * cols, B.CELL_H * ATLAS_ROWS), (0, 0, 0, 0))
     for r, (name, frs, s) in enumerate(rows):
         report['rows'][name] = {'row': r, 'frames': len(frs),
-                                'clipped': [B.paste(sheet, fr, r, c, s, (shifts[name][c] + ROOT_SHIFT.get(name, [0] * 99)[c], 0))
+                                'clipped': [A.paste_frame(sheet, fr, r, c, s, (shifts[name][c] + ROOT_SHIFT.get(name, [0] * 99)[c], 0))
                                             for c, fr in enumerate(frs)]}
     sheet.save(f'{OUT}/hero-kael.png', optimize=True)
     report['sheet'] = {'cols': cols, 'rows': ATLAS_ROWS, 'size': sheet.size}
