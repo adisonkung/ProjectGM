@@ -1,0 +1,62 @@
+{
+  "id": "kael",
+  "source": {
+    "type": "atlas",
+    "file": "public/sprites/hero-kael.png",
+    "cell": [
+      260,
+      170
+    ]
+  },
+  "canvas": {
+    "cell": [
+      260,
+      170
+    ],
+    "pivot": [
+      130,
+      155
+    ]
+  },
+  "reference": {
+    "anim": "idle",
+    "frame": 0
+  },
+  "metric": "edge",
+  "anims": {
+    "idle": {
+      "row": 0,
+      "frames": 5,
+      "ms": 170,
+      "scale": "auto"
+    },
+    "walk": {
+      "row": 1,
+      "frames": 7,
+      "ms": 85,
+      "scale": "auto"
+    },
+    "hurt": {
+      "row": 2,
+      "frames": 4,
+      "ms": 100,
+      "scale": "auto"
+    },
+    "attack": {
+      "row": 3,
+      "frames": 7,
+      "ms": 80,
+      "scale": "auto"
+    },
+    "die": {
+      "row": 4,
+      "frames": 6,
+      "ms": 140,
+      "scale": "follow"
+    }
+  },
+  "output": {
+    "dir": "art/normalized/kael",
+    "atlas": "public/sprites/hero-kael.png"
+  }
+}

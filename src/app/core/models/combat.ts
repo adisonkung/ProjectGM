@@ -100,12 +100,13 @@ export interface StatusEffectDefinition {
  * FRONT_COLUMN_3 ground: the column in front (lane −1 / 0 / +1), all main
  * FRONT_CROSS   ground: main in front, splash above / below it and one cell further
  * FRONT_T3      ground: main in front, splash on the cells above / below it
+ * FRONT_LINE_4  ground: the 4 cells straight ahead, all main (sword wave down the lane)
  * FRONT_ARC     short cone in front of the caster: 1–2 columns ahead, ±1 lane
  * RADIUS_2/3    within 2 / 3 cells of the centre
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';
@@ -165,8 +166,14 @@ export type SkillEffectCore =
       executeBonus?: { hpBelow: number; mul: number };
       /** cancels interruptible casts of the units it hits (dedicated Interrupt — plain damage never interrupts) */
       interrupt?: boolean;
-      /** Break Gauge damage dealt to a breakable cast (e.g. Forest Oblivion) by this hit */
+      /**
+       * Break Gauge damage dealt to a breakable cast (e.g. Forest Oblivion) by this hit. Without `interrupt` the hit only
+       * breaks: it fills the gauge of a breakable cast but never cancels an interruptible one (and the AI does not plan
+       * interrupts around it)
+       */
       breakPower?: number;
+      /** ×mul against a guarded target: it carries a shield or a damage-reducing status (damage taken < ×1) */
+      bonusVsGuard?: number;
       /**
        * line pierce (LINE_2 / LINE_3): the n-th unit behind the primary is hit this many seconds after it (one entry per
        * unit, the last repeats) — the same blade reaching it — with its own `impact` event (index n) for FX / feel
@@ -268,7 +275,11 @@ export interface SkillDefinition {
    * (then the hits land on those events). `weights` split the skill's multipliers over the hits (sum 1 = same total
    * as one hit). `keepAfterKill` = later hits still land (areas centred on the last cell) when the target dies.
    */
-  repeat?: { count: number; gap: number; weights?: number[]; keepAfterKill?: boolean };
+  /**
+   * multi-hit. `comboBonus`: the last hit deals ×(1 + comboBonus) when every earlier hit damaged the same primary
+   * target (Kael Relentless Cross)
+   */
+  repeat?: { count: number; gap: number; weights?: number[]; keepAfterKill?: boolean; comboBonus?: number };
   effects: SkillEffect[];
   ai?: SkillAI;
 }

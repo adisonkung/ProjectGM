@@ -417,6 +417,20 @@ export const SHEETS: Record<string, SheetDef> = {
       ult: ['gr-ult-main', 'gr-ult-aura'],
     },
   },
+  'hero-kael.png': {
+    // Kael Ashen Vanguard base rows from the user's sheet (tools/sprites/kael.py, rows cut per connected figure) —
+    // skill rows 5–7 reserved (S1 / S2 / Ult fall back to the attack clip until their sheets arrive)
+    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    anims: {
+      idle: { row: 0, frames: 5, ms: 170 },
+      walk: { row: 1, frames: 7, ms: 85 },
+      hurt: { row: 2, frames: 4, ms: 100 },
+      // ready F1 → sword raised F2 → overhead cut F3 (arc) → forward thrust F4 (arc = contact) → extended F5 → recover F6–F7
+      attack: { row: 3, frames: 7, ms: 80, events: { DAMAGE: 3, RECOVERY_START: 5 } },
+      die: { row: 4, frames: 6, ms: 140 },
+    },
+  },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
     cols: 21, rows: 8, cellW: 260, cellH: 170, pixelated: true,

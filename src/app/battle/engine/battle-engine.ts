@@ -1997,6 +1997,13 @@ export class BattleEngine {
       heal: (dst, amount, src) => self.heal(dst, amount, src),
       applyStatus: (dst, id, src, duration, opts) => self.applyStatus(dst, id, src, duration, opts),
       interrupt: (src, dst, breakPower) => self.tryInterrupt(src, dst, breakPower),
+      breakCast: (src, dst, breakPower) => {
+        // break-only (Kael Sundering Edge): feeds a breakable cast's gauge, an interruptible cast is not touched
+        const c = dst.casting;
+        const need = c && !c.def.interruptible && isMonsterSkill(c.def) ? c.def.breakRequired ?? 0 : 0;
+        if (need > 0 && dst.alive && breakPower > 0) self.addBreak(src, dst, breakPower, need);
+      },
+      guarded: u => u.shield > 0 || modifier(u, 'damageTakenMultiplier') < 1,
       knockback: (src, dst, cells) => self.knockback(src, dst, cells),
       shield: (src, dst, amount, duration) => {
         dst.shield += amount;

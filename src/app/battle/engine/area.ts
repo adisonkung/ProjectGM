@@ -60,6 +60,8 @@ export const GROUND_SHAPES: Partial<Record<AreaPattern, [number, number, boolean
   FRONT_CROSS: [[1, 0, true], [1, -1, false], [1, 1, false], [2, 0, false]],
   // main in front, splash on the cells above / below it (Garrick Hammerfall)
   FRONT_T3: [[1, 0, true], [1, -1, false], [1, 1, false]],
+  // the 4 cells straight ahead, all main (Kael Ashen Rupture: one sword wave down the lane)
+  FRONT_LINE_4: [[1, 0, true], [2, 0, true], [3, 0, true], [4, 0, true]],
 };
 
 /** the ground shape cell a unit stands in: true = main, false = splash, null = outside */
@@ -103,6 +105,7 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
     case 'FRONT_COLUMN_3':
     case 'FRONT_CROSS':
     case 'FRONT_T3':
+    case 'FRONT_LINE_4':
       // ground-targeted: every unit in the shape's cells (any number stacked), main cells first
       hit = candidates.filter(u => groundCell(pattern, caster, primary, candidates, u) !== null);
       hit = [...hit.filter(u => groundCell(pattern, caster, primary, candidates, u)), ...hit.filter(u => !groundCell(pattern, caster, primary, candidates, u))];

@@ -355,6 +355,34 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
     },
   },
+  // เคล แอชเชน แวนการ์ด (Kael Ashen Vanguard, 3★ Fighter / Frontline DPS · Guard Breaker, remodel #7): Steel /
+  // Martial Force · hand-and-a-half longsword · Classic Fantasy (Kingdom Adventurers) · Fighter class ids + cooldowns
+  // (rank tables apply; same slot swap as Bai Long), effects arranged to his kit — provisional numbers, no balance run:
+  // S1 Sundering Edge = heavy diagonal cut on one target, high Break (break-only: feeds a breakable cast's gauge, does
+  // not interrupt), ×1.3 vs a guarded target (shield / damage-reducing status) · S2 Relentless Cross = horizontal cut
+  // + stronger rising reverse cut (40 / 60 %), +20 % on the 2nd when both land on the same target · Ult Ashen Rupture =
+  // one overhead cut releasing a sword wave down the lane: the 4 cells ahead (ground, every unit standing there), one hit
+  kael: {
+    id: 'kael', cls: 'fighter', identity: 'Melee DPS · Guard Breaker · Combo Pressure · Line Burst',
+    kit: {
+      ...fighter,
+      skill: {
+        ...fighter.skill2, slot: 'skill', name: 'คมดาบแยกเกราะ', label: 'Sundering Edge', range: 1,
+        effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 2.2, breakPower: 60, bonusVsGuard: 1.3 }],
+        ai: { tier: 'NORMAL' },
+      },
+      skill2: {
+        ...fighter.skill, slot: 'skill2', name: 'กากบาทไม่หยุดยั้ง', label: 'Relentless Cross', range: 1,
+        effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 1.7 }],
+        repeat: { count: 2, gap: 0.3, weights: [0.4, 0.6], comboBonus: 0.2 },
+        ai: { tier: 'NORMAL' },
+      },
+      ult: {
+        ...fighter.ult, name: 'เถ้าธุลีแยกแผ่นดิน', label: 'Ashen Rupture', range: 1,
+        effects: [{ type: 'DAMAGE', area: 'FRONT_LINE_4', primary: 2.6 }], ai: { tier: 'NORMAL', minTargets: 1 },
+      },
+    },
+  },
   bailong: {
     id: 'bailong', cls: 'fighter', identity: 'Spear Lancer · Line Pierce · Sweep · Three-strike Finisher',
     kit: {

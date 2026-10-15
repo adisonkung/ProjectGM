@@ -32,6 +32,8 @@ export const HERO_ART: Record<string, HeroArt> = {
   linxue: { ...art('linxue'), banner: 'banners/linxue.webp' },
   // การ์ริก: ภาพจากผู้ใช้ 2026-10 (art/incoming/garrick/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
   garrick: { ...art('garrick'), banner: 'banners/garrick.webp' },
+  // เคล: รูปโปรไฟล์ครอปจากภาพอ้างอิงของผู้ใช้ (tools/sprites/kael.py) · ไอคอนสกิล / แบนเนอร์ยังไม่มา
+  kael: { portrait: 'portraits/kael.webp' },
 };
 
 export const heroArt = (heroId?: string): HeroArt | undefined => (heroId ? HERO_ART[heroId] : undefined);

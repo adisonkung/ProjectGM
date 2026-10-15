@@ -40,6 +40,10 @@ export interface SkillHost {
   applyStatus(dst: BattleUnit, statusId: string, src: BattleUnit, duration?: number, opts?: StatusApplyOptions): void;
   /** dedicated interrupt: cancels an interruptible cast (emits CAST_INTERRUPTED / immune); `breakPower` fills a Break Gauge */
   interrupt(src: BattleUnit, dst: BattleUnit, breakPower?: number): void;
+  /** break-only hit: fills the Break Gauge of a breakable cast, never cancels an interruptible one */
+  breakCast(src: BattleUnit, dst: BattleUnit, breakPower: number): void;
+  /** does the unit hold a guard: a shield or a damage-reducing status? */
+  guarded(u: BattleUnit): boolean;
   knockback(src: BattleUnit, dst: BattleUnit, cells: number): void;
   shield(src: BattleUnit, dst: BattleUnit, amount: number, duration: number): void;
   /** remove up to `count` debuffs from `dst` (newest first); returns how many were removed */
@@ -545,6 +549,7 @@ export class SkillSystem {
     const land = (primary: BattleUnit, at: Cell, skill = s, index = 0) => {
       const dst = primary.alive ? primary.id : undefined;
       const hits = this.applyEffects(u, skill, slot, primary, at);
+      connected[index] = hits.includes(primary);
       // a heal-only hit has no damaged units: its impact lists the allies it healed (per-ally heal FX)
       const shown = hits.length ? hits : this.healed;
       if (slot !== 'attack') {
@@ -558,7 +563,14 @@ export class SkillSystem {
     const shots = s.repeat?.count ?? 1;
     const clipHits = shots > 1 && tm.hits.length === shots;
     const offsetOf = (i: number) => (clipHits ? tm.hits[i] - tm.hits[0] : i * (s.repeat?.gap ?? 0));
-    const weighted = (i: number) => repeatHit(s, i);
+    // combo: the last hit is stronger when every earlier hit damaged the primary target
+    const connected: boolean[] = [];
+    const combo = s.repeat?.comboBonus ?? 0;
+    const weighted = (i: number) => {
+      const r = repeatHit(s, i);
+      if (!combo || i !== shots - 1 || i === 0 || connected.slice(0, i).some(c => !c) || connected.length < i) return r;
+      return { ...r, effects: r.effects.map(e => (e.type === 'DAMAGE' ? { ...e, primary: e.primary * (1 + combo) } : e)) };
+    };
 
     this.h.later(tm.hit, u, () => {
       const delivery = s.delivery ?? 'INSTANT';
@@ -622,6 +634,7 @@ export class SkillSystem {
               continue;
             }
             if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
+            else if (e.breakPower && f.casting) this.h.breakCast(u, f, breakPowerOf(e.breakPower, u, slot));
             // ground-targeted areas: everyone in the front cell takes the primary multiplier (no unit is "the" target)
             const g = groundCell(e.area, u, p, foes, f);
             const main = GROUND_SHAPES[e.area] ? g === true : f === primary;
@@ -629,6 +642,7 @@ export class SkillSystem {
             if (mul <= 0) continue;
             mul *= rankPower(u, slot);
             if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
+            if (e.bonusVsGuard && this.h.guarded(f)) mul *= e.bonusVsGuard;
             const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);
             if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot })) (hits.push(f), damaged.add(f));
           }

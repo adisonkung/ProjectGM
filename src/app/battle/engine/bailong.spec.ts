@@ -124,7 +124,7 @@ describe('Bai Long — data (sheet / clip events / VFX)', () => {
 
   it('every other sheet keeps the old hit-frame timing (events authored only on the remodelled heroes)', () => {
     const withEvents = Object.entries(SHEETS).filter(([, d]) => Object.values(d.anims).some(a => a?.events)).map(([k]) => k);
-    expect(withEvents.sort()).toEqual([SPRITE, 'hero-garrick.png', 'hero-linxue.png', 'hero-moye.png', 'hero-tangxun.png', 'hero-yuezheng.png'].sort());
+    expect(withEvents.sort()).toEqual([SPRITE, 'hero-garrick.png', 'hero-kael.png', 'hero-linxue.png', 'hero-moye.png', 'hero-tangxun.png', 'hero-yuezheng.png'].sort());
   });
 });
 
