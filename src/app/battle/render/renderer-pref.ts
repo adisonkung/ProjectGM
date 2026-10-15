@@ -1,9 +1,13 @@
-/** who draws the board: DOM (Web Animations) or Pixi (WebGL, one game clock) — remembered per browser */
+/**
+ * who draws the board: Pixi (WebGL, one game clock — the default since phase 6) or DOM (Web Animations, kept as the
+ * fallback: a device without WebGL gets it automatically, and the switch stays in the pause menu / sprite lab).
+ * Remembered per browser; the key was bumped with the default change so an old test toggle does not pin DOM.
+ */
 export type BoardRenderer = 'dom' | 'pixi';
 
-const KEY = 'projectgm-renderer';
+const KEY = 'projectgm-renderer-v2';
 
-export function savedRenderer(fallback: BoardRenderer = 'dom'): BoardRenderer {
+export function savedRenderer(fallback: BoardRenderer = 'pixi'): BoardRenderer {
   try {
     const v = localStorage.getItem(KEY);
     return v === 'pixi' || v === 'dom' ? v : fallback;
