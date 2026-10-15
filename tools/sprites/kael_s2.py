@@ -44,7 +44,8 @@ REL1, HIT1, REL2, HIT2 = 15, 20, 40, 45   # F4 / F5 / F9 / F10
 CHAR_SCALE = 0.256                       # VFX sheets drawn at the S1 sheet's scale (same canvas 1983 × 793)
 MAIN_DX = 52                             # Main VFX cell centre ahead of his feet (the cut crosses the target line)
 IMPACT_DX = -10                          # Impact VFX: at the target's contact side (toward Kael)
-MAIN1_LIFT = 30                          # the horizontal arc (main row 1) rides at blade height (chest), not on the ground
+MAIN1_LIFT = 12                          # the horizontal arc (main row 1) rides at blade height (chest), not on the ground
+VFX_GROW = 1.35                          # user 2026-10: S2 VFX bigger than the sheet's drawn scale
 
 atlas = np.array(Image.open('public/sprites/hero-kael.png').convert('RGBA'))
 ROW = atlas[6 * CELL_H:7 * CELL_H]
@@ -126,7 +127,7 @@ def cut(name, counts):
                 own[sel] = np.broadcast_to(slot, lab.shape)[sel]
             else:
                 own[sel] = ks[np.argmax(cnt)]
-        ground = int(np.nonzero(m.any(1))[0].max())
+        row = []
         for s in range(per_row):
             fr = band.copy()
             fr[own != s] = 0
@@ -142,13 +143,18 @@ def cut(name, counts):
             ys, xs = np.nonzero(fr[..., 3] > 12)
             fy0, fy1, fx0, fx1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
             cx = (edges[s] + edges[s + 1]) / 2
-            out.append({'img': fr[fy0:fy1, fx0:fx1], 'px': cx - fx0, 'py': ground - fy0})
+            row.append({'img': fr[fy0:fy1, fx0:fx1], 'px': cx - fx0, 'fy0': fy0, 'fy1': fy1})
+        # the row's ground = the lowest edge of its cleaned frames (a stray speck near the band edge used to set it,
+        # leaving the art floating) → the rising cut scoops up off the ground, bursts sit on it
+        ground = max(f['fy1'] for f in row) - 1
+        for f in row:
+            out.append({'img': f['img'], 'px': f['px'], 'py': ground - f['fy0']})
     return out
 
 
 MAIN = cut('vfx/kael_s2_main_vfx', [5, 6])
 IMPACT = cut('vfx/kael_s2_impact_vfx', [6, 6])
-SC = CHAR_SCALE
+SC = CHAR_SCALE * VFX_GROW
 
 
 def plan(keys):

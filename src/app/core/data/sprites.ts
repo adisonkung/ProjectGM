@@ -740,27 +740,27 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-kael-s1-impact.png', frames: 22, w: 113, h: 91, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 0, pivot: [0.4665, 0.9731], dx: -12.5, dy: 27.25, scale: 1 / 1.5,
   },
-  // Kael S2 Relentless Cross (tools/sprites/kael_s2.py, 60 FPS strips): main 1 = horizontal arc at blade height F4 → peak
-  // on hit 1 · main 2 = rising diagonal arc F9 → peak on hit 2 · impact 1 / 2 at the target's contact side
+  // Kael S2 Relentless Cross (tools/sprites/kael_s2.py, 60 FPS strips): main 1 = horizontal arc at blade height F4 → peak (S2 VFX ×1.35 of the drawn scale, user 2026-10)
+  // on hit 1 · main 2 = rising diagonal arc scooping up off the ground F9 → peak on hit 2 · impact 1 / 2 at the target's contact side
   'kl-s2-main1': {
-    file: 'fx-kael-s2-main1.png', frames: 17, w: 131, h: 48, frameMs: 16.67, at: 'self', orient: 'flip',
-    event: 'VFX_SPAWN', eventIndex: 0, dx: 65, dy: -10.25, scale: 1 / 1.5,
-    pivot: [0.5196, 0.9542],
+    file: 'fx-kael-s2-main1.png', frames: 17, w: 175, h: 64, frameMs: 16.67, at: 'self', orient: 'flip',
+    event: 'VFX_SPAWN', eventIndex: 0, dx: 65, dy: 12.25, scale: 1 / 1.5,
+    pivot: [0.5231, 0.9606],
   },
   'kl-s2-main2': {
-    file: 'fx-kael-s2-main2.png', frames: 17, w: 103, h: 82, frameMs: 16.67, at: 'self', orient: 'flip',
+    file: 'fx-kael-s2-main2.png', frames: 17, w: 139, h: 110, frameMs: 16.67, at: 'self', orient: 'flip',
     event: 'VFX_SPAWN', eventIndex: 1, dx: 65, dy: 27.25, scale: 1 / 1.5,
-    pivot: [0.5801, 1.286],
+    pivot: [0.5778, 0.9799],
   },
   'kl-s2-impact1': {
-    file: 'fx-kael-s2-impact1.png', frames: 16, w: 85, h: 69, frameMs: 16.67, at: 'target', orient: 'flip',
+    file: 'fx-kael-s2-impact1.png', frames: 16, w: 114, h: 92, frameMs: 16.67, at: 'target', orient: 'flip',
     on: 'impact', hitIndex: 0, dx: -12.5, dy: 27.25, scale: 1 / 1.5,
-    pivot: [0.45, 0.968],
+    pivot: [0.4499, 0.9763],
   },
   'kl-s2-impact2': {
-    file: 'fx-kael-s2-impact2.png', frames: 16, w: 90, h: 80, frameMs: 16.67, at: 'target', orient: 'flip',
+    file: 'fx-kael-s2-impact2.png', frames: 16, w: 121, h: 106, frameMs: 16.67, at: 'target', orient: 'flip',
     on: 'impact', hitIndex: 1, dx: -12.5, dy: 27.25, scale: 1 / 1.5,
-    pivot: [0.4819, 1.2349],
+    pivot: [0.481, 0.981],
   },
   'gr-s1-main': {
     file: 'fx-garrick-s1-main.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
