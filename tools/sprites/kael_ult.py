@@ -173,10 +173,23 @@ def plan(keys):
     return out
 
 
-# charge F2 (T05) → builds around him over F2–F5 → blazing vortex f6 at F6 (T38), roaring through the held anticipation
-# (f6 / f5 alternate every 3 T) → crescent f7–f8 drawn into the overhead sword on the cut F7 → gone just after the release
-CHARGE_PLAN = plan([(5, 1), (11, 2), (17, 3), (23, 4), (30, 5), (38, 6), (41, 5), (44, 6), (47, 5), (50, 6), (53, 5),
-                    (55, 6), (58, 7), (61, 8), (65, None)])
+# charge F2 (T05) → builds around him over F2–F5 → the biggest vortex f6 from T38, held still through the whole held
+# anticipation F6 (user 2026-10: no f6 / f5 flicker) → crescent f7–f8 drawn into the overhead sword on the cut F7 → gone
+# just after the release
+CHARGE_PLAN = plan([(5, 1), (11, 2), (17, 3), (23, 4), (30, 5), (38, 6), (58, 7), (61, 8), (65, None)])
+HOLD = (38, 58)                          # f6 held: a smooth breathing loop instead of a frozen frame (user 2026-10)
+BREATH_T, BREATH_GROW, BREATH_GLOW = 10, 0.05, 0.45   # one breath per 10 T · up to +5 % size · glow up to +45 %
+
+
+def charge_tile(t):
+    """f6 during the hold breathes: grows from his feet and its ember glow swells, eased (1 − cos) so it loops smoothly
+    and starts / ends exactly on the plain f6 (no pop into the hold or into the cut)"""
+    f = CHARGE_PLAN[t]
+    if HOLD[0] <= t < HOLD[1]:
+        w = (1 - np.cos(2 * np.pi * (t - HOLD[0]) / BREATH_T)) / 2
+        r, k = GLOW['charge']
+        return tile(CHARGE[f - 1], SC['charge'] * (1 + BREATH_GROW * w), glow=(r, k * (1 + BREATH_GLOW * w)))
+    return tile(CHARGE[f - 1], SC['charge'], glow=GLOW['charge'])
 # the wave: F8 (T62) small X at his front edge → grows while it flies → peak f5 over cells 2–3 → fades past cell 4
 WAVE_PLAN = plan([(62, 1), (65, 2), (68, 3), (72, 4), (78, 5), (86, 6), (93, 7), (98, 8), (102, None)])
 WAVE_END = 102
@@ -255,7 +268,7 @@ def frame(t, log=True):
     img = background()
     dr = ImageDraw.Draw(img)
     if t in CHARGE_PLAN:                 # behind him
-        a, px, py = tile(CHARGE[CHARGE_PLAN[t] - 1], SC['charge'], glow=GLOW['charge'])
+        a, px, py = charge_tile(t)
         x, y = put(img, a, px, py, (X0, GROUND))
         if log:
             LOG.append({'T': t, 'track': 'charge', 'frame': CHARGE_PLAN[t], 'x': x, 'y': y, 'opacity': 1, 'split': 'back', 'part': 'charge'})
@@ -331,7 +344,7 @@ def bake(name, tiles, frame_ms=1000 / 60, offsets=None):
 wave_ts = list(range(SPAWN_T, WAVE_END, 2))     # 30 FPS strip: the travel is long, every other preview frame
 charge_ts = list(range(CHARGE_T, max(CHARGE_PLAN) + 1, 2))
 game_fx = {
-    'charge': bake('charge', [tile(CHARGE[CHARGE_PLAN[t] - 1], SC['charge'], glow=GLOW['charge']) for t in charge_ts], 1000 / 30),
+    'charge': bake('charge', [charge_tile(t) for t in charge_ts], 1000 / 30),
     'wave': bake('wave', [tile(WAVE[WAVE_PLAN[t] - 1], SC['wave'], glow=GLOW['wave']) for t in wave_ts], 1000 / 30,
                  [wave_x(t) - WAVE_X0 for t in wave_ts]),
     'impact': bake('impact', [tile(IMPACT[f], SC['impact'], glow=GLOW['impact']) for f in range(8)], IMP_T * 1000 / FPS),
@@ -361,7 +374,7 @@ meta = {
                 f'damage on collision (cell 1–4: {hs})',
     'phases': [[0, CHARGE_T - 1, 'A', 'READY', [120, 130, 150], 'ตั้งท่า'],
                [CHARGE_T, PEAK_T - 1, 'B', 'CHARGE / LIFT', [200, 170, 90], 'รวมพลัง F2 · ยกดาบเหนือศีรษะ'],
-               [PEAK_T, SPAWN_T - 1, 'C', 'PEAK / RELEASE', [230, 110, 90], 'ง้างค้าง F6 (vortex คำราม) · ฟันลง F7'],
+               [PEAK_T, SPAWN_T - 1, 'C', 'PEAK / RELEASE', [230, 110, 90], 'ง้างค้าง F6 (vortex ใหญ่สุดหายใจ) · ฟันลง F7'],
                [SPAWN_T, N - 1, 'D', 'WAVE / RECOVER', [235, 130, 70], 'ปล่อยคลื่น F8 · ชน 4 ช่อง · กลับท่า']],
     'poses': {c: [f'F{c}', f'{v[0]} — {v[1]}', v[2]] for c, v in POSES.items()},
     'gameSteps': steps,
@@ -373,7 +386,7 @@ meta = {
                [HITS[3], 'COLLISION cell 4', 'ดาเมจ + impact + แฟลช']],
     'lanes': 5,
     'tracks': [['charge', 'L2 Charge VFX (ultimate_charge)', [235, 160, 90], 'fx-kael-ult-charge (kael_ult_charge_vfx.png 8 fr)',
-                'L2 · หลังตัวละคร', 'เท้าเคล', f'F2 T{CHARGE_T:03d} > vortex f6 T038 คำรามตลอด F6 > เข้าดาบ F7 > หาย T065'],
+                'L2 · หลังตัวละคร', 'เท้าเคล', f'F2 T{CHARGE_T:03d} > vortex f6 T038 หายใจเป็นลูปตลอด F6 > เข้าดาบ F7 > หาย T065'],
                ['wave', 'L3 Sword Wave (ultimate_main)', [255, 140, 80], 'fx-kael-ult-wave (kael_ult_main_vfx.png 8 fr, เดินทาง 4 ช่อง)',
                 'L3 · หน้าตัวละคร', f'เริ่มหน้าเคล +{WAVE_X0} px · {SPEED} ช่อง/วิ',
                 f'F8 T{SPAWN_T:03d} เกิด 1 ลูก > โตขณะวิ่ง > peak ช่อง 2–3 > จางหลังช่อง 4 (T{WAVE_END})'],
@@ -393,7 +406,7 @@ meta = {
     'notes': [
         'ฟันลงครั้งเดียว ปล่อยคลื่นดาบ 1 ลูกที่ F8 — ไม่พุ่ง ไม่หลายจังหวะ · ที่ F8 ยังไม่มีดาเมจ',
         f'คลื่นวิ่ง {SPEED} ช่อง/วิ: ช่อง 1–4 ลงที่ {hs} — ใครยืนในช่องตอนคลื่นถึงโดน ตัวละ 1 ครั้งต่อการร่าย',
-        'ชาร์จยาวขึ้น (ผู้ใช้ 2026-10): F2–F5 ค่อย ๆ รวม > F6 ค้าง 0.3 วิ vortex คำราม > F7 ฟันเร็ว 4 T ตัดกัน',
+        'ชาร์จยาวขึ้น (ผู้ใช้ 2026-10): F2–F5 ค่อย ๆ รวม > F6 ค้าง 0.3 วิ บน vortex เฟรมใหญ่สุด f6 หายใจเป็นลูปนุ่ม (ขยาย 5 % + แสงเรือง ทุก 10 T ไม่สลับเฟรม) > F7 ฟันเร็ว 4 T ตัดกัน',
         'VFX ใหญ่ขึ้น: charge 2.4 × ตัว · คลื่น 1.9 × ความสูงตัว · impact 1.6 × ตัว · ทุกชั้นมี bloom ถ่านเพลิง',
         f'สั่น {"/".join(map(str, SHAKE))} px ต่อการชน · แฟลชตอนชนช่อง 4 · ไม่มี root motion',
     ],

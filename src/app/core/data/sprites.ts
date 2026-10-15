@@ -783,13 +783,13 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.481, 0.981],
   },
   // Kael Ult Ashen Rupture (tools/sprites/kael_ult.py, every layer with an ember bloom — user 2026-10: bigger, an
-  // ultimate): the charge vortex behind him from CHARGE_START (30 FPS, ~2.4 × his width, roaring through the held F6,
-  // drawn into the sword on the cut) · the ground wave from VFX_SPAWN (30 FPS strip, ~1.9 × his height, its travel along
+  // ultimate): the charge vortex behind him from CHARGE_START (30 FPS, ~2.4 × his width, its biggest frame breathing in
+  // a smooth loop through the held F6 — no frame flicker, drawn into the sword on the cut) · the ground wave from VFX_SPAWN (30 FPS strip, ~1.9 × his height, its travel along
   // the front line baked in at the kit's 7 cells/s — leading edge reaches cell k at (k − 0.5) / 7 s, when that cell's
   // damage resolves) · a burst (~1.6 × body) on every unit each collision hit (one impact event per cell)
   'kl-ult-charge': {
-    file: 'fx-kael-ult-charge.png', frames: 30, w: 232, h: 268, frameMs: 33.33, at: 'self', orient: 'flip',
-    event: 'CHARGE_START', layer: 'under', pivot: [0.5007, 0.9395], dy: 27.25, scale: 1 / 1.5,
+    file: 'fx-kael-ult-charge.png', frames: 30, w: 242, h: 280, frameMs: 33.33, at: 'self', orient: 'flip',
+    event: 'CHARGE_START', layer: 'under', pivot: [0.5009, 0.9415], dy: 27.25, scale: 1 / 1.5,
   },
   'kl-ult-wave': {
     file: 'fx-kael-ult-wave.png', frames: 20, w: 446, h: 175, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
