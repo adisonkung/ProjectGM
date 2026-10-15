@@ -10,6 +10,7 @@
     "sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/simulate.js",
     "trace": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/trace.js",
     "balance": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/balance.js",
+    "hero-sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/hero-sim.js",
     "bailong-ult-sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/bailong-ult-sim.js",
     "economy": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/economy.js",
     "gear-economy": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/gear-economy.js",
