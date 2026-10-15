@@ -50,7 +50,7 @@ export class ProjectileComponent {
       host.animate([{ transform: t(a) }, { transform: t(b) }], { duration: ms, easing: 'linear' });
       const el = this.el().nativeElement;
       const flyFrames = Math.max(1, d.frames - 1);
-      const x = (i: number) => `${(i / (d.frames - 1)) * 100}% 0%`;
+      const x = (i: number) => `${d.frames > 1 ? (i / (d.frames - 1)) * 100 : 0}% 0%`; // one-frame bolt: no NaN %
       const k: Keyframe[] = [];
       for (let i = 0; i < flyFrames; i++) k.push({ offset: i / flyFrames, easing: 'steps(1, end)', backgroundPosition: x(i) });
       k.push({ offset: 1, backgroundPosition: x(flyFrames - 1) });

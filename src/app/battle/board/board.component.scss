@@ -133,6 +133,8 @@
   height: var(--cell);
   pointer-events: none;
   z-index: 100;
+  // drawn by the Pixi layer (renderer 'pixi'): the DOM copy stays for layout only
+  &.px { visibility: hidden; }
 }
 
 .float-wrap {

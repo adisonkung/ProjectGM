@@ -156,6 +156,8 @@ export interface FxDef {
   fitCells?: number;
   /** 'under' = drawn below the units (ground aura), default above them */
   layer?: 'under' | 'over';
+  /** 'add' = additive light (glows brighten what is behind instead of covering it) — Pixi blendMode 'add', DOM plus-lighter */
+  blend?: 'add';
   /** กระสุน: ทิศที่ภาพวาดชี้อยู่ (องศา, 0 = ขวา, 90 = ลง) — เฟรมสุดท้ายคือตอนกระทบ */
   angle0?: number;
   /** กระสุน: ไม่หมุนตามทิศที่บิน (ดอกบัวลอยตั้งตรงเสมอ) */
@@ -807,7 +809,7 @@ export const FX: Record<string, FxDef> = {
   // damage resolves) · a burst (~1.6 × body) on every unit each collision hit (one impact event per cell)
   'kl-ult-charge': {
     file: 'fx-kael-ult-charge.png', frames: 30, w: 232, h: 268, frameMs: 33.33, at: 'self', orient: 'flip',
-    event: 'CHARGE_START', layer: 'under', pivot: [0.5007, 0.9395], dy: 27.25, scale: 1 / 1.5,
+    event: 'CHARGE_START', layer: 'under', pivot: [0.5007, 0.9395], dy: 27.25, scale: 1 / 1.5, blend: 'add',
   },
   // F8 ground slam (user 2026-10): the S1 impact burst (kael_s1_impact_vfx.png) reused at the blade's ground contact,
   // ~1.7 × his width with the ember bloom, drawn under the wave

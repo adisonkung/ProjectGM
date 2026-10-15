@@ -7,12 +7,13 @@ import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
   template: `<div #el class="fx" [style.background-image]="'url(sprites/' + def().file + ')'"
     [style.background-size]="strip() * 100 + '% 100%'" [style.width.%]="def().fitCells ? def().fitCells! * 100 : def().w * pxToCell * (def().scale ?? 1) * fxScale"
     [style.aspect-ratio]="def().w + ' / ' + def().h" [style.left]="'calc(50% + ' + (offset()?.[0] ?? def().dx ?? 0) * (flip() ? -1 : 1) + '%)'"
-    [style.top]="'calc(50% + ' + (offset()?.[1] ?? def().dy ?? 0) + '%)'" [style.transform-origin]="origin()" [class.pixelated]="!!def().pixelated"
+    [style.top]="'calc(50% + ' + (offset()?.[1] ?? def().dy ?? 0) + '%)'" [style.transform-origin]="origin()" [class.pixelated]="!!def().pixelated" [class.add]="def().blend === 'add'"
     [style.transform]="'translate(' + -pivot()[0] * 100 + '%, ' + -pivot()[1] * 100 + '%) rotate(' + angle() + 'deg)' + (flip() ? ' scaleX(-1)' : '')"></div>`,
   styles: `
     :host { position: absolute; inset: 0; pointer-events: none; }
     .fx { position: absolute; background-repeat: no-repeat; opacity: 0; }
     .pixelated { image-rendering: pixelated; }
+    .add { mix-blend-mode: plus-lighter; }
   `,
 })
 export class FxSpriteComponent {
@@ -55,7 +56,7 @@ export class FxSpriteComponent {
         // repeat > 1 = a looping field: the strip plays `repeat` times back to back (then the optional fade-out)
         (d.repeat ?? 1) > 1
           ? { duration: (d.frames * d.frameMs) / this.speed(), iterations: d.repeat, delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' }
-          : { duration: fxDuration(this.name(), this.speed()) - this.delay(), delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
+          : { duration: (d.frames * d.frameMs) / this.speed(), delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
       );
       // release-and-vanish FX: the last (peak) frame stays and fades out over fadeOutMs instead of collapsing
       if (d.fadeOutMs) {

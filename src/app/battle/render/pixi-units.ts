@@ -1,5 +1,6 @@
 import type { Application, Container, Sprite, Texture } from 'pixi.js';
-import { SHEETS, SheetDef } from '../../core/data/sprites';
+import { FX, SHEETS, SheetDef } from '../../core/data/sprites';
+import { fxPlacement, fxPoseAt } from './fx-clip';
 import { ClipRequest, UnitClip } from './unit-clip';
 
 /** one unit to draw this frame (board pixels, already interpolated by the board's motion loop) */
@@ -19,10 +20,29 @@ export interface PixiUnit {
   pace?: number;
 }
 
+/** one skill FX on the board this frame (FxView, positions in board px) */
+export interface PixiFx {
+  id: number;
+  name: string;
+  /** top-left of the cell it sits on (board px) — the unit's drawn cell for an attached FX */
+  x: number;
+  y: number;
+  angle: number;
+  flip: boolean;
+  offset?: [number, number];
+  under: boolean;
+}
+
 type Pixi = typeof import('pixi.js');
 
+/** z bands on the one stage: ground FX < units (≈ 10–90) < FX over them */
+const Z_UNDER = -100000;
+const Z_OVER = 100000;
+
 /**
- * Battle units drawn by PixiJS (WebGL) — phase 1–2 of the renderer move (FX, projectiles, bars stay DOM for now).
+ * Battle units and skill FX drawn by PixiJS (WebGL) — phases 1–3 of the renderer move (projectiles, bars, floats
+ * stay DOM for now). FX: `fxPoseAt(def, now − spawn)` on the same clock — a hit-stop freezes the burst on its frame,
+ * and an FX the battle list drops early (its real-time timer) still plays out on the game clock.
  * The board's frame loop calls `draw()` once per display frame with ONE game clock; every unit's frame comes from
  * `UnitClip.pose(now)` (nothing animates by itself → pause / hit-stop / x2 / x4 are just the clock).
  * Pixi is imported lazily (its own chunk) only when the Pixi renderer is switched on.
@@ -31,6 +51,8 @@ export class PixiUnitLayer {
   private readonly sprites = new Map<number, { sprite: Sprite; clip: UnitClip; sheet: string }>();
   private readonly textures = new Map<string, Texture | 'loading' | 'failed'>();
   private readonly frames = new Map<string, Texture>();
+  private readonly fxs = new Map<number, { sprite: Sprite; name: string; t0: number; seq: number; last: PixiFx }>();
+  private fxSeq = 0;
   private cell = 0;
 
   private constructor(
@@ -75,10 +97,11 @@ export class PixiUnitLayer {
   destroy(): void {
     this.app.destroy(true, { children: true });
     this.sprites.clear();
+    this.fxs.clear();
   }
 
   /** the sheet's texture (loaded on first use; null until ready) */
-  private texture(file: string, def: SheetDef): Texture | null {
+  private texture(file: string, def: { pixelated?: boolean }): Texture | null {
     const t = this.textures.get(file);
     if (t === 'loading' || t === 'failed') return null;
     if (t) return t;
@@ -105,11 +128,85 @@ export class PixiUnitLayer {
     return f;
   }
 
+  /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
+  private preloadFx(def: SheetDef): void {
+    const names = [...Object.values(def.fx ?? {}).flat(), ...Object.values(def.projectile ?? {})].filter((n): n is string => !!n);
+    for (const n of names) {
+      const d = FX[n];
+      if (!d) continue;
+      this.texture(d.file, d);
+      if (d.hitFx && FX[d.hitFx]) this.texture(FX[d.hitFx].file, FX[d.hitFx]);
+    }
+  }
+
+  private fxFrame(file: string, base: Texture, strip: number, i: number): Texture {
+    const k = `fx|${file}|${i}`;
+    let f = this.frames.get(k);
+    if (!f) {
+      const w = base.source.width / strip;
+      f = new this.pixi.Texture({ source: base.source, frame: new this.pixi.Rectangle(i * w, 0, w, base.source.height) });
+      this.frames.set(k, f);
+    }
+    return f;
+  }
+
   /**
-   * Draw all units for this display frame. `cell` = board cell size (px) · `now` = game clock (s) · `idleNow` =
+   * The FX for this frame (`now` = game clock). Returns the ids drawn (their DOM copy is hidden by the board).
+   * An id that left the list keeps playing at its last place until its clip ends.
+   */
+  private drawFx(list: PixiFx[], cell: number, now: number): Set<number> {
+    const drawn = new Set<number>();
+    const seen = new Set<number>();
+    for (const f of list) {
+      seen.add(f.id);
+      let s = this.fxs.get(f.id);
+      if (!s) {
+        if (!FX[f.name]) continue;
+        const sprite = new this.pixi.Sprite();
+        sprite.visible = false;
+        this.stage.addChild(sprite);
+        s = { sprite, name: f.name, t0: now, seq: ++this.fxSeq, last: f };
+        this.fxs.set(f.id, s);
+      }
+      s.last = f;
+    }
+    for (const [id, s] of this.fxs) {
+      const d = FX[s.name];
+      const pose = fxPoseAt(d, now - s.t0);
+      if (pose.done) {
+        s.sprite.destroy();
+        this.fxs.delete(id);
+        continue;
+      }
+      const base = this.texture(d.file, d);
+      const sp = s.sprite;
+      if (!base) {
+        sp.visible = false;
+        continue;
+      }
+      const f = s.last;
+      const at = fxPlacement(d, cell, f.x, f.y, f.flip, f.angle, f.offset);
+      const tex = this.fxFrame(d.file, base, d.stripFrames ?? d.frames, pose.frame);
+      sp.texture = tex;
+      const piv = d.pivot ?? [0.5, 0.5];
+      sp.anchor.set(piv[0], piv[1]);
+      sp.position.set(at.x, at.y);
+      sp.rotation = at.rotation;
+      sp.scale.set(((at.flip ? -1 : 1) * at.width) / tex.frame.width, at.height / tex.frame.height);
+      sp.alpha = pose.alpha;
+      sp.blendMode = d.blend === 'add' ? 'add' : 'normal';
+      sp.zIndex = (f.under ? Z_UNDER : Z_OVER) + s.seq;
+      sp.visible = pose.visible;
+      if (seen.has(id)) drawn.add(id);
+    }
+    return drawn;
+  }
+
+  /**
+   * Draw all units (and FX) for this display frame. `cell` = board cell size (px) · `now` = game clock (s) · `idleNow` =
    * real-time clock for the idle breath. Returns the ids actually drawn (their DOM sheet is hidden by the board).
    */
-  draw(units: PixiUnit[], cell: number, now: number, idleNow: number): Set<number> {
+  draw(units: PixiUnit[], cell: number, now: number, idleNow: number, fx: PixiFx[] = []): { units: Set<number>; fx: Set<number> } {
     this.cell = cell;
     const drawn = new Set<number>();
     const live = new Set<number>();
@@ -126,6 +223,7 @@ export class PixiUnitLayer {
         this.stage.addChild(sprite);
         s = { sprite, clip: new UnitClip(def), sheet: u.sheet };
         this.sprites.set(u.id, s);
+        this.preloadFx(def);
       }
       s.clip.request(u.req, u.key, now, u.moving);
       const pose = s.clip.pose(now, idleNow, u.moving, u.pace);
@@ -151,8 +249,9 @@ export class PixiUnitLayer {
         this.sprites.delete(id);
       }
     }
+    const fxDrawn = this.drawFx(fx, cell, now);
     this.app.render();
-    return drawn;
+    return { units: drawn, fx: fxDrawn };
   }
 
   get cellSize(): number {
