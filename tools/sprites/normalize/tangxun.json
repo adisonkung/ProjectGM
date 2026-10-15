@@ -34,25 +34,25 @@
       "row": 1,
       "frames": 8,
       "ms": 70,
-      "scale": "auto"
+      "scale": 1.17
     },
     "hurt": {
       "row": 2,
       "frames": 3,
       "ms": 110,
-      "scale": "auto"
+      "scale": 1.17
     },
     "attack": {
       "row": 3,
       "frames": 8,
       "ms": 80,
-      "scale": "auto"
+      "scale": 1.17
     },
     "die": {
       "row": 4,
       "frames": 6,
       "ms": 130,
-      "scale": "follow"
+      "scale": 1.17
     },
     "skill": {
       "row": 5,
@@ -76,5 +76,6 @@
   "output": {
     "dir": "art/normalized/tangxun",
     "atlas": "public/sprites/hero-tangxun.png"
-  }
+  },
+  "notes": "2026-10: the base sheet's idle row was drawn ~15 % larger than its walk / hurt / attack / die rows (measured per row vs idle: walk 0.83 \u00b7 hurt 0.85 \u00b7 attack 0.85 high) \u2014 in battle he looked small walking / attacking and grew on skills. Those rows \u00d71.17 about the feet; idle + skill rows unchanged."
 }
