@@ -13,7 +13,7 @@ import {
   AreaPattern, DamageKind, HeroKit, INTERRUPT_PRIORITY_RANK, InterruptPriority, SkillDefinition, SkillEffect, SkillSlot, SkillUseMode, TargetRule,
 } from '../../core/models/combat';
 import { Cell } from '../../core/models/unit';
-import { GROUND_SHAPES, groundCell, resolveArea } from './area';
+import { frontCell, GROUND_SHAPES, groundCell, resolveArea } from './area';
 import type { BattleEvent, BattleUnit } from './battle-engine';
 import { effectiveAttack } from './damage-resolver';
 import { distance } from './grid';
@@ -131,6 +131,8 @@ export type SkillPick = { slot: SkillSlot; skill: SkillDefinition; target: Battl
 export class SkillSystem {
   /** allies the last applyEffects healed (impact `hits` of a heal-only skill) */
   private healed: BattleUnit[] = [];
+  /** the last applyEffects launched a travelling wave (it emits its own impacts per collision) */
+  private travelled = false;
 
   constructor(private readonly h: SkillHost) {}
 
@@ -552,7 +554,8 @@ export class SkillSystem {
       connected[index] = hits.includes(primary);
       // a heal-only hit has no damaged units: its impact lists the allies it healed (per-ally heal FX)
       const shown = hits.length ? hits : this.healed;
-      if (slot !== 'attack') {
+      // a travelling wave reports its own impacts per collision — none at the release
+      if (slot !== 'attack' && !this.travelled) {
         // contact presentation after the effects resolved: which units this hit really damaged (impact FX per target)
         if (authoredImpact) this.h.emit({ type: 'animEvent', src: u.id, event: 'IMPACT', name: `${s.id.toUpperCase()}_IMPACT`, kind: kind as SkillKind, index });
         this.h.emit({ type: 'impact', src: u.id, dst, kind: kind as SkillKind, index, hits: shown.map(f => f.id) });
@@ -612,11 +615,40 @@ export class SkillSystem {
     let hits: BattleUnit[] = [];
     const damaged = new Set<BattleUnit>();
     this.healed = [];
+    this.travelled = false;
     for (const e of s.effects) {
       switch (e.type) {
         case 'DAMAGE': {
           const foes = this.h.foes(u);
           const p = focusOf(primary);
+          const shape = GROUND_SHAPES[e.area];
+          if (e.travel && shape) {
+            // travelling wave (Kael Ashen Rupture): cells resolve in order as the wave reaches them, exactly once per unit
+            const origin = { ...u.pos };
+            const dir = frontCell(u, p, foes).c - origin.c || 1;
+            const struck = new Set<BattleUnit>();
+            for (const [dc, dr, main] of [...shape].sort((x, y) => x[0] - y[0])) {
+              const cell = { r: origin.r + dr, c: origin.c + dc * dir };
+              this.h.later(Math.max(0, (dc - 0.5) / e.travel), u, () => {
+                const now: BattleUnit[] = [];
+                for (const f of this.h.foes(u)) {
+                  if (struck.has(f) || f.pos.r !== cell.r || f.pos.c !== cell.c) continue;
+                  struck.add(f);
+                  let mul = (main ? e.primary : e.secondary ?? e.primary) * rankPower(u, slot);
+                  if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
+                  if (e.bonusVsGuard && this.h.guarded(f)) mul *= e.bonusVsGuard;
+                  if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
+                  else if (e.breakPower && f.casting) this.h.breakCast(u, f, breakPowerOf(e.breakPower, u, slot));
+                  const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);
+                  if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot })) now.push(f);
+                }
+                if (now.length && slot !== 'attack') this.h.emit({ type: 'impact', src: u.id, dst: now[0].id, kind: slot as SkillKind, index: dc - 1, hits: now.map(f => f.id) });
+              });
+            }
+            hits = [];
+            this.travelled = true;
+            break;
+          }
           const targets = e.area === 'ALL_ENEMIES' ? foes : resolveArea({ pattern: e.area, caster: u, primary: p, center: e.center, candidates: foes });
           hits = [];
           for (const [k, f] of targets.entries()) {

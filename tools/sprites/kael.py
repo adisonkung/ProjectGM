@@ -194,12 +194,14 @@ SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as 
     ('ult', 'ult_char', [5, 5]),      # Ult Ashen Rupture: gather → sword overhead → one forward cut → sword wave
 ]
 # skills are integrated one at a time after the user approves the previous one (2026-10) — rows 5 / 6 / 7 stay in place
-ENABLED = {'skill', 'skill2'}
+ENABLED = {'skill', 'skill2', 'ult'}
 # one size correction per skill clip on top of the idle-height match (README: one factor per clip, never per frame):
 # S1's first pose is a crouched ready stance, so matching its height to the standing idle drew him ~13 % too big —
 # measured against the base attack's matching ready pose (height 80 vs 69 px, SIFT median ≈ 1.12) · S2: its ready
 # stance has bent knees yet stood as tall as the idle → ~8 % big (SIFT vs S1 ≈ 1.07–1.11, vs idle ≈ 1.0–1.04)
-CLIP_SCALE = {'skill': 0.885, 'skill2': 0.92}
+CLIP_SCALE = {'skill': 0.885, 'skill2': 0.92, 'ult': 0.83}
+# F8's blade tip touches F9's boot on the ult sheet: hand that tip back to F8 (source px; index = frame in its row)
+B.CLIP_FIXES['ult_char'] = [(1040, 735, 1072, 782, 2, None), (1072, 755, 1094, 780, 2, None)]
 COMMON_GROUND: dict = {}
 SHIFT_MAX = {'skill': 3, 'skill2': 4, 'ult': 4}
 # base rows cut by fixed x-slots instead of blob seeds: name → (y0, y1, dividers) in source px

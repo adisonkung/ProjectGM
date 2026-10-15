@@ -13,9 +13,9 @@ import { SkillHost, SkillSystem } from './skill-system';
 
 /** Kael Ashen Vanguard (remodel #7): guard-breaking cut · two-slash combo · sword wave down the lane */
 describe('Kael (3★ Fighter, base sheet + kit)', () => {
-  it('10 × 8 atlas 260 × 170: idle 5 · run 7 · hurt 4 · cut → thrust 7 (damage F4) · die 6 · on the starter bench', () => {
+  it('14 × 8 atlas 260 × 170 (S2 = 14 frames): idle 5 · run 7 · hurt 4 · cut → thrust 7 (damage F4) · die 6 · on the starter bench', () => {
     const sh = SHEETS['hero-kael.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([14, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 5], [1, 7], [2, 4], [3, 7], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
@@ -51,6 +51,23 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     expect(fxFor('hero-kael.png', 'skill2', { on: 'event', event: 'VFX_SPAWN', index: 1 })).toEqual(['kl-s2-main2']);
     expect(fxFor('hero-kael.png', 'skill2', { on: 'impact', hit: 0 })).toEqual(['kl-s2-impact1']);
     expect(fxFor('hero-kael.png', 'skill2', { on: 'impact', hit: 1 })).toEqual(['kl-s2-impact2']);
+  });
+
+  it('Ult Ashen Rupture (timeline v2): 10 frames, charge F2 → peak F6, wave + travelling damage from F8, recovery F9', () => {
+    const a = SHEETS['hero-kael.png'].anims.ult!;
+    expect([a.row, a.frames]).toEqual([7, 10]);
+    expect(a.steps!.reduce((x, y) => x + y, 0)).toBe(833);
+    const ev = animEvents('hero-kael.png', 'ult');
+    const at = (k: string) => ev.filter(e => e.event === k).map(e => Math.round(e.t * 1000));
+    expect(at('CHARGE_START')).toEqual([83]);
+    expect(at('VFX_SPAWN')).toEqual([581]);
+    expect(at('DAMAGE')).toEqual([581]);
+    expect(at('RECOVERY_START')).toEqual([664]);
+    expect(fxFor('hero-kael.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['kl-ult-charge']);
+    expect(fxFor('hero-kael.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['kl-ult-wave']);
+    expect(fxFor('hero-kael.png', 'ult', { on: 'impact', hit: 2 })).toEqual(['kl-ult-impact']);
+    expect(FX['kl-ult-impact'].perHit).toBe(6);
+    expect(kitOf('kael', 'fighter').ult.effects[0]).toEqual(jasmine.objectContaining({ travel: 10 }));
   });
 
   it('Sundering Edge / Relentless Cross / Ashen Rupture keep the Fighter ids + cooldowns (Bai Long slot order), no interrupt', () => {
@@ -147,6 +164,21 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     expect(muls).toEqual([+(1.7 * 0.4).toFixed(3), +(1.7 * 0.6 * 1.2).toFixed(3)]);
   });
 
+  /** run the ult with the host's `later` captured: the travelling hits stay queued until flush() */
+  function rupture(b: ReturnType<typeof battle>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const h = (b.e.skills as any).h as SkillHost;
+    const q: { d: number; fn: () => void }[] = [];
+    const later = h.later;
+    h.later = (d: number, _u: BattleUnit, fn: () => void) => q.push({ d, fn });
+    const events: { type: string; index?: number; hits?: number[] }[] = [];
+    const emit = h.emit;
+    h.emit = (e: never) => (events.push(e), emit.call(h, e));
+    b.e.skills.applyEffects(b.k, kitOf('kael', 'fighter').ult, 'ult', b.foes()[0], b.foes()[0].pos);
+    h.later = later;
+    return { q: q.sort((x, y) => x.d - y.d), events };
+  }
+
   it('Ashen Rupture: one wave down the lane — every unit in the 4 cells ahead is hit, nothing beside or beyond', () => {
     const b = battle([0, 1, 2, 3, 4, 5].map(c => ({ enemy: 'forest_slime', r: 0, c })));
     const foes = b.foes();
@@ -155,8 +187,32 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     const cells = [{ r, c: c + 1 }, { r, c: c + 2 }, { r, c: c + 3 }, { r, c: c + 4 }, { r, c: c + 5 }, { r: r === 0 ? 1 : r - 1, c: c + 1 }];
     foes.forEach((f, i) => b.place(f, cells[i]));
     const hp = foes.map(f => f.hp);
-    b.e.skills.applyEffects(b.k, kitOf('kael', 'fighter').ult, 'ult', foes[0], foes[0].pos);
-    const hit = foes.map((f, i) => hp[i] - f.hp > 0);
-    expect(hit).toEqual([true, true, true, true, false, false]);
+    const { q } = rupture(b);
+    expect(foes.every((f, i) => f.hp === hp[i])).toBeTrue();             // nothing at the release itself
+    q.forEach(p => p.fn());
+    expect(foes.map((f, i) => hp[i] - f.hp > 0)).toEqual([true, true, true, true, false, false]);
+  });
+
+  it('Ashen Rupture travels at 10 cells/s: cell k resolves at (k − 0.5) / 10 s, one impact per collision, each unit hit once', () => {
+    const b = battle([0, 1].map(c => ({ enemy: 'forest_slime', r: 0, c })));
+    const [a, z] = b.foes();
+    for (const f of [a, z]) f.hp = f.maxHp = 1e6;
+    const { r, c } = b.k.pos;
+    b.place(a, { r, c: c + 1 });
+    b.place(z, { r, c: c + 3 });
+    const { q, events } = rupture(b);
+    expect(q.map(p => +p.d.toFixed(3))).toEqual([0.05, 0.15, 0.25, 0.35]);
+    q[0].fn();
+    const hpA = a.hp;
+    expect(hpA).toBeLessThan(1e6);
+    b.place(a, { r, c: c + 2 });                                           // a runs ahead of the wave …
+    q[1].fn();
+    expect(a.hp).toBe(hpA);                                               // … and is not cut a second time
+    q[2].fn();
+    q[3].fn();
+    expect(z.hp).toBeLessThan(1e6);
+    const impacts = events.filter(e => e.type === 'impact');
+    expect(impacts.map(e => [e.index, e.hits])).toEqual([[0, [a.id]], [2, [z.id]]]);
+    expect(events.filter(e => e.type === 'impact').length).toBe(2);       // no extra land-time impact
   });
 });

@@ -362,6 +362,7 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
   // not interrupt), ×1.3 vs a guarded target (shield / damage-reducing status) · S2 Relentless Cross = horizontal cut
   // + stronger rising reverse cut (40 / 60 %), +20 % on the 2nd when both land on the same target · Ult Ashen Rupture =
   // one overhead cut releasing a sword wave down the lane: the 4 cells ahead (ground, every unit standing there), one hit
+  // per unit when the wave reaches its cell (`travel` 10 cells / s, timeline v2: spawn F8, damage on collision)
   kael: {
     id: 'kael', cls: 'fighter', identity: 'Melee DPS · Guard Breaker · Combo Pressure · Line Burst',
     kit: {
@@ -379,7 +380,7 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
       ult: {
         ...fighter.ult, name: 'เถ้าธุลีแยกแผ่นดิน', label: 'Ashen Rupture', range: 1,
-        effects: [{ type: 'DAMAGE', area: 'FRONT_LINE_4', primary: 2.6 }], ai: { tier: 'NORMAL', minTargets: 1 },
+        effects: [{ type: 'DAMAGE', area: 'FRONT_LINE_4', primary: 2.6, travel: 10 }], ai: { tier: 'NORMAL', minTargets: 1 },
       },
     },
   },

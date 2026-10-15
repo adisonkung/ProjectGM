@@ -419,8 +419,8 @@ export const SHEETS: Record<string, SheetDef> = {
   },
   'hero-kael.png': {
     // Kael Ashen Vanguard (tools/sprites/kael.py, sources = assets/heroes/Kael): base rows cut per connected figure ·
-    // row 5 = S1 Sundering Edge · rows 6–7 reserved (S2 / Ult fall back until they are integrated, one skill at a time)
-    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    // row 5 = S1 Sundering Edge · row 6 = S2 Relentless Cross (14 frames → 14 columns) · row 7 = Ult Ashen Rupture
+    cols: 14, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5, ms: 170 },
@@ -455,8 +455,24 @@ export const SHEETS: Record<string, SheetDef> = {
         },
         impact: [{ hitStopMs: 0, shakePx: 2, shakeMs: 80 }, { hitStopMs: 0, shakePx: 3, shakeMs: 110 }],
       },
+      // Ult Ashen Rupture — kael_timeline_v2 ultimate (tools/sprites/kael_ult.py, 10 frames, 12 FPS provisional = 0.83 s):
+      // READY F1 · CHARGE F2–F6 (ember vortex from CHARGE_START, peak F6) · STRIKE F7 · RELEASE F8 = the ground wave
+      // spawns AND the travelling DAMAGE starts (kit `travel` 10 cells/s: front line cell 1 → 4, each unit hit once as
+      // the wave reaches it, one impact per collision) · RECOVERY F9–F10
+      ult: {
+        row: 7, frames: 10, ms: 83,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [83, 83, 83, 83, 83, 83, 83, 83, 83, 86],
+        events: {
+          CAST_START: 0, CHARGE_START: 1, CHARGE_PEAK: 5, STRIKE_START: 6, VFX_SPAWN: 7, DAMAGE: 7, RECOVERY_START: 8,
+        },
+        impact: { hitStopMs: 0, shakePx: 3, shakeMs: 120 },
+      },
     },
-    fx: { skill: ['kl-s1-main', 'kl-s1-impact'], skill2: ['kl-s2-main1', 'kl-s2-main2', 'kl-s2-impact1', 'kl-s2-impact2'] },
+    fx: {
+      skill: ['kl-s1-main', 'kl-s1-impact'], skill2: ['kl-s2-main1', 'kl-s2-main2', 'kl-s2-impact1', 'kl-s2-impact2'],
+      ult: ['kl-ult-charge', 'kl-ult-wave', 'kl-ult-impact'],
+    },
   },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
@@ -761,6 +777,22 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-kael-s2-impact2.png', frames: 16, w: 121, h: 106, frameMs: 16.67, at: 'target', orient: 'flip',
     on: 'impact', hitIndex: 1, dx: -12.5, dy: 27.25, scale: 1 / 1.5,
     pivot: [0.481, 0.981],
+  },
+  // Kael Ult Ashen Rupture (tools/sprites/kael_ult.py): the ember charge vortex behind him from CHARGE_START (60 FPS,
+  // peak at CHARGE_PEAK) · the ground wave from VFX_SPAWN (30 FPS strip, its travel along the front line baked in at
+  // the kit's 10 cells/s — leading edge reaches cell k at (k − 0.5) / 10 s, when that cell's damage resolves) · a
+  // burst on every unit each collision hit (one impact event per cell)
+  'kl-ult-charge': {
+    file: 'fx-kael-ult-charge.png', frames: 31, w: 145, h: 171, frameMs: 16.67, at: 'self', orient: 'flip',
+    event: 'CHARGE_START', layer: 'under', pivot: [0.5011, 0.9867], dy: 27.25, scale: 1 / 1.5,
+  },
+  'kl-ult-wave': {
+    file: 'fx-kael-ult-wave.png', frames: 14, w: 389, h: 100, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.0554, 0.985], dx: 50, dy: 27.25, scale: 1 / 1.5,
+  },
+  'kl-ult-impact': {
+    file: 'fx-kael-ult-impact.png', frames: 16, w: 94, h: 109, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
+    perHit: 6, pivot: [0.5021, 0.499], dx: -7.5, dy: -12.75, scale: 1 / 1.5,
   },
   'gr-s1-main': {
     file: 'fx-garrick-s1-main.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',

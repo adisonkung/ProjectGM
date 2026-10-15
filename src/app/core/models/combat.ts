@@ -179,6 +179,12 @@ export type SkillEffectCore =
        * unit, the last repeats) — the same blade reaching it — with its own `impact` event (index n) for FX / feel
        */
       pierceDelays?: number[];
+      /**
+       * ground shapes only: the strike travels as a wave at this many cells / s from the caster — the cell k ahead
+       * resolves (k − 0.5) / travel s after the hit, on whoever stands in it then, each unit at most once per cast
+       * (own `impact` event per collision, index k − 1). No damage at the release itself.
+       */
+      travel?: number;
     }
   /**
    * heal allies: atk × sourceAtk + maxHpPct × recipient max HP. `center: 'TARGET'` centres the area on the primary
