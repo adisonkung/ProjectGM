@@ -2,7 +2,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_KITS, kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { HERO_ART } from '../../core/data/hero-art';
-import { SHEETS } from '../../core/data/sprites';
+import { animEvents, FX, fxFor, SHEETS } from '../../core/data/sprites';
 import { OwnedHero } from '../../core/models/hero';
 import { EnemyPlacement, StageDef } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
@@ -13,14 +13,29 @@ import { SkillHost, SkillSystem } from './skill-system';
 
 /** Kael Ashen Vanguard (remodel #7): guard-breaking cut · two-slash combo · sword wave down the lane */
 describe('Kael (3★ Fighter, base sheet + kit)', () => {
-  it('7 × 8 atlas 260 × 170: idle 5 · run 7 · hurt 4 · cut → thrust 7 (damage F4) · die 6 · on the starter bench', () => {
+  it('10 × 8 atlas 260 × 170: idle 5 · run 7 · hurt 4 · cut → thrust 7 (damage F4) · die 6 · on the starter bench', () => {
     const sh = SHEETS['hero-kael.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([7, 8, 260, 170]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 5], [1, 7], [2, 4], [3, 7], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
     expect(HERO_BY_ID['kael']).toEqual(jasmine.objectContaining({ name: 'เคล', cls: 'fighter', star: 3, sprite: 'hero-kael.png' }));
     expect(HERO_ART['kael']).toEqual({ portrait: 'portraits/kael.webp' });
+  });
+
+  it('S1 Sundering Edge (timeline v2): 10 frames at 83.3 ms, Main VFX F6, exactly one damage + impact F7, recovery F9', () => {
+    const a = SHEETS['hero-kael.png'].anims.skill!;
+    expect([a.row, a.frames]).toEqual([5, 10]);
+    expect(a.steps!.reduce((x, y) => x + y, 0)).toBe(833);
+    const ev = animEvents('hero-kael.png', 'skill');
+    const at = (k: string) => ev.filter(e => e.event === k).map(e => e.t);
+    expect(at('VFX_SPAWN').map(t => Math.round(t * 1000))).toEqual([415]);
+    expect(at('DAMAGE').map(t => Math.round(t * 1000))).toEqual([498]);
+    expect(at('RECOVERY_START').map(t => Math.round(t * 1000))).toEqual([664]);
+    expect(fxFor('hero-kael.png', 'skill', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['kl-s1-main']);
+    expect(fxFor('hero-kael.png', 'skill', { on: 'impact', hit: 0 })).toEqual(['kl-s1-impact']);
+    expect([FX['kl-s1-main'].at, FX['kl-s1-impact'].at]).toEqual(['self', 'target']);
+    expect(kitOf('kael', 'fighter').skill.repeat).toBeUndefined();
   });
 
   it('Sundering Edge / Relentless Cross / Ashen Rupture keep the Fighter ids + cooldowns (Bai Long slot order), no interrupt', () => {

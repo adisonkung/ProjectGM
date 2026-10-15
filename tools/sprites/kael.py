@@ -4,10 +4,10 @@ First batch = base sheet only (skills use the Tank class ids, effects arranged t
 the attack clip until s1/s2/ult arrive). Same import pipeline as Garrick (tools/sprites/garrick.py: bailong.py +
 aurel_v2.py helpers, k-means body seeds, stray cut). Classic fantasy swordsman (Kingdom Adventurers) — no wuxia motifs.
 
-Sources (art/incoming/kael, not committed):
-  base.png       idle 5 · walk (run) 7 · hurt 4 · attack (overhead cut → thrust, slash arc drawn on F3–F4) 7 · die 6
+Sources = the canonical asset directory assets/heroes/Kael (user 2026-10; not committed, never edited):
+  character/kael_base_combat.png       idle 5 · walk (run) 7 · hurt 4 · attack (overhead cut → thrust, slash arc drawn on F3–F4) 7 · die 6
                  (on #FF00FF, no labels)
-  reference.png  full figure + 4 action poses + longsword / scabbard turnaround + armour details + 6 face close-ups +
+  reference/kael_master_reference.png  full figure + 4 action poses + longsword / scabbard turnaround + armour details + 6 face close-ups +
                  palette; the head and shoulders
                  of the full figure become the portrait (only while art/portrait.png is missing)
 
@@ -25,7 +25,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import bailong as B  # noqa: E402
 
-SRC = sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/kael'
+SRC = sys.argv[1] if len(sys.argv) > 1 else 'assets/heroes/Kael'
 OUT = sys.argv[2] if len(sys.argv) > 2 else 'public/sprites'
 POUT = sys.argv[3] if len(sys.argv) > 3 else 'public/portraits'
 B.SRC = SRC
@@ -40,10 +40,20 @@ from scipy import ndimage  # noqa: E402
 _load = B.load
 
 
+# logical sheet names (the pipeline keys behaviour on them, e.g. 'base') → canonical files in assets/heroes/Kael
+FILES = {
+    'base': 'character/kael_base_combat',
+    'reference': 'reference/kael_master_reference',
+    's1_char': 'character/kael_s1_character',
+    's2_char': 'character/kael_s2_character_14f',
+    'ult_char': 'character/kael_ult_character',
+}
+
+
 def load_dark(name):
     """no despill: the burgundy cape / scarf are his; keyed-out pixels keep their magenta RGB and the BOX downscale
     would bleed it into the edges → make them dark"""
-    im, n = _load(name)
+    im, n = _load(FILES.get(name, name))
     im = im.copy()
     im[im[..., 3] == 0, :3] = (14, 14, 18)
     return im, n
@@ -180,9 +190,15 @@ BASE_NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 ATLAS_ROWS = 8          # 5 base rows + skill / skill2 / ult (empty until their sheets arrive)
 SKILL_ROWS: list = [  # (anim, file, frames per source row) — rows 5, 6, 7 as the skill sheets arrive
     ('skill', 's1_char', [5, 5]),     # S1 Sundering Edge: heavy diagonal cut (frame counts set when the sheet arrives)
-    ('skill2', 's2_char', [5, 5]),    # S2 Relentless Cross: horizontal cut → rising reverse cut
-    ('ult', 'ult_char', [7, 7]),      # Ult Ashen Rupture: gather → sword overhead → one forward cut → sword wave
+    ('skill2', 's2_char', [7, 7]),    # S2 Relentless Cross: horizontal cut → rising reverse cut
+    ('ult', 'ult_char', [5, 5]),      # Ult Ashen Rupture: gather → sword overhead → one forward cut → sword wave
 ]
+# skills are integrated one at a time after the user approves the previous one (2026-10) — rows 5 / 6 / 7 stay in place
+ENABLED = {'skill'}
+# one size correction per skill clip on top of the idle-height match (README: one factor per clip, never per frame):
+# S1's first pose is a crouched ready stance, so matching its height to the standing idle drew him ~13 % too big —
+# measured against the base attack's matching ready pose (height 80 vs 69 px, SIFT median ≈ 1.12)
+CLIP_SCALE = {'skill': 0.885}
 COMMON_GROUND: dict = {}
 SHIFT_MAX = {'skill': 3, 'skill2': 4, 'ult': 4}
 # base rows cut by fixed x-slots instead of blob seeds: name → (y0, y1, dividers) in source px
@@ -197,19 +213,22 @@ COMP_ROWS = {
 ROOT_SHIFT: dict = {}
 # head and shoulders of the full figure on the reference sheet (x0, y0, x1, y1) in source px
 FACE = (50, 60, 370, 340)
+# canonical file names inside SRC (no extension)
+BASE = 'base'
+REF = 'reference'
 
 
 def main():
     report = {'notes': [], 'rows': {}}
-    base = A.sheet_frames('base', BASE_COUNTS, False)
+    base = A.sheet_frames(BASE, BASE_COUNTS, False)
     groups, i = {}, 0
     for name, n in zip(BASE_NAMES, BASE_COUNTS):
         groups[name] = base[i:i + n]
         i += n
     for name, (y0, y1, divs) in CELL_ROWS.items():
-        groups[name] = cell_frames('base', y0, y1, divs, BASE_COUNTS[BASE_NAMES.index(name)])
+        groups[name] = cell_frames(BASE, y0, y1, divs, BASE_COUNTS[BASE_NAMES.index(name)])
     for name, (y0, y1, divs) in COMP_ROWS.items():
-        groups[name] = comp_frames('base', y0, y1, divs, BASE_COUNTS[BASE_NAMES.index(name)])
+        groups[name] = comp_frames(BASE, y0, y1, divs, BASE_COUNTS[BASE_NAMES.index(name)])
     # the walk is a run: the lowest foot of each frame is not always on the ground (flight frames) → every walk
     # frame keeps its drawn height above the row's common ground line instead of dropping its lowest pixel onto it
     ground = max(fr['root'][1] for fr in groups['walk'])
@@ -225,7 +244,7 @@ def main():
     rows = [(n, groups[n], sc) for n in BASE_NAMES]
     # skill rows that have arrived (character only — VFX sheets come separately): same on-screen body as the idle
     for name, file, counts in SKILL_ROWS:
-        if not os.path.exists(f'{SRC}/{file}.png'):
+        if name not in ENABLED or not os.path.exists(f'{SRC}/{FILES[file]}.png'):
             continue
         frs = A.sheet_frames(file, counts, False)
         for fr in frs:
@@ -235,6 +254,7 @@ def main():
             for fr in frs[a0:a1]:
                 fr['root'] = (fr['root'][0], g)
         s = sc * A.body_h(groups['idle'][0]) / A.body_h(frs[0])
+        s *= CLIP_SCALE.get(name, 1.0)
         rows.append((name, frs, s))
         report['notes'].append(f'{file}: {len(frs)} frames, scale {s:.3f}')
     cols = max(len(r[1]) for r in rows)
@@ -246,6 +266,8 @@ def main():
     tx = {name: [A.torso_x(pa[r * B.CELL_H:(r + 1) * B.CELL_H, c * B.CELL_W:(c + 1) * B.CELL_W]) for c in range(len(frs))]
           for r, (name, frs, _) in enumerate(rows)}
     shifts = A.stabilise(tx)
+    # the approved base rows keep the shifts they were built with (base rows only), skill rows are stabilised with them
+    shifts.update(A.stabilise({k: v for k, v in tx.items() if k in BASE_NAMES}))
     # a planted cast (S1 brace): the torso stabiliser chases the hammer / widening stance → the feet may slide at most
     # SHIFT_MAX px so he stays planted
     for name, lim in SHIFT_MAX.items():
@@ -265,7 +287,7 @@ def main():
         print(json.dumps(report, indent=1))
         return
     # portrait: head and shoulders, magenta keyed, on an ash-grey → burgundy / ember backdrop (Ashen Vanguard)
-    ref, _ = B.load('reference')
+    ref, _ = B.load(REF)
     x0, y0, x1, y1 = FACE
     face = ref[y0:y1, x0:x1].copy()
     ys, xs = np.nonzero(face[..., 3] > 0)

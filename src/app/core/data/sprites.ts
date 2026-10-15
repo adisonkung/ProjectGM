@@ -418,9 +418,9 @@ export const SHEETS: Record<string, SheetDef> = {
     },
   },
   'hero-kael.png': {
-    // Kael Ashen Vanguard base rows from the user's sheet (tools/sprites/kael.py, rows cut per connected figure) —
-    // skill rows 5–7 reserved (S1 / S2 / Ult fall back to the attack clip until their sheets arrive)
-    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    // Kael Ashen Vanguard (tools/sprites/kael.py, sources = assets/heroes/Kael): base rows cut per connected figure ·
+    // row 5 = S1 Sundering Edge · rows 6–7 reserved (S2 / Ult fall back until they are integrated, one skill at a time)
+    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5, ms: 170 },
@@ -429,7 +429,20 @@ export const SHEETS: Record<string, SheetDef> = {
       // ready F1 → sword raised F2 → overhead cut F3 (arc) → forward thrust F4 (arc = contact) → extended F5 → recover F6–F7
       attack: { row: 3, frames: 7, ms: 80, events: { DAMAGE: 3, RECOVERY_START: 5 } },
       die: { row: 4, frames: 6, ms: 140 },
+      // S1 Sundering Edge — kael_timeline_v2 skill_1 (tools/sprites/kael_s1.py, 12 FPS provisional = 83.3 ms / frame,
+      // 0.83 s): READY F1 · LOWER F2 · DRAW_BACK F3 · WIND_UP F4 · MAX_ANTICIPATION F5 · ATTACK_RELEASE F6 (Main VFX) ·
+      // HIT_1 F7 (damage once + Impact VFX) · FOLLOW_THROUGH F8 · RECOVERY F9 · READY_END F10 · root 0 · light shake
+      skill: {
+        row: 5, frames: 10, ms: 83,
+        seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [83, 83, 83, 83, 83, 83, 83, 83, 83, 86],
+        events: {
+          CAST_START: 0, ANTICIPATION_PEAK: 4, STRIKE_START: 5, VFX_SPAWN: 5, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8,
+        },
+        impact: { hitStopMs: 0, shakePx: 2, shakeMs: 90 },
+      },
     },
+    fx: { skill: ['kl-s1-main', 'kl-s1-impact'] },
   },
   'hero-linxue.png': {
     // Lin Xue (Lotus Spirit Physician) base rows from the user's sheet (tools/sprites/linxue.py) — rows 6–7 reserved
@@ -703,6 +716,16 @@ export const FX: Record<string, FxDef> = {
   // Garrick S1 Brace for Impact (tools/sprites/garrick_s1.py): the Main VFX once at his feet (F20 rune ring → F30 peak
   // crystal guard + golden sword crest → breaks → fades F53) · the Guard Aura from the activation (F30): 8 frames ×
   // 93.75 ms, 4 loops = the 3 s guard, then fades · both drawn IN FRONT of him (user 2026-10; the dome is see-through)
+  // Kael S1 Sundering Edge (tools/sprites/kael_s1.py, 60 FPS strips): Main VFX = the slash arc at the sword swing, F6 →
+  // peak at the hit F7 · Impact VFX = burst at the target's contact side, F7 (after the damage resolved)
+  'kl-s1-main': {
+    file: 'fx-kael-s1-main.png', frames: 23, w: 138, h: 92, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.5768, 0.9792], dx: 70, dy: 27.25, scale: 1 / 1.5,
+  },
+  'kl-s1-impact': {
+    file: 'fx-kael-s1-impact.png', frames: 22, w: 113, h: 91, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
+    hitIndex: 0, pivot: [0.4665, 0.9731], dx: -12.5, dy: 27.25, scale: 1 / 1.5,
+  },
   'gr-s1-main': {
     file: 'fx-garrick-s1-main.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
     pivot: [0.4945, 0.6589], dy: 27.25, scale: 1 / 1.5,
