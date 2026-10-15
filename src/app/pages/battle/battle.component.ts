@@ -22,6 +22,7 @@ import { hasStatus } from '../../battle/engine/buffs';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
+import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
 import { animOf, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
@@ -105,23 +106,12 @@ export class BattleComponent implements OnDestroy {
   readonly paused = signal(false);
   readonly menuOpen = signal(false);
   /** who draws the battle units: DOM (Web Animations) or Pixi (WebGL, one game clock) — `?render=pixi|dom`, remembered */
-  readonly renderer = signal<'dom' | 'pixi'>(BattleComponent.savedRenderer());
+  readonly renderer = signal<BoardRenderer>(savedRenderer());
   /** the board's game clock stands still (paused / hit-stop) */
   readonly boardFrozen = (): boolean => this.paused() || performance.now() < this.hitStopUntil;
-  private static savedRenderer(): 'dom' | 'pixi' {
-    try {
-      return localStorage.getItem('projectgm-renderer') === 'pixi' ? 'pixi' : 'dom';
-    } catch {
-      return 'dom';
-    }
-  }
   toggleRenderer(): void {
     this.renderer.update(r => (r === 'pixi' ? 'dom' : 'pixi'));
-    try {
-      localStorage.setItem('projectgm-renderer', this.renderer());
-    } catch {
-      /* private window: just this session */
-    }
+    saveRenderer(this.renderer());
   }
   readonly result = signal<BattleResult | null>(null);
   readonly time = signal(0);
@@ -942,7 +932,8 @@ export class BattleComponent implements OnDestroy {
           // hero clip events (VFX_SPAWN, CHARGE_START, STRIKE_START …): the FX layers bound to them; missing FX = no-op
           if (e.kind) {
             addFx(e.src, e.dst, e.kind, { on: 'event', event: e.event, index: e.index });
-            const stop = playImpactFeel(this.boardEl()?.nativeElement, eventFeelOf(unitOf(e.src).sprite, e.kind, e.event));
+            const fp = posOf(e.dst != null && this.engine.units.some(u => u.id === e.dst) ? e.dst : e.src);
+            const stop = playImpactFeel(this.boardEl()?.nativeElement, eventFeelOf(unitOf(e.src).sprite, e.kind, e.event), { c: fp.c, r: fp.r + SCENERY_ROWS });
             if (stop) this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + stop);
           }
           break;

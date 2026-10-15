@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AnimState, BoardComponent, FloatText, FxView, UnitView } from '../../battle/board/board.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
+import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { HEROES } from '../../core/data/heroes';
 import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxAttached, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
@@ -34,7 +35,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
       </header>
 
       <div class="stage" [class.anchors]="showAnchors()">
-        <app-board #board [units]="units()" [fx]="fx()" [floats]="floats()" [anims]="anims()" [speed]="speed()" />
+        <app-board #board [units]="units()" [fx]="fx()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
         @if (showAnchors()) {
           <i class="mark root" [style.left]="mark().root.x" [style.top]="mark().root.y" title="root (feet)"></i>
           @for (t of mark().anchors; track t.name) { <i class="mark tip" [style.left]="t.x" [style.top]="t.y" [title]="t.name"><b>{{ t.name }}</b></i> }
@@ -53,6 +54,11 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
         <label>ความเร็ว
           <select [value]="speed()" (change)="speed.set(+$any($event.target).value)">
             <option value="0.25">×0.25</option><option value="0.5">×0.5</option><option value="1">×1</option>
+          </select>
+        </label>
+        <label>ตัววาด
+          <select [value]="renderer()" (change)="setRenderer($any($event.target).value)">
+            <option value="dom">DOM</option><option value="pixi">Pixi (WebGL)</option>
           </select>
         </label>
       </div>
@@ -79,12 +85,18 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
 })
 export class SpriteLabComponent implements OnDestroy {
   readonly spriteHeroes = HEROES.filter(h => h.sprite && SHEETS[h.sprite]);
-  readonly heroId = signal(inject(ActivatedRoute).snapshot.queryParamMap.get('hero') ?? 'bailong');
+  private readonly qp = inject(ActivatedRoute).snapshot.queryParamMap;
+  readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
   readonly heroName = computed(() => this.hero()?.name ?? '');
   readonly sheet = computed(() => SHEETS[this.hero()?.sprite ?? '']);
 
   readonly speed = signal(1);
+  /** same renderer switch as the battle (`?render=pixi|dom`, remembered) — check a clip exactly as the battle draws it */
+  readonly renderer = signal<BoardRenderer>(this.qp.get('render') === 'pixi' ? 'pixi' : this.qp.get('render') === 'dom' ? 'dom' : savedRenderer());
+  /** Pixi board clock stands still during the authored hit-stop (DOM animations are paused by playImpactFeel) */
+  private hitStopUntil = 0;
+  readonly frozen = (): boolean => performance.now() < this.hitStopUntil;
   readonly loop = signal(false);
   readonly faceLeft = signal(false);
   readonly showAnchors = signal(false);
@@ -97,6 +109,17 @@ export class SpriteLabComponent implements OnDestroy {
   readonly log = signal<{ t: string; text: string }[]>([]);
 
   private readonly boardEl = viewChild(BoardComponent, { read: ElementRef });
+
+  setRenderer(r: BoardRenderer): void {
+    this.renderer.set(r);
+    saveRenderer(r);
+  }
+
+  /** impact feel + hold the Pixi clock for its hit-stop */
+  private feel(f: Parameters<typeof playImpactFeel>[1]): void {
+    const stop = playImpactFeel(this.boardEl()?.nativeElement, f);
+    if (stop) this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + stop);
+  }
   private timers: ReturnType<typeof setTimeout>[] = [];
   private key = 0;
   private id = 0;
@@ -189,13 +212,13 @@ export class SpriteLabComponent implements OnDestroy {
             return;
           }
           if (ev.event !== 'DAMAGE' && ev.event !== 'IMPACT') this.spawn(kind, { on: 'event', event: ev.event, index: ev.index });
-          playImpactFeel(this.boardEl()?.nativeElement, eventFeelOf(sprite, kind, ev.event));
+          this.feel(eventFeelOf(sprite, kind, ev.event));
           if (ev.event === 'DAMAGE') {
             const hits = this.hitDummies(kind, ev.index);
             this.spawn(kind, { on: 'impact', hit: ev.index }, hits);
-            if (!hasImpact) playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(sprite, kind, ev.index));
+            if (!hasImpact) this.feel(impactFeelOf(sprite, kind, ev.index));
           }
-          if (ev.event === 'IMPACT') playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(sprite, kind, ev.index));
+          if (ev.event === 'IMPACT') this.feel(impactFeelOf(sprite, kind, ev.index));
         });
       }
       if (kind) this.spawn(kind, { on: 'cast' });

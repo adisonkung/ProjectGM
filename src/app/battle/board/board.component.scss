@@ -15,6 +15,12 @@
   background: var(--board);
 }
 
+// everything on the board sits in the camera layer (same box as .board) — impact feel zooms it (ImpactFeel.zoomPct)
+.cam {
+  position: absolute;
+  inset: 0;
+}
+
 .unit,
 .float-wrap {
   position: absolute;
@@ -242,4 +248,8 @@ app-projectile.px { visibility: hidden; }
 }
 @keyframes star-aura { from { opacity: 0.75; transform: scale(0.94); } to { opacity: 1; transform: scale(1.04); } }
 @keyframes star-motes { from { background-position: 0 0, 4px 6px; } to { background-position: 0 -26px, 4px -24px; } }
+// Pixi draws this unit (renderer 'pixi'): its glows and ground rings are drawn on the canvas (render/unit-look.ts)
+.unit.px.buffed { filter: none; animation: none; }
+.unit.px.reviving { filter: none; }
+.unit.px.taunt::before, .unit.px.aura5::before, .unit.px.aura6::before, .unit.px.elite::after { display: none; }
 @media (prefers-reduced-motion: reduce) { .unit.aura5::before, .unit.aura6::before, .unit.aura6::after { animation: none; } }

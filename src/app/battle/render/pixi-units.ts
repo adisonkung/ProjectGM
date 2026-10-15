@@ -1,7 +1,9 @@
-import type { Application, Container, Sprite, Texture } from 'pixi.js';
+import type { Application, ColorMatrixFilter, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { FX, SHEETS, SheetDef } from '../../core/data/sprites';
 import { fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
 import { ClipRequest, UnitClip } from './unit-clip';
+import { frameChunk } from './tex-chunks';
+import { LOOK_COLORS, RING_BOX, UnitLook } from './unit-look';
 
 /** one unit to draw this frame (board pixels, already interpolated by the board's motion loop) */
 export interface PixiUnit {
@@ -18,6 +20,8 @@ export interface PixiUnit {
   key: number;
   moving: boolean | undefined;
   pace?: number;
+  /** state looks (glow / broken / grey / ground rings) — `unitLook()` */
+  look?: UnitLook;
 }
 
 /** one skill FX on the board this frame (FxView, positions in board px) */
@@ -44,6 +48,18 @@ export interface PixiBolt {
 
 type Pixi = typeof import('pixi.js');
 
+interface UnitGfx {
+  sprite: Sprite;
+  clip: UnitClip;
+  sheet: string;
+  /** glow: the same frame as a blurred one-colour silhouette behind the sprite */
+  halo?: Sprite;
+  haloTint?: ColorMatrixFilter;
+  tone?: ColorMatrixFilter;
+  rings?: Graphics;
+  ringKey?: string;
+}
+
 /** z bands on the one stage: ground FX < units (≈ 10–90) < FX over them */
 const Z_UNDER = -100000;
 const Z_OVER = 100000;
@@ -58,19 +74,26 @@ const Z_BOLT = 200000;
  * Pixi is imported lazily (its own chunk) only when the Pixi renderer is switched on.
  */
 export class PixiUnitLayer {
-  private readonly sprites = new Map<number, { sprite: Sprite; clip: UnitClip; sheet: string }>();
+  private readonly sprites = new Map<number, UnitGfx>();
+  private readonly reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   private readonly textures = new Map<string, Texture | 'loading' | 'failed'>();
   private readonly frames = new Map<string, Texture>();
   private readonly fxs = new Map<number, { sprite: Sprite; name: string; t0: number; seq: number; last: PixiFx }>();
   private readonly bolts = new Map<number, { sprite: Sprite; t0: number; last: PixiBolt }>();
+  private readonly chunks = new Map<string, Texture>();
   private fxSeq = 0;
   private cell = 0;
+  /** GPU texture size limit (bigger sheets are cut into chunks — render/tex-chunks.ts) */
+  private readonly maxTex: number;
 
   private constructor(
     private readonly pixi: Pixi,
     private readonly app: Application,
     private readonly stage: Container,
-  ) {}
+  ) {
+    const gl = (app.renderer as unknown as { gl?: WebGLRenderingContext }).gl;
+    this.maxTex = Math.min(16384, (gl?.getParameter(gl.MAX_TEXTURE_SIZE) as number | undefined) ?? 4096);
+  }
 
   /** null = WebGL unavailable (the board keeps drawing units with the DOM) */
   static async create(host: HTMLElement, width: number, height: number): Promise<PixiUnitLayer | null> {
@@ -107,6 +130,8 @@ export class PixiUnitLayer {
 
   destroy(): void {
     this.app.destroy(true, { children: true });
+    for (const t of this.chunks.values()) t.destroy(true);
+    this.chunks.clear();
     this.sprites.clear();
     this.fxs.clear();
     this.bolts.clear();
@@ -128,16 +153,37 @@ export class PixiUnitLayer {
     return null;
   }
 
-  private frame(file: string, def: SheetDef, base: Texture, row: number, col: number): Texture {
-    const k = `${file}|${row}|${col}`;
+  /** frame (col, row) of a grid of fw × fh cells — a sub-texture, or of a chunk when the image is over the GPU limit */
+  private cellTex(file: string, base: Texture, pixelated: boolean | undefined, fw: number, fh: number, col: number, row: number): Texture {
+    const k = `${file}|${fw}|${fh}|${col}|${row}`;
     let f = this.frames.get(k);
-    if (!f) {
-      const w = def.cellW ?? 132;
-      const h = def.cellH ?? 100;
-      f = new this.pixi.Texture({ source: base.source, frame: new this.pixi.Rectangle(col * w, row * h, w, h) });
-      this.frames.set(k, f);
+    if (f) return f;
+    const src = base.source;
+    const W = src.pixelWidth;
+    const H = src.pixelHeight;
+    if (W <= this.maxTex && H <= this.maxTex) {
+      f = new this.pixi.Texture({ source: src, frame: new this.pixi.Rectangle(col * fw, row * fh, fw, fh) });
+    } else {
+      const c = frameChunk(col, row, fw, fh, W, H, this.maxTex);
+      const ck = `${file}|${fw}|${fh}|${c.cx}|${c.cy}`;
+      let chunk = this.chunks.get(ck);
+      if (!chunk) {
+        const canvas = document.createElement('canvas');
+        canvas.width = c.sw;
+        canvas.height = c.sh;
+        canvas.getContext('2d')!.drawImage(src.resource as CanvasImageSource, c.sx, c.sy, c.sw, c.sh, 0, 0, c.sw, c.sh);
+        chunk = this.pixi.Texture.from(canvas);
+        chunk.source.scaleMode = pixelated ? 'nearest' : 'linear';
+        this.chunks.set(ck, chunk);
+      }
+      f = new this.pixi.Texture({ source: chunk.source, frame: new this.pixi.Rectangle(c.fx, c.fy, fw, fh) });
     }
+    this.frames.set(k, f);
     return f;
+  }
+
+  private frame(file: string, def: SheetDef, base: Texture, row: number, col: number): Texture {
+    return this.cellTex(file, base, def.pixelated, def.cellW ?? 132, def.cellH ?? 100, col, row);
   }
 
   /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
@@ -151,15 +197,8 @@ export class PixiUnitLayer {
     }
   }
 
-  private fxFrame(file: string, base: Texture, strip: number, i: number): Texture {
-    const k = `fx|${file}|${i}`;
-    let f = this.frames.get(k);
-    if (!f) {
-      const w = base.source.width / strip;
-      f = new this.pixi.Texture({ source: base.source, frame: new this.pixi.Rectangle(i * w, 0, w, base.source.height) });
-      this.frames.set(k, f);
-    }
-    return f;
+  private fxFrame(file: string, base: Texture, strip: number, i: number, pixelated?: boolean): Texture {
+    return this.cellTex(file, base, pixelated, base.source.pixelWidth / strip, base.source.pixelHeight, i, 0);
   }
 
   /**
@@ -198,7 +237,7 @@ export class PixiUnitLayer {
       }
       const f = s.last;
       const at = fxPlacement(d, cell, f.x, f.y, f.flip, f.angle, f.offset);
-      const tex = this.fxFrame(d.file, base, d.stripFrames ?? d.frames, pose.frame);
+      const tex = this.fxFrame(d.file, base, d.stripFrames ?? d.frames, pose.frame, d.pixelated);
       sp.texture = tex;
       const piv = d.pivot ?? [0.5, 0.5];
       sp.anchor.set(piv[0], piv[1]);
@@ -248,7 +287,7 @@ export class PixiUnitLayer {
       }
       const at = projectilePlacement(d, cell, b.from, b.to, pose.k);
       const sp = s.sprite;
-      const tex = this.fxFrame(d.file, base, d.frames, pose.frame);
+      const tex = this.fxFrame(d.file, base, d.frames, pose.frame, d.pixelated);
       sp.texture = tex;
       sp.position.set(at.x, at.y);
       sp.rotation = at.rotation;
@@ -283,7 +322,7 @@ export class PixiUnitLayer {
       const base = this.texture(u.sheet, def);
       let s = this.sprites.get(u.id);
       if (!s || s.sheet !== u.sheet) {
-        s?.sprite.destroy();
+        if (s) this.dropUnit(s);
         const sprite = new this.pixi.Sprite();
         sprite.anchor.set(0.5, 1);
         this.stage.addChild(sprite);
@@ -307,11 +346,12 @@ export class PixiUnitLayer {
       sp.alpha = u.alpha * pose.opacity;
       sp.zIndex = u.z;
       sp.visible = sp.alpha > 0.001;
+      this.applyLook(s, u, cell, idleNow);
       drawn.add(u.id);
     }
     for (const [id, s] of this.sprites) {
       if (!live.has(id)) {
-        s.sprite.destroy();
+        this.dropUnit(s);
         this.sprites.delete(id);
       }
     }
@@ -319,6 +359,98 @@ export class PixiUnitLayer {
     const boltsDrawn = this.drawBolts(bolts, cell, now);
     this.app.render();
     return { units: drawn, fx: fxDrawn, bolts: boltsDrawn };
+  }
+
+  private dropUnit(s: UnitGfx): void {
+    s.sprite.destroy();
+    s.halo?.destroy();
+    s.rings?.destroy();
+  }
+
+  /** the CSS state looks of the DOM `.unit`, drawn on the canvas (render/unit-look.ts) */
+  private applyLook(s: UnitGfx, u: PixiUnit, cell: number, idleNow: number): void {
+    const look = u.look;
+    const sp = s.sprite;
+    const px = cell / 56; // CSS px at the reference cell size (56 px)
+    // broken: darkened sepia (brightness .6 sepia .6 hue −20°) + 2 px jitter every 0.2 s · untargetable: partly grey
+    if (look?.broken || look?.gray) {
+      if (!s.tone) s.tone = new this.pixi.ColorMatrixFilter();
+      const t = s.tone;
+      t.reset();
+      if (look.broken) {
+        t.brightness(0.6, false);
+        t.sepia(true);
+        t.alpha = 0.6;
+      } else {
+        t.desaturate();
+        t.alpha = 0.6;
+      }
+      sp.filters = [t];
+      if (look.broken && !this.reduced) sp.position.x += (idleNow % 0.2 < 0.1 ? 0 : 2) * px;
+    } else if (sp.filters) {
+      sp.filters = null;
+    }
+    // glow
+    if (look?.glow != null && sp.visible) {
+      if (!s.halo) {
+        s.halo = new this.pixi.Sprite();
+        s.haloTint = new this.pixi.ColorMatrixFilter();
+        s.halo.filters = [s.haloTint, new this.pixi.BlurFilter({ strength: 6 * px, quality: 2 })];
+        s.halo.blendMode = 'add';
+        this.stage.addChild(s.halo);
+      }
+      const c = look.glow;
+      // one colour, the frame's own alpha
+      s.haloTint!.matrix = [0, 0, 0, 0, ((c >> 16) & 255) / 255, 0, 0, 0, 0, ((c >> 8) & 255) / 255, 0, 0, 0, 0, (c & 255) / 255, 0, 0, 0, 1, 0];
+      const h = s.halo;
+      h.texture = sp.texture;
+      h.anchor.copyFrom(sp.anchor);
+      h.position.copyFrom(sp.position);
+      h.scale.copyFrom(sp.scale);
+      const pulse = look.glowPulse && !this.reduced ? 0.5 + 0.5 * Math.abs(((idleNow / 0.9) % 2) - 1) : 1;
+      h.alpha = sp.alpha * (0.75 + 0.25 * pulse);
+      h.zIndex = u.z - 0.01;
+      h.visible = true;
+    } else if (s.halo) {
+      s.halo.visible = false;
+    }
+    // ground rings (under the sprite)
+    const key = look?.rings?.length ? `${look.rings.join(',')}|${cell.toFixed(1)}` : '';
+    if (key && !s.rings) {
+      s.rings = new this.pixi.Graphics();
+      this.stage.addChild(s.rings);
+    }
+    if (s.rings) {
+      const g = s.rings;
+      if (s.ringKey !== key) {
+        g.clear();
+        for (const r of look?.rings ?? []) {
+          const b = RING_BOX[r];
+          const rx = (b.w / 2) * cell;
+          const ry = (b.h / 2) * cell;
+          const cy = (b.cy - 1) * cell; // drawn around the cell bottom, the Graphics sits there
+          if (r === 'aura5' || r === 'aura6') {
+            const col = r === 'aura6' ? LOOK_COLORS.r6 : LOOK_COLORS.r5;
+            g.ellipse(0, cy, rx * 1.15, ry * 1.25).fill({ color: col, alpha: 0.12 });
+            g.ellipse(0, cy, rx, ry).fill({ color: col, alpha: 0.35 });
+            g.ellipse(0, cy, rx, ry).stroke({ color: r === 'aura6' ? LOOK_COLORS.aura6Rim : LOOK_COLORS.aura5Rim, width: 2 * px, alpha: 1 });
+          } else {
+            const col = r === 'elite' ? LOOK_COLORS.r5 : LOOK_COLORS.gold;
+            g.ellipse(0, cy, rx + 3 * px, ry + 3 * px).stroke({ color: col, width: 4 * px, alpha: 0.25 });
+            g.ellipse(0, cy, rx, ry).stroke({ color: col, width: 2 * px, alpha: 1 });
+          }
+        }
+        s.ringKey = key;
+      }
+      g.visible = !!key;
+      g.position.set(u.x + cell / 2, u.y + cell);
+      const aura = look?.rings?.some(r => r === 'aura5' || r === 'aura6');
+      // star aura breathes (scale .94 → 1.04, opacity .75 → 1, 1.6 s alternate)
+      const k = aura && !this.reduced ? Math.abs(((idleNow / 1.6) % 2) - 1) : 1;
+      g.scale.set(aura ? 0.94 + 0.1 * k : 1);
+      g.alpha = (aura ? 0.75 + 0.25 * k : 1) * u.alpha;
+      g.zIndex = u.z - 0.02;
+    }
   }
 
   get cellSize(): number {

@@ -71,6 +71,8 @@ export interface ImpactFeel {
   shakeMs?: number;
   /** brief white flash over the board (ms) */
   flashMs?: number;
+  /** camera punch-in on the hit (% larger at the peak, eases back over shakeMs) */
+  zoomPct?: number;
 }
 
 export interface SheetDef {
@@ -486,7 +488,7 @@ export const SHEETS: Record<string, SheetDef> = {
           CAST_START: 0, CHARGE_START: 1, CHARGE_PEAK: 5, STRIKE_START: 6, VFX_SPAWN: 7, DAMAGE: 7, RECOVERY_START: 8,
         },
         // F8 the sword slams the ground (+ the S1 burst, `kl-ult-slam`) — felt before the wave's first collision
-        eventFeel: { VFX_SPAWN: { hitStopMs: 50, shakePx: 7, shakeMs: 180, flashMs: 80 } },
+        eventFeel: { VFX_SPAWN: { hitStopMs: 50, shakePx: 7, shakeMs: 180, flashMs: 80, zoomPct: 5 } },
         impact: [
           { hitStopMs: 0, shakePx: 4, shakeMs: 120 }, { hitStopMs: 0, shakePx: 4, shakeMs: 120 },
           { hitStopMs: 0, shakePx: 5, shakeMs: 140 }, { hitStopMs: 60, shakePx: 8, shakeMs: 220, flashMs: 120 },

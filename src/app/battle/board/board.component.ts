@@ -12,6 +12,7 @@ import { ProjectileComponent } from '../projectile/projectile.component';
 import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 import { SHEETS } from '../../core/data/sprites';
 import type { PixiBolt, PixiFx, PixiUnit, PixiUnitLayer } from '../render/pixi-units';
+import { unitLook } from '../render/unit-look';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
 export interface UnitView {
@@ -311,7 +312,7 @@ export class BoardComponent {
     host.className = 'pixi-host';
     // created at runtime (no encapsulation attribute): inline styles · above the 'under' FX (z 5), below DOM FX / bars
     host.style.cssText = 'position:absolute;inset:0;z-index:6;pointer-events:none;';
-    board.appendChild(host);
+    (board.querySelector<HTMLElement>(':scope > .cam') ?? board).appendChild(host);
     this.pixiHost = host;
     import('../render/pixi-units').then(m => m.PixiUnitLayer.create(host, board.clientWidth, board.clientHeight)).then(layer => {
       this.pixiPending = false;
@@ -369,6 +370,7 @@ export class BoardComponent {
         key: a.key,
         moving: u.moving === undefined ? undefined : !!u.moving && u.alive,
         pace: u.pace,
+        look: unitLook(u),
       });
     }
     // skill FX: the cell they were placed on, or (attached auras) their unit's drawn cell this frame

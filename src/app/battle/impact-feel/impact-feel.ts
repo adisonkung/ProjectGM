@@ -6,7 +6,12 @@ import { ImpactFeel } from '../../core/data/sprites';
  * screen shake on `root`. Returns the hit-stop length (the battle page also holds the engine for it).
  * Purely visual — never touches combat state; reduced-motion users get no shake.
  */
-export function playImpactFeel(root: HTMLElement | null | undefined, feel: ImpactFeel | undefined): number {
+export function playImpactFeel(
+  root: HTMLElement | null | undefined,
+  feel: ImpactFeel | undefined,
+  /** zoom centre in board cells (c = column, r = screen row incl. scenery) — default the board centre */
+  focus?: { c: number; r: number },
+): number {
   if (!root || !feel || typeof root.getAnimations !== 'function') return 0;
   const stop = Math.max(0, feel.hitStopMs ?? 0);
   if (stop > 0) {
@@ -26,6 +31,21 @@ export function playImpactFeel(root: HTMLElement | null | undefined, feel: Impac
         { translate: '0 0' },
       ],
       { duration: feel.shakeMs ?? 140, delay: stop, easing: 'linear' },
+    );
+  }
+  // camera punch-in: the board's camera layer (units, FX, Pixi canvas, background) scales up around the hit and eases back
+  const zoom = feel.zoomPct ?? 0;
+  const cam = root.querySelector<HTMLElement>('.board > .cam');
+  if (zoom > 0 && cam && !reduced) {
+    const origin = focus ? `calc(var(--cell) * ${focus.c + 0.5}) calc(var(--cell) * ${focus.r + 0.5})` : '50% 50%';
+    cam.style.transformOrigin = origin;
+    cam.animate(
+      [
+        { scale: '1', easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' },
+        { scale: `${1 + zoom / 100}`, offset: 0.25, easing: 'ease-in-out' },
+        { scale: '1' },
+      ],
+      { duration: stop + (feel.shakeMs ?? 140) * 2, easing: 'linear' },
     );
   }
   const flash = feel.flashMs ?? 0;
