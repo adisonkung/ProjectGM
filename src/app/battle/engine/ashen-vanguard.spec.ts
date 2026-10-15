@@ -53,21 +53,22 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     expect(fxFor('hero-kael.png', 'skill2', { on: 'impact', hit: 1 })).toEqual(['kl-s2-impact2']);
   });
 
-  it('Ult Ashen Rupture (timeline v2): 10 frames, charge F2 → peak F6, wave + travelling damage from F8, recovery F9', () => {
+  it('Ult Ashen Rupture: 10 frames held to 1.57 s, charge F2 → held peak F6, wave + travelling damage from F8, recovery F9', () => {
     const a = SHEETS['hero-kael.png'].anims.ult!;
     expect([a.row, a.frames]).toEqual([7, 10]);
-    expect(a.steps!.reduce((x, y) => x + y, 0)).toBe(833);
+    expect(a.steps!.reduce((x, y) => x + y, 0)).toBe(1567);
     const ev = animEvents('hero-kael.png', 'ult');
     const at = (k: string) => ev.filter(e => e.event === k).map(e => Math.round(e.t * 1000));
     expect(at('CHARGE_START')).toEqual([83]);
-    expect(at('VFX_SPAWN')).toEqual([581]);
-    expect(at('DAMAGE')).toEqual([581]);
-    expect(at('RECOVERY_START')).toEqual([664]);
+    expect(at('CHARGE_PEAK')).toEqual([666]);
+    expect(at('VFX_SPAWN')).toEqual([1033]);
+    expect(at('DAMAGE')).toEqual([1033]);
+    expect(at('RECOVERY_START')).toEqual([1200]);
     expect(fxFor('hero-kael.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['kl-ult-charge']);
     expect(fxFor('hero-kael.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['kl-ult-wave']);
     expect(fxFor('hero-kael.png', 'ult', { on: 'impact', hit: 2 })).toEqual(['kl-ult-impact']);
     expect(FX['kl-ult-impact'].perHit).toBe(6);
-    expect(kitOf('kael', 'fighter').ult.effects[0]).toEqual(jasmine.objectContaining({ travel: 10 }));
+    expect(kitOf('kael', 'fighter').ult.effects[0]).toEqual(jasmine.objectContaining({ travel: 7 }));
   });
 
   it('Sundering Edge / Relentless Cross / Ashen Rupture keep the Fighter ids + cooldowns (Bai Long slot order), no interrupt', () => {
@@ -193,7 +194,7 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     expect(foes.map((f, i) => hp[i] - f.hp > 0)).toEqual([true, true, true, true, false, false]);
   });
 
-  it('Ashen Rupture travels at 10 cells/s: cell k resolves at (k − 0.5) / 10 s, one impact per collision, each unit hit once', () => {
+  it('Ashen Rupture travels at 7 cells/s: cell k resolves at (k − 0.5) / 7 s, one impact per collision, each unit hit once', () => {
     const b = battle([0, 1].map(c => ({ enemy: 'forest_slime', r: 0, c })));
     const [a, z] = b.foes();
     for (const f of [a, z]) f.hp = f.maxHp = 1e6;
@@ -201,7 +202,7 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     b.place(a, { r, c: c + 1 });
     b.place(z, { r, c: c + 3 });
     const { q, events } = rupture(b);
-    expect(q.map(p => +p.d.toFixed(3))).toEqual([0.05, 0.15, 0.25, 0.35]);
+    expect(q.map(p => +p.d.toFixed(3))).toEqual([0.071, 0.214, 0.357, 0.5]);
     q[0].fn();
     const hpA = a.hp;
     expect(hpA).toBeLessThan(1e6);

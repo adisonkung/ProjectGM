@@ -380,7 +380,7 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
       ult: {
         ...fighter.ult, name: 'เถ้าธุลีแยกแผ่นดิน', label: 'Ashen Rupture', range: 1,
-        effects: [{ type: 'DAMAGE', area: 'FRONT_LINE_4', primary: 2.6, travel: 10 }], ai: { tier: 'NORMAL', minTargets: 1 },
+        effects: [{ type: 'DAMAGE', area: 'FRONT_LINE_4', primary: 2.6, travel: 7 }], ai: { tier: 'NORMAL', minTargets: 1 },
       },
     },
   },

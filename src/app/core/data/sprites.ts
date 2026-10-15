@@ -455,18 +455,22 @@ export const SHEETS: Record<string, SheetDef> = {
         },
         impact: [{ hitStopMs: 0, shakePx: 2, shakeMs: 80 }, { hitStopMs: 0, shakePx: 3, shakeMs: 110 }],
       },
-      // Ult Ashen Rupture — kael_timeline_v2 ultimate (tools/sprites/kael_ult.py, 10 frames, 12 FPS provisional = 0.83 s):
-      // READY F1 · CHARGE F2–F6 (ember vortex from CHARGE_START, peak F6) · STRIKE F7 · RELEASE F8 = the ground wave
-      // spawns AND the travelling DAMAGE starts (kit `travel` 10 cells/s: front line cell 1 → 4, each unit hit once as
-      // the wave reaches it, one impact per collision) · RECOVERY F9–F10
+      // Ult Ashen Rupture — kael_timeline_v2 ultimate (tools/sprites/kael_ult.py, 10 frames held per frame = 1.57 s —
+      // user 2026-10: bigger, slower, a longer charge): READY F1 · CHARGE F2–F5 (ember vortex from CHARGE_START) · F6
+      // held 0.3 s at the peak (CHARGE_PEAK) · a fast cut F7 · RELEASE F8 = the ground wave spawns AND the travelling
+      // DAMAGE starts (kit `travel` 7 cells/s: front line cell 1 → 4, each unit hit once as the wave reaches it, one
+      // impact per collision, the last one hardest + flash) · RECOVERY F9–F10
       ult: {
         row: 7, frames: 10, ms: 83,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        steps: [83, 83, 83, 83, 83, 83, 83, 83, 83, 86],
+        steps: [83, 133, 133, 150, 167, 300, 67, 167, 167, 200],
         events: {
           CAST_START: 0, CHARGE_START: 1, CHARGE_PEAK: 5, STRIKE_START: 6, VFX_SPAWN: 7, DAMAGE: 7, RECOVERY_START: 8,
         },
-        impact: { hitStopMs: 0, shakePx: 3, shakeMs: 120 },
+        impact: [
+          { hitStopMs: 33, shakePx: 4, shakeMs: 120 }, { hitStopMs: 0, shakePx: 4, shakeMs: 120 },
+          { hitStopMs: 0, shakePx: 5, shakeMs: 140 }, { hitStopMs: 60, shakePx: 8, shakeMs: 220, flashMs: 120 },
+        ],
       },
     },
     fx: {
@@ -778,21 +782,22 @@ export const FX: Record<string, FxDef> = {
     on: 'impact', hitIndex: 1, dx: -12.5, dy: 27.25, scale: 1 / 1.5,
     pivot: [0.481, 0.981],
   },
-  // Kael Ult Ashen Rupture (tools/sprites/kael_ult.py): the ember charge vortex behind him from CHARGE_START (60 FPS,
-  // peak at CHARGE_PEAK) · the ground wave from VFX_SPAWN (30 FPS strip, its travel along the front line baked in at
-  // the kit's 10 cells/s — leading edge reaches cell k at (k − 0.5) / 10 s, when that cell's damage resolves) · a
-  // burst on every unit each collision hit (one impact event per cell)
+  // Kael Ult Ashen Rupture (tools/sprites/kael_ult.py, every layer with an ember bloom — user 2026-10: bigger, an
+  // ultimate): the charge vortex behind him from CHARGE_START (30 FPS, ~2.4 × his width, roaring through the held F6,
+  // drawn into the sword on the cut) · the ground wave from VFX_SPAWN (30 FPS strip, ~1.9 × his height, its travel along
+  // the front line baked in at the kit's 7 cells/s — leading edge reaches cell k at (k − 0.5) / 7 s, when that cell's
+  // damage resolves) · a burst (~1.6 × body) on every unit each collision hit (one impact event per cell)
   'kl-ult-charge': {
-    file: 'fx-kael-ult-charge.png', frames: 31, w: 145, h: 171, frameMs: 16.67, at: 'self', orient: 'flip',
-    event: 'CHARGE_START', layer: 'under', pivot: [0.5011, 0.9867], dy: 27.25, scale: 1 / 1.5,
+    file: 'fx-kael-ult-charge.png', frames: 30, w: 232, h: 268, frameMs: 33.33, at: 'self', orient: 'flip',
+    event: 'CHARGE_START', layer: 'under', pivot: [0.5007, 0.9395], dy: 27.25, scale: 1 / 1.5,
   },
   'kl-ult-wave': {
-    file: 'fx-kael-ult-wave.png', frames: 14, w: 389, h: 100, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
-    pivot: [0.0554, 0.985], dx: 50, dy: 27.25, scale: 1 / 1.5,
+    file: 'fx-kael-ult-wave.png', frames: 20, w: 446, h: 175, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.1081, 0.9211], dx: 50, dy: 27.25, scale: 1 / 1.5,
   },
   'kl-ult-impact': {
-    file: 'fx-kael-ult-impact.png', frames: 16, w: 94, h: 109, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
-    perHit: 6, pivot: [0.5021, 0.499], dx: -7.5, dy: -12.75, scale: 1 / 1.5,
+    file: 'fx-kael-ult-impact.png', frames: 8, w: 156, h: 177, frameMs: 50, at: 'target', orient: 'flip', on: 'impact',
+    perHit: 6, pivot: [0.5013, 0.5009], dx: -7.5, dy: -12.75, scale: 1 / 1.5,
   },
   'gr-s1-main': {
     file: 'fx-garrick-s1-main.png', frames: 34, w: 129, h: 159, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
