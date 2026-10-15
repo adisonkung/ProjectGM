@@ -141,6 +141,12 @@ export interface FxDef {
   delayMs?: number;
   /** play the strip this many times back to back (a looping field, e.g. a bastion that lasts as long as its taunt) */
   repeat?: number;
+  /**
+   * stays on the unit it was placed on and moves with it (an aura / guard / field that lasts while the unit walks).
+   * Default: on for a lingering layer on a unit (`repeat` or `fadeOutMs`, at 'self' / 'target'), off otherwise —
+   * a slash, wave or burst stays where it happened.
+   */
+  attach?: boolean;
   /** size the frame to this many board cells wide (e.g. an area burst matching the skill's hit area), instead of w × scale */
   fitCells?: number;
   /** 'under' = drawn below the units (ground aura), default above them */
@@ -1188,6 +1194,13 @@ export function animEvents(sprite: string | undefined, anim: 'attack' | SkillKin
 export function impactFeelOf(sprite: string | undefined, anim: 'attack' | SkillKind, hit = 0): ImpactFeel | undefined {
   const f = animOf(sprite, anim)?.impact;
   return Array.isArray(f) ? f[Math.min(hit, f.length - 1)] : f;
+}
+
+/** does this FX follow the unit it was placed on (`FxDef.attach`, default = a lingering aura on a unit)? */
+export function fxAttached(name: string): boolean {
+  const d = FX[name];
+  if (!d || d.at === 'allies') return false;
+  return d.attach ?? (d.repeat != null || d.fadeOutMs != null);
 }
 
 /** the feel bound to a clip event (`AnimDef.eventFeel`), if any */

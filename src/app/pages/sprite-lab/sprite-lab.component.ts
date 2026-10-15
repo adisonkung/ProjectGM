@@ -5,7 +5,7 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { HEROES } from '../../core/data/heroes';
-import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
+import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxAttached, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
 import { kitOf } from '../../core/data/hero-skills';
 
 type Action = 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
@@ -215,7 +215,8 @@ export class SpriteLabComponent implements OnDestroy {
       const def = FX[name];
       const at = def.at === 'target' ? (trig.on === 'event' ? DUMMY_IDS.slice(0, 1) : hits).slice(def.exceptPrimary ? 1 : 0).slice(0, def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
       for (const u of at) {
-        const f: FxView = { id: ++this.id, r: u.r, c: u.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under' };
+        const f: FxView = { id: ++this.id, r: u.r, c: u.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
+          follow: fxAttached(name) ? u.id : undefined };
         this.fx.update(l => [...l, f]);
         setTimeout(() => this.fx.update(l => l.filter(x => x.id !== f.id)), fxDuration(name, this.speed()) + 50);
       }

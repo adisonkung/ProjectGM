@@ -22,7 +22,7 @@ import { hasStatus } from '../../battle/engine/buffs';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
-import { animOf, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
+import { animOf, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
 import { Router } from '@angular/router';
@@ -845,7 +845,8 @@ export class BattleComponent implements OnDestroy {
           const angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
           // หันตามผู้ใช้ (หรือตามทิศไปหาเป้าหมาย ถ้าเป้าไม่ได้อยู่คอลัมน์เดียวกัน)
           const flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(src);
-          fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under' });
+          fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
+            follow: fxAttached(name) ? id : undefined });
         }
       }
     };

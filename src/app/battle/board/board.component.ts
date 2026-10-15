@@ -118,6 +118,8 @@ export interface FxView {
   offset?: [number, number];
   /** drawn below the units (FxDef.layer 'under') */
   under?: boolean;
+  /** unit id this FX rides on (an attached aura): the frame loop moves it with that unit's drawn position */
+  follow?: number;
 }
 
 /** กระสุนที่กำลังบิน: ตำแหน่งเป็นจำนวนช่องบนจอ (รวมแถวฉากแล้ว) */
@@ -333,6 +335,12 @@ export class BoardComponent {
         el.style.transform = tf;
         this.drawn.set(id, tf);
       }
+    }
+    // attached FX (auras / guards / fields) ride on their unit: same drawn transform as the unit this frame
+    const riders = this.host.nativeElement.querySelectorAll<HTMLElement>('.fx-wrap[data-follow]');
+    for (const el of Array.from(riders)) {
+      const tf = this.drawn.get(Number(el.dataset['follow']));
+      if (tf && el.style.transform !== tf) el.style.transform = tf;
     }
     // camera: background parallax reads --shift from the board (FieldComponent [live])
     if (alphaFn) {
