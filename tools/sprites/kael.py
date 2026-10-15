@@ -288,8 +288,9 @@ def main():
     sheet.save(f'{OUT}/hero-kael.png', optimize=True)
     report['sheet'] = {'cols': cols, 'rows': ATLAS_ROWS, 'size': sheet.size}
 
-    # the user's painted portrait (art/portrait.png → public/portraits/kael.webp, done by hand) wins over the crop
-    if os.path.exists(f'{SRC}/art/portrait.png'):
+    # the user's painted portrait (art/incoming/kael/art/portrait.png → public/portraits/kael.webp, done by hand) wins over
+    # the crop — UI art lives beside the old incoming sources, never inside the canonical assets/heroes/Kael
+    if os.path.exists('art/incoming/kael/art/portrait.png') or os.path.exists(f'{SRC}/art/portrait.png'):
         print(json.dumps(report, indent=1))
         return
     # portrait: head and shoulders, magenta keyed, on an ash-grey → burgundy / ember backdrop (Ashen Vanguard)

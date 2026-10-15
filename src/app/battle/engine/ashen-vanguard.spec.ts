@@ -20,7 +20,10 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [a[k]!.row, a[k]!.frames])).toEqual([[0, 5], [1, 7], [2, 4], [3, 7], [4, 6]]);
     expect(a.attack!.events!.DAMAGE).toBe(3);
     expect(HERO_BY_ID['kael']).toEqual(jasmine.objectContaining({ name: 'เคล', cls: 'fighter', star: 3, sprite: 'hero-kael.png' }));
-    expect(HERO_ART['kael']).toEqual({ portrait: 'portraits/kael.webp' });
+    expect(HERO_ART['kael']).toEqual({
+      portrait: 'portraits/kael.webp', s1: 'skills/kael-s1.webp', s2: 'skills/kael-s2.webp', ult: 'skills/kael-ult.webp',
+      banner: 'banners/kael.webp',
+    });
   });
 
   it('S1 Sundering Edge (timeline v2): 10 frames at 83.3 ms, Main VFX F6, exactly one damage + impact F7, recovery F9', () => {
