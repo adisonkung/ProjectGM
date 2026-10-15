@@ -2,11 +2,12 @@
 (user 2026-10: the approved sheet draws F4–F6 with the sword held straight out like a thrust).
 
 Never touches the approved PNG: works on the frames kael.py cut from it (source px, hard alpha) and returns new frames.
-Side view of a horizontal cut = the blade sweeps across the depth axis, so its visible length changes:
-  F4 RELEASE_HORIZONTAL   blade turning toward the viewer → short, broad (foreshortened 45 %) + sweep smear behind it
-  F5 HIT_1_HORIZONTAL_CUT blade at full reach, crossing the target line + bright horizontal sweep smear (contact)
-  F6 FOLLOW_THROUGH_1     blade carried past, receding to the far side → short, thin (foreshortened 35 %), fading smear
-Body, arms, hands, guard and cape stay exactly as drawn — only the blade beyond the guard and the smear change.
+The cut reads from a horizontal sweep trail around the blade (user 2026-10: keep the blade at full length — no
+foreshortening):
+  F4 RELEASE_HORIZONTAL   sweep trail coming around from behind him
+  F5 HIT_1_HORIZONTAL_CUT bright horizontal sweep + leading-edge glint (contact)
+  F6 FOLLOW_THROUGH_1     fading trail carried past the target line
+Body, arms, hands, guard, blade and cape stay exactly as drawn — only the translucent smear layer is added.
 
 Run directly for a BEFORE | AFTER comparison: python3 tools/sprites/kael_s2_edit.py <out.png>
 """
@@ -82,11 +83,11 @@ def edit_frame(img, which):
     canvas[pad:pad + h, pad:pad + w] = body
     gx, gy = guard + pad, int(round(yl)) + pad
     if which == 'F4':
-        k, thick, sm = 0.45, 1.45, (gx - 190, gx + int(L * 0.45) + 20, gy + 4, 30, 0.7, 1.0)
+        k, thick, sm = 1.0, 1.0, (gx - 190, gx + L + 10, gy + 4, 30, 0.7, 1.0)
     elif which == 'F5':
         k, thick, sm = 1.0, 1.0, (gx - 230, gx + L + 16, gy + 4, 34, 0.9, 1.0)
     else:
-        k, thick, sm = 0.35, 0.8, (gx - 120, gx + L + 30, gy + 6, 28, 0.45, 0.6)
+        k, thick, sm = 1.0, 1.0, (gx - 120, gx + L + 30, gy + 6, 28, 0.45, 0.6)
     nb = Image.fromarray(strip).resize((max(2, int(round(strip.shape[1] * k))), max(2, int(round(strip.shape[0] * thick)))),
                                        Image.LANCZOS)
     nb = np.array(nb)
