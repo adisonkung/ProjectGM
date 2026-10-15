@@ -1,6 +1,6 @@
 import { MockVisual } from '../../core/data/visuals';
 import { BackgroundDef } from '../../core/data/backgrounds';
-import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, input, NgZone, output, untracked } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, input, NgZone, output, untracked } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
@@ -10,6 +10,8 @@ import { FocusMarkComponent } from '../focus-mark/focus-mark.component';
 import { FxSpriteComponent } from '../fx-sprite/fx-sprite.component';
 import { ProjectileComponent } from '../projectile/projectile.component';
 import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
+import { SHEETS } from '../../core/data/sprites';
+import type { PixiUnit, PixiUnitLayer } from '../render/pixi-units';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
 export interface UnitView {
@@ -179,6 +181,13 @@ export class BoardComponent {
   readonly world = input<WorldDebug | null>(null);
   /** real ms between two snapshots (positions tween linearly over it) */
   readonly tickMs = input(50);
+  /**
+   * who draws the units: 'dom' (app-unit-sprite, a Web Animation per clip) or 'pixi' (one WebGL canvas, every frame
+   * from one game clock — render/pixi-units.ts). FX / projectiles / bars / floats stay DOM either way (phase 1–2).
+   */
+  readonly renderer = input<'dom' | 'pixi'>('dom');
+  /** battle: the game clock is frozen (paused / hit-stop) — the Pixi units hold their frame */
+  readonly frozen = input<(() => boolean) | undefined>(undefined);
   /** debug: lines from each monster to its target (board cell coordinates incl. scenery rows) */
   readonly targetLines = computed(() => {
     if (!this.debug()) return [];
@@ -235,6 +244,7 @@ export class BoardComponent {
    * Positions are in % of a cell (the same numbers as `pos()`).
    */
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
   /** per unit: last two snapshot positions (prev → cur), the drawn position, and the tween start (no-alpha mode) */
   private readonly st = new Map<number, { prev: [number, number]; cur: [number, number]; draw: [number, number]; t0: number; from: [number, number] }>();
   /** stacking offset on a shared cell (spread): eased separately toward its target, so re-stacking never jerks the walk */
@@ -250,6 +260,14 @@ export class BoardComponent {
   /** measured ms between snapshots (EMA) — the tween length without alpha */
   private gap = 50;
   private raf = 0;
+  /** ONE visual game clock (s): advances × battle speed, stands still while frozen · idle breath clock (real s) */
+  private vclock = 0;
+  private idleClock = 0;
+  private pixi: PixiUnitLayer | null = null;
+  private pixiPending = false;
+  private pixiHost?: HTMLElement;
+  private resizeObs?: ResizeObserver;
+  private pxOn = new Set<number>();
 
   constructor() {
     effect(() => {
@@ -261,7 +279,101 @@ export class BoardComponent {
     });
     const zone = inject(NgZone);
     afterNextRender(() => zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(this.frame))));
-    inject(DestroyRef).onDestroy(() => cancelAnimationFrame(this.raf));
+    inject(DestroyRef).onDestroy(() => {
+      cancelAnimationFrame(this.raf);
+      this.resizeObs?.disconnect();
+      this.pixi?.destroy();
+      this.pixi = null;
+    });
+    // the Pixi renderer: created lazily (its own chunk) when switched on, torn down when switched off
+    effect(() => {
+      const want = this.renderer() === 'pixi';
+      untracked(() => (want ? this.startPixi() : this.stopPixi()));
+    });
+  }
+
+  private boardEl(): HTMLElement | null {
+    return this.host.nativeElement.querySelector<HTMLElement>('.board');
+  }
+
+  private startPixi(): void {
+    if (this.pixi || this.pixiPending || typeof window === 'undefined') return;
+    const board = this.boardEl();
+    if (!board) {
+      afterNextRender(() => this.startPixi(), { injector: this.injector });
+      return;
+    }
+    this.pixiPending = true;
+    const host = document.createElement('div');
+    host.className = 'pixi-host';
+    // created at runtime (no encapsulation attribute): inline styles · above the 'under' FX (z 5), below DOM FX / bars
+    host.style.cssText = 'position:absolute;inset:0;z-index:6;pointer-events:none;';
+    board.appendChild(host);
+    this.pixiHost = host;
+    import('../render/pixi-units').then(m => m.PixiUnitLayer.create(host, board.clientWidth, board.clientHeight)).then(layer => {
+      this.pixiPending = false;
+      if (!layer || this.renderer() !== 'pixi') {
+        layer?.destroy();
+        host.remove();
+        return;
+      }
+      this.pixi = layer;
+      this.resizeObs = new ResizeObserver(() => this.pixi?.resize(board.clientWidth, board.clientHeight));
+      this.resizeObs.observe(board);
+    });
+  }
+
+  private stopPixi(): void {
+    this.resizeObs?.disconnect();
+    this.pixi?.destroy();
+    this.pixi = null;
+    this.pixiHost?.remove();
+    this.pixiHost = undefined;
+    for (const id of this.pxOn) this.host.nativeElement.querySelector(`.unit[data-uid="${id}"]`)?.classList.remove('px');
+    this.pxOn.clear();
+  }
+
+  /** this frame's units for the Pixi layer (same interpolated positions as the DOM units) */
+  private drawPixi(els: HTMLElement[]): void {
+    const board = this.boardEl();
+    if (!this.pixi || !board) return;
+    const cell = board.clientWidth / this.cols;
+    const byId = new Map(this.units().map(u => [u.id, u]));
+    const anims = this.anims();
+    const list: PixiUnit[] = [];
+    const elOf = new Map<number, HTMLElement>();
+    for (const el of els) {
+      const id = Number(el.dataset['uid']);
+      const u = byId.get(id);
+      const s = this.st.get(id);
+      if (!u || !s || !u.sprite || !SHEETS[u.sprite]) continue;
+      elOf.set(id, el);
+      const o = this.off.get(id);
+      const a = anims[id] ?? { anim: 'idle' as SpriteAnim, key: 0 };
+      list.push({
+        id,
+        sheet: u.sprite,
+        x: ((s.draw[0] + (o?.cur[0] ?? 0)) / 100) * cell,
+        y: ((s.draw[1] + (o?.cur[1] ?? 0)) / 100) * cell,
+        flip: !!u.flip,
+        z: this.unitZ(u),
+        alpha: Number(getComputedStyle(el).opacity) || 0,
+        req: { anim: a.anim, castTime: a.castTime, castClip: a.castClip, force: a.force },
+        key: a.key,
+        moving: u.moving === undefined ? undefined : !!u.moving && u.alive,
+        pace: u.pace,
+      });
+    }
+    const drawn = this.pixi.draw(list, cell, this.vclock, this.idleClock);
+    // the DOM sheet of a unit Pixi draws is hidden (bars, cast bar, focus mark … stay DOM)
+    for (const [id, el] of elOf) {
+      const on = drawn.has(id);
+      if (on !== this.pxOn.has(id)) {
+        el.classList.toggle('px', on);
+        if (on) this.pxOn.add(id);
+        else this.pxOn.delete(id);
+      }
+    }
   }
 
   /** cell position in % of a cell (what `pos()` writes) */
@@ -316,6 +428,10 @@ export class BoardComponent {
     const alphaFn = this.alpha();
     const a = alphaFn ? alphaFn() : 0;
     const follow = 1 - Math.exp(-dt / 55);
+    if (!this.frozen()?.()) {
+      this.vclock += (dt / 1000) * this.speed();
+      this.idleClock += dt / 1000;
+    }
     const ease = 1 - Math.exp(-dt / 90);
     const els = this.host.nativeElement.querySelectorAll<HTMLElement>('.unit[data-uid]');
     for (const el of Array.from(els)) {
@@ -338,6 +454,7 @@ export class BoardComponent {
         this.drawn.set(id, tf);
       }
     }
+    if (this.pixi) this.drawPixi(Array.from(els));
     // attached FX (auras / guards / fields) ride on their unit: same drawn transform as the unit this frame
     const riders = this.host.nativeElement.querySelectorAll<HTMLElement>('.fx-wrap[data-follow]');
     for (const el of Array.from(riders)) {

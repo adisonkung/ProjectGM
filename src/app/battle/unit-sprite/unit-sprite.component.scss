@@ -69,3 +69,6 @@
   &.hex .body { clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); border: 0; box-shadow: inset 0 0 0 3px var(--ma); }
   &.ghost .body { opacity: 0.72; }
 }
+
+// the battle board's Pixi layer draws this unit — keep the DOM sheet (and its Web Animations) invisible
+:host-context(.unit.px) .sheet { visibility: hidden; }

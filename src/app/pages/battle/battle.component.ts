@@ -104,6 +104,25 @@ export class BattleComponent implements OnDestroy {
   /** settings popup open → the fight is paused (engine not stepped, board animations frozen) */
   readonly paused = signal(false);
   readonly menuOpen = signal(false);
+  /** who draws the battle units: DOM (Web Animations) or Pixi (WebGL, one game clock) — `?render=pixi|dom`, remembered */
+  readonly renderer = signal<'dom' | 'pixi'>(BattleComponent.savedRenderer());
+  /** the board's game clock stands still (paused / hit-stop) */
+  readonly boardFrozen = (): boolean => this.paused() || performance.now() < this.hitStopUntil;
+  private static savedRenderer(): 'dom' | 'pixi' {
+    try {
+      return localStorage.getItem('projectgm-renderer') === 'pixi' ? 'pixi' : 'dom';
+    } catch {
+      return 'dom';
+    }
+  }
+  toggleRenderer(): void {
+    this.renderer.update(r => (r === 'pixi' ? 'dom' : 'pixi'));
+    try {
+      localStorage.setItem('projectgm-renderer', this.renderer());
+    } catch {
+      /* private window: just this session */
+    }
+  }
   readonly result = signal<BattleResult | null>(null);
   readonly time = signal(0);
   readonly views = signal<UnitView[]>([]);
@@ -261,6 +280,8 @@ export class BattleComponent implements OnDestroy {
     const qp = route.queryParamMap;
     const q = Number(qp.get('floor'));
     if (isDevMode() && qp.get('debug') === '1') this.debug.set(true);
+    const render = qp.get('render');
+    if (render === 'pixi' || render === 'dom') this.renderer.set(render);
     if (q >= 1 && q <= STAGES.length) this.floor.set(q);
     const farm = qp.get('farm');
     if (farm && FARM_BY_ID[farm]) {

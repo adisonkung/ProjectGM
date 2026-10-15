@@ -43,7 +43,7 @@
     <div class="arena" [class.paused]="paused()">
       <div class="screen" [class.boss]="!!bossBar()">
         <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
-                   [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
+                   [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
 
         <!-- top HUD (scenery rows only — never over the lanes' units) -->
         <div class="hud-top">
@@ -132,6 +132,7 @@
             <button type="button" class="gm-btn primary" (click)="resume()"><app-icon name="play" [size]="15" /> เล่นต่อ</button>
             <button type="button" class="gm-btn" (click)="restart()"><app-icon name="restart" [size]="15" /> เริ่มใหม่</button>
             <button type="button" class="gm-btn ghost" (click)="exitStage()"><app-icon name="exit" [size]="15" /> ออกจากด่าน</button>
+            <button type="button" class="gm-btn small" (click)="toggleRenderer()">ตัววาดตัวละคร: {{ renderer() === 'pixi' ? 'Pixi (WebGL)' : 'DOM (เดิม)' }} — กดเพื่อสลับ</button>
             <small>ออกจากด่าน = กลับไปจัดทีม/ตำแหน่งใหม่ (ไม่ได้รางวัล)</small>
           </div>
         </div>
