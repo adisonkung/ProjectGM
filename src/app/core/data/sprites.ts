@@ -4,6 +4,7 @@
  * เอฟเฟกต์ใช้สเกลพิกเซลเดียวกับตัวละคร (1 px ต้นฉบับ = 1.25% ของความกว้างช่องกระดาน)
  */
 
+import type { ParticleRef } from './particles';
 import { AnimationConfig, SemanticEvent } from '../models/monster';
 import { MONSTERS, PROJECTILES } from './monsters';
 
@@ -158,6 +159,8 @@ export interface FxDef {
   fitCells?: number;
   /** 'under' = drawn below the units (ground aura), default above them */
   layer?: 'under' | 'over';
+  /** Pixi renderer: particle presets spawned at the FX's pivot when it starts (data/particles.ts) */
+  particles?: ParticleRef[];
   /** 'add' = additive light (glows brighten what is behind instead of covering it) — Pixi blendMode 'add', DOM plus-lighter */
   blend?: 'add';
   /** กระสุน: ทิศที่ภาพวาดชี้อยู่ (องศา, 0 = ขวา, 90 = ลง) — เฟรมสุดท้ายคือตอนกระทบ */
@@ -692,6 +695,7 @@ export const FX: Record<string, FxDef> = {
   // · impact on each pierced unit at its contact point: target 1 full, 2 / 3 smaller + fainter (hitIndex 1 / 2)
   'tx-s1-fang': { file: 'fx-tangxun-s1-fang.png', frames: 8, w: 188, h: 26, frameMs: 33, at: 'target', angle0: 0, scale: 1 / 1.3, overshoot: 2.2, pixelated: true },
   'tx-s1-impact1': {
+    particles: [{ name: 'sparks', colors: [0xe6fbff, 0x9fd8ff, 0x5ab0ff], count: 8 }],
     file: 'fx-tangxun-s1-impact1.png', frames: 4, w: 72, h: 49, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 0, delayMs: 17,
     pivot: [0.4998, 0.5018], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
   },
@@ -706,6 +710,7 @@ export const FX: Record<string, FxDef> = {
   // Tang Xun S2 Severing Chain: ONE blade per throw (spawned three times) — f1 spawn sparkle … f7 trail · f8 contact sparkle
   'tx-s2-blade': { file: 'fx-tangxun-s2-blade.png', frames: 8, w: 152, h: 36, frameMs: 33, at: 'target', angle0: 0, scale: 1 / 1.3, pixelated: true },
   'tx-s2-impact1': {
+    particles: [{ name: 'sparks', colors: [0xe6fbff, 0x9fd8ff, 0x5ab0ff], count: 8 }],
     file: 'fx-tangxun-s2-impact1.png', frames: 5, w: 43, h: 93, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 0,
     pivot: [0.6409, 0.5355], dx: -12.5, dy: -27.75, scale: 1 / 1.5,
   },
@@ -755,6 +760,7 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.5, 0.5], dy: 24.75, scale: 1 / 1.5,
   },
   'tx-ult-impact': {
+    particles: [{ name: 'sparks', colors: [0xe6fbff, 0x9fd8ff, 0x5ab0ff], count: 20 }],
     file: 'fx-tangxun-ult-impact.png', frames: 5, w: 182, h: 117, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 4,
     pivot: [0.5008, 0.4943], dy: -22.75, scale: 1 / 1.5,
   },
@@ -779,6 +785,7 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.5768, 0.9792], dx: 70, dy: 27.25, scale: 1 / 1.5,
   },
   'kl-s1-impact': {
+    particles: ['sparks'],
     file: 'fx-kael-s1-impact.png', frames: 22, w: 113, h: 91, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 0, pivot: [0.4665, 0.9731], dx: -12.5, dy: 27.25, scale: 1 / 1.5,
   },
@@ -795,11 +802,13 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.5778, 0.9799],
   },
   'kl-s2-impact1': {
+    particles: ['sparks'],
     file: 'fx-kael-s2-impact1.png', frames: 16, w: 114, h: 92, frameMs: 16.67, at: 'target', orient: 'flip',
     on: 'impact', hitIndex: 0, dx: -12.5, dy: 27.25, scale: 1 / 1.5,
     pivot: [0.4499, 0.9763],
   },
   'kl-s2-impact2': {
+    particles: [{ name: 'sparks', count: 18 }],
     file: 'fx-kael-s2-impact2.png', frames: 16, w: 121, h: 106, frameMs: 16.67, at: 'target', orient: 'flip',
     on: 'impact', hitIndex: 1, dx: -12.5, dy: 27.25, scale: 1 / 1.5,
     pivot: [0.481, 0.981],
@@ -810,12 +819,14 @@ export const FX: Record<string, FxDef> = {
   // the front line baked in at the kit's 7 cells/s — leading edge reaches cell k at (k − 0.5) / 7 s, when that cell's
   // damage resolves) · a burst (~1.6 × body) on every unit each collision hit (one impact event per cell)
   'kl-ult-charge': {
+    particles: ['ember-rise'],
     file: 'fx-kael-ult-charge.png', frames: 30, w: 232, h: 268, frameMs: 33.33, at: 'self', orient: 'flip',
     event: 'CHARGE_START', layer: 'under', pivot: [0.5007, 0.9395], dy: 27.25, scale: 1 / 1.5, blend: 'add',
   },
   // F8 ground slam (user 2026-10): the S1 impact burst (kael_s1_impact_vfx.png) reused at the blade's ground contact,
   // ~1.7 × his width with the ember bloom, drawn under the wave
   'kl-ult-slam': {
+    particles: ['embers', 'debris', 'dust'],
     file: 'fx-kael-ult-slam.png', frames: 27, w: 170, h: 141, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
     pivot: [0.472, 0.8996], dx: 65, dy: 27.25, scale: 1 / 1.5,
   },
@@ -824,6 +835,7 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.1081, 0.9211], dx: 50, dy: 27.25, scale: 1 / 1.5,
   },
   'kl-ult-impact': {
+    particles: ['sparks'],
     file: 'fx-kael-ult-impact.png', frames: 8, w: 156, h: 177, frameMs: 50, at: 'target', orient: 'flip', on: 'impact',
     perHit: 6, pivot: [0.5013, 0.5009], dx: -7.5, dy: -12.75, scale: 1 / 1.5,
   },
@@ -847,6 +859,7 @@ export const FX: Record<string, FxDef> = {
     hitIndex: 0, pivot: [0.5089, 0.8149], dy: 27.25, scale: 1 / 1.5,
   },
   'gr-s2-shock': {
+    particles: [{ name: 'dust', count: 12 }, { name: 'sparks', colors: [0xfff6d0, 0xffd76a, 0xe0a83a] }],
     file: 'fx-garrick-s2-shock.png', frames: 15, w: 55, h: 73, frameMs: 16.67, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 0, perHit: 6, exceptPrimary: true, pivot: [0.512, 0.8104], dy: 27.25, scale: 1 / 1.5,
   },
@@ -854,6 +867,7 @@ export const FX: Record<string, FxDef> = {
   // F48 full fortress → recedes → gone F78, 30 FPS) · the lighter persistent aura from F60 (activation + 200 ms) for the
   // 6 s buff (125 ms steps: seal → gates rise → breathe → sink) · both BEHIND him — he stands inside the bastion
   'gr-ult-main': {
+    particles: [{ name: 'dust', count: 14 }, { name: 'embers', colors: [0xfff6d0, 0xffd76a, 0xe0a83a] }],
     file: 'fx-garrick-ult-main.png', frames: 30, w: 202, h: 203, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
     layer: 'under', pivot: [0.5185, 0.8322], dy: 27.25, scale: 1 / 1.5,
   },
@@ -862,6 +876,7 @@ export const FX: Record<string, FxDef> = {
     hitIndex: 0, layer: 'under', delayMs: 200, fadeOutMs: 300, pivot: [0.4979, 0.767], dy: 27.25, scale: 1 / 1.5,
   },
   'lx-s1-bloom': {
+    particles: ['petals'],
     file: 'fx-linxue-s1-bloom.png', frames: 20, w: 86, h: 99, frameMs: 16.67, at: 'target', orient: 'flip', on: 'vfx',
     pivot: [0.5082, 0.5021], dy: -22.75, scale: 1 / 1.5,
   },
@@ -891,6 +906,7 @@ export const FX: Record<string, FxDef> = {
     layer: 'under', pivot: [0.5053, 0.8963], dx: 5, dy: 27.25, scale: 1 / 1.5,
   },
   'lx-ult-main': {
+    particles: [{ name: 'petals', count: 26 }],
     file: 'fx-linxue-ult-main.png', frames: 74, w: 151, h: 129, frameMs: 16.67, at: 'allies', orient: 'flip', on: 'vfx',
     layer: 'under', pivot: [0.5029, 0.8979], dy: 27.25, scale: 2 / 1.5,
   },
@@ -919,6 +935,7 @@ export const FX: Record<string, FxDef> = {
   },
   // ประกายกระทบของ Sweeping Moon — บนตัวที่โดนจริง (สูงสุด 3 ตัว ตัวหลักก่อน) ไม่ใช่ตัวทำดาเมจ
   'bailong-sweeping-moon-hit': {
+    particles: [{ name: 'sparks', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 8 }],
     file: 'fx-bailong-sweeping-moon-hit.png', frames: 8, w: 160, h: 145, frameMs: 55, at: 'target', orient: 'flip', on: 'impact',
     perHit: 3, dy: -16.5, scale: 0.43, pixelated: true,
   },
@@ -970,6 +987,7 @@ export const FX: Record<string, FxDef> = {
   },
   // final hit: roaring dragon pillar on the target (only the 3rd strike) + scattering residue after it
   'bl3-impact': {
+    particles: [{ name: 'sparks', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 20 }, 'debris'],
     file: 'fx-bailong-v3-impact.png', frames: 10, w: 145, h: 354, frameMs: 55, at: 'self', orient: 'flip', on: 'impact',
     hitIndex: 2, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.36, pixelated: true,
   },
@@ -982,6 +1000,7 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.496, 0.4975], dx: 53.75, dy: -9.62, scale: 1 / 1.5, pixelated: true,
   },
   'yz-s1-impact': {
+    particles: ['sparks'],
     file: 'fx-yuezheng-s1-impact.png', frames: 11, w: 70, h: 69, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
     pivot: [0.5008, 0.4949], dx: 71.25, dy: -9.62, scale: 1 / 1.5, pixelated: true,
   },
@@ -1000,6 +1019,7 @@ export const FX: Record<string, FxDef> = {
     hitIndex: 0, pivot: [0.6658, 0.5006], dx: -7.5, dy: -22.75, scale: 1 / 1.5, pixelated: true,
   },
   'my-s1-impact1': {
+    particles: [{ name: 'sparks', colors: [0xf3e0ff, 0xc58cff, 0x8a4ad6], count: 8 }],
     file: 'fx-moye-s1-impact1.png', frames: 4, w: 36, h: 43, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 0, delayMs: 33, pivot: [0.5336, 0.4965], dx: -17.5, dy: -25.25, scale: 1 / 1.5, pixelated: true,
   },
@@ -1015,6 +1035,7 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.006, 0.4981], dx: 5, dy: -20.25, scale: 1 / 1.5, pixelated: true,
   },
   'my-s2-reappear': {
+    particles: ['mist'],
     file: 'fx-moye-s2-reappear.png', frames: 3, w: 72, h: 43, frameMs: 33.33, at: 'self', event: 'REAPPEAR_START',
     pivot: [0.5, 0.4186], dx: 5, dy: -22.75, scale: 1 / 1.5, pixelated: true,
   },
@@ -1051,6 +1072,7 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.4593, 0.536], dx: -27.5, dy: -45.25, scale: 1 / 1.5, pixelated: true,
   },
   'my-ult-impact': {
+    particles: [{ name: 'sparks', colors: [0xf3e0ff, 0xc58cff, 0x8a4ad6], count: 20 }, 'mist'],
     file: 'fx-moye-ult-impact.png', frames: 7, w: 151, h: 152, frameMs: 33.33, at: 'target', orient: 'flip', on: 'impact', hitIndex: 3,
     pivot: [0.5499, 0.9868], dx: -12.5, dy: 27.25, scale: 1 / 1.5, pixelated: true,
   },
@@ -1074,6 +1096,7 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.45, 0.9796], dx: 0, dy: 27.25, scale: 1 / 1.5,
   },
   'yz-ult-impact': {
+    particles: ['debris', 'dust'],
     file: 'fx-yuezheng-ult-impact.png', frames: 16, w: 141, h: 154, frameMs: 33.33, at: 'self', orient: 'flip',
     on: 'impact',
     pivot: [0.2056, 0.9828], dx: 0, dy: 27.25, scale: 1 / 1.5,
@@ -1094,6 +1117,7 @@ export const FX: Record<string, FxDef> = {
   },
   // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
   'bailong-nine-dragon-impact': {
+    particles: [{ name: 'sparks', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 16 }],
     file: 'fx-bailong-nine-dragon-impact.png', frames: 12, w: 202, h: 168, frameMs: 60, at: 'target', orient: 'flip', on: 'impact',
     hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, fitCells: 3.4, scale: 0.78, pixelated: true,
   },

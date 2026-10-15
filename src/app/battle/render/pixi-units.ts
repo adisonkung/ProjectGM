@@ -1,6 +1,9 @@
 import type { Application, ColorMatrixFilter, Container, Graphics, Sprite, Texture } from 'pixi.js';
+import { particleDef, ParticleShape } from '../../core/data/particles';
 import { FX, SHEETS, SheetDef } from '../../core/data/sprites';
-import { fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
+import type { AdvancedBloomFilter, GlowFilter } from 'pixi-filters';
+import { fxLength, fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
+import { Emitter, particleRng } from './particles';
 import { ClipRequest, UnitClip } from './unit-clip';
 import { frameChunk } from './tex-chunks';
 import { LOOK_COLORS, RING_BOX, UnitLook } from './unit-look';
@@ -22,6 +25,8 @@ export interface PixiUnit {
   pace?: number;
   /** state looks (glow / broken / grey / ground rings) — `unitLook()` */
   look?: UnitLook;
+  /** hits taken so far (battle): a change = a white hit flash */
+  hit?: number;
 }
 
 /** one skill FX on the board this frame (FxView, positions in board px) */
@@ -47,15 +52,20 @@ export interface PixiBolt {
 }
 
 type Pixi = typeof import('pixi.js');
+type Filters = typeof import('pixi-filters');
 
 interface UnitGfx {
   sprite: Sprite;
   clip: UnitClip;
   sheet: string;
-  /** glow: the same frame as a blurred one-colour silhouette behind the sprite */
-  halo?: Sprite;
-  haloTint?: ColorMatrixFilter;
+  /** state glow (pixi-filters GlowFilter, colour / strength per frame) */
+  glow?: GlowFilter;
   tone?: ColorMatrixFilter;
+  /** white hit flash */
+  flash?: ColorMatrixFilter;
+  lastHit?: number;
+  flashAt?: number;
+  filterKey?: string;
   rings?: Graphics;
   ringKey?: string;
 }
@@ -64,6 +74,10 @@ interface UnitGfx {
 const Z_UNDER = -100000;
 const Z_OVER = 100000;
 const Z_BOLT = 200000;
+/** particles: above the FX, below the projectiles */
+const Z_PARTICLES = 150000;
+/** hit flash length (game s) */
+const FLASH = 0.11;
 
 /**
  * Battle units, skill FX and projectiles drawn by PixiJS (WebGL) — phases 1–4 of the renderer move (bars, cast bars,
@@ -78,9 +92,18 @@ export class PixiUnitLayer {
   private readonly reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   private readonly textures = new Map<string, Texture | 'loading' | 'failed'>();
   private readonly frames = new Map<string, Texture>();
-  private readonly fxs = new Map<number, { sprite: Sprite; name: string; t0: number; seq: number; last: PixiFx }>();
+  private readonly fxs = new Map<number, { sprite: Sprite; name: string; t0: number; seq: number; last: PixiFx; sparked: boolean }>();
   private readonly bolts = new Map<number, { sprite: Sprite; t0: number; last: PixiBolt }>();
   private readonly chunks = new Map<string, Texture>();
+  /** FX drawn over the units sit in one container with a bloom (bright pixels glow) */
+  private readonly overFx: Container;
+  private readonly bloom?: AdvancedBloomFilter;
+  private readonly partLayer: Container;
+  private readonly partSprites: Sprite[] = [];
+  private readonly partTex = new Map<ParticleShape, Texture>();
+  private readonly emitters: Emitter[] = [];
+  private readonly rng = particleRng(0x5eed);
+  private lastNow = 0;
   private fxSeq = 0;
   private cell = 0;
   /** GPU texture size limit (bigger sheets are cut into chunks — render/tex-chunks.ts) */
@@ -90,7 +113,19 @@ export class PixiUnitLayer {
     private readonly pixi: Pixi,
     private readonly app: Application,
     private readonly stage: Container,
+    private readonly filters: Filters | null,
   ) {
+    this.overFx = new pixi.Container();
+    this.overFx.sortableChildren = true;
+    this.overFx.zIndex = Z_OVER;
+    if (filters) {
+      this.bloom = new filters.AdvancedBloomFilter({ threshold: 0.55, bloomScale: 0.9, brightness: 1, blur: 6, quality: 4 });
+      this.overFx.filters = [this.bloom];
+    }
+    stage.addChild(this.overFx);
+    this.partLayer = new pixi.Container();
+    this.partLayer.zIndex = Z_PARTICLES;
+    stage.addChild(this.partLayer);
     const gl = (app.renderer as unknown as { gl?: WebGLRenderingContext }).gl;
     this.maxTex = Math.min(16384, (gl?.getParameter(gl.MAX_TEXTURE_SIZE) as number | undefined) ?? 4096);
   }
@@ -117,7 +152,9 @@ export class PixiUnitLayer {
       const stage = new pixi.Container();
       stage.sortableChildren = true;
       app.stage.addChild(stage);
-      return new PixiUnitLayer(pixi, app, stage);
+      // pixi-filters (bloom / glow): optional — without it the layer still draws, just plainer
+      const filters = await import('pixi-filters').catch(() => null);
+      return new PixiUnitLayer(pixi, app, stage, filters);
     } catch (err) {
       console.warn('[pixi] renderer unavailable — units stay DOM', err);
       return null;
@@ -131,6 +168,9 @@ export class PixiUnitLayer {
   destroy(): void {
     this.app.destroy(true, { children: true });
     for (const t of this.chunks.values()) t.destroy(true);
+    for (const t of this.partTex.values()) t.destroy(true);
+    this.partTex.clear();
+    this.emitters.length = 0;
     this.chunks.clear();
     this.sprites.clear();
     this.fxs.clear();
@@ -215,8 +255,8 @@ export class PixiUnitLayer {
         if (!FX[f.name]) continue;
         const sprite = new this.pixi.Sprite();
         sprite.visible = false;
-        this.stage.addChild(sprite);
-        s = { sprite, name: f.name, t0: now, seq: ++this.fxSeq, last: f };
+        (f.under ? this.stage : this.overFx).addChild(sprite);
+        s = { sprite, name: f.name, t0: now, seq: ++this.fxSeq, last: f, sparked: false };
         this.fxs.set(f.id, s);
       }
       s.last = f;
@@ -246,8 +286,16 @@ export class PixiUnitLayer {
       sp.scale.set(((at.flip ? -1 : 1) * at.width) / tex.frame.width, at.height / tex.frame.height);
       sp.alpha = pose.alpha;
       sp.blendMode = d.blend === 'add' ? 'add' : 'normal';
-      sp.zIndex = (f.under ? Z_UNDER : Z_OVER) + s.seq;
+      sp.zIndex = f.under ? Z_UNDER + s.seq : s.seq;
       sp.visible = pose.visible;
+      // particles start with the FX (after its delay), at its pivot, mirrored with it
+      if (!s.sparked && pose.visible) {
+        s.sparked = true;
+        for (const ref of d.particles ?? []) {
+          const pd = particleDef(ref);
+          if (pd) this.emitters.push(new Emitter(pd, at.x / cell, at.y / cell, at.flip, this.rng, fxLength(d)));
+        }
+      }
       if (seen.has(id)) drawn.add(id);
     }
     return drawn;
@@ -357,14 +405,79 @@ export class PixiUnitLayer {
     }
     const fxDrawn = this.drawFx(fx, cell, now);
     const boltsDrawn = this.drawBolts(bolts, cell, now);
+    this.drawParticles(cell, now);
     this.app.render();
     return { units: drawn, fx: fxDrawn, bolts: boltsDrawn };
   }
 
   private dropUnit(s: UnitGfx): void {
     s.sprite.destroy();
-    s.halo?.destroy();
     s.rings?.destroy();
+  }
+
+  /** one white texture per particle shape (tinted per particle) */
+  private shapeTex(shape: ParticleShape): Texture {
+    let t = this.partTex.get(shape);
+    if (t) return t;
+    const g = new this.pixi.Graphics();
+    if (shape === 'spark') {
+      for (let i = 0; i < 4; i++) g.ellipse(32, 6, 32 - i * 6, 6 - i * 1.2).fill({ color: 0xffffff, alpha: 0.25 + i * 0.2 });
+    } else if (shape === 'chunk') {
+      g.poly([2, 0, 14, 3, 16, 12, 6, 16, 0, 9]).fill({ color: 0xffffff });
+    } else if (shape === 'petal') {
+      g.ellipse(10, 6, 10, 6).fill({ color: 0xffffff });
+    } else {
+      // soft round (dot / puff): stacked discs, brighter in the middle
+      const r = shape === 'puff' ? 32 : 16;
+      for (let i = 0; i < 6; i++) g.circle(r, r, r * (1 - i / 6)).fill({ color: 0xffffff, alpha: shape === 'puff' ? 0.12 : 0.2 });
+    }
+    t = this.app.renderer.generateTexture({ target: g, resolution: 1 });
+    g.destroy();
+    this.partTex.set(shape, t);
+    return t;
+  }
+
+  /** step every emitter by the game clock (frozen → dt 0) and draw its particles from a sprite pool */
+  private drawParticles(cell: number, now: number): void {
+    const dt = Math.min(0.1, Math.max(0, now - this.lastNow));
+    this.lastNow = now;
+    let n = 0;
+    for (let i = this.emitters.length - 1; i >= 0; i--) {
+      const em = this.emitters[i];
+      em.step(dt);
+      if (em.done) {
+        this.emitters.splice(i, 1);
+        continue;
+      }
+      const tex = this.shapeTex(em.def.shape);
+      for (const p of em.particles) {
+        let sp = this.partSprites[n];
+        if (!sp) {
+          sp = new this.pixi.Sprite();
+          sp.anchor.set(0.5);
+          this.partLayer.addChild(sp);
+          this.partSprites.push(sp);
+        }
+        n++;
+        sp.texture = tex;
+        sp.tint = p.color;
+        sp.blendMode = em.def.blend === 'normal' ? 'normal' : 'add';
+        sp.alpha = Math.max(0, em.alphaOf(p));
+        sp.position.set(p.x * cell, p.y * cell);
+        const size = em.sizeOf(p) * cell;
+        if (em.def.shape === 'spark') {
+          // a streak along its flight, longer while fast
+          const v = Math.hypot(p.vx, p.vy);
+          sp.rotation = Math.atan2(p.vy, p.vx);
+          sp.scale.set((size * (2 + Math.min(4, v * 0.35))) / tex.width, (size * 0.7) / tex.height);
+        } else {
+          sp.rotation = p.rot;
+          sp.scale.set(size / tex.width, (size * (em.def.shape === 'petal' ? 0.6 : 1)) / tex.height);
+        }
+        sp.visible = true;
+      }
+    }
+    for (let i = n; i < this.partSprites.length; i++) this.partSprites[i].visible = false;
   }
 
   /** the CSS state looks of the DOM `.unit`, drawn on the canvas (render/unit-look.ts) */
@@ -373,56 +486,57 @@ export class PixiUnitLayer {
     const sp = s.sprite;
     const px = cell / 56; // CSS px at the reference cell size (56 px)
     // broken: darkened sepia (brightness .6 sepia .6 hue −20°) + 2 px jitter every 0.2 s · untargetable: partly grey
+    let tone: ColorMatrixFilter | undefined;
     if (look?.broken || look?.gray) {
-      if (!s.tone) s.tone = new this.pixi.ColorMatrixFilter();
-      const t = s.tone;
-      t.reset();
-      if (look.broken) {
-        t.brightness(0.6, false);
-        t.sepia(true);
-        t.alpha = 0.6;
-      } else {
-        t.desaturate();
-        t.alpha = 0.6;
+      tone = s.tone ??= new this.pixi.ColorMatrixFilter();
+      const want = look.broken ? 'broken' : 'gray';
+      if (s.filterKey?.split('|')[0] !== want) {
+        tone.reset();
+        if (look.broken) {
+          tone.brightness(0.6, false);
+          tone.sepia(true);
+        } else {
+          tone.desaturate();
+        }
+        tone.alpha = 0.6;
       }
-      sp.filters = [t];
       if (look.broken && !this.reduced) sp.position.x += (idleNow % 0.2 < 0.1 ? 0 : 2) * px;
-    } else if (sp.filters) {
-      sp.filters = null;
     }
-    // glow
-    if (look?.glow != null && sp.visible) {
-      if (!s.halo) {
-        s.halo = new this.pixi.Sprite();
-        s.haloTint = new this.pixi.ColorMatrixFilter();
-        s.halo.filters = [s.haloTint, new this.pixi.BlurFilter({ strength: 6 * px, quality: 2 })];
-        s.halo.blendMode = 'add';
-        this.stage.addChild(s.halo);
-      }
-      const c = look.glow;
-      // one colour, the frame's own alpha
-      s.haloTint!.matrix = [0, 0, 0, 0, ((c >> 16) & 255) / 255, 0, 0, 0, 0, ((c >> 8) & 255) / 255, 0, 0, 0, 0, (c & 255) / 255, 0, 0, 0, 1, 0];
-      const h = s.halo;
-      h.texture = sp.texture;
-      h.anchor.copyFrom(sp.anchor);
-      h.position.copyFrom(sp.position);
-      h.scale.copyFrom(sp.scale);
-      const pulse = look.glowPulse && !this.reduced ? 0.5 + 0.5 * Math.abs(((idleNow / 0.9) % 2) - 1) : 1;
-      h.alpha = sp.alpha * (0.75 + 0.25 * pulse);
-      h.zIndex = u.z - 0.01;
-      h.visible = true;
-    } else if (s.halo) {
-      s.halo.visible = false;
+    // hit flash: the frame washes to white and back over FLASH game seconds
+    if (u.hit != null && u.hit !== s.lastHit) {
+      if (s.lastHit != null) s.flashAt = this.lastNow;
+      s.lastHit = u.hit;
+    }
+    const fk = s.flashAt != null ? 1 - (this.lastNow - s.flashAt) / FLASH : 0;
+    let flash: ColorMatrixFilter | undefined;
+    if (fk > 0) {
+      flash = s.flash ??= new this.pixi.ColorMatrixFilter();
+      const w = 0.85 * fk;
+      flash.matrix = [1 - w, 0, 0, 0, w, 0, 1 - w, 0, 0, w, 0, 0, 1 - w, 0, w, 0, 0, 0, 1, 0];
+    }
+    // state glow (buffed pulses)
+    let glow: GlowFilter | undefined;
+    if (look?.glow != null && this.filters) {
+      glow = s.glow ??= new this.filters.GlowFilter({ distance: 10, outerStrength: 2, innerStrength: 0, color: look.glow, quality: 0.2 });
+      glow.color = look.glow;
+      const pulse = look.glowPulse && !this.reduced ? Math.abs(((idleNow / 0.9) % 2) - 1) : 1;
+      glow.outerStrength = 1.4 + 1.6 * pulse;
+    }
+    const key = `${tone ? (look!.broken ? 'broken' : 'gray') : ''}|${flash ? 'f' : ''}|${glow ? 'g' : ''}`;
+    if (key !== s.filterKey) {
+      const list = [tone, flash, glow].filter((x): x is NonNullable<typeof x> => !!x);
+      sp.filters = list.length ? list : null;
+      s.filterKey = key;
     }
     // ground rings (under the sprite)
-    const key = look?.rings?.length ? `${look.rings.join(',')}|${cell.toFixed(1)}` : '';
-    if (key && !s.rings) {
+    const rkey = look?.rings?.length ? `${look.rings.join(',')}|${cell.toFixed(1)}` : '';
+    if (rkey && !s.rings) {
       s.rings = new this.pixi.Graphics();
       this.stage.addChild(s.rings);
     }
     if (s.rings) {
       const g = s.rings;
-      if (s.ringKey !== key) {
+      if (s.ringKey !== rkey) {
         g.clear();
         for (const r of look?.rings ?? []) {
           const b = RING_BOX[r];
@@ -440,9 +554,9 @@ export class PixiUnitLayer {
             g.ellipse(0, cy, rx, ry).stroke({ color: col, width: 2 * px, alpha: 1 });
           }
         }
-        s.ringKey = key;
+        s.ringKey = rkey;
       }
-      g.visible = !!key;
+      g.visible = !!rkey;
       g.position.set(u.x + cell / 2, u.y + cell);
       const aura = look?.rings?.some(r => r === 'aura5' || r === 'aura6');
       // star aura breathes (scale .94 → 1.04, opacity .75 → 1, 1.6 s alternate)

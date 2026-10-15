@@ -68,6 +68,8 @@ export interface UnitView {
   moving?: boolean;
   /** ground speed while walking (cells / game s) — scales the walk cycle (AnimDef.pace) */
   pace?: number;
+  /** hits taken so far (battle) — the Pixi renderer flashes the unit white when it changes */
+  hit?: number;
   buffed?: boolean;
   icon?: string;
   /** hero AI use modes per slot (party bar chips) */
@@ -371,6 +373,7 @@ export class BoardComponent {
         moving: u.moving === undefined ? undefined : !!u.moving && u.alive,
         pace: u.pace,
         look: unitLook(u),
+        hit: u.hit,
       });
     }
     // skill FX: the cell they were placed on, or (attached auras) their unit's drawn cell this frame

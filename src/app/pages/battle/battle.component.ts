@@ -235,6 +235,8 @@ export class BattleComponent implements OnDestroy {
   private movingUntil = new Map<number, number>();
   /** smoothed ground speed (cells / game s) while walking — the walk cycle runs at pace / AnimDef.pace */
   private paces = new Map<number, number>();
+  /** hits taken per unit (white hit flash on the Pixi board) */
+  private hits = new Map<number, number>();
   private tickNo = 0;
   private trackMovement(): void {
     this.tickNo++;
@@ -379,6 +381,7 @@ export class BattleComponent implements OnDestroy {
     this.lastPos.clear();
     this.movingUntil.clear();
     this.paces.clear();
+    this.hits.clear();
     this.selectedId.set(null);
     this.focusId.set(null);
     this.facing.clear();
@@ -684,6 +687,7 @@ export class BattleComponent implements OnDestroy {
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
         moving: this.isMoving(u),
         pace: this.paces.get(u.id),
+        hit: this.hits.get(u.id),
         buffed: u.buffs.some(b => (b.def.modifiers.attackMultiplier ?? 1) > 1),
         icon: u.monster ? MONSTERS[u.monster.definitionId]?.animation.tokenIcon : undefined,
         mock: u.sprite ? undefined : mockVisualOf(u.monster ? MONSTERS[u.monster.definitionId]?.visual : undefined),
@@ -946,6 +950,8 @@ export class BattleComponent implements OnDestroy {
           break;
         case 'damage': {
           if (!e.poison && e.hurt !== false && anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
+          // white hit flash (Pixi renderer): every real, non-poison hit
+          if (e.amount > 0 && !e.poison) this.hits.set(e.dst, (this.hits.get(e.dst) ?? 0) + 1);
           const p = posOf(e.dst);
           const text = e.amount > 0 ? `-${e.amount}` : 'บล็อก';
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: e.poison ? 'poison' : e.crit ? 'crit' : 'dmg' });
