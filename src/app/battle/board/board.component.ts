@@ -11,7 +11,7 @@ import { FxSpriteComponent } from '../fx-sprite/fx-sprite.component';
 import { ProjectileComponent } from '../projectile/projectile.component';
 import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 import { SHEETS } from '../../core/data/sprites';
-import type { PixiFx, PixiUnit, PixiUnitLayer } from '../render/pixi-units';
+import type { PixiBolt, PixiFx, PixiUnit, PixiUnitLayer } from '../render/pixi-units';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
 export interface UnitView {
@@ -184,7 +184,7 @@ export class BoardComponent {
   /**
    * who draws the units: 'dom' (app-unit-sprite, a Web Animation per clip) or 'pixi' (one WebGL canvas, every frame
    * from one game clock — render/pixi-units.ts). With 'pixi' the skill FX are drawn on the same canvas and clock
-   * (phase 3); projectiles / bars / floats stay DOM either way.
+   * (phase 3) and so are the projectiles (phase 4); bars / cast bars / numbers stay DOM either way.
    */
   readonly renderer = input<'dom' | 'pixi'>('dom');
   /** battle: the game clock is frozen (paused / hit-stop) — the Pixi units hold their frame */
@@ -270,6 +270,7 @@ export class BoardComponent {
   private resizeObs?: ResizeObserver;
   private pxOn = new Set<number>();
   private fxPxOn = new Set<number>();
+  private boltPxOn = new Set<number>();
 
   constructor() {
     effect(() => {
@@ -335,6 +336,8 @@ export class BoardComponent {
     this.pxOn.clear();
     for (const id of this.fxPxOn) this.host.nativeElement.querySelector(`.fx-wrap[data-fx="${id}"]`)?.classList.remove('px');
     this.fxPxOn.clear();
+    for (const id of this.boltPxOn) this.host.nativeElement.querySelector(`app-projectile[data-proj="${id}"]`)?.classList.remove('px');
+    this.boltPxOn.clear();
   }
 
   /** this frame's units for the Pixi layer (same interpolated positions as the DOM units) */
@@ -383,14 +386,11 @@ export class BoardComponent {
         under: !!f.under,
       };
     });
-    const out = this.pixi.draw(list, cell, this.vclock, this.idleClock, fx);
+    const bolts: PixiBolt[] = this.projectiles().map(p => ({ id: p.id, name: p.name, from: p.from, to: p.to, flight: p.flight }));
+    const out = this.pixi.draw(list, cell, this.vclock, this.idleClock, fx, bolts);
     const drawn = out.units;
-    for (const id of out.fx) {
-      if (this.fxPxOn.has(id)) continue;
-      const el = this.host.nativeElement.querySelector(`.fx-wrap[data-fx="${id}"]`);
-      if (el) (el.classList.add('px'), this.fxPxOn.add(id));
-    }
-    for (const id of this.fxPxOn) if (!out.fx.has(id)) this.fxPxOn.delete(id);
+    this.hideDrawn(out.fx, this.fxPxOn, id => `.fx-wrap[data-fx="${id}"]`);
+    this.hideDrawn(out.bolts, this.boltPxOn, id => `app-projectile[data-proj="${id}"]`);
     // the DOM sheet of a unit Pixi draws is hidden (bars, cast bar, focus mark … stay DOM)
     for (const [id, el] of elOf) {
       const on = drawn.has(id);
@@ -400,6 +400,16 @@ export class BoardComponent {
         else this.pxOn.delete(id);
       }
     }
+  }
+
+  /** the DOM copy of what Pixi drew this frame gets `.px` (hidden) — once per id */
+  private hideDrawn(ids: Set<number>, on: Set<number>, sel: (id: number) => string): void {
+    for (const id of ids) {
+      if (on.has(id)) continue;
+      const el = this.host.nativeElement.querySelector(sel(id));
+      if (el) (el.classList.add('px'), on.add(id));
+    }
+    for (const id of on) if (!ids.has(id)) on.delete(id);
   }
 
   /** cell position in % of a cell (what `pos()` writes) */

@@ -66,7 +66,7 @@
   }
 
   @for (p of projectiles(); track p.id) {
-    <app-projectile [name]="p.name" [from]="p.from" [to]="p.to" [flight]="p.flight" [speed]="speed()" />
+    <app-projectile [attr.data-proj]="p.id" [name]="p.name" [from]="p.from" [to]="p.to" [flight]="p.flight" [speed]="speed()" />
   }
 
   @for (f of floats(); track f.id) {

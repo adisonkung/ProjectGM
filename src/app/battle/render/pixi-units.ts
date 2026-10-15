@@ -1,6 +1,6 @@
 import type { Application, Container, Sprite, Texture } from 'pixi.js';
 import { FX, SHEETS, SheetDef } from '../../core/data/sprites';
-import { fxPlacement, fxPoseAt } from './fx-clip';
+import { fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
 import { ClipRequest, UnitClip } from './unit-clip';
 
 /** one unit to draw this frame (board pixels, already interpolated by the board's motion loop) */
@@ -33,15 +33,25 @@ export interface PixiFx {
   under: boolean;
 }
 
+/** one projectile (ProjectileView): from / to in board cells (x = column, y = row incl. scenery), flight ms at x1 */
+export interface PixiBolt {
+  id: number;
+  name: string;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+  flight: number;
+}
+
 type Pixi = typeof import('pixi.js');
 
 /** z bands on the one stage: ground FX < units (≈ 10–90) < FX over them */
 const Z_UNDER = -100000;
 const Z_OVER = 100000;
+const Z_BOLT = 200000;
 
 /**
- * Battle units and skill FX drawn by PixiJS (WebGL) — phases 1–3 of the renderer move (projectiles, bars, floats
- * stay DOM for now). FX: `fxPoseAt(def, now − spawn)` on the same clock — a hit-stop freezes the burst on its frame,
+ * Battle units, skill FX and projectiles drawn by PixiJS (WebGL) — phases 1–4 of the renderer move (bars, cast bars,
+ * focus marks and the damage numbers stay DOM: text and a few divs per unit, cheap and crisp). FX: `fxPoseAt(def, now − spawn)` on the same clock — a hit-stop freezes the burst on its frame,
  * and an FX the battle list drops early (its real-time timer) still plays out on the game clock.
  * The board's frame loop calls `draw()` once per display frame with ONE game clock; every unit's frame comes from
  * `UnitClip.pose(now)` (nothing animates by itself → pause / hit-stop / x2 / x4 are just the clock).
@@ -52,6 +62,7 @@ export class PixiUnitLayer {
   private readonly textures = new Map<string, Texture | 'loading' | 'failed'>();
   private readonly frames = new Map<string, Texture>();
   private readonly fxs = new Map<number, { sprite: Sprite; name: string; t0: number; seq: number; last: PixiFx }>();
+  private readonly bolts = new Map<number, { sprite: Sprite; t0: number; last: PixiBolt }>();
   private fxSeq = 0;
   private cell = 0;
 
@@ -98,6 +109,7 @@ export class PixiUnitLayer {
     this.app.destroy(true, { children: true });
     this.sprites.clear();
     this.fxs.clear();
+    this.bolts.clear();
   }
 
   /** the sheet's texture (loaded on first use; null until ready) */
@@ -202,11 +214,65 @@ export class PixiUnitLayer {
     return drawn;
   }
 
+  /** projectiles: fly from → to on the game clock, impact frame on arrival; the same play-out rule as the FX */
+  private drawBolts(list: PixiBolt[], cell: number, now: number): Set<number> {
+    const drawn = new Set<number>();
+    const seen = new Set<number>();
+    for (const b of list) {
+      seen.add(b.id);
+      let s = this.bolts.get(b.id);
+      if (!s) {
+        if (!FX[b.name]) continue;
+        const sprite = new this.pixi.Sprite();
+        sprite.anchor.set(0.5, 0.5);
+        sprite.visible = false;
+        this.stage.addChild(sprite);
+        s = { sprite, t0: now, last: b };
+        this.bolts.set(b.id, s);
+      }
+      s.last = b;
+    }
+    for (const [id, s] of this.bolts) {
+      const b = s.last;
+      const d = FX[b.name];
+      const pose = projectilePoseAt(d, b.flight / 1000, now - s.t0);
+      if (pose.done) {
+        s.sprite.destroy();
+        this.bolts.delete(id);
+        continue;
+      }
+      const base = this.texture(d.file, d);
+      if (!base) {
+        s.sprite.visible = false;
+        continue;
+      }
+      const at = projectilePlacement(d, cell, b.from, b.to, pose.k);
+      const sp = s.sprite;
+      const tex = this.fxFrame(d.file, base, d.frames, pose.frame);
+      sp.texture = tex;
+      sp.position.set(at.x, at.y);
+      sp.rotation = at.rotation;
+      sp.scale.set(at.width / tex.frame.width, at.height / tex.frame.height);
+      sp.blendMode = d.blend === 'add' ? 'add' : 'normal';
+      sp.zIndex = Z_BOLT + id;
+      sp.visible = true;
+      if (seen.has(id)) drawn.add(id);
+    }
+    return drawn;
+  }
+
   /**
    * Draw all units (and FX) for this display frame. `cell` = board cell size (px) · `now` = game clock (s) · `idleNow` =
    * real-time clock for the idle breath. Returns the ids actually drawn (their DOM sheet is hidden by the board).
    */
-  draw(units: PixiUnit[], cell: number, now: number, idleNow: number, fx: PixiFx[] = []): { units: Set<number>; fx: Set<number> } {
+  draw(
+    units: PixiUnit[],
+    cell: number,
+    now: number,
+    idleNow: number,
+    fx: PixiFx[] = [],
+    bolts: PixiBolt[] = [],
+  ): { units: Set<number>; fx: Set<number>; bolts: Set<number> } {
     this.cell = cell;
     const drawn = new Set<number>();
     const live = new Set<number>();
@@ -250,8 +316,9 @@ export class PixiUnitLayer {
       }
     }
     const fxDrawn = this.drawFx(fx, cell, now);
+    const boltsDrawn = this.drawBolts(bolts, cell, now);
     this.app.render();
-    return { units: drawn, fx: fxDrawn };
+    return { units: drawn, fx: fxDrawn, bolts: boltsDrawn };
   }
 
   get cellSize(): number {

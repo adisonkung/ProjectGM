@@ -1,6 +1,7 @@
 import { FX, FX_SCALE, FxDef, PX_TO_CELL } from '../../core/data/sprites';
 import { fxDuration } from '../fx-sprite/fx-sprite.component';
-import { easeIn, fxLength, fxPlacement, fxPoseAt } from './fx-clip';
+import { projectileLife } from '../projectile/projectile.component';
+import { easeIn, fxLength, fxPlacement, fxPoseAt, PROJECTILE_HOLD, projectilePlacement, projectilePoseAt } from './fx-clip';
 
 /** the Pixi renderer's FX: one clock in, frame / alpha / place out — the same rules as the DOM FX sprite */
 describe('fxPoseAt / fxPlacement (one-clock skill FX)', () => {
@@ -82,4 +83,52 @@ describe('fxPlacement matches the DOM FX box', () => {
       wrap.remove();
     });
   }
+});
+
+describe('projectilePoseAt / projectilePlacement (one-clock projectiles)', () => {
+  const bolt: FxDef = { file: 'b.png', frames: 5, w: 40, h: 20, frameMs: 50, at: 'target', angle0: 0 };
+
+  it('flight frames 0 … n−2 once over the flight, the impact frame on arrival, gone after the hold', () => {
+    expect(projectilePoseAt(bolt, 0.4, 0)).toEqual({ k: 0, frame: 0, done: false });
+    expect(projectilePoseAt(bolt, 0.4, 0.39).frame).toBe(3);
+    expect(projectilePoseAt(bolt, 0.4, 0.2).k).toBeCloseTo(0.5, 6);
+    expect(projectilePoseAt(bolt, 0.4, 0.41)).toEqual({ k: 1, frame: 4, done: false });
+    expect(projectilePoseAt(bolt, 0.4, 0.4 + PROJECTILE_HOLD + 0.001).done).toBeTrue();
+    expect((0.4 + PROJECTILE_HOLD) * 1000).toBeCloseTo(projectileLife(400), 6);
+    expect(projectilePoseAt({ ...bolt, frames: 1 }, 0.4, 0.2).frame).toBe(0);
+  });
+
+  it('flies the line, centred at 50 % / 42 % of the cell, rotated to the flight (noRotate stays upright)', () => {
+    const a = { x: 2, y: 3 }, b = { x: 2, y: 5 };
+    const p = projectilePlacement(bolt, 40, a, b, 0.5);
+    expect([p.x, p.y]).toEqual([2 * 40 + 20, 4 * 40 + 40 * 0.42]);
+    expect(p.rotation).toBeCloseTo(Math.PI / 2, 6);
+    expect(projectilePlacement({ ...bolt, noRotate: true }, 40, a, b, 0.5).rotation).toBe(0);
+    expect(projectilePlacement({ ...bolt, angle0: 90 }, 40, a, b, 0.5).rotation).toBeCloseTo(0, 6);
+  });
+
+  it('is the same box as the DOM projectile', async () => {
+    const { TestBed } = await import('@angular/core/testing');
+    const { ProjectileComponent } = await import('../projectile/projectile.component');
+    const name = Object.keys(FX).find(n => FX[n].angle0 != null)!;
+    const cell = 50;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `position:fixed;left:0;top:0;width:${cell * 16}px;height:${cell * 8}px;--cell:${cell}px;`;
+    document.body.appendChild(wrap);
+    const fixture = TestBed.createComponent(ProjectileComponent);
+    fixture.componentRef.setInput('name', name);
+    fixture.componentRef.setInput('from', { x: 3, y: 2 });
+    fixture.componentRef.setInput('to', { x: 3, y: 2 });
+    fixture.componentRef.setInput('flight', 1000);
+    wrap.appendChild(fixture.nativeElement);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const r = (fixture.nativeElement as HTMLElement).querySelector('.p')!.getBoundingClientRect();
+    const p = projectilePlacement(FX[name], cell, { x: 3, y: 2 }, { x: 3, y: 2 }, 1);
+    // from = to → atan2(0, 0) = 0: rotation −angle0 on both sides; compare the centre
+    expect(r.left + r.width / 2).toBeCloseTo(p.x, 0);
+    expect(r.top + r.height / 2).toBeCloseTo(p.y, 0);
+    fixture.destroy();
+    wrap.remove();
+  });
 });

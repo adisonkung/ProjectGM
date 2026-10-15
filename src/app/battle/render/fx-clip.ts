@@ -1,4 +1,4 @@
-import { FX_SCALE, FxDef, PX_TO_CELL } from '../../core/data/sprites';
+import { FX_SCALE, FxDef, PROJECTILE_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 
 /**
  * A skill FX as a pure function of ONE clock — the same rules `app-fx-sprite` applies with Web Animations
@@ -95,4 +95,38 @@ export function fxPlacement(
     rotation: (angle * Math.PI) / 180,
     flip,
   };
+}
+
+/** a projectile in flight at t game seconds after it was fired — the `app-projectile` rules sampled by time */
+export interface ProjectilePose {
+  /** 0 → 1 along from → to */
+  k: number;
+  frame: number;
+  done: boolean;
+}
+
+/** the impact frame stays this long after arrival (`projectileLife`) */
+export const PROJECTILE_HOLD = 0.14;
+
+/** flight frames 0 … n−2 spread once over the flight, the last (impact) frame on arrival */
+export function projectilePoseAt(d: FxDef, flightSec: number, t: number): ProjectilePose {
+  const fly = Math.max(1, d.frames - 1);
+  if (t >= flightSec) return { k: 1, frame: d.frames - 1, done: t >= flightSec + PROJECTILE_HOLD };
+  const k = flightSec > 0 ? Math.max(0, t / flightSec) : 1;
+  return { k, frame: Math.min(fly - 1, Math.floor(k * fly)), done: false };
+}
+
+/** the bolt's centre (board px) and size: the DOM `.p` box (left 50 %, top 42 % of the cell, centred) */
+export function projectilePlacement(
+  d: FxDef,
+  cell: number,
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  k: number,
+): FxPlacement {
+  const width = ((d.w * PX_TO_CELL * (d.scale ?? 1) * PROJECTILE_SCALE) / 100) * cell;
+  const cx = from.x + (to.x - from.x) * k;
+  const cy = from.y + (to.y - from.y) * k;
+  const deg = d.noRotate ? 0 : (Math.atan2(to.y - from.y, to.x - from.x) * 180) / Math.PI - (d.angle0 ?? 0);
+  return { x: cx * cell + cell / 2, y: cy * cell + cell * 0.42, width, height: (width * d.h) / d.w, rotation: (deg * Math.PI) / 180, flip: false };
 }

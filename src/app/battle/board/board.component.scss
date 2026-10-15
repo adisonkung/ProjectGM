@@ -136,6 +136,7 @@
   // drawn by the Pixi layer (renderer 'pixi'): the DOM copy stays for layout only
   &.px { visibility: hidden; }
 }
+app-projectile.px { visibility: hidden; }
 
 .float-wrap {
   pointer-events: none;
