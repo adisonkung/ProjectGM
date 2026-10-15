@@ -41,6 +41,11 @@ export interface AnimDef {
   /** contact feel when this clip's skill lands (battle page + sprite lab): hit-stop + screen shake — a list = per hit */
   impact?: ImpactFeel | ImpactFeel[];
   /**
+   * feel played when one of this clip's events fires (battle page + sprite lab), independent of a hit landing — e.g. a
+   * sword slamming the ground on the release of a travelling wave whose damage only lands later
+   */
+  eventFeel?: Partial<Record<SemanticEvent, ImpactFeel>>;
+  /**
    * runtime opacity of the character while this clip plays: [step (fractions ok, same unit as `events`), opacity 0–1]
    * keys, linear between them (e.g. Phantom Step vanishing / reappearing). A blink inside such a clip skips the
    * board's own blink-in fade — the clip draws it.
@@ -467,15 +472,17 @@ export const SHEETS: Record<string, SheetDef> = {
         events: {
           CAST_START: 0, CHARGE_START: 1, CHARGE_PEAK: 5, STRIKE_START: 6, VFX_SPAWN: 7, DAMAGE: 7, RECOVERY_START: 8,
         },
+        // F8 the sword slams the ground (+ the S1 burst, `kl-ult-slam`) — felt before the wave's first collision
+        eventFeel: { VFX_SPAWN: { hitStopMs: 50, shakePx: 7, shakeMs: 180, flashMs: 80 } },
         impact: [
-          { hitStopMs: 33, shakePx: 4, shakeMs: 120 }, { hitStopMs: 0, shakePx: 4, shakeMs: 120 },
+          { hitStopMs: 0, shakePx: 4, shakeMs: 120 }, { hitStopMs: 0, shakePx: 4, shakeMs: 120 },
           { hitStopMs: 0, shakePx: 5, shakeMs: 140 }, { hitStopMs: 60, shakePx: 8, shakeMs: 220, flashMs: 120 },
         ],
       },
     },
     fx: {
       skill: ['kl-s1-main', 'kl-s1-impact'], skill2: ['kl-s2-main1', 'kl-s2-main2', 'kl-s2-impact1', 'kl-s2-impact2'],
-      ult: ['kl-ult-charge', 'kl-ult-wave', 'kl-ult-impact'],
+      ult: ['kl-ult-charge', 'kl-ult-slam', 'kl-ult-wave', 'kl-ult-impact'],
     },
   },
   'hero-linxue.png': {
@@ -783,13 +790,19 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.481, 0.981],
   },
   // Kael Ult Ashen Rupture (tools/sprites/kael_ult.py, every layer with an ember bloom — user 2026-10: bigger, an
-  // ultimate): the charge vortex behind him from CHARGE_START (30 FPS, ~2.4 × his width, its biggest frame breathing in
-  // a smooth loop through the held F6 — no frame flicker, drawn into the sword on the cut) · the ground wave from VFX_SPAWN (30 FPS strip, ~1.9 × his height, its travel along
+  // ultimate): the charge vortex behind him from CHARGE_START (30 FPS, ~2.4 × his width, its biggest frame held still
+  // through the held F6 — user 2026-10, drawn into the sword on the cut) · the ground wave from VFX_SPAWN (30 FPS strip, ~1.9 × his height, its travel along
   // the front line baked in at the kit's 7 cells/s — leading edge reaches cell k at (k − 0.5) / 7 s, when that cell's
   // damage resolves) · a burst (~1.6 × body) on every unit each collision hit (one impact event per cell)
   'kl-ult-charge': {
-    file: 'fx-kael-ult-charge.png', frames: 30, w: 242, h: 280, frameMs: 33.33, at: 'self', orient: 'flip',
-    event: 'CHARGE_START', layer: 'under', pivot: [0.5009, 0.9415], dy: 27.25, scale: 1 / 1.5,
+    file: 'fx-kael-ult-charge.png', frames: 30, w: 232, h: 268, frameMs: 33.33, at: 'self', orient: 'flip',
+    event: 'CHARGE_START', layer: 'under', pivot: [0.5007, 0.9395], dy: 27.25, scale: 1 / 1.5,
+  },
+  // F8 ground slam (user 2026-10): the S1 impact burst (kael_s1_impact_vfx.png) reused at the blade's ground contact,
+  // ~1.7 × his width with the ember bloom, drawn under the wave
+  'kl-ult-slam': {
+    file: 'fx-kael-ult-slam.png', frames: 27, w: 170, h: 141, frameMs: 16.67, at: 'self', orient: 'flip', on: 'vfx',
+    pivot: [0.472, 0.8996], dx: 65, dy: 27.25, scale: 1 / 1.5,
   },
   'kl-ult-wave': {
     file: 'fx-kael-ult-wave.png', frames: 20, w: 446, h: 175, frameMs: 33.33, at: 'self', orient: 'flip', on: 'vfx',
@@ -1175,6 +1188,11 @@ export function animEvents(sprite: string | undefined, anim: 'attack' | SkillKin
 export function impactFeelOf(sprite: string | undefined, anim: 'attack' | SkillKind, hit = 0): ImpactFeel | undefined {
   const f = animOf(sprite, anim)?.impact;
   return Array.isArray(f) ? f[Math.min(hit, f.length - 1)] : f;
+}
+
+/** the feel bound to a clip event (`AnimDef.eventFeel`), if any */
+export function eventFeelOf(sprite: string | undefined, anim: 'attack' | SkillKind, event: SemanticEvent): ImpactFeel | undefined {
+  return animOf(sprite, anim)?.eventFeel?.[event];
 }
 
 /** every FX layer a sheet lists for a skill */

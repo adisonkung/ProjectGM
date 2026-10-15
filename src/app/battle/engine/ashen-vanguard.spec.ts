@@ -2,7 +2,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_KITS, kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { HERO_ART } from '../../core/data/hero-art';
-import { animEvents, FX, fxFor, SHEETS } from '../../core/data/sprites';
+import { animEvents, eventFeelOf, FX, fxFor, SHEETS } from '../../core/data/sprites';
 import { OwnedHero } from '../../core/models/hero';
 import { EnemyPlacement, StageDef } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
@@ -65,7 +65,10 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     expect(at('DAMAGE')).toEqual([1033]);
     expect(at('RECOVERY_START')).toEqual([1200]);
     expect(fxFor('hero-kael.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['kl-ult-charge']);
-    expect(fxFor('hero-kael.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['kl-ult-wave']);
+    expect(fxFor('hero-kael.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['kl-ult-slam', 'kl-ult-wave']);
+    expect(FX['kl-ult-slam'].file).toBe('fx-kael-ult-slam.png');                 // the S1 impact burst at the ground slam
+    expect(eventFeelOf('hero-kael.png', 'ult', 'VFX_SPAWN')).toEqual(jasmine.objectContaining({ shakePx: 7 }));
+    expect(eventFeelOf('hero-kael.png', 'ult', 'CHARGE_START')).toBeUndefined();
     expect(fxFor('hero-kael.png', 'ult', { on: 'impact', hit: 2 })).toEqual(['kl-ult-impact']);
     expect(FX['kl-ult-impact'].perHit).toBe(6);
     expect(kitOf('kael', 'fighter').ult.effects[0]).toEqual(jasmine.objectContaining({ travel: 7 }));

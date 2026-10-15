@@ -150,6 +150,47 @@ def cut(name, n, pivot='ground'):
 
 
 CHARGE = cut('vfx/kael_ult_charge_vfx', 8)
+
+
+def cut_rows(name, per_row=5):
+    """two rows of per_row frames (the S1 sheets, same cut as kael_s1.py): rows split at the emptiest row between 35–65 %
+    of the height, then the single-row cut per band; pivot = slot centre on the band's ground line"""
+    im = unmix(name)
+    hard = im[..., 3] > 40
+    h = im.shape[0]
+    rows = hard.sum(1)
+    mid = int(h * 0.35) + int(np.argmin(rows[int(h * 0.35):int(h * 0.65)]))
+    out = []
+    for y0, y1 in [(0, mid), (mid, h)]:
+        band = im[y0:y1]
+        m = hard[y0:y1]
+        divs = dividers(m, per_row)
+        edges = [0] + divs + [band.shape[1]]
+        lab, k = ndimage.label(band[..., 3] > 0, np.ones((3, 3)))
+        slot = np.broadcast_to(np.digitize(np.arange(band.shape[1]), divs), lab.shape)
+        own = np.full(lab.shape, -1)
+        for i in range(1, k + 1):
+            sel = lab == i
+            ks, cnt = np.unique(slot[sel], return_counts=True)
+            own[sel] = slot[sel] if len(ks) > 1 and np.sort(cnt)[-2] >= 0.15 * sel.sum() else ks[np.argmax(cnt)]
+        ground = int(np.nonzero(m.any(1))[0].max())
+        for sl in range(per_row):
+            fr = band.copy()
+            fr[own != sl] = 0
+            ml, mk = ndimage.label(fr[..., 3] > 12, np.ones((3, 3)))
+            if mk > 1:
+                sz = ndimage.sum(np.ones(ml.shape), ml, range(1, mk + 1))
+                near = ndimage.binary_dilation(ml == 1 + int(np.argmax(sz)), iterations=60)
+                for i in range(1, mk + 1):
+                    if sz[i - 1] < 400 and not (near & (ml == i)).any():
+                        fr[ml == i] = 0
+            ys, xs = np.nonzero(fr[..., 3] > 12)
+            cx = (edges[sl] + edges[sl + 1]) / 2
+            out.append({'img': fr[ys.min():ys.max() + 1, xs.min():xs.max() + 1], 'px': cx - xs.min(), 'py': ground - ys.min()})
+    return out
+
+
+SLAM = cut_rows('vfx/kael_s1_impact_vfx')
 WAVE = cut('vfx/kael_ult_main_vfx', 8)
 IMPACT = cut('vfx/kael_ult_impact_vfx', 8, 'centre')
 
@@ -160,8 +201,8 @@ def size(fr, thr=60):
 
 
 SC = {'charge': 2.4 * BODY_W / size(CHARGE[5])[0], 'wave': 1.9 * BODY_H / size(WAVE[4])[1],
-      'impact': 1.6 * BODY_W / size(IMPACT[4])[0]}
-GLOW = {'charge': (7, 0.75), 'wave': (6, 0.7), 'impact': (5, 0.6)}   # bloom radius (game px) / strength
+      'impact': 1.6 * BODY_W / size(IMPACT[4])[0], 'slam': 1.7 * BODY_W / size(SLAM[2])[0]}
+GLOW = {'charge': (7, 0.75), 'wave': (6, 0.7), 'impact': (5, 0.6), 'slam': (6, 0.85)}   # bloom radius (game px) / strength
 
 
 def plan(keys):
@@ -177,19 +218,18 @@ def plan(keys):
 # anticipation F6 (user 2026-10: no f6 / f5 flicker) → crescent f7–f8 drawn into the overhead sword on the cut F7 → gone
 # just after the release
 CHARGE_PLAN = plan([(5, 1), (11, 2), (17, 3), (23, 4), (30, 5), (38, 6), (58, 7), (61, 8), (65, None)])
-HOLD = (38, 58)                          # f6 held: a smooth breathing loop instead of a frozen frame (user 2026-10)
-BREATH_T, BREATH_GROW, BREATH_GLOW = 10, 0.05, 0.45   # one breath per 10 T · up to +5 % size · glow up to +45 %
 
 
 def charge_tile(t):
-    """f6 during the hold breathes: grows from his feet and its ember glow swells, eased (1 − cos) so it loops smoothly
-    and starts / ends exactly on the plain f6 (no pop into the hold or into the cut)"""
-    f = CHARGE_PLAN[t]
-    if HOLD[0] <= t < HOLD[1]:
-        w = (1 - np.cos(2 * np.pi * (t - HOLD[0]) / BREATH_T)) / 2
-        r, k = GLOW['charge']
-        return tile(CHARGE[f - 1], SC['charge'] * (1 + BREATH_GROW * w), glow=(r, k * (1 + BREATH_GLOW * w)))
-    return tile(CHARGE[f - 1], SC['charge'], glow=GLOW['charge'])
+    """the charge frame at T — f6 is simply held through the held anticipation F6 (user 2026-10: hold it still; an f6 / f5
+    alternation read as flicker, a breathing loop moved too much)"""
+    return tile(CHARGE[CHARGE_PLAN[t] - 1], SC['charge'], glow=GLOW['charge'])
+
+
+# ground slam (user 2026-10: the S1 impact VFX reused where the sword hits the ground on F8, to sell the blow): the S1
+# burst (spike → ground burst with rocks, peak f3) at the blade's ground contact, bigger + ember bloom, under the wave
+SLAM_DX = 52                             # px ahead of his feet: F8 blade tip (+54, 12 px above the ground) meets the ground
+SLAM_PLAN = plan([(62, 1), (63, 2), (65, 3), (68, 4), (71, 5), (74, 6), (77, 7), (80, 8), (83, 9), (86, 10), (89, None)])
 # the wave: F8 (T62) small X at his front edge → grows while it flies → peak f5 over cells 2–3 → fades past cell 4
 WAVE_PLAN = plan([(62, 1), (65, 2), (68, 3), (72, 4), (78, 5), (86, 6), (93, 7), (98, 8), (102, None)])
 WAVE_END = 102
@@ -277,6 +317,11 @@ def frame(t, log=True):
         sx = (-3 if (t - h) % 2 else 2) if hit else 0
         img.alpha_composite(Image.fromarray(ENEMY), (int(X0 + k * CELL_PX + sx - ENEMY_ROOT[0]), GROUND - ENEMY_ROOT[1]))
     img.alpha_composite(Image.fromarray(pose(char_at(t))), (X0 - ROOT[0], GROUND - ROOT[1]))
+    if t in SLAM_PLAN:                   # in front of him, under the wave
+        a, px, py = tile(SLAM[SLAM_PLAN[t] - 1], SC['slam'], glow=GLOW['slam'])
+        x, y = put(img, a, px, py, (X0 + SLAM_DX, GROUND))
+        if log:
+            LOG.append({'T': t, 'track': 'slam', 'frame': SLAM_PLAN[t], 'x': x, 'y': y, 'opacity': 1, 'split': 'front', 'part': 'slam'})
     if t in WAVE_PLAN:
         a, px, py = tile(WAVE[WAVE_PLAN[t] - 1], SC['wave'], glow=GLOW['wave'])
         x, y = put(img, a, px, py, (X0 + wave_x(t), GROUND))
@@ -347,6 +392,7 @@ game_fx = {
     'charge': bake('charge', [charge_tile(t) for t in charge_ts], 1000 / 30),
     'wave': bake('wave', [tile(WAVE[WAVE_PLAN[t] - 1], SC['wave'], glow=GLOW['wave']) for t in wave_ts], 1000 / 30,
                  [wave_x(t) - WAVE_X0 for t in wave_ts]),
+    'slam': bake('slam', [tile(SLAM[SLAM_PLAN[t] - 1], SC['slam'], glow=GLOW['slam']) for t in sorted(SLAM_PLAN)]),
     'impact': bake('impact', [tile(IMPACT[f], SC['impact'], glow=GLOW['impact']) for f in range(8)], IMP_T * 1000 / FPS),
 }
 steps = [round((b - a + 1) * 1000 / FPS) for a, b, _ in CHAR]
@@ -354,7 +400,7 @@ steps[-1] += round(N * 1000 / FPS) - sum(steps)
 game = {'steps': steps,
         'events': {'CAST_START': 0, 'CHARGE_START': step_of(CHARGE_T), 'CHARGE_PEAK': step_of(PEAK_T), 'STRIKE_START': step_of(STRIKE_T),
                    'VFX_SPAWN': step_of(SPAWN_T), 'DAMAGE': step_of(SPAWN_T), 'RECOVERY_START': step_of(RECOVER_T)},
-        'waveDx': round(WAVE_X0 / CELL_PX * 100, 2), 'impactDy': round(-32 / CELL_PX * 100 + 27.25, 2), 'scale': SC}
+        'waveDx': round(WAVE_X0 / CELL_PX * 100, 2), 'slamDx': round(SLAM_DX / CELL_PX * 100, 2), 'impactDy': round(-32 / CELL_PX * 100 + 27.25, 2), 'scale': SC}
 
 pf = [{'T': t, 'char': f'C{char_at(t):02d}', 'drawnFrame': char_at(t), 'root': [X0, GROUND],
        'spearTip': [X0 + 60, GROUND - 40], 'center': [X0, GROUND - 40]} for t in range(N)]
@@ -374,30 +420,32 @@ meta = {
                 f'damage on collision (cell 1–4: {hs})',
     'phases': [[0, CHARGE_T - 1, 'A', 'READY', [120, 130, 150], 'ตั้งท่า'],
                [CHARGE_T, PEAK_T - 1, 'B', 'CHARGE / LIFT', [200, 170, 90], 'รวมพลัง F2 · ยกดาบเหนือศีรษะ'],
-               [PEAK_T, SPAWN_T - 1, 'C', 'PEAK / RELEASE', [230, 110, 90], 'ง้างค้าง F6 (vortex ใหญ่สุดหายใจ) · ฟันลง F7'],
+               [PEAK_T, SPAWN_T - 1, 'C', 'PEAK / RELEASE', [230, 110, 90], 'ง้างค้าง F6 (vortex ใหญ่สุดค้างนิ่ง) · ฟันลง F7'],
                [SPAWN_T, N - 1, 'D', 'WAVE / RECOVER', [235, 130, 70], 'ปล่อยคลื่น F8 · ชน 4 ช่อง · กลับท่า']],
     'poses': {c: [f'F{c}', f'{v[0]} — {v[1]}', v[2]] for c, v in POSES.items()},
     'gameSteps': steps,
     'hits': [h for h in HITS if h < N],
     'events': [[0, 'CAST_START', 'F1'], [CHARGE_T, 'VFX_SPAWN ultimate_charge', 'F2 รอบตัว'], [PEAK_T, 'CHARGE_PEAK', 'F6 ค้าง'],
-               [STRIKE_T, 'RELEASE_START', 'F7'], [SPAWN_T, 'WAVE SPAWN ultimate_main (1)', 'F8 ที่หน้าเคล'],
+               [STRIKE_T, 'RELEASE_START', 'F7'], [SPAWN_T, 'GROUND SLAM + WAVE SPAWN (1)', 'F8 ดาบกระแทกพื้น'],
                [HITS[0], 'COLLISION cell 1', 'ดาเมจ + impact'], [RECOVER_T, 'RECOVERY', 'F9'],
                [HITS[1], 'COLLISION cell 2', 'ดาเมจ + impact'], [HITS[2], 'COLLISION cell 3', 'ดาเมจ + impact'],
                [HITS[3], 'COLLISION cell 4', 'ดาเมจ + impact + แฟลช']],
     'lanes': 5,
     'tracks': [['charge', 'L2 Charge VFX (ultimate_charge)', [235, 160, 90], 'fx-kael-ult-charge (kael_ult_charge_vfx.png 8 fr)',
-                'L2 · หลังตัวละคร', 'เท้าเคล', f'F2 T{CHARGE_T:03d} > vortex f6 T038 หายใจเป็นลูปตลอด F6 > เข้าดาบ F7 > หาย T065'],
+                'L2 · หลังตัวละคร', 'เท้าเคล', f'F2 T{CHARGE_T:03d} > vortex f6 T038 ค้างนิ่งตลอด F6 > เข้าดาบ F7 > หาย T065'],
                ['wave', 'L3 Sword Wave (ultimate_main)', [255, 140, 80], 'fx-kael-ult-wave (kael_ult_main_vfx.png 8 fr, เดินทาง 4 ช่อง)',
                 'L3 · หน้าตัวละคร', f'เริ่มหน้าเคล +{WAVE_X0} px · {SPEED} ช่อง/วิ',
                 f'F8 T{SPAWN_T:03d} เกิด 1 ลูก > โตขณะวิ่ง > peak ช่อง 2–3 > จางหลังช่อง 4 (T{WAVE_END})'],
+               ['slam', 'L3b Ground Slam (skill1_impact)', [255, 120, 60], 'fx-kael-ult-slam (kael_s1_impact_vfx.png 10 fr)',
+                'L3 · หน้าตัวละคร ใต้คลื่น', f'จุดดาบแตะพื้น +{SLAM_DX} px', f'F8 T{SPAWN_T:03d} > peak f3 T065 > เศษหิน > จาง T088 · สั่น 7 px'],
                ['impact', 'L4 Impact VFX (ultimate_impact)', [255, 200, 120], 'fx-kael-ult-impact (kael_ult_impact_vfx.png 8 fr × 3 T)',
                 'L4 · หน้าเป้า', 'กลางตัวเป้าที่ชน', 'ทุกครั้งที่คลื่นชน (ไม่ใช่ที่ F8)'],
                ['damage', 'L5 Damage on collision', [255, 110, 90], f'DAMAGE FRONT_LINE_4 260 % travel {SPEED}', '-', 'ทุกตัวในช่องที่คลื่นถึง',
                 f'ตัวละ 1 ครั้ง · {hs}'],
                ['events', 'L6 Gameplay Events', [200, 200, 200], 'engine', '-', '-', 'F1 cast · F2 charge · F9 recovery']],
-    'trackNames': {'charge': 'Charge', 'wave': 'คลื่นดาบ', 'impact': 'Impact', 'damage': 'ดาเมจ', 'spawn': 'Spawn', 'events': 'อีเวนต์'},
-    'layers': [[1, 'Charge (L2, หลัง)'], [2, 'ตัวละคร (L1)'], [3, 'คลื่นดาบ (L3)'], [4, 'Impact (L4)'], [5, 'ดาเมจ (L5)'], [6, 'อีเวนต์ (L6)']],
-    'shake': {str(h): [s, 0] for h, s in zip(HITS, SHAKE) if h < N},
+    'trackNames': {'slam': 'Slam', 'charge': 'Charge', 'wave': 'คลื่นดาบ', 'impact': 'Impact', 'damage': 'ดาเมจ', 'spawn': 'Spawn', 'events': 'อีเวนต์'},
+    'layers': [[1, 'Charge (L2, หลัง)'], [2, 'ตัวละคร (L1)'], [3, 'Slam + คลื่นดาบ (L3)'], [4, 'Impact (L4)'], [5, 'ดาเมจ (L5)'], [6, 'อีเวนต์ (L6)']],
+    'shake': {str(SPAWN_T): [7, 0], **{str(h): [s, 0] for h, s in zip(HITS, SHAKE) if h < N}},
     'thumbs': [0, CHARGE_T, 30, PEAK_T, STRIKE_T, SPAWN_T, HITS[0], HITS[1], HITS[2], HITS[3]],
     'thumbLabels': {0: 'READY', CHARGE_T: 'CHARGE START', 30: 'LIFT SWORD', PEAK_T: 'CHARGE PEAK', STRIKE_T: 'RELEASE',
                     SPAWN_T: 'WAVE SPAWN', HITS[0]: 'HIT CELL 1', HITS[1]: 'HIT CELL 2', HITS[2]: 'HIT CELL 3', HITS[3]: 'HIT CELL 4'},
@@ -406,7 +454,8 @@ meta = {
     'notes': [
         'ฟันลงครั้งเดียว ปล่อยคลื่นดาบ 1 ลูกที่ F8 — ไม่พุ่ง ไม่หลายจังหวะ · ที่ F8 ยังไม่มีดาเมจ',
         f'คลื่นวิ่ง {SPEED} ช่อง/วิ: ช่อง 1–4 ลงที่ {hs} — ใครยืนในช่องตอนคลื่นถึงโดน ตัวละ 1 ครั้งต่อการร่าย',
-        'ชาร์จยาวขึ้น (ผู้ใช้ 2026-10): F2–F5 ค่อย ๆ รวม > F6 ค้าง 0.3 วิ บน vortex เฟรมใหญ่สุด f6 หายใจเป็นลูปนุ่ม (ขยาย 5 % + แสงเรือง ทุก 10 T ไม่สลับเฟรม) > F7 ฟันเร็ว 4 T ตัดกัน',
+        'ชาร์จยาวขึ้น (ผู้ใช้ 2026-10): F2–F5 ค่อย ๆ รวม > F6 ค้างนิ่ง 0.3 วิ บน vortex เฟรมใหญ่สุด f6 > F7 ฟันเร็ว 4 T ตัดกัน',
+        'F8 ดาบกระแทกพื้น: ระเบิดพื้นจาก Impact ของ S1 (1.7 × ตัว + bloom) ที่จุดดาบแตะพื้น + สั่น 7 px / hit-stop 50 ms / แฟลช',
         'VFX ใหญ่ขึ้น: charge 2.4 × ตัว · คลื่น 1.9 × ความสูงตัว · impact 1.6 × ตัว · ทุกชั้นมี bloom ถ่านเพลิง',
         f'สั่น {"/".join(map(str, SHAKE))} px ต่อการชน · แฟลชตอนชนช่อง 4 · ไม่มี root motion',
     ],

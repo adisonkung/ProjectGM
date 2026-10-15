@@ -22,7 +22,7 @@ import { hasStatus } from '../../battle/engine/buffs';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
-import { animOf, CLASS_PROJECTILE, FX, fxFor, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
+import { animOf, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
 import { Router } from '@angular/router';
@@ -907,7 +907,11 @@ export class BattleComponent implements OnDestroy {
         }
         case 'animEvent':
           // hero clip events (VFX_SPAWN, CHARGE_START, STRIKE_START …): the FX layers bound to them; missing FX = no-op
-          if (e.kind) addFx(e.src, e.dst, e.kind, { on: 'event', event: e.event, index: e.index });
+          if (e.kind) {
+            addFx(e.src, e.dst, e.kind, { on: 'event', event: e.event, index: e.index });
+            const stop = playImpactFeel(this.boardEl()?.nativeElement, eventFeelOf(unitOf(e.src).sprite, e.kind, e.event));
+            if (stop) this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + stop);
+          }
           break;
         case 'blink':
           // วาร์ป: ย้ายทันที + ค่อย ๆ ปรากฏ (ไม่ไถลข้ามสนาม)

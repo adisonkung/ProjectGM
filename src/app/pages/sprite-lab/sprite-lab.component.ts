@@ -5,7 +5,7 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { HEROES } from '../../core/data/heroes';
-import { animEvents, animOf, animTiming, clipClock, FX, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
+import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
 import { kitOf } from '../../core/data/hero-skills';
 
 type Action = 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
@@ -189,6 +189,7 @@ export class SpriteLabComponent implements OnDestroy {
             return;
           }
           if (ev.event !== 'DAMAGE' && ev.event !== 'IMPACT') this.spawn(kind, { on: 'event', event: ev.event, index: ev.index });
+          playImpactFeel(this.boardEl()?.nativeElement, eventFeelOf(sprite, kind, ev.event));
           if (ev.event === 'DAMAGE') {
             const hits = this.hitDummies(kind, ev.index);
             this.spawn(kind, { on: 'impact', hit: ev.index }, hits);
