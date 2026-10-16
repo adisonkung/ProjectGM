@@ -1,0 +1,383 @@
+{
+  "schema_version": "2.0",
+  "character_id": "kael_ashen_vanguard",
+  "revision": "Universal Timeline Sync V2",
+  "status": "integration_draft_not_qa_approved",
+  "source_of_truth": "Skill 2 14-frame image attached by user in this turn",
+  "timeline_fps_default": 12,
+  "timeline_fps_status": "PROVISIONAL",
+  "clock_ms_rule": "frame_start_ms=(frame_1_based - 1) * 1000 / fps",
+  "runtime_update_fps": 60,
+  "runtime_update_fps_note": "Engine tick example; use independent time progression, not same as animation fps",
+  "facing": "RIGHT",
+  "coordinate_conventions": {
+    "origin": "character_ground_pivot",
+    "positive_x": "forward",
+    "positive_y": "engine_specific",
+    "pixel_per_unit": "read_from_game",
+    "anchor_transform": "character_local_to_world",
+    "scale": "one unified Kael scale for ALL animations"
+  },
+  "skills": {
+    "skill_1": {
+      "display_name": "Sundering Edge (working label)",
+      "events": [
+        {
+          "frame": 6,
+          "type": "vfx_spawn",
+          "asset_key": "skill1_main",
+          "anchor": "sword_swing",
+          "status": "provisional"
+        },
+        {
+          "frame": 7,
+          "type": "damage",
+          "hit_index": 1,
+          "shape": "melee",
+          "status": "design_confirmed"
+        },
+        {
+          "frame": 7,
+          "type": "vfx_spawn",
+          "asset_key": "skill1_impact",
+          "anchor": "target_contact"
+        }
+      ],
+      "character_frame_count": 10,
+      "frames": [
+        {
+          "frame": 1,
+          "role": "READY",
+          "start_ms_provisional": 0.0,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 2,
+          "role": "LOWER_STANCE",
+          "start_ms_provisional": 83.33,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 3,
+          "role": "DRAW_BACK",
+          "start_ms_provisional": 166.67,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 4,
+          "role": "WIND_UP",
+          "start_ms_provisional": 250.0,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 5,
+          "role": "MAX_ANTICIPATION",
+          "start_ms_provisional": 333.33,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 6,
+          "role": "ATTACK_RELEASE",
+          "start_ms_provisional": 416.67,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 7,
+          "role": "HIT_1",
+          "start_ms_provisional": 500.0,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 8,
+          "role": "FOLLOW_THROUGH",
+          "start_ms_provisional": 583.33,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 9,
+          "role": "RECOVERY",
+          "start_ms_provisional": 666.67,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 10,
+          "role": "READY_END",
+          "start_ms_provisional": 750.0,
+          "sheet_row": null,
+          "sheet_column": null
+        }
+      ]
+    },
+    "skill_2": {
+      "display_name": "Relentless Cross (working label)",
+      "asset_reference": "Skill2_14frame_SOURCE_REFERENCE.png",
+      "source_layout": {
+        "rows": 2,
+        "columns": 7,
+        "reading_order": "left_to_right_top_to_bottom",
+        "original_image_px": [
+          1774,
+          887
+        ]
+      },
+      "events": [
+        {
+          "frame": 5,
+          "type": "damage",
+          "hit_index": 1,
+          "shape": "horizontal_cut",
+          "status": "timing_spec_confirmed_visual_check_required"
+        },
+        {
+          "frame": 5,
+          "type": "vfx_spawn",
+          "asset_key": "skill2_impact",
+          "anchor": "target_contact",
+          "instance": "impact_1"
+        },
+        {
+          "frame": 10,
+          "type": "damage",
+          "hit_index": 2,
+          "shape": "rising_reverse_diagonal_cut",
+          "status": "timing_spec_confirmed_visual_check_required"
+        },
+        {
+          "frame": 10,
+          "type": "vfx_spawn",
+          "asset_key": "skill2_impact",
+          "anchor": "target_contact",
+          "instance": "impact_2"
+        }
+      ],
+      "main_vfx_policy": "DO NOT ASSIGN main VFX: final user choice was impact-only",
+      "visual_note": "Check F5/F10 poses against desired horizontal and rising reverse cuts; source image not automatically validated as correct attack mechanics.",
+      "character_frame_count": 14,
+      "frames": [
+        {
+          "frame": 1,
+          "role": "READY",
+          "start_ms_provisional": 0.0,
+          "sheet_row": 1,
+          "sheet_column": 1
+        },
+        {
+          "frame": 2,
+          "role": "PREPARE_FIRST_CUT",
+          "start_ms_provisional": 83.33,
+          "sheet_row": 1,
+          "sheet_column": 2
+        },
+        {
+          "frame": 3,
+          "role": "WIND_UP_HORIZONTAL",
+          "start_ms_provisional": 166.67,
+          "sheet_row": 1,
+          "sheet_column": 3
+        },
+        {
+          "frame": 4,
+          "role": "RELEASE_HORIZONTAL",
+          "start_ms_provisional": 250.0,
+          "sheet_row": 1,
+          "sheet_column": 4
+        },
+        {
+          "frame": 5,
+          "role": "HIT_1_HORIZONTAL_CUT",
+          "start_ms_provisional": 333.33,
+          "sheet_row": 1,
+          "sheet_column": 5
+        },
+        {
+          "frame": 6,
+          "role": "FOLLOW_THROUGH_1",
+          "start_ms_provisional": 416.67,
+          "sheet_row": 1,
+          "sheet_column": 6
+        },
+        {
+          "frame": 7,
+          "role": "TRANSITION_TO_REVERSE",
+          "start_ms_provisional": 500.0,
+          "sheet_row": 1,
+          "sheet_column": 7
+        },
+        {
+          "frame": 8,
+          "role": "RELOAD_RISING_CUT",
+          "start_ms_provisional": 583.33,
+          "sheet_row": 2,
+          "sheet_column": 1
+        },
+        {
+          "frame": 9,
+          "role": "RELEASE_RISING_CUT",
+          "start_ms_provisional": 666.67,
+          "sheet_row": 2,
+          "sheet_column": 2
+        },
+        {
+          "frame": 10,
+          "role": "HIT_2_RISING_DIAGONAL",
+          "start_ms_provisional": 750.0,
+          "sheet_row": 2,
+          "sheet_column": 3
+        },
+        {
+          "frame": 11,
+          "role": "FOLLOW_THROUGH_2",
+          "start_ms_provisional": 833.33,
+          "sheet_row": 2,
+          "sheet_column": 4
+        },
+        {
+          "frame": 12,
+          "role": "DECELERATE",
+          "start_ms_provisional": 916.67,
+          "sheet_row": 2,
+          "sheet_column": 5
+        },
+        {
+          "frame": 13,
+          "role": "RECOVERY",
+          "start_ms_provisional": 1000.0,
+          "sheet_row": 2,
+          "sheet_column": 6
+        },
+        {
+          "frame": 14,
+          "role": "READY_END",
+          "start_ms_provisional": 1083.33,
+          "sheet_row": 2,
+          "sheet_column": 7
+        }
+      ]
+    },
+    "ultimate_ashen_rupture": {
+      "display_name": "Ashen Rupture",
+      "area": {
+        "shape": "line",
+        "rows": 1,
+        "forward_cells": 4
+      },
+      "events": [
+        {
+          "frame": 2,
+          "type": "vfx_spawn",
+          "asset_key": "ultimate_charge",
+          "anchor": "caster_or_sword",
+          "status": "provisional"
+        },
+        {
+          "frame": 8,
+          "type": "projectile_spawn",
+          "asset_key": "ultimate_main",
+          "anchor": "sword_release",
+          "spawn_count": 1,
+          "travel_cells": 4,
+          "status": "design_confirmed"
+        },
+        {
+          "frame": null,
+          "type": "impact_on_collision",
+          "asset_key": "ultimate_impact",
+          "anchor": "collision_location",
+          "status": "runtime_collision_not_character_frame"
+        }
+      ],
+      "damage_policy": "Damage once per valid target per cast; resolve on wave hit; not both on F8 and collision",
+      "character_frame_count": 10,
+      "frames": [
+        {
+          "frame": 1,
+          "role": "READY",
+          "start_ms_provisional": 0.0,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 2,
+          "role": "CHARGE_START",
+          "start_ms_provisional": 83.33,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 3,
+          "role": "CHARGE",
+          "start_ms_provisional": 166.67,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 4,
+          "role": "LIFT_SWORD",
+          "start_ms_provisional": 250.0,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 5,
+          "role": "OVERHEAD_READY",
+          "start_ms_provisional": 333.33,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 6,
+          "role": "STRONG_ANTICIPATION",
+          "start_ms_provisional": 416.67,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 7,
+          "role": "RELEASE_START",
+          "start_ms_provisional": 500.0,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 8,
+          "role": "SWORD_WAVE_SPAWN",
+          "start_ms_provisional": 583.33,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 9,
+          "role": "FOLLOW_THROUGH",
+          "start_ms_provisional": 666.67,
+          "sheet_row": null,
+          "sheet_column": null
+        },
+        {
+          "frame": 10,
+          "role": "RECOVERY",
+          "start_ms_provisional": 750.0,
+          "sheet_row": null,
+          "sheet_column": null
+        }
+      ]
+    }
+  },
+  "global_runtime_rules": [
+    "Use event crossing (previous_time < event_time <= new_time), handle seeks/lag and animation cancellation",
+    "Unique key cast_id + hit_index + target_id prevents duplicate damage",
+    "VFX spawn independently; do not tie gameplay damage to displayed VFX particle count",
+    "Skill2 impacts only at F5/F10, no unapproved main VFX",
+    "Ultimate spawn exactly one wave on F8; subsequent cell collisions own damage and impact timing",
+    "Apply identical character root scale across all clips, preserve weapon size, pivot, facing and local anchors",
+    "Actual filename mapping must be resolved from project asset registry before editing"
+  ]
+}
