@@ -313,10 +313,12 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     expect((clip.impact as { hitStopMs?: number; shakePx?: number }[]).map(i => [i.hitStopMs, i.shakePx])).toEqual([[17, 1], [17, 1], [50, 4]]);
   });
 
-  it('Ult Heaven-Snaring Blade Array on its Timeline Sync Sheet: 2.50 s, charge T018, array T040, cuts T108–T120, finisher T130 (55 %, crit), residual T140', () => {
+  it('Ult Heaven-Snaring Blade Array on its Timeline Sync Sheet ×1.15 (slowed 2026-10): charge T018, array T040, cuts T108–T120, finisher T130 (55 %, crit), residual T140', () => {
     const clip = SHEETS['hero-tangxun.png'].anims.ult!;
-    expect(clipClock(clip).total * 60).toBeCloseTo(150, 0);
-    const ev = (e: string) => animEvents('hero-tangxun.png', 'ult').filter(x => x.event === e).map(x => Math.round(x.t * 60));
+    // the sheet's 60 FPS timeline played 15 % slower: T (sheet) = game time × 60 / 1.15
+    const K = 1.15;
+    expect(clipClock(clip).total * 60 / K).toBeCloseTo(150, 0);
+    const ev = (e: string) => animEvents('hero-tangxun.png', 'ult').filter(x => x.event === e).map(x => Math.round((x.t * 60) / K));
     expect(ev('CHARGE_START')).toEqual([18]);
     expect(ev('CHARGE_PEAK')).toEqual([36]);
     expect(ev('VFX_SPAWN')).toEqual([40]);
@@ -337,10 +339,15 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     for (const i of [0, 1, 2, 3]) expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: i })).toEqual([`tx-ult-spark${i}`]);
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual([]);
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: 4 })).toEqual(['tx-ult-impact', 'tx-ult-shock', 'tx-ult-residual']);
-    expect(FX['tx-ult-residual'].delayMs).toBeCloseTo(167, -1);
-    const imp = clip.impact as { hitStopMs?: number; shakePx?: number }[];
-    expect(imp.map(i => i.hitStopMs)).toEqual([17, 17, 17, 17, 100]);
-    expect(imp[4].shakePx).toBe(8);
+    expect(FX['tx-ult-residual'].delayMs! / K).toBeCloseTo(167, -1);
+    // every ult FX slowed by the same factor as the clip (stays in sync)
+    expect(FX['tx-ult-main'].frameMs / K).toBeCloseTo(33.33, 1);
+    expect(FX['tx-ult-charge'].frameMs / K).toBeCloseTo(33.33, 1);
+    const imp = clip.impact as { hitStopMs?: number; shakePx?: number; zoomPct?: number }[];
+    expect(imp.slice(0, 4).every(i => (i.hitStopMs ?? 0) <= 25)).toBeTrue();
+    expect(imp[4].hitStopMs!).toBeGreaterThanOrEqual(100);
+    expect(imp[4].shakePx!).toBeGreaterThanOrEqual(8);
+    expect(imp[4].zoomPct).toBeGreaterThan(0);
   });
 });
 
