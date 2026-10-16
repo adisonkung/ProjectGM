@@ -1,6 +1,7 @@
 # Architecture — as it exists (2026-10-16)
 
-> Canonical since 2026-10-16 (approved by the user).
+> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
+> **Descriptive** document: it describes the current code. When it disagrees with the code, the code wins and this file is updated (`docs/PROJECT_RULES.md` §2).
 
 ## Folder map
 
@@ -29,7 +30,7 @@ tools/
   island/        island art generator + Sky City build
   simulate.ts    legacy-roster win-rate sim
 public/          sprites (+ opt/), portraits, skills, banners, island, backgrounds
-art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical Kael source (untracked)
+art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical Kael source (tracked, read-only)
 ```
 
 ## Systems
@@ -214,7 +215,7 @@ Engine results become progression through `ProgressionService`.
 ## Known architectural issues
 
 1. **Two renderers.** DOM and Pixi both exist, with duplicated FX and projectile rules. Parity is kept by specs that compare boxes. DOM is to be removed once Pixi is proven on the user's devices.
-2. **Animation data drives gameplay timing.**
+2. **Animation data drives gameplay timing.** — **KNOWN ARCHITECTURAL / BALANCE DEBT · DEFERRED UNTIL THE ROSTER / BALANCE PASS.** Do not redesign the timeline system before then.
    - Damage and cast-lock timing come from clip events, frames and steps (`animTiming` / `animEvents`). Slowing or lengthening a clip changes DPS.
    - hero-sim showed F5 0 % because clips are long; it reaches 100 % with `--nosprite`.
    - This uses semantic events, not frame checks, but it is still a gameplay dependency on art data. See `docs/COMBAT_RULES.md`.

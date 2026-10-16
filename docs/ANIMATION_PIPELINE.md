@@ -1,6 +1,6 @@
 # Animation & VFX Pipeline
 
-> Canonical since 2026-10-16 (approved by the user).
+> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
 
 ## Principles
 
@@ -83,9 +83,17 @@ One per FX key. Fields:
 | `ANIMATION_END` | clip ends |
 
 - Monsters declare clip frame numbers (1-based) in `MonsterDefinition.animation`. `monsterSheet()` and `castTimeline` turn them into events.
-- `DEATH_FINAL` (user baseline) is **not implemented**. Death plays the `die` clip and holds the last frame.
+- `DEATH_FINAL` (user baseline) is **not implemented** — see *Planned / not fully implemented* below.
 
-## Mapping: user baseline → current implementation
+### Gameplay timing — KNOWN ARCHITECTURAL / BALANCE DEBT (deferred until the roster / balance pass)
+
+- Gameplay reacts to semantic events, never to raw frame checks (principle 3).
+- But the event **times** come from clip data (`steps`, `events`), so changing a clip's timing changes when damage lands and how long the caster is locked — i.e. combat performance.
+- Do not redesign the timeline system now. Treat clip-timing changes as balance-relevant and mention them in the commit message. (`docs/COMBAT_RULES.md`, `docs/ARCHITECTURE.md` issue 2.)
+
+## Mapping: canonical design intent → current implementation
+
+The left column is **CANONICAL DESIGN INTENT** (the baseline concepts). The right column is the **CURRENT IMPLEMENTATION**. Rows marked *planned* are not (fully) implemented — see the next section.
 
 | Baseline concept | Current implementation |
 |---|---|
@@ -94,10 +102,20 @@ One per FX key. Fields:
 | Projectile Renderer | `app-projectile` / Pixi bolts (`projectilePoseAt`) |
 | Ground Renderer | `layer: 'under'` FX (shockwaves, rings) |
 | FOLLOW_OWNER | `FxDef.attach` (default for `repeat` / `fadeOutMs` FX on a unit) → `FxView.follow` |
-| FOLLOW_ANCHOR | `FxDef.anchor` resolved once at spawn (`fxOffset`). It does **not** keep following the anchor. |
+| FOLLOW_ANCHOR | *Partial / planned.* `FxDef.anchor` resolved once at spawn (`fxOffset`). It does **not** keep following the anchor. |
 | WORLD_SPACE | Default: FX placed at the spawn cell |
-| FOLLOW_PROJECTILE | Not implemented. Projectiles are one strip with an impact frame. |
+| FOLLOW_PROJECTILE | *Planned.* Not implemented as an attachment mode. Projectiles are one strip with an impact frame. |
 | Anchors | `SheetDef.anchors`: feet, bodyCenter, weaponTip, skillOrigin, ultimateChargeOrigin, ultimateForwardOrigin, plus per-hero extras such as ultTip1..3 and ultAir. There is no shieldFront or targetContactPoint key; FX use `dx`/`dy` offsets on the target instead. |
+
+## PLANNED / NOT FULLY IMPLEMENTED
+
+Documentation only — do not implement these as part of unrelated work; each needs its own task and the user's go-ahead.
+
+| # | Concept (design intent) | Current implementation |
+|---|---|---|
+| 1 | **Persistent FOLLOW_ANCHOR tracking** — an FX keeps following a moving anchor (weapon tip, shield front) for its whole life. | `FxDef.anchor` is resolved **once at spawn** (`fxOffset`). The FX does not follow the anchor afterwards. (Following the whole unit is available via `FxDef.attach` / FOLLOW_OWNER.) |
+| 2 | **FOLLOW_PROJECTILE** — a general attachment mode for FX riding on a projectile. | **Not implemented** as an attachment mode. Projectile visuals use the existing projectile system (`app-projectile` / Pixi bolts, flight frames + impact frame, `hitFx`, `overshoot`). |
+| 3 | **`DEATH_FINAL` semantic event** — a final event at the end of the death clip. | **Not implemented.** The `die` clip plays and holds its final frame; no event is emitted. |
 
 ## Clocks and feel
 

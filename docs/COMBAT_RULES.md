@@ -1,6 +1,6 @@
 # Combat Rules
 
-> Canonical since 2026-10-16 (approved by the user).
+> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
 > Baseline = the user's spec (2026-10-16). Where the repository holds a newer, approved value, **the repository value is used** (the user instruction: "if information is old, use the current state"). Each such case is listed under *Differences*.
 > Balance is frozen until the full roster is done (user decision). Do not tune numbers to "fix" a difference below without asking.
 
@@ -120,6 +120,7 @@ Constants are in `core/data/classes.ts`. Logic is in `battle-engine.ts`.
   - Hero clips declare events in `AnimDef.events`; monster clips declare frame numbers that are converted to events.
   - The engine schedules damage and cast-lock from these event times. So **clip length and event placement are gameplay-relevant**: slowing a clip slows that skill.
   - Changing a hero's clip timing is therefore a balance-relevant change. Mention it in the commit message.
+- **Status: KNOWN ARCHITECTURAL / BALANCE DEBT — DEFERRED UNTIL THE ROSTER / BALANCE PASS.** Semantic events are used and raw frame checks are avoided, but event timing still derives from clip timing. Do not redesign the timeline system or retune clips for DPS before that pass. (`docs/ARCHITECTURE.md` issue 2, `docs/ANIMATION_PIPELINE.md`.)
 
 ## Differences: spec baseline vs repository
 

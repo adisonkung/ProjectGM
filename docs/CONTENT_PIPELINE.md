@@ -1,6 +1,6 @@
 # Content Pipeline — adding content safely
 
-> Canonical since 2026-10-16 (approved by the user).
+> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
 
 ## Always first: inspect the current state
 
@@ -18,11 +18,13 @@ IDs and file names follow **`docs/PROJECT_RULES.md` §8 (Naming)** exactly. That
 
 ## NEW HERO
 
+A new hero is a **long task**: create `wip/<agent>-hero-<id>` **before the first edit** and commit a checkpoint after each finished step (`docs/PROJECT_RULES.md` §5). Start from `HEROES` (`core/data/heroes.ts`), never from memory.
+
 | # | Step | Real location |
 |---|---|---|
 | 1 | Choose a stable ID and check it is unused | `core/data/heroes.ts` (`HEROES`), `grep -rn` |
 | 2 | Inspect the current roster and the latest hero commits | `HEROES`, `git log -- src/app/core/data/heroes.ts` |
-| 3 | Hero template: id, name, cls, base star, sprite | `core/data/heroes.ts` → `HEROES` (`HERO_BY_ID` is derived) |
+| 3 | Hero template: id, name, cls (one existing primary class — see *Hybrid role labels*), base star, sprite | `core/data/heroes.ts` → `HEROES` (`HERO_BY_ID` is derived) |
 | 4 | Localization | **No i18n layer.** The Thai name is in `HeroTemplate.name`; skill names are in the kit. Nothing else to register. |
 | 5 | Base stats | From the class: `core/data/classes.ts` (`HERO_CLASS_BASE`, `HERO_3STAR_LV1`). There are no per-hero stat overrides today. |
 | 6 | Star data | Global `STAR_STAT_MULTIPLIER`, `STAR_UP_COST`, `STAR_PERKS`. Nothing per hero. |
@@ -41,6 +43,27 @@ IDs and file names follow **`docs/PROJECT_RULES.md` §8 (Naming)** exactly. That
 | 19 | Docs | `CLAUDE.md` hero section + claude.ai project doc `claude/hero-<id>-<identity-slug>.md` (Claude) + `docs/AI_HANDOFF.md`. |
 
 Remodel order so far: bailong → yuezheng → moye → tangxun → linxue → garrick → kael. **Check `HEROES` for the real current list before choosing anything.**
+
+### Hybrid role labels
+
+A design label such as **Fighter / Assassin**, **Tank / Support** or **Mage / Controller** does **not** create a new gameplay class.
+
+Before implementing a hybrid-role hero, inspect:
+
+1. the class model — `HeroClass` in `core/models/hero.ts` (currently `tank`, `fighter`, `assassin`, `archer`, `mage`, `healer`);
+2. class stat ownership — `HERO_CLASS_BASE` / `HERO_3STAR_LV1` in `core/data/classes.ts`;
+3. `ROLE_BEHAVIOR` (leash, safe range, focus chase) in `core/data/classes.ts`;
+4. skill-kit lookup — `kitOf(heroId, cls)` / `CLASS_KITS` / `HERO_DEFINITIONS` in `core/data/hero-skills.ts`;
+5. class-based progression and ranks — `SKILL_RANK_TABLES` / `SKILL_PRIORITY_BY_CLASS` (`core/data/skill-ranks.ts`), `WEAPON_GROUP_OF` / `CLASS_BUILDS` (`core/data/equipment.ts`).
+
+Unless the user explicitly approves a new gameplay class, **use one existing PRIMARY class** (the one whose stats, leash and weapon group fit best) and express the hybrid identity through:
+
+- the hero kit (`HERO_DEFINITIONS`), skill effects and damage pattern;
+- mobility (`BLINK_BEHIND`, `CHARGE`, `DASH_THROUGH`, ground shapes);
+- targeting (`TargetRule`) and AI (`SkillDefinition.ai`, `useMode`);
+- statuses and utility.
+
+Do **not** automatically add a `HeroClass` value, create a combined class, duplicate class tables, or change global class progression because of a design label. If a new gameplay class seems genuinely necessary, report the architectural impact (every `Record<HeroClass, …>` table above, save data, equipment, ranks, sims) and ask before implementing.
 
 ## NEW ENEMY / BOSS
 

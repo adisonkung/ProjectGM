@@ -1,6 +1,7 @@
 # Project Rules — Summon Tower (ProjectGM)
 
-> Canonical since 2026-10-16 (approved by the user). It applies to **every** agent: Claude, Codex and future agents. Change it only with the user's approval.
+> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
+> Once approved, it applies to **every** agent: Claude, Codex and future agents. Change it only with the user's approval.
 
 ## 1. Project overview
 
@@ -16,20 +17,33 @@ Summon Tower is a gacha, team-building and auto-battle game in the style of TFT.
 
 ## 2. Source of truth
 
-Precedence, from highest to lowest:
+Precedence, from highest to lowest (`AGENTS.md` and `CLAUDE.md` repeat this exact order):
 
-1. The user's explicit instruction in the current task.
-2. Approved docs: `docs/COMBAT_RULES.md` → `docs/ANIMATION_PIPELINE.md` → `docs/CONTENT_PIPELINE.md` → this file → `docs/ARCHITECTURE.md` → `CLAUDE.md` (per-feature notes).
-3. The current repository implementation.
-4. Current Git history.
-5. Current tests.
-6. Previous conversation context. This is advisory only.
-7. Agent preference.
+1. **Explicit user instruction** in the current task.
+2. **Canonical prescriptive docs** (once approved): `docs/COMBAT_RULES.md` → `docs/ANIMATION_PIPELINE.md` → `docs/CONTENT_PIPELINE.md` → this file.
+3. **Current repository implementation.**
+4. **Current tests.**
+5. **`docs/ARCHITECTURE.md`**: descriptive documentation of the current implementation. It does not override code; when it disagrees, code wins and `ARCHITECTURE.md` is updated.
+6. **`CLAUDE.md`**: Claude's implementation notebook (per-feature notes, history, operational context). It does not override the canonical docs or current code.
+7. **`docs/AI_HANDOFF.md`**: convenience handoff note only. Never authoritative.
+8. **Git history.**
+9. **Previous conversation context.** Advisory only.
+10. **Agent preference.**
+
+Kinds of document:
+
+| Kind | File(s) | Meaning |
+|---|---|---|
+| PRESCRIPTIVE | COMBAT_RULES, ANIMATION_PIPELINE, CONTENT_PIPELINE, PROJECT_RULES | How things **should** be. A deviation is reported, never silently "fixed" either way. |
+| DESCRIPTIVE | ARCHITECTURE | How things **are**. Kept in sync with code. |
+| IMPLEMENTATION NOTEBOOK | CLAUDE.md | Feature notes and history. Useful context, not a rulebook. |
+| HANDOFF NOTE | AI_HANDOFF | Short state note between agents. |
 
 Rules:
 
-- **Git wins over memory.** Conversation memory, `docs/AI_HANDOFF.md` and the claude.ai docs never override the repository.
-- **Newer approved data wins.** When a document and the code disagree, the newer approved value is canonical. Report the difference as CURRENT / CANONICAL / DIFFERENCE. Never silently change gameplay.
+- **The repository is authoritative for what exists now:** files, registries, IDs, branch state, gameplay values. Never take these from conversation memory, `CLAUDE.md`, `AI_HANDOFF.md` or the claude.ai docs without checking the repository.
+- **Prescriptive doc vs implementation:** when a canonical doc and the code disagree, report it as CURRENT IMPLEMENTATION / CANONICAL RULE / DIFFERENCE and ask. Never silently change gameplay, and never silently rewrite the rule to match the code.
+- **Stale notes:** when `ARCHITECTURE.md`, `CLAUDE.md` or `AI_HANDOFF.md` disagree with the code, the code wins; update the stale note in the same task (or report it).
 - **The canonical repository** is the user's local clone: `/Users/webuild/ProjectGM`, branch `master`. A cloud copy (Claude) is never the source of truth.
 
 ## 3. Multi-agent development
@@ -69,7 +83,7 @@ git log --since='3 days' --name-status --format='--- %h %an %s'
 
 Then:
 
-1. **Read the rules.** Read `AGENTS.md`, this file, and the doc for the system you will touch. Read `docs/AI_HANDOFF.md` as a hint; Git wins.
+1. **Read the rules.** Read `AGENTS.md`, this file, and the doc for the system you will touch. Read `docs/AI_HANDOFF.md` as a hint (its *Next agent must inspect* list and sync checkpoint); Git wins.
 2. **Read other agents' work.** If any commit or `wip/*` branch was made since your last session by another agent, check the `Co-Authored-By` trailer or the handoff note, then read it (`git show <hash> --stat`, then the diff) **before** continuing.
 3. **Check the registries.** Inspect the registries and tests of the system (`docs/CONTENT_PIPELINE.md`). For example, before a new hero, read `HEROES` in `core/data/heroes.ts`.
 4. **Uncommitted changes you did not make:** never reset, clean, stash-drop or overwrite them. Work out whose they are; if unclear, report before touching overlapping files.
@@ -82,14 +96,33 @@ Then:
 This model was chosen because Claude and Codex usually **take turns**, for example when one hits its usage limit.
 
 - **Trunk.** `master` is the trunk and is always green: tests pass and every completed task is committed. The next agent always starts from `master`, so it automatically sees everything the previous agent finished.
-- **Normal case (sequential).** Work directly on `master` in small finished commits.
-  - Example: Claude finishes hero #7 → commits → stops. Codex reconciles, sees #7 in `HEROES` and in the log, builds #8 → commits. Claude reconciles, sees #8, builds #9.
-  - No long-lived branches means no merge drift. This is why it works better than a branch per hero when agents alternate.
-- **Interrupted case** (limit hit or session cut mid-task):
-  1. Commit whatever exists to **`wip/<agent>-<task>`**, e.g. `wip/claude-hero-vaelric-s2`, with a `wip:` subject.
-  2. Add the state to `docs/AI_HANDOFF.md` on that branch: what is done, what is left, how to test.
-  3. Never leave half-finished work on `master`.
-  4. The next agent either finishes it on that branch and fast-forward merges it into `master`, or leaves it alone and works on something else.
+- **Sequential handoff.** One agent at a time. The next agent starts from `master` (plus any `wip/*` branch it is asked to continue).
+  - Example: Claude finishes hero #7 → merges to `master` → stops. Codex reconciles, sees #7 in `HEROES` and in the log, builds #8 → merges. Claude reconciles, sees #8, builds #9.
+  - No long-lived branches means no merge drift. This is why it works better than parallel branches per hero when agents alternate.
+
+### Task size classification (decides where the work happens)
+
+An agent can hit a usage / token / session limit **without warning**, before it has time to move unfinished work to a branch. So the branch is chosen **before** implementation starts:
+
+| Size | What | Where |
+|---|---|---|
+| **Small task** | Expected to finish safely in one session: a small scoped fix, a doc change, a test. | May work directly on `master`, but must end with a completed, green commit. |
+| **Long task** | New hero (**always long by default**), large feature, multi-stage content, large sprite / VFX integration, system refactor, anything likely to span many files or steps. | **Create `wip/<agent>-<task>` before the first edit** (e.g. `wip/claude-hero-vaelric`, `wip/codex-hero-draeven`, `wip/claude-status-system`). |
+
+While a long task is incomplete:
+
+1. Commit safe checkpoints to the `wip/` branch (subject `wip: …`), at least after every finished step (e.g. per skill of a hero).
+2. Keep `docs/AI_HANDOFF.md` on that branch up to date: done, left, how to test, files to inspect.
+3. Never merge incomplete work to `master`.
+
+When the long task is finished:
+
+1. Run the required validation (§13) on the branch.
+2. Make sure the branch is complete (registries, assets, docs, tests).
+3. Merge into `master` — fast-forward when possible; otherwise rebase onto `master`, re-test, then fast-forward.
+4. Delete the `wip/` branch after a successful merge (with the user's approval if it is not your own branch).
+
+If an agent is cut off on `master` during a small task anyway, the next agent treats the uncommitted changes under §4.4 (inspect, never discard).
 - **Parallel case** (both agents at once, only when the user asks):
   1. Each works on `feature/<task>` with **disjoint files**.
   2. Two new heroes are *not* disjoint, because both touch `sprites.ts`, `hero-skills.ts` and `heroes.ts`. Do them one after the other.
@@ -103,17 +136,28 @@ This model was chosen because Claude and Codex usually **take turns**, for examp
 
 ### Claude (cloud) ↔ local repository
 
-Claude works in a cloud copy, so commit hashes differ from local: `git am` re-commits them. **Compare tree hashes, not commit hashes.**
+Claude works in a cloud copy. `git am` re-commits every patch, so **cloud and local commit hashes never have to match. Tree content must match** (`git rev-parse HEAD^{tree}`) before Claude starts implementation work.
 
-1. **Start of session:** compare local `master` with the cloud copy (`git rev-parse HEAD^{tree}`).
-   - If local has newer commits (for example from Codex), export them on the local machine with `git format-patch --binary <base>..master -o "Claude outputs/sync"`, where `<base>` is the last commit already in the cloud.
-   - Apply them in the cloud with `git am --3way`.
-   - Do not start until the tree hashes match.
-2. **Delivery:**
+**Synchronization checkpoint.** `docs/AI_HANDOFF.md` records:
+
+- *Last synchronized local commit* — the **local** commit hash at which the local tree was last verified equal to Claude's cloud tree;
+- *Last synchronized tree* — that tree hash.
+
+A note cannot contain the hash of the commit that adds it. When the handoff says the checkpoint is "this commit", read it from Git: `git log -1 --format='%H %T' -- docs/AI_HANDOFF.md` (local repo), and confirm the tree matches the cloud copy.
+
+1. **Start of session (local → Claude):**
+   1. Read the checkpoint. On the local machine run `git log --oneline <LAST_SYNCED_LOCAL_COMMIT>..master` to see newer commits (e.g. from Codex).
+   2. If there are any: `git format-patch --binary <LAST_SYNCED_LOCAL_COMMIT>..master -o "Claude outputs/sync"`.
+   3. Apply them in the cloud copy with `git am --3way`.
+   4. Compare `git rev-parse HEAD^{tree}` on both sides. **Do not start until they match.**
+   5. Check `wip/*` branches the same way if you are continuing one.
+   - **If the checkpoint is unknown or inconsistent** (missing, or its tree does not match the cloud copy's history): do not guess a base. Inspect the history on both sides (`git log --format='%h %T %s'`), find the last commit whose **tree** exists on both sides, and report the ambiguity to the user before applying anything.
+2. **Delivery (Claude → local):**
    1. Run `git format-patch --binary` and write the patch to `Claude outputs/<task>/` (gitignored).
    2. Apply it locally with `git am --3way`.
    3. Verify that the tree hash equals the cloud tree hash.
-   4. If `git am` fails: `git am --abort`, then report. Never force it.
+   4. Update the checkpoint in `docs/AI_HANDOFF.md` (in the delivered commit, or in the next one).
+   5. If `git am` fails: `git am --abort`, then report. Never force it.
 3. Lock files left by an interrupted `git am` may only be removed after confirming that no git process is running.
 
 ### Local agents (Codex, etc.)
@@ -266,7 +310,9 @@ Every new mechanic or hero skill gets a spec.
 
 ## 16. Content creation
 
-Follow `docs/CONTENT_PIPELINE.md`. Inspect the registries first. Never infer "the next hero" from memory.
+Follow `docs/CONTENT_PIPELINE.md`. Inspect the registries first (`HEROES` for heroes). Never infer "the next hero" from memory. A new hero is a **long task** (§5).
+
+**Hybrid role labels** ("Fighter / Assassin", "Tank / Support", "Mage / Controller") are design labels, **not** new gameplay classes. Use an existing primary `HeroClass` and express the hybrid through the kit, unless the user explicitly approves a new class — see `docs/CONTENT_PIPELINE.md` → *Hybrid role labels*.
 
 ## 17. Balance data
 
