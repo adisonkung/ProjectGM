@@ -65,7 +65,7 @@ export const STORY_RULES: StageBattleRules = {
   hideDeadHeroesBetweenWaves: true,
   allowRevive: true,
   partyReviveLimit: 1,
-  reviveHpDefaultPercent: 0.3,
+  reviveHpDefaultPercent: 0.4,   // canonical revive HP 40 % (docs/COMBAT_RULES.md, user 2026-10-16)
   reviveInvulnerabilityDuration: 0.75,
   reviveSearchRadius: 1,
 };

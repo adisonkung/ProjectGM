@@ -376,7 +376,7 @@ describe('Stage / Wave / Transition flow', () => {
   it('28. the revived hero gets the configured HP percentage', () => {
     const { s, mage } = deadInWave2();
     s.e.reviveHero({ unitId: mage.id, sourceId: 'x' });
-    expect(mage.hp).toBe(Math.round(mage.maxHp * 0.3));
+    expect(mage.hp).toBe(Math.round(mage.maxHp * 0.4));
     const b = deadInWave2();
     b.s.e.reviveHero({ unitId: b.mage.id, sourceId: 'x', reviveHpPercent: 0.5 });
     expect(b.mage.hp).toBe(Math.round(b.mage.maxHp * 0.5));
