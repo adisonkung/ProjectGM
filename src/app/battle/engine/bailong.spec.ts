@@ -302,7 +302,7 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
     const f = [0, 1, 2].map(i => impactFeelOf(SPRITE, 'ult', i)!);
     expect(f[0].hitStopMs!).toBeGreaterThanOrEqual(20);
     expect(f[2].hitStopMs!).toBeGreaterThanOrEqual(80);
-    expect(f[2].hitStopMs!).toBeLessThanOrEqual(110);
+    expect(f[2].hitStopMs!).toBeLessThanOrEqual(130);
     for (let i = 1; i < 3; i++) expect(f[i].shakePx!).toBeGreaterThan(f[i - 1].shakePx!);
     expect(f[2].flashMs!).toBeGreaterThan(0);
   });

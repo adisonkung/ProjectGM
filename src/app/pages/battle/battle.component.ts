@@ -927,7 +927,8 @@ export class BattleComponent implements OnDestroy {
           addFx(e.src, e.dst, e.kind, { on: 'impact', hit: e.index }, e.hits);
           // contact feel authored on the clip (AnimDef.impact, per hit): hit-stop + shake (+ flash) — only on a real hit
           if (e.hits?.length !== 0) {
-            const stop = playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(unitOf(e.src).sprite, e.kind, e.index ?? 0));
+            const ip = posOf(e.dst != null && this.engine.units.some(u => u.id === e.dst) ? e.dst : e.src);
+            const stop = playImpactFeel(this.boardEl()?.nativeElement, impactFeelOf(unitOf(e.src).sprite, e.kind, e.index ?? 0), { c: ip.c, r: ip.r + SCENERY_ROWS });
             if (stop) this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + stop);
           }
           break;

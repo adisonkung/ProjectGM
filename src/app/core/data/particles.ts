@@ -37,7 +37,7 @@ export interface ParticleDef {
 }
 
 /** a preset reference on an FX: name + optional tint / amount */
-export type ParticleRef = string | { name: string; colors?: number[]; count?: number; scale?: number };
+export type ParticleRef = string | { name: string; colors?: number[]; count?: number; scale?: number; duration?: number };
 
 export const PARTICLES: Record<string, ParticleDef> = {
   /** hit sparks: thin streaks flying out of the contact point */
@@ -66,6 +66,11 @@ export const PARTICLES: Record<string, ParticleDef> = {
     count: 0, rate: 26, life: [0.6, 1.2], speed: [0.6, 1.6], angle: [-110, -70], gravity: -1.2, drag: 0.4,
     size: [0.05, 0.1], sizeEnd: 0.2, colors: [0xffd27a, 0xff8a3a, 0xff4a2a], blend: 'add', shape: 'dot', area: [1.1, 0.3],
   },
+  /** spirit motes rising around a dragon (Bai Long ult, continuous) */
+  'spirit-rise': {
+    count: 6, rate: 34, life: [0.5, 1.0], speed: [0.8, 2.2], angle: [-120, -60], gravity: -1.6, drag: 0.35,
+    size: [0.05, 0.11], sizeEnd: 0.2, colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], blend: 'add', shape: 'dot', area: [1.2, 0.9],
+  },
   /** lotus petals drifting from a heal bloom */
   petals: {
     count: 14, life: [0.9, 1.5], speed: [0.8, 2.2], angle: [-170, -10], gravity: 1.2, drag: 0.35,
@@ -89,6 +94,7 @@ export function particleDef(ref: ParticleRef): ParticleDef | undefined {
     ...base,
     colors: ref.colors ?? base.colors,
     count: ref.count ?? base.count,
+    duration: ref.duration ?? base.duration,
     size: [base.size[0] * k, base.size[1] * k],
     speed: [base.speed[0] * k, base.speed[1] * k],
   };

@@ -605,7 +605,7 @@ export const SHEETS: Record<string, SheetDef> = {
       ult: {
         row: 7, frames: 19, ms: 120,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-        steps: [90, 90, 140, 80, 200, 100, 180, 100, 90, 140, 90, 90, 90, 200, 80, 120, 260, 120, 120],
+        steps: [90, 90, 140, 80, 200, 100, 180, 100, 90, 140, 90, 90, 90, 300, 80, 120, 260, 120, 120],
         events: {
           CAST_START: 0, CHARGE_START: 1, ANTICIPATION_PEAK: 2, STRIKE_START: [3, 5, 9], VFX_SPAWN: [11, 14],
           FINAL_ANTICIPATION: 13, DAMAGE: [4, 6, 16], IMPACT: [4, 6, 16], RECOVERY_START: 17,
@@ -613,8 +613,10 @@ export const SHEETS: Record<string, SheetDef> = {
         impact: [
           { hitStopMs: 30, shakePx: 2, shakeMs: 110 },
           { hitStopMs: 40, shakePx: 4, shakeMs: 150 },
-          { hitStopMs: 100, shakePx: 7, shakeMs: 240, flashMs: 140 },
+          { hitStopMs: 120, shakePx: 11, shakeMs: 320, flashMs: 180, zoomPct: 7 },
         ],
+        // overhead gather at the apex: a slow push-in before the dive
+        eventFeel: { FINAL_ANTICIPATION: { zoomPct: 3, shakeMs: 260 } },
       },
     },
     fx: {
@@ -962,34 +964,43 @@ export const FX: Record<string, FxDef> = {
   // thrust: thin dragon launches from the spear tip forward (tail = left pivot)
   'bl3-hint': {
     file: 'fx-bailong-v3-hint.png', frames: 6, w: 174, h: 238, frameMs: 45, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultTip1', pivot: [0.011, 0.5], dy: -6, scale: 0.34, pixelated: true,
+    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultTip1', pivot: [0.011, 0.5], dy: -6, scale: 0.48, pixelated: true,
+    particles: [{ name: 'sparks', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 8, scale: 0.8 }],
   },
   // sweep: swirl unfurls into the S dragon ahead of the sweep
   'bl3-emerge': {
     file: 'fx-bailong-v3-emerge.png', frames: 8, w: 144, h: 205, frameMs: 50, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultTip2', pivot: [0.014, 0.5], scale: 0.4, pixelated: true,
+    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultTip2', pivot: [0.014, 0.5], scale: 0.56, pixelated: true,
+    particles: [{ name: 'sparks', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 10 }],
   },
   // leap: dragon spirals up from his feet, under the unit
   'bl3-ascent': {
     file: 'fx-bailong-v3-ascent.png', frames: 8, w: 116, h: 308, frameMs: 55, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 2, anchor: 'feet', pivot: [0.5, 0.994], scale: 0.36, layer: 'under', pixelated: true,
+    event: 'STRIKE_START', eventIndex: 2, anchor: 'feet', pivot: [0.5, 0.994], scale: 0.52, layer: 'under', pixelated: true,
+    particles: [{ name: 'dust', count: 8 }, { name: 'spirit-rise', duration: 0.5 }],
   },
   // air: the dragon coils around the airborne body
   'bl3-coil': {
     file: 'fx-bailong-v3-core.png', frames: 12, w: 100, h: 130, frameMs: 45, at: 'self', orient: 'flip',
-    event: 'VFX_SPAWN', eventIndex: 0, anchor: 'ultAir', scale: 0.52, layer: 'under', pixelated: true,
+    event: 'VFX_SPAWN', eventIndex: 0, anchor: 'ultAir', scale: 0.76, layer: 'under', pixelated: true,
+    particles: ['spirit-rise'],
   },
   // ground-targeted (the ult hits fixed cells): dive / impact / residual land on the cell in front (dx 100 % = 1 cell)
   // dive: dragon plunges head-first onto the front cell, lands with the spear (F15 → F17)
   'bl3-dive': {
     file: 'fx-bailong-v3-dive.png', frames: 8, w: 112, h: 334, frameMs: 30, at: 'self', orient: 'flip',
-    event: 'VFX_SPAWN', eventIndex: 1, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.34, pixelated: true,
+    event: 'VFX_SPAWN', eventIndex: 1, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.5, pixelated: true,
   },
   // final hit: roaring dragon pillar on the target (only the 3rd strike) + scattering residue after it
   'bl3-impact': {
-    particles: [{ name: 'sparks', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 20 }, 'debris'],
+    particles: [
+      { name: 'sparks', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 36, scale: 1.35 },
+      { name: 'embers', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 30 },
+      { name: 'debris', count: 20, scale: 1.3 },
+      { name: 'dust', count: 16, scale: 1.4 },
+    ],
     file: 'fx-bailong-v3-impact.png', frames: 10, w: 145, h: 354, frameMs: 55, at: 'self', orient: 'flip', on: 'impact',
-    hitIndex: 2, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.36, pixelated: true,
+    hitIndex: 2, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.58, pixelated: true,
   },
   // Yue Zheng S1 Iron Wall Taunt (tools/sprites/yuezheng_s1.py): both tracks baked in sync-sheet order at 30 FPS
   // (every 2nd timeline frame), atlas px (scale 1 / FX_SCALE) · main = Mountain Seal wall, pivot = shield front of the
@@ -1113,7 +1124,8 @@ export const FX: Record<string, FxDef> = {
   },
   'bl3-residual': {
     file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'self', orient: 'flip', on: 'impact',
-    hitIndex: 2, dx: 100, dy: -30, scale: 0.3, delayMs: 420, pixelated: true,
+    hitIndex: 2, dx: 100, dy: -40, scale: 0.46, delayMs: 420, pixelated: true,
+    particles: [{ name: 'spirit-rise', duration: 0.6 }],
   },
   // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
   'bailong-nine-dragon-impact': {
