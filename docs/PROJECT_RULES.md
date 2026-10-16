@@ -44,11 +44,11 @@ Rules:
 - **The repository is authoritative for what exists now:** files, registries, IDs, branch state, gameplay values. Never take these from conversation memory, `CLAUDE.md`, `AI_HANDOFF.md` or the claude.ai docs without checking the repository.
 - **Prescriptive doc vs implementation:** when a canonical doc and the code disagree, report it as CURRENT IMPLEMENTATION / CANONICAL RULE / DIFFERENCE and ask. Never silently change gameplay, and never silently rewrite the rule to match the code.
 - **Stale notes:** when `ARCHITECTURE.md`, `CLAUDE.md` or `AI_HANDOFF.md` disagree with the code, the code wins; update the stale note in the same task (or report it).
-- **The canonical repository** is the user's local clone: `/Users/webuild/ProjectGM`, branch `master`. A cloud copy (Claude) is never the source of truth.
+- **Repositories:** GitHub `origin/master` is the **shared remote handoff point**; the user's local clone `/Users/webuild/ProjectGM` is the **working canonical clone**; a cloud copy (Claude) is never the source of truth (details in §5).
 
 ## 3. Multi-agent development
 
-- Agents hand work over **through Git**: commits plus `docs/AI_HANDOFF.md`. Never through chat.
+- Agents hand work over **through Git**: pushed task branches on GitHub `origin`, reviewed and merged into `master`, plus `docs/AI_HANDOFF.md`. Never through chat.
 - Content from any agent is first-class. Change it only for:
   - a confirmed bug;
   - a canonical-rule violation;
@@ -73,10 +73,12 @@ Rules:
 Run these before any change:
 
 ```bash
+git fetch origin                               # shared remote handoff point
 git branch --show-current
 git status --short --untracked-files=all
-git log --oneline -15 --format='%h %ad %an %s' --date=short
-git branch -a --list 'wip/*' 'feature/*'       # unfinished / parallel work
+git log --oneline -15 --format='%h %ad %an %s' --date=short origin/master
+git rev-list --left-right --count master...origin/master   # local vs remote master
+git branch -a --list '*wip/*' '*feature/*' '*fix/*'        # pushed / local task branches
 git diff --stat HEAD                           # uncommitted work
 git log --since='3 days' --name-status --format='--- %h %an %s'
 ```
@@ -87,89 +89,93 @@ Then:
 2. **Read other agents' work.** If any commit or `wip/*` branch was made since your last session by another agent, check the `Co-Authored-By` trailer or the handoff note, then read it (`git show <hash> --stat`, then the diff) **before** continuing.
 3. **Check the registries.** Inspect the registries and tests of the system (`docs/CONTENT_PIPELINE.md`). For example, before a new hero, read `HEROES` in `core/data/heroes.ts`.
 4. **Uncommitted changes you did not make:** never reset, clean, stash-drop or overwrite them. Work out whose they are; if unclear, report before touching overlapping files.
-5. **"Continue from the previous agent"** means: find that work in Git (`master`, then `wip/*`). Never assume context.
+5. **"Continue from the previous agent"** means: `git fetch origin`, then find that work in Git (`origin/master`, then the agent's pushed `wip/*` / `feature/*` branch). Never assume context.
 
-## 5. Git workflow (decided 2026-10-16)
+## 5. Git workflow (decided 2026-10-16 · GitHub remote handoff added 2026-10-16)
 
-### Model: trunk-based, one active agent, a clean handoff commit
+### Repositories and roles
+
+| Repository | Role |
+|---|---|
+| **GitHub `origin`** (`adisonkung/ProjectGM`), branch **`origin/master`** | **Shared remote handoff point.** Every agent starts from it and hands work back to it — on a task branch. |
+| **Local clone `/Users/webuild/ProjectGM`** | The user's **working canonical clone**. The user reviews and merges here (or on GitHub) and pushes `master`. |
+| Claude's cloud copy | A disposable working copy. Never the source of truth. |
+
+Rules:
+
+- **`master` changes only by merging a reviewed task branch.** No agent commits directly to `master` or pushes to `origin/master`; **never force-push or otherwise overwrite `master`**. The user (or an agent the user explicitly asks) merges after review.
+- **Before any work:** `git fetch origin` and start from the latest `origin/master` (`git switch -c <task-branch> origin/master`). If the user's local `master` holds commits not yet on `origin/master`, the remote is stale: report it and ask the user to push `master` (or say which base to use) — do not guess.
+- **After work:** push **only the task branch** (`git push -u origin <task-branch>`), then stop and report it for review.
+- **Pushing other branches, deleting remote branches, force-push** — only with explicit user approval.
+
+### Model: one active agent, task branches, review, merge
 
 This model was chosen because Claude and Codex usually **take turns**, for example when one hits its usage limit.
 
-- **Trunk.** `master` is the trunk and is always green: tests pass and every completed task is committed. The next agent always starts from `master`, so it automatically sees everything the previous agent finished.
-- **Sequential handoff.** One agent at a time. The next agent starts from `master` (plus any `wip/*` branch it is asked to continue).
-  - Example: Claude finishes hero #7 → merges to `master` → stops. Codex reconciles, sees #7 in `HEROES` and in the log, builds #8 → merges. Claude reconciles, sees #8, builds #9.
-  - No long-lived branches means no merge drift. This is why it works better than parallel branches per hero when agents alternate.
+- **Trunk.** `master` (= `origin/master` after the user pushes) is always green and reviewed. The next agent starts from it, so it sees everything that was merged.
+- **Sequential handoff.** One agent at a time. Example: Claude builds hero #7 on its branch → pushes the branch → the user reviews and merges → Codex fetches, sees #7 in `HEROES`, builds #8 on its branch → … → Claude fetches, sees #8, builds #9.
+- **Unmerged work of the previous agent** lives on its pushed branch. The next agent does not build on it unless the user says so (then it starts from that branch, not from `master`).
 
-### Task size classification (decides where the work happens)
+### Task size classification (decides how the branch is used)
 
-An agent can hit a usage / token / session limit **without warning**, before it has time to move unfinished work to a branch. So the branch is chosen **before** implementation starts:
+An agent can hit a usage / token / session limit **without warning**. So the branch is created **before the first edit** for every task, and long tasks checkpoint on it:
 
-| Size | What | Where |
+| Size | What | Branch |
 |---|---|---|
-| **Small task** | Expected to finish safely in one session: a small scoped fix, a doc change, a test. | May work directly on `master`, but must end with a completed, green commit. |
-| **Long task** | New hero (**always long by default**), large feature, multi-stage content, large sprite / VFX integration, system refactor, anything likely to span many files or steps. | **Create `wip/<agent>-<task>` before the first edit** (e.g. `wip/claude-hero-vaelric`, `wip/codex-hero-draeven`, `wip/claude-status-system`). |
+| **Small task** | Expected to finish safely in one session: a small scoped fix, a doc change, a test. | `fix/<area>-<topic>` / `feature/<task>` (or `docs/…` work on `feature/<task>`), one finished green commit, pushed for review. |
+| **Long task** | New hero (**always long by default**), large feature, multi-stage content, large sprite / VFX integration, system refactor, anything likely to span many files or steps. | **`wip/<agent>-<task>`** (e.g. `wip/claude-hero-vaelric`, `wip/codex-hero-draeven`, `wip/claude-status-system`), created and pushed **before the first edit**. |
 
 While a long task is incomplete:
 
-1. Commit safe checkpoints to the `wip/` branch (subject `wip: …`), at least after every finished step (e.g. per skill of a hero).
+1. Commit safe checkpoints to the `wip/` branch (subject `wip: …`), at least after every finished step (e.g. per skill of a hero), and push the branch when possible so the work survives a cut-off session.
 2. Keep `docs/AI_HANDOFF.md` on that branch up to date: done, left, how to test, files to inspect.
 3. Never merge incomplete work to `master`.
 
-When the long task is finished:
+When a task is finished:
 
 1. Run the required validation (§13) on the branch.
-2. Make sure the branch is complete (registries, assets, docs, tests).
-3. Merge into `master` — fast-forward when possible; otherwise rebase onto `master`, re-test, then fast-forward.
-4. Delete the `wip/` branch after a successful merge (with the user's approval if it is not your own branch).
+2. Make sure the branch is complete (registries, assets, docs, tests) and rebased on the latest `origin/master` (re-test after a rebase).
+3. Push the branch and report it for review.
+4. After the user's review, the branch is merged into `master` — fast-forward when possible. Delete the branch after the merge (remote branch deletion only with the user's approval).
 
-If an agent is cut off on `master` during a small task anyway, the next agent treats the uncommitted changes under §4.4 (inspect, never discard).
+If an agent is cut off with uncommitted changes, the next agent treats them under §4.4 (inspect, never discard).
+
 - **Parallel case** (both agents at once, only when the user asks):
   1. Each works on `feature/<task>` with **disjoint files**.
   2. Two new heroes are *not* disjoint, because both touch `sprites.ts`, `hero-skills.ts` and `heroes.ts`. Do them one after the other.
   3. Merge one branch, then rebase the other onto `master`, re-run its tests, then merge.
-- **Merging into `master`:** fast-forward when possible. Delete the `wip/` or `feature/` branch after merging.
-- **Do not push** unless the user asks.
 - **Destructive commands need explicit user approval:**
   - `git reset --hard`, `git clean -fd`, `git checkout -- .`, force checkout;
-  - `git stash drop`, `git branch -D`, force push;
+  - `git stash drop`, `git branch -D`, force push, deleting remote branches;
   - `rm` of tracked files outside an intended cleanup commit.
 
-### Claude (cloud) ↔ local repository
+### Claude (cloud) ↔ GitHub ↔ local
 
-Claude works in a cloud copy. `git am` re-commits every patch, so **cloud and local commit hashes never have to match. Tree content must match** (`git rev-parse HEAD^{tree}`) before Claude starts implementation work.
+Claude works in a cloud copy. Preferred path = **through GitHub**:
+
+1. **Start of session:** `git fetch origin` in the cloud copy; create the task branch from `origin/master`. Query the current state (`git rev-parse HEAD`, `git rev-parse HEAD^{tree}`) — never read it from `AI_HANDOFF.md`. Report if the user's local `master` is ahead of `origin/master` (see *Rules* above).
+2. **End of session:** push the task branch to `origin`. The user reviews it and merges (locally or on GitHub) and pushes `master`.
+
+**Fallback when the cloud copy cannot push to GitHub** (no write access for the session): deliver the task branch as patches. `git format-patch --binary origin/master..<task-branch>` → `Claude outputs/<task>/` (gitignored) → on the local clone `git switch -c <task-branch> master` (or the agreed base) and `git am --3way` → verify the tree hash equals the cloud branch's tree → the user pushes / reviews / merges. **Never `git am` onto local `master`.** If `git am` fails: `git am --abort`, then report. Lock files left by an interrupted `git am` may only be removed after confirming that no git process is running.
+
+Because `git am` re-commits, cloud and local commit hashes may differ; **tree content must match**.
 
 **Synchronization base (confirmed sync point).** `docs/AI_HANDOFF.md` may store only the **last confirmed** synchronization base:
 
-- *Last confirmed local commit* — a **local** commit hash;
+- *Last confirmed local commit* — a **local** commit hash (normally equal to an `origin/master` commit);
 - *Last confirmed common tree* — the tree hash that the local copy and the cloud copy were **both verified** to have at that commit.
 
 Rules:
 
 - **No self-reference.** `AI_HANDOFF.md` never stores the hash of the commit or tree that contains it: editing the note changes the tree, so its "own" hash cannot be written into it. It records an **earlier**, already-confirmed base.
 - **Current state is always queried, never read from the note:** `git rev-parse HEAD` and `git rev-parse HEAD^{tree}`, on each side.
-- **A sync point becomes confirmed only after both copies verify identical tree content** (`git rev-parse HEAD^{tree}` equal locally and in the cloud). A commit that has not been verified on both sides is not a sync point, even if it was delivered.
+- **A sync point becomes confirmed only after both copies verify identical tree content.** A commit that has not been verified on both sides is not a sync point, even if it was delivered or pushed.
 - `git log -1 -- docs/AI_HANDOFF.md` may be used to **locate the last handoff-note commit**, but it is **not** automatically the last confirmed sync point.
-- When a later session verifies a newer commit on both sides, it may record that commit / tree as the new confirmed base (in a later commit — which, again, is not itself the base).
-
-1. **Start of session (local → Claude):**
-   1. Query the current state on both sides: `git rev-parse HEAD` and `git rev-parse HEAD^{tree}`. If the trees already match, there is nothing to sync.
-   2. Otherwise read the *last confirmed local commit* `<BASE>` from `AI_HANDOFF.md`. Check that the cloud copy has a commit with the same **tree** as `<BASE>` (`git log --format='%H %T'`). On the local machine run `git log --oneline <BASE>..master` to see newer commits (e.g. from Codex).
-   3. `git format-patch --binary <BASE>..master -o "Claude outputs/sync"` (local), starting from the cloud commit whose tree equals the confirmed common tree.
-   4. Apply them in the cloud copy with `git am --3way`.
-   5. Compare `git rev-parse HEAD^{tree}` on both sides. **Do not start until they match** — that match is now a confirmed sync point.
-   6. Check `wip/*` branches the same way if you are continuing one.
-   - **If the confirmed base is unknown or inconsistent** (missing, or no cloud commit has its tree): do not guess a base. Inspect the history on both sides (`git log --format='%h %T %s'`), find the last commit whose **tree** exists on both sides, and report the ambiguity to the user before applying anything.
-2. **Delivery (Claude → local):**
-   1. Run `git format-patch --binary` and write the patch to `Claude outputs/<task>/` (gitignored).
-   2. Apply it locally with `git am --3way`.
-   3. Verify that the tree hash equals the cloud tree hash (`git rev-parse HEAD^{tree}` on both sides). The delivered commit is now a confirmed sync point.
-   4. Record it as the confirmed base in `docs/AI_HANDOFF.md` **in a later commit** (never inside the delivered commit itself — see *No self-reference*).
-   5. If `git am` fails: `git am --abort`, then report. Never force it.
-3. Lock files left by an interrupted `git am` may only be removed after confirming that no git process is running.
+- When the remote cannot be used and the cloud copy must be brought up to date from the local clone, use the confirmed base: `git format-patch --binary <BASE>..master` (local) → `git am --3way` (cloud, starting from the commit whose tree equals the confirmed common tree) → trees must match before work starts. If the base is unknown or inconsistent: do not guess; inspect `git log --format='%h %T %s'` on both sides and report.
 
 ### Local agents (Codex, etc.)
 
-Commit directly in `/Users/webuild/ProjectGM`. Then stop.
+Work in `/Users/webuild/ProjectGM` on a task branch created from the latest `origin/master` (`git fetch origin` first). Commit, push the branch, then stop. Do not commit to or push `master`.
 
 ## 6. Commit rules
 

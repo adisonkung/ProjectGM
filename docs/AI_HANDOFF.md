@@ -9,28 +9,29 @@ Never take the current commit or tree from this file. Query it on each side:
 This note never stores the hash of the commit that contains it (see `docs/PROJECT_RULES.md` §5).
 
 Last completed task:
-The user approved the shared Claude / Codex rule set. It is now CANONICAL (status headers only, documentation-only commit).
+Rule update (user, 2026-10-16): GitHub `origin/master` is the shared remote handoff point. Agents work on task branches, push only the task branch, and `master` changes only by merge after review. This change is documentation only, on branch `feature/github-remote-handoff`.
 
 Last commit:
 Query it with `git log -1`. Use `git log -1 -- docs/AI_HANDOFF.md` only to locate the last handoff-note commit. That commit is **not** automatically a confirmed sync point.
 
 Last confirmed local commit:
-`4c3d66e34ed9ffac9fb138a426dd3a340c60cf56` — "docs: sync metadata records only the last confirmed base". The local and cloud copies were both verified at this commit.
+`3a61ffba88f1004661f73e06d271adb6569d2396` (local `master`) — "docs: rule set approved by the user (canonical)". The local and cloud copies were both verified at this commit.
 
 Last confirmed common tree:
-`3723690b8615a3267a65032063c7bf8916ccc003`
+`fc3456568a99d3b449a21fce552f4b3b0800b83c`
 
 Agent:
 Claude (cloud copy → patch → `git am --3way` into `/Users/webuild/ProjectGM`)
 
 Current branch:
-`master` (ahead of `origin/master`; not pushed, per the user's rule)
+`feature/github-remote-handoff` (branched from local `master` 3a61ffb).
+- **Remote is stale:** GitHub `origin/master` is `3c23b91`, 35 commits behind local `master`. Until the user pushes local `master`, the latest reviewed work exists only in the local clone.
 
 Working tree expected:
 Clean.
 
 Active WIP branches:
-None.
+- `feature/github-remote-handoff`: this rule update, waiting for the user's review and merge.
 
 Tests:
 - Docs-only change. No gameplay tests were run.
@@ -44,10 +45,12 @@ Known issues:
 - Tang Xun ult surround blades launch about 2.2 cells before the target, so they appear behind him when he stands 1 cell away. This predates the latest changes.
 
 Next suggested task:
-1. Continue the hero roster. A new hero is a long task, so start a `wip/` branch first and read `HEROES` before choosing the next hero.
+1. The user pushes local `master` to `origin` and reviews / merges `feature/github-remote-handoff`.
+2. Continue the hero roster. A new hero is a long task, so start a `wip/` branch first and read `HEROES` before choosing the next hero.
 
 Next agent must inspect:
 - `git rev-parse HEAD` and `git rev-parse HEAD^{tree}` on both sides;
-- `git log 4c3d66e..master` (local), i.e. the commits after the confirmed base;
+- `git fetch origin`, then `git rev-list --left-right --count master...origin/master` (is the remote up to date?);
+- `git log 3a61ffb..master` (local), i.e. the commits after the confirmed base;
 - `AGENTS.md`;
 - `docs/PROJECT_RULES.md` §2, §4 and §5.

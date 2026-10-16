@@ -45,19 +45,21 @@ If another agent committed or left a `wip/*` branch since you last worked, read 
 
 | Agent | Normal role |
 |---|---|
-| Claude | Primary implementation agent: features, systems, content, scoped refactors. Works in a cloud copy and delivers patches (PROJECT_RULES §5). |
-| Codex | Secondary implementer, reviewer, debugger, test author, investigator, regression checker. May implement full features when Claude is unavailable. Works directly in the local repo. |
+| Claude | Primary implementation agent: features, systems, content, scoped refactors. Works in a cloud copy; pushes its task branch to GitHub `origin` (fallback: patches onto the same-named local branch) (PROJECT_RULES §5). |
+| Codex | Secondary implementer, reviewer, debugger, test author, investigator, regression checker. May implement full features when Claude is unavailable. Works in the local clone on task branches and pushes them to `origin`. |
 
 Work produced by any agent is first-class. Never rewrite it for style or preference.
 
 ## Git in one paragraph
 
-- `master` is the trunk and is always green. One agent at a time.
-- **Small task** (fits safely in one session): may work on `master`, ending with a finished green commit.
-- **Long task** (a new hero is always long; also large features, multi-step content, big sprite / VFX work, refactors): **create `wip/<agent>-<task>` before the first edit** (e.g. `wip/codex-hero-draeven`), commit checkpoints there, keep `docs/AI_HANDOFF.md` current on that branch, and merge to `master` only when complete and validated. A usage limit can hit without warning — that is why the branch comes first. **Never leave half-done work on `master`.**
+- **GitHub `origin/master` is the shared remote handoff point**; the user's local clone `/Users/webuild/ProjectGM` is the working canonical clone.
+- **Before work:** `git fetch origin`, then branch from the latest `origin/master`. If local `master` is ahead of `origin/master`, report it and ask — do not guess.
+- **Every task gets its own branch, created before the first edit.** Never commit to or push `master`; never force-push or overwrite `master`.
+- **Small task** (fits safely in one session): `fix/<area>-<topic>` or `feature/<task>`, one finished green commit.
+- **Long task** (a new hero is always long; also large features, multi-step content, big sprite / VFX work, refactors): `wip/<agent>-<task>` (e.g. `wip/codex-hero-draeven`), commit and push checkpoints there, keep `docs/AI_HANDOFF.md` current on that branch. A usage limit can hit without warning — that is why the branch comes first.
+- **After work:** push **only the task branch** (`git push -u origin <branch>`) and report it. The user reviews; the branch is merged into `master` only after review.
 - Parallel work (only when the user asks) goes on `feature/<task>` branches with disjoint files. Two heroes are not disjoint.
-- No push unless the user asks.
-- No `reset --hard`, `clean`, force checkout, `stash drop`, `branch -D` or force push without explicit user approval.
+- Push only your own task branch. No `reset --hard`, `clean`, force checkout, `stash drop`, `branch -D`, remote-branch deletion or force push without explicit user approval.
 
 ## Naming (summary of PROJECT_RULES §8 — follow it exactly)
 

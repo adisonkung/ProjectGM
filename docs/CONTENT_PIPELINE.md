@@ -18,7 +18,7 @@ IDs and file names follow **`docs/PROJECT_RULES.md` §8 (Naming)** exactly. That
 
 ## NEW HERO
 
-A new hero is a **long task**: create `wip/<agent>-hero-<id>` **before the first edit** and commit a checkpoint after each finished step (`docs/PROJECT_RULES.md` §5). Start from `HEROES` (`core/data/heroes.ts`), never from memory.
+A new hero is a **long task**: `git fetch origin`, create `wip/<agent>-hero-<id>` from the latest `origin/master` **before the first edit**, commit (and push) a checkpoint after each finished step, and push the finished branch for review — it is merged into `master` only after the user's review (`docs/PROJECT_RULES.md` §5). Start from `HEROES` (`core/data/heroes.ts`), never from memory.
 
 | # | Step | Real location |
 |---|---|---|
