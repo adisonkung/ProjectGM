@@ -148,7 +148,11 @@ export class PixiUnitLayer {
         preference: 'webgl',
       });
       app.ticker?.stop();
-      app.canvas.style.cssText = 'position:absolute;left:0;top:0;display:block;';
+      // keep autoDensity's CSS width / height (a cssText here wiped them → on a 2× screen the canvas showed at its
+      // pixel size: every sprite twice as big and shifted right / down)
+      Object.assign(app.canvas.style, { position: 'absolute', left: '0', top: '0', display: 'block' });
+      app.canvas.style.width = `${Math.max(1, width)}px`;
+      app.canvas.style.height = `${Math.max(1, height)}px`;
       host.appendChild(app.canvas);
       const stage = new pixi.Container();
       stage.sortableChildren = true;
@@ -163,7 +167,11 @@ export class PixiUnitLayer {
   }
 
   resize(width: number, height: number): void {
-    if (width > 0 && height > 0) this.app.renderer.resize(width, height);
+    if (width > 0 && height > 0) {
+      this.app.renderer.resize(width, height);
+      this.app.canvas.style.width = `${width}px`;
+      this.app.canvas.style.height = `${height}px`;
+    }
   }
 
   destroy(): void {
