@@ -193,7 +193,7 @@ export const CLASS_KITS: Record<HeroClass, HeroKit> = { tank, fighter, assassin,
 // ------------------------------------------------------------------ heroes with their own kit
 
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
-  // 2026-10 remodel: Bai Long is the only hero (the template the remodelled roster follows) — the old roster was removed
+  // 2026-10 remodel: per-hero kits of the shipped roster (the old roster lives only in src/testing/legacy-roster.ts)
   // เยว่เจิ้ง (Iron Mountain Bastion, 3★ Tank, remodel #2): Tank baseline numbers (ids / rank tables unchanged) —
   // only the names follow the character · Stone Guardian Lion / Mountain Seal Qi visuals come with the skill art
   yuezheng: {
