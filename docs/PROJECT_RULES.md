@@ -83,7 +83,7 @@ git log --since='3 days' --name-status --format='--- %h %an %s'
 
 Then:
 
-1. **Read the rules.** Read `AGENTS.md`, this file, and the doc for the system you will touch. Read `docs/AI_HANDOFF.md` as a hint (its *Next agent must inspect* list and sync checkpoint); Git wins.
+1. **Read the rules.** Read `AGENTS.md`, this file, and the doc for the system you will touch. Read `docs/AI_HANDOFF.md` as a hint (its *Next agent must inspect* list and last confirmed sync base); query the current state with `git rev-parse HEAD` / `HEAD^{tree}`. Git wins.
 2. **Read other agents' work.** If any commit or `wip/*` branch was made since your last session by another agent, check the `Co-Authored-By` trailer or the handoff note, then read it (`git show <hash> --stat`, then the diff) **before** continuing.
 3. **Check the registries.** Inspect the registries and tests of the system (`docs/CONTENT_PIPELINE.md`). For example, before a new hero, read `HEROES` in `core/data/heroes.ts`.
 4. **Uncommitted changes you did not make:** never reset, clean, stash-drop or overwrite them. Work out whose they are; if unclear, report before touching overlapping files.
@@ -138,25 +138,32 @@ If an agent is cut off on `master` during a small task anyway, the next agent tr
 
 Claude works in a cloud copy. `git am` re-commits every patch, so **cloud and local commit hashes never have to match. Tree content must match** (`git rev-parse HEAD^{tree}`) before Claude starts implementation work.
 
-**Synchronization checkpoint.** `docs/AI_HANDOFF.md` records:
+**Synchronization base (confirmed sync point).** `docs/AI_HANDOFF.md` may store only the **last confirmed** synchronization base:
 
-- *Last synchronized local commit* — the **local** commit hash at which the local tree was last verified equal to Claude's cloud tree;
-- *Last synchronized tree* — that tree hash.
+- *Last confirmed local commit* — a **local** commit hash;
+- *Last confirmed common tree* — the tree hash that the local copy and the cloud copy were **both verified** to have at that commit.
 
-A note cannot contain the hash of the commit that adds it. When the handoff says the checkpoint is "this commit", read it from Git: `git log -1 --format='%H %T' -- docs/AI_HANDOFF.md` (local repo), and confirm the tree matches the cloud copy.
+Rules:
+
+- **No self-reference.** `AI_HANDOFF.md` never stores the hash of the commit or tree that contains it: editing the note changes the tree, so its "own" hash cannot be written into it. It records an **earlier**, already-confirmed base.
+- **Current state is always queried, never read from the note:** `git rev-parse HEAD` and `git rev-parse HEAD^{tree}`, on each side.
+- **A sync point becomes confirmed only after both copies verify identical tree content** (`git rev-parse HEAD^{tree}` equal locally and in the cloud). A commit that has not been verified on both sides is not a sync point, even if it was delivered.
+- `git log -1 -- docs/AI_HANDOFF.md` may be used to **locate the last handoff-note commit**, but it is **not** automatically the last confirmed sync point.
+- When a later session verifies a newer commit on both sides, it may record that commit / tree as the new confirmed base (in a later commit — which, again, is not itself the base).
 
 1. **Start of session (local → Claude):**
-   1. Read the checkpoint. On the local machine run `git log --oneline <LAST_SYNCED_LOCAL_COMMIT>..master` to see newer commits (e.g. from Codex).
-   2. If there are any: `git format-patch --binary <LAST_SYNCED_LOCAL_COMMIT>..master -o "Claude outputs/sync"`.
-   3. Apply them in the cloud copy with `git am --3way`.
-   4. Compare `git rev-parse HEAD^{tree}` on both sides. **Do not start until they match.**
-   5. Check `wip/*` branches the same way if you are continuing one.
-   - **If the checkpoint is unknown or inconsistent** (missing, or its tree does not match the cloud copy's history): do not guess a base. Inspect the history on both sides (`git log --format='%h %T %s'`), find the last commit whose **tree** exists on both sides, and report the ambiguity to the user before applying anything.
+   1. Query the current state on both sides: `git rev-parse HEAD` and `git rev-parse HEAD^{tree}`. If the trees already match, there is nothing to sync.
+   2. Otherwise read the *last confirmed local commit* `<BASE>` from `AI_HANDOFF.md`. Check that the cloud copy has a commit with the same **tree** as `<BASE>` (`git log --format='%H %T'`). On the local machine run `git log --oneline <BASE>..master` to see newer commits (e.g. from Codex).
+   3. `git format-patch --binary <BASE>..master -o "Claude outputs/sync"` (local), starting from the cloud commit whose tree equals the confirmed common tree.
+   4. Apply them in the cloud copy with `git am --3way`.
+   5. Compare `git rev-parse HEAD^{tree}` on both sides. **Do not start until they match** — that match is now a confirmed sync point.
+   6. Check `wip/*` branches the same way if you are continuing one.
+   - **If the confirmed base is unknown or inconsistent** (missing, or no cloud commit has its tree): do not guess a base. Inspect the history on both sides (`git log --format='%h %T %s'`), find the last commit whose **tree** exists on both sides, and report the ambiguity to the user before applying anything.
 2. **Delivery (Claude → local):**
    1. Run `git format-patch --binary` and write the patch to `Claude outputs/<task>/` (gitignored).
    2. Apply it locally with `git am --3way`.
-   3. Verify that the tree hash equals the cloud tree hash.
-   4. Update the checkpoint in `docs/AI_HANDOFF.md` (in the delivered commit, or in the next one).
+   3. Verify that the tree hash equals the cloud tree hash (`git rev-parse HEAD^{tree}` on both sides). The delivered commit is now a confirmed sync point.
+   4. Record it as the confirmed base in `docs/AI_HANDOFF.md` **in a later commit** (never inside the delivered commit itself — see *No self-reference*).
    5. If `git am` fails: `git am --abort`, then report. Never force it.
 3. Lock files left by an interrupted `git am` may only be removed after confirming that no git process is running.
 

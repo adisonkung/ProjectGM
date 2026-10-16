@@ -92,5 +92,5 @@ Work produced by any agent is first-class. Never rewrite it for style or prefere
    - `npx tsc -p tsconfig.spec.json --noEmit`
 3. Tests: `npm test` (headless: `--karma-config=karma.ci.cjs`), plus the relevant sims if combat changed.
 4. Run `npm run sprites:optimize` if `public/sprites/*.png` changed.
-5. Update `CLAUDE.md` (the feature notes; Codex too) and `docs/AI_HANDOFF.md`.
+5. Update `CLAUDE.md` (the feature notes; Codex too) and `docs/AI_HANDOFF.md`. The handoff note records only the **last confirmed** sync base (a commit/tree verified identical on both sides) — never the hash of the commit that contains the note. Current state is always `git rev-parse HEAD` / `HEAD^{tree}` (PROJECT_RULES §5).
 6. Commit with `git add <paths>`, a subject in the form `type(scope): summary`, and your agent trailer (`Co-Authored-By: Codex …` / `Claude …`). Then stop.
