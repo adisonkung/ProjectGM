@@ -1,5 +1,6 @@
 import type { Application, ColorMatrixFilter, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { particleDef, ParticleShape } from '../../core/data/particles';
+import { gridCell, spriteUrl, stripGrid } from '../../core/data/sprite-files';
 import { FX, SHEETS, SheetDef } from '../../core/data/sprites';
 import type { AdvancedBloomFilter, GlowFilter } from 'pixi-filters';
 import { fxLength, fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
@@ -183,7 +184,7 @@ export class PixiUnitLayer {
     if (t === 'loading' || t === 'failed') return null;
     if (t) return t;
     this.textures.set(file, 'loading');
-    this.pixi.Assets.load<Texture>(`sprites/${file}`).then(
+    this.pixi.Assets.load<Texture>(spriteUrl(file)).then(
       tex => {
         tex.source.scaleMode = def.pixelated ? 'nearest' : 'linear';
         this.textures.set(file, tex);
@@ -222,8 +223,9 @@ export class PixiUnitLayer {
     return f;
   }
 
+  /** the DOM rule: the image is cut into cols × rows equal cells (background-size cols×100 % rows×100 %) */
   private frame(file: string, def: SheetDef, base: Texture, row: number, col: number): Texture {
-    return this.cellTex(file, base, def.pixelated, def.cellW ?? 132, def.cellH ?? 100, col, row);
+    return this.cellTex(file, base, def.pixelated, base.source.pixelWidth / def.cols, base.source.pixelHeight / def.rows, col, row);
   }
 
   /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
@@ -237,8 +239,11 @@ export class PixiUnitLayer {
     }
   }
 
+  /** frame i of an FX / projectile strip — one row, or the grid the optimizer re-packed it into */
   private fxFrame(file: string, base: Texture, strip: number, i: number, pixelated?: boolean): Texture {
-    return this.cellTex(file, base, pixelated, base.source.pixelWidth / strip, base.source.pixelHeight, i, 0);
+    const g = stripGrid(file, strip);
+    const [c, r] = gridCell(i, g);
+    return this.cellTex(file, base, pixelated, base.source.pixelWidth / g.cols, base.source.pixelHeight / g.rows, c, r);
   }
 
   /**

@@ -1,4 +1,5 @@
 import { Component, ElementRef, afterNextRender, computed, inject, input, viewChild } from '@angular/core';
+import { gridPosition, spriteUrl, stripGrid } from '../../core/data/sprite-files';
 import { FX, PROJECTILE_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 
 /**
@@ -10,8 +11,8 @@ import { FX, PROJECTILE_SCALE, PX_TO_CELL } from '../../core/data/sprites';
  */
 @Component({
   selector: 'app-projectile',
-  template: `<div #el class="p" [style.background-image]="'url(sprites/' + def().file + ')'"
-    [style.background-size]="def().frames * 100 + '% 100%'" [style.width.%]="def().w * pxToCell * (def().scale ?? 1) * projScale"
+  template: `<div #el class="p" [style.background-image]="'url(' + url() + ')'"
+    [style.background-size]="grid().cols * 100 + '% ' + grid().rows * 100 + '%'" [style.width.%]="def().w * pxToCell * (def().scale ?? 1) * projScale"
     [style.aspect-ratio]="def().w + ' / ' + def().h" [style.transform]="'translate(-50%, -50%) rotate(' + rot() + 'deg)'"></div>`,
   styles: `
     :host { position: absolute; left: 0; top: 0; width: var(--cell); height: var(--cell); pointer-events: none; z-index: 105; }
@@ -29,6 +30,8 @@ export class ProjectileComponent {
 
   readonly el = viewChild.required<ElementRef<HTMLElement>>('el');
   readonly def = computed(() => FX[this.name()]);
+  readonly grid = computed(() => stripGrid(this.def().file, this.def().frames));
+  readonly url = computed(() => spriteUrl(this.def().file));
   readonly pxToCell = PX_TO_CELL;
   readonly projScale = PROJECTILE_SCALE;
   readonly rot = computed(() => {
@@ -50,7 +53,8 @@ export class ProjectileComponent {
       host.animate([{ transform: t(a) }, { transform: t(b) }], { duration: ms, easing: 'linear' });
       const el = this.el().nativeElement;
       const flyFrames = Math.max(1, d.frames - 1);
-      const x = (i: number) => `${d.frames > 1 ? (i / (d.frames - 1)) * 100 : 0}% 0%`; // one-frame bolt: no NaN %
+      const g = this.grid();
+      const x = (i: number) => gridPosition(i, g); // one-frame bolt: 0 % (no NaN)
       const k: Keyframe[] = [];
       for (let i = 0; i < flyFrames; i++) k.push({ offset: i / flyFrames, easing: 'steps(1, end)', backgroundPosition: x(i) });
       k.push({ offset: 1, backgroundPosition: x(flyFrames - 1) });

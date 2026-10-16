@@ -316,7 +316,8 @@ export class BoardComponent {
     host.style.cssText = 'position:absolute;inset:0;z-index:6;pointer-events:none;';
     (board.querySelector<HTMLElement>(':scope > .cam') ?? board).appendChild(host);
     this.pixiHost = host;
-    import('../render/pixi-units').then(m => m.PixiUnitLayer.create(host, board.clientWidth, board.clientHeight)).then(layer => {
+    // chunk load failure (offline / stale deploy) = stay DOM, like a device without WebGL
+    import('../render/pixi-units').then(m => m.PixiUnitLayer.create(host, board.clientWidth, board.clientHeight)).catch(() => null).then(layer => {
       this.pixiPending = false;
       if (!layer || this.renderer() !== 'pixi') {
         layer?.destroy();

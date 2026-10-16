@@ -1,11 +1,12 @@
 import { Component, ElementRef, afterNextRender, computed, inject, input, viewChild } from '@angular/core';
+import { gridPosition, spriteUrl, stripGrid } from '../../core/data/sprite-files';
 import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 
 /** เล่นเอฟเฟกต์สกิลหนึ่งรอบแล้วหายไป (ผู้เรียกลบออกจากรายการเองตาม fxDuration) */
 @Component({
   selector: 'app-fx-sprite',
-  template: `<div #el class="fx" [style.background-image]="'url(sprites/' + def().file + ')'"
-    [style.background-size]="strip() * 100 + '% 100%'" [style.width.%]="def().fitCells ? def().fitCells! * 100 : def().w * pxToCell * (def().scale ?? 1) * fxScale"
+  template: `<div #el class="fx" [style.background-image]="'url(' + url() + ')'"
+    [style.background-size]="grid().cols * 100 + '% ' + grid().rows * 100 + '%'" [style.width.%]="def().fitCells ? def().fitCells! * 100 : def().w * pxToCell * (def().scale ?? 1) * fxScale"
     [style.aspect-ratio]="def().w + ' / ' + def().h" [style.left]="'calc(50% + ' + (offset()?.[0] ?? def().dx ?? 0) * (flip() ? -1 : 1) + '%)'"
     [style.top]="'calc(50% + ' + (offset()?.[1] ?? def().dy ?? 0) + '%)'" [style.transform-origin]="origin()" [class.pixelated]="!!def().pixelated" [class.add]="def().blend === 'add'"
     [style.transform]="'translate(' + -pivot()[0] * 100 + '%, ' + -pivot()[1] * 100 + '%) rotate(' + angle() + 'deg)' + (flip() ? ' scaleX(-1)' : '')"></div>`,
@@ -32,6 +33,9 @@ export class FxSpriteComponent {
   readonly pivot = computed(() => this.def().pivot ?? [0.5, 0.5]);
   /** frames in the file (a segment of a longer strip plays frames from → from + frames − 1) */
   readonly strip = computed(() => this.def().stripFrames ?? this.def().frames);
+  /** frame layout in the served file (long strips are re-packed into grids — core/data/sprite-files.ts) */
+  readonly grid = computed(() => stripGrid(this.def().file, this.strip()));
+  readonly url = computed(() => spriteUrl(this.def().file));
   readonly origin = computed(() => `${this.pivot()[0] * 100}% ${this.pivot()[1] * 100}%`);
   readonly pxToCell = PX_TO_CELL;
   readonly fxScale = FX_SCALE;
@@ -43,29 +47,28 @@ export class FxSpriteComponent {
   constructor() {
     afterNextRender(() => {
       const d = this.def();
-      const n = this.strip();
-      const pos = (i: number) => (n > 1 ? (i / (n - 1)) * 100 : 0);
-      this.el().nativeElement.animate(
-        [
-          { backgroundPosition: `${pos(d.from ?? 0)}% 0%`, opacity: 1 },
-          { backgroundPosition: `${pos((d.from ?? 0) + d.frames - 1)}% 0%`, opacity: 1 },
-        ],
-        // steps(n, jump-none) = n ค่า 0% … 100% ตรงกับ n เฟรมพอดี
-        // (ถ้าใช้ n-1 ตำแหน่งจะคร่อมระหว่างเฟรม เห็นครึ่งเฟรมข้าง ๆ เป็นรอยตัดแนวตั้ง)
-        // delayMs: hidden (base opacity 0) until it starts
-        // repeat > 1 = a looping field: the strip plays `repeat` times back to back (then the optional fade-out)
-        (d.repeat ?? 1) > 1
-          ? { duration: (d.frames * d.frameMs) / this.speed(), iterations: d.repeat, delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' }
-          : { duration: (d.frames * d.frameMs) / this.speed(), delay: this.delay(), easing: `steps(${d.frames}, jump-none)`, fill: 'none' },
-      );
+      const g = this.grid();
+      const from = d.from ?? 0;
+      const pos = (i: number) => gridPosition(i, g);
+      // one keyframe per frame held for frameMs (steps(1, end)) — a strip or a re-packed grid alike
+      // delayMs: hidden (base opacity 0) until it starts
+      // repeat > 1 = a looping field: the strip plays `repeat` times back to back (then the optional fade-out)
+      const k: Keyframe[] = Array.from({ length: d.frames }, (_, i) => ({ offset: i / d.frames, easing: 'steps(1, end)', backgroundPosition: pos(from + i), opacity: 1 }));
+      k.push({ offset: 1, backgroundPosition: pos(from + d.frames - 1), opacity: 1 });
+      this.el().nativeElement.animate(k, {
+        duration: (d.frames * d.frameMs) / this.speed(),
+        iterations: Math.max(1, d.repeat ?? 1),
+        delay: this.delay(),
+        fill: 'none',
+      });
       // release-and-vanish FX: the last (peak) frame stays and fades out over fadeOutMs instead of collapsing
       if (d.fadeOutMs) {
         const play = (d.frames * d.frameMs * (d.repeat ?? 1)) / this.speed();
         const total = fxDuration(this.name(), this.speed());
         this.el().nativeElement.animate(
           [
-            { backgroundPosition: `${pos((d.from ?? 0) + d.frames - 1)}% 0%`, opacity: 1, offset: 0 },
-            { backgroundPosition: `${pos((d.from ?? 0) + d.frames - 1)}% 0%`, opacity: 0, offset: 1 },
+            { backgroundPosition: pos(from + d.frames - 1), opacity: 1, offset: 0 },
+            { backgroundPosition: pos(from + d.frames - 1), opacity: 0, offset: 1 },
           ],
           { duration: total - this.delay() - play, delay: this.delay() + play, easing: 'ease-in', fill: 'none' },
         );

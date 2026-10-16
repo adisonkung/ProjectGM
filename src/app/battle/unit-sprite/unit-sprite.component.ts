@@ -1,3 +1,4 @@
+import { spriteUrl } from '../../core/data/sprite-files';
 import { Component, ElementRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { ANIM_FALLBACK, FRAME_MS, IDLE_FRAME_MS, SHEETS, SheetDef, SpriteAnim } from '../../core/data/sprites';
 import { MockVisual } from '../../core/data/visuals';
@@ -60,6 +61,8 @@ export class UnitSpriteComponent {
   readonly sheet = viewChild<ElementRef<HTMLElement>>('sheet');
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);
   readonly def = computed<SheetDef | undefined>(() => SHEETS[this.sprite() ?? '']);
+  /** the optimised file the game serves (core/data/sprite-files.ts) */
+  readonly url = computed(() => spriteUrl(this.sprite() ?? ''));
   readonly bgSize = computed(() => {
     const d = this.def();
     return d ? `${d.cols * 100}% ${d.rows * 100}%` : null;
