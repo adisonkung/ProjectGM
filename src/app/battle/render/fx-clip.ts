@@ -93,7 +93,8 @@ export function fxPlacement(
     width,
     height,
     rotation: (angle * Math.PI) / 180,
-    flip,
+    // the image mirrors with the caster's facing (dx above), and once more for art drawn facing left
+    flip: flip !== !!d.mirror,
   };
 }
 

@@ -129,6 +129,8 @@ export interface FxDef {
   pivot?: [number, number];
   /** nearest-neighbour rendering (pixel-art FX) */
   pixelated?: boolean;
+  /** the art faces left (e.g. a dragon head looking back at the caster): drawn mirrored so it faces the way the caster faces */
+  mirror?: boolean;
   /** spawn on a semantic clip event instead (e.g. CHARGE_START, STRIKE_START) — `eventIndex` for repeated events */
   event?: SemanticEvent;
   eventIndex?: number;
@@ -1001,6 +1003,8 @@ export const FX: Record<string, FxDef> = {
     ],
     file: 'fx-bailong-v3-impact.png', frames: 10, w: 145, h: 354, frameMs: 55, at: 'self', orient: 'flip', on: 'impact',
     hitIndex: 2, pivot: [0.5, 0.994], dx: 100, dy: 27.25, scale: 0.58, pixelated: true,
+    // the roaring head in the art looks left (back at Bai Long) — mirror it to face the enemy
+    mirror: true,
   },
   // Yue Zheng S1 Iron Wall Taunt (tools/sprites/yuezheng_s1.py): both tracks baked in sync-sheet order at 30 FPS
   // (every 2nd timeline frame), atlas px (scale 1 / FX_SCALE) · main = Mountain Seal wall, pivot = shield front of the

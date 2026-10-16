@@ -132,3 +132,24 @@ describe('projectilePoseAt / projectilePlacement (one-clock projectiles)', () =>
     wrap.remove();
   });
 });
+
+describe('FxDef.mirror (art drawn facing left)', () => {
+  it('the Bai Long ult pillar head faces the enemy: image mirrored, placement unchanged', async () => {
+    const d = FX['bl3-impact'];
+    expect(d.mirror).toBeTrue();
+    for (const flip of [false, true]) {
+      const p = fxPlacement(d, 50, 0, 0, flip, 0);
+      expect(p.flip).toBe(!flip);                                                // facing right → drawn mirrored
+      expect(p.x).toBeCloseTo(fxPlacement({ ...d, mirror: false }, 50, 0, 0, flip, 0).x, 6); // same spot (dx follows the caster)
+    }
+    const { TestBed } = await import('@angular/core/testing');
+    const { FxSpriteComponent } = await import('../fx-sprite/fx-sprite.component');
+    const fixture = TestBed.createComponent(FxSpriteComponent);
+    fixture.componentRef.setInput('name', 'bl3-impact');
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.fx')!.style.transform).toContain('scaleX(-1)');
+    fixture.componentRef.setInput('flip', true);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.fx')!.style.transform).not.toContain('scaleX(-1)');
+  });
+});
