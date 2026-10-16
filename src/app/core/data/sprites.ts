@@ -961,25 +961,6 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-sweeping-moon-hit.png', frames: 8, w: 160, h: 145, frameMs: 55, at: 'target', orient: 'flip', on: 'impact',
     perHit: 3, dy: -16.5, scale: 0.43, pixelated: true,
   },
-  // Nine Dragon — ชาร์จ: ออร่ามังกรรอบตัว (ใต้ยูนิต) CHARGE_START → หมดก่อนจังหวะแรก (10 × 65 ms = 0.65 วิ)
-  'bailong-nine-dragon-charge': {
-    file: 'fx-bailong-nine-dragon-charge.png', frames: 10, w: 164, h: 126, frameMs: 65, at: 'self', orient: 'flip',
-    event: 'CHARGE_START', anchor: 'ultimateChargeOrigin', pivot: [0.5, 0.984], scale: 0.72, layer: 'under', pixelated: true,
-  },
-  // จังหวะ 1–2: แผ่นมังกรเดิม 28 เฟรม (ช่วงเฟรม 1–10 มังกรพุ่งตรง · 11–19 มังกรขดโค้ง) กลางอยู่ 1.5 ช่องหน้าตัว
-  'bailong-nine-dragon-1': {
-    file: 'fx-bailong-nine-dragon.png', from: 0, frames: 10, stripFrames: 28, w: 292, h: 173, frameMs: 45, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 0, anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
-  },
-  'bailong-nine-dragon-2': {
-    file: 'fx-bailong-nine-dragon.png', from: 10, frames: 9, stripFrames: 28, w: 292, h: 173, frameMs: 63, at: 'self', orient: 'flip',
-    event: 'STRIKE_START', eventIndex: 1, anchor: 'ultimateForwardOrigin', scale: 0.95, pixelated: true,
-  },
-  // จังหวะ 3 (ปิด): เก้ามังกร v2 เล่นครบ 8 เฟรม พีคเฟรม 5 ตรงดาเมจ แล้วสลายเอง
-  'bailong-nine-dragon-3': {
-    file: 'fx-bailong-nine-dragon-3.png', frames: 8, w: 277, h: 143, frameMs: 82, at: 'self', orient: 'flip',
-    event: 'FINAL_ANTICIPATION', anchor: 'ultTip3', pivot: [0.068, 0.5], scale: 1.1, pixelated: true,
-  },
   // ---- Bai Long ult v3 dragons (bailong.py VFX_SHEETS 'v3_*', strips cut at 0.5 of the 2172 × 724 sources) ----
   // thrust: thin dragon launches from the spear tip forward (tail = left pivot)
   'bl3-hint': {
@@ -1148,12 +1129,6 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-v3-residual.png', frames: 6, w: 190, h: 270, frameMs: 70, at: 'self', orient: 'flip', on: 'impact',
     hitIndex: 2, dx: 100, dy: -40, scale: 0.46, delayMs: 420, pixelated: true,
     particles: [{ name: 'spirit-rise', duration: 0.6 }],
-  },
-  // กระแทกครั้งสุดท้าย — กว้างเท่าพื้นที่ที่โดน (ADJACENT_8 รอบเป้า = 3 ช่อง + ขอบ) — เฉพาะจังหวะที่ 3 ที่โดนจริง บนพื้นใต้เป้า
-  'bailong-nine-dragon-impact': {
-    particles: [{ name: 'sparks', colors: [0xe8fdff, 0x8fe8ff, 0x3ab8e0], count: 16 }],
-    file: 'fx-bailong-nine-dragon-impact.png', frames: 12, w: 202, h: 168, frameMs: 60, at: 'target', orient: 'flip', on: 'impact',
-    hitIndex: 2, pivot: [0.5, 0.988], dy: 27.25, fitCells: 3.4, scale: 0.78, pixelated: true,
   },
 };
 

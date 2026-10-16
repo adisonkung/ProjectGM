@@ -49,3 +49,7 @@ Thumbs.db
 
 # sprite normalization outputs (tools/sprites/normalize.py) — regenerated, not committed
 /art/normalized/
+
+# python bytecode
+__pycache__/
+*.pyc

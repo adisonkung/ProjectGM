@@ -21,9 +21,6 @@ Skill 2 / Ultimate (optional, used when the files exist):
   sweep_vfx.png     Sweeping Moon crescent (7 + 6 = 13 frames)            → fx-bailong-sweeping-moon.png
   sweep_impact.png  Sweeping Moon contact FX (4 + 4)                      → fx-bailong-sweeping-moon-hit.png
   ult_char.png      Nine Dragon Sequence character clip v2 (magenta, 4 x 5 = 20 frames) → atlas row 7 (ult)
-  ult_strike1..3.png  v2 main VFX: one 1×8 strip per strike (thrust / dragon pillar under the target / nine dragons) → fx-bailong-nine-dragon-1..3.png
-  ult_charge.png    charge aura around the body (5 + 5)                   → fx-bailong-nine-dragon-charge.png
-  ult_impact.png    final contact burst (4 + 4 + 4)                       → fx-bailong-nine-dragon-impact.png
   Frames that touch (spear / qi across neighbours) are split by a watershed seeded on each body / core, never by
   straight cuts. VFX frames are aligned per sheet (left-centre crescent, centre, bottom-centre ground bursts).
 
@@ -363,20 +360,6 @@ VFX_SHEETS = {
     'sweep_impact': ('fx-bailong-sweeping-moon-hit.png', 'center', 0.4, [
         (0, 600, [160, 470, 840, 1240]),
         (600, 1086, [210, 590, 930, 1270])]),
-    'ult_charge': ('fx-bailong-nine-dragon-charge.png', 'bottom', 0.35, [
-        (0, 350, [206, 624, 1043, 1504, 1944]),
-        (350, 724, [206, 630, 1086, 1542, 1955])]),
-    # old 28-frame main sheet (alpha version of the white-background render the user re-sent): strikes 1–2 use
-    # its first two segments (frames 1–10 straight dragon, 11–19 curling dragons)
-    'ult_main': ('fx-bailong-nine-dragon.png', 'center', 0.7, [
-        (0, 222, [115, 345, 575, 815, 1035, 1265, 1510]),
-        (222, 440, [160, 450, 690, 900, 1085, 1305, 1535]),
-        (440, 680, [105, 310, 530, 740, 945, 1180, 1480]),
-        (680, 941, [215, 615, 815, 1030, 1235, 1400, 1580])]),
-    'ult_impact': ('fx-bailong-nine-dragon-impact.png', 'bottom', 0.45, [
-        (0, 380, [165, 510, 865, 1240]),
-        (380, 770, [225, 590, 945, 1280]),
-        (770, 1086, [210, 560, 900, 1260])]),
     # ult v3 dragon set (one strip per phase, 2172 × 724, transparent): frame centres read off each strip
     'v3_hint': ('fx-bailong-v3-hint.png', 'left', 0.5, [(0, 724, [185, 510, 847, 1216, 1607, 1977])]),
     'v3_emerge': ('fx-bailong-v3-emerge.png', 'left', 0.5, [(0, 724, [119, 364, 624, 890, 1162, 1428, 1710, 2009])]),
@@ -389,10 +372,7 @@ VFX_SHEETS = {
 
 
 # Nine Dragon strikes (v2 art): one 1×8 strip per strike, magenta background, the dragon's tail spark at the left.
-STRIKE_STRIPS = {
-    # (ult_strike1 / ult_strike2 — straight dragon / pillar — retired with the in-between strikes; art kept in incoming)
-    'ult_strike3': ('fx-bailong-nine-dragon-3.png', 0.62),
-}
+STRIKE_STRIPS = {}   # ult v2 strike strips retired (ult v3 uses the v3_* dragon set above)
 
 
 def cut_strip(name, scale, want=8, mode='tail'):

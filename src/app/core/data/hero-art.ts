@@ -1,6 +1,6 @@
 /**
  * ภาพประกอบของฮีโร่ (public/portraits, public/skills): รูปโปรไฟล์ + ไอคอนสกิล 1 / สกิล 2 / ท่าไม้ตาย
- * ตัดมาจากแผ่นไอคอนที่ผู้เล่นเจนมา (ดู tools/art/slice_icons.py) · ฮีโร่ที่ยังไม่มีภาพ ใช้ sprite ครอปแทน
+ * จาก art/incoming/<id>/art/{portrait,s1,s2,ult,banner}.png ผ่านสคริปต์ของฮีโร่ (tools/sprites/<id>.py) · ฮีโร่ที่ยังไม่มีภาพ ใช้ sprite ครอปแทน
  */
 export interface HeroArt {
   portrait: string;
