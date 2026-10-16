@@ -369,12 +369,13 @@ export const SHEETS: Record<string, SheetDef> = {
         row: 7, frames: 17, ms: 100,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
         // ×1.15 slower than the sync sheet (user 2026-10: a little slower, smooth, grander) — every tx-ult FX frameMs / delayMs × 1.15 too
-        steps: [192, 153, 422, 230, 153, 153, 192, 115, 230, 153, 153, 153, 77, 77, 230, 115, 77],
+        // C03 held T018–T063 (user 2026-10: the charge loops and holds, the blades are thrown once at T064 = VFX_SPAWN)
+        steps: [192, 153, 882, 230, 153, 153, 192, 115, 230, 153, 153, 153, 77, 77, 230, 115, 77],
         events: {
-          CAST_START: 0, ANTICIPATION_PEAK: 1.0, CHARGE_START: 2.0, CHARGE_PEAK: 2.818, VFX_SPAWN: 3.0,
+          CAST_START: 0, ANTICIPATION_PEAK: 1.0, CHARGE_START: 2.0, CHARGE_PEAK: 2.913, VFX_SPAWN: 3.0,
           FINAL_ANTICIPATION: 13.0, STRIKE_START: 14.0, DAMAGE: [10.5, 11.0, 11.5, 12.0, 14.167], IMPACT: [10.5, 11.0, 11.5, 12.0, 14.167], RECOVERY_START: 16.0,
         },
-        root: [[0.0, 0.0, 0], [0.6, 0.0, 0], [1.25, 0.0, 0], [2.0, 0.0, 0], [2.273, 0.0, 0], [2.545, 0.0, 0], [2.818, 0.0, 0], [3.0, 0.0, 0], [3.167, 2.0, 0], [3.333, 4.0, 0], [3.667, 3.0, 0], [4.0, 2.0, 0], [4.25, 1.7, 0], [5.0, 0.0, 0], [5.75, 0.0, 0], [6.4, 0.0, 0], [7.0, 0.0, 0], [8.0, 0.0, 0], [8.333, 5.0, 0], [8.5, 5.0, 0], [9.0, 4.5, 0], [9.75, 4.0, 0], [10.0, 4.0, 0], [10.5, 3.8, 0], [11.25, 3.0, 0], [12.0, 2.2, 0], [13.0, 2.0, 0], [13.5, 5.0, 0], [14.0, 8.0, 0], [14.333, 12.0, 0], [14.833, 10.3, 0], [15.0, 10.0, 0], [15.667, 6.3, 0], [16.0, 5.0, 0], [17.0, 0.0, 0]],
+        root: [[0.0, 0.0, 0], [0.6, 0.0, 0], [1.25, 0.0, 0], [2.0, 0.0, 0], [2.913, 0.0, 0], [3.0, 0.0, 0], [3.167, 2.0, 0], [3.333, 4.0, 0], [3.667, 3.0, 0], [4.0, 2.0, 0], [4.25, 1.7, 0], [5.0, 0.0, 0], [5.75, 0.0, 0], [6.4, 0.0, 0], [7.0, 0.0, 0], [8.0, 0.0, 0], [8.333, 5.0, 0], [8.5, 5.0, 0], [9.0, 4.5, 0], [9.75, 4.0, 0], [10.0, 4.0, 0], [10.5, 3.8, 0], [11.25, 3.0, 0], [12.0, 2.2, 0], [13.0, 2.0, 0], [13.5, 5.0, 0], [14.0, 8.0, 0], [14.333, 12.0, 0], [14.833, 10.3, 0], [15.0, 10.0, 0], [15.667, 6.3, 0], [16.0, 5.0, 0], [17.0, 0.0, 0]],
         // minor cuts: 1-frame hit-stop, 1–2 px · finisher: 6 frames, 8 px + flash
         impact: [{ hitStopMs: 17, shakePx: 2, shakeMs: 50 }, { hitStopMs: 17, shakePx: 2, shakeMs: 50 }, { hitStopMs: 17, shakePx: 2, shakeMs: 50 }, { hitStopMs: 25, shakePx: 3, shakeMs: 60 }, { hitStopMs: 120, shakePx: 10, shakeMs: 300, flashMs: 200, zoomPct: 6 }],
         // the charge gathers with a slow push-in; the blades leave the hand with a small kick
@@ -730,16 +731,16 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.6333, 0.5345], dx: -12.5, dy: -27.75, scale: 1 / 1.5,
   },
   // Tang Xun Ult Heaven-Snaring Blade Array (painted VFX, 30 FPS strips in timeline order — not pixelated):
-  // charge around him (CHARGE_START T018, behind, ends streaming toward the target) · the array at the locked target's
-  // feet (VFX_SPAWN T040 → fades T124–T129) · small jade sparks on the 4 minor cuts · impact (hit 5, peak T133) · residual (T140)
+  // charge around him (CHARGE_START T018, behind: builds f1–f8 then LOOPS f8 → f9 → f10 → f9 cross-faded until the throw at
+  // T064, then pulls in and fades — no stream-out frames) · the array at the locked target's feet (after the blades dive, T094 → fades T148–T153) · small jade sparks on the 4 minor cuts · impact (hit 5, peak T133) · residual (T140)
   'tx-ult-charge': {
-    file: 'fx-tangxun-ult-charge.png', frames: 18, w: 306, h: 151, frameMs: 38.33, at: 'self', orient: 'flip', event: 'CHARGE_START', layer: 'under',
-    pivot: [0.2523, 0.7998], dy: 27.25, scale: 1.35 / 1.5,
+    file: 'fx-tangxun-ult-charge.png', frames: 26, w: 155, h: 152, frameMs: 38.33, at: 'self', orient: 'flip', event: 'CHARGE_START', layer: 'under',
+    pivot: [0.4981, 0.7945], dy: 27.25, scale: 1.35 / 1.5,
     blend: 'add',
     particles: [{ name: 'spirit-rise', colors: [0xeafff4, 0x8ff0c8, 0x2fbf8a] }, { name: 'ember-rise', colors: [0xeafff4, 0x8ff0c8, 0x2fbf8a], scale: 0.9 }],
   },
   'tx-ult-main': {
-    file: 'fx-tangxun-ult-main.png', frames: 37, w: 162, h: 175, frameMs: 38.33, at: 'target', orient: 'flip', on: 'vfx', delayMs: 307,
+    file: 'fx-tangxun-ult-main.png', frames: 30, w: 162, h: 175, frameMs: 38.33, at: 'target', orient: 'flip', on: 'vfx', delayMs: 575,
     pivot: [0.4994, 0.7819], dy: 24.75, scale: 1.25 / 1.5,
     particles: [{ name: 'spirit-rise', colors: [0xeafff4, 0x8ff0c8, 0x2fbf8a], duration: 1.6 }],
   },
@@ -763,10 +764,11 @@ export const FX: Record<string, FxDef> = {
     dx: 12.5, dy: -32.75, scale: 1.3 / 1.5, pixelated: true,
     particles: [{ name: 'sparks', colors: [0xeafff4, 0x8ff0c8, 0x2fbf8a], count: 9, scale: 0.85 }],
   },
-  // the 8 thrown blades (S2 single-blade art) fly in from Tang Xun's side and ring the target T040–T065 (60 FPS, landing T052) — the
-  // storm / array ('tx-ult-main') forms only after they surround it (+267 ms = T056, frames cross-fade) · jade ground shockwave from T130
+  // the 8 blades (S2 single-blade art) are thrown ONCE at T064 (VFX_SPAWN), ring the target (T076), orbit faster and faster, dive
+  // into it together (T088–T094) with a contact flash (60 FPS, 36 fr) — the storm / array ('tx-ult-main') forms only then
+  // (+500 ms × 1.15 = T094, frames cross-fade) · jade ground shockwave from the finisher
   'tx-ult-surround': {
-    file: 'fx-tangxun-ult-surround.png', frames: 26, w: 333, h: 154, frameMs: 19.17, at: 'target', orient: 'flip', on: 'vfx',
+    file: 'fx-tangxun-ult-surround.png', frames: 36, w: 333, h: 154, frameMs: 19.17, at: 'target', orient: 'flip', on: 'vfx',
     pivot: [0.6667, 0.5649], dy: -22.75, scale: 1.25 / 1.5,
   },
   'tx-ult-shock': {

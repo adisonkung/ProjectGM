@@ -38,7 +38,7 @@ from jade import jadeify  # noqa: E402
 B.SRC = 'art/incoming/tangxun'
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/tmp/tangxun_ult'
 os.makedirs(OUT, exist_ok=True)
-FPS, N = 60, 150
+FPS, N = 60, 174
 CELL_W, CELL_H, ROOT = 260, 170, (130, 155)
 W, H, UP = 430, 200, 3
 GROUND, X0 = 168, 72
@@ -50,31 +50,33 @@ TCY = GROUND - 40                       # target body centre
 # ------------------------------------------------------------------ character (atlas row 7, game scale)
 atlas = np.array(Image.open('public/sprites/hero-tangxun.png').convert('RGBA'))
 ROW = atlas[7 * CELL_H:8 * CELL_H]
-CHAR = [(0, 9, 1), (10, 17, 2), (18, 39, 3), (40, 51, 4), (52, 59, 5), (60, 67, 6), (68, 77, 7), (78, 83, 8), (84, 95, 9),
-        (96, 103, 10), (104, 111, 11), (112, 119, 12), (120, 123, 13), (124, 127, 14), (128, 139, 15), (140, 145, 16),
-        (146, 149, 17)]
+# user 2026-10: the charge LOOPS and holds (C03 held T018–T063) → the blades are thrown ONCE (C04 T064) → they ring the
+# target, orbit, dive into it (T092) → only then the storm forms · everything after the throw = the old sheet + 24 T
+CHAR = [(0, 9, 1), (10, 17, 2), (18, 63, 3), (64, 75, 4), (76, 83, 5), (84, 91, 6), (92, 101, 7), (102, 107, 8), (108, 119, 9),
+        (120, 127, 10), (128, 135, 11), (136, 143, 12), (144, 147, 13), (148, 151, 14), (152, 163, 15), (164, 169, 16),
+        (170, 173, 17)]
 POSES = {1: ('READY', 'ยืนพร้อม', 'CAST_START T000'),
          2: ('DRAW', 'ย่อตัว ชักมีดลับ', 'PREPARE_ARRAY T010'),
-         3: ('CHARGE', 'กางแขน มีดสองมือ คุมพลัง', 'CHARGE T018–T039'),
-         4: ('RELEASE', 'ชี้ปล่อยค่ายมีด', 'MAIN_VFX_SPAWN T040'),
-         5: ('CONTROL', 'ย่อตัว มือคุมค่าย', 'ARRAY_FORMED T048'),
-         6: ('RAISE', 'ยกมือคุมวงโคจร', 'ORBIT_START T060'),
-         7: ('RAISE', 'ยกมีดสูง (กระโดดเบา)', 'TARGET_SCAN T068'),
-         8: ('LOCK', 'ลงพื้น มือยังชู', 'TARGET_LOCK T080'),
-         9: ('COMMAND', 'ชี้สั่งบีบค่าย', 'COMPRESSION T084'),
-         10: ('COMMAND', 'ค้างแขนชี้', 'ARRAY_TIGHT T096'),
-         11: ('GUIDE', 'ชี้นำมีด', 'HIT 1 T108'),
+         3: ('CHARGE', 'กางแขน มีดสองมือ คุมพลัง (ค้างลูป)', 'CHARGE T018–T063'),
+         4: ('RELEASE', 'ปามีดออกครั้งเดียว', 'BLADES_THROWN T064'),
+         5: ('CONTROL', 'ย่อตัว มือคุมมีดล้อมเป้า', 'BLADES_SURROUND T076'),
+         6: ('RAISE', 'ยกมือคุมวงโคจร', 'ORBIT T084'),
+         7: ('RAISE', 'ยกมีดสูง (กระโดดเบา)', 'BLADES_DIVE → STORM T092'),
+         8: ('LOCK', 'ลงพื้น มือยังชู', 'TARGET_LOCK T104'),
+         9: ('COMMAND', 'ชี้สั่งบีบค่าย', 'COMPRESSION T108'),
+         10: ('COMMAND', 'ค้างแขนชี้', 'ARRAY_TIGHT T120'),
+         11: ('GUIDE', 'ชี้นำมีด', 'HIT 1 T132'),
          12: ('GUIDE', 'ย่อรวบมือ', 'HIT 2 / 3'),
-         13: ('GUIDE', 'ชี้อีกครั้ง', 'HIT 4 T120'),
-         14: ('GATHER', 'ย่อ ยกมีดเตรียมสั่งปิด', 'FINAL_ALIGNMENT T124'),
-         15: ('EXECUTE', 'ชี้สั่งเด็ดขาด ค้างจนระเบิด', 'FINAL_DAMAGE T130'),
-         16: ('SETTLE', 'ย่อต่ำ ผ่อนแรง', 'RESIDUAL T140'),
-         17: ('READY', 'ยืนพร้อม', 'RECOVERY T146')}
-HITS = [108, 112, 116, 120]
-FINAL = 130
+         13: ('GUIDE', 'ชี้อีกครั้ง', 'HIT 4 T144'),
+         14: ('GATHER', 'ย่อ ยกมีดเตรียมสั่งปิด', 'FINAL_ALIGNMENT T148'),
+         15: ('EXECUTE', 'ชี้สั่งเด็ดขาด ค้างจนระเบิด', 'FINAL_DAMAGE T154'),
+         16: ('SETTLE', 'ย่อต่ำ ผ่อนแรง', 'RESIDUAL T164'),
+         17: ('READY', 'ยืนพร้อม', 'RECOVERY T170')}
+HITS = [132, 136, 140, 144]
+FINAL = 154
 WEIGHTS = [0.10, 0.10, 0.10, 0.15, 0.55]
-ROOT_KEYS = [[0, 0], [40, 0], [44, 4], [52, 2], [60, 0], [84, 0], [88, 5], [104, 4], [124, 2], [128, 8], [132, 12],
-             [140, 10], [146, 5], [149, 0]]
+ROOT_KEYS = [[0, 0], [64, 0], [68, 4], [76, 2], [84, 0], [108, 0], [112, 5], [128, 4], [148, 2], [152, 8], [156, 12],
+             [164, 10], [170, 5], [173, 0]]
 
 
 def smooth(keys, t):
@@ -182,45 +184,49 @@ GLOW = {'charge': (3, 0.45), 'main': (3, 0.6), 'impact': (4, 0.85), 'residual': 
 SC['residual'] = SC['impact']
 
 # ------------------------------------------------------------------ plans: T → (frame 1-based, alpha, scale mul)
+# user 2026-10: "charge-throw, charge-throw" → the charge now BUILDS once (f1–f8 T018–T039), then LOOPS on the stable
+# star vortex (f8 → f9 → f10 → f9, continuous cross-fade, no flicker, no breathing scale) and HOLDS until the throw ·
+# the stream-out frames f11–f13 are no longer used (they read as a second throw) · at the throw (T064) the vortex is
+# pulled in and fades in 6 T while the 8 blades leave his hand ONCE (SURROUND)
+CH_BUILD = [(18, 1), (21, 2), (24, 3), (27, 4), (30, 5), (33, 6), (36, 7), (40, 8)]
+CH_LOOP = [8, 9, 10, 9]
+CH_LOOP_T = 5                            # T per loop key (cross-faded) → one loop = 20 T
+THROW = 64
+CH_END = THROW + 6
 CHARGE_PLAN = {}
-# user 2026-10: charge done → the blades are THROWN at T040 (charge f11–f13 stream out of his hand) → they fly in and
-# surround the target (SURROUND) → only then the storm / array (MAIN) forms → minor cuts → explosion
-# smoothness pass (user 2026-10: "frames look rushed"): every charge frame held 2–4 T, the stream tail lingers to T051
-CH_KEYS = [(18, 1), (21, 2), (24, 3), (27, 4), (30, 5), (33, 6), (35, 7), (38, 8), (40, 9), (42, 10), (44, 11), (47, 12),
-           (50, 13), (54, None)]
-for (t0, f), (t1, _) in zip(CH_KEYS, CH_KEYS[1:]):
+for (t0, f), (t1, _) in zip(CH_BUILD, CH_BUILD[1:] + [(CH_END, None)]):
     for t in range(t0, t1):
-        CHARGE_PLAN[t] = f
-for t in list(CHARGE_PLAN):
-    CHARGE_PLAN[t] = (CHARGE_PLAN[t], 1.0 if t < 45 else max(0.15, 1 - (t - 44) * 0.095), 1.0)
-MAIN_KEYS = [(56, 1), (60, 2), (64, 3), (68, 4), (72, 5), (76, 6), (80, 7), (86, 8), (96, 9), (104, 10), (112, 11),
-             (120, 12), (130, None)]
+        CHARGE_PLAN[t] = (f, 1.0 if t < THROW else 1 - (t - THROW + 1) / (CH_END - THROW + 1), 1.0 if t < THROW else 1 - 0.04 * (t - THROW + 1))
+MAIN0 = 94                               # the storm forms where the blades dived in
+MAIN_KEYS = [(94, 1), (97, 2), (100, 3), (103, 4), (106, 5), (109, 6), (112, 7), (116, 8), (122, 9), (128, 10), (136, 11),
+             (144, 12), (154, None)]
 MAIN_PLAN = {}
 for (t0, f), (t1, _) in zip(MAIN_KEYS, MAIN_KEYS[1:]):
     for t in range(t0, t1):
-        a = (min(1.0, 0.2 + 0.1 * (t - 56)) if t < 124 else [0.85, 0.7, 0.55, 0.4, 0.3, 0.2][t - 124])
+        a = (min(1.0, 0.35 + 0.13 * (t - MAIN0)) if t < 148 else [0.85, 0.7, 0.55, 0.4, 0.3, 0.2][t - 148])
         MAIN_PLAN[t] = (f, a, 1.0)
-IMP_KEYS = [(130, 1, 0.8), (131, 1, 0.88), (132, 1, 0.95), (133, 1, 1.0), (134, 1, 1.0), (135, 2, 1.0), (136, 2, 1.0),
-            (137, 3, 1.0), (138, 4, 1.0), (139, 5, 1.0)]
+IMP_KEYS = [(154, 1, 0.8), (155, 1, 0.88), (156, 1, 0.95), (157, 1, 1.0), (158, 1, 1.0), (159, 2, 1.0), (160, 2, 1.0),
+            (161, 3, 1.0), (162, 4, 1.0), (163, 5, 1.0)]
 IMP_PLAN = {t: (f, 1.0, s) for t, f, s in IMP_KEYS}
 RES_PLAN = {}
 for k, f in enumerate([1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6]):
-    RES_PLAN[140 + k] = (f, 1.0 if k < 12 else 0.75, 1.0)
+    RES_PLAN[164 + k] = (f, 1.0 if k < 12 else 0.75, 1.0)
 SPARK_PLAN = {}                          # minor hit → small jade spark (3 frames × 2 T) at a spot on the target
 SPARK_AT = [(-10, -14), (6, -26), (-4, 2), (10, -8)]
 for i, h in enumerate(HITS):
     for d in range(6):
         SPARK_PLAN.setdefault(h + d, []).append((i, d // 2))
-HITSTOP = {108: 1, 112: 1, 116: 1, 120: 1, 130: 6}
-SHAKE = {108: (1, 0), 112: (-1, 0), 116: (1, 1), 120: (-2, 0), 121: (1, 0),
-         130: (8, 0), 131: (-6, 2), 132: (5, -1), 133: (-4, 1), 134: (3, 0), 135: (-2, 0), 136: (1, 0)}
+HITSTOP = {132: 1, 136: 1, 140: 1, 144: 1, 154: 6}
+SHAKE = {THROW: (1, 0), 94: (2, 0), 95: (-2, 1), 96: (1, 0),
+         132: (1, 0), 136: (-1, 0), 140: (1, 1), 144: (-2, 0), 145: (1, 0),
+         154: (8, 0), 155: (-6, 2), 156: (5, -1), 157: (-4, 1), 158: (3, 0), 159: (-2, 0), 160: (1, 0)}
 
 
 def zoom_at(t):
-    if 124 <= t <= 133:
-        return 1 + 0.04 * (t - 124) / 9
-    if 133 < t < 140:
-        return 1 + 0.04 * (140 - t) / 7
+    if 148 <= t <= 157:
+        return 1 + 0.04 * (t - 148) / 9
+    if 157 < t < 164:
+        return 1 + 0.04 * (164 - t) / 7
     return 1.0
 
 
@@ -251,28 +257,49 @@ def tile(fr, s, alpha=1.0, glow=None):
     return a, px, py
 
 
-# ---- surround: 8 blades (the S2 single-blade art) thrown at T040 fly in from Tang Xun's side, fan out and take a ring
-# around the target (T047), orbit pointing inward while the storm forms (MAIN from T050), fade by T056
+# ---- surround: 8 blades (the S2 single-blade art) thrown once at T064 fly in from Tang Xun's side, fan out and take a ring
+# around the target
 BLADE = np.array(Image.open('public/sprites/fx-tangxun-s2-blade.png').convert('RGBA'))
 BLADE = BLADE[:, 4 * (BLADE.shape[1] // 8):5 * (BLADE.shape[1] // 8)]      # f5: blade + jade trail, tip at the centre
-SUR_T0, SUR_ARRIVE, SUR_END = 40, 52, 66
+# user 2026-10: thrown ONCE at T064 → ring the target (T076) → orbit, speeding up → all 8 DIVE into the target
+# (T088–T094, accelerating, pointing inward) → contact flash at the centre (T094–T099) → the storm forms from there
+SUR_T0, SUR_ARRIVE, DIVE0, CONTACT, SUR_END = THROW, 76, 88, 94, 100
 SUR_FROM = (-175, -4)                   # launch point relative to the target centre (Tang Xun's hand, in front of him)
 SUR_RING = 64                           # ring radius (x), ellipse 0.55
 SUR_PLAN = list(range(SUR_T0, SUR_END))
 
 
-def _ring(k, t):
-    spin = 0 if t <= SUR_ARRIVE else 7 * (t - SUR_ARRIVE) + 0.12 * (t - SUR_ARRIVE) ** 2
-    th = np.radians(k * 45 + 22.5 + spin)
-    return th, np.array([SUR_RING * np.cos(th), SUR_RING * np.sin(th) * 0.55])
+def _spin(t):
+    if t <= SUR_ARRIVE:
+        return 0.0
+    d = min(t, DIVE0) - SUR_ARRIVE
+    s = 6 * d + 0.25 * d ** 2                              # orbit, speeding up
+    if t > DIVE0:
+        d2 = t - DIVE0
+        s += (6 + 0.5 * (DIVE0 - SUR_ARRIVE)) * d2 + 1.2 * d2 ** 2   # keeps whirling as it closes in
+    return s
+
+
+def _ring(k, t, rad=1.0):
+    th = np.radians(k * 45 + 22.5 + _spin(t))
+    return th, np.array([SUR_RING * rad * np.cos(th), SUR_RING * rad * np.sin(th) * 0.55])
+
+
+def _dive(t):
+    """ring radius factor during the dive (1 → 0 at CONTACT, accelerating)"""
+    if t <= DIVE0:
+        return 1.0
+    u = min(1.0, (t - DIVE0) / (CONTACT - DIVE0))
+    return 1 - u ** 2.2
 
 
 def _blade_pos(k, t):
-    """(position, angle) of blade k at T (relative to the target centre)"""
-    th, ring = _ring(k, t)
+    """(position, angle, size) of blade k at T (relative to the target centre)"""
+    rad = _dive(t)
+    th, ring = _ring(k, t, rad)
+    inward = np.degrees(np.arctan2(np.sin(th) * 0.55, -np.cos(th)))
     if t >= SUR_ARRIVE:
-        inward = np.degrees(np.arctan2(np.sin(th) * 0.55, -np.cos(th)))
-        return ring, inward
+        return ring, inward, 0.75 + 0.25 * rad
     u = (t - SUR_T0) / (SUR_ARRIVE - SUR_T0)
     e = u * u * (3 - 2 * u) * 0.35 + (1 - (1 - u) ** 3) * 0.65   # quick launch, long soft settle
     p0 = np.array(SUR_FROM, float) + np.array([0, (k - 3.5) * 2])
@@ -281,25 +308,42 @@ def _blade_pos(k, t):
     d = 2 * (1 - e) * (ctrl - p0) + 2 * e * (ring - ctrl)  # velocity → blade direction (PIL rotates CCW, y down)
     ang = np.degrees(np.arctan2(-d[1], d[0]))
     if u > 0.6:                                            # turn to face the target as it settles
-        inward = np.degrees(np.arctan2(np.sin(th) * 0.55, -np.cos(th)))
         k2 = (u - 0.6) / 0.4
         k2 = k2 * k2 * (3 - 2 * k2)
         ang = ang + ((inward - ang + 180) % 360 - 180) * k2
-    return pos, ang
+    return pos, ang, 1.0
+
+
+def _contact_flash(img, cx, cy, t):
+    """the 8 blades strike the centre together: white-jade burst + 8 radial glints, T094–T099"""
+    k = (t - CONTACT) / (SUR_END - CONTACT)
+    lay = Image.new('RGBA', img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(lay)
+    al = int(255 * (1 - k) ** 1.3)
+    r = 10 + 34 * (1 - (1 - k) ** 2)
+    d.ellipse((cx - r, cy - r * 0.62, cx + r, cy + r * 0.62), fill=(150, 255, 210, al // 3))
+    d.ellipse((cx - r * 0.45, cy - r * 0.3, cx + r * 0.45, cy + r * 0.3), fill=(240, 255, 248, al))
+    for j in range(8):
+        th = np.radians(j * 45 + 22.5)
+        r0, r1 = r * 0.4, r * (1.25 + 0.35 * (j % 2))
+        d.line((cx + r0 * np.cos(th), cy + r0 * np.sin(th) * 0.6, cx + r1 * np.cos(th), cy + r1 * np.sin(th) * 0.6),
+               fill=(220, 255, 238, al), width=2)
+    img.alpha_composite(lay)
 
 
 def surround_tile(t):
     x0, x1, y0, y1 = SUR_FROM[0] - 40, SUR_RING + 40, -80, 60
     img = Image.new('RGBA', (x1 - x0, y1 - y0), (0, 0, 0, 0))
     b = Image.fromarray(BLADE)
-    alpha = 1.0 if t < 59 else max(0.0, 1 - (t - 58) * 0.13)
-    for k in range(8):
-        pos, ang = _blade_pos(k, t)
-        r = b.rotate(ang, Image.BICUBIC, expand=True)
-        a = np.array(r)
-        a[..., 3] = (a[..., 3] * alpha).astype(np.uint8)
-        img.alpha_composite(Image.fromarray(a), (round(pos[0] - x0 - r.width / 2), round(pos[1] - y0 - r.height / 2)))
-    a, pad = bloom(np.array(img), 2, 0.6)
+    if t < CONTACT:
+        for k in range(8):
+            pos, ang, sz = _blade_pos(k, t)
+            bb = b if sz >= 0.999 else b.resize((max(1, round(b.width * sz)), max(1, round(b.height * sz))), Image.LANCZOS)
+            r = bb.rotate(ang, Image.BICUBIC, expand=True)
+            img.alpha_composite(r, (round(pos[0] - x0 - r.width / 2), round(pos[1] - y0 - r.height / 2)))
+    else:
+        _contact_flash(img, -x0, -y0, t)
+    a, pad = bloom(np.array(img), 2, 0.6 if t < CONTACT else 0.9)
     return a, -x0 + pad, -y0 + pad
 
 
@@ -357,13 +401,32 @@ def main_tile(t):
     return cur
 
 
+def charge_tile(t):
+    """build: each frame dissolves into the next (≤ 2 T) · loop from T040: continuous cross-fade f8 → f9 → f10 → f9 …"""
+    f, a, m = CHARGE_PLAN[t]
+    sc = SC['charge'] * m
+    if t >= CH_BUILD[-1][0]:
+        p = (t - CH_BUILD[-1][0]) / CH_LOOP_T
+        i, w = int(p), p - int(p)
+        f0, f1 = CH_LOOP[i % len(CH_LOOP)], CH_LOOP[(i + 1) % len(CH_LOOP)]
+        cur = tile(CHARGE[f0 - 1], sc, a, GLOW['charge'])
+        return (blend_tiles(cur, tile(CHARGE[f1 - 1], sc, a, GLOW['charge']), w) if w > 0.01 else cur), f0
+    cur = tile(CHARGE[f - 1], sc, a, GLOW['charge'])
+    t1 = next(k for k, _ in CH_BUILD if k > t)
+    left = t1 - t
+    if left <= 2:
+        w = (3 - left) / 3
+        return blend_tiles(cur, tile(CHARGE[f], sc, a, GLOW['charge']), w), f
+    return cur, f
+
+
 def tracks_at(t):
     """(key, frame, rgba, pivot x, pivot y, anchor xy, alpha, layer)"""
     out = []
     feet = (X0 + root_x(t), GROUND)
     if t in CHARGE_PLAN:
-        f, a, m = CHARGE_PLAN[t]
-        img, px, py = tile(CHARGE[f - 1], SC['charge'] * m, a, GLOW['charge'])
+        (img, px, py), f = charge_tile(t)
+        a = CHARGE_PLAN[t][1]
         out.append(('charge', f, img, px, py, feet, a, 'under'))
     if t in MAIN_PLAN:
         f, a, m = MAIN_PLAN[t]
@@ -435,10 +498,10 @@ def frame(t, log=True):
             if log:
                 LOG.append({'T': t, 'track': key, 'frame': f, 'x': x, 'y': y, 'opacity': round(op, 2), 'split': 'front', 'part': key})
     if log:
-        for name, a0, a1 in [('mark', 68, 74), ('mark', 74, 80), ('mark', 80, 130)]:
+        for name, a0, a1 in [('mark', 92, 98), ('mark', 98, 104), ('mark', 104, 154)]:
             if a0 <= t < a1:
-                LOG.append({'T': t, 'track': 'mark', 'frame': {68: 1, 74: 2, 80: 3}[a0], 'x': 0, 'y': 0,
-                            'opacity': 1.0 if a0 == 80 else 0.6, 'split': '-'})
+                LOG.append({'T': t, 'track': 'mark', 'frame': {92: 1, 98: 2, 104: 3}[a0], 'x': 0, 'y': 0,
+                            'opacity': 1.0 if a0 == 104 else 0.6, 'split': '-'})
         for i, h in enumerate(HITS):
             if h <= t <= h + 1:
                 LOG.append({'T': t, 'track': 'minor', 'frame': i + 1, 'x': 0, 'y': 0, 'opacity': 1.0 if t == h else 0.5, 'split': '-'})
@@ -470,7 +533,7 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '60', '-i', f'{tmp}
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '60', '-i', f'{tmp}/f%03d.png', '-vf',
                 'fps=30,scale=645:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=200[p];[b][p]paletteuse=dither=bayer',
                 '-loop', '0', f'{OUT}/tangxun_ult_preview_30fps.gif'], check=True)
-KEYS = [0, 30, 36, 40, 43, 46, 49, 52, 55, 58, 62, 66, 72, 80, 96, 108, 120, 130, 133, 140]
+KEYS = [0, 30, 40, 50, 60, 64, 68, 72, 76, 82, 88, 91, 94, 97, 104, 120, 132, 154, 157, 164]
 KEYS = sorted(KEYS)
 cw, ch = 430, 200
 sheet = Image.new('RGB', (cw * 4, ch * 5))
@@ -505,13 +568,13 @@ def bake_tiles(name, tiles, frame_ms=2000 / 60):
 
 
 game_fx = {
-    'charge': {**bake('charge', CHARGE_PLAN, SC['charge'], CHARGE, sorted(CHARGE_PLAN), GLOW['charge']), 'dy': 27.25},
+    'charge': {**bake_tiles('charge', [charge_tile(t)[0] for t in sorted(CHARGE_PLAN)[::2]]), 'dy': 27.25},
     'main': {**bake_tiles('main', [main_tile(t) for t in sorted(MAIN_PLAN)[::2]]), 'dy': round(27.25 - 2 * 1.25, 2),
-             'delayMs': round((min(MAIN_PLAN) - 40) * 1000 / FPS)},
+             'delayMs': round((min(MAIN_PLAN) - SUR_T0) * 1000 / FPS)},
     'impact': {**bake('impact', IMP_PLAN, SC['impact'], IMPACT, sorted(IMP_PLAN), GLOW['impact']), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2)},
     'residual': {**bake('residual', RES_PLAN, SC['residual'], RESIDUAL, sorted(RES_PLAN), GLOW['residual']), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2),
-                 'delayMs': round((140 - FINAL) * 1000 / FPS)},
-    # 60 FPS strip (26 frames T040–T065) — the thrown blades must visibly travel in
+                 'delayMs': round((min(RES_PLAN) - FINAL) * 1000 / FPS)},
+    # 60 FPS strip (36 frames T064–T099) — thrown once, ring, orbit, dive in, contact flash
     'surround': {**bake_tiles('surround', [surround_tile(t) for t in SUR_PLAN], 1000 / 60), 'dy': round(27.25 + (TCY - GROUND) * 1.25, 2)},
     'shock': {**bake_tiles('shock', [shock_tile(t) for t in SHOCK_PLAN[::2]]), 'dy': round(27.25 - 2 * 1.25, 2)},
 }
@@ -519,9 +582,9 @@ steps = [round((b - a + 1) * 1000 / FPS) for a, b, _ in CHAR]
 steps[-1] += round(N * 1000 / FPS) - sum(steps)
 sx = lambda t: step_of(t) if t < N - 1 else float(len(CHAR))
 game = {'steps': steps,
-        'events': {'CAST_START': 0, 'ANTICIPATION_PEAK': step_of(10), 'CHARGE_START': step_of(18), 'CHARGE_PEAK': step_of(36),
-                   'VFX_SPAWN': step_of(40), 'FINAL_ANTICIPATION': step_of(124), 'STRIKE_START': step_of(128),
-                   'DAMAGE': [step_of(t) for t in HITS + [FINAL]], 'RECOVERY_START': step_of(146)},
+        'events': {'CAST_START': 0, 'ANTICIPATION_PEAK': step_of(10), 'CHARGE_START': step_of(18), 'CHARGE_PEAK': step_of(60),
+                   'VFX_SPAWN': step_of(THROW), 'FINAL_ANTICIPATION': step_of(148), 'STRIKE_START': step_of(152),
+                   'DAMAGE': [step_of(t) for t in HITS + [FINAL]], 'RECOVERY_START': step_of(170)},
         'root': [[sx(t), round(root_x(t), 1), 0] for t in sorted({k[0] for k in ROOT_KEYS} | set(range(0, N, 6)) | {N - 1})],
         'weights': WEIGHTS,
         'impact': [{'hitStopMs': 17, 'shakePx': 1, 'shakeMs': 40}] * 3 + [{'hitStopMs': 17, 'shakePx': 2, 'shakeMs': 50},
@@ -537,74 +600,75 @@ for t in range(N):
 meta = {
     'name': 'tangxun_ult_sync_sheet',
     'readme': ['Timeline Sync Sheet — Ultimate Heaven-Snaring Blade Array · Tang Xun', '',
-               '60 FPS, 150 เฟรม (T000–T149) = 2.50 วินาที · ตัวละคร 17 ท่า + Charge 13 + Main 12 + Impact 5 + Residual 6 เฟรม',
+               '60 FPS, 174 เฟรม (T000–T173) = 2.90 วินาที (ในเกม ×1.15) · ตัวละคร 17 ท่า + Charge f1–f10 (ลูป f8–f10) + มีดล้อม/ดิ่ง + Main 12 + Impact 5 + Residual 6 เฟรม',
                'Frames = ทุกเฟรม · Character = ท่า C01–C17 + ความยาวในเกม · VFX Tracks / Events / Layers',
                'หน่วย: px = พิกเซลของแผ่นเกม (canvas 430×200, พื้น y = 168) · 80 px = 1 ช่อง · เป้าล็อกห่าง 2.75 ช่อง',
                'ที่มา: tools/sprites/tangxun_ult.py → tangxun_ult_timeline.json → tools/sprites/ult_sync_sheet.py'],
     'gameNote': 'Game ms = steps ของท่า ult ใน SHEETS hero-tangxun.png (รวม 2500 ms) · ซูม 4 % = preview เท่านั้น',
     'title': 'Timeline Sync Sheet — Ultimate Heaven-Snaring Blade Array  ·  Tang Xun · Whispering Blade',
-    'subtitle': '60 FPS · 150 frames (T000–T149) = 2.50 s · 1 column = 1 frame (16.7 ms) · lock T080 · hits T108 / T112 / T116 / T120 · finisher T130',
+    'subtitle': '60 FPS · 174 frames (T000–T173) = 2.90 s · charge loop T040–T063 · throw T064 · dive T094 · hits T132 / T136 / T140 / T144 · finisher T154',
     'phases': [[0, 17, 'A', 'CAST / PREPARE', [120, 130, 150], 'ร่าย / เตรียม'],
-               [18, 39, 'B', 'CHARGE', [90, 110, 170], 'ชาร์จ'],
-               [40, 59, 'C', 'ARRAY DEPLOY', [60, 170, 140], 'กางค่าย'],
-               [60, 83, 'D', 'ORBIT / LOCK', [70, 150, 190], 'โคจร / ล็อก'],
-               [84, 103, 'E', 'COMPRESSION', [100, 130, 200], 'บีบค่าย'],
-               [104, 123, 'F', 'MULTI-HIT', [200, 140, 80], 'ฟันรัว'],
-               [124, 133, 'G', 'FINAL', [215, 90, 90], 'ปิดฉาก'],
-               [134, 139, 'H', 'IMPACT', [235, 120, 110], 'ระเบิด'],
-               [140, 145, 'I', 'RESIDUAL', [150, 110, 170], 'เศษค่าย'],
-               [146, 149, 'J', 'RECOVERY', [90, 170, 120], 'กลับท่า']],
+               [18, 39, 'B', 'CHARGE BUILD', [90, 110, 170], 'ชาร์จ'],
+               [40, 63, 'B2', 'CHARGE LOOP', [110, 100, 190], 'ชาร์จค้าง (ลูป)'],
+               [64, 75, 'C', 'THROW', [60, 170, 140], 'ปามีดครั้งเดียว'],
+               [76, 87, 'D', 'SURROUND / ORBIT', [70, 150, 190], 'ล้อม / โคจร'],
+               [88, 93, 'D2', 'DIVE', [80, 210, 170], 'พุ่งเข้าเป้า'],
+               [94, 127, 'E', 'STORM / COMPRESSION', [100, 130, 200], 'พายุค่ายมีด'],
+               [128, 147, 'F', 'MULTI-HIT', [200, 140, 80], 'ฟันรัว'],
+               [148, 157, 'G', 'FINAL', [215, 90, 90], 'ปิดฉาก'],
+               [158, 163, 'H', 'IMPACT', [235, 120, 110], 'ระเบิด'],
+               [164, 169, 'I', 'RESIDUAL', [150, 110, 170], 'เศษค่าย'],
+               [170, 173, 'J', 'RECOVERY', [90, 170, 120], 'กลับท่า']],
     'poses': {c: [f'F{c}', f'{v[0]} — {v[1]}', v[2]] for c, v in POSES.items()},
     'gameSteps': steps,
     'hits': HITS + [FINAL],
-    'events': [[0, 'CAST_START', 'C01'], [10, 'PREPARE_ARRAY', 'C02'], [18, 'CHARGE_VFX_START', 'C03'], [28, 'CHARGE_BUILD', ''],
-               [36, 'CHARGE_PEAK', ''], [40, 'MAIN_VFX_SPAWN', 'C04 ปามีด 8 เล่ม'], [52, 'BLADES_SURROUND', 'มีดล้อมเป้า'], [56, 'ARRAY_FORMED', 'พายุค่ายมีดก่อตัว'], [60, 'ORBIT_START', 'C06'],
-               [68, 'TARGET_SCAN', ''], [74, 'MARK_PRIORITY_CHECK', 'แผลเปิดก่อน'], [80, 'TARGET_LOCK', 'C08'],
-               [84, 'ARRAY_COMPRESSION_START', 'C09'], [96, 'ARRAY_TIGHT', ''], [104, 'CONVERGENCE_START', 'C11'],
-               [108, 'MULTI_HIT_1', '10 %'], [112, 'MULTI_HIT_2', '10 %'], [116, 'MULTI_HIT_3', '10 %'], [120, 'MULTI_HIT_4', '15 %'],
-               [124, 'FINAL_ALIGNMENT', 'C14'], [128, 'FINAL_BLADE_CONVERGENCE', 'C15'], [130, 'FINAL_DAMAGE', '55 % คริ'],
-               [130, 'IMPACT_VFX_SPAWN', ''], [133, 'IMPACT_PEAK', ''], [140, 'RESIDUAL_FX_START', 'C16'],
-               [146, 'RECOVERY_START', 'C17'], [149, 'ANIMATION_END', '']],
+    'events': [[0, 'CAST_START', 'C01'], [10, 'PREPARE_ARRAY', 'C02'], [18, 'CHARGE_VFX_START', 'C03'], [40, 'CHARGE_LOOP', 'f8–f10'],
+               [60, 'CHARGE_PEAK', ''], [64, 'BLADES_THROWN', 'C04 ปามีด 8 เล่ม ครั้งเดียว'], [76, 'BLADES_SURROUND', 'มีดล้อมเป้า'],
+               [88, 'BLADES_DIVE', 'พุ่งเข้าเป้า'], [94, 'BLADES_CONTACT', 'แสงวาบ'], [94, 'STORM_FORMS', 'พายุค่ายมีด'],
+               [104, 'TARGET_LOCK', 'C08'], [108, 'ARRAY_COMPRESSION_START', 'C09'], [120, 'ARRAY_TIGHT', ''],
+               [132, 'MULTI_HIT_1', '10 %'], [136, 'MULTI_HIT_2', '10 %'], [140, 'MULTI_HIT_3', '10 %'], [144, 'MULTI_HIT_4', '15 %'],
+               [148, 'FINAL_ALIGNMENT', 'C14'], [152, 'FINAL_BLADE_CONVERGENCE', 'C15'], [154, 'FINAL_DAMAGE', '55 % คริ'],
+               [154, 'IMPACT_VFX_SPAWN', ''], [157, 'IMPACT_PEAK', ''], [164, 'RESIDUAL_FX_START', 'C16'],
+               [170, 'RECOVERY_START', 'C17'], [173, 'ANIMATION_END', '']],
     'lanes': 9,
-    'tracks': [['charge', 'L3 Ultimate Charge VFX', [150, 120, 210], 'fx-tangxun-ult-charge (ult_charge.png 13 fr)', 'L3 · หลังตัว',
-                'เท้าถังซวิ่น (วงพื้น)', 'T018 ไอลม → มีดโผล่ → วงหมุน T036 peak → T040 ปามีดออกไปทางเป้า → จางถึง T046'],
-               ['surround', 'L3b Blade Surround', [140, 255, 215], 'fx-tangxun-ult-surround (มีด S2 × 8, 60 FPS)', 'L4 · หน้า',
-                'กลางตัวเป้า (ปล่อยจากฝั่งถังซวิ่น)', 'T040 ปามีด 8 เล่ม → บินโค้งกระจาย → T052 ล้อมเป้าเป็นวง → หมุนช้า ๆ → จาง T059–T065'],
+    'tracks': [['charge', 'L3 Ultimate Charge VFX', [150, 120, 210], 'fx-tangxun-ult-charge (ult_charge.png f1–f10)', 'L3 · หลังตัว',
+                'เท้าถังซวิ่น (วงพื้น)', 'T018 ก่อตัว f1–f8 → T040 ลูปค้าง f8 → f9 → f10 → f9 (cross-fade) → T064 ปามีด วงยุบจางถึง T069'],
+               ['surround', 'L3b Blade Surround / Dive', [140, 255, 215], 'fx-tangxun-ult-surround (มีด S2 × 8, 60 FPS)', 'L4 · หน้า',
+                'กลางตัวเป้า (ปล่อยจากฝั่งถังซวิ่น)', 'T064 ปามีด 8 เล่ม → T076 ล้อมเป้า → โคจรเร็วขึ้น → T088 พุ่งเข้าเป้า → T094 แสงวาบ → T099'],
                ['main', 'L4 Ultimate Main VFX', [80, 200, 150], 'fx-tangxun-ult-main (ult_main.png 12 fr)', 'L4 · หน้า',
-                'ตราบนพื้นใต้เป้า', 'T056 ตรา (หลังมีดล้อมเป้า) ค่อย ๆ ชัด → T064 ค่ายก่อตัว → T080 เสาล็อก → T096 บีบแน่น → จาง T124–T129'],
+                'ตราบนพื้นใต้เป้า', 'T094 พายุเกิดตรงที่มีดพุ่งเข้า → ค่ายก่อตัว → T112 เสาล็อก → T122 บีบแน่น → จาง T148–T153'],
                ['mark', 'L5 Target / Mark State', [240, 150, 220], 'TargetRule FOCUS → MARKED (open_wound)', '-', '-',
-                'T068 สแกน · T074 เช็กแผลเปิด · T080 ล็อก'],
+                'T092 สแกน · T098 เช็กแผลเปิด · T104 ล็อก'],
                ['spark', 'L6 Minor Hit Events', [120, 230, 200], 'fx-tangxun-s1-impact3 (ประกายหยกเล็ก ใช้ซ้ำ)', 'L6 · หน้า',
-                'จุดบนตัวเป้า 4 จุด', 'T108 / T112 / T116 / T120 = 10 / 10 / 10 / 15 %'],
+                'จุดบนตัวเป้า 4 จุด', 'T132 / T136 / T140 / T144 = 10 / 10 / 10 / 15 %'],
                ['minor', 'L6b Minor Damage', [230, 160, 90], 'engine (repeat 5)', '-', '-', 'ตัดร่าย Break 60 ที่ครั้งแรก'],
-               ['final', 'L7 Final Damage', [230, 90, 90], 'engine', '-', '-', 'T130 = 55 % คริแน่นอน + รอบตัว 8 ช่อง'],
-
+               ['final', 'L7 Final Damage', [230, 90, 90], 'engine', '-', '-', 'T154 = 55 % คริแน่นอน + รอบตัว 8 ช่อง'],
                ['impact', 'L8 Ultimate Impact VFX', [255, 200, 140], 'fx-tangxun-ult-impact (ult_impact.png แถว 1, 5 fr) + bloom', 'L8 · หน้าสุด',
-                'กลางตัวเป้า', 'T130 → peak T133 (2.0 ตัว) → T139'],
+                'กลางตัวเป้า', 'T154 → peak T157 (2.0 ตัว) → T163'],
                ['shock', 'L8b Shockwave', [120, 240, 190], 'fx-tangxun-ult-shock (วงพื้นหยก)', 'L8 · ใต้ตัว',
-                'พื้นใต้เป้า', 'T130 → T141 ขยายถึง ~3 ช่อง แล้วจาง'],
+                'พื้นใต้เป้า', 'T154 → T165 ขยายถึง ~3 ช่อง แล้วจาง'],
                ['residual', 'L9 Residual FX', [170, 130, 200], 'fx-tangxun-ult-residual (ult_impact.png แถว 2, 6 fr)', 'L9 · หน้า',
-                'กลางตัวเป้า', 'T140 → T157 ไม่มีดาเมจ'],
+                'กลางตัวเป้า', 'T164 → T181 ไม่มีดาเมจ'],
                ['hitstop', 'L10 Hitstop', [255, 255, 255], 'AnimDef.impact', '-', '-', 'ครั้งย่อย 1 เฟรม · ปิดฉาก 6 เฟรม']],
     'trackNames': {'charge': 'ชาร์จ', 'main': 'ค่ายมีด', 'mark': 'สแกน / ล็อก', 'spark': 'ประกายย่อย', 'minor': 'ดาเมจย่อย',
-                   'final': 'ดาเมจปิด', 'surround': 'มีดล้อมเป้า', 'shock': 'คลื่นพื้น', 'impact': 'ระเบิด', 'residual': 'เศษค่าย', 'hitstop': 'หยุดเฟรม'},
+                   'final': 'ดาเมจปิด', 'surround': 'มีดล้อม / ดิ่ง', 'shock': 'คลื่นพื้น', 'impact': 'ระเบิด', 'residual': 'เศษค่าย', 'hitstop': 'หยุดเฟรม'},
     'layers': [[1, 'ตัวละคร (L1)'], [2, 'Root X (L2)'], [3, 'ชาร์จ (L3)'], [4, 'ค่ายมีด (L4)'], [5, 'ล็อกเป้า (L5)'],
                [6, 'ดาเมจย่อย (L6)'], [7, 'ดาเมจปิด (L7)'], [8, 'Impact (L8)'], [9, 'Residual (L9)'], [10, 'Hitstop (L10)'],
                [11, 'สั่นกล้อง (L11)'], [12, 'ซูม (L12)']],
     'shake': {str(k): list(v) for k, v in SHAKE.items()},
-    'thumbs': [0, 36, 46, 54, 80, 96, 108, 133, 140, 146],
-    'thumbLabels': {0: 'READY', 36: 'CHARGE PEAK', 46: 'BLADES THROWN', 54: 'SURROUND', 80: 'LOCK', 96: 'TIGHT', 108: 'HIT 1', 128: 'ALIGN',
-                    133: 'IMPACT PEAK', 140: 'RESIDUAL', 146: 'RECOVERY'},
+    'thumbs': [0, 30, 52, 66, 78, 90, 95, 120, 132, 157, 164, 170],
+    'thumbLabels': {0: 'READY', 30: 'CHARGE BUILD', 52: 'CHARGE LOOP', 66: 'THROW ONCE', 78: 'SURROUND', 90: 'DIVE', 95: 'CONTACT',
+                    120: 'STORM', 132: 'HIT 1', 157: 'IMPACT PEAK', 164: 'RESIDUAL', 170: 'RECOVERY'},
     'thumbCrop': [20 * UP, 40 * UP, 420 * UP, 185 * UP],
     'travelLabel': 'L2 Root X (px) — ไม่เกิน 12 px ยืนที่เดิม', 'heightLabel': 'Y movement (px) — ยืนพื้น',
     'notes': [
         'ถังซวิ่นยืนที่เดิมตลอด (root ไม่เกิน 12 px) ไม่เข้าระยะประชิด — พลังมาจากค่ายมีด ไม่ใช่การเคลื่อนที่',
-        'ลำดับ: ชาร์จเสร็จ T036 > ปามีดออก T040 > มีด 8 เล่มบินไปล้อมเป้า T052 > พายุค่ายมีดก่อตัว T056 > บีบ > ฟันย่อย > ระเบิด T130',
+        'ลำดับ (ผู้ใช้ 2026-10): ชาร์จก่อตัว T018 > ลูปค้าง T040–T063 > ปามีดครั้งเดียว T064 > มีด 8 เล่มล้อมเป้า T076 > โคจร > พุ่งเข้าเป้า T088–T094 > แสงวาบ + พายุค่ายมีด T094 > บีบ > ฟันย่อย > ระเบิด T154',
+        'ชาร์จไม่ใช้เฟรมมีดพุ่งออก f11–f13 แล้ว (ดูเหมือนปาซ้ำ) — ลูป f8 → f9 → f10 → f9 แบบ cross-fade ต่อเนื่อง ไม่ขยับขนาด',
         'เลือกเป้า: โฟกัสของผู้เล่น แล้ว แผลเปิด (Open Wound จาก S2) แล้ว แถวหลัง แล้ว ผู้ร่าย แล้ว เป้าปัจจุบัน',
-        'ครั้งย่อย T108 / T112 / T116 / T120 = 10 / 10 / 10 / 15 % ใช้ประกายหยกเล็ก ไม่ใช้ Impact ใหญ่ · hit-stop 1 เฟรม สั่น 1-2 px',
-        'ปิดฉาก T130 = 55 % คริแน่นอน + รอบตัว 8 ช่อง · Impact 2.0 ตัว peak T133 · hit-stop 6 เฟรม สั่น 8 px แฟลช 180 ms · ไม่ระเบิดทั้งสนาม',
-        'อลังการขึ้น: ทุกชั้นภาพวาดมี bloom หยก · ค่ายมีด 1.95 ตัว · T040 ปามีด 8 เล่มบินไปล้อมเป้า (T052) ก่อนพายุค่ายมีดก่อตัว (T056) · ภาพค่ายมีดค่อย ๆ ละลายเข้าเฟรมถัดไป (cross-fade) ไม่กระตุก · T130 คลื่นพื้นหยกขยาย ~3 ช่อง',
-        'Residual T140 ไม่มีดาเมจ · ซูม 4 % T124 ถึง T133 กลับ T140 (preview เท่านั้น)',
+        'ครั้งย่อย T132 / T136 / T140 / T144 = 10 / 10 / 10 / 15 % ใช้ประกายหยกเล็ก · hit-stop 1 เฟรม สั่น 1-2 px',
+        'ปิดฉาก T154 = 55 % คริแน่นอน + รอบตัว 8 ช่อง · Impact 2.0 ตัว peak T157 · hit-stop 6 เฟรม สั่น 8 px · ไม่ระเบิดทั้งสนาม',
+        'Residual T164 ไม่มีดาเมจ · ซูม 4 % T148 ถึง T157 กลับ T164 (preview เท่านั้น)',
         'VFX เป็นภาพวาด: alpha / สีแยกจากพื้น magenta, ย่อแบบเนียน ไม่ pixelated',
     ],
 }

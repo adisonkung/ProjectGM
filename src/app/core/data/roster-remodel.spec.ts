@@ -313,18 +313,18 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     expect((clip.impact as { hitStopMs?: number; shakePx?: number }[]).map(i => [i.hitStopMs, i.shakePx])).toEqual([[17, 1], [17, 1], [50, 4]]);
   });
 
-  it('Ult Heaven-Snaring Blade Array on its Timeline Sync Sheet ×1.15 (slowed 2026-10): charge T018, array T040, cuts T108–T120, finisher T130 (55 %, crit), residual T140', () => {
+  it('Ult Heaven-Snaring Blade Array on its Timeline Sync Sheet ×1.15 (slowed 2026-10): charge T018 (loops, held), blades thrown once T064, cuts T132–T144, finisher T154 (55 %, crit)', () => {
     const clip = SHEETS['hero-tangxun.png'].anims.ult!;
     // the sheet's 60 FPS timeline played 15 % slower: T (sheet) = game time × 60 / 1.15
     const K = 1.15;
-    expect(clipClock(clip).total * 60 / K).toBeCloseTo(150, 0);
+    expect(clipClock(clip).total * 60 / K).toBeCloseTo(174, 0);
     const ev = (e: string) => animEvents('hero-tangxun.png', 'ult').filter(x => x.event === e).map(x => Math.round((x.t * 60) / K));
     expect(ev('CHARGE_START')).toEqual([18]);
-    expect(ev('CHARGE_PEAK')).toEqual([36]);
-    expect(ev('VFX_SPAWN')).toEqual([40]);
-    expect(ev('FINAL_ANTICIPATION')).toEqual([124]);
-    expect(ev('DAMAGE')).toEqual([108, 112, 116, 120, 130]);
-    expect(ev('RECOVERY_START')).toEqual([146]);
+    expect(ev('CHARGE_PEAK')).toEqual([60]);
+    expect(ev('VFX_SPAWN')).toEqual([64]);
+    expect(ev('FINAL_ANTICIPATION')).toEqual([148]);
+    expect(ev('DAMAGE')).toEqual([132, 136, 140, 144, 154]);
+    expect(ev('RECOVERY_START')).toEqual([170]);
     expect(Math.max(...clip.root!.map(k => Math.abs(k[1])))).toBeLessThanOrEqual(12);
     const ult = kitOf('tangxun', 'archer').ult;
     expect(ult.delivery).toBe('INSTANT');
@@ -335,7 +335,10 @@ describe('Tang Xun (3★ ranged hidden-weapon specialist, base sheet)', () => {
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['tx-ult-charge']);
     // blades thrown at T040 surround the target first; the array storm follows after they land
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['tx-ult-surround', 'tx-ult-main']);
-    expect(FX['tx-ult-main'].delayMs).toBeGreaterThan(100);
+    // charge holds until the throw (CHARGE_START T018 → fades by T070) · storm starts after the blades dive in (T094)
+    expect(Math.round((FX['tx-ult-charge'].frames * FX['tx-ult-charge'].frameMs / K) * 60 / 1000) + 18).toBeCloseTo(70, -1);
+    expect(Math.round(FX['tx-ult-main'].delayMs! / K * 60 / 1000) + 64).toBe(94);
+    expect(Math.round(FX['tx-ult-surround'].frames * FX['tx-ult-surround'].frameMs / K * 60 / 1000) + 64).toBe(100);
     for (const i of [0, 1, 2, 3]) expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: i })).toEqual([`tx-ult-spark${i}`]);
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'event', event: 'FINAL_ANTICIPATION' })).toEqual([]);
     expect(fxFor('hero-tangxun.png', 'ult', { on: 'impact', hit: 4 })).toEqual(['tx-ult-impact', 'tx-ult-shock', 'tx-ult-residual']);
