@@ -1,6 +1,6 @@
 # ProjectGM — Summon Tower
 
-> **Status of the shared rule set: REVIEWED DRAFT** (2026-10-16) · pending final user approval · กฎร่วมกับ Codex อยู่ใน `AGENTS.md` + `docs/*`
+> **Status of the shared rule set: CANONICAL** — ผู้ใช้อนุมัติ 2026-10-16 · กฎร่วมกับ Codex อยู่ใน `AGENTS.md` + `docs/*` (แก้กฎได้เมื่อผู้ใช้อนุมัติเท่านั้น)
 >
 > **CLAUDE.md = Claude implementation notebook (สมุดบันทึกการพัฒนาของ Claude) ไม่ใช่ rulebook หลัก** — เก็บบันทึกการ implement ปัจจุบัน, ประวัติฟีเจอร์, รายละเอียดรายฮีโร่, renderer, พฤติกรรมที่รู้แล้ว · ถ้าขัดกับเอกสาร canonical หรือโค้ดปัจจุบัน → ทำตามลำดับ source of truth แล้วรายงาน/แก้บันทึกที่เก่า · **ห้ามใช้ไฟล์นี้เป็นหลักฐาน** เรื่อง ID ฮีโร่ถัดไป, ของใน registry ตอนนี้, ไฟล์ที่มีอยู่, สถานะ branch, ค่าพลังในเกม — ต้องเช็กจาก repo ก่อนเสมอ
 >

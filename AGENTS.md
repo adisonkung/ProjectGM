@@ -1,6 +1,6 @@
 # AGENTS.md — rules for every AI coding agent (Codex, Claude, others)
 
-> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
+> **Status: CANONICAL** · approved by the user on 2026-10-16 (after review). Change only with the user's approval.
 > Codex reads this file automatically; Claude reads `CLAUDE.md`. **Both files point to the same rules in `docs/`**, so every agent follows one rulebook.
 
 This repository is changed by several AI agents taking turns. **Git and the current files are authoritative for what exists now.** Chat memory, previous sessions and `docs/AI_HANDOFF.md` are hints only.

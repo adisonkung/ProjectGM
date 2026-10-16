@@ -1,6 +1,6 @@
 # Combat Rules
 
-> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
+> **Status: CANONICAL** · approved by the user on 2026-10-16 (after review). Change only with the user's approval.
 > Baseline = the user's spec (2026-10-16). Where the repository holds a newer, approved value, **the repository value is used** (the user instruction: "if information is old, use the current state"). Each such case is listed under *Differences*.
 > Balance is frozen until the full roster is done (user decision). Do not tune numbers to "fix" a difference below without asking.
 

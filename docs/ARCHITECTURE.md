@@ -1,6 +1,6 @@
 # Architecture — as it exists (2026-10-16)
 
-> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
+> **Status: APPROVED** (user, 2026-10-16) as the descriptive reference. It follows the code; keep it updated when the code changes.
 > **Descriptive** document: it describes the current code. When it disagrees with the code, the code wins and this file is updated (`docs/PROJECT_RULES.md` §2).
 
 ## Folder map

@@ -9,16 +9,16 @@ Never take the current commit or tree from this file. Query it on each side:
 This note never stores the hash of the commit that contains it (see `docs/PROJECT_RULES.md` §5).
 
 Last completed task:
-Documentation-only fix of the synchronization-metadata rule. The rule set is still a REVIEWED DRAFT, pending final user approval.
+The user approved the shared Claude / Codex rule set. It is now CANONICAL (status headers only, documentation-only commit).
 
 Last commit:
 Query it with `git log -1`. Use `git log -1 -- docs/AI_HANDOFF.md` only to locate the last handoff-note commit. That commit is **not** automatically a confirmed sync point.
 
 Last confirmed local commit:
-`979437abefc57d2d3129faa403e3b133fc0218f3` — "docs: harden shared Claude Codex workflow". The local and cloud copies were both verified at this commit.
+`4c3d66e34ed9ffac9fb138a426dd3a340c60cf56` — "docs: sync metadata records only the last confirmed base". The local and cloud copies were both verified at this commit.
 
 Last confirmed common tree:
-`e6841e19b7d666fbc552df6b3e4d7ad6fb84de61`
+`3723690b8615a3267a65032063c7bf8916ccc003`
 
 Agent:
 Claude (cloud copy → patch → `git am --3way` into `/Users/webuild/ProjectGM`)
@@ -44,11 +44,10 @@ Known issues:
 - Tang Xun ult surround blades launch about 2.2 cells before the target, so they appear behind him when he stands 1 cell away. This predates the latest changes.
 
 Next suggested task:
-1. The user reviews and approves the rule documents (they are still a REVIEWED DRAFT).
-2. Then continue the hero roster. A new hero is a long task, so start a `wip/` branch first and read `HEROES` before choosing the next hero.
+1. Continue the hero roster. A new hero is a long task, so start a `wip/` branch first and read `HEROES` before choosing the next hero.
 
 Next agent must inspect:
 - `git rev-parse HEAD` and `git rev-parse HEAD^{tree}` on both sides;
-- `git log 979437a..master` (local), plus the commits after the confirmed base;
+- `git log 4c3d66e..master` (local), i.e. the commits after the confirmed base;
 - `AGENTS.md`;
 - `docs/PROJECT_RULES.md` §2, §4 and §5.

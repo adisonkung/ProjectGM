@@ -1,6 +1,6 @@
 # Content Pipeline — adding content safely
 
-> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
+> **Status: CANONICAL** · approved by the user on 2026-10-16 (after review). Change only with the user's approval.
 
 ## Always first: inspect the current state
 

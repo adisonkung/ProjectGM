@@ -1,7 +1,7 @@
 # Project Rules — Summon Tower (ProjectGM)
 
-> **Status: REVIEWED DRAFT** · generated / reviewed 2026-10-16 · **pending final user approval.** Not canonical yet.
-> Once approved, it applies to **every** agent: Claude, Codex and future agents. Change it only with the user's approval.
+> **Status: CANONICAL** · approved by the user on 2026-10-16 (after review). Change only with the user's approval.
+> It applies to **every** agent: Claude, Codex and future agents.
 
 ## 1. Project overview
 
@@ -20,7 +20,7 @@ Summon Tower is a gacha, team-building and auto-battle game in the style of TFT.
 Precedence, from highest to lowest (`AGENTS.md` and `CLAUDE.md` repeat this exact order):
 
 1. **Explicit user instruction** in the current task.
-2. **Canonical prescriptive docs** (once approved): `docs/COMBAT_RULES.md` → `docs/ANIMATION_PIPELINE.md` → `docs/CONTENT_PIPELINE.md` → this file.
+2. **Canonical prescriptive docs**: `docs/COMBAT_RULES.md` → `docs/ANIMATION_PIPELINE.md` → `docs/CONTENT_PIPELINE.md` → this file.
 3. **Current repository implementation.**
 4. **Current tests.**
 5. **`docs/ARCHITECTURE.md`**: descriptive documentation of the current implementation. It does not override code; when it disagrees, code wins and `ARCHITECTURE.md` is updated.
