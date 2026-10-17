@@ -11,6 +11,10 @@ import { MONSTERS } from '../../core/data/monsters';
 import { HEROES } from '../../core/data/heroes';
 import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxAttached, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
 import { kitOf } from '../../core/data/hero-skills';
+import { appliedStatusFx } from '../../core/data/sprites';
+import { STATUS_ICONS } from '../../core/data/visuals';
+import { groundFxCell } from '../../battle/render/fx-clip';
+import { skillReview } from './skill-review';
 
 type Action = 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
 
@@ -39,6 +43,9 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
 
       @if (comparisonHeroes.length) {
         <p class="comparison">เทียบสัดส่วน: {{ comparisonNames }} · ตัวละครยืนบนเลนเดียวกัน</p>
+      }
+      @if (activeEngineReview()) {
+        <p class="comparison">ทดสอบหนึ่งครั้งด้วยระบบต่อสู้ · เป้าแรก{{ initialStatus ? ' มี ' + initialStatus + ' ก่อนร่าย' : ' ยังไม่มีสถานะก่อนร่าย' }} · จังหวะสำหรับรีวิว</p>
       }
       <div class="stage" [class.anchors]="showAnchors()">
         <app-board #board [background]="previewBackground" [units]="units()" [fx]="fx()" [projectiles]="projectiles()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
@@ -99,6 +106,10 @@ export class SpriteLabComponent implements OnDestroy {
   readonly previewBackground = BACKGROUNDS[this.qp.get('bg') ?? ''] ?? null;
   private readonly comparisonMonster = MONSTERS[this.qp.get('enemy') ?? ''];
   private readonly targetDistance = Math.min(5, Math.max(1, Number(this.qp.get('distance')) || 1));
+  readonly engineReview = this.qp.get('combat') === '1';
+  readonly initialStatus = this.qp.get('status') ?? '';
+  private readonly dummyIds = this.qp.get('formation') === 'square' ? [2, 3, 4, 5] : DUMMY_IDS;
+  private readonly reviewStatuses = signal<Record<number, { id: string; left: number }[]>>({});
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
   readonly heroName = computed(() => this.hero()?.name ?? '');
@@ -114,6 +125,12 @@ export class SpriteLabComponent implements OnDestroy {
   readonly faceLeft = signal(false);
   readonly showAnchors = signal(false);
   readonly last = signal<Action>('idle');
+  readonly activeEngineReview = computed(() => {
+    const action = this.last();
+    if (!this.engineReview || (action !== 'skill' && action !== 'skill2' && action !== 'ult')) return false;
+    const h = this.hero();
+    return (kitOf(h.id, h.cls)[action].delivery ?? 'INSTANT') === 'INSTANT';
+  });
   /** blink clips (AnimDef.move): columns the hero is relocated by until the clip ends · own-fade = clip opacity */
   readonly blinked = signal<{ dc: number; ownFade: boolean } | null>(null);
   readonly anims = signal<Partial<Record<number, AnimState>>>({});
@@ -152,9 +169,12 @@ export class SpriteLabComponent implements OnDestroy {
         ...base, id: 100 + i, side: 'ally' as const, name: other.name, cls: other.cls,
         r: 1, c: hc - (i + 1) * 2 * (left ? -1 : 1), sprite: other.sprite, star: other.star, heroId: other.id, flip: left,
       })),
-      ...DUMMY_IDS.map((id, i) => ({
-        ...base, id, side: 'enemy' as const, name: this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const, r: 1, c: hc + (this.targetDistance + i) * (left ? -1 : 1),
+      ...this.dummyIds.map((id, i) => ({
+        ...base, id, side: 'enemy' as const, name: this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
+        r: this.dummyIds.length === 4 ? 1 + Math.floor(i / 2) : 1,
+        c: hc + (this.targetDistance + (this.dummyIds.length === 4 ? i % 2 : i)) * (left ? -1 : 1),
         sprite: this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: !left,
+        statuses: (this.reviewStatuses()[id] ?? []).filter(b => STATUS_ICONS[b.id]).map(b => ({ ...b, icon: STATUS_ICONS[b.id] })),
       })),
     ];
   });
@@ -190,7 +210,7 @@ export class SpriteLabComponent implements OnDestroy {
     this.blinked.set(null);
     this.fx.set([]);
     this.set(HERO_ID, 'idle');
-    DUMMY_IDS.forEach(id => this.set(id, 'idle'));
+    this.dummyIds.forEach(id => this.set(id, 'idle'));
   }
 
   play(a: Action): void {
@@ -198,7 +218,7 @@ export class SpriteLabComponent implements OnDestroy {
     this.last.set(a);
     this.log.set([]);
     if (a === 'idle') {
-      DUMMY_IDS.forEach(id => this.set(id, 'idle'));
+      this.dummyIds.forEach(id => this.set(id, 'idle'));
       this.set(HERO_ID, 'idle');
       return;
     }
@@ -213,6 +233,11 @@ export class SpriteLabComponent implements OnDestroy {
     const kitSkill = a === 'skill' || a === 'skill2' || a === 'ult' ? kitOf(this.hero().id, this.hero().cls)[a] : undefined;
     // Lab-only single-target projectile preview. Contact follows travel, just as in the combat engine.
     const singleProjectile = kitSkill?.delivery === 'PROJECTILE' && kitSkill.effects.some(e => e.type === 'DAMAGE' && e.area === 'SINGLE');
+    if (this.engineReview && kitSkill && (kitSkill.delivery ?? 'INSTANT') === 'INSTANT') {
+      this.playEngineReview(a as SkillKind);
+      if (this.loop()) this.at(len + 0.8, () => this.play(a));
+      return;
+    }
     if (clip?.move != null && kitSkill?.movement?.type === 'BLINK_BEHIND') {
       // blink skill: stand on the front dummy's cell (the back dummy is the target) from the clip's `move`, back after it
       const mt = clk!.at(clip.move);
@@ -262,7 +287,7 @@ export class SpriteLabComponent implements OnDestroy {
   private launchSingleProjectile(kind: SkillKind, release: number, contact: () => void): void {
     const name = this.sheet()?.projectile?.[kind];
     const [me] = this.units();
-    const target = this.units().find(u => u.id === DUMMY_IDS[0])!;
+    const target = this.units().find(u => u.id === this.dummyIds[0])!;
     const flight = 0.1 + 0.06 * Math.max(Math.abs(target.c - me.c), Math.abs(target.r - me.r));
     if (name && FX[name]) {
       const p: ProjectileView = { id: ++this.id, name,
@@ -282,9 +307,10 @@ export class SpriteLabComponent implements OnDestroy {
     const me = units[0];
     for (const name of names) {
       const def = FX[name];
-      const at = def.at === 'target' ? (trig.on === 'event' ? DUMMY_IDS.slice(0, 1) : hits).slice(def.exceptPrimary ? 1 : 0).slice(0, def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
+      const at = def.at === 'target' ? (trig.on === 'event' ? this.dummyIds.slice(0, 1) : hits).slice(def.exceptPrimary ? 1 : 0).slice(0, def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
       for (const u of at) {
-        const f: FxView = { id: ++this.id, r: u.r, c: u.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
+        const cell = groundFxCell(def, { r: me.r, c: me.c }, { r: u.r, c: u.c });
+        const f: FxView = { id: ++this.id, r: cell.r, c: cell.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
           follow: fxAttached(name) ? u.id : undefined };
         this.fx.update(l => [...l, f]);
         this.at((fxDuration(name) + 50) / 1000, () => this.fx.update(l => l.filter(x => x.id !== f.id)));
@@ -294,7 +320,7 @@ export class SpriteLabComponent implements OnDestroy {
 
   /** dummies hit by this action (ult / sweep = both, thrust = both in the line, attack = the front one) → ids */
   private hitDummies(kind: 'attack' | SkillKind, index = 0, single = false): number[] {
-    const targets = kind === 'attack' || single ? DUMMY_IDS.slice(0, 1) : DUMMY_IDS;
+    const targets = kind === 'attack' || single ? this.dummyIds.slice(0, 1) : this.dummyIds;
     const fl: FloatText[] = targets.map(id => {
       this.set(id, 'hurt', { force: true });
       const u = this.units().find(x => x.id === id)!;
@@ -307,6 +333,44 @@ export class SpriteLabComponent implements OnDestroy {
 
   private set(id: number, anim: SpriteAnim, extra: Partial<AnimState> = {}): void {
     this.anims.update(m => ({ ...m, [id]: { anim, key: ++this.key, ...extra } }));
+  }
+
+  /** Optional isolated actual-engine review for instant skills; no duplicate imitation of Chill/Root rules. */
+  private playEngineReview(kind: SkillKind): void {
+    const units = this.units();
+    const me = units[0];
+    const targets = units.filter(u => this.dummyIds.includes(u.id));
+    const review = skillReview(this.hero().id, kind, { r: me.r, c: me.c }, targets.map((u, i) =>
+      ({ id: u.id, pos: { r: u.r, c: u.c }, statuses: i === 0 && this.initialStatus ? [this.initialStatus] : [] })), this.qp.get('enemy') ?? 'forest_slime');
+    const id = (n: number) => review.ids.get(n)!;
+    for (const sample of review.samples) this.at(sample.t, () => {
+      this.reviewStatuses.set(sample.statuses);
+      for (const e of sample.events) {
+        if (e.type === 'animEvent') {
+          this.note(sample.t, e.event);
+          if (e.event !== 'DAMAGE' && e.event !== 'IMPACT') this.spawn(kind, { on: 'event', event: e.event, index: e.index });
+        } else if (e.type === 'impact') {
+          this.spawn(kind, { on: 'impact', hit: e.index }, (e.hits ?? []).map(id));
+        } else if (e.type === 'damage' || e.type === 'buff') {
+          const target = units.find(u => u.id === id(e.dst))!;
+          const f: FloatText = { id: ++this.id, r: target.r, c: target.c,
+            text: e.type === 'damage' ? `-${e.amount}` : e.name, kind: e.type === 'damage' ? 'dmg' : 'buff' };
+          this.floats.update(l => [...l, f]);
+          this.at(0.9, () => this.floats.update(l => l.filter(x => x.id !== f.id)));
+          if (e.type === 'damage') this.set(target.id, 'hurt', { force: true });
+          else {
+            this.note(sample.t, `${e.buff} → ${target.id} (applied)`);
+            const name = appliedStatusFx(this.hero().sprite, e.buff);
+            if (name) {
+              const effect: FxView = { id: ++this.id, r: target.r, c: target.c, name, angle: 0,
+                offset: fxOffset(name), under: FX[name].layer === 'under', follow: fxAttached(name) ? target.id : undefined };
+              this.fx.update(l => [...l, effect]);
+              this.at((fxDuration(name) + 50) / 1000, () => this.fx.update(l => l.filter(x => x.id !== effect.id)));
+            }
+          }
+        }
+      }
+    });
   }
 
   /** game seconds → real ms at the lab speed */
@@ -324,5 +388,6 @@ export class SpriteLabComponent implements OnDestroy {
     this.projectiles.set([]);
     this.fx.set([]);
     this.floats.set([]);
+    this.reviewStatuses.set({});
   }
 }

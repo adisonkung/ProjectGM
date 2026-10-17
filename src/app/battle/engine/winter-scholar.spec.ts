@@ -51,16 +51,15 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     for (const slot of ['skill', 'skill2', 'ult'] as const) expect(kitInterrupts(kit(), slot)).toBeFalse();
   });
 
-  it('registers S1 review assets while keeping unproduced skills on their previous base fallback', () => {
+  it('registers S1/S2 review assets while keeping the unproduced ultimate on its previous base fallback', () => {
     expect(HERO_ART['mirelle']).toEqual({ portrait: 'portraits/mirelle.webp' });
     const sheet = SHEETS['hero-mirelle.png'];
-    expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH]).toEqual([10, 8, 260, 170]);
+    expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH]).toEqual([20, 8, 260, 170]);
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => sheet.anims[k]!.frames)).toEqual([5, 7, 4, 7, 6]);
     expect([sheet.anims.skill!.row, sheet.anims.skill!.frames]).toEqual([5, 10]);
     expect(sheet.anims.skill!.steps).toBeUndefined(); // uniform review playback, no final choreography
-    expect(sheet.anims.skill2).toBe(sheet.anims.attack);
+    expect([sheet.anims.skill2!.row, sheet.anims.skill2!.frames]).toEqual([6, 20]);
     expect(sheet.anims.ult).toBe(sheet.anims.attack);
-    expect(animTiming('hero-mirelle.png', 'skill2')).toEqual(animTiming('hero-mirelle.png', 'attack'));
     expect(animTiming('hero-mirelle.png', 'ult')).toEqual(animTiming('hero-mirelle.png', 'attack'));
     expect(sheet.projectile!.skill).toBe('mf-s1-projectile');
     expect(sheet.fx!.skill).toBe('mf-s1-impact');
@@ -68,7 +67,10 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     const s1 = MIRELLE_PRODUCTION.clips.skill;
     expect(s1.state).toBe('PROVISIONAL_REVIEW');
     for (const asset of s1.assets) expect(FX[asset.key].file).toBe(asset.file);
-    for (const clip of [MIRELLE_PRODUCTION.clips.skill2, MIRELLE_PRODUCTION.clips.ult]) {
+    const s2 = MIRELLE_PRODUCTION.clips.skill2;
+    expect(s2.state).toBe('PROVISIONAL_REVIEW');
+    for (const asset of s2.assets) expect(FX[asset.key].file).toBe(asset.file);
+    for (const clip of [MIRELLE_PRODUCTION.clips.ult]) {
       expect(clip.state).toBe('AWAITING_SKILL_REVIEW');
       expect(clip.events).toContain('CAST_START');
       expect(clip.events).toContain('ANIMATION_END');

@@ -23,7 +23,8 @@ import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
-import { animOf, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
+import { animOf, appliedStatusFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
+import { groundFxCell } from '../../battle/render/fx-clip';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
 import { Router } from '@angular/router';
@@ -160,6 +161,8 @@ export class BattleComponent implements OnDestroy {
   readonly debug = signal(false);
   /** running cast FX per unit (removed on fxStop) */
   private castFx = new Map<number, number>();
+  /** Target cell at cast start, for ground visuals when an aimed unit dies before activation. */
+  private castAim = new Map<number, { id: number; at: { r: number; c: number } }>();
   /** ฮีโร่ของเรา เรียงตามทีม (ซ้าย→ขวาในแถบด้านล่าง) */
   readonly party = computed(() => this.views().filter(v => isPlayerUnit(v)));
   /** STEP 9: ศัตรูที่แตะเลือกไว้ และเป้าโฟกัสของทีม */
@@ -385,6 +388,7 @@ export class BattleComponent implements OnDestroy {
     this.selectedId.set(null);
     this.focusId.set(null);
     this.facing.clear();
+    this.castAim.clear();
     this.blinkUntil.clear();
     this.ownFade.clear();
     this.snapshot();
@@ -852,9 +856,11 @@ export class BattleComponent implements OnDestroy {
       for (const name of fxFor(sprite, kind, trig)) {
         const def = FX[name];
         const p = posOf(src);
+        const aim = def.groundArea && dst == null ? this.castAim.get(src) : undefined;
+        const target = dst ?? aim?.id;
         // contact FX on every unit the hit damaged (capped, primary first) — or the primary only
         const at = def.at === 'target'
-          ? (def.perHit ? [...new Set([dst, ...(hits ?? [])].filter((x): x is number => x != null && !(def.exceptPrimary && x === dst) && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit) : dst != null ? [dst] : [src])
+          ? (def.perHit ? [...new Set([target, ...(hits ?? [])].filter((x): x is number => x != null && !(def.exceptPrimary && x === target) && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit) : target != null ? [target] : [src])
           : [src];
         if (def.at === 'allies') {
           // team field: the centre of the caster's living formation (lanes / columns averaged), never rotated
@@ -867,11 +873,15 @@ export class BattleComponent implements OnDestroy {
         }
         for (const id of at) {
           const q = id === src ? p : posOf(id);
+          const areaCell = groundFxCell(def, unitOf(src).pos, aim?.at ?? unitOf(id).pos);
+          const cell = def.groundArea
+            ? { r: areaCell.r, c: areaCell.c + this.engine.formation.originPosition - this.engine.cameraX }
+            : q;
           const rotate = q !== p && def.orient !== 'flip';
           const angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
           // หันตามผู้ใช้ (หรือตามทิศไปหาเป้าหมาย ถ้าเป้าไม่ได้อยู่คอลัมน์เดียวกัน)
           const flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(src);
-          fx.push({ id: ++this.floatId, r: q.r, c: q.c, name, angle, flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
+          fx.push({ id: ++this.floatId, r: cell.r, c: cell.c, name, angle, flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
             follow: fxAttached(name) ? id : undefined });
         }
       }
@@ -917,6 +927,8 @@ export class BattleComponent implements OnDestroy {
           if (anims[e.src]?.anim !== 'die') set(e.src, 'walk');
           break;
         case 'cast': {
+          if (e.dst != null) this.castAim.set(e.src, { id: e.dst, at: { ...unitOf(e.dst).pos } });
+          else this.castAim.delete(e.src);
           set(e.src, e.kind);
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
@@ -1095,6 +1107,9 @@ export class BattleComponent implements OnDestroy {
         }
         case 'buff': {
           const p = posOf(e.dst);
+          const name = appliedStatusFx(unitOf(e.src).sprite, e.buff);
+          if (name) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name, angle: 0,
+            offset: fxOffset(name), under: FX[name].layer === 'under', follow: fxAttached(name) ? e.dst : undefined });
           const text = e.buff === 'alpha_howl_buff' ? (e.refreshed ? 'ATK↑ ต่อเวลา' : 'ATK +25%') : e.refreshed ? '' : e.name;
           if (text) floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: 'buff' });
           break;

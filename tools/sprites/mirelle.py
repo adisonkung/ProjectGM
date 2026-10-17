@@ -1,4 +1,4 @@
-"""Bake approved Mirelle base combat + portrait and optional S1 character source.
+"""Bake approved Mirelle base combat + portrait and supplied skill character sources.
 
 python3 tools/sprites/mirelle.py [source directory] [sprite output] [portrait output]
 Sources: base.png / reference.png, copied byte-for-byte from the user's mirelle-source.zip.
@@ -60,6 +60,10 @@ def main():
         groups['skill'] = A.sheet_frames('s1/s1_character', [5, 5], False)
         names.append('skill')
         scales['skill'] = IDLE_BODY / A.body_h(groups['skill'][0])
+    if (SRC / 's2/s2_character.png').exists():
+        groups['skill2'] = A.sheet_frames('s2/s2_character', [10, 10], False)
+        names.append('skill2')
+        scales['skill2'] = IDLE_BODY / A.body_h(groups['skill2'][0])
     cols = max(len(groups[name]) for name in names)
     probe = Image.new('RGBA', (260 * cols, 170 * 8))
     for row, name in enumerate(names):

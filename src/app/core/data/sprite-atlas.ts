@@ -76,6 +76,8 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-mirelle-basic-crystal.png': { url: 'opt/fx-mirelle-basic-crystal.webp' },
   'fx-mirelle-s1-impact.png': { url: 'opt/fx-mirelle-s1-impact.webp' },
   'fx-mirelle-s1-projectile.png': { url: 'opt/fx-mirelle-s1-projectile.webp' },
+  'fx-mirelle-s2-bind.png': { url: 'opt/fx-mirelle-s2-bind.webp' },
+  'fx-mirelle-s2-main.png': { url: 'opt/fx-mirelle-s2-main.webp' },
   'fx-mirror-stance.png': { url: 'opt/fx-mirror-stance.webp' },
   'fx-moye-s1-impact1.png': { url: 'opt/fx-moye-s1-impact1.webp' },
   'fx-moye-s1-impact2.png': { url: 'opt/fx-moye-s1-impact2.webp' },

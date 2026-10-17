@@ -113,7 +113,8 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 - Source death cancels; target death does not. Engine quiesce clears fields at wave advance/stage end.
 - Engine emits generic `FIELD_STARTED` / `FIELD_ENDED` events; production FX consumers remain pending approved art.
 - `moveSpeedMultiplier` slows combat movement; status conditions snapshot pre-hit recipient status.
-- Mirelle production/review states live in `core/data/mirelle-production.ts`. Base art and the supplied S1 character/projectile/impact cuts are registered. S1 uses provisional review playback; unproduced S2/Ult explicitly reuse the original basic-attack clip so their timing does not inherit S1.
+- Mirelle production/review states live in `core/data/mirelle-production.ts`. Base art and supplied S1/S2 cuts are registered with provisional review playback; the unproduced Ult explicitly reuses the original basic-attack clip.
+- `square2Center()` shares the existing oriented 2×2 footprint between `resolveArea` and ground presentation, including bottom-lane handling; hit semantics are unchanged.
 
 ### Monsters
 
@@ -148,6 +149,10 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 - **Drawing:**
   - DOM: `battle/fx-sprite`, `projectile`;
   - Pixi: `render/pixi-units.ts` with `render/fx-clip.ts` and `particles.ts`.
+
+- `FxDef.groundArea: 'SQUARE_2'` places a target visual at the logical footprint centre via `groundFxCell`, independent of occupants or PNG bounds. The battle page converts grid cells to world/screen columns with formation origin/camera; captured cast aim covers a target that dies before activation.
+- `SheetDef.appliedStatusFx` maps a caster's successfully applied status to a one-shot visual. The battle page consumes existing `buff` events after conditions/immunities, not damage or status guesses. No combat mechanic or hero-specific branch is involved.
+- Sprite lab `?combat=1&formation=square&status=chill` can replay an isolated single INSTANT cast through the actual engine (`pages/sprite-lab/skill-review.ts`); only the first training target starts with the requested status. Automatic actions are frozen, training HP is high, source stats/kit are real and saves are untouched. This is distinct from the lab's older fixed-number visual playback.
 
 ### Rendering / board
 

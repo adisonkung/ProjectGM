@@ -91,6 +91,8 @@ export interface SheetDef {
   shieldFx?: string;
   /** เอฟเฟกต์ที่ตัวเพื่อนตอนได้รับฮีลจากตัวนี้ */
   healFx?: string;
+  /** One-shot visual when a status applied by this caster succeeds (buff event, after immunity/conditions). */
+  appliedStatusFx?: Record<string, string>;
   /** กระสุน (คีย์ของ FX) ของการยิงแต่ละแบบ */
   projectile?: Partial<Record<'attack' | SkillKind, string>>;
   /** ความสูงช่อง (ค่าเริ่มต้น 100) — แผ่นที่มีท่ายกอาวุธสูงใช้ 120 */
@@ -113,6 +115,8 @@ export interface FxDef {
   /** เล่นที่ตัวผู้ใช้ หรือที่เป้าหมาย (หมุนตามทิศที่พุ่งไป) */
   /** 'allies' = centre of the caster's living team formation (team-wide field, e.g. a healer's ritual) */
   at: 'self' | 'target' | 'allies';
+  /** Place a target ground effect at the logical footprint centre, independent of its PNG dimensions. */
+  groundArea?: 'SQUARE_2';
   /** เลื่อนจากกลางช่อง เป็น % ของช่อง (+x ขวา, +y ลง) */
   dx?: number;
   dy?: number;
@@ -198,9 +202,9 @@ export const SHEETS: Record<string, SheetDef> = {
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
-  // Mirelle: approved base + S1 visual review. S1 timing is PROVISIONAL, no final Timeline Sync.
+  // Mirelle: supplied base + S1/S2 visual review. Timing is PROVISIONAL, no final Timeline Sync.
   'hero-mirelle.png': {
-    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 20, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5 },
@@ -212,12 +216,15 @@ export const SHEETS: Record<string, SheetDef> = {
       // Uniform review playback only. DAMAGE marks launch for PROJECTILE delivery; effects land on arrival.
       skill: { row: 5, frames: 10, ms: 1000 / 12,
         events: { CAST_START: 0, PROJECTILE_SPAWN: 6, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 } },
-      // Preserve the Phase A basic-attack fallback for unproduced skills; never inherit S1's new timing.
-      skill2: MIRELLE_BASIC_ATTACK,
+      // Supplied S2 has 20 poses, unlike the workbook's hypothetical 10. Uniform review playback only.
+      skill2: { row: 6, frames: 20, ms: 1000 / 12,
+        events: { CAST_START: 0, SKILL_ACTIVATE: 12, VFX_SPAWN: 12, DAMAGE: 12, IMPACT: 12, RECOVERY_START: 16 } },
+      // Preserve the Phase A base fallback for the unproduced ultimate.
       ult: MIRELLE_BASIC_ATTACK,
     },
     projectile: { attack: 'mf-basic-crystal', skill: 'mf-s1-projectile' },
-    fx: { skill: 'mf-s1-impact' },
+    fx: { skill: 'mf-s1-impact', skill2: 'mf-s2-main' },
+    appliedStatusFx: { root: 'mf-s2-bind' },
   },
   // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet + S1 (row 5) + S2 (row 6)
   // + ult (row 7). Cell 260 × 170 like Aurel v2
@@ -703,6 +710,15 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'mf-s2-main': {
+    file: 'fx-mirelle-s2-main.png', frames: 8, w: 148, h: 193, frameMs: 100,
+    at: 'target', groundArea: 'SQUARE_2', on: 'vfx', fitCells: 2,
+    orient: 'flip', pivot: [0.5, 0.870466], dy: 27.25, layer: 'under', attach: false,
+  },
+  'mf-s2-bind': {
+    file: 'fx-mirelle-s2-bind.png', frames: 8, w: 64, h: 84, frameMs: 100,
+    at: 'target', orient: 'flip', pivot: [0.5, 0.869048], dy: 27.25, scale: 0.65, attach: true,
+  },
   // Mirelle S1 source cuts; review sizes/playback only, no final VFX timeline.
   'mf-s1-projectile': {
     file: 'fx-mirelle-s1-projectile.png', frames: 7, w: 116, h: 50, frameMs: 50,
@@ -1292,6 +1308,12 @@ export function eventFeelOf(sprite: string | undefined, anim: 'attack' | SkillKi
 export function fxNames(sprite: string | undefined, kind: SkillKind): string[] {
   const v = sprite ? SHEETS[sprite]?.fx?.[kind] : undefined;
   return v == null ? [] : Array.isArray(v) ? v : [v];
+}
+
+/** The caller must supply a successful buff event; merely being hit or already holding a status is insufficient. */
+export function appliedStatusFx(sprite: string | undefined, status: string): string | undefined {
+  const name = sprite ? SHEETS[sprite]?.appliedStatusFx?.[status] : undefined;
+  return name && FX[name] ? name : undefined;
 }
 
 export type FxTrigger = { on: 'cast' } | { on: 'impact'; hit?: number } | { on: 'event'; event: SemanticEvent; index?: number };

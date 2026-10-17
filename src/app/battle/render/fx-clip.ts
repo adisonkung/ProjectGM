@@ -1,4 +1,11 @@
 import { FX_SCALE, FxDef, PROJECTILE_SCALE, PX_TO_CELL } from '../../core/data/sprites';
+import { Cell } from '../../core/models/unit';
+import { square2Center } from '../engine/area';
+
+/** Ground footprint placement uses logical cells, never the art bounds or number of occupants. */
+export function groundFxCell(d: FxDef, caster: Cell, target: Cell): Cell {
+  return d.groundArea === 'SQUARE_2' ? square2Center(caster, target) : target;
+}
 
 /**
  * A skill FX as a pure function of ONE clock — the same rules `app-fx-sprite` applies with Web Animations

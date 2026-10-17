@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from
 
 import { provideRouter } from '@angular/router';
 import { BattleComponent } from './battle.component';
+import { BattleEngine, BattleEvent } from '../../battle/engine/battle-engine';
 
 describe('BattleComponent', () => {
   let component: BattleComponent;
@@ -99,5 +100,31 @@ describe('BattleComponent', () => {
     expect(fixture.nativeElement.querySelector('.overlay .result-card')).not.toBeNull();
     discardPeriodicTasks();
     component.ngOnDestroy();
+  }));
+
+  it('ground FX retain the cast cell after target death; immunity does not show Bind, successful Root does', fakeAsync(() => {
+    component.start();
+    component.openMenu();
+    const host = component as unknown as { engine: BattleEngine; handleEvents(events: BattleEvent[]): void };
+    const engine = host.engine;
+    const caster = engine.units.find(u => u.side === 'ally')!;
+    const target = engine.units.find(u => u.side === 'enemy')!;
+    caster.sprite = 'hero-mirelle.png'; caster.pos = { r: 1, c: 5 };
+    target.pos = { r: 1, c: 9 };
+    host.handleEvents([{ type: 'cast', src: caster.id, dst: target.id, kind: 'skill2', skill: 'Glassbind' }]);
+    // The original target moved and died during the cast. Engine AoE uses its captured cast-start cell.
+    target.pos = { r: 2, c: 12 }; target.alive = false;
+    host.handleEvents([{ type: 'animEvent', src: caster.id, kind: 'skill2', event: 'VFX_SPAWN', name: 'GLASSBIND_VFX' }]);
+    const main = component.fx().find(f => f.name === 'mf-s2-main')!;
+    expect(main.r).toBe(1.5);
+    expect(main.c).toBe(9.5 + engine.formation.originPosition - engine.cameraX);
+    host.handleEvents([{ type: 'immune', src: caster.id, dst: target.id, skill: 'Root' }]);
+    expect(component.fx().some(f => f.name === 'mf-s2-bind')).toBeFalse();
+    target.alive = true;
+    host.handleEvents([{ type: 'buff', src: caster.id, dst: target.id, buff: 'root', name: 'Root', refreshed: false }]);
+    expect(component.fx().filter(f => f.name === 'mf-s2-bind').length).toBe(1);
+    tick(2000);
+    component.ngOnDestroy();
+    discardPeriodicTasks();
   }));
 });

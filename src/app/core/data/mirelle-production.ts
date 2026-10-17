@@ -9,7 +9,7 @@ interface PendingClip {
 }
 
 export const MIRELLE_PRODUCTION = {
-  heroId: 'mirelle', phase: 'S1_REVIEW', timing: 'PROVISIONAL_S1_REVIEW',
+  heroId: 'mirelle', phase: 'S2_REVIEW', timing: 'PROVISIONAL_SKILL_REVIEW',
   approvedReferences: [
     'ChatGPT Image Oct 17, 2026, 12_38_47 AM.png',
     'ChatGPT Image Oct 17, 2026, 12_39_00 AM.png',
@@ -18,6 +18,7 @@ export const MIRELLE_PRODUCTION = {
   sourceSlots: {
     reference: 'art/incoming/mirelle/reference.png', base: 'art/incoming/mirelle/base.png',
     s1: 'art/incoming/mirelle/s1',
+    s2: 'art/incoming/mirelle/s2',
   },
   expectedSheet: 'hero-mirelle.png',
   expectedPortrait: 'portraits/mirelle.webp',
@@ -32,7 +33,7 @@ export const MIRELLE_PRODUCTION = {
       ],
     },
     skill2: {
-      clip: 'skill2', state: 'AWAITING_SKILL_REVIEW',
+      clip: 'skill2', state: 'PROVISIONAL_REVIEW',
       events: ['CAST_START', 'SKILL_ACTIVATE', 'VFX_SPAWN', 'DAMAGE', 'IMPACT', 'RECOVERY_START', 'ANIMATION_END'],
       assets: [
         { key: 'mf-s2-main', file: 'fx-mirelle-s2-main.png', role: 'MAIN' },

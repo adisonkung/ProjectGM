@@ -62,3 +62,5 @@ Rebake supplied S1 art at projectile peak width 56 px (previous32, ×1.75) and i
 - Playwright at DPR2: all five units use Pixi, DOM fallback also checked, base actions and mirrored S1 checked, zero page errors.
 
 Stop here for user review of S1 action, projectile identity/size and impact. Final S1 timing/Timeline Sync comes only after that review; do not proceed to S2 or Ultimate production.
+
+Subsequent user steering requested S2 assets and supplied `mirelle-s2-source.zip`; S2 provisional production is recorded separately in `MIRELLE_S2_REVIEW.md`. The shared atlas expands to 20 columns with base/S1 pixels unchanged. No final S1 timing approval or Sync Sheet is inferred from that progression.
