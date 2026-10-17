@@ -1,6 +1,6 @@
 import { AreaCenter, AreaPattern } from '../../core/models/combat';
 import { Cell } from '../../core/models/unit';
-import { distance, LANES } from './grid';
+import { BOARD_COLS, distance, LANES } from './grid';
 
 /** What the resolver needs of a unit */
 export interface AreaUnit {
@@ -80,6 +80,12 @@ export function square2Center(caster: Cell, primary: Cell, facing: 1 | -1 = 1): 
     c: primary.c + (sign(primary.c - caster.c) || facing) * 0.5 };
 }
 
+/** Fixed 3-column × 2-lane footprint; retain all six cells at the board edges. */
+export function rect3x2Center(primary: Cell): Cell {
+  return { r: Math.max(0, Math.min(LANES - 2, primary.r)) + 0.5,
+    c: Math.max(1, Math.min(BOARD_COLS - 2, primary.c)) };
+}
+
 export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
   const { pattern, caster, primary, candidates } = q;
   const centerCell = (q.center ?? 'TARGET') === 'SELF' || !primary ? caster.pos : primary.pos;
@@ -94,6 +100,11 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
       const dc = primary ? direction(caster.pos, primary.pos, facing).dc as 1 | -1 : facing;
       const at = square2Center(caster.pos, centerCell, dc);
       hit = candidates.filter(u => Math.abs(u.pos.r - at.r) <= 0.5 && Math.abs(u.pos.c - at.c) <= 0.5);
+      break;
+    }
+    case 'RECT_3X2': {
+      const at = rect3x2Center(centerCell);
+      hit = candidates.filter(u => Math.abs(u.pos.r - at.r) <= 0.5 && Math.abs(u.pos.c - at.c) <= 1);
       break;
     }
     case 'ADJACENT_8':

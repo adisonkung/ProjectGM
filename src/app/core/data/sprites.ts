@@ -198,7 +198,28 @@ const MIRELLE_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
 
+// Approved base sheet only. Skill slots temporarily reuse this action; final skill sources/timing are pending.
+const SYLVARA_BASIC_ATTACK: AnimDef = {
+  row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
+};
+
 export const SHEETS: Record<string, SheetDef> = {
+  'hero-sylvara.png': {
+    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    anims: {
+      idle: { row: 0, frames: 5 },
+      walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
+      hurt: { row: 2, frames: 4, ms: 100 },
+      attack: SYLVARA_BASIC_ATTACK,
+      die: { row: 4, frames: 6, ms: 130 },
+      skill: SYLVARA_BASIC_ATTACK,
+      skill2: SYLVARA_BASIC_ATTACK,
+      // This is an activation fallback, not the final upward-launch clip or arrow-rain presentation.
+      ult: { ...SYLVARA_BASIC_ATTACK, events: { SKILL_ACTIVATE: 4, DAMAGE: 4, RECOVERY_START: 5 } },
+    },
+    projectile: { attack: 'sw-basic-arrow', skill: 'sw-basic-arrow', skill2: 'sw-basic-arrow' },
+  },
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
   // ไป๋หลง (ทวนมังกรขาว) — tools/sprites/bailong.py จากภาพของผู้ใช้ (แผ่นตัวละคร ≠ แผ่น VFX)
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
@@ -717,6 +738,10 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'sw-basic-arrow': {
+    file: 'fx-sylvara-basic-arrow.png', frames: 1, w: 18, h: 5, frameMs: 100,
+    at: 'self', pixelated: true,
+  },
   'mf-ult-charge': {
     // User readability revision (2026-10-17): about 40% larger, using a higher-resolution source cut.
     file: 'fx-mirelle-ult-charge.png', frames: 10, w: 148, h: 335, frameMs: 100,

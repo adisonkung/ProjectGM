@@ -105,6 +105,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-smoke-pouch.png': { url: 'opt/fx-smoke-pouch.png' },
   'fx-star-bolt.png': { url: 'opt/fx-star-bolt.png' },
   'fx-starfall.png': { url: 'opt/fx-starfall.webp' },
+  'fx-sylvara-basic-arrow.png': { url: 'opt/fx-sylvara-basic-arrow.png' },
   'fx-tangxun-knife.png': { url: 'opt/fx-tangxun-knife.webp' },
   'fx-tangxun-s1-fang.png': { url: 'opt/fx-tangxun-s1-fang.webp' },
   'fx-tangxun-s1-impact1.png': { url: 'opt/fx-tangxun-s1-impact1.webp' },
@@ -135,6 +136,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'hero-linxue.png': { url: 'opt/hero-linxue.webp' },
   'hero-mirelle.png': { url: 'opt/hero-mirelle.webp' },
   'hero-moye.png': { url: 'opt/hero-moye.webp' },
+  'hero-sylvara.png': { url: 'opt/hero-sylvara.webp' },
   'hero-tangxun.png': { url: 'opt/hero-tangxun.webp' },
   'hero-yuezheng.png': { url: 'opt/hero-yuezheng.webp' },
 };

@@ -178,7 +178,7 @@ export function skillLines(s: SkillDefinition): string[] {
   for (const e of s.effects) {
     switch (e.type) {
       case 'FIELD':
-        out.push(`สนาม ${e.field.area === 'ADJACENT_8' ? '3×3' : '2×2'} นาน ${e.field.duration} วิ · ทุก ${e.field.interval} วิ`);
+        out.push(`สนาม ${{ ADJACENT_8: '3×3', SQUARE_2: '2×2', RECT_3X2: '3×2' }[e.field.area]} นาน ${e.field.duration} วิ · ทุก ${e.field.interval} วิ`);
         out.push(...skillLines({ ...s, cooldown: undefined, effects: e.field.effects }));
         break;
       case 'DAMAGE':

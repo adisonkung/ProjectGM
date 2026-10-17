@@ -193,6 +193,38 @@ export const CLASS_KITS: Record<HeroClass, HeroKit> = { tank, fighter, assassin,
 // ------------------------------------------------------------------ heroes with their own kit
 
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
+  // Sylvara Windwhisper — The Emerald Huntress (user 2026-10-17). Phase A values, not final balance.
+  sylvara: {
+    id: 'sylvara', cls: 'archer', identity: 'Ranged DPS · Precision Shot · Root Setup · Five-wave Arrow Rain',
+    kit: {
+      attack: archer.attack,
+      skill: {
+        ...archer.skill, name: 'ศรมรกตทะลวง', label: 'Emerald Piercer',
+        target: 'FOCUS_OR_LOWEST_HP', delivery: 'PROJECTILE', repeat: undefined,
+        effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 2.2, damageType: 'PHYSICAL' }],
+        ai: { tier: 'NORMAL' },
+      },
+      skill2: {
+        ...archer.skill2, name: 'พันธนาการพฤกษา', label: 'Verdant Snare',
+        target: 'CLUSTER', fallback: ['CURRENT'], delivery: 'PROJECTILE',
+        effects: [
+          { type: 'DAMAGE', area: 'SQUARE_2', primary: 0.8, secondary: 0.8, damageType: 'PHYSICAL' },
+          { type: 'APPLY_STATUS', status: 'root', to: 'HIT', duration: 2 },
+        ],
+        ai: { tier: 'HIGH_VALUE', minTargets: 1, countArea: 'SQUARE_2' },
+      },
+      ult: {
+        ...archer.ult, name: 'ฝนศรมรกต', label: 'Emerald Skyfall',
+        target: 'CLUSTER', fallback: ['NEAREST_ENEMY'], delivery: 'INSTANT',
+        // One activation, then five independent area pulses. Ascending-arrow art is pending; no launch burst.
+        effects: [{ type: 'FIELD', field: {
+          area: 'RECT_3X2', duration: 5, interval: 1,
+          effects: [{ type: 'DAMAGE', area: 'RECT_3X2', primary: 0.6, secondary: 0.6, damageType: 'PHYSICAL' }],
+        } }],
+        ai: { tier: 'HIGH_VALUE', minTargets: 1, countArea: 'RECT_3X2' },
+      },
+    },
+  },
   // Mirelle Frostglass — The Winter Scholar (user 2026-10-17): Phase A provisional gameplay.
   // Mage ids/rank tables retained. No skill clips or final VFX timing until individual user review.
   mirelle: {

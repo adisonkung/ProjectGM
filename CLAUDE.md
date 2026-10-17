@@ -16,6 +16,16 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Sylvara Windwhisper — Phase A (2026-10-17, Codex)
+
+ผู้ใช้อนุมัติแผนให้เริ่มจากคอนเซปต์และ `sylvara_base.zip` · ฐาน `origin/master`895369a หลัง Mirelle merge · branch `wip/codex-hero-sylvara` สร้าง local/remote ก่อนแก้ไฟล์ · roster9ตัว: เพิ่ม `sylvara` / ซิลวารา วินด์วิสเปอร์ / Archerเดิม / 3★ชั่วคราว / ไม่แจกstarterหรือbench
+
+- S1 Emerald Piercer: projectileหนึ่งดอก Physical220%/CD6s, focusหรือHP%ต่ำในระยะ; S2 Verdant Snare: projectileหนึ่งดอก → Physical80%ทุกตัวใน2×2+Root2s/CD11s; Ult Emerald Skyfall: FIELD3คอลัมน์×2เลน5วิ/5ระลอก Physical60%ต่อระลอก ไม่มีดาเมจยิงขึ้นฟ้าหรือระเบิดท้าย · ทั้งหมดprovisional และชื่อS1/S2ยังรอยืนยันกับassetจริง · ไม่ปรับบาลานซ์ฮีโร่อื่น
+- ใช้class skill IDsเดิม/ranksเดิม; ไม่สืบทอดRapid Shot repeatหรือinterrupt/Break · Root/immunityเดิม · geometryทั่วไป `RECT_3X2`/`rect3x2Center()` ขยับพื้นที่ให้อยู่ในขอบบอร์ด · ใช้FIELD lifecycleเดิม ตรวจผู้ที่ยืนในพื้นที่ใหม่ทุกระลอก · ไม่ติดตามเป้า/ไม่ทำDoTติดตัว
+- Base ZIPมีแค่reference+basePNG · sourcebyteเดิมอยู่ `/workspace/attachments/sylvara-originals/` แบบread-only · `tools/sprites/sylvara.py` ใช้sharedpipeline →7×8 atlas/260×170/root130,155/body78px/base5/7/4/7/6+arrowแยก18×5+portraitครอปreference · ไม่มีsourceสกิลหรือUIartแยก
+- `sylvara-production.ts` ระบุAWAITING_SOURCEทุกสกิล · S1/S2fallbackไปbasicattack,Ultใช้poseเดิมและactivationแทนprojectile · fallback85ms×7/ปล่อยF5 มีผลtiming/cast-lockชั่วคราว ไม่ใช่finalSync · ยังไม่มีภาพยิงขึ้นฟ้าหรือฝนธนู/fieldVFX · ห้ามสร้างแทนจากภาพbase
+- รายละเอียด/ค่า/hash/ขอบเขตและขั้นต่อไป: `docs/SYLVARA_PHASE_A.md` · tests `emerald-huntress.spec.ts`, roster/semantic-sheetregistry · พรีวิวbase `/sprite-lab?hero=sylvara&compare=mirelle,kael&enemy=forest_slime&bg=forest-1&distance=4&render=pixi`/DOM · ผลvalidationล่าสุดใน `docs/AI_HANDOFF.md`
+
 ## Mirelle Frostglass — Phase A (2026-10-17, Codex)
 
 เพิ่ม `mirelle` / มิเรลล์ ฟรอสต์กลาส เป็น Mage 3★ · Control DPS · Classic Western Fantasy / Kingdom Adventurers. ใช้ stats/อุปกรณ์/AI ของ Mage เดิม ไม่เพิ่มคลาส ไม่แจก starter bench และไม่แก้บาลานซ์ฮีโร่อื่น

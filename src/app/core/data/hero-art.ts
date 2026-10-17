@@ -20,6 +20,8 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
+  // Phase A: approved master-reference face crop; dedicated UI art is still pending.
+  sylvara: { portrait: 'portraits/sylvara.webp' },
   // Supplied final-art ZIP (2026-10-17): portrait, skill icons and banner.
   mirelle: { ...art('mirelle'), banner: 'banners/mirelle.webp' },
   // ไป๋หลง: ภาพจากผู้ใช้ 2026-10 (art/incoming/bailong/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง

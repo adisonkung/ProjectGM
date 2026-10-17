@@ -7,15 +7,16 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { dropRemovedHeroes, prepare } from '../services/save.service';
 import { GameState } from '../models/game-state';
 import { newGameState } from './starter';
+import { SYLVARA_PRODUCTION } from './sylvara-production';
 
 /** 2026-10 roster remodel: the old roster left the game — Bai Long is the only hero and the template for the new ones */
 describe('Roster remodel — Bai Long lead + new heroes', () => {
-  it('ships only the remodelled heroes (Bai Long + Yue Zheng + Mo Ye + Tang Xun + Lin Xue) as the starter team (+ Garrick / Kael on the bench), Mirelle Phase A has approved base art; no old hero sheet / art is left', () => {
-    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle']);
+  it('ships the remodelled roster, keeps the starter team/bench and registers only supplied hero art', () => {
+    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara']);
     expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue']);
     expect(SHIPPED_STARTER_BENCH).toEqual(['garrick', 'kael']);
-    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-garrick.png', 'hero-kael.png', 'hero-linxue.png', 'hero-mirelle.png', 'hero-moye.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
-    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'garrick', 'kael', 'linxue', 'mirelle', 'moye', 'tangxun', 'yuezheng']);
+    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-garrick.png', 'hero-kael.png', 'hero-linxue.png', 'hero-mirelle.png', 'hero-moye.png', 'hero-sylvara.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
+    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'garrick', 'kael', 'linxue', 'mirelle', 'moye', 'sylvara', 'tangxun', 'yuezheng']);
   });
 
   it('an old save drops heroes whose template is gone: gear back to the bag, team / slots / memory forget them', () => {
@@ -45,6 +46,29 @@ describe('Roster remodel — Bai Long lead + new heroes', () => {
     expect(s.team.length).toBeGreaterThan(0);
     expect(s.team.every(t => s.heroes.some(h => h.uid === t.uid))).toBeTrue();
     expect(s.heroes.some(h => h.uid === s.island!.mainIslandHeroId)).toBeTrue();
+  });
+});
+
+describe('Sylvara base art and provisional skill slots', () => {
+  it('uses the supplied five base rows; skill production cannot accidentally become final via fallback', () => {
+    const sh = SHEETS['hero-sylvara.png'];
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([7, 8, 260, 170]);
+    expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => [sh.anims[k]!.row, sh.anims[k]!.frames]))
+      .toEqual([[0, 5], [1, 7], [2, 4], [3, 7], [4, 6]]);
+    expect(sh.anims.attack!.events!.PROJECTILE_SPAWN).toBe(4);
+    expect(sh.anims.skill).toBe(sh.anims.attack);
+    expect(sh.anims.skill2).toBe(sh.anims.attack);
+    expect(sh.anims.ult!.row).toBe(3);
+    expect(animEvents('hero-sylvara.png', 'ult').some(e => e.event === 'PROJECTILE_SPAWN')).toBeFalse();
+    expect(SYLVARA_PRODUCTION.timing).toBe('PROVISIONAL_BASIC_FALLBACK');
+    for (const slot of ['skill', 'skill2', 'ult'] as const) {
+      expect(SYLVARA_PRODUCTION.clips[slot].state).toBe('AWAITING_SOURCE');
+    }
+    expect(HERO_ART['sylvara']).toEqual({ portrait: 'portraits/sylvara.webp' });
+    expect(sh.projectile!.attack).toBe('sw-basic-arrow');
+    expect(sh.fx).toBeUndefined();
+    expect(sh.fieldFx).toBeUndefined();
+    expect(Object.keys(FX).filter(k => k.startsWith('sw-'))).toEqual(['sw-basic-arrow']);
   });
 });
 
