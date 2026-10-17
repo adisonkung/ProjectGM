@@ -44,6 +44,8 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-devour.png': { url: 'opt/fx-devour.png' },
   'fx-dummy-bolt.png': { url: 'opt/fx-dummy-bolt.png' },
   'fx-elira-basic-light.png': { url: 'opt/fx-elira-basic-light.webp' },
+  'fx-elira-s1-impact.png': { url: 'opt/fx-elira-s1-impact.webp' },
+  'fx-elira-s1-main.png': { url: 'opt/fx-elira-s1-main.webp' },
   'fx-garrick-s1-aura.png': { url: 'opt/fx-garrick-s1-aura.webp' },
   'fx-garrick-s1-main.png': { url: 'opt/fx-garrick-s1-main.png', cols: 31, rows: 2 },
   'fx-garrick-s2-impact.png': { url: 'opt/fx-garrick-s2-impact.png' },

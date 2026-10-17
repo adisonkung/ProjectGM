@@ -128,3 +128,18 @@ describe('Emerald Skyfall actual-engine five-wave review', () => {
     expect(review.samples.find(s => s.events.some(e => e.type === 'FIELD_ENDED'))!.t).toBeCloseTo(6.2, 8);
   });
 });
+
+describe('targeted support skill review', () => {
+  it('casts on a real injured ally once and shows no enemy damage/projectile', () => {
+    const review = skillReview('elira', 'skill', { r: 1, c: 5 }, [{ id: 2, pos: { r: 1, c: 9 } }, { id: 3, pos: { r: 1, c: 10 } }]);
+    const heal = review.samples.filter(s => s.events.some(e => e.type === 'heal'));
+    expect(heal.length).toBe(1); expect(heal[0].t).toBeCloseTo(0.5, 6);
+    const events = review.samples.flatMap(s => s.events);
+    const effect = events.find(e => e.type === 'heal')!;
+    if (effect.type === 'heal') { expect(review.ids.get(effect.dst)).toBe(2); expect(effect.amount).toBeGreaterThan(0); }
+    expect(events.some(e => e.type === 'damage' || e.type === 'projectile')).toBeFalse();
+    const impact = events.find(e => e.type === 'impact');
+    if (impact?.type !== 'impact') throw new Error('Missing heal impact');
+    expect(impact.hits!.map(id => review.ids.get(id))).toEqual([2]);
+  });
+});

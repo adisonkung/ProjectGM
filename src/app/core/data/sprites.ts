@@ -216,15 +216,19 @@ const ELIRA_SUPPORT_FALLBACK: AnimDef = {
 
 export const SHEETS: Record<string, SheetDef> = {
   'hero-elira.png': {
-    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5 }, walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
       hurt: { row: 2, frames: 4, ms: 100 }, attack: ELIRA_BASIC_ATTACK,
       die: { row: 4, frames: 6, ms: 130 },
-      skill: ELIRA_SUPPORT_FALLBACK, skill2: ELIRA_SUPPORT_FALLBACK, ult: ELIRA_SUPPORT_FALLBACK,
+      // Supplied 10 poses, trial 12 FPS: one heal at F7; S2/Ult retain base fallbacks.
+      skill: { row: 5, frames: 10, ms: 1000 / 12,
+        events: { CAST_START: 0, VFX_SPAWN: 2, SKILL_ACTIVATE: 6, DAMAGE: 6, RECOVERY_START: 8 } },
+      skill2: ELIRA_SUPPORT_FALLBACK, ult: ELIRA_SUPPORT_FALLBACK,
     },
     projectile: { attack: 'el-basic-light' },
+    fx: { skill: ['el-s1-main', 'el-s1-impact'] },
   },
   'hero-sylvara.png': {
     cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
@@ -772,6 +776,10 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'el-s1-main': { file: 'fx-elira-s1-main.png', frames: 8, w: 114, h: 180, frameMs: 1000 / 24,
+    at: 'self', on: 'vfx', pivot: [0.5, 0.872222], dy: 27.25, fitCells: 1.1, orient: 'flip', layer: 'under' },
+  'el-s1-impact': { file: 'fx-elira-s1-impact.png', frames: 8, w: 76, h: 83, frameMs: 75,
+    at: 'target', on: 'impact', perHit: 1, dy: -22, fitCells: 0.85, orient: 'flip' },
   'el-basic-light': { file: 'fx-elira-basic-light.png', frames: 1, w: 16, h: 16, frameMs: 85, at: 'target', scale: 0.4 },
   'sw-ult-charge': {
     file: 'fx-sylvara-ult-charge.png', frames: 8, w: 124, h: 172, frameMs: 77.5,

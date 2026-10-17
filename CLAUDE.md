@@ -286,3 +286,8 @@ Phase A from supplied Elira_master_base.zip: existing healer/ID elira, provision
 Provisional kit:Holy-themed Magic basic without Heal Bolt; S1 lowest ally HP% heal220% ATK+10% target Max HP/CD8s; S2 single-ally shield15% caster Max HP/4s/CD15s; Ult fixed home6×3/6s/20% damage reduction for current allied occupants. No inherited revive or instant Ult burst. Class IDs retained; HEAL rank effects do not scale shield/aura, S2 class cooldown progression remains. No starter grants or balance changes.
 
 Generic FieldDefinition HOME_ZONE anchor/aura + RECT_6X3 area. Buffable live auraModifiers queries ensure immediate entry/exit/death protection changes, normal status composition, no lingering timed buff and mirrored source-side zones. AUTO defensive-field checks use actual occupants; manual still allowed. Source death/wave-stage clear cancel, natural expiry ends once. Existing pulse fields unchanged. Details/rebuild/source hashes/production boundary:docs/ELIRA_PHASE_A.md.
+
+
+### Elira S1 review (Codex, 2026-10-18)
+
+Supplied elira_s1.zip adds10 character poses plus8-stage caster Main and target Impact; no separate Charge. Atlas10×8,base rows pixel-identical,S2/Ult blank. Trial12FPS:MainF3(.1667s/engine.20),single HealF7(.50s),recoveryF9(.6667),end.8333. Prior heal.35s engine/end.595s,so this changes provisional combat timing. Main ground ring surrounds caster under character rather than floating at optional workbook staff-head;target Impact starts on real heal and lasts.6s beyond recovery. Kit values/CD/ranks unchanged. Generic sprite lab now creates real injured allied targets for LOWEST_HP_ALLY review,emits actual positive heal floats/log and uses real impact recipients. Final Sync and S2/Ult pending;see docs/ELIRA_S1_REVIEW.md.

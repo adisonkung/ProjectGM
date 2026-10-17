@@ -19,12 +19,18 @@ export interface ReviewSample {
 /** Isolated training targets, one actual engine cast. Never reads/writes the player's save or changes kit data. */
 export function skillReview(heroId: string, slot: SkillKind, casterCell: Cell, targets: ReviewTarget[], monsterId = 'forest_slime') {
   const hero = HERO_BY_ID[heroId];
+  const skill = kitOf(heroId, hero.cls)[slot];
+  const alliedTargets = skill.target === 'LOWEST_HP_ALLY';
+  const trainingHero = HERO_BY_ID['bailong'];
   const enemy = MONSTERS[monsterId] ? monsterId : 'forest_slime';
   const engine = new BattleEngine({
     allies: [{ heroId, name: hero.name, cls: hero.cls, sprite: hero.sprite, pos: { r: 0, c: 1 },
-      stats: heroStats(hero, { uid: 1, templateId: heroId, level: 1, potential: 'B' }) }],
+      stats: heroStats(hero, { uid: 1, templateId: heroId, level: 1, potential: 'B' }) },
+      ...(alliedTargets ? targets.map((_, i) => ({ heroId: trainingHero.id, name: 'พันธมิตรฝึก', cls: trainingHero.cls,
+        sprite: trainingHero.sprite, pos: { r: 2 + i, c: i % 3 },
+        stats: heroStats(trainingHero, { uid: i + 2, templateId: trainingHero.id, level: 1, potential: 'B' }) })) : [])],
     stage: { floor: 1, mode: 'eliminate', timeLimit: 999,
-      enemies: targets.map((_, i) => ({ enemy, r: i % 6, c: i % 3 })) },
+      enemies: (alliedTargets ? targets.slice(0, 1) : targets).map((_, i) => ({ enemy, r: i % 6, c: i % 3 })) },
     enemyTemplates: ENEMIES, monsters: MONSTERS, seed: 7,
   });
   const freeze = () => engine.units.forEach(u => { u.castLock = 1e6; u.cd1 = u.cd2 = 1e6; });
@@ -37,11 +43,13 @@ export function skillReview(heroId: string, slot: SkillKind, casterCell: Cell, t
     engine.grid.move(u.id, u.pos, at); u.pos = { ...at }; u.x = at.c; u.y = at.r;
   };
   place(caster, casterCell);
-  foes.forEach((u, i) => {
+  const training = alliedTargets ? engine.units.filter(u => u.side === 'ally' && u !== caster) : foes;
+  training.forEach((u, i) => {
     place(u, targets[i].pos);
     ids.set(u.id, targets[i].id);
     // Training HP keeps all four targets visible; source hero uses its real 3★ Lv1 stats.
-    u.hp = u.maxHp = 100000;
+    u.maxHp = 100000;
+    u.hp = alliedTargets ? (i === 0 ? 40000 : 70000) : u.maxHp;
     for (const status of targets[i].statuses ?? []) {
       if (STATUS_EFFECTS[status]) applyBuff(u, STATUS_EFFECTS[status], caster.id);
     }
@@ -54,8 +62,9 @@ export function skillReview(heroId: string, slot: SkillKind, casterCell: Cell, t
     statuses: Object.fromEntries(engine.units.filter(u => ids.has(u.id)).map(u =>
       [ids.get(u.id)!, u.buffs.map(b => ({ id: b.def.id, left: b.remaining, sourceId: ids.get(b.sourceId) ?? b.sourceId }))])) });
   snapshot();
-  const skill = kitOf(heroId, hero.cls)[slot];
-  engine.skills.use(caster, slot, skill, foes[0]);
+  const target = alliedTargets ? engine.skills.pickTarget(caster, skill, foes[0]) : foes[0];
+  if (!target) throw new Error('No valid review target');
+  engine.skills.use(caster, slot, skill, target);
   snapshot();
   // Combat's fixed 50 ms step, including status expiry; automatic attacks/movement stay frozen for the demo.
   const fieldDuration = Math.max(0, ...skill.effects.filter(e => e.type === 'FIELD').map(e => e.field.duration));

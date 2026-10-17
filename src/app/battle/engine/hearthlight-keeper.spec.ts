@@ -67,7 +67,7 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     const b = battle(), a = b.allies[1];
     a.hp = 1000;
     b.e.skills.use(b.caster, 'skill', kit().skill, a);
-    b.run(0.3); expect(a.hp).toBe(1000);
+    b.run(0.45); expect(a.hp).toBe(1000);
     b.run(0.05);
     expect(a.hp).toBe(1000 + Math.round(b.caster.atk * 2.2 + a.maxHp * 0.1));
     const events = b.e.drainEvents();
@@ -82,7 +82,7 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     b.apply('skill', a);
     expect(a.hp).toBe(1000 + Math.round((b.caster.atk * 2.2 + a.maxHp * 0.1) * 0.5));
     b.e.skills.use(b.caster, 'skill', kit().skill, a); a.alive = false; a.hp = 0;
-    b.run(0.4); expect(a.hp).toBe(0); expect(a.alive).toBeFalse();
+    b.run(0.6); expect(a.hp).toBe(0); expect(a.alive).toBeFalse();
     expect(b.caster.hp).toBe(b.caster.maxHp);
   });
 
@@ -178,5 +178,15 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     expect(skillLines(kit().ult).join(' ')).toContain('6×3');
     expect(skillLines(kit().ult).join(' ')).toContain('20%');
     expect(animTiming('hero-elira.png', 'ult').hit).toBeCloseTo(0.34, 6);
+  });
+});
+
+describe('Elira S1 visual-review contract', () => {
+  it('keeps healing amount/cooldown/targeting and has one activation without repeats', () => {
+    const s = kitOf('elira', 'healer').skill;
+    expect(s.cooldown).toBe(8); expect(s.target).toBe('LOWEST_HP_ALLY');
+    expect(s.effects).toEqual([{ type: 'HEAL', area: 'PRIMARY', atk: 2.2, maxHpPct: 0.1 }]);
+    expect(s.repeat).toBeUndefined(); expect(s.delivery).toBe('INSTANT');
+    expect(animTiming('hero-elira.png', 'skill').hit).toBeCloseTo(0.5, 6);
   });
 });

@@ -163,7 +163,7 @@ export class SpriteLabComponent implements OnDestroy {
   private readonly boardEl = viewChild(BoardComponent, { read: ElementRef });
 
   private enginePlayback(skill: SkillDefinition): boolean {
-    return this.engineReview || skill.effects.some(e => e.type === 'FIELD') || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
+    return this.engineReview || skill.target === 'LOWEST_HP_ALLY' || skill.effects.some(e => e.type === 'FIELD') || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
   }
 
   setRenderer(r: BoardRenderer): void {
@@ -184,6 +184,8 @@ export class SpriteLabComponent implements OnDestroy {
   readonly units = computed<UnitView[]>(() => {
     const h = this.hero();
     const left = this.faceLeft();
+    const action = this.last();
+    const support = (action === 'skill' || action === 'skill2' || action === 'ult') && kitOf(h.id, h.cls)[action].target === 'LOWEST_HP_ALLY';
     const base = { hpPct: 100, manaPct: 0, shieldPct: 0, alive: true, taunt: false };
     const hc = left ? 8 : 5;
     const b = this.blinked();
@@ -195,10 +197,12 @@ export class SpriteLabComponent implements OnDestroy {
         r: 1, c: hc - (i + 1) * 2 * (left ? -1 : 1), sprite: other.sprite, star: other.star, heroId: other.id, flip: left,
       })),
       ...this.dummyIds.map((id, i) => ({
-        ...base, id, side: 'enemy' as const, name: this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
+        ...base, id, side: support ? 'ally' as const : 'enemy' as const,
+        hpPct: support ? (i === 0 ? 40 : 70) : 100,
+        name: support ? 'พันธมิตรฝึก' : this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
         r: this.dummyIds.length === 4 ? 1 + Math.floor(i / 2) : 1,
         c: hc + (this.targetDistance + (this.dummyIds.length === 4 ? i % 2 : i)) * (left ? -1 : 1),
-        sprite: this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: !left,
+        sprite: support ? 'hero-bailong.png' : this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: support ? left : !left,
         statuses: (this.reviewStatuses()[id] ?? []).filter(b => STATUS_ICONS[b.id]).map(b => ({ ...b, icon: STATUS_ICONS[b.id] })),
       })),
     ];
@@ -401,6 +405,12 @@ export class SpriteLabComponent implements OnDestroy {
           }
         } else if (e.type === 'impact') {
           this.spawn(kind, { on: 'impact', hit: e.index }, (e.hits ?? []).map(id));
+        } else if (e.type === 'heal') {
+          const target = units.find(u => u.id === id(e.dst))!;
+          const f: FloatText = { id: ++this.id, r: target.r, c: target.c, text: `+${e.amount}`, kind: 'heal' };
+          this.floats.update(l => [...l, f]);
+          this.note(sample.t, `HEAL_APPLY → ${target.id} (+${e.amount})`);
+          this.at(0.9, () => this.floats.update(l => l.filter(x => x.id !== f.id)));
         } else if (e.type === 'damage' || e.type === 'buff') {
           const target = units.find(u => u.id === id(e.dst))!;
           const f: FloatText = { id: ++this.id, r: target.r, c: target.c,
