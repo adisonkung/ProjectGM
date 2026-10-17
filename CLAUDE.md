@@ -18,6 +18,8 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
 
 ## Sylvara Windwhisper — Phase A (2026-10-17, Codex)
 
+S1 follow-up (ผู้ใช้2026-10-17): `sylvara-s1-source.zip` มีcharacter10poses/2×5, Main8stagesที่มีalphaจริง, Impact8และExcelV2provisional · `sylvara.py` เพิ่มrow5/atlas10×8โดยbase5แถวพิกเซลเดิม; sourceS1เป็นrequiredตอนrebake · `sylvara_s1.py` แยกMainstages2–8เป็นprojectile7+blank/132×33/visible64px และImpact8/68×70/visible64px, ไม่keyสีเขียวทิ้ง · ปล่อยF7=.5s/end.8333sที่12FPSแบบreviewเท่านั้น (ช้ากว่าbase.16s/lockยาวขึ้น.2383s), actualdamage/Impactที่arrivalหนึ่งครั้ง · kit220%/CD6/ranks/เป้าเดิม · S2/Ultfallback.34/.595sเดิม · ไม่มีChargeแยก/ภาพใหม่/finalSync · รายละเอียดhash/sourceข้อจำกัดorigin/pipeline: `docs/SYLVARA_S1_REVIEW.md` · พรีวิวจริงDPR2 `tmp/sylvara-s1-preview/` · หยุดรอS1รีวิวก่อนSync/S2
+
 ผู้ใช้อนุมัติแผนให้เริ่มจากคอนเซปต์และ `sylvara_base.zip` · ฐาน `origin/master`895369a หลัง Mirelle merge · branch `wip/codex-hero-sylvara` สร้าง local/remote ก่อนแก้ไฟล์ · roster9ตัว: เพิ่ม `sylvara` / ซิลวารา วินด์วิสเปอร์ / Archerเดิม / 3★ชั่วคราว / ไม่แจกstarterหรือbench
 
 - S1 Emerald Piercer: projectileหนึ่งดอก Physical220%/CD6s, focusหรือHP%ต่ำในระยะ; S2 Verdant Snare: projectileหนึ่งดอก → Physical80%ทุกตัวใน2×2+Root2s/CD11s; Ult Emerald Skyfall: FIELD3คอลัมน์×2เลน5วิ/5ระลอก Physical60%ต่อระลอก ไม่มีดาเมจยิงขึ้นฟ้าหรือระเบิดท้าย · ทั้งหมดprovisional และชื่อS1/S2ยังรอยืนยันกับassetจริง · ไม่ปรับบาลานซ์ฮีโร่อื่น

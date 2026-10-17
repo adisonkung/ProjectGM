@@ -76,7 +76,19 @@ describe('Sylvara Windwhisper — Emerald Huntress, Phase A', () => {
     expect(launch.some(e => e.type === 'damage')).toBeFalse();
     b.run(1);
     expect(b.foes.map(f => f.hp < 1e6)).toEqual([true, false, false]);
-    expect(b.e.drainEvents().filter(e => e.type === 'damage').length).toBe(1);
+    const landed = b.e.drainEvents();
+    expect(landed.filter(e => e.type === 'damage').length).toBe(1);
+    expect(landed.filter(e => e.type === 'impact' && e.hits?.includes(b.foes[0].id)).length).toBe(1);
+    expect(landed.filter(e => e.type === 'animEvent' && e.event === 'IMPACT').length).toBe(1);
+  });
+
+  it('S1 cancels if the caster dies during draw, without a late projectile or ghost damage', () => {
+    const b = battle(2);
+    b.e.skills.use(b.caster, 'skill', kit().skill, b.foes[0]);
+    b.run(0.2); b.kill(b.caster); b.e.drainEvents(); b.run(1);
+    const events = b.e.drainEvents();
+    expect(events.some(e => e.type === 'projectile' || e.type === 'damage')).toBeFalse();
+    expect(b.foes.every(f => f.hp === 1e6)).toBeTrue();
   });
 
   it('S1 never retargets or damages a target that dies in flight', () => {

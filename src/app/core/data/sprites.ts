@@ -205,7 +205,7 @@ const SYLVARA_BASIC_ATTACK: AnimDef = {
 
 export const SHEETS: Record<string, SheetDef> = {
   'hero-sylvara.png': {
-    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5 },
@@ -213,12 +213,15 @@ export const SHEETS: Record<string, SheetDef> = {
       hurt: { row: 2, frames: 4, ms: 100 },
       attack: SYLVARA_BASIC_ATTACK,
       die: { row: 4, frames: 6, ms: 130 },
-      skill: SYLVARA_BASIC_ATTACK,
+      // S1 provisional review: source10 poses, F7 releases once; actual damage/Impact are arrival-based.
+      skill: { row: 5, frames: 10, ms: 1000 / 12,
+        events: { CAST_START: 0, PROJECTILE_SPAWN: 6, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 } },
       skill2: SYLVARA_BASIC_ATTACK,
       // This is an activation fallback, not the final upward-launch clip or arrow-rain presentation.
       ult: { ...SYLVARA_BASIC_ATTACK, events: { SKILL_ACTIVATE: 4, DAMAGE: 4, RECOVERY_START: 5 } },
     },
-    projectile: { attack: 'sw-basic-arrow', skill: 'sw-basic-arrow', skill2: 'sw-basic-arrow' },
+    projectile: { attack: 'sw-basic-arrow', skill: 'sw-s1-projectile', skill2: 'sw-basic-arrow' },
+    fx: { skill: 'sw-s1-impact' },
   },
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
   // ไป๋หลง (ทวนมังกรขาว) — tools/sprites/bailong.py จากภาพของผู้ใช้ (แผ่นตัวละคร ≠ แผ่น VFX)
@@ -738,6 +741,14 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'sw-s1-projectile': {
+    file: 'fx-sylvara-s1-projectile.png', frames: 8, w: 132, h: 33, frameMs: 50,
+    at: 'self',
+  },
+  'sw-s1-impact': {
+    file: 'fx-sylvara-s1-impact.png', frames: 8, w: 68, h: 70, frameMs: 50,
+    at: 'target', on: 'impact',
+  },
   'sw-basic-arrow': {
     file: 'fx-sylvara-basic-arrow.png', frames: 1, w: 18, h: 5, frameMs: 100,
     at: 'self', pixelated: true,
