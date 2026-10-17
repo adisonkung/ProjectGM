@@ -18,6 +18,8 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
 
 ## Sylvara Windwhisper — Phase A (2026-10-17, Codex)
 
+Current UI art (ผู้ใช้2026-10-17): `sylvana_icon.zip`→portrait288px,icons160pxทั้ง3,banner1400×788/WebPq92 · `HERO_ART.sylvara`ครบ5ไฟล์/IDเดิม · `sylvara_art.py`+`sylvara.py`requireUIsourceป้องกันportraitเก่าทับเมื่อrebake · characteratlasbytesเดิม · 684tests/typechecks/build/fullrebake/browserdesktop-mobileผ่าน · ผู้ใช้อนุญาตpush+mergeเข้าmaster · finalSync/balanceเดิม · รายละเอียดhashและpipeline `docs/SYLVARA_UI_ART.md`
+
 Final publication review (ผู้ใช้2026-10-17): ตรวจfull diffกับorigin/masterล่าสุดแล้วไม่พบblockingissueใหม่ · app/spec typechecks,684Karma,productionbuild,10-run/floor/botทีมSylvaraผ่านอีกครั้ง ผลsimเดิม · ตรวจPixi/DOMสองทิศ/reset/cleanup · ส่งเฉพาะbranch `wip/codex-hero-sylvara`; สถานะfinalSync/UIartเดิม
 
 Current visual revision (ผู้ใช้2026-10-17): Charge1.25→1.45cells(+16%); ascentหนึ่งดอกเดิม แก้Pixiไม่สร้างone-shotIDเดิมซ้ำหลังจบระหว่างรอhostcleanup · rain48frames/.8s/30ดอกสุ่มตำแหน่งและเวลาภายในพื้นที่(drop240pxเดิม160px,+50%),seed1729สำหรับrebakeเดิมได้,lead800ms · Impact/damage5pulse/activation/cast-lockเดิม · optimizerเปลี่ยนrainเป็น13×4WebP · 684tests/typechecks/buildผ่าน · พรีวิว `tmp/sylvara-ult-rain-review/` · ดูrevisionใน `docs/SYLVARA_ULT_REVIEW.md`

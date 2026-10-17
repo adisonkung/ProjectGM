@@ -43,5 +43,5 @@ export const SYLVARA_PRODUCTION = {
     ult: { state: 'PROVISIONAL_REVIEW', frames: 10, finalSync: 'AWAITING_REVIEW', label: 'Emerald Skyfall', launchCount: 1, waves: 5,
       columns: 3, lanes: 2, assets: ['CHARACTER', 'CHARGE', 'ASCENDING_ARROW', 'GROUND_FIELD', 'RAIN', 'IMPACT', 'RESIDUAL'] },
   },
-  uiArt: { portrait: 'REFERENCE_CROP', skillIcons: 'AWAITING_SOURCE', banner: 'AWAITING_SOURCE' },
+  uiArt: { archive: 'sylvana_icon.zip', portrait: 'SUPPLIED', skillIcons: 'SUPPLIED', banner: 'SUPPLIED' },
 } as const;

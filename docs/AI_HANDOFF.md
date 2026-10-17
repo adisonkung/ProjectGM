@@ -3,12 +3,15 @@
 **Git is authoritative.** Query `git rev-parse HEAD` / `HEAD^{tree}` for current state; this note never stores its containing commit's hash.
 
 Last task (Codex, 2026-10-17):
+UI-art follow-up: `sylvana_icon.zip` supplies portrait/S1/S2/Ult/banner. All five WebP outputs registered under existing `sylvara`; dedicated portrait replaces reference crop. New `sylvara_art.py` is reused by the combined baker so rebakes cannot restore the old crop. User explicitly authorized push and merge to master before the next hero. Branch `feature/codex-sylvara-ui-art` starts at freshly fetched master2ab8ebd; source hashes/rebuild/validation in `SYLVARA_UI_ART.md`. App/spec checks,684Karma/build and full combined byte-identical character/UI rebake pass; disposable-account desktop/mobile art check passes. No combat changes. Final Timeline Sync/balance remain pending.
+
+Previous combat publication review:
 Final publication review requested by user after the visual revision. Reviewed the complete Sylvara diff against freshly fetched origin/master; no new blocking finding. Re-ran app/spec typechecks,684/684 Karma, production build and10-run/floor/bot Sylvara-team simulation on the4618bbe content checkpoint; all passed and simulation results match the prior run. Native Pixi/DOM/facing/reset checks confirm one release/five pulses and cleanup. Publication remains on `wip/codex-hero-sylvara`; final Timeline Sync/UI art scope is unchanged.
 
 Sylvara Ultimate Emerald Skyfall provisional visual review from `sylvara_ult_source.zip`. Character/Charge/one upward ascent/fixed3×2 Field/five vertical rain waves/cell Impacts and fade residue are integrated. User explicitly requested Ultimate next; final S1/S2/Ult Timeline Sync remains pending. Details: `docs/SYLVARA_ULT_REVIEW.md`.
 
 Branch:
-`wip/codex-hero-sylvara`, created locally and on GitHub before the first edit from freshly fetched `origin/master`895369a (Mirelle merge). Initial tree was clean; no local `master` exists in this cloud clone. Shell pushes return403 for `webuilddeveloper`; publication uses the connected owner account `adisonkung`. Only this task branch is authorized for publication; no master merge or branch deletion. Connector commits may have different metadata/SHAs; require identical local/remote trees, preserve original local commits if remapping, and query Git for the published tip.
+`wip/codex-hero-sylvara`, created locally and on GitHub before the first edit from freshly fetched `origin/master`895369a (Mirelle merge). Initial tree was clean; no local `master` exists in this cloud clone. Shell pushes return403 for `webuilddeveloper`; publication uses the connected owner account `adisonkung`. That original publication scope was the hero task branch. The user subsequently authorized its master merge (master2ab8ebd), then the UI-art feature branch and its master merge. No branch deletion is authorized. Connector commits may have different metadata/SHAs; require identical local/remote trees, preserve original local commits if remapping, and query Git for the published tip.
 
 Last confirmed local commit (canonical local clone, prior verified base, unchanged):
 `3a61ffba88f1004661f73e06d271adb6569d2396`
@@ -50,6 +53,8 @@ Validation:
 - Ult native DPR2 Pixi/DOM right/left: one release/five pulses, zero errors/missing assets, no FX after expiry and empty log/projectiles after reset. `tmp/sylvara-ult-preview/verification.json`. Final video uses a clean single-cast2×canvas capture; warm-up and recording share the controlled browser clock to avoid old native timers leaking into the capture. Review videos, not final Sync Sheets.
 
 - User visual revision: Charge1.45cells (+16%); one ascent unchanged, Pixi completed-one-shot ownership fix prevents replay during host cleanup. Rain uses30 seeded scattered arrows/48frames/.8s per wave, drop height240px (+50%) and800ms lead; damage/activation/cast-lock unchanged. Generator repacks optimized rain as13×4WebP (old opt PNG removed by optimizer). App/spec checks,684Karma/build pass; no combat sim rerun for this visual-only change. Fresh review captures under `tmp/sylvara-ult-rain-review/`; final Sync pending.
+
+- UI art is now complete: portrait288×288/icons160×160/banner1400×788. `HERO_ART` and production metadata updated. Combined `sylvara.py` takes UI source as its last argument; see `SYLVARA_UI_ART.md`. Source hash verification and full rebake prove existing combat atlas is unchanged.
 
 Next agent must inspect:
 - Fresh remote refs, branch/status/history and registries before edits. Mirelle is merged and FINAL_SYNC; do not revert from historical provisional notes. See `MIRELLE_FINAL_SYNC.md` / `MIRELLE_REMOTE_HANDOFF.md`.

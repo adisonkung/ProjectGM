@@ -1,5 +1,7 @@
 # Sylvara — Ultimate Emerald Skyfall · provisional visual review
 
+Current UI status: portrait, all skill icons and banner were subsequently supplied/integrated; see `SYLVARA_UI_ART.md`. Append its UI source directory as the final argument when running the combined `sylvara.py` command below. Earlier pending-UI notes are historical. Final Timeline Sync remains pending.
+
 User requested Ultimate next on2026-10-17 and supplied `sylvara_ult_source.zip`. This authorizes Ultimate integration/review; final S1/S2/Ult timing and Timeline Sync remain pending.
 
 ## Session reconciliation and sources

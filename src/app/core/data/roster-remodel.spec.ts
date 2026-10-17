@@ -67,7 +67,8 @@ describe('Sylvara base art and provisional skill slots', () => {
     for (const slot of ['ult'] as const) {
       expect(SYLVARA_PRODUCTION.clips[slot].state).toBe('PROVISIONAL_REVIEW');
     }
-    expect(HERO_ART['sylvara']).toEqual({ portrait: 'portraits/sylvara.webp' });
+    expect(HERO_ART['sylvara']).toEqual({ portrait: 'portraits/sylvara.webp', s1: 'skills/sylvara-s1.webp',
+      s2: 'skills/sylvara-s2.webp', ult: 'skills/sylvara-ult.webp', banner: 'banners/sylvara.webp' });
     expect(sh.projectile!.attack).toBe('sw-basic-arrow');
     expect(sh.projectile!.skill).toBe('sw-s1-projectile');
     expect(sh.fx!.skill).toBe('sw-s1-impact');

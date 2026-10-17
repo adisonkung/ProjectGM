@@ -1,6 +1,6 @@
-"""Bake the user's approved Sylvara base, S1, S2 and Ultimate character sources.
+"""Bake the user's approved Sylvara base, S1, S2 and Ultimate character sources plus dedicated UI art.
 
-python3 tools/sprites/sylvara.py [source directory] [sprite output] [portrait output] [S1 source directory] [S2 source directory] [Ult source directory]
+python3 tools/sprites/sylvara.py [source directory] [sprite output] [portrait output] [S1 source directory] [S2 source directory] [Ult source directory] [UI art directory]
 Read-only source slots: base.png and reference.png, byte-identical to sylvara_base.zip.
 Uses the shared chroma-key, body watershed, scale and torso stabilisation pipeline.
 """
@@ -14,6 +14,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import aurel_v2 as A
+from sylvara_art import bake_ui
 import bailong as B
 
 SRC = Path(sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/sylvara')
@@ -22,6 +23,7 @@ PORTRAITS = Path(sys.argv[3] if len(sys.argv) > 3 else 'public/portraits')
 S1 = Path(sys.argv[4]) if len(sys.argv) > 4 else SRC / 's1'
 S2 = Path(sys.argv[5]) if len(sys.argv) > 5 else SRC / 's2'
 ULT = Path(sys.argv[6]) if len(sys.argv) > 6 else SRC / 'ult'
+ART = Path(sys.argv[7]) if len(sys.argv) > 7 else SRC / 'art'
 B.SRC = str(SRC)
 B.CELL_W, B.CELL_H, B.ROOT_X, B.ROOT_Y = 260, 170, 130, 155
 NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
@@ -103,13 +105,8 @@ def main():
     arrow_image = arrow_image.resize((max(1, round(arrow_image.width * scale)),
                                       max(1, round(arrow_image.height * scale))), Image.Resampling.BOX)
     arrow_image.save(OUT / 'fx-sylvara-basic-arrow.png', optimize=True)
-    # Temporary portrait from the approved reference close-up; no fabricated skill icons or banner.
-    reference, _ = B.load('reference')
-    portrait = Image.fromarray(reference).crop((1040, 760, 1448, 1086))
-    portrait.thumbnail((288, 288), Image.Resampling.LANCZOS)
-    canvas = Image.new('RGBA', (288, 288))
-    canvas.alpha_composite(portrait, ((288 - portrait.width) // 2, 288 - portrait.height))
-    canvas.save(PORTRAITS / 'sylvara.webp', quality=92)
+    # Dedicated supplied UI art is required; never restore the historical reference crop.
+    bake_ui(ART, PORTRAITS.parent)
     print(json.dumps({'scales': scales, 'bodyHeight': IDLE_BODY, 'counts': {n: len(groups[n]) for n in names},
                       'sheet': sheet.size, 'projectile': arrow_image.size, 'clipped': sum(clipped)}, indent=2))
 
