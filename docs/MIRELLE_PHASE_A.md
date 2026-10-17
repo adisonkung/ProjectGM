@@ -69,4 +69,15 @@ Character, Charge, Main, Impact, Projectile, Field and Residual assets stay sepa
 
 `winter-scholar.spec.ts` covers registration, pending assets, conditional Slow/Root, projectile arrival, geometry, immunities, movement, attack-speed reduction, field occupancy/lifetime and ranks. `fields.spec.ts` covers scheduler boundaries, cancellation and invalid periods. Roster expectations include Mirelle without requiring nonexistent art.
 
-Run app/spec typechecks, full Karma and `hero-sim -- 10` (also a team including Mirelle). Record results without rebalancing.
+Confirmed validation:
+
+- `npx tsc -p tsconfig.app.json --noEmit` and `npx tsc -p tsconfig.spec.json --noEmit`: passed.
+- Full Karma/Chromium: **631/631 passed**, including **20 new cases**. A temporary no-sandbox launcher was used outside the repository because `karma.ci.cjs` is absent and the execution sandbox cannot bind Karma's local port.
+- `npm run build -- --configuration development`: passed.
+- `npm run build`: blocked at Google Fonts inlining by the inaccessible environment proxy; production build is not verified.
+- `npm run hero-sim -- 10`: completed, default team F1–4/F6 100%; F5/F7/F9/F10 0%; F8 AUTO 0% / TACTICAL 50%. Existing balance issues remain deferred.
+- `node dist/sim/tools/dev/hero-sim.js 10 --team=bailong,yuezheng,mirelle,tangxun,linxue --stats`: completed without runtime errors. Mirelle contributes 30% of aggregate AUTO team damage. Token timing/placeholder numbers make this a smoke check, not a final balance assessment.
+- No sprite PNGs were changed, so `sprites:optimize` was not needed.
+- Branch `wip/codex-hero-mirelle` exists locally. Remote fetch/push remain blocked by the environment proxy.
+
+Phase A stops here. Actual approved-source integration is pending file access, and each skill's production/review/sync remains a separate later step.

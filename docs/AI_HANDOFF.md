@@ -28,7 +28,10 @@ User approved Master Character Reference and Base Combat images in chat. Neither
 Validation:
 - App/spec typechecks pass. Full Karma: 631/631 passed (includes 20 new cases).
 - Default `hero-sim -- 10` passed: F1–4/F6 100%; F5/F7/F9/F10 0%; F8 AUTO 0% / TACTICAL 50%. Known balance issues preserved.
-- Production build blocked by unavailable Google Fonts/proxy. Offline development build and Mirelle-team sim validation in progress.
+- Development build passed. Production build blocked at Google Fonts inlining by unavailable network/proxy; no source/build config workaround was committed.
+- Mirelle-team sim completed: `hero-sim 10 --team=bailong,yuezheng,mirelle,tangxun,linxue --stats`; no runtime errors. Mirelle contributes 30% of aggregate AUTO team damage with provisional token timing. This is not a balance conclusion.
+- No PNG changes; sprite optimizer not needed.
+- Task commits are local only: pushes fail at the environment proxy. Phase A is complete within available assets; stop here.
 
 Details:
 `docs/MIRELLE_PHASE_A.md`, `core/data/mirelle-production.ts`, `battle/engine/{fields,winter-scholar}.spec.ts`.
