@@ -19,8 +19,8 @@ The connector does not expose original author/date fields when creating commits,
 
 A documentation-only handoff commit follows these ten checkpoints. Query the current branch tip using Git rather than treating a containing commit as a synchronization base. Original local history is preserved on `backup/codex-mirelle-local-history` in the Cloud workspace; the task branch tracks its published remote counterpart.
 
-Base: `e29bc20f4b5b2a4d7e1b475445dc587841000f78`. Only the task branch is published; `master` is not merged or overwritten. The canonical local clone's previously confirmed synchronization base in `AI_HANDOFF.md` remains unchanged because that clone has not been re-verified in this session.
+Base: `e29bc20f4b5b2a4d7e1b475445dc587841000f78`. At initial publication only the task branch was published, and master was unchanged. The user subsequently authorized merging Mirelle into master on 2026-10-17; fresh Git/connector comparison confirmed that master is an ancestor of the reviewed branch, allowing a fast-forward with all checkpoints retained. No force update or branch deletion is authorized. The canonical local clone's previously confirmed synchronization base in `AI_HANDOFF.md` remains unchanged because that clone has not been re-verified in this session.
 
 Validation already completed on the identical implementation tree: app/spec/sim typechecks, 652/652 Karma tests, production build and Mirelle-team simulation. This publication step changes only handoff documentation. Approved originals under ignored `art/incoming/**` and temporary previews are not exported.
 
-[Published task branch](https://github.com/adisonkung/ProjectGM/tree/wip/codex-hero-mirelle). Review before merging; do not restart hero production or revert finalized timelines based on historical provisional notes.
+[Published task branch](https://github.com/adisonkung/ProjectGM/tree/wip/codex-hero-mirelle). The user has now approved merging this delivery into master. Query remote Git refs to verify completion; do not restart hero production or revert finalized timelines based on historical provisional notes.
