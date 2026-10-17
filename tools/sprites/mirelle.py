@@ -1,7 +1,7 @@
-"""Bake approved Mirelle base combat + portrait and supplied skill character sources.
+"""Bake approved Mirelle base combat, supplied UI art and skill character sources.
 
 python3 tools/sprites/mirelle.py [source directory] [sprite output] [portrait output]
-Sources: base.png / reference.png, copied byte-for-byte from the user's mirelle-source.zip.
+Sources: base.png, skill PNGs and art/*.png from the user's approved ZIPs.
 Shared chroma key, body-seeded watershed, root placement and torso stabilisation match the other heroes.
 Requires numpy, scipy, scikit-image, Pillow (same dependencies as bailong.py).
 """
@@ -96,13 +96,19 @@ def main():
     shard = shard.resize((round(shard.width * scale), round(shard.height * scale)), Image.Resampling.BOX)
     shard.save(OUT / 'fx-mirelle-basic-crystal.png', optimize=True)
 
-    # Existing approved face close-up; crop/key/resize only, no redrawing or colour changes.
-    reference, _ = B.load('reference')
-    face = Image.fromarray(reference).crop((1040, 550, 1440, 1080))
-    face.thumbnail((288, 288), Image.Resampling.LANCZOS)
-    portrait = Image.new('RGBA', (288, 288), (24, 40, 67, 255))
-    portrait.alpha_composite(face, ((288 - face.width) // 2, (288 - face.height) // 2))
-    portrait.convert('RGB').save(PORTRAITS / 'mirelle.webp', quality=92)
+    # Approved new portrait/UI sources are required; never silently restore the old reference crop.
+    portrait = Image.open(SRC / 'art/portrait.png').convert('RGB')
+    portrait = portrait.resize((288, 288), Image.Resampling.LANCZOS)
+    portrait.save(PORTRAITS / 'mirelle.webp', quality=92)
+    for part in ['s1', 's2', 'ult', 'banner']:
+        source = SRC / 'art' / f'{part}.png'
+        folder = PORTRAITS.parent / ('banners' if part == 'banner' else 'skills')
+        folder.mkdir(parents=True, exist_ok=True)
+        art = Image.open(source).convert('RGB')
+        size = (1400, round(art.height * 1400 / art.width)) if part == 'banner' else (160, 160)
+        art = art.resize(size, Image.Resampling.LANCZOS)
+        name = 'mirelle.webp' if part == 'banner' else f'mirelle-{part}.webp'
+        art.save(folder / name, quality=92)
     print(json.dumps({'scales': scales, 'bodyHeight': IDLE_BODY, 'counts': {n: len(groups[n]) for n in names},
                       'sheet': sheet.size, 'projectile': shard.size, 'clipped': sum(clipped)}, indent=2))
 

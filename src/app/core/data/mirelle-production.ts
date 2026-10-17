@@ -20,6 +20,8 @@ export const MIRELLE_PRODUCTION = {
     s1: 'art/incoming/mirelle/s1',
     s2: 'art/incoming/mirelle/s2',
     ult: 'art/incoming/mirelle/ult',
+    art: 'art/incoming/mirelle/art',
+    ultFieldLoop: 'art/incoming/mirelle/ult/ult_field_loop.png',
   },
   expectedSheet: 'hero-mirelle.png',
   expectedPortrait: 'portraits/mirelle.webp',

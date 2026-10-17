@@ -52,11 +52,11 @@ The initial Phase A used token fallback. The subsequent user-uploaded `mirelle-s
 
 - No approved source was fabricated, redrawn or overwritten.
 - Runtime registrations point only to baked assets; pending skill slots are not registered as FX.
-- Base-art follow-up: approved ZIP is now accessible. Mirelle uses the real base sheet and reference-cropped portrait. At the Phase A boundary, S1/S2/Ult used the basic attack provisionally. The subsequent user-authorized S1 review is recorded in `MIRELLE_S1_REVIEW.md`; S2/Ult retain their base fallback.
+- Base-art follow-up: Mirelle uses the approved base sheet. The initial reference-cropped portrait is now replaced by the supplied painted Portrait. At the Phase A boundary, S1/S2/Ult used the basic attack provisionally. Subsequent user-authorized skill production is recorded in the individual S1/S2/Ult review notes; all three now have separate provisional clips and FX.
 - Do not create an empty atlas or copy another hero's art as Mirelle.
 - Source slots are `art/incoming/mirelle/reference.png` and `base.png` (read-only originals when available).
 - Base cutting/normalization, portrait crop and runtime registration are complete. Run `sprites:optimize` after any PNG bake.
-- S1, S2 and Ult character/VFX sources are now supplied for individual visual review (`MIRELLE_S1_REVIEW.md`, `MIRELLE_S2_REVIEW.md`, `MIRELLE_ULT_REVIEW.md`). The Ult field loop is a provisional cut of formed Main poses; a dedicated seamless loop is not supplied. Icons and banner remain missing. No final Sync is inferred.
+- S1, S2 and Ult character/VFX sources are now supplied for individual visual review (`MIRELLE_S1_REVIEW.md`, `MIRELLE_S2_REVIEW.md`, `MIRELLE_ULT_REVIEW.md`). The subsequent `mirelle-final-art.zip` supplies a dedicated8-frame field loop, painted Portrait, all three icons and Banner, now integrated (`MIRELLE_ART_REVIEW.md`). No final Sync is inferred.
 - Do not register or synthesize final skill clips, final field art, or final shatter timing during Phase A.
 
 ## Production order after Phase A

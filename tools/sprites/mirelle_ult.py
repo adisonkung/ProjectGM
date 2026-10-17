@@ -1,7 +1,7 @@
 """Cut supplied Winterglass Field assets for provisional review, without a final Timeline Sync.
 
 python3 tools/sprites/mirelle_ult.py [source directory] [sprite output]
-Field loop reuses formed Main poses; no new source art or burst damage is invented.
+Field loop uses its supplied source; no new art or burst damage is invented.
 """
 import json
 import sys
@@ -22,8 +22,9 @@ def main():
     impact = load_fx(src / 'ult_impact.png')
     breaking = cut_frames(impact[397:681], [186, 566, 971, 1293, 1614])
     fragments = cut_frames(impact[681:], [152, 498, 828, 1140, 1411, 1673])
-    # Do not replay formation or the large rising pillars as the persistent field / finisher.
-    loop = [formation[i] for i in [6, 7]]
+    # Supplied field loop replaces the original formed-Main fallback; never cycle a formation/explosion.
+    loop_source = src / 'ult_field_loop.png'
+    loop = cut_frames(load_fx(loop_source), [156, 470, 784, 1097, 1410, 1724, 2038, 2351])
     shatter = breaking + fragments[:3]
     report = {'state': 'PROVISIONAL_REVIEW',
               # Larger review presentation (user, 2026-10-17): retain more source resolution.

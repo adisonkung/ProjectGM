@@ -52,7 +52,8 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
   });
 
   it('registers all supplied skill review assets without final choreography or a burst ultimate', () => {
-    expect(HERO_ART['mirelle']).toEqual({ portrait: 'portraits/mirelle.webp' });
+    expect(HERO_ART['mirelle']).toEqual({ portrait: 'portraits/mirelle.webp',
+      s1: 'skills/mirelle-s1.webp', s2: 'skills/mirelle-s2.webp', ult: 'skills/mirelle-ult.webp', banner: 'banners/mirelle.webp' });
     const sheet = SHEETS['hero-mirelle.png'];
     expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH]).toEqual([20, 8, 260, 170]);
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => sheet.anims[k]!.frames)).toEqual([5, 7, 4, 7, 6]);

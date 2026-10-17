@@ -724,8 +724,9 @@ export const FX: Record<string, FxDef> = {
     at: 'target', fitCells: 3, pivot: [0.5, 0.883392], dy: 27.25, layer: 'under', attach: false,
   },
   'mf-ult-field': {
-    file: 'fx-mirelle-ult-field.png', frames: 2, w: 204, h: 251, frameMs: 200, delayMs: 800,
-    at: 'target', fitCells: 3, pivot: [0.5, 0.868526], dy: 27.25, layer: 'under', attach: false,
+    // Supplied 8-pose loop (2026-10-17); uniform preview playback, not final Timeline Sync.
+    file: 'fx-mirelle-ult-field.png', frames: 8, w: 204, h: 270, frameMs: 100, delayMs: 800,
+    at: 'target', fitCells: 3, pivot: [0.5, 0.892593], dy: 27.25, layer: 'under', attach: false,
   },
   'mf-ult-shatter': {
     // User-requested larger visual finisher; gameplay remains the fixed 3x3 control field.

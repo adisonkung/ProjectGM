@@ -16,7 +16,7 @@ Byte-identical, read-only copies are under ignored `art/incoming/mirelle/ult/`:
 
 The character actually has **20 poses, rows8+6+6**, unlike the workbook's 10 placeholders. Its proposed F5 activation and final-shatter suggestions are a draft, not final timing/gameplay authorization. Repository Mage skill IDs, 6-second field and existing cancellation policy remain authoritative.
 
-There is no separate `ult_field.png` or residual/shatter source. For this review, the loop reuses only the formed Main poses7–8 (not the formation/explosion sequence). Residual uses the last four lower-row Main frames. Shatter uses eight breaking/scattering frames from the second/third Impact rows; the large growing pillar sequence in its first row is unused. Its presentation was enlarged at the user's request below. No replacement approved art, new design, recolour, meteor or added burst damage is generated. A dedicated seamless field-loop source may improve the final production after review.
+The initial review had no separate field-loop source and reused formed Main poses7–8. The user subsequently supplied `ult_field_loop.png` in `mirelle-final-art.zip`; its8 poses now replace that fallback, see `MIRELLE_ART_REVIEW.md`. There is still no separate residual/shatter source. Residual uses the last four lower-row Main frames. Shatter uses eight breaking/scattering frames from the second/third Impact rows; the large growing pillar sequence in its first row is unused. Its presentation was enlarged at the user's request below. No replacement approved art, new design, recolour, meteor or added burst damage is generated.
 
 ## Baking and review assets
 
@@ -27,7 +27,7 @@ There is no separate `ult_field.png` or residual/shatter source. For this review
 |---|---:|---|---|
 | `fx-mirelle-ult-charge.png` | 10 | 148×335 | caster wind-up, 1.3-cell width |
 | `fx-mirelle-ult-main.png` | 8 | 204×283 | one formation at the fixed field centre |
-| `fx-mirelle-ult-field.png` | 2 | 204×251 | formed-field loop, 3-cell width |
+| `fx-mirelle-ult-field.png` | 8 | 204×270 | supplied persistent-field loop, 3-cell width |
 | `fx-mirelle-ult-shatter.png` | 8 | 364×267 | enlarged visual-only ending, 4.2-cell width |
 | `fx-mirelle-ult-residual.png` | 4 | 154×121 | brief ground residue/fade |
 
@@ -42,7 +42,7 @@ This cloud uses `PYTHONPATH=/tmp/mirelle-python-deps` for the existing shared cu
 ## Provisional playback and preserved gameplay
 
 - Character: uniform12FPS,20 poses (~1.667s), `CAST_START` at start, chargeF3, activationF15, recoveryF18. `DAMAGE` in clip data is the existing engine's FIELD activation scheduler marker; it causes no launch damage. Actual engine execution is quantized to the existing50ms step.
-- Charge10×100ms; formation8×100ms; loop2×200ms begins after the formation's provisional800ms; shatter8×80ms; residue4×100ms plus250ms fade. These are playable review defaults, not final frame-perfect timing or a Sync Sheet.
+- Charge10×100ms; formation8×100ms; loop8×100ms begins after the formation's provisional800ms; shatter8×80ms; residue4×100ms plus250ms fade. These are playable review defaults, not final frame-perfect timing or a Sync Sheet.
 - Ult cast-lock/activation differ from the previous base fallback and are gameplay-relevant under existing timeline debt. Mention this in the commit. No S1/S2 timing, kit, cooldown, rank, status value, other hero or stage was rebalanced.
 - Existing field remains fixed3×3 (`ADJACENT_8`) for6 combat seconds, first light pulse after1s and six pulses total;15% magic ATK per occupant per pulse, movement×0.75 and attack-speed×0.90 for1.1s. No Chill/Root added by Ult. No launch burst or extra damaging finisher; shatter is presentation only. The last normal pulse may coincide with the visual ending.
 
@@ -64,7 +64,7 @@ Validation: app/spec typechecks, full Karma **650/650**, production build and Mi
 
 Native-DPR2 PNG/MP4 recordings are in ignored `tmp/mirelle-ult-preview/`; prefer PNG/video for sharpness. The preview includes charge, formation, sustained field, actual damage/control pulses, expiry/shatter and cleared state; DOM, mirrored playback, reset and earlier actions are checked separately. Captures report zero page errors, zero managed field views after ending and zero DOM loops after reset. Video is native1792×562 at normal speed; the half-speed close-up crops960×562 without resizing.
 
-Stop after this Ultimate preview for user review. All three skills' final timing/Timeline Sync remain pending. Icons/banner and a dedicated seamless field loop are not supplied; do not fabricate them or claim final hero-art production is complete.
+Stop after this Ultimate preview for user review. All three skills' final timing/Timeline Sync remain pending. Portrait/icons/banner and the dedicated field-loop source are now supplied and integrated; final timing/Sync remains pending.
 
 ## User readability revision — larger Charge and ending (2026-10-17)
 
