@@ -1,5 +1,7 @@
 # Sylvara — S1 Emerald Piercer · provisional visual review
 
+Current status: user subsequently requested S2 with a separate source ZIP. See `SYLVARA_S2_REVIEW.md` for the current combined rebuild command (S1/S2 sources required). S1 art/timing remains unchanged and final S1 Sync is still pending.
+
 User authorized S1 integration from `sylvara-s1-source.zip` on2026-10-17, continuing the existing `wip/codex-hero-sylvara` branch. Fresh fetch confirms `origin/master`895369a and the published Sylvara Phase A checkpoint. Working tree was clean; no other agent changes were present. This step produces an in-game S1 review, before final Timeline Sync or S2/Ult production.
 
 ## Source audit

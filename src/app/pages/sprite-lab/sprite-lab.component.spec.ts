@@ -50,6 +50,51 @@ describe('Sprite lab single-target projectile review', () => {
   }));
 });
 
+describe('Sprite lab projectile area and status-owned Root review', () => {
+  let fixture: ComponentFixture<SpriteLabComponent>;
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [SpriteLabComponent], providers: [
+      { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({
+        hero: 'sylvara', render: 'dom', combat: '1', formation: 'square', distance: '4', enemy: 'forest_slime',
+      }) } } },
+    ] });
+    fixture = TestBed.createComponent(SpriteLabComponent);
+  });
+  afterEach(() => fixture.destroy());
+
+  it('shows one actual arrow, one area impact, four Root growth/loops, then no visuals after expiry', fakeAsync(() => {
+    const lab = fixture.componentInstance;
+    lab.play('skill2');
+    tick(351);
+    expect(lab.projectiles().length).toBe(1);
+    expect(lab.log().filter(l => l.text === 'PROJECTILE_SPAWN').length).toBe(1);
+    expect(lab.fx()).toEqual([]);
+    expect(lab.floats()).toEqual([]);
+    tick(360);
+    expect(lab.fx().filter(f => f.name === 'sw-s2-impact').length).toBe(1);
+    expect(lab.fx().filter(f => f.name === 'sw-s2-root-start').length).toBe(4);
+    expect(lab.fx().filter(f => f.name === 'sw-s2-root-loop' && f.managed && f.loop).length).toBe(4);
+    tick(600);
+    expect(lab.fx().map(f => f.name)).toEqual(Array(4).fill('sw-s2-root-loop'));
+    tick(1500);
+    expect(lab.fx()).toEqual([]);
+    lab.reset();
+    tick(5000);
+    expect(lab.fx()).toEqual([]);
+    expect(lab.projectiles()).toEqual([]);
+  }));
+
+  it('clears an in-flight area projectile and all pending status samples when switching to Idle', fakeAsync(() => {
+    const lab = fixture.componentInstance;
+    lab.play('skill2'); tick(400);
+    expect(lab.projectiles().length).toBe(1);
+    lab.play('idle'); tick(5000);
+    expect(lab.fx()).toEqual([]);
+    expect(lab.projectiles()).toEqual([]);
+    expect(lab.floats()).toEqual([]);
+  }));
+});
+
 describe('Sprite lab engine-backed area/status review', () => {
   let fixture: ComponentFixture<SpriteLabComponent>;
   beforeEach(() => {

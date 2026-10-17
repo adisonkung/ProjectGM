@@ -15,7 +15,9 @@ import { appliedStatusFx } from '../../core/data/sprites';
 import { STATUS_ICONS } from '../../core/data/visuals';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
+import { StatusFxPlayback } from '../../battle/render/status-fx';
 import { skillReview } from './skill-review';
+import { SkillDefinition } from '../../core/models/combat';
 
 type Action = 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
 
@@ -128,9 +130,9 @@ export class SpriteLabComponent implements OnDestroy {
   readonly last = signal<Action>('idle');
   readonly activeEngineReview = computed(() => {
     const action = this.last();
-    if (!this.engineReview || (action !== 'skill' && action !== 'skill2' && action !== 'ult')) return false;
+    if (action !== 'skill' && action !== 'skill2' && action !== 'ult') return false;
     const h = this.hero();
-    return (kitOf(h.id, h.cls)[action].delivery ?? 'INSTANT') === 'INSTANT';
+    return this.enginePlayback(kitOf(h.id, h.cls)[action]);
   });
   /** blink clips (AnimDef.move): columns the hero is relocated by until the clip ends · own-fade = clip opacity */
   readonly blinked = signal<{ dc: number; ownFade: boolean } | null>(null);
@@ -145,11 +147,24 @@ export class SpriteLabComponent implements OnDestroy {
     },
     remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
   });
+  private statusVisuals = new StatusFxPlayback({
+    spawn: (name, target, at, loop) => {
+      const id = ++this.id;
+      this.fx.update(l => [...l, { id, name, ...at, angle: 0, offset: fxOffset(name),
+        under: FX[name].layer === 'under', follow: target, managed: true, loop }]);
+      return id;
+    },
+    remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
+  });
   readonly projectiles = signal<ProjectileView[]>([]);
   readonly floats = signal<FloatText[]>([]);
   readonly log = signal<{ t: string; text: string }[]>([]);
 
   private readonly boardEl = viewChild(BoardComponent, { read: ElementRef });
+
+  private enginePlayback(skill: SkillDefinition): boolean {
+    return this.engineReview || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
+  }
 
   setRenderer(r: BoardRenderer): void {
     this.renderer.set(r);
@@ -243,7 +258,7 @@ export class SpriteLabComponent implements OnDestroy {
     const kitSkill = a === 'skill' || a === 'skill2' || a === 'ult' ? kitOf(this.hero().id, this.hero().cls)[a] : undefined;
     // Lab-only single-target projectile preview. Contact follows travel, just as in the combat engine.
     const singleProjectile = kitSkill?.delivery === 'PROJECTILE' && kitSkill.effects.some(e => e.type === 'DAMAGE' && e.area === 'SINGLE');
-    if (this.engineReview && kitSkill && (kitSkill.delivery ?? 'INSTANT') === 'INSTANT') {
+    if (kitSkill && this.enginePlayback(kitSkill)) {
       const duration = this.playEngineReview(a as SkillKind);
       if (this.loop()) this.at(duration + 0.4, () => this.play(a));
       return;
@@ -345,7 +360,7 @@ export class SpriteLabComponent implements OnDestroy {
     this.anims.update(m => ({ ...m, [id]: { anim, key: ++this.key, ...extra } }));
   }
 
-  /** Optional isolated actual-engine review for instant skills; no duplicate imitation of Chill/Root rules. */
+  /** Isolated actual-engine review; damage, projectiles and status lifetime all come from engine samples. */
   private playEngineReview(kind: SkillKind): number {
     const units = this.units();
     const me = units[0];
@@ -356,13 +371,34 @@ export class SpriteLabComponent implements OnDestroy {
     for (const sample of review.samples) this.at(sample.t, () => {
       this.reviewStatuses.set(sample.statuses);
       this.fieldVisuals.advance(sample.t);
+      this.statusVisuals.sync(Object.entries(sample.statuses).flatMap(([target, buffs]) => buffs.filter(b => b.left > 0).map(b => ({
+        target: Number(target), source: b.sourceId, status: b.id,
+        sprite: units.find(u => u.id === b.sourceId)?.sprite,
+        at: { r: units.find(u => u.id === Number(target))!.r, c: units.find(u => u.id === Number(target))!.c },
+      }))), sample.t);
+      const markers = new Set<string>();
       for (const e of sample.events) {
         if (e.type === 'FIELD_STARTED' || e.type === 'FIELD_ENDED') {
           this.note(sample.t, `${e.type}${e.type === 'FIELD_ENDED' ? ' · ' + e.reason : ''}`);
           this.fieldVisuals.handle(e, this.hero().sprite, 0, sample.t);
         } else if (e.type === 'animEvent') {
+          // Engine launch + authored clip may describe the same marker in one step; present it only once.
+          const marker = `${e.event}:${e.kind ?? kind}:${e.index ?? 0}`;
+          if (markers.has(marker)) continue;
+          markers.add(marker);
           this.note(sample.t, e.event);
           if (e.event !== 'DAMAGE' && e.event !== 'IMPACT') this.spawn(kind, { on: 'event', event: e.event, index: e.index });
+        } else if (e.type === 'projectile') {
+          const from = units.find(u => u.id === id(e.src))!;
+          const to = units.find(u => u.id === id(e.dst))!;
+          const name = SHEETS[from.sprite ?? '']?.projectile?.[e.kind];
+          if (name && FX[name]) {
+            const p: ProjectileView = { id: ++this.id, name, flight: e.flight * 1000,
+              from: e.sky ? { x: to.c + (from.c < to.c ? -1.2 : 1.2), y: to.r + SCENERY_ROWS - 3.2 }
+                : { x: from.c, y: from.r + SCENERY_ROWS }, to: { x: to.c, y: to.r + SCENERY_ROWS } };
+            this.projectiles.update(l => [...l, p]);
+            this.at(projectileLife(p.flight) / 1000, () => this.projectiles.update(l => l.filter(x => x.id !== p.id)));
+          }
         } else if (e.type === 'impact') {
           this.spawn(kind, { on: 'impact', hit: e.index }, (e.hits ?? []).map(id));
         } else if (e.type === 'damage' || e.type === 'buff') {
@@ -401,6 +437,7 @@ export class SpriteLabComponent implements OnDestroy {
     this.timers.forEach(clearTimeout);
     this.timers = [];
     this.fieldVisuals.clear();
+    this.statusVisuals.clear();
     this.projectiles.set([]);
     this.fx.set([]);
     this.floats.set([]);

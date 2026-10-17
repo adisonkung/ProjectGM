@@ -77,3 +77,32 @@ describe('Glassbind isolated skill review and generic presentation', () => {
       .toEqual([2.2, 3.2, 4.2, 5.2, 6.2, 7.2]);
   });
 });
+
+describe('Verdant Snare actual-engine projectile review', () => {
+  const targets = [
+    { id: 2, pos: { r: 1, c: 9 } }, { id: 3, pos: { r: 1, c: 10 } },
+    { id: 4, pos: { r: 2, c: 9 } }, { id: 5, pos: { r: 2, c: 10 } },
+  ];
+  it('has one arrow, then four damage/Root results at arrival; no periodic damage or field', () => {
+    const r = skillReview('sylvara', 'skill2', { r: 1, c: 5 }, targets);
+    const launch = r.samples.find(s => s.events.some(e => e.type === 'projectile'))!;
+    const contact = r.samples.find(s => s.events.some(e => e.type === 'damage'))!;
+    const events = r.samples.flatMap(s => s.events);
+    expect(launch.t).toBeCloseTo(0.35, 8);
+    expect(contact.t).toBeCloseTo(0.7, 8);
+    expect(launch.events.some(e => e.type === 'damage' || e.type === 'buff')).toBeFalse();
+    expect(events.filter(e => e.type === 'projectile').length).toBe(1);
+    expect(events.filter(e => e.type === 'damage').length).toBe(4);
+    expect(events.filter(e => e.type === 'buff' && e.buff === 'root').length).toBe(4);
+    expect(events.filter(e => e.type === 'FIELD_STARTED').length).toBe(0);
+    expect(Object.values(contact.statuses).flat().filter(b => b.id === 'root').every(b => b.sourceId === 1)).toBeTrue();
+    expect(Object.values(r.samples.at(-1)!.statuses).flat().some(b => b.id === 'root')).toBeFalse();
+  });
+
+  it('does not invent a Root on the Unstoppable target; the remaining occupants still get Root', () => {
+    const r = skillReview('sylvara', 'skill2', { r: 1, c: 5 }, targets.map((t, i) => ({ ...t, statuses: i === 0 ? ['gate_stance'] : [] })));
+    const roots = r.samples.flatMap(s => s.events).filter(e => e.type === 'buff' && e.buff === 'root');
+    expect(roots.length).toBe(3);
+    expect(roots.every(e => e.type === 'buff' && r.ids.get(e.dst) !== 2)).toBeTrue();
+  });
+});

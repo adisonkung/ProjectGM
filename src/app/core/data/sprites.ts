@@ -93,6 +93,8 @@ export interface SheetDef {
   healFx?: string;
   /** One-shot visual when a status applied by this caster succeeds (buff event, after immunity/conditions). */
   appliedStatusFx?: Record<string, string>;
+  /** Persistent status visuals, owned by real status presence rather than fixed VFX duration. */
+  statusFx?: Record<string, { start?: string; loop: string }>;
   /** Presentation of this caster's fixed fields. Engine lifecycle events, not animation end, own their lifetime. */
   fieldFx?: { start?: string; loop: string; end?: string; residual?: string };
   /** กระสุน (คีย์ของ FX) ของการยิงแต่ละแบบ */
@@ -216,12 +218,17 @@ export const SHEETS: Record<string, SheetDef> = {
       // S1 provisional review: source10 poses, F7 releases once; actual damage/Impact are arrival-based.
       skill: { row: 5, frames: 10, ms: 1000 / 12,
         events: { CAST_START: 0, PROJECTILE_SPAWN: 6, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 } },
-      skill2: SYLVARA_BASIC_ATTACK,
+      // S2 source releases at F5 (F7 contains decorative volley streaks); one gameplay arrow, arrival-based area hit.
+      skill2: { row: 6, frames: 10, ms: 1000 / 12,
+        // Keep supplied F7 in the atlas; hold clean follow-through F6 instead of displaying its baked extra arrows.
+        seq: [0, 1, 2, 3, 4, 5, 5, 7, 8, 9],
+        events: { CAST_START: 0, PROJECTILE_SPAWN: 4, DAMAGE: 4, IMPACT: 4, RECOVERY_START: 7 } },
       // This is an activation fallback, not the final upward-launch clip or arrow-rain presentation.
       ult: { ...SYLVARA_BASIC_ATTACK, events: { SKILL_ACTIVATE: 4, DAMAGE: 4, RECOVERY_START: 5 } },
     },
-    projectile: { attack: 'sw-basic-arrow', skill: 'sw-s1-projectile', skill2: 'sw-basic-arrow' },
-    fx: { skill: 'sw-s1-impact' },
+    projectile: { attack: 'sw-basic-arrow', skill: 'sw-s1-projectile', skill2: 'sw-s2-projectile' },
+    fx: { skill: 'sw-s1-impact', skill2: 'sw-s2-impact' },
+    statusFx: { root: { start: 'sw-s2-root-start', loop: 'sw-s2-root-loop' } },
   },
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
   // ไป๋หลง (ทวนมังกรขาว) — tools/sprites/bailong.py จากภาพของผู้ใช้ (แผ่นตัวละคร ≠ แผ่น VFX)
@@ -741,6 +748,21 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'sw-s2-projectile': {
+    file: 'fx-sylvara-s2-projectile.png', frames: 8, w: 148, h: 31, frameMs: 50, at: 'self',
+  },
+  'sw-s2-impact': {
+    file: 'fx-sylvara-s2-impact.png', frames: 8, w: 116, h: 116, frameMs: 65,
+    at: 'target', on: 'impact', groundArea: 'SQUARE_2', fitCells: 2, orient: 'flip', attach: false,
+  },
+  'sw-s2-root-start': {
+    file: 'fx-sylvara-s2-root.png', stripFrames: 10, from: 0, frames: 5, w: 84, h: 100, frameMs: 100,
+    at: 'target', fitCells: 1.05, dy: 27.25, pivot: [0.5, 0.92], attach: true,
+  },
+  'sw-s2-root-loop': {
+    file: 'fx-sylvara-s2-root.png', stripFrames: 10, from: 5, frames: 5, w: 84, h: 100, frameMs: 100, delayMs: 500,
+    at: 'target', fitCells: 1.05, dy: 27.25, pivot: [0.5, 0.92], attach: true,
+  },
   'sw-s1-projectile': {
     file: 'fx-sylvara-s1-projectile.png', frames: 8, w: 132, h: 33, frameMs: 50,
     at: 'self',

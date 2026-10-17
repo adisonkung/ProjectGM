@@ -2,6 +2,8 @@
 
 Current status (2026-10-17): user subsequently supplied S1 sources and requested S1 integration. See `SYLVARA_S1_REVIEW.md`; base-only inventory/fallback descriptions below record the earlier Phase A boundary. S1 now has a provisional separate clip/FX, while S2/Ult remain pending. No final Timeline Sync is inferred.
 
+Subsequent S2 request/source integration is recorded in `SYLVARA_S2_REVIEW.md`. S2 now also has provisional character/projectile/Impact/status-owned Root visuals; Ult remains pending. Historical fallback descriptions below are not the current production state.
+
 User scope, 2026-10-17: implement the reported foundation plan from the character concept and `sylvara_base.zip`. Team: Classic Fantasy — Kingdom Adventurers. This is base art + provisional gameplay, not finished skill production.
 
 ## Repository base and registration

@@ -1,6 +1,6 @@
-"""Bake the user's approved Sylvara base and S1 character sources.
+"""Bake the user's approved Sylvara base, S1 and S2 character sources.
 
-python3 tools/sprites/sylvara.py [source directory] [sprite output] [portrait output] [S1 source directory]
+python3 tools/sprites/sylvara.py [source directory] [sprite output] [portrait output] [S1 source directory] [S2 source directory]
 Read-only source slots: base.png and reference.png, byte-identical to sylvara_base.zip.
 Uses the shared chroma-key, body watershed, scale and torso stabilisation pipeline.
 """
@@ -20,6 +20,7 @@ SRC = Path(sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/sylvara')
 OUT = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
 PORTRAITS = Path(sys.argv[3] if len(sys.argv) > 3 else 'public/portraits')
 S1 = Path(sys.argv[4]) if len(sys.argv) > 4 else SRC / 's1'
+S2 = Path(sys.argv[5]) if len(sys.argv) > 5 else SRC / 's2'
 B.SRC = str(SRC)
 B.CELL_W, B.CELL_H, B.ROOT_X, B.ROOT_Y = 260, 170, 130, 155
 NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
@@ -57,6 +58,20 @@ def main():
     B.SRC = str(SRC)
     names.append('skill')
     scales['skill'] = IDLE_BODY / A.body_h(groups['skill'][0])
+    if not (S2 / 's2_character.png').exists():
+        raise FileNotFoundError(f'Required S2 source: {S2 / "s2_character.png"}')
+    B.SRC = str(S2)
+    # F7's long detached arrowheads sit closer to F8's hair. Keep them owned by F7, which review playback skips.
+    old_fixes = B.CLIP_FIXES.get('s2_character')
+    B.CLIP_FIXES['s2_character'] = [(680, 550, 780, 685, 1, 'all')]
+    groups['skill2'] = A.sheet_frames('s2_character', [5, 5], False)
+    if old_fixes is None:
+        B.CLIP_FIXES.pop('s2_character')
+    else:
+        B.CLIP_FIXES['s2_character'] = old_fixes
+    B.SRC = str(SRC)
+    names.append('skill2')
+    scales['skill2'] = IDLE_BODY / A.body_h(groups['skill2'][0])
     cols = max(len(groups[name]) for name in names)
     probe = Image.new('RGBA', (260 * cols, 170 * 8))
     for row, name in enumerate(names):

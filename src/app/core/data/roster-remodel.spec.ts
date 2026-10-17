@@ -57,13 +57,14 @@ describe('Sylvara base art and provisional skill slots', () => {
       .toEqual([[0, 5], [1, 7], [2, 4], [3, 7], [4, 6]]);
     expect(sh.anims.attack!.events!.PROJECTILE_SPAWN).toBe(4);
     expect([sh.anims.skill!.row, sh.anims.skill!.frames]).toEqual([5, 10]);
-    expect(sh.anims.skill2).toBe(sh.anims.attack);
+    expect([sh.anims.skill2!.row, sh.anims.skill2!.frames]).toEqual([6, 10]);
     expect(sh.anims.ult!.row).toBe(3);
     expect(animEvents('hero-sylvara.png', 'ult').some(e => e.event === 'PROJECTILE_SPAWN')).toBeFalse();
     expect(SYLVARA_PRODUCTION.timing).toBe('PROVISIONAL_REVIEW');
     expect(SYLVARA_PRODUCTION.clips.skill.state).toBe('PROVISIONAL_REVIEW');
     expect(SYLVARA_PRODUCTION.clips.skill.finalSync).toBe('AWAITING_REVIEW');
-    for (const slot of ['skill2', 'ult'] as const) {
+    expect(SYLVARA_PRODUCTION.clips.skill2.state).toBe('PROVISIONAL_REVIEW');
+    for (const slot of ['ult'] as const) {
       expect(SYLVARA_PRODUCTION.clips[slot].state).toBe('AWAITING_SOURCE');
     }
     expect(HERO_ART['sylvara']).toEqual({ portrait: 'portraits/sylvara.webp' });
@@ -71,7 +72,8 @@ describe('Sylvara base art and provisional skill slots', () => {
     expect(sh.projectile!.skill).toBe('sw-s1-projectile');
     expect(sh.fx!.skill).toBe('sw-s1-impact');
     expect(sh.fieldFx).toBeUndefined();
-    expect(Object.keys(FX).filter(k => k.startsWith('sw-')).sort()).toEqual(['sw-basic-arrow', 'sw-s1-impact', 'sw-s1-projectile']);
+    expect(Object.keys(FX).filter(k => k.startsWith('sw-')).sort()).toEqual(['sw-basic-arrow', 'sw-s1-impact', 'sw-s1-projectile',
+      'sw-s2-impact', 'sw-s2-projectile', 'sw-s2-root-loop', 'sw-s2-root-start']);
   });
 
   it('S1 has one release/contact marker and arrival-only impact; pending slots keep the previous base timing', () => {
@@ -80,12 +82,25 @@ describe('Sylvara base art and provisional skill slots', () => {
     expect(events.filter(e => e.event === 'DAMAGE').length).toBe(1);
     expect(animTiming('hero-sylvara.png', 'skill').hit).toBeCloseTo(0.5, 8);
     expect(animTiming('hero-sylvara.png', 'skill').total).toBeCloseTo(10 / 12, 8);
-    for (const slot of ['attack', 'skill2', 'ult'] as const) {
+    for (const slot of ['attack', 'ult'] as const) {
       expect(animTiming('hero-sylvara.png', slot).hit).toBeCloseTo(0.34, 8);
       expect(animTiming('hero-sylvara.png', slot).total).toBeCloseTo(0.595, 8);
     }
     expect(fxFor('hero-sylvara.png', 'skill', { on: 'cast' })).toEqual([]);
     expect(fxFor('hero-sylvara.png', 'skill', { on: 'impact' })).toEqual(['sw-s1-impact']);
+  });
+
+  it('S2 release follows audited F5, keeps arrival-only 2×2 impact and a status-owned stable Root loop', () => {
+    const tm = animTiming('hero-sylvara.png', 'skill2');
+    expect(tm.hit).toBeCloseTo(4 / 12, 8);
+    expect(tm.total).toBeCloseTo(10 / 12, 8);
+    expect(SHEETS['hero-sylvara.png'].anims.skill2!.seq).toEqual([0, 1, 2, 3, 4, 5, 5, 7, 8, 9]);
+    expect(animEvents('hero-sylvara.png', 'skill2').filter(e => e.event === 'PROJECTILE_SPAWN').length).toBe(1);
+    expect(fxFor('hero-sylvara.png', 'skill2', { on: 'cast' })).toEqual([]);
+    expect(fxFor('hero-sylvara.png', 'skill2', { on: 'impact' })).toEqual(['sw-s2-impact']);
+    expect(FX['sw-s2-impact'].groundArea).toBe('SQUARE_2');
+    expect(SHEETS['hero-sylvara.png'].statusFx!['root']).toEqual({ start: 'sw-s2-root-start', loop: 'sw-s2-root-loop' });
+    expect([FX['sw-s2-root-loop'].from, FX['sw-s2-root-loop'].frames]).toEqual([5, 5]);
   });
 });
 

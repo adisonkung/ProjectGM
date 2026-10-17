@@ -19,6 +19,7 @@ import { PartyBarComponent } from '../../battle/party-bar/party-bar.component';
 import { DEV_FLAGS } from '../../core/data/dev-flags';
 import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { hasStatus } from '../../battle/engine/buffs';
+import { StatusFxPlayback } from '../../battle/render/status-fx';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
@@ -169,6 +170,15 @@ export class BattleComponent implements OnDestroy {
       const id = ++this.floatId;
       this.fx.update(l => [...l, { id, name, r: world.r, c: world.c - this.engine.cameraX, angle: 0,
         offset: fxOffset(name), under: FX[name].layer === 'under', managed: true, loop }]);
+      return id;
+    },
+    remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
+  });
+  private statusVisuals = new StatusFxPlayback({
+    spawn: (name, target, at, loop) => {
+      const id = ++this.floatId;
+      this.fx.update(l => [...l, { id, name, ...at, angle: 0, offset: fxOffset(name),
+        under: FX[name].layer === 'under', follow: target, managed: true, loop }]);
       return id;
     },
     remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
@@ -400,6 +410,7 @@ export class BattleComponent implements OnDestroy {
     this.facing.clear();
     this.castAim.clear();
     this.fieldVisuals.clear();
+    this.statusVisuals.clear();
     this.blinkUntil.clear();
     this.ownFade.clear();
     this.snapshot();
@@ -653,6 +664,9 @@ export class BattleComponent implements OnDestroy {
     this.specialCharge.set(e.specialCharge);
     this.specialReady.set(this.running() && e.canUseSpecial());
     const byId = new Map(e.units.map(u => [u.id, u]));
+    this.statusVisuals.sync(e.units.filter(u => u.alive && u.visible).flatMap(u => u.buffs.filter(b => b.remaining > 0).map(b => ({
+      target: u.id, source: b.sourceId, status: b.def.id, sprite: byId.get(b.sourceId)?.sprite, at: this.screenOf(u),
+    }))), e.time);
     const combat = e.phase === BattlePhase.COMBAT;
     for (const u of e.units) {
       const t = u.targetId != null ? byId.get(u.targetId) : undefined;
