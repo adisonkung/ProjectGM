@@ -102,6 +102,12 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
       hit = candidates.filter(u => Math.abs(u.pos.r - at.r) <= 0.5 && Math.abs(u.pos.c - at.c) <= 0.5);
       break;
     }
+    case 'RECT_6X3': {
+      // Even-width footprint: anchor is the left-middle cell; includes columns anchor-2 through anchor+3.
+      const left = Math.max(0, Math.min(BOARD_COLS - 6, centerCell.c - 2));
+      hit = candidates.filter(u => u.pos.r >= 0 && u.pos.r < LANES && u.pos.c >= left && u.pos.c < left + 6);
+      break;
+    }
     case 'RECT_3X2': {
       const at = rect3x2Center(centerCell);
       hit = candidates.filter(u => Math.abs(u.pos.r - at.r) <= 0.5 && Math.abs(u.pos.c - at.c) <= 1);

@@ -17,6 +17,7 @@ import { frontCell, GROUND_SHAPES, groundCell, resolveArea } from './area';
 import type { BattleEvent, BattleUnit } from './battle-engine';
 import { effectiveAttack } from './damage-resolver';
 import { distance } from './grid';
+import { fieldAnchor } from './fields';
 
 /** What the skill system needs from the battle (implemented by BattleEngine — the skill system never runs AI loops itself) */
 export interface SkillHost {
@@ -221,12 +222,17 @@ export class SkillSystem {
   /** heal-need check of a HEAL / EMERGENCY skill: allies (in its area or range) below the thresholds */
   private healNeed(u: BattleUnit, s: SkillDefinition, target: BattleUnit): { emergency: boolean; wanted: boolean } {
     const ai = s.ai!;
-    const pool =
+    let pool =
       ai.countArea || (target === u && s.effects.some(e => e.type === 'HEAL' && e.area !== 'PRIMARY' && e.area !== 'ALL_ALLIES'))
         ? this.areaUnits(u, s, target, 'ALLY', ai.countArea)
         : s.target === 'LOWEST_HP_ALLY'
           ? [target]
           : this.h.allies(u);
+    const field = s.effects.find((e): e is Extract<SkillEffect, { type: 'FIELD' }> => e.type === 'FIELD' && e.field.aura?.team === 'ALLY');
+    if (field) {
+      const anchor = { ...u, pos: fieldAnchor(u.side, field.field, target.pos) };
+      pool = resolveArea({ pattern: field.field.area, caster: anchor, primary: anchor, candidates: pool });
+    }
     const emergency = ai.emergencyHpBelow != null && pool.some(a => hpPct(a) < ai.emergencyHpBelow!);
     const below = ai.allyHpBelow != null ? pool.filter(a => hpPct(a) < ai.allyHpBelow!).length : 0;
     return { emergency, wanted: emergency || below >= (ai.alliesBelowCount ?? 1) };
@@ -418,7 +424,8 @@ export class SkillSystem {
     if (ai?.enemyWithin != null && !foes.some(f => distance(f.pos, u.pos) <= ai.enemyWithin!)) return null;
     const t = this.pickTarget(u, s, current);
     if (!t) return null;
-    const heals = s.effects.some(e => e.type === 'HEAL' || e.type === 'REVIVE');
+    const heals = s.effects.some(e => e.type === 'HEAL' || e.type === 'REVIVE' ||
+      (e.type === 'FIELD' && e.field.aura?.team === 'ALLY'));
     if (!heals && !foes.length) return null;
     if (!manual && s.movement?.type === 'BLINK_BEHIND' && this.h.blinkAllowed && !this.h.blinkAllowed(u, s, t)) return null;
     if (manual || !heals || !ai) return t;
@@ -623,7 +630,8 @@ export class SkillSystem {
     for (const e of s.effects) {
       switch (e.type) {
         case 'FIELD': {
-          const center = { ...at };
+          // Home-zone fields keep their anchor even if the caster crosses the board mid-cast.
+          const center = fieldAnchor(u.side, e.field, at);
           const origin = { ...u.pos };
           // Never retain the aimed unit: even when it moves / dies, the field keeps this cell.
           const anchor = { ...primary, pos: center, alive: false };

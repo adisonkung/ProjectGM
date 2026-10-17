@@ -277,3 +277,12 @@ S1 follow-up (ผู้ใช้2026-10-17): `sylvara-s1-source.zip` มีchara
 
 ## Roadmap
 0 ตั้งโปรเจกต์ ✅ · 1 เอนจินต่อสู้ ✅ · 2 กระดานลากวาง + ภาพ ✅ · 3 หอคอยและโหมด ✅ (flow ไต่ชั้น + การ์ดผล + โหมดฟาร์ม, ไม่มีบาดเจ็บ) · 4 ฐาน/รายชื่อ ✅ (Home Island / Sky City + เมนู Phase 4) · 5 กาชา ✅ (ดาว 1–3★ + พัฒนาถึง 6★ ด้วย Memory) · Remodel roster (กำลังทำ) · 6 ปรับสมดุล (รอ roster ครบ)
+
+
+## Elira Dawnmere — Keeper of the Hearthlight (Codex, 2026-10-17)
+
+Phase A from supplied Elira_master_base.zip: existing healer/ID elira, provisional3★, roster10 after Mirelle/Sylvara. Base5/7/4/7/6 poses,78px body,7×8 atlas260×170/root130,155; separate supplied-star basic bolt and temporary reference portrait. No S1/S2/Ult/Dome/UI sources in this ZIP. Skill fallbacks use base poses at activation.34s/end.595s; final clips/FX/Sync remain pending in elira-production.ts.
+
+Provisional kit:Holy-themed Magic basic without Heal Bolt; S1 lowest ally HP% heal220% ATK+10% target Max HP/CD8s; S2 single-ally shield15% caster Max HP/4s/CD15s; Ult fixed home6×3/6s/20% damage reduction for current allied occupants. No inherited revive or instant Ult burst. Class IDs retained; HEAL rank effects do not scale shield/aura, S2 class cooldown progression remains. No starter grants or balance changes.
+
+Generic FieldDefinition HOME_ZONE anchor/aura + RECT_6X3 area. Buffable live auraModifiers queries ensure immediate entry/exit/death protection changes, normal status composition, no lingering timed buff and mirrored source-side zones. AUTO defensive-field checks use actual occupants; manual still allowed. Source death/wave-stage clear cancel, natural expiry ends once. Existing pulse fields unchanged. Details/rebuild/source hashes/production boundary:docs/ELIRA_PHASE_A.md.

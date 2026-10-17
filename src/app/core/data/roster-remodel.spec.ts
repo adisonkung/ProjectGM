@@ -12,11 +12,11 @@ import { SYLVARA_PRODUCTION } from './sylvara-production';
 /** 2026-10 roster remodel: the old roster left the game — Bai Long is the only hero and the template for the new ones */
 describe('Roster remodel — Bai Long lead + new heroes', () => {
   it('ships the remodelled roster, keeps the starter team/bench and registers only supplied hero art', () => {
-    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara']);
+    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara', 'elira']);
     expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue']);
     expect(SHIPPED_STARTER_BENCH).toEqual(['garrick', 'kael']);
-    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-garrick.png', 'hero-kael.png', 'hero-linxue.png', 'hero-mirelle.png', 'hero-moye.png', 'hero-sylvara.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
-    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'garrick', 'kael', 'linxue', 'mirelle', 'moye', 'sylvara', 'tangxun', 'yuezheng']);
+    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-elira.png', 'hero-garrick.png', 'hero-kael.png', 'hero-linxue.png', 'hero-mirelle.png', 'hero-moye.png', 'hero-sylvara.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
+    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'elira', 'garrick', 'kael', 'linxue', 'mirelle', 'moye', 'sylvara', 'tangxun', 'yuezheng']);
   });
 
   it('an old save drops heroes whose template is gone: gear back to the bag, team / slots / memory forget them', () => {
@@ -536,5 +536,22 @@ describe('Lin Xue (3★ Healer / Support, base sheet)', () => {
     expect(70 + FX['lx-ult-main'].frames).toBe(144);
     const rev = kitOf('linxue', 'healer').ult.effects[2] as { delay?: number };
     expect(Math.round(rev.delay! * 60)).toBe(4);
+  });
+});
+
+describe('Elira supplied base and pending production', () => {
+  it('registers all five base actions while keeping skill slots on an explicit provisional fallback', () => {
+    const sh = SHEETS['hero-elira.png'];
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([7, 8, 260, 170]);
+    expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => sh.anims[k]!.frames)).toEqual([5, 7, 4, 7, 6]);
+    for (const k of ['skill', 'skill2', 'ult'] as const) {
+      expect(sh.anims[k]!.row).toBe(3);
+      expect(animTiming('hero-elira.png', k).hit).toBeCloseTo(0.34, 6);
+      expect(animTiming('hero-elira.png', k).total).toBeCloseTo(0.595, 6);
+      expect(animEvents('hero-elira.png', k).some(e => e.event === 'PROJECTILE_SPAWN')).toBeFalse();
+    }
+    expect(sh.fieldFx).toBeUndefined(); expect(sh.fx).toBeUndefined();
+    expect(HERO_ART['elira']).toEqual({ portrait: 'portraits/elira.webp' });
+    expect(sh.projectile!.attack).toBe('el-basic-light');
   });
 });

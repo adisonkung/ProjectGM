@@ -112,7 +112,7 @@ export interface StatusEffectDefinition {
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';
@@ -162,7 +162,11 @@ export type SkillEffect = SkillEffectCore & {
   onHits?: number[];
 };
 export interface FieldDefinition {
-  area: 'SQUARE_2' | 'RECT_3X2' | 'ADJACENT_8';
+  area: 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'ADJACENT_8';
+  /** Omitted: activation target cell. HOME_ZONE: fixed centre of the source side's formation zone. */
+  anchor?: 'HOME_ZONE';
+  /** Continuous occupancy-based protection; independent of pulse cadence and never leaves a lingering buff. */
+  aura?: { team: 'ALLY' | 'ENEMY'; modifiers: StatusModifiers };
   /** combat seconds; first pulse after interval, final pulse may land at duration */
   duration: number;
   interval: number;

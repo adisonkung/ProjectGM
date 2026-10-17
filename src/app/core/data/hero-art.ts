@@ -20,6 +20,8 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
+  // Temporary crop of the supplied master reference; dedicated UI sources pending.
+  elira: { portrait: 'portraits/elira.webp' },
   // Supplied sylvana_icon.zip (2026-10-17): preserve the existing Sylvara entity ID.
   sylvara: { ...art('sylvara'), banner: 'banners/sylvara.webp' },
   // Supplied final-art ZIP (2026-10-17): portrait, skill icons and banner.

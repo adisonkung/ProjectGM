@@ -23,6 +23,8 @@ export interface ActiveBuff {
 
 export interface Buffable {
   buffs: ActiveBuff[];
+  /** Live spatial auras, queried rather than copied into timed statuses. */
+  auraModifiers?: () => readonly StatusModifiers[];
 }
 
 export type ApplyResult = 'applied' | 'refreshed' | 'stacked' | 'ignored';
@@ -110,12 +112,14 @@ export const hasFlag = (u: Buffable, flag: StatusFlag): boolean => u.buffs.some(
 
 /** product of one modifier over all active statuses (1 when none) */
 export const modifier = (u: Buffable, key: Exclude<keyof StatusModifiers, 'dodgeChance'>): number =>
-  u.buffs.reduce((m, b) => m * Math.pow(b.def.modifiers[key] ?? 1, b.stacks), 1);
+  u.buffs.reduce((m, b) => m * Math.pow(b.def.modifiers[key] ?? 1, b.stacks), 1) *
+  (u.auraModifiers?.() ?? []).reduce((m, modifiers) => m * (modifiers[key] ?? 1), 1);
 
 export const attackModifier = (u: Buffable): number => modifier(u, 'attackMultiplier');
 
 /** highest dodge chance of the active statuses (they don't add up) */
-export const dodgeChance = (u: Buffable): number => Math.max(0, ...u.buffs.map(b => b.def.modifiers.dodgeChance ?? 0));
+export const dodgeChance = (u: Buffable): number => Math.max(0, ...u.buffs.map(b => b.def.modifiers.dodgeChance ?? 0),
+    ...(u.auraModifiers?.() ?? []).map(m => m.dodgeChance ?? 0));
 
 /** the unit that taunted this one (longest remaining taunt), if any */
 export const tauntSource = (u: Buffable): number | null => {

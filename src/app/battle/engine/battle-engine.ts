@@ -226,6 +226,7 @@ export interface BattleUnit {
   shieldTime: number;
   /** runtime status effects: buffs, debuffs, DoT/HoT, stun/root/taunted (base stats are never modified) */
   buffs: ActiveBuff[];
+  auraModifiers?: () => readonly import('../../core/models/combat').StatusModifiers[];
   /** battle time of the last receive-hit gauge gain (+2, internal cooldown RECEIVE_GAUGE_ICD) */
   lastGaugeHitAt: number;
   /** charge / dash / knock-back: the visual position slides fast until this time */
@@ -692,6 +693,7 @@ export class BattleEngine {
       interruptMinPriority: 'LOW',
       skillQueued: null,
     };
+    u.auraModifiers = () => this.fields.modifiersAt(u);
     this.grid.place(u.id, pos);
     this.units.push(u);
     return u;
@@ -1998,7 +2000,7 @@ export class BattleEngine {
         else self.metrics.reservedSkillMisses++;
       },
       later: (d, u, fn) => self.later(d, u, fn),
-      createField: (u, center, definition, pulse) => self.fields.add(u.id, center, definition, pulse, () => u.alive),
+      createField: (u, center, definition, pulse) => self.fields.add(u.id, center, definition, pulse, () => u.alive, u.side),
       shoot: (u, t, slot, sky, onArrive) => {
         const flight = sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
         self.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: slot, flight, ...(sky ? { sky } : {}) });

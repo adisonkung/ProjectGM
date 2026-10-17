@@ -206,7 +206,26 @@ const SYLVARA_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
 
+// Phase A only: basic poses are temporary skill fallbacks, not approved skill production.
+const ELIRA_BASIC_ATTACK: AnimDef = {
+  row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
+};
+const ELIRA_SUPPORT_FALLBACK: AnimDef = {
+  row: 3, frames: 7, ms: 85, events: { CAST_START: 0, SKILL_ACTIVATE: 4, DAMAGE: 4, RECOVERY_START: 5 },
+};
+
 export const SHEETS: Record<string, SheetDef> = {
+  'hero-elira.png': {
+    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    anims: {
+      idle: { row: 0, frames: 5 }, walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
+      hurt: { row: 2, frames: 4, ms: 100 }, attack: ELIRA_BASIC_ATTACK,
+      die: { row: 4, frames: 6, ms: 130 },
+      skill: ELIRA_SUPPORT_FALLBACK, skill2: ELIRA_SUPPORT_FALLBACK, ult: ELIRA_SUPPORT_FALLBACK,
+    },
+    projectile: { attack: 'el-basic-light' },
+  },
   'hero-sylvara.png': {
     cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22], ultNock: [30, -55] },
@@ -753,6 +772,7 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'el-basic-light': { file: 'fx-elira-basic-light.png', frames: 1, w: 16, h: 16, frameMs: 85, at: 'target', scale: 0.4 },
   'sw-ult-charge': {
     file: 'fx-sylvara-ult-charge.png', frames: 8, w: 124, h: 172, frameMs: 77.5,
     pivot: [0.5, 0.837209], at: 'self', event: 'CHARGE_START', dy: 27.25, fitCells: 1.45, layer: 'under', attach: true,

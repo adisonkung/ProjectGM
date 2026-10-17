@@ -193,6 +193,33 @@ export const CLASS_KITS: Record<HeroClass, HeroKit> = { tank, fighter, assassin,
 // ------------------------------------------------------------------ heroes with their own kit
 
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
+  // Elira Dawnmere — user-approved Phase A plan, 2026-10-17. Provisional R1 values, not final balance.
+  elira: {
+    id: 'elira', cls: 'healer', identity: 'Team Healing · Targeted Shield · Home-zone Sanctuary',
+    kit: {
+      attack: healer.attack,
+      skill: {
+        ...healer.skill, name: 'พรแห่งแสงอุ่น', label: 'Hearthlight Blessing',
+        target: 'LOWEST_HP_ALLY', range: Infinity, delivery: 'INSTANT',
+        effects: [{ type: 'HEAL', area: 'PRIMARY', atk: 2.2, maxHpPct: 0.1 }],
+        ai: { tier: 'HEAL', allyHpBelow: 0.8, emergencyHpBelow: 0.35 },
+      },
+      skill2: {
+        ...healer.skill2, name: 'ม่านพิทักษ์ศักดิ์สิทธิ์', label: 'Sanctuary Veil',
+        range: Infinity, delivery: 'INSTANT',
+        effects: [{ type: 'SHIELD', to: 'PRIMARY', selfPct: 0.15, allyPct: 0.15, duration: 4 }],
+        ai: { tier: 'HEAL', allyHpBelow: 0.75, emergencyHpBelow: 0.35 },
+      },
+      ult: {
+        ...healer.ult, name: 'เขตพิทักษ์แสงอุ่น', label: 'Hearthlight Sanctuary', delivery: 'INSTANT',
+        effects: [{ type: 'FIELD', field: {
+          area: 'RECT_6X3', anchor: 'HOME_ZONE', duration: 6, interval: 1, effects: [],
+          aura: { team: 'ALLY', modifiers: { damageTakenMultiplier: 0.8 } },
+        } }],
+        ai: { tier: 'HEAL', allyHpBelow: 0.75, emergencyHpBelow: 0.35 },
+      },
+    },
+  },
   // Sylvara Windwhisper — The Emerald Huntress (user 2026-10-17). Phase A values, not final balance.
   sylvara: {
     id: 'sylvara', cls: 'archer', identity: 'Ranged DPS · Precision Shot · Root Setup · Five-wave Arrow Rain',

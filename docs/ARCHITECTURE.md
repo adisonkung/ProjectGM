@@ -249,3 +249,8 @@ Engine results become progression through `ProgressionService`.
 6. **No lint config. No CI.** Tests run only through Karma with Chrome.
 7. **Most source art is outside git** (`art/incoming/`). Re-baking a hero other than Kael needs the user's local files, so a cloud agent and the local machine may hold different copies. Kael's source (`assets/heroes/Kael/`) has been tracked since 2026-10-16.
 8. **`DEV_FLAGS.fullUltAtStart` is ON** in the committed code.
+
+
+### Spatial field auras (Elira Phase A, 2026-10-17)
+
+`FieldDefinition.anchor: HOME_ZONE` selects a fixed source-side home-zone anchor through shared `fieldAnchor()`. `RECT_6X3` resolves18 board cells; even-width integer anchors use columns−2 through+3. FieldSystem stores source side and resolves `aura` team/modifiers against current logical occupancy and living source on each query. Units expose `Buffable.auraModifiers`, composed with timed buffs by `modifier()`/`dodgeChance()` and the existing DamageResolver. No buff instance is copied to recipients, so entry/exit, source death and field clear leave no timed residue. Positive-field AUTO checks use the same anchor/area. Existing pulse damage fields keep their scheduler behavior; aura protection does not wait for a pulse. Elira has no registered dome art yet.
