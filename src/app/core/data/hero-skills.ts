@@ -216,7 +216,7 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       ult: {
         ...archer.ult, name: 'ฝนศรมรกต', label: 'Emerald Skyfall',
         target: 'CLUSTER', fallback: ['NEAREST_ENEMY'], delivery: 'INSTANT',
-        // One activation, then five independent area pulses. Ascending-arrow art is pending; no launch burst.
+        // One visual ascent, then activation and five independent area pulses; no launch burst.
         effects: [{ type: 'FIELD', field: {
           area: 'RECT_3X2', duration: 5, interval: 1,
           effects: [{ type: 'DAMAGE', area: 'RECT_3X2', primary: 0.6, secondary: 0.6, damageType: 'PHYSICAL' }],

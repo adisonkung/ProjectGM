@@ -58,36 +58,48 @@ describe('Sylvara base art and provisional skill slots', () => {
     expect(sh.anims.attack!.events!.PROJECTILE_SPAWN).toBe(4);
     expect([sh.anims.skill!.row, sh.anims.skill!.frames]).toEqual([5, 10]);
     expect([sh.anims.skill2!.row, sh.anims.skill2!.frames]).toEqual([6, 10]);
-    expect(sh.anims.ult!.row).toBe(3);
-    expect(animEvents('hero-sylvara.png', 'ult').some(e => e.event === 'PROJECTILE_SPAWN')).toBeFalse();
+    expect(sh.anims.ult!.row).toBe(7);
+    expect(animEvents('hero-sylvara.png', 'ult').filter(e => e.event === 'PROJECTILE_SPAWN').length).toBe(1);
     expect(SYLVARA_PRODUCTION.timing).toBe('PROVISIONAL_REVIEW');
     expect(SYLVARA_PRODUCTION.clips.skill.state).toBe('PROVISIONAL_REVIEW');
     expect(SYLVARA_PRODUCTION.clips.skill.finalSync).toBe('AWAITING_REVIEW');
     expect(SYLVARA_PRODUCTION.clips.skill2.state).toBe('PROVISIONAL_REVIEW');
     for (const slot of ['ult'] as const) {
-      expect(SYLVARA_PRODUCTION.clips[slot].state).toBe('AWAITING_SOURCE');
+      expect(SYLVARA_PRODUCTION.clips[slot].state).toBe('PROVISIONAL_REVIEW');
     }
     expect(HERO_ART['sylvara']).toEqual({ portrait: 'portraits/sylvara.webp' });
     expect(sh.projectile!.attack).toBe('sw-basic-arrow');
     expect(sh.projectile!.skill).toBe('sw-s1-projectile');
     expect(sh.fx!.skill).toBe('sw-s1-impact');
-    expect(sh.fieldFx).toBeUndefined();
+    expect(sh.fieldFx!.wave!.leadMs).toBe(400);
     expect(Object.keys(FX).filter(k => k.startsWith('sw-')).sort()).toEqual(['sw-basic-arrow', 'sw-s1-impact', 'sw-s1-projectile',
-      'sw-s2-impact', 'sw-s2-projectile', 'sw-s2-root-loop', 'sw-s2-root-start']);
+      'sw-s2-impact', 'sw-s2-projectile', 'sw-s2-root-loop', 'sw-s2-root-start',
+      'sw-ult-ascent', 'sw-ult-charge', 'sw-ult-field-loop', 'sw-ult-field-start', 'sw-ult-impact', 'sw-ult-rain', 'sw-ult-residual']);
   });
 
-  it('S1 has one release/contact marker and arrival-only impact; pending slots keep the previous base timing', () => {
+  it('S1 has one release/contact marker and arrival-only impact; basic timing stays unchanged', () => {
     const events = animEvents('hero-sylvara.png', 'skill');
     expect(events.filter(e => e.event === 'PROJECTILE_SPAWN').length).toBe(1);
     expect(events.filter(e => e.event === 'DAMAGE').length).toBe(1);
     expect(animTiming('hero-sylvara.png', 'skill').hit).toBeCloseTo(0.5, 8);
     expect(animTiming('hero-sylvara.png', 'skill').total).toBeCloseTo(10 / 12, 8);
-    for (const slot of ['attack', 'ult'] as const) {
+    for (const slot of ['attack'] as const) {
       expect(animTiming('hero-sylvara.png', slot).hit).toBeCloseTo(0.34, 8);
       expect(animTiming('hero-sylvara.png', slot).total).toBeCloseTo(0.595, 8);
     }
     expect(fxFor('hero-sylvara.png', 'skill', { on: 'cast' })).toEqual([]);
     expect(fxFor('hero-sylvara.png', 'skill', { on: 'impact' })).toEqual(['sw-s1-impact']);
+  });
+
+  it('Ult releases one arrow before field activation, with no impact burst or damaging projectile', () => {
+    const events = animEvents('hero-sylvara.png', 'ult');
+    expect(events.find(e => e.event === 'PROJECTILE_SPAWN')!.t).toBeCloseTo(0.7, 8);
+    expect(animTiming('hero-sylvara.png', 'ult').hit).toBeCloseTo(1.2, 8);
+    expect(animTiming('hero-sylvara.png', 'ult').total).toBeCloseTo(1.4, 8);
+    expect(fxFor('hero-sylvara.png', 'ult', { on: 'event', event: 'PROJECTILE_SPAWN' })).toEqual(['sw-ult-ascent']);
+    expect(fxFor('hero-sylvara.png', 'ult', { on: 'impact' })).toEqual([]);
+    expect(SHEETS['hero-sylvara.png'].projectile!.ult).toBeUndefined();
+    expect(SYLVARA_PRODUCTION.clips.ult.finalSync).toBe('AWAITING_REVIEW');
   });
 
   it('S2 release follows audited F5, keeps arrival-only 2×2 impact and a status-owned stable Root loop', () => {

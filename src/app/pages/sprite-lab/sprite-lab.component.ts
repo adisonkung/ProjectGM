@@ -163,7 +163,7 @@ export class SpriteLabComponent implements OnDestroy {
   private readonly boardEl = viewChild(BoardComponent, { read: ElementRef });
 
   private enginePlayback(skill: SkillDefinition): boolean {
-    return this.engineReview || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
+    return this.engineReview || skill.effects.some(e => e.type === 'FIELD') || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
   }
 
   setRenderer(r: BoardRenderer): void {
@@ -378,8 +378,8 @@ export class SpriteLabComponent implements OnDestroy {
       }))), sample.t);
       const markers = new Set<string>();
       for (const e of sample.events) {
-        if (e.type === 'FIELD_STARTED' || e.type === 'FIELD_ENDED') {
-          this.note(sample.t, `${e.type}${e.type === 'FIELD_ENDED' ? ' · ' + e.reason : ''}`);
+        if (e.type === 'FIELD_STARTED' || e.type === 'FIELD_ENDED' || e.type === 'FIELD_PULSED') {
+          this.note(sample.t, `${e.type}${e.type === 'FIELD_ENDED' ? ' · ' + e.reason : e.type === 'FIELD_PULSED' ? ' · ' + (e.index + 1) : ''}`);
           this.fieldVisuals.handle(e, this.hero().sprite, 0, sample.t);
         } else if (e.type === 'animEvent') {
           // Engine launch + authored clip may describe the same marker in one step; present it only once.

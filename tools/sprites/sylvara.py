@@ -1,6 +1,6 @@
-"""Bake the user's approved Sylvara base, S1 and S2 character sources.
+"""Bake the user's approved Sylvara base, S1, S2 and Ultimate character sources.
 
-python3 tools/sprites/sylvara.py [source directory] [sprite output] [portrait output] [S1 source directory] [S2 source directory]
+python3 tools/sprites/sylvara.py [source directory] [sprite output] [portrait output] [S1 source directory] [S2 source directory] [Ult source directory]
 Read-only source slots: base.png and reference.png, byte-identical to sylvara_base.zip.
 Uses the shared chroma-key, body watershed, scale and torso stabilisation pipeline.
 """
@@ -21,6 +21,7 @@ OUT = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
 PORTRAITS = Path(sys.argv[3] if len(sys.argv) > 3 else 'public/portraits')
 S1 = Path(sys.argv[4]) if len(sys.argv) > 4 else SRC / 's1'
 S2 = Path(sys.argv[5]) if len(sys.argv) > 5 else SRC / 's2'
+ULT = Path(sys.argv[6]) if len(sys.argv) > 6 else SRC / 'ult'
 B.SRC = str(SRC)
 B.CELL_W, B.CELL_H, B.ROOT_X, B.ROOT_Y = 260, 170, 130, 155
 NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
@@ -72,6 +73,13 @@ def main():
     B.SRC = str(SRC)
     names.append('skill2')
     scales['skill2'] = IDLE_BODY / A.body_h(groups['skill2'][0])
+    if not (ULT / 'Ultimate character.png').exists():
+        raise FileNotFoundError(f'Required Ult source: {ULT}')
+    B.SRC = str(ULT)
+    groups['ult'] = A.sheet_frames('Ultimate character', [5, 5], False)
+    B.SRC = str(SRC)
+    names.append('ult')
+    scales['ult'] = IDLE_BODY / A.body_h(groups['ult'][0])
     cols = max(len(groups[name]) for name in names)
     probe = Image.new('RGBA', (260 * cols, 170 * 8))
     for row, name in enumerate(names):

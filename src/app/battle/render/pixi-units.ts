@@ -241,7 +241,8 @@ export class PixiUnitLayer {
   /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
   private preloadFx(def: SheetDef): void {
     const names = [...Object.values(def.fx ?? {}).flat(), ...Object.values(def.projectile ?? {}),
-      ...Object.values(def.appliedStatusFx ?? {}), ...Object.values(def.fieldFx ?? {})].filter((n): n is string => !!n);
+      ...Object.values(def.appliedStatusFx ?? {}), ...Object.values(def.statusFx ?? {}).flatMap(f => [f.start, f.loop]),
+      ...[def.fieldFx?.start, def.fieldFx?.loop, def.fieldFx?.end, def.fieldFx?.residual, def.fieldFx?.wave?.rain, def.fieldFx?.wave?.impact]].filter((n): n is string => !!n);
     for (const n of names) {
       const d = FX[n];
       if (!d) continue;

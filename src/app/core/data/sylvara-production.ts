@@ -1,6 +1,6 @@
 /** Asset inventory only; pending files are never registered as runtime sheets/FX. */
 export const SYLVARA_PRODUCTION = {
-  heroId: 'sylvara', phase: 'S2_VISUAL_REVIEW', timing: 'PROVISIONAL_REVIEW',
+  heroId: 'sylvara', phase: 'ULT_VISUAL_REVIEW', timing: 'PROVISIONAL_REVIEW',
   rarity: 'PROVISIONAL_3_STAR', fxPrefix: 'sw',
   approvedArchive: 'sylvara_base.zip',
   approvedSources: {
@@ -23,6 +23,16 @@ export const SYLVARA_PRODUCTION = {
     root: { file: 's2_root.png', sha256: '5630d947466ef58e5d734159de9410df6e69d73887cbf5155e57f49a14509ba1' },
     workbook: { file: 'SYLVARA_S2_UNIVERSAL_TIMELINE_V2.xlsx', sha256: '620ff9ef683dc80ad8ba34258a41376a6292e469c12eb826b4c6122d6f989cb3' },
   },
+  ultSources: {
+    archive: 'sylvara_ult_source.zip',
+    character: { file: 'Ultimate character.png', sha256: 'f1616bb9029ba67f851e8b08aebfdd9f88fc9d82c5ef241f65de8ad6671c1cd8' },
+    charge: { file: 'Ultimate Charge VFX.png', sha256: 'fb77a3e79bf4dc24f66c70ecac044f3c532556c027e8c0939c031f0e5d54bc70' },
+    ascent: { file: 'Ultimate Main VFX.png', sha256: 'bd88aa8a650ff7e671a6974709f714c5e74f364a99ad606179bc1a872e271d60' },
+    field: { file: 'Ultimate Arrow Rain Ground Field VFX.png', sha256: '66acc5a31bc785a7b5adb2ecf81c1812b13df5d8978befaaa52faf1f87f16808' },
+    rain: { file: 'ultimate Falling Arrows VFX.png', sha256: 'aafec8253d744d443d1578792ef04024d84c581c8db696abda79b78bfd0f1e1a' },
+    impact: { file: 'Ultimate Arrow Impact Burst VFX.png', sha256: '6da834b8eb8355ba0a76455e3f094bb986c8ee9be0fe238f7bedebece453d144' },
+    workbook: { file: 'SYLVARA_ULT_UNIVERSAL_TIMELINE_V2.xlsx', sha256: '0c51bb581ebed1a089cc6b680b8bd9cdce486fce669e869dcfc60ea55f84f7a0' },
+  },
   clips: {
     skill: { state: 'PROVISIONAL_REVIEW', proposedLabel: 'Emerald Piercer', frames: 10,
       assets: ['CHARACTER', 'PROJECTILE', 'IMPACT'], charge: 'NO_SEPARATE_SOURCE',
@@ -30,7 +40,7 @@ export const SYLVARA_PRODUCTION = {
     skill2: { state: 'PROVISIONAL_REVIEW', proposedLabel: 'Verdant Snare', frames: 10,
       sourcePose7: 'RETAINED_IN_ATLAS_NOT_PLAYED_BAKED_VOLLEY',
       assets: ['CHARACTER', 'PROJECTILE', 'IMPACT', 'ROOT_START', 'ROOT_LOOP'], finalSync: 'AWAITING_REVIEW' },
-    ult: { state: 'AWAITING_SOURCE', label: 'Emerald Skyfall', launchCount: 1, waves: 5,
+    ult: { state: 'PROVISIONAL_REVIEW', frames: 10, finalSync: 'AWAITING_REVIEW', label: 'Emerald Skyfall', launchCount: 1, waves: 5,
       columns: 3, lanes: 2, assets: ['CHARACTER', 'CHARGE', 'ASCENDING_ARROW', 'GROUND_FIELD', 'RAIN', 'IMPACT', 'RESIDUAL'] },
   },
   uiArt: { portrait: 'REFERENCE_CROP', skillIcons: 'AWAITING_SOURCE', banner: 'AWAITING_SOURCE' },

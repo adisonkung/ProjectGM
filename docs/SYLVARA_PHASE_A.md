@@ -1,5 +1,7 @@
 # Sylvara Windwhisper — The Emerald Huntress · Phase A
 
+Current status: user subsequently requested Ultimate production; see `SYLVARA_ULT_REVIEW.md`. S1/S2/Ult remain provisional, final Timeline Sync pending. Earlier fallback/pending-source/stop notes below are historical.
+
 Current status (2026-10-17): user subsequently supplied S1 sources and requested S1 integration. See `SYLVARA_S1_REVIEW.md`; base-only inventory/fallback descriptions below record the earlier Phase A boundary. S1 now has a provisional separate clip/FX, while S2/Ult remain pending. No final Timeline Sync is inferred.
 
 Subsequent S2 request/source integration is recorded in `SYLVARA_S2_REVIEW.md`. S2 now also has provisional character/projectile/Impact/status-owned Root visuals; Ult remains pending. Historical fallback descriptions below are not the current production state.

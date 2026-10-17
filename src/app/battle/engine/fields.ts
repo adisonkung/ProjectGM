@@ -2,9 +2,9 @@ import { FieldDefinition } from '../../core/models/combat';
 import { Cell } from '../../core/models/unit';
 
 export type FieldEndReason = 'EXPIRED' | 'SOURCE_DIED' | 'CLEARED';
-interface FieldEventBase { fieldId: number; src: number; at: Cell; area: FieldDefinition['area']; duration: number }
+interface FieldEventBase { fieldId: number; src: number; at: Cell; area: FieldDefinition['area']; duration: number; interval?: number }
 export type FieldLifecycleEvent = FieldEventBase &
-  ({ type: 'FIELD_STARTED' } | { type: 'FIELD_ENDED'; reason: FieldEndReason });
+  ({ type: 'FIELD_STARTED' } | { type: 'FIELD_PULSED'; index: number } | { type: 'FIELD_ENDED'; reason: FieldEndReason });
 
 export interface RuntimeField {
   readonly id: number;
@@ -26,7 +26,10 @@ export class FieldSystem {
   private seq = 0;
   private fields: FieldState[] = [];
 
-  constructor(private readonly changed: (f: RuntimeField, state: 'start' | 'end', reason?: FieldEndReason) => void = () => undefined) {}
+  constructor(
+    private readonly changed: (f: RuntimeField, state: 'start' | 'end', reason?: FieldEndReason) => void = () => undefined,
+    private readonly pulsed: (f: RuntimeField, index: number) => void = () => undefined,
+  ) {}
 
   get active(): readonly RuntimeField[] { return this.fields; }
 
@@ -50,6 +53,7 @@ export class FieldSystem {
       while (f.nextPulse <= f.elapsed + 1e-9 && f.nextPulse <= f.definition.duration + 1e-9) {
         if (!f.sourceAlive() || !this.fields.includes(f)) break;
         f.pulse();
+        this.pulsed(f, Math.round(f.nextPulse / f.definition.interval) - 1);
         f.nextPulse += f.definition.interval;
       }
       if (!f.sourceAlive()) this.remove(f, 'SOURCE_DIED');

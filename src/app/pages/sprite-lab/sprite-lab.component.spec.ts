@@ -84,6 +84,42 @@ describe('Sprite lab projectile area and status-owned Root review', () => {
     expect(lab.projectiles()).toEqual([]);
   }));
 
+  it('Ult shows one ascent, five rain waves and thirty cell impacts, then cleans the field and residue', fakeAsync(() => {
+    const lab = fixture.componentInstance;
+    lab.play('ult');
+    tick(701);
+    expect(lab.fx().filter(f => f.name === 'sw-ult-ascent').length).toBe(1);
+    expect(lab.log().filter(l => l.text === 'PROJECTILE_SPAWN').length).toBe(1);
+    expect(lab.projectiles()).toEqual([]);
+    tick(500);
+    expect(lab.fx().some(f => f.name === 'sw-ult-field-loop' && f.managed && f.loop)).toBeTrue();
+    expect(lab.floats()).toEqual([]);
+    for (let i = 0; i < 5; i++) {
+      tick(i === 0 ? 600 : 1000);
+      expect(lab.fx().filter(f => f.name === 'sw-ult-rain').length).toBe(1);
+    }
+    tick(400);
+    expect(lab.log().filter(l => l.text.startsWith('FIELD_PULSED')).length).toBe(5);
+    expect(lab.fx().filter(f => f.name === 'sw-ult-impact').length).toBe(6);
+    expect(lab.fx().some(f => f.name === 'sw-ult-field-loop')).toBeFalse();
+    tick(1000);
+    expect(lab.fx()).toEqual([]);
+    lab.reset(); tick(8000);
+    expect(lab.fx()).toEqual([]);
+  }));
+
+  it('switching to Idle during ascent or falling rain cancels the entire replay without late waves', fakeAsync(() => {
+    const lab = fixture.componentInstance;
+    for (const t of [800, 1900]) {
+      lab.play('ult'); tick(t);
+      expect(lab.fx().length).toBeGreaterThan(0);
+      lab.play('idle'); tick(8000);
+      expect(lab.fx()).toEqual([]);
+      expect(lab.projectiles()).toEqual([]);
+      expect(lab.floats()).toEqual([]);
+    }
+  }));
+
   it('clears an in-flight area projectile and all pending status samples when switching to Idle', fakeAsync(() => {
     const lab = fixture.componentInstance;
     lab.play('skill2'); tick(400);

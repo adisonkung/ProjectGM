@@ -153,6 +153,17 @@ describe('Sylvara Windwhisper — Emerald Huntress, Phase A', () => {
     expect(b.foes[0].hp).toBe(hp);
   });
 
+  it('Ult cancels before release or during ascent when the caster dies, with no field or ghost damage', () => {
+    for (const seconds of [0.3, 0.9]) {
+      const b = battle(2);
+      b.e.skills.use(b.caster, 'ult', kit().ult, b.foes[0]);
+      b.run(seconds); b.kill(b.caster); b.e.drainEvents(); b.run(7);
+      const events = b.e.drainEvents();
+      expect(events.some(e => e.type === 'FIELD_STARTED' || e.type === 'FIELD_PULSED' || e.type === 'damage')).toBeFalse();
+      expect(b.e.fields.active.length).toBe(0);
+    }
+  });
+
   it('rain stays on its original six cells after target/caster movement; entrants are hit and leavers escape', () => {
     const b = battle(4);
     b.place(b.foes[0], { r: 1, c: 8 });

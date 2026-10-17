@@ -96,7 +96,8 @@ export interface SheetDef {
   /** Persistent status visuals, owned by real status presence rather than fixed VFX duration. */
   statusFx?: Record<string, { start?: string; loop: string }>;
   /** Presentation of this caster's fixed fields. Engine lifecycle events, not animation end, own their lifetime. */
-  fieldFx?: { start?: string; loop: string; end?: string; residual?: string };
+  fieldFx?: { start?: string; loop: string; end?: string; residual?: string;
+    wave?: { rain: string; impact: string; leadMs: number; impactCells?: boolean } };
   /** กระสุน (คีย์ของ FX) ของการยิงแต่ละแบบ */
   projectile?: Partial<Record<'attack' | SkillKind, string>>;
   /** ความสูงช่อง (ค่าเริ่มต้น 100) — แผ่นที่มีท่ายกอาวุธสูงใช้ 120 */
@@ -200,7 +201,7 @@ const MIRELLE_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
 
-// Approved base sheet only. Skill slots temporarily reuse this action; final skill sources/timing are pending.
+// Approved normal-attack action; each supplied skill has its own provisional row below.
 const SYLVARA_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
@@ -208,7 +209,7 @@ const SYLVARA_BASIC_ATTACK: AnimDef = {
 export const SHEETS: Record<string, SheetDef> = {
   'hero-sylvara.png': {
     cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
-    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22], ultNock: [30, -55] },
     anims: {
       idle: { row: 0, frames: 5 },
       walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
@@ -223,11 +224,15 @@ export const SHEETS: Record<string, SheetDef> = {
         // Keep supplied F7 in the atlas; hold clean follow-through F6 instead of displaying its baked extra arrows.
         seq: [0, 1, 2, 3, 4, 5, 5, 7, 8, 9],
         events: { CAST_START: 0, PROJECTILE_SPAWN: 4, DAMAGE: 4, IMPACT: 4, RECOVERY_START: 7 } },
-      // This is an activation fallback, not the final upward-launch clip or arrow-rain presentation.
-      ult: { ...SYLVARA_BASIC_ATTACK, events: { SKILL_ACTIVATE: 4, DAMAGE: 4, RECOVERY_START: 5 } },
+      // Provisional: one F7 release at0.7s, visual ascent0.5s, field activation1.2s, recovery/end1.2/1.4s.
+      ult: { row: 7, frames: 10, ms: 1000 / 12, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [80, 80, 90, 100, 110, 240, 100, 400, 100, 100],
+        events: { CAST_START: 0, CHARGE_START: 1, PROJECTILE_SPAWN: 6, SKILL_ACTIVATE: 8, DAMAGE: 8, RECOVERY_START: 8 } },
     },
     projectile: { attack: 'sw-basic-arrow', skill: 'sw-s1-projectile', skill2: 'sw-s2-projectile' },
-    fx: { skill: 'sw-s1-impact', skill2: 'sw-s2-impact' },
+    fx: { skill: 'sw-s1-impact', skill2: 'sw-s2-impact', ult: ['sw-ult-charge', 'sw-ult-ascent'] },
+    fieldFx: { start: 'sw-ult-field-start', loop: 'sw-ult-field-loop', residual: 'sw-ult-residual',
+      wave: { rain: 'sw-ult-rain', impact: 'sw-ult-impact', leadMs: 400, impactCells: true } },
     statusFx: { root: { start: 'sw-s2-root-start', loop: 'sw-s2-root-loop' } },
   },
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
@@ -748,6 +753,34 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'sw-ult-charge': {
+    file: 'fx-sylvara-ult-charge.png', frames: 8, w: 124, h: 172, frameMs: 77.5,
+    pivot: [0.5, 0.837209], at: 'self', event: 'CHARGE_START', dy: 27.25, fitCells: 1.25, layer: 'under', attach: true,
+  },
+  'sw-ult-ascent': {
+    file: 'fx-sylvara-ult-ascent.png', frames: 8, w: 440, h: 390, frameMs: 62.5,
+    pivot: [0.14772727272727273, 0.7435897435897436], at: 'self', event: 'PROJECTILE_SPAWN', anchor: 'ultNock', fitCells: 5, attach: false,
+  },
+  'sw-ult-field-start': {
+    file: 'fx-sylvara-ult-field.png', frames: 3, w: 244, h: 157, frameMs: 100,
+    pivot: [0.5, 0.828025], at: 'target', stripFrames: 6, from: 0, fitCells: 3, dy: 27.25, layer: 'under', attach: false,
+  },
+  'sw-ult-field-loop': {
+    file: 'fx-sylvara-ult-field.png', frames: 3, w: 244, h: 157, frameMs: 100,
+    pivot: [0.5, 0.828025], at: 'target', stripFrames: 6, from: 3, delayMs: 300, fitCells: 3, dy: 27.25, layer: 'under', attach: false,
+  },
+  'sw-ult-residual': {
+    file: 'fx-sylvara-ult-field.png', frames: 1, w: 244, h: 157, frameMs: 100,
+    pivot: [0.5, 0.828025], at: 'target', stripFrames: 6, from: 5, fitCells: 3, dy: 27.25, layer: 'under', fadeOutMs: 400, attach: false,
+  },
+  'sw-ult-rain': {
+    file: 'fx-sylvara-ult-rain.png', frames: 8, w: 300, h: 400, frameMs: 50,
+    pivot: [0.5, 0.775], at: 'target', fitCells: 3, dy: 27.25, attach: false,
+  },
+  'sw-ult-impact': {
+    file: 'fx-sylvara-ult-impact.png', frames: 8, w: 100, h: 106, frameMs: 50,
+    pivot: [0.5, 0.867925], at: 'target', fitCells: 1, dy: 27.25, attach: false,
+  },
   'sw-s2-projectile': {
     file: 'fx-sylvara-s2-projectile.png', frames: 8, w: 148, h: 31, frameMs: 50, at: 'self',
   },

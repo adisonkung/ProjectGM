@@ -1,5 +1,7 @@
 # Sylvara — S2 Verdant Snare · provisional visual review
 
+Current status: user subsequently requested Ultimate production; see `SYLVARA_ULT_REVIEW.md`. S1/S2/Ult remain provisional, final Timeline Sync pending. Earlier fallback/pending-source/stop notes below are historical.
+
 User requested S2 on2026-10-17 and supplied `sylvara-s2-source.zip`. Continue `wip/codex-hero-sylvara` after fresh fetch: master remains895369a, task branch505dfc3, clean tree/no new agent work. This request authorizes S2 production; it does not finalize S1 timing or authorize Ult production.
 
 ## Source audit and reconciliation

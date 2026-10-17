@@ -918,6 +918,7 @@ export class BattleComponent implements OnDestroy {
     for (const e of events) {
       switch (e.type) {
         case 'FIELD_STARTED':
+        case 'FIELD_PULSED':
         case 'FIELD_ENDED':
           this.fieldVisuals.handle(e, unitOf(e.src)?.sprite, this.engine.formation.originPosition, this.engine.time);
           break;

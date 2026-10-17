@@ -106,3 +106,25 @@ describe('Verdant Snare actual-engine projectile review', () => {
     expect(roots.every(e => e.type === 'buff' && r.ids.get(e.dst) !== 2)).toBeTrue();
   });
 });
+
+
+describe('Emerald Skyfall actual-engine five-wave review', () => {
+  it('launches one visual arrow, activates after ascent, and resolves five occupant pulses with no launch/end damage', () => {
+    const targets = [1, 2].flatMap(r => [9, 8, 10].map(c => ({ id: r * 10 + c, pos: { r, c } })));
+    const review = skillReview('sylvara', 'ult', { r: 1, c: 5 }, targets);
+    const events = review.samples.flatMap(s => s.events);
+    const release = review.samples.find(s => s.events.some(e => e.type === 'animEvent' && e.event === 'PROJECTILE_SPAWN'))!;
+    const start = review.samples.find(s => s.events.some(e => e.type === 'FIELD_STARTED'))!;
+    expect(release.t).toBeCloseTo(0.7, 8);
+    expect(start.t).toBeCloseTo(1.2, 8);
+    expect(events.filter(e => e.type === 'animEvent' && e.event === 'PROJECTILE_SPAWN').length).toBe(1);
+    expect(events.filter(e => e.type === 'projectile')).toEqual([]); // ascent is visual, never a damaging homing arrow
+    expect(review.samples.filter(s => s.t < 2.19).flatMap(s => s.events).some(e => e.type === 'damage')).toBeFalse();
+    const pulses = review.samples.filter(s => s.events.some(e => e.type === 'FIELD_PULSED'));
+    expect(pulses.map(s => Number(s.t.toFixed(2)))).toEqual([2.2, 3.2, 4.2, 5.2, 6.2]);
+    expect(pulses.flatMap(s => s.events).filter(e => e.type === 'damage').length).toBe(30);
+    expect(events.filter(e => e.type === 'FIELD_PULSED').map(e => e.type === 'FIELD_PULSED' ? e.index : -1)).toEqual([0, 1, 2, 3, 4]);
+    expect(events.filter(e => e.type === 'buff')).toEqual([]);
+    expect(review.samples.find(s => s.events.some(e => e.type === 'FIELD_ENDED'))!.t).toBeCloseTo(6.2, 8);
+  });
+});

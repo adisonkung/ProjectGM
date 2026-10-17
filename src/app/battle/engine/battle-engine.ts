@@ -322,10 +322,11 @@ export class BattleEngine {
   /** colliding projectiles currently flying */
   readonly projectiles: RuntimeProjectile[] = [];
   readonly fields = new FieldSystem((f, state, reason) => {
-    const base = { fieldId: f.id, src: f.sourceId, at: { ...f.center }, area: f.definition.area, duration: f.definition.duration };
+    const base = { fieldId: f.id, src: f.sourceId, at: { ...f.center }, area: f.definition.area, duration: f.definition.duration, interval: f.definition.interval };
     this.events.push(state === 'start' ? { ...base, type: 'FIELD_STARTED' }
       : { ...base, type: 'FIELD_ENDED', reason: reason ?? 'CLEARED' });
-  });
+  }, (f, index) => this.events.push({ type: 'FIELD_PULSED', fieldId: f.id, src: f.sourceId,
+    at: { ...f.center }, area: f.definition.area, duration: f.definition.duration, interval: f.definition.interval, index }));
   /** runs every data-driven monster (one shared state machine) */
   readonly monsterAI: MonsterController;
   /** hero skills: targeting, AI tiers, effects (data in core/data/hero-skills.ts) */
