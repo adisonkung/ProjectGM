@@ -48,11 +48,11 @@ Approved references shown in chat:
 
 Preserve face, hairstyle, proportions, costume, book, floating crystal focus, navy/ice-blue/muted-silver palette and silhouette. No redesign or Chinese/wuxia/xianxia motifs.
 
-These files are visible in chat but not present in the cloud filesystem. The user's `/Users/webuild/Downloads/...` paths are not mounted here. Therefore:
+The initial Phase A used token fallback. The subsequent user-uploaded `mirelle-source.zip` supplies byte-identical PNGs now copied into the source slots below. The Mac Downloads path is still not mounted; the ZIP resolves that dependency.
 
 - No approved source was fabricated, redrawn or overwritten.
-- No `HeroTemplate.sprite`, `SHEETS`, `HERO_ART` or `FX` entry points to a missing file.
-- Mirelle currently uses the existing class-token/portrait fallback and `TOKEN_TIMING`; this is explicitly provisional.
+- Runtime registrations point only to baked assets; pending skill slots are not registered as FX.
+- Base-art follow-up: approved ZIP is now accessible. Mirelle uses the real base sheet and reference-cropped portrait. S1/S2/Ult have no authored clips; the existing animation fallback uses the basic attack provisionally.
 - Do not create an empty atlas or copy another hero's art as Mirelle.
 - Source slots are `art/incoming/mirelle/reference.png` and `base.png` (read-only originals when available).
 - Base sheet cutting/normalization, portrait crop and actual runtime registrations remain pending source access. Run `sprites:optimize` after any PNG bake.
@@ -74,10 +74,12 @@ Confirmed validation:
 - `npx tsc -p tsconfig.app.json --noEmit` and `npx tsc -p tsconfig.spec.json --noEmit`: passed.
 - Full Karma/Chromium: **631/631 passed**, including **20 new cases**. A temporary no-sandbox launcher was used outside the repository because `karma.ci.cjs` is absent and the execution sandbox cannot bind Karma's local port.
 - `npm run build -- --configuration development`: passed.
-- `npm run build`: blocked at Google Fonts inlining by the inaccessible environment proxy; production build is not verified.
+- `npm run build`: passed after network recovery; existing size/CommonJS warnings remain.
 - `npm run hero-sim -- 10`: completed, default team F1–4/F6 100%; F5/F7/F9/F10 0%; F8 AUTO 0% / TACTICAL 50%. Existing balance issues remain deferred.
 - `node dist/sim/tools/dev/hero-sim.js 10 --team=bailong,yuezheng,mirelle,tangxun,linxue --stats`: completed without runtime errors. Mirelle contributes 30% of aggregate AUTO team damage. Token timing/placeholder numbers make this a smoke check, not a final balance assessment.
-- No sprite PNGs were changed, so `sprites:optimize` was not needed.
-- Branch `wip/codex-hero-mirelle` exists locally. Remote fetch/push remain blocked by the environment proxy.
+- Base-art follow-up changes sprite PNGs; `sprites:optimize` was run.
+- Branch `wip/codex-hero-mirelle` exists locally. Network is restored and production build passed on retry; push remains pending explicit user approval after automatic approval review rejected the export.
 
-Phase A stops here. Actual approved-source integration is pending file access, and each skill's production/review/sync remains a separate later step.
+Base-art follow-up: approved source integration is complete. Full Karma remains 631/631 passed, app/spec typechecks and production build pass, and the Mirelle-team 10-run/floor simulation completed after base timing integration (smoke only; no rebalance). Real Pixi/DOM previews use `/sprite-lab?hero=mirelle&compare=kael,garrick&enemy=forest_slime&bg=forest-1&render=pixi` (DPR 2). Comparison options reuse real hero, monster and stage-art registries, without save changes. No browser errors during idle/move/attack/hurt/death checks.
+
+Each skill's production/review/sync remains a separate later step. No final S1/S2/Ult timing was introduced. Base-attack fallback length changes provisional skill timing compared with tokens; do not interpret the new simulation as final balance.

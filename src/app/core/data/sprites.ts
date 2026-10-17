@@ -194,6 +194,20 @@ export const SHEETS: Record<string, SheetDef> = {
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
+  // Mirelle approved base combat only. Rows 5–7 remain empty: no authored S1/S2/Ult timings.
+  'hero-mirelle.png': {
+    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    anims: {
+      idle: { row: 0, frames: 5 },
+      walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
+      hurt: { row: 2, frames: 4, ms: 100 },
+      // Normal attack only: book/focus gathers F4, ice shard releases F5; contact is projectile arrival.
+      attack: { row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 } },
+      die: { row: 4, frames: 6, ms: 130 },
+    },
+    projectile: { attack: 'mf-basic-crystal' },
+  },
   // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet + S1 (row 5) + S2 (row 6)
   // + ult (row 7). Cell 260 × 170 like Aurel v2
   // (the tower shield needs the width), feet 15 px above the cell bottom, idle body 78 px.
@@ -678,6 +692,10 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'mf-basic-crystal': {
+    file: 'fx-mirelle-basic-crystal.png', frames: 1, w: 25, h: 10, frameMs: 100,
+    at: 'target', pixelated: true, scale: 0.65,
+  },
   // ---- special-dungeon monsters (tools/sprites/dungeon/fx.py: 6 frames × 64 px, directional ones point right)
   'triple-volley': { file: 'fx-triple-volley.png', frames: 6, w: 64, h: 64, frameMs: 60, at: 'target', orient: 'flip', dy: -10, scale: 0.9 },
   'rally-whistle': { file: 'fx-rally-whistle.png', frames: 6, w: 64, h: 64, frameMs: 90, at: 'self', dx: 22, dy: -30, scale: 1.2 },

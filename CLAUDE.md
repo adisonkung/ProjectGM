@@ -22,8 +22,8 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
 
 - Kit: Frost Needle (single-target magic + Slow, แรงขึ้นถ้า Chilled), Glassbind (2×2 + Chill; Root เฉพาะคนที่ Chilled อยู่ก่อน), Winterglass Field (สนามคงที่ 3×3, ดาเมจเวทเบาเป็นระยะ + Slow + ลดความเร็วโจมตี)
 - กลไกทั่วไป: `moveSpeedMultiplier`, conditional `APPLY_STATUS.when`, `SQUARE_2`, `FIELD` / `FieldSystem`, rank traversal ภายในสนาม · Root/immunity/Unstoppable ใช้ของเดิม
-- **ค่า gameplay เป็น provisional**; ยังไม่มี final skill timing/Timeline Sync/VFX timing. ใช้ `TOKEN_TIMING` สำรองของระบบเดิม
-- Approved master/base แสดงในแชท แต่ไฟล์ไม่อยู่บน cloud. ยังไม่ลง `sprite`, `SHEETS`, `HERO_ART` หรือ `FX` ที่ชี้ไฟล์ไม่มีจริง · slots/semantic requirements อยู่ใน `core/data/mirelle-production.ts`
+- **ค่า gameplay เป็น provisional**; ยังไม่มี final skill timing/Timeline Sync/VFX timing. หลังลง base sprite สกิลใช้ basic-attack fallback เดิม (ความยาวท่ามีผลต่อ gameplay ตาม architectural debt เดิม ไม่ใช่ timing สกิลที่อนุมัติแล้ว)
+- **Base-art follow-up:** ผู้ใช้ส่ง `mirelle-source.zip` แล้ว · `tools/sprites/mirelle.py` ใช้ original PNG แบบไม่แก้ต้นฉบับ → `hero-mirelle.png` 7×8 ช่อง 260×170, idle body 78 px, base rows 5/7/4/7/6 + portrait และ crystal projectile ของโจมตีปกติแยก · ลง `SHEETS`/`HERO_ART` แล้ว · slots สกิลยัง pending ใน `mirelle-production.ts` · ไม่มี final S1/S2/Ult timing · preview จริง `/sprite-lab?hero=mirelle&compare=kael,garrick&enemy=forest_slime&bg=forest-1&render=pixi` ที่ DPR 2
 - รายละเอียดค่า/stack/lifecycle/asset dependencies: `docs/MIRELLE_PHASE_A.md` · tests: `winter-scholar.spec.ts`, `fields.spec.ts`
 - **หยุดหลัง Phase A**; ขั้นต่อไป S1 production → user review → S1 Timeline Sync แล้วค่อย S2/Ult ตามลำดับ
 

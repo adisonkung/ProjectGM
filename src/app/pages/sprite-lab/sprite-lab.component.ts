@@ -5,6 +5,8 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
+import { BACKGROUNDS } from '../../core/data/backgrounds';
+import { MONSTERS } from '../../core/data/monsters';
 import { HEROES } from '../../core/data/heroes';
 import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxAttached, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
 import { kitOf } from '../../core/data/hero-skills';
@@ -34,8 +36,11 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
         </select>
       </header>
 
+      @if (comparisonHeroes.length) {
+        <p class="comparison">เทียบสัดส่วน: {{ comparisonNames }} · ตัวละครยืนบนเลนเดียวกัน</p>
+      }
       <div class="stage" [class.anchors]="showAnchors()">
-        <app-board #board [units]="units()" [fx]="fx()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
+        <app-board #board [background]="previewBackground" [units]="units()" [fx]="fx()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
         @if (showAnchors()) {
           <i class="mark root" [style.left]="mark().root.x" [style.top]="mark().root.y" title="root (feet)"></i>
           @for (t of mark().anchors; track t.name) { <i class="mark tip" [style.left]="t.x" [style.top]="t.y" [title]="t.name"><b>{{ t.name }}</b></i> }
@@ -72,6 +77,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
     .lab { padding: 12px; display: grid; gap: 10px; max-width: 980px; margin: 0 auto; }
     header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     h1 { font-size: 18px; margin: 0; flex: 1; }
+    .comparison { margin: 0; text-align: center; font-size: 13px; color: #b9cee2; }
     .stage { position: relative; --cell: min(56px, calc((100vw - 32px) / 16)); width: calc(16 * var(--cell)); margin: 0 auto; }
     .mark { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; z-index: 300; pointer-events: none; }
     .mark.root { background: #ff3b3b; box-shadow: 0 0 0 2px #fff; }
@@ -86,6 +92,11 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
 export class SpriteLabComponent implements OnDestroy {
   readonly spriteHeroes = HEROES.filter(h => h.sprite && SHEETS[h.sprite]);
   private readonly qp = inject(ActivatedRoute).snapshot.queryParamMap;
+  /** Optional lab-only comparison uses real roster sheets, never changes saves or combat. */
+  readonly comparisonHeroes = HEROES.filter(h => (this.qp.get('compare') ?? '').split(',').includes(h.id) && h.sprite && SHEETS[h.sprite]).slice(0, 2);
+  readonly comparisonNames = this.comparisonHeroes.map(h => h.name).join(' / ');
+  readonly previewBackground = BACKGROUNDS[this.qp.get('bg') ?? ''] ?? null;
+  private readonly comparisonMonster = MONSTERS[this.qp.get('enemy') ?? ''];
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
   readonly heroName = computed(() => this.hero()?.name ?? '');
@@ -134,8 +145,13 @@ export class SpriteLabComponent implements OnDestroy {
     return [
       { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left,
         blink: !!b, blinkFade: !b?.ownFade },
+      ...this.comparisonHeroes.filter(other => other.id !== h.id).map((other, i) => ({
+        ...base, id: 100 + i, side: 'ally' as const, name: other.name, cls: other.cls,
+        r: 1, c: hc - (i + 1) * 2 * (left ? -1 : 1), sprite: other.sprite, star: other.star, heroId: other.id, flip: left,
+      })),
       ...DUMMY_IDS.map((id, i) => ({
-        ...base, id, side: 'enemy' as const, name: 'หุ่นฝึก', cls: 'tank' as const, r: 1, c: left ? hc - 1 - i : hc + 1 + i, sprite: DUMMY_SPRITE, flip: !left,
+        ...base, id, side: 'enemy' as const, name: this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const, r: 1, c: left ? hc - 1 - i : hc + 1 + i,
+        sprite: this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: !left,
       })),
     ];
   });

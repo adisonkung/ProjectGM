@@ -9,12 +9,12 @@ interface PendingClip {
 }
 
 export const MIRELLE_PRODUCTION = {
-  heroId: 'mirelle', phase: 'A', timing: 'PROVISIONAL_TOKEN_FALLBACK',
+  heroId: 'mirelle', phase: 'A', timing: 'PROVISIONAL_BASE_ATTACK_FALLBACK',
   approvedReferences: [
     'ChatGPT Image Oct 17, 2026, 12_38_47 AM.png',
     'ChatGPT Image Oct 17, 2026, 12_39_00 AM.png',
   ],
-  sourcesAvailableInWorkspace: false,
+  sourcesAvailableInWorkspace: true,
   sourceSlots: { reference: 'art/incoming/mirelle/reference.png', base: 'art/incoming/mirelle/base.png' },
   expectedSheet: 'hero-mirelle.png',
   expectedPortrait: 'portraits/mirelle.webp',

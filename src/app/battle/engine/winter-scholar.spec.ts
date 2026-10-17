@@ -43,7 +43,7 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
   }
 
   it('registers an existing Mage, retaining Mage stats/basic attack and the established skill rank ids', () => {
-    expect(HERO_BY_ID['mirelle']).toEqual({ id: 'mirelle', name: 'มิเรลล์ ฟรอสต์กลาส', cls: 'mage', star: 3 });
+    expect(HERO_BY_ID['mirelle']).toEqual({ id: 'mirelle', name: 'มิเรลล์ ฟรอสต์กลาส', cls: 'mage', star: 3, sprite: 'hero-mirelle.png' });
     expect(kit().attack).toBe(CLASS_KITS.mage.attack);
     expect([kit().skill.id, kit().skill2.id, kit().ult.id]).toEqual(['soul_curse', 'bone_hand', 'soul_beam']);
     expect(STARTER_TEAM).not.toContain('mirelle');
@@ -52,9 +52,14 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
   });
 
   it('records pending assets and semantic requirements without broken runtime registrations or final timings', () => {
-    expect(HERO_ART['mirelle']).toBeUndefined();
-    expect(SHEETS['hero-mirelle.png']).toBeUndefined();
-    expect(MIRELLE_PRODUCTION.sourcesAvailableInWorkspace).toBeFalse();
+    expect(HERO_ART['mirelle']).toEqual({ portrait: 'portraits/mirelle.webp' });
+    const sheet = SHEETS['hero-mirelle.png'];
+    expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH]).toEqual([7, 8, 260, 170]);
+    expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => sheet.anims[k]!.frames)).toEqual([5, 7, 4, 7, 6]);
+    expect(sheet.anims.skill).toBeUndefined();
+    expect(sheet.anims.skill2).toBeUndefined();
+    expect(sheet.anims.ult).toBeUndefined();
+    expect(MIRELLE_PRODUCTION.sourcesAvailableInWorkspace).toBeTrue();
     for (const clip of Object.values(MIRELLE_PRODUCTION.clips)) {
       expect(clip.state).toBe('AWAITING_SKILL_REVIEW');
       expect(clip.events).toContain('CAST_START');

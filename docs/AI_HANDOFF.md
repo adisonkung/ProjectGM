@@ -3,10 +3,10 @@
 Git is authoritative. Query current commit/tree with `git rev-parse HEAD HEAD^{tree}`; this note never records its containing commit as a sync base.
 
 Last task:
-Mirelle Frostglass — The Winter Scholar, Phase A (Codex, user-approved 2026-10-17): existing Mage, Control DPS, hero/kit registration, generic Slow/conditional status/2×2 area/persistent fields, provisional presentation slots and tests. No final S1/S2/Ult timing, skill art or Timeline Sync Sheet. Stop after Phase A.
+Mirelle Frostglass — The Winter Scholar, Phase A (Codex, user-approved 2026-10-17): existing Mage, Control DPS, hero/kit registration, generic Slow/conditional status/2×2 area/persistent fields, provisional presentation slots and tests. Follow-up user request integrates approved base art and shows an actual in-game comparison. No final S1/S2/Ult timing or Timeline Sync Sheet. Stop before skill production.
 
 Branch:
-`wip/codex-hero-mirelle`, created from cached `origin/master`. Fetch and initial branch push failed because the configured proxy could not connect. Latest GitHub state and the user's local clone cannot be verified here. No master branch was edited or pushed. No other task branch was changed.
+`wip/codex-hero-mirelle`. Fresh fetch now succeeds; origin/master remains the original base. No master or other task branch changed. Push was rejected by automatic approval review pending explicit confirmation of code export to adisonkung/ProjectGM. Do not bypass/retry that export until user approval.
 
 Last confirmed local commit (previously verified base, unchanged):
 `3a61ffba88f1004661f73e06d271adb6569d2396`
@@ -20,18 +20,21 @@ Implementation:
 - All values are provisional gameplay parameters. No new class or existing hero/stage rebalance.
 - Generic `FIELD` / `FieldSystem`: fixed center, current occupants, combat-clock pulses, source-death cancellation, target-death independence, cleared on advance/end. Short control lingers at most 1.1 s after exit.
 - Negative attack-speed modifiers now slow the monster cooldown clock; legacy positive-haste behavior is preserved.
-- `mirelle-production.ts` contains pending asset/clip/event requirements only. Runtime uses existing token timing; no missing sprite/FX URLs are registered.
+- `mirelle-production.ts` records pending skill slots/events. Approved base sheet/portrait and separate basic-attack crystal projectile are now registered. No final skill clips; existing basic-attack fallback is provisional and affects timing compared with the old tokens.
 
 Assets:
-User approved Master Character Reference and Base Combat images in chat. Neither original file is available in this cloud filesystem; `/Users/webuild/Downloads/...` is not mounted. Preserve the exact approved Western fantasy design. No replacement art was generated. Base-sprite cutting/portrait/runtime art registrations remain pending source access. No sprites changed, so optimizer is not required for this phase.
+User uploaded `mirelle-source.zip`, accessible in this chat. Original PNGs copied byte-for-byte to `art/incoming/mirelle/{reference,base}.png` (read-only/gitignored). `tools/sprites/mirelle.py` uses the shared bake pipeline: 7×8 atlas, 260×170 cells/root 130,155, idle body 78 px, base rows 5/7/4/7/6. Portrait cropped from master close-up; free normal-attack ice shard separated from character. No redesign, source changes or new skill art.
+- Runtime: `public/sprites/hero-mirelle.png`, `fx-mirelle-basic-crystal.png`, `public/portraits/mirelle.webp`, optimized copies and generated atlas.
+- Pixi + DOM comparison: `/sprite-lab?hero=mirelle&compare=kael,garrick&enemy=forest_slime&bg=forest-1&render=pixi`. Generic optional lab parameters do not alter saves or combat.
+- Real screenshots (gitignored): `tmp/mirelle-preview/mirelle-in-game-{pixi,dom}.png` at DPR 2; idle/move/attack/hurt/death checked, no page errors.
 
 Validation:
 - App/spec typechecks pass. Full Karma: 631/631 passed (includes 20 new cases).
 - Default `hero-sim -- 10` passed: F1–4/F6 100%; F5/F7/F9/F10 0%; F8 AUTO 0% / TACTICAL 50%. Known balance issues preserved.
-- Development build passed. Production build blocked at Google Fonts inlining by unavailable network/proxy; no source/build config workaround was committed.
+- Production build passed after network access was restored; no font/build config workaround committed.
 - Mirelle-team sim completed: `hero-sim 10 --team=bailong,yuezheng,mirelle,tangxun,linxue --stats`; no runtime errors. Mirelle contributes 30% of aggregate AUTO team damage with provisional token timing. This is not a balance conclusion.
-- No PNG changes; sprite optimizer not needed.
-- Task commits are local only: pushes fail at the environment proxy. Phase A is complete within available assets; stop here.
+- Base-art follow-up: 631/631 tests pass; app/spec typechecks and production build pass. Mirelle-team sim (10 runs/floor) completes after new base-clip timing. Sprite optimizer run; zero clipped pixels. Source PNG bytes match uploaded originals.
+- Task commits are local only. Base-art integration complete; stop before S1 production.
 
 Details:
 `docs/MIRELLE_PHASE_A.md`, `core/data/mirelle-production.ts`, `battle/engine/{fields,winter-scholar}.spec.ts`.
@@ -39,7 +42,7 @@ Details:
 Next agent must inspect:
 - Git branch/status/history and fresh remote refs; remote availability is unresolved.
 - Current `HEROES`, `HERO_DEFINITIONS`, status/field/rank systems and Phase A tests.
-- Approved source-image availability before baking any asset.
+- Read-only original ZIP-derived PNGs before rebaking; skill-specific art is still missing.
 - Stop boundary: S1 production → user review → S1 Timeline Sync → S2 production/review/sync → Ult production/review/sync. Do not skip reviews or create final timing in Phase A.
 
 Known pre-existing issues:
