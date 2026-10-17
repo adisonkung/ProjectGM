@@ -1,5 +1,7 @@
 # Mirelle — Ultimate Winterglass Field · provisional visual review
 
+Current status (2026-10-17): the user subsequently authorized Final Timeline Sync and slightly longer weighted motion. See `MIRELLE_FINAL_SYNC.md` and `docs/timelines/mirelle/`; provisional timing and stop notes below describe the earlier review stage.
+
 2026-10-17: user requested Ultimate next and supplied `mirelle-ult-source.zip`. This is individual visual production/review only. It does not infer final timing approval for S1/S2/Ult or create any final Timeline Sync Sheet.
 
 ## Original sources and audit

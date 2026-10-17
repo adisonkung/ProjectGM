@@ -57,4 +57,23 @@ describe('Glassbind isolated skill review and generic presentation', () => {
     expect(events.filter(e => e.type === 'buff' && e.buff === 'root')).toEqual([]);
     expect(events.filter(e => e.type === 'buff' && e.buff === 'frost_fatigue').length).toBe(24);
   });
+
+  it('final Sync actual events use the 50ms combat step: projectile arrival, one S2 hit and independent field expiry', () => {
+    const s1 = skillReview('mirelle', 'skill', { r: 1, c: 5 }, targets.slice(0, 1));
+    const launch = s1.samples.find(s => s.events.some(e => e.type === 'projectile'))!;
+    const contact = s1.samples.find(s => s.events.some(e => e.type === 'damage'))!;
+    expect(launch.t).toBeCloseTo(0.5, 8);
+    expect(contact.t).toBeCloseTo(0.85, 8); // distance4:0.34s flight, arrival rounded by combat step
+    expect(launch.events.some(e => e.type === 'damage' || e.type === 'buff')).toBeFalse();
+    const s2 = skillReview('mirelle', 'skill2', { r: 1, c: 5 }, targets);
+    const hits = s2.samples.filter(s => s.events.some(e => e.type === 'damage'));
+    expect(hits.length).toBe(1);
+    expect(hits[0].t).toBeCloseTo(1, 8);
+    const ult = skillReview('mirelle', 'ult', { r: 1, c: 5 }, targets);
+    expect(ult.samples.find(s => s.events.some(e => e.type === 'FIELD_STARTED'))!.t).toBeCloseTo(1.2, 8);
+    expect(ult.samples.find(s => s.events.some(e => e.type === 'FIELD_ENDED'))!.t).toBeCloseTo(7.2, 8);
+    expect(ult.samples.find(s => s.events.some(e => e.type === 'animEvent' && e.event === 'ANIMATION_END'))!.t).toBeCloseTo(1.8, 8);
+    expect(ult.samples.filter(s => s.events.some(e => e.type === 'damage')).map(s => Number(s.t.toFixed(2))))
+      .toEqual([2.2, 3.2, 4.2, 5.2, 6.2, 7.2]);
+  });
 });

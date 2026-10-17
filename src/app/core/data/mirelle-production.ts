@@ -1,15 +1,16 @@
 import { SemanticEvent } from '../models/monster';
 
-/** Production/review state only. Runtime presentation lives in sprites.ts; no final Timeline Sync here. */
-interface PendingClip {
+/** Production status and final Sync Sheet locations. Runtime timing remains in sprites.ts. */
+interface ProducedClip {
   clip: 'skill' | 'skill2' | 'ult';
-  state: 'AWAITING_SKILL_REVIEW' | 'PROVISIONAL_REVIEW';
+  state: 'FINAL_SYNC';
+  syncSheet: string;
   events: SemanticEvent[];
   assets: { key: string; file: string; role: 'PROJECTILE' | 'CHARGE' | 'MAIN' | 'IMPACT' | 'FIELD' | 'RESIDUAL'; optional?: boolean }[];
 }
 
 export const MIRELLE_PRODUCTION = {
-  heroId: 'mirelle', phase: 'ULT_REVIEW', timing: 'PROVISIONAL_SKILL_REVIEW',
+  heroId: 'mirelle', phase: 'FINAL_TIMELINE_SYNC', timing: 'FINAL_SYNC',
   approvedReferences: [
     'ChatGPT Image Oct 17, 2026, 12_38_47 AM.png',
     'ChatGPT Image Oct 17, 2026, 12_39_00 AM.png',
@@ -28,7 +29,7 @@ export const MIRELLE_PRODUCTION = {
   visualIdentity: 'Classic Western Fantasy / Kingdom Adventurers; approved face, hair, proportions, costume and silhouette; spellbook + floating crystal focus; navy / ice blue / muted silver',
   clips: {
     skill: {
-      clip: 'skill', state: 'PROVISIONAL_REVIEW',
+      clip: 'skill', state: 'FINAL_SYNC', syncSheet: 'docs/timelines/mirelle/mirelle_s1_final_sync',
       events: ['CAST_START', 'PROJECTILE_SPAWN', 'DAMAGE', 'IMPACT', 'RECOVERY_START', 'ANIMATION_END'],
       assets: [
         { key: 'mf-s1-projectile', file: 'fx-mirelle-s1-projectile.png', role: 'PROJECTILE' },
@@ -36,7 +37,7 @@ export const MIRELLE_PRODUCTION = {
       ],
     },
     skill2: {
-      clip: 'skill2', state: 'PROVISIONAL_REVIEW',
+      clip: 'skill2', state: 'FINAL_SYNC', syncSheet: 'docs/timelines/mirelle/mirelle_s2_final_sync',
       events: ['CAST_START', 'SKILL_ACTIVATE', 'VFX_SPAWN', 'DAMAGE', 'IMPACT', 'RECOVERY_START', 'ANIMATION_END'],
       assets: [
         { key: 'mf-s2-main', file: 'fx-mirelle-s2-main.png', role: 'MAIN' },
@@ -44,7 +45,7 @@ export const MIRELLE_PRODUCTION = {
       ],
     },
     ult: {
-      clip: 'ult', state: 'PROVISIONAL_REVIEW',
+      clip: 'ult', state: 'FINAL_SYNC', syncSheet: 'docs/timelines/mirelle/mirelle_ult_final_sync',
       events: ['CAST_START', 'CHARGE_START', 'SKILL_ACTIVATE', 'VFX_SPAWN', 'RECOVERY_START', 'ANIMATION_END'],
       assets: [
         { key: 'mf-ult-charge', file: 'fx-mirelle-ult-charge.png', role: 'CHARGE' },
@@ -54,5 +55,5 @@ export const MIRELLE_PRODUCTION = {
         { key: 'mf-ult-residual', file: 'fx-mirelle-ult-residual.png', role: 'RESIDUAL', optional: true },
       ],
     },
-  } satisfies Record<'skill' | 'skill2' | 'ult', PendingClip>,
+  } satisfies Record<'skill' | 'skill2' | 'ult', ProducedClip>,
 };

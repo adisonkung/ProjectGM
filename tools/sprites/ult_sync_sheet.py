@@ -175,8 +175,8 @@ if M and M.get('thumbCrop'):          # small characters: zoom the thumbnails on
     thumbs = {t: im.crop(tuple(M['thumbCrop'])) for t, im in thumbs.items()}
 
 # ------------------------------------------------------------------ X-sheet PNG
-FONT = '/usr/share/fonts/opentype/tlwg/Loma.otf'
-FONTB = '/usr/share/fonts/opentype/tlwg/Loma-Bold.otf'
+FONT = os.environ.get('SYNC_SHEET_FONT', '/usr/share/fonts/opentype/tlwg/Loma.otf')
+FONTB = os.environ.get('SYNC_SHEET_FONT_BOLD', '/usr/share/fonts/opentype/tlwg/Loma-Bold.otf')
 f = lambda s, b=False: ImageFont.truetype(FONTB if b else FONT, s)
 CW, LX = max(13, 1700 // N), 300                      # px per timeline frame · label column width
 W = LX + N * CW + 40
@@ -500,7 +500,8 @@ for n_, name in LAYERS:
     for ci in (1, 2):
         ws.cell(row=ws.max_row, column=ci).font = Font(name=AR, size=11)
 ws.append([])
-ws.append(['', 'หน้าตัวละครกับปลายอาวุธถูกเว้นออกจาก L5 ทุกเฟรม (เอฟเฟกต์ไม่บังหน้า/ปลายอาวุธ)'])
+layer_note = 'หน้าตัวละครกับปลายอาวุธถูกเว้นออกจาก L5 ทุกเฟรม (เอฟเฟกต์ไม่บังหน้า/ปลายอาวุธ)'
+ws.append(['', M.get('layerNote', layer_note) if M else layer_note])
 ws.cell(row=ws.max_row, column=2).font = Font(name=AR, italic=True)
 
 wb.save(f'{OUT}/{NAME}.xlsx')

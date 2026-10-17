@@ -1,5 +1,7 @@
 # Mirelle Frostglass — The Winter Scholar · Phase A
 
+Current status (2026-10-17): the user subsequently authorized Final Timeline Sync and slightly longer weighted motion. See `MIRELLE_FINAL_SYNC.md` and `docs/timelines/mirelle/`; provisional timing and stop notes below describe the earlier review stage.
+
 User-approved scope, 2026-10-17: hero/gameplay foundation only. Classic Western Fantasy / Kingdom Adventurers.
 
 ## Registration and scope

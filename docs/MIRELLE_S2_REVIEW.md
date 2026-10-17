@@ -1,5 +1,7 @@
 # Mirelle — S2 Glassbind · provisional visual review
 
+Current status (2026-10-17): the user subsequently authorized Final Timeline Sync and slightly longer weighted motion. See `MIRELLE_FINAL_SYNC.md` and `docs/timelines/mirelle/`; provisional timing and stop notes below describe the earlier review stage.
+
 2026-10-17: the user requested the S2 asset checklist and then supplied `mirelle-s2-source.zip` to continue production. This task prepares the individual S2 preview. It does not infer final S1 timing approval, create a final S1/S2 Sync Sheet, or start Ultimate art/timing.
 
 ## Read-only sources

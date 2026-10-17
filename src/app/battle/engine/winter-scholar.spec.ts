@@ -51,29 +51,29 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     for (const slot of ['skill', 'skill2', 'ult'] as const) expect(kitInterrupts(kit(), slot)).toBeFalse();
   });
 
-  it('registers all supplied skill review assets without final choreography or a burst ultimate', () => {
+  it('registers supplied art and final Sync contracts without adding a burst ultimate', () => {
     expect(HERO_ART['mirelle']).toEqual({ portrait: 'portraits/mirelle.webp',
       s1: 'skills/mirelle-s1.webp', s2: 'skills/mirelle-s2.webp', ult: 'skills/mirelle-ult.webp', banner: 'banners/mirelle.webp' });
     const sheet = SHEETS['hero-mirelle.png'];
     expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH]).toEqual([20, 8, 260, 170]);
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => sheet.anims[k]!.frames)).toEqual([5, 7, 4, 7, 6]);
     expect([sheet.anims.skill!.row, sheet.anims.skill!.frames]).toEqual([5, 10]);
-    expect(sheet.anims.skill!.steps).toBeUndefined(); // uniform review playback, no final choreography
+    expect(sheet.anims.skill!.seq).toEqual(Array.from({ length: 10 }, (_, i) => i));
     expect([sheet.anims.skill2!.row, sheet.anims.skill2!.frames]).toEqual([6, 20]);
     expect([sheet.anims.ult!.row, sheet.anims.ult!.frames]).toEqual([7, 20]);
-    expect(sheet.anims.ult!.steps).toBeUndefined();
+    expect(sheet.anims.ult!.seq).toEqual(Array.from({ length: 20 }, (_, i) => i));
     expect(sheet.fieldFx?.loop).toBe('mf-ult-field');
     expect(sheet.projectile!.skill).toBe('mf-s1-projectile');
     expect(sheet.fx!.skill).toBe('mf-s1-impact');
     expect(MIRELLE_PRODUCTION.sourcesAvailableInWorkspace).toBeTrue();
     const s1 = MIRELLE_PRODUCTION.clips.skill;
-    expect(s1.state).toBe('PROVISIONAL_REVIEW');
+    expect(s1.state).toBe('FINAL_SYNC');
     for (const asset of s1.assets) expect(FX[asset.key].file).toBe(asset.file);
     const s2 = MIRELLE_PRODUCTION.clips.skill2;
-    expect(s2.state).toBe('PROVISIONAL_REVIEW');
+    expect(s2.state).toBe('FINAL_SYNC');
     for (const asset of s2.assets) expect(FX[asset.key].file).toBe(asset.file);
     for (const clip of [MIRELLE_PRODUCTION.clips.ult]) {
-      expect(clip.state).toBe('PROVISIONAL_REVIEW');
+      expect(clip.state).toBe('FINAL_SYNC');
       expect(clip.events).toContain('CAST_START');
       expect(clip.events).toContain('ANIMATION_END');
       for (const asset of clip.assets) expect(FX[asset.key].file).toBe(asset.file);
@@ -87,6 +87,25 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     expect(b.foes.map((f, i) => f.hp < hp[i])).toEqual([true, false, false]);
     expect(modifier(b.foes[0], 'moveSpeedMultiplier')).toBe(0.75);
     expect(hasStatus(b.foes[0], 'chill')).toBeFalse();
+  });
+
+  it('locks final weighted pose timing and keeps contact/field damage independent of the character ending', () => {
+    const expected = { skill: [10, 0.5, 0.665, 0.9], skill2: [20, 1, 1.36, 1.8], ult: [20, 1.2, 1.49, 1.8] };
+    for (const slot of ['skill', 'skill2', 'ult'] as const) {
+      const [count, hit, recovery, total] = expected[slot];
+      const a = SHEETS['hero-mirelle.png'].anims[slot]!;
+      expect(a.seq).toEqual(Array.from({ length: count }, (_, i) => i));
+      expect(a.steps!.length).toBe(count);
+      expect(animTiming('hero-mirelle.png', slot).hit).toBeCloseTo(hit, 8);
+      expect(animTiming('hero-mirelle.png', slot).total).toBeCloseTo(total, 8);
+      const events = animEvents('hero-mirelle.png', slot);
+      expect(events.find(e => e.event === 'RECOVERY_START')!.t).toBeCloseTo(recovery, 8);
+      expect(events.filter(e => e.event === 'ANIMATION_END').length).toBe(1);
+      expect(events.find(e => e.event === 'ANIMATION_END')!.t).toBeCloseTo(total, 8);
+      expect(MIRELLE_PRODUCTION.clips[slot].syncSheet).toContain('_final_sync');
+    }
+    expect(FX['mf-ult-field'].frames * FX['mf-ult-field'].frameMs).toBe(800);
+    expect(FX['mf-ult-shatter'].fitCells).toBe(4.2);
   });
 
   it('Frost Needle upgrades an existing Slow on a Chilled target, and later weaker Slow cannot dilute it', () => {

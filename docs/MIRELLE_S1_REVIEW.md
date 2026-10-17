@@ -1,5 +1,7 @@
 # Mirelle — S1 Frost Needle · provisional visual review
 
+Current status (2026-10-17): the user subsequently authorized Final Timeline Sync and slightly longer weighted motion. See `MIRELLE_FINAL_SYNC.md` and `docs/timelines/mirelle/`; provisional timing and stop notes below describe the earlier review stage.
+
 User authorized S1 production and an in-game preview on 2026-10-17. This is the individual skill review step after Phase A, before final S1 Timeline Sync. S2 and Ultimate production remain out of scope.
 
 ## Sources and cuts

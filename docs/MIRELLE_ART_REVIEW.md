@@ -1,5 +1,7 @@
 # Mirelle — supplied UI art and dedicated Ultimate field loop
 
+Current status (2026-10-17): the user subsequently authorized Final Timeline Sync and slightly longer weighted motion. See `MIRELLE_FINAL_SYNC.md` and `docs/timelines/mirelle/`; provisional timing and stop notes below describe the earlier review stage.
+
 2026-10-17, Codex. User supplied `mirelle-final-art.zip`, explicitly including a new Portrait and asking to try its Field loop in place of the old one. This is asset integration for visual review, not final skill timing approval.
 
 ## Source audit

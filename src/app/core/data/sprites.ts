@@ -204,7 +204,7 @@ export const SHEETS: Record<string, SheetDef> = {
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
-  // Mirelle: supplied base + individual skill visual reviews. Timing is PROVISIONAL, no final Timeline Sync.
+  // Mirelle: final Sync (user 2026-10-17), docs/timelines/mirelle/. Full poses + weighted anticipation/recovery.
   'hero-mirelle.png': {
     cols: 20, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
@@ -215,14 +215,17 @@ export const SHEETS: Record<string, SheetDef> = {
       // Normal attack only: book/focus gathers F4, ice shard releases F5; contact is projectile arrival.
       attack: MIRELLE_BASIC_ATTACK,
       die: { row: 4, frames: 6, ms: 130 },
-      // Uniform review playback only. DAMAGE marks launch for PROJECTILE delivery; effects land on arrival.
-      skill: { row: 5, frames: 10, ms: 1000 / 12,
+      // Final S1: release F7 at0.5s, recovery F9 at0.665s, end0.9s. Effects land on projectile arrival.
+      skill: { row: 5, frames: 10, ms: 1000 / 12, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        steps: [80, 70, 80, 90, 90, 90, 90, 75, 105, 130],
         events: { CAST_START: 0, PROJECTILE_SPAWN: 6, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 } },
-      // Supplied S2 has 20 poses, unlike the workbook's hypothetical 10. Uniform review playback only.
-      skill2: { row: 6, frames: 20, ms: 1000 / 12,
+      // Final S2: actual20 poses, activation F13 at1s, recovery F17 at1.36s, end1.8s.
+      skill2: { row: 6, frames: 20, ms: 1000 / 12, seq: Array.from({ length: 20 }, (_, i) => i),
+        steps: [70, 70, 75, 75, 85, 110, 85, 85, 75, 85, 80, 105, 100, 90, 85, 85, 100, 105, 110, 125],
         events: { CAST_START: 0, SKILL_ACTIVATE: 12, VFX_SPAWN: 12, DAMAGE: 12, IMPACT: 12, RECOVERY_START: 16 } },
-      // FIELD activation scheduler marker only, no cast burst. Actual light pulses belong to FieldSystem.
-      ult: { row: 7, frames: 20, ms: 1000 / 12,
+      // Final Ult: charge F3 at0.16s, activate F15 at1.2s, recovery F18 at1.49s, end1.8s. No cast burst.
+      ult: { row: 7, frames: 20, ms: 1000 / 12, seq: Array.from({ length: 20 }, (_, i) => i),
+        steps: [80, 80, 75, 75, 100, 110, 100, 100, 75, 75, 75, 75, 80, 100, 100, 90, 100, 100, 100, 110],
         events: { CAST_START: 0, CHARGE_START: 2, SKILL_ACTIVATE: 14, VFX_SPAWN: 14, DAMAGE: 14, RECOVERY_START: 17 } },
     },
     projectile: { attack: 'mf-basic-crystal', skill: 'mf-s1-projectile' },
@@ -724,7 +727,7 @@ export const FX: Record<string, FxDef> = {
     at: 'target', fitCells: 3, pivot: [0.5, 0.883392], dy: 27.25, layer: 'under', attach: false,
   },
   'mf-ult-field': {
-    // Supplied 8-pose loop (2026-10-17); uniform preview playback, not final Timeline Sync.
+    // Final Sync: supplied8-pose loop,0.8s cycle after0.8s formation; lifetime belongs to FIELD events.
     file: 'fx-mirelle-ult-field.png', frames: 8, w: 204, h: 270, frameMs: 100, delayMs: 800,
     at: 'target', fitCells: 3, pivot: [0.5, 0.892593], dy: 27.25, layer: 'under', attach: false,
   },
@@ -746,7 +749,7 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-mirelle-s2-bind.png', frames: 8, w: 64, h: 84, frameMs: 100,
     at: 'target', orient: 'flip', pivot: [0.5, 0.869048], dy: 27.25, scale: 0.65, attach: true,
   },
-  // Mirelle S1 source cuts; review sizes/playback only, no final VFX timeline.
+  // Mirelle S1 final Sync: reviewed source cuts/sizes; impact starts on actual contact, never on release.
   'mf-s1-projectile': {
     file: 'fx-mirelle-s1-projectile.png', frames: 7, w: 116, h: 50, frameMs: 50,
     at: 'target', scale: 1, angle0: 0,

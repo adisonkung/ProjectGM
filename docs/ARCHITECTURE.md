@@ -113,7 +113,7 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 - Source death cancels; target death does not. Engine quiesce clears fields at wave advance/stage end.
 - Engine emits generic `FIELD_STARTED` / `FIELD_ENDED` events. End metadata distinguishes `EXPIRED`, `SOURCE_DIED` and `CLEARED`, without changing pulses/damage/lifetime.
 - `moveSpeedMultiplier` slows combat movement; status conditions snapshot pre-hit recipient status.
-- Mirelle production/review states live in `core/data/mirelle-production.ts`. Base art and supplied S1/S2/Ult cuts are registered with provisional review playback. No final Timeline Sync has been authored.
+- Mirelle production states live in `core/data/mirelle-production.ts`. All three clips now link Final Timeline Sync under `docs/timelines/mirelle/` (user authorized2026-10-17). Existing `seq`/`steps` hold all10/20/20 poses with total0.9/1.8/1.8s. JSON/XLSX distinguish exact authored times from the50ms engine step; field/projectile lifetime is independent of character recovery. See `MIRELLE_FINAL_SYNC.md`.
 - `square2Center()` shares the existing oriented 2×2 footprint between `resolveArea` and ground presentation, including bottom-lane handling; hit semantics are unchanged.
 
 ### Monsters
