@@ -19,25 +19,37 @@ from mirelle_s2 import bake_ground
 
 def motion(frames, out, name, rain=False):
     """Translate the supplied arrow stages; never rotate the vertical falling variant."""
-    w, h = (300, 400) if rain else (440, 390)
-    strip = Image.new('RGBA', (w * len(frames), h))
+    w, h = (300, 500) if rain else (440, 390)
+    count = 48 if rain else len(frames)
+    strip = Image.new('RGBA', (w * count, h))
     scale = (90 / max(im.height for im, _ in frames)) if rain else (110 / max(im.width for im, _ in frames))
-    for i, (source, _) in enumerate(frames):
-        im = source.resize((max(1, round(source.width * scale)), max(1, round(source.height * scale))), Image.Resampling.LANCZOS)
-        k = i / (len(frames) - 1)
+    tiles = [im.resize((max(1, round(im.width * scale)), max(1, round(im.height * scale))), Image.Resampling.LANCZOS)
+             for im, _ in frames]
+    # Seeded presentation scatter: thirty straight-down arrows, staggered across each wave.
+    rng = np.random.default_rng(1729)
+    drops = [(int(rng.integers(18, 283)), int(rng.integers(340, 461)), int(rng.integers(0, 30)))
+             for _ in range(30)]
+    for i in range(count):
+        placements = []
         if rain:
-            # Six fixed cell contacts in three columns and two lanes, not six damage emitters.
-            positions = [(x - im.width // 2, round(y - 160 * (1 - k)) - im.height)
-                         for y in (260, 360) for x in (50, 150, 250)]
+            for x, ground, start in drops:
+                age = i - start
+                if not 0 <= age < 18:
+                    continue
+                k = age / 17
+                im = tiles[min(len(tiles) - 1, int(k * len(tiles)))]
+                placements.append((im, x - im.width // 2, round(ground - 240 * (1 - k)) - im.height))
         else:
-            positions = [(round(65 + 245 * k) - im.width // 2, round(290 - 245 * k) - im.height // 2)]
-        for x, y in positions:
+            im = tiles[i]
+            k = i / (count - 1)
+            placements = [(im, round(65 + 245 * k) - im.width // 2, round(290 - 245 * k) - im.height // 2)]
+        for im, x, y in placements:
             if x < 0 or y < 0 or x + im.width >= w or y + im.height >= h:
                 raise ValueError(f'{name}: clipped arrow stage {i + 1}: {(x, y, im.size)}')
             strip.alpha_composite(im, (i * w + x, y))
     strip.save(out / name, optimize=True)
-    return {'frames': len(frames), 'w': w, 'h': h,
-            'pivot': [0.5, 310 / h] if rain else [65 / w, 290 / h],
+    return {'frames': count, 'w': w, 'h': h,
+            'pivot': [0.5, 400 / h] if rain else [65 / w, 290 / h],
             'sourceBounds': [bounds for _, bounds in frames]}
 
 

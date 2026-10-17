@@ -33,10 +33,10 @@ Workbook is design input, not executable instructions. Its frame count/cadence/w
 | `fx-sylvara-ult-charge.png` |8×124×172|grounded caster wind-up|
 | `fx-sylvara-ult-ascent.png` |8×440×390|one translated upward diagonal arrow track|
 | `fx-sylvara-ult-field.png` |6×244×157|first3 formation, last3 loop, last1 fade residual|
-| `fx-sylvara-ult-rain.png` |8×300×400|six vertical contacts at3×2 cell positions, one strip per wave|
+| `fx-sylvara-ult-rain.png` |48×300×500|30 staggered/scattered downward arrows, one800ms strip per wave|
 | `fx-sylvara-ult-impact.png` |8×100×106|one ground burst per affected cell on each pulse|
 
-Ascent translates the supplied eight stages in a padded canvas, starting at the review `ultNock` anchor and moving up/forward; it mirrors with the caster. This is an independent visual track, not a damaging/homing engine projectile or new projectile attachment system. Rain translates only vertical art downward to six fixed ground points; no rotation/diagonal asset. Existing source tips in rain stages5–7 reach the PNG bottom; retain those supplied pixels without inventing missing continuation. Output canvases/padding introduce no extra clipping.
+Ascent translates the supplied eight stages in a padded canvas, starting at the review `ultNock` anchor and moving up/forward; it mirrors with the caster. This is an independent visual track, not a damaging/homing engine projectile or new projectile attachment system. Rain translates only vertical art downward to seeded scattered ground points inside the3×2 footprint; no rotation/diagonal asset. Existing source tips in rain stages5–7 reach the PNG bottom; retain those supplied pixels without inventing missing continuation. Output canvases/padding introduce no extra clipping.
 
 No separate residual source exists: hold the last Field pose and fade400ms. Never add an ending explosion/damage. Field/rain/impact stay independent of character animation. Optimizer regenerates `opt/*` and `sprite-atlas.ts`; other heroes and earlier Sylvara assets are unchanged.
 
@@ -55,7 +55,7 @@ Ten source poses with review holds `[80,80,90,100,110,240,100,400,100,100]`ms:
 - Ascent8×62.5ms=.50s. `SKILL_ACTIVATE`/scheduler `DAMAGE` markerF9/1.20s opens the field without damage. Recovery1.20s, animation end1.40s.
 - Previous fallback activation.34s/engine.35s, total.595s. New activation+0.86s nominal/+0.85s engine, cast-lock+0.805s. These timing changes affect combat under existing timeline debt; they are review defaults, not balance/final Sync approval.
 - Field remains5s, interval1s, Physical60% ATK per eligible occupant per pulse. Actual50ms engine times: pulses2.20/3.20/4.20/5.20/6.20s, field expiry6.20s. No damage at.70s or1.20s, no sixth/ending hit.
-- Rain leads each pulse400ms. Each wave has six visible cell contacts even if empty; damage still queries actual occupants once per wave (stacked occupants are each hit). Impact starts on authoritative pulse, not on animation frame/hit count.
+- Rain leads each pulse800ms. Each wave has30 staggered visible arrows even if cells are empty; damage still queries actual occupants once per wave (stacked occupants are each hit). Impact starts on authoritative pulse, not on animation frame/hit count.
 - Original fixed activation anchor/`rect3x2Center()` footprint; entrants can be hit and leavers escape. Field survives target death and character recovery, cancels on source death or encounter clear. Root2s/immunity/Unstoppable remain unchanged; no hidden root bonus, interrupt or Break.
 
 ## Generic lifecycle integration
@@ -77,3 +77,11 @@ App/spec typechecks, optimizer/sim typecheck, **683/683 Karma**, production buil
 Simulation team `yuezheng,kael,sylvara,mirelle,linxue`: F1–3 both100%;F4 AUTO90%/TACTICAL60%;F5 20%/10%;F6 100%/40%;F7–10 both0%. Sylvara33% aggregate AUTO damage. Smoke only; no tuning. Existing build warnings remain.
 
 Native Pixi/DOM/facing/reset checks and2×canvas recordings are in ignored `tmp/sylvara-ult-preview/`. Source hashes, earlier rows and optimized character alpha/visible RGB are verified. See `AI_HANDOFF.md` for final verification status. These are provisional review recordings, not final Timeline Sync Sheets. Stop for user visual review; final Sync/UI art remain separate follow-ups.
+
+## User visual revision — larger Charge and scattered high rain (2026-10-17)
+
+User requested a slightly larger charge aura, exactly one upward arrow, and rapid scattered falling arrows from higher up. Charge fit1.25→1.45cells (+16%); its source/baked strip and timing stay unchanged. The upward arrow source/trajectory/event remain one; a confirmed Pixi lifecycle bug could restart a completed one-shot while its host retained the ID for its50ms cleanup allowance. Retain its completed hidden instance until that ID leaves the host list. This also prevents Charge replay; legacy removed one-shots still finish normally. Regression test exercises completion, repeated snapshots and final cleanup without WebGL.
+
+Rain is now48×300×500 at60FPS/800ms,30 straight-down arrows per wave with seeded random x/ground-y/start times. Each arrow lives18 frames with the supplied eight stages, drops240px instead of160px (+50% height), and stays inside the existing horizontal footprint. Seed1729 makes rebakes/review repeatable; no combat RNG is consumed. The same scattered pattern repeats for the five authoritative waves. Rain leads800ms instead of400ms, at1.4/2.4/3.4/4.4/5.4s; impact/damage still resolve at2.2…6.2s. This changes visual lead only, not launch/activation/cast-lock/pulse cadence or damage. The six per-cell Impact bursts remain tied to actual pulses, independent of the decorative30 arrows.
+
+Optimizer selects a13×4 grid/lossy-colour WebP for the larger rain strip, replacing its old optimized PNG. App/spec typechecks, **684/684 Karma**, production build and output-edge checks pass. No combat sim rerun is needed for this presentation-only revision. Native Pixi/DOM mirrored/reset checks and a fresh single-cast2×canvas preview are in ignored `tmp/sylvara-ult-rain-review/`. Final Sync remains pending.

@@ -1,4 +1,4 @@
-import { PixiUnitLayer } from './pixi-units';
+import { PixiFx, PixiUnitLayer } from './pixi-units';
 
 /** the Pixi canvas must keep its CSS size on high-DPI screens (bug: 2× sprites shifted on Retina) */
 describe('PixiUnitLayer canvas', () => {
@@ -24,5 +24,25 @@ describe('PixiUnitLayer canvas', () => {
       else delete (window as { devicePixelRatio?: number }).devicePixelRatio;
       host.remove();
     }
+  });
+});
+
+
+describe('Pixi one-shot ownership', () => {
+  it('never restarts a completed ascending arrow while the host retains its ID for cleanup', () => {
+    const layer = Object.create(PixiUnitLayer.prototype) as {
+      fxs: Map<number, unknown>; drawFx(list: PixiFx[], cell: number, now: number): Set<number>;
+    };
+    const view: PixiFx = { id: 1, name: 'sw-ult-ascent', x: 0, y: 0, flip: false, angle: 0, under: false };
+    const sprite = { visible: true, destroy: jasmine.createSpy('destroy') };
+    layer.fxs = new Map([[1, { sprite, name: view.name, t0: 0, seq: 1, last: view, sparked: true }]]);
+    layer.drawFx([view], 56, 0.51);
+    expect(sprite.visible).toBeFalse();
+    expect(layer.fxs.size).toBe(1);
+    layer.drawFx([view], 56, 0.55);
+    expect(sprite.destroy).not.toHaveBeenCalled();
+    layer.drawFx([], 56, 0.6);
+    expect(layer.fxs.size).toBe(0);
+    expect(sprite.destroy).toHaveBeenCalledTimes(1);
   });
 });

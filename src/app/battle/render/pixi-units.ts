@@ -285,7 +285,8 @@ export class PixiUnitLayer {
       const d = FX[s.name];
       const pose = fxPoseAt(d, now - s.t0, !!s.last.loop);
       if (pose.done) {
-        if (s.last.managed && seen.has(id)) { s.sprite.visible = false; continue; }
+        // Retain completed instances while the host still lists them; otherwise they restart as new one-shots.
+        if (seen.has(id)) { s.sprite.visible = false; continue; }
         s.sprite.destroy();
         this.fxs.delete(id);
         continue;

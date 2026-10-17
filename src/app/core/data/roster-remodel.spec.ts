@@ -71,7 +71,7 @@ describe('Sylvara base art and provisional skill slots', () => {
     expect(sh.projectile!.attack).toBe('sw-basic-arrow');
     expect(sh.projectile!.skill).toBe('sw-s1-projectile');
     expect(sh.fx!.skill).toBe('sw-s1-impact');
-    expect(sh.fieldFx!.wave!.leadMs).toBe(400);
+    expect(sh.fieldFx!.wave!.leadMs).toBe(800);
     expect(Object.keys(FX).filter(k => k.startsWith('sw-')).sort()).toEqual(['sw-basic-arrow', 'sw-s1-impact', 'sw-s1-projectile',
       'sw-s2-impact', 'sw-s2-projectile', 'sw-s2-root-loop', 'sw-s2-root-start',
       'sw-ult-ascent', 'sw-ult-charge', 'sw-ult-field-loop', 'sw-ult-field-start', 'sw-ult-impact', 'sw-ult-rain', 'sw-ult-residual']);

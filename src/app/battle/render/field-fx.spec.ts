@@ -51,10 +51,10 @@ describe('generic field visual lifecycle', () => {
     const s = scene();
     const field: FieldLifecycleEvent = { ...start, area: 'RECT_3X2', duration: 5, interval: 1 };
     s.player.handle(field, 'hero-sylvara.png', 16, 0);
-    s.player.advance(0.59);
+    s.player.advance(0.19);
     expect(s.spawned.filter(n => n === 'sw-ult-rain').length).toBe(0);
     for (let index = 0; index < 5; index++) {
-      s.player.advance(index + 0.6);
+      s.player.advance(index + 0.2);
       const pulse: FieldLifecycleEvent = { ...field, type: 'FIELD_PULSED', index };
       s.player.handle(pulse, undefined, 999, index + 1);
       s.player.handle(pulse, undefined, 999, index + 1);

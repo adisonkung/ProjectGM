@@ -232,7 +232,7 @@ export const SHEETS: Record<string, SheetDef> = {
     projectile: { attack: 'sw-basic-arrow', skill: 'sw-s1-projectile', skill2: 'sw-s2-projectile' },
     fx: { skill: 'sw-s1-impact', skill2: 'sw-s2-impact', ult: ['sw-ult-charge', 'sw-ult-ascent'] },
     fieldFx: { start: 'sw-ult-field-start', loop: 'sw-ult-field-loop', residual: 'sw-ult-residual',
-      wave: { rain: 'sw-ult-rain', impact: 'sw-ult-impact', leadMs: 400, impactCells: true } },
+      wave: { rain: 'sw-ult-rain', impact: 'sw-ult-impact', leadMs: 800, impactCells: true } },
     statusFx: { root: { start: 'sw-s2-root-start', loop: 'sw-s2-root-loop' } },
   },
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
@@ -755,7 +755,7 @@ for (const m of Object.values(MONSTERS)) {
 export const FX: Record<string, FxDef> = {
   'sw-ult-charge': {
     file: 'fx-sylvara-ult-charge.png', frames: 8, w: 124, h: 172, frameMs: 77.5,
-    pivot: [0.5, 0.837209], at: 'self', event: 'CHARGE_START', dy: 27.25, fitCells: 1.25, layer: 'under', attach: true,
+    pivot: [0.5, 0.837209], at: 'self', event: 'CHARGE_START', dy: 27.25, fitCells: 1.45, layer: 'under', attach: true,
   },
   'sw-ult-ascent': {
     file: 'fx-sylvara-ult-ascent.png', frames: 8, w: 440, h: 390, frameMs: 62.5,
@@ -774,8 +774,8 @@ export const FX: Record<string, FxDef> = {
     pivot: [0.5, 0.828025], at: 'target', stripFrames: 6, from: 5, fitCells: 3, dy: 27.25, layer: 'under', fadeOutMs: 400, attach: false,
   },
   'sw-ult-rain': {
-    file: 'fx-sylvara-ult-rain.png', frames: 8, w: 300, h: 400, frameMs: 50,
-    pivot: [0.5, 0.775], at: 'target', fitCells: 3, dy: 27.25, attach: false,
+    file: 'fx-sylvara-ult-rain.png', frames: 48, w: 300, h: 500, frameMs: 1000 / 60,
+    pivot: [0.5, 0.8], at: 'target', fitCells: 3, dy: 27.25, attach: false,
   },
   'sw-ult-impact': {
     file: 'fx-sylvara-ult-impact.png', frames: 8, w: 100, h: 106, frameMs: 50,

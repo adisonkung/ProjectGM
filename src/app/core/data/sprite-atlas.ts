@@ -115,7 +115,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-sylvara-ult-charge.png': { url: 'opt/fx-sylvara-ult-charge.webp' },
   'fx-sylvara-ult-field.png': { url: 'opt/fx-sylvara-ult-field.webp' },
   'fx-sylvara-ult-impact.png': { url: 'opt/fx-sylvara-ult-impact.webp' },
-  'fx-sylvara-ult-rain.png': { url: 'opt/fx-sylvara-ult-rain.png' },
+  'fx-sylvara-ult-rain.png': { url: 'opt/fx-sylvara-ult-rain.webp', cols: 13, rows: 4 },
   'fx-tangxun-knife.png': { url: 'opt/fx-tangxun-knife.webp' },
   'fx-tangxun-s1-fang.png': { url: 'opt/fx-tangxun-s1-fang.webp' },
   'fx-tangxun-s1-impact1.png': { url: 'opt/fx-tangxun-s1-impact1.webp' },
