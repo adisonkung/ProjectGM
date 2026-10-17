@@ -111,9 +111,9 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 - `battle/engine/fields.ts`: `FieldSystem`, fixed cells, pulse interval/duration on the combat clock.
 - Hero `FIELD` effects create fields at activation; pulse effects query current occupants via `SkillSystem`.
 - Source death cancels; target death does not. Engine quiesce clears fields at wave advance/stage end.
-- Engine emits generic `FIELD_STARTED` / `FIELD_ENDED` events; production FX consumers remain pending approved art.
+- Engine emits generic `FIELD_STARTED` / `FIELD_ENDED` events. End metadata distinguishes `EXPIRED`, `SOURCE_DIED` and `CLEARED`, without changing pulses/damage/lifetime.
 - `moveSpeedMultiplier` slows combat movement; status conditions snapshot pre-hit recipient status.
-- Mirelle production/review states live in `core/data/mirelle-production.ts`. Base art and supplied S1/S2 cuts are registered with provisional review playback; the unproduced Ult explicitly reuses the original basic-attack clip.
+- Mirelle production/review states live in `core/data/mirelle-production.ts`. Base art and supplied S1/S2/Ult cuts are registered with provisional review playback. No final Timeline Sync has been authored.
 - `square2Center()` shares the existing oriented 2×2 footprint between `resolveArea` and ground presentation, including bottom-lane handling; hit semantics are unchanged.
 
 ### Monsters
@@ -152,6 +152,8 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 
 - `FxDef.groundArea: 'SQUARE_2'` places a target visual at the logical footprint centre via `groundFxCell`, independent of occupants or PNG bounds. The battle page converts grid cells to world/screen columns with formation origin/camera; captured cast aim covers a target that dies before activation.
 - `SheetDef.appliedStatusFx` maps a caster's successfully applied status to a one-shot visual. The battle page consumes existing `buff` events after conditions/immunities, not damage or status guesses. No combat mechanic or hero-specific branch is involved.
+- `SheetDef.fieldFx` selects start/loop/end/residual assets for a caster's fixed fields. `battle/render/field-fx.ts` (`FieldFxPlayback`) consumes field events, keeps the world centre fixed through camera motion, and advances owned visuals on the combat clock. Only natural expiry selects ending visuals; death/clear cancel them. It is shared by battle and the actual-engine sprite lab.
+- Runtime `FxView` / `PixiFx` flags `managed` and `loop` keep a field looping until removed by its owner. Pixi removes managed views immediately (legacy one-shots retain their old finish behavior); DOM uses infinite iterations for loop instances and cancels the animation on component destruction. Standard FX repeat/frame data stays unchanged. Field visuals have no wall-clock cleanup timer.
 - Sprite lab `?combat=1&formation=square&status=chill` can replay an isolated single INSTANT cast through the actual engine (`pages/sprite-lab/skill-review.ts`); only the first training target starts with the requested status. Automatic actions are frozen, training HP is high, source stats/kit are real and saves are untouched. This is distinct from the lab's older fixed-number visual playback.
 
 ### Rendering / board

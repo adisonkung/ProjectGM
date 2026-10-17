@@ -9,7 +9,7 @@ interface PendingClip {
 }
 
 export const MIRELLE_PRODUCTION = {
-  heroId: 'mirelle', phase: 'S2_REVIEW', timing: 'PROVISIONAL_SKILL_REVIEW',
+  heroId: 'mirelle', phase: 'ULT_REVIEW', timing: 'PROVISIONAL_SKILL_REVIEW',
   approvedReferences: [
     'ChatGPT Image Oct 17, 2026, 12_38_47 AM.png',
     'ChatGPT Image Oct 17, 2026, 12_39_00 AM.png',
@@ -19,6 +19,7 @@ export const MIRELLE_PRODUCTION = {
     reference: 'art/incoming/mirelle/reference.png', base: 'art/incoming/mirelle/base.png',
     s1: 'art/incoming/mirelle/s1',
     s2: 'art/incoming/mirelle/s2',
+    ult: 'art/incoming/mirelle/ult',
   },
   expectedSheet: 'hero-mirelle.png',
   expectedPortrait: 'portraits/mirelle.webp',
@@ -41,7 +42,7 @@ export const MIRELLE_PRODUCTION = {
       ],
     },
     ult: {
-      clip: 'ult', state: 'AWAITING_SKILL_REVIEW',
+      clip: 'ult', state: 'PROVISIONAL_REVIEW',
       events: ['CAST_START', 'CHARGE_START', 'SKILL_ACTIVATE', 'VFX_SPAWN', 'RECOVERY_START', 'ANIMATION_END'],
       assets: [
         { key: 'mf-ult-charge', file: 'fx-mirelle-ult-charge.png', role: 'CHARGE' },

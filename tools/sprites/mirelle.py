@@ -64,6 +64,10 @@ def main():
         groups['skill2'] = A.sheet_frames('s2/s2_character', [10, 10], False)
         names.append('skill2')
         scales['skill2'] = IDLE_BODY / A.body_h(groups['skill2'][0])
+    if (SRC / 'ult/ult_character.png').exists():
+        groups['ult'] = A.sheet_frames('ult/ult_character', [8, 6, 6], False)
+        names.append('ult')
+        scales['ult'] = IDLE_BODY / A.body_h(groups['ult'][0])
     cols = max(len(groups[name]) for name in names)
     probe = Image.new('RGBA', (260 * cols, 170 * 8))
     for row, name in enumerate(names):

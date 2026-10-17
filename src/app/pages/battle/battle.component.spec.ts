@@ -127,4 +127,21 @@ describe('BattleComponent', () => {
     component.ngOnDestroy();
     discardPeriodicTasks();
   }));
+
+  it('field events own the managed loop and only natural expiry produces the visual shatter', fakeAsync(() => {
+    component.start(); component.openMenu();
+    const host = component as unknown as { engine: BattleEngine; handleEvents(events: BattleEvent[]): void };
+    const caster = host.engine.units.find(u => u.side === 'ally')!;
+    caster.sprite = 'hero-mirelle.png';
+    const base = { fieldId: 1, src: caster.id, at: { r: 1, c: 9 }, area: 'ADJACENT_8' as const, duration: 6 };
+    host.handleEvents([{ ...base, type: 'FIELD_STARTED' }]);
+    expect(component.fx().some(f => f.name === 'mf-ult-field' && f.loop && f.managed)).toBeTrue();
+    host.handleEvents([{ ...base, type: 'FIELD_ENDED', reason: 'SOURCE_DIED' }]);
+    expect(component.fx()).toEqual([]);
+    host.handleEvents([{ ...base, fieldId: 2, type: 'FIELD_STARTED' }]);
+    host.handleEvents([{ ...base, fieldId: 2, type: 'FIELD_ENDED', reason: 'EXPIRED' }]);
+    expect(component.fx().map(f => f.name)).toEqual(['mf-ult-shatter', 'mf-ult-residual']);
+    expect(component.floats().some(f => f.kind === 'dmg')).toBeFalse();
+    component.ngOnDestroy(); discardPeriodicTasks();
+  }));
 });

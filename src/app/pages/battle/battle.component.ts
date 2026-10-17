@@ -25,6 +25,7 @@ import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
 import { animOf, appliedStatusFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
 import { groundFxCell } from '../../battle/render/fx-clip';
+import { FieldFxPlayback } from '../../battle/render/field-fx';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
 import { Router } from '@angular/router';
@@ -163,6 +164,15 @@ export class BattleComponent implements OnDestroy {
   private castFx = new Map<number, number>();
   /** Target cell at cast start, for ground visuals when an aimed unit dies before activation. */
   private castAim = new Map<number, { id: number; at: { r: number; c: number } }>();
+  private fieldVisuals = new FieldFxPlayback({
+    spawn: (name, world, loop) => {
+      const id = ++this.floatId;
+      this.fx.update(l => [...l, { id, name, r: world.r, c: world.c - this.engine.cameraX, angle: 0,
+        offset: fxOffset(name), under: FX[name].layer === 'under', managed: true, loop }]);
+      return id;
+    },
+    remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
+  });
   /** ฮีโร่ของเรา เรียงตามทีม (ซ้าย→ขวาในแถบด้านล่าง) */
   readonly party = computed(() => this.views().filter(v => isPlayerUnit(v)));
   /** STEP 9: ศัตรูที่แตะเลือกไว้ และเป้าโฟกัสของทีม */
@@ -389,6 +399,7 @@ export class BattleComponent implements OnDestroy {
     this.focusId.set(null);
     this.facing.clear();
     this.castAim.clear();
+    this.fieldVisuals.clear();
     this.blinkUntil.clear();
     this.ownFade.clear();
     this.snapshot();
@@ -636,6 +647,9 @@ export class BattleComponent implements OnDestroy {
 
   private snapshot(): void {
     const e = this.engine;
+    this.fieldVisuals.advance(e.time);
+    const fieldPositions = this.fieldVisuals.positions(e.cameraX);
+    if (fieldPositions.size) this.fx.update(l => l.map(f => fieldPositions.has(f.id) ? { ...f, ...fieldPositions.get(f.id)! } : f));
     this.specialCharge.set(e.specialCharge);
     this.specialReady.set(this.running() && e.canUseSpecial());
     const byId = new Map(e.units.map(u => [u.id, u]));
@@ -889,6 +903,10 @@ export class BattleComponent implements OnDestroy {
 
     for (const e of events) {
       switch (e.type) {
+        case 'FIELD_STARTED':
+        case 'FIELD_ENDED':
+          this.fieldVisuals.handle(e, unitOf(e.src)?.sprite, this.engine.formation.originPosition, this.engine.time);
+          break;
         case 'WAVE_STARTED':
           this.wave.set(e.wave);
           if (e.wave > 0) this.showBanner(`เวฟ ${e.wave + 1}/${e.totalWaves} ศัตรูบุก!`, 1200);

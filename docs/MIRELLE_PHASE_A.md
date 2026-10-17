@@ -56,7 +56,7 @@ The initial Phase A used token fallback. The subsequent user-uploaded `mirelle-s
 - Do not create an empty atlas or copy another hero's art as Mirelle.
 - Source slots are `art/incoming/mirelle/reference.png` and `base.png` (read-only originals when available).
 - Base cutting/normalization, portrait crop and runtime registration are complete. Run `sprites:optimize` after any PNG bake.
-- S1 and S2 character/VFX sources are now supplied for individual visual review (`MIRELLE_S1_REVIEW.md`, `MIRELLE_S2_REVIEW.md`). Ult sheets/VFX, icons and banner remain missing; their slots are requirements only.
+- S1, S2 and Ult character/VFX sources are now supplied for individual visual review (`MIRELLE_S1_REVIEW.md`, `MIRELLE_S2_REVIEW.md`, `MIRELLE_ULT_REVIEW.md`). The Ult field loop is a provisional cut of formed Main poses; a dedicated seamless loop is not supplied. Icons and banner remain missing. No final Sync is inferred.
 - Do not register or synthesize final skill clips, final field art, or final shatter timing during Phase A.
 
 ## Production order after Phase A

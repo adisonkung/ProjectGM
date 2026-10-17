@@ -51,3 +51,5 @@ Recordings in ignored `tmp/mirelle-s2-preview/`: native DPR2 PNG frames (1792×5
 Validation: app/spec typechecks passed; full Karma **640/640 passed**; production build passed (existing CSS/CommonJS warnings); Mirelle-team 10-run/floor sim completed without errors. Tests cover conditional status/damage, single-cast scheduling, immunity, cast-target death, logical area positioning, orientation/bottom edge, reset cleanup and original kit behavior. Original ZIP source hashes and unchanged base/S1 pixels verified. No final timeline/spreadsheet generated.
 
 Stop for user S2 visual review. S1/S2 final timing and Timeline Sync remain pending; Ultimate art remains pending.
+
+Subsequent steering: the user requested Ultimate next and supplied `mirelle-ult-source.zip`. Its provisional production is recorded in `MIRELLE_ULT_REVIEW.md`; no final S1/S2 timing approval or Sync Sheet is inferred. Base/S1/S2 pixels and skill data remain unchanged during that follow-up.

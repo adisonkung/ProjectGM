@@ -1,6 +1,11 @@
 import { FieldDefinition } from '../../core/models/combat';
 import { Cell } from '../../core/models/unit';
 
+export type FieldEndReason = 'EXPIRED' | 'SOURCE_DIED' | 'CLEARED';
+interface FieldEventBase { fieldId: number; src: number; at: Cell; area: FieldDefinition['area']; duration: number }
+export type FieldLifecycleEvent = FieldEventBase &
+  ({ type: 'FIELD_STARTED' } | { type: 'FIELD_ENDED'; reason: FieldEndReason });
+
 export interface RuntimeField {
   readonly id: number;
   readonly sourceId: number;
@@ -21,7 +26,7 @@ export class FieldSystem {
   private seq = 0;
   private fields: FieldState[] = [];
 
-  constructor(private readonly changed: (f: RuntimeField, state: 'start' | 'end') => void = () => undefined) {}
+  constructor(private readonly changed: (f: RuntimeField, state: 'start' | 'end', reason?: FieldEndReason) => void = () => undefined) {}
 
   get active(): readonly RuntimeField[] { return this.fields; }
 
@@ -39,7 +44,7 @@ export class FieldSystem {
   /** Call only during COMBAT. First pulse is delayed; large steps and final boundary are deterministic. */
   tick(dt: number): void {
     for (const f of [...this.fields]) {
-      if (!f.sourceAlive()) { this.remove(f); continue; }
+      if (!f.sourceAlive()) { this.remove(f, 'SOURCE_DIED'); continue; }
       f.elapsed = Math.min(f.definition.duration, f.elapsed + dt);
       f.remaining = Math.max(0, f.definition.duration - f.elapsed);
       while (f.nextPulse <= f.elapsed + 1e-9 && f.nextPulse <= f.definition.duration + 1e-9) {
@@ -47,15 +52,16 @@ export class FieldSystem {
         f.pulse();
         f.nextPulse += f.definition.interval;
       }
-      if (f.remaining <= 1e-9 || !f.sourceAlive()) this.remove(f);
+      if (!f.sourceAlive()) this.remove(f, 'SOURCE_DIED');
+      else if (f.remaining <= 1e-9) this.remove(f, 'EXPIRED');
     }
   }
 
-  clear(): void { for (const f of [...this.fields]) this.remove(f); }
+  clear(): void { for (const f of [...this.fields]) this.remove(f, 'CLEARED'); }
 
-  private remove(f: FieldState): void {
+  private remove(f: FieldState, reason: FieldEndReason): void {
     if (!this.fields.includes(f)) return;
     this.fields = this.fields.filter(x => x !== f);
-    this.changed(f, 'end');
+    this.changed(f, 'end', reason);
   }
 }

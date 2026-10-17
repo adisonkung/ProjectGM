@@ -93,6 +93,8 @@ export interface SheetDef {
   healFx?: string;
   /** One-shot visual when a status applied by this caster succeeds (buff event, after immunity/conditions). */
   appliedStatusFx?: Record<string, string>;
+  /** Presentation of this caster's fixed fields. Engine lifecycle events, not animation end, own their lifetime. */
+  fieldFx?: { start?: string; loop: string; end?: string; residual?: string };
   /** กระสุน (คีย์ของ FX) ของการยิงแต่ละแบบ */
   projectile?: Partial<Record<'attack' | SkillKind, string>>;
   /** ความสูงช่อง (ค่าเริ่มต้น 100) — แผ่นที่มีท่ายกอาวุธสูงใช้ 120 */
@@ -202,7 +204,7 @@ export const SHEETS: Record<string, SheetDef> = {
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
-  // Mirelle: supplied base + S1/S2 visual review. Timing is PROVISIONAL, no final Timeline Sync.
+  // Mirelle: supplied base + individual skill visual reviews. Timing is PROVISIONAL, no final Timeline Sync.
   'hero-mirelle.png': {
     cols: 20, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
@@ -219,12 +221,14 @@ export const SHEETS: Record<string, SheetDef> = {
       // Supplied S2 has 20 poses, unlike the workbook's hypothetical 10. Uniform review playback only.
       skill2: { row: 6, frames: 20, ms: 1000 / 12,
         events: { CAST_START: 0, SKILL_ACTIVATE: 12, VFX_SPAWN: 12, DAMAGE: 12, IMPACT: 12, RECOVERY_START: 16 } },
-      // Preserve the Phase A base fallback for the unproduced ultimate.
-      ult: MIRELLE_BASIC_ATTACK,
+      // FIELD activation scheduler marker only, no cast burst. Actual light pulses belong to FieldSystem.
+      ult: { row: 7, frames: 20, ms: 1000 / 12,
+        events: { CAST_START: 0, CHARGE_START: 2, SKILL_ACTIVATE: 14, VFX_SPAWN: 14, DAMAGE: 14, RECOVERY_START: 17 } },
     },
     projectile: { attack: 'mf-basic-crystal', skill: 'mf-s1-projectile' },
-    fx: { skill: 'mf-s1-impact', skill2: 'mf-s2-main' },
+    fx: { skill: 'mf-s1-impact', skill2: 'mf-s2-main', ult: 'mf-ult-charge' },
     appliedStatusFx: { root: 'mf-s2-bind' },
+    fieldFx: { start: 'mf-ult-main', loop: 'mf-ult-field', end: 'mf-ult-shatter', residual: 'mf-ult-residual' },
   },
   // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet + S1 (row 5) + S2 (row 6)
   // + ult (row 7). Cell 260 × 170 like Aurel v2
@@ -710,6 +714,26 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'mf-ult-charge': {
+    file: 'fx-mirelle-ult-charge.png', frames: 10, w: 76, h: 170, frameMs: 100,
+    at: 'self', event: 'CHARGE_START', pivot: [0.5, 0.923529], dy: 27.25, scale: 0.65, layer: 'under',
+  },
+  'mf-ult-main': {
+    file: 'fx-mirelle-ult-main.png', frames: 8, w: 204, h: 283, frameMs: 100,
+    at: 'target', fitCells: 3, pivot: [0.5, 0.883392], dy: 27.25, layer: 'under', attach: false,
+  },
+  'mf-ult-field': {
+    file: 'fx-mirelle-ult-field.png', frames: 2, w: 204, h: 251, frameMs: 200, delayMs: 800,
+    at: 'target', fitCells: 3, pivot: [0.5, 0.868526], dy: 27.25, layer: 'under', attach: false,
+  },
+  'mf-ult-shatter': {
+    file: 'fx-mirelle-ult-shatter.png', frames: 8, w: 124, h: 93, frameMs: 80,
+    at: 'target', fitCells: 1.4, pivot: [0.5, 0.795699], dy: 27.25, attach: false,
+  },
+  'mf-ult-residual': {
+    file: 'fx-mirelle-ult-residual.png', frames: 4, w: 154, h: 121, frameMs: 100, fadeOutMs: 250,
+    at: 'target', fitCells: 3, pivot: [0.5, 0.785124], dy: 27.25, layer: 'under', attach: false,
+  },
   'mf-s2-main': {
     file: 'fx-mirelle-s2-main.png', frames: 8, w: 148, h: 193, frameMs: 100,
     at: 'target', groundArea: 'SQUARE_2', on: 'vfx', fitCells: 2,

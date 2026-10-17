@@ -37,7 +37,7 @@ describe('Sprite lab single-target projectile review', () => {
   it('cancels pending arrival when switching actions and excludes base fallbacks from produced-skill buttons', fakeAsync(() => {
     expect(lab.actions().map(a => a.id)).toContain('skill');
     expect(lab.actions().map(a => a.id)).toContain('skill2');
-    expect(lab.actions().map(a => a.id)).not.toContain('ult');
+    expect(lab.actions().map(a => a.id)).toContain('ult');
     lab.speed.set(0.5);
     lab.faceLeft.set(true);
     lab.play('skill');
@@ -79,5 +79,21 @@ describe('Sprite lab engine-backed area/status review', () => {
     tick(6000);
     expect(lab.fx()).toEqual([]);
     expect(lab.floats()).toEqual([]);
+  }));
+
+  it('Ultimate field outlives the cast, then stops its loop and shows only a visual shatter at expiry', fakeAsync(() => {
+    const lab = fixture.componentInstance;
+    lab.play('ult');
+    tick(2000);
+    expect(lab.fx().some(f => f.name === 'mf-ult-field' && f.loop && f.managed)).toBeTrue();
+    expect(lab.floats().some(f => f.kind === 'dmg')).toBeFalse(); // first pulse is later than cast activation
+    tick(2500);
+    expect(lab.fx().some(f => f.name === 'mf-ult-field')).toBeTrue();
+    tick(3000);
+    expect(lab.fx().some(f => f.name === 'mf-ult-field')).toBeFalse();
+    expect(lab.fx().some(f => f.name === 'mf-ult-shatter')).toBeTrue();
+    tick(2000);
+    expect(lab.fx()).toEqual([]);
+    lab.reset();
   }));
 });

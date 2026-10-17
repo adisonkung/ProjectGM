@@ -127,6 +127,9 @@ export interface FxView {
   under?: boolean;
   /** unit id this FX rides on (an attached aura): the frame loop moves it with that unit's drawn position */
   follow?: number;
+  /** Runtime-owned field visuals stop immediately when removed; loops run until their owner ends them. */
+  managed?: boolean;
+  loop?: boolean;
 }
 
 /** กระสุนที่กำลังบิน: ตำแหน่งเป็นจำนวนช่องบนจอ (รวมแถวฉากแล้ว) */
@@ -390,6 +393,8 @@ export class BoardComponent {
         flip: !!f.flip,
         offset: f.offset,
         under: !!f.under,
+        managed: !!f.managed,
+        loop: !!f.loop,
       };
     });
     const bolts: PixiBolt[] = this.projectiles().map(p => ({ id: p.id, name: p.name, from: p.from, to: p.to, flight: p.flight }));

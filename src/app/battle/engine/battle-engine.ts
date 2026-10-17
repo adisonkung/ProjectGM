@@ -15,7 +15,7 @@ import { resolveArea } from './area';
 import { ActiveBuff, applyBuff, dodgeChance, effectiveMoveSpeed, hasFlag, hasStatus, modifier, tauntSource, tickStatuses } from './buffs';
 import { breakRequiredOf, canStopCast, priorityOf, rankOf, SkillHost, SkillSystem, StatusApplyOptions } from './skill-system';
 import type { AreaPattern, DamageKind, InterruptPriority, SkillSlot, SkillUseMode } from '../../core/models/combat';
-import { FieldSystem } from './fields';
+import { FieldLifecycleEvent, FieldSystem } from './fields';
 import { BattleMetrics } from './metrics';
 import { isRanged, Positioning, SAFE_DANGER } from './positioning';
 import { FormationRuntime } from './stage/formation';
@@ -38,7 +38,7 @@ const MIST_HUNTER_WINDOW = 3;
 export type BattleResult = 'win' | 'lose' | 'timeout';
 
 export type BattleEvent =
-  | { type: 'FIELD_STARTED' | 'FIELD_ENDED'; fieldId: number; src: number; at: Cell; area: AreaPattern; duration: number }
+  | FieldLifecycleEvent
   | { type: 'attack'; src: number; dst: number }
   | { type: 'cast'; src: number; skill: string; kind: SkillKind; dst?: number }
   | { type: 'move'; src: number }
@@ -321,10 +321,11 @@ export class BattleEngine {
   readonly grid = new Grid(STACK_CAP);
   /** colliding projectiles currently flying */
   readonly projectiles: RuntimeProjectile[] = [];
-  readonly fields = new FieldSystem((f, state) => this.events.push({
-    type: state === 'start' ? 'FIELD_STARTED' : 'FIELD_ENDED', fieldId: f.id, src: f.sourceId, at: { ...f.center },
-    area: f.definition.area, duration: f.definition.duration,
-  }));
+  readonly fields = new FieldSystem((f, state, reason) => {
+    const base = { fieldId: f.id, src: f.sourceId, at: { ...f.center }, area: f.definition.area, duration: f.definition.duration };
+    this.events.push(state === 'start' ? { ...base, type: 'FIELD_STARTED' }
+      : { ...base, type: 'FIELD_ENDED', reason: reason ?? 'CLEARED' });
+  });
   /** runs every data-driven monster (one shared state machine) */
   readonly monsterAI: MonsterController;
   /** hero skills: targeting, AI tiers, effects (data in core/data/hero-skills.ts) */

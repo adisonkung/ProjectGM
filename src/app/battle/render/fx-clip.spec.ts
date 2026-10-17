@@ -37,6 +37,29 @@ describe('fxPoseAt / fxPlacement (one-clock skill FX)', () => {
     for (const [name, d] of Object.entries(FX)) expect(fxLength(d) * 1000).withContext(name).toBeCloseTo(fxDuration(name), 6);
   });
 
+  it('a runtime field loop keeps cycling after its nominal strip, with the same delay and frames', () => {
+    const d = { ...base, delayMs: 100 };
+    expect(fxPoseAt(d, 0.05, true).visible).toBeFalse();
+    expect(fxPoseAt(d, 1.651, true).done).toBeFalse();
+    expect(fxPoseAt(d, 1.651, true).frame).toBe(1);
+    expect(fxPoseAt(d, 1.651).done).toBeTrue();
+  });
+
+  it('DOM field loop repeats indefinitely and cancels its animation when the field view is destroyed', async () => {
+    const { TestBed } = await import('@angular/core/testing');
+    const { FxSpriteComponent } = await import('../fx-sprite/fx-sprite.component');
+    const fixture = TestBed.createComponent(FxSpriteComponent);
+    fixture.componentRef.setInput('name', 'mf-ult-field');
+    fixture.componentRef.setInput('loop', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const el = (fixture.nativeElement as HTMLElement).querySelector('.fx')!;
+    const animation = el.getAnimations()[0];
+    expect(animation.effect!.getTiming().iterations).toBe(Infinity);
+    fixture.destroy();
+    expect(animation.playState).toBe('idle');
+  });
+
   it('places the pivot on (50 % + dx·flip, 50 % + dy) of the cell, sized like the DOM box', () => {
     const d = { ...base, dx: 50, dy: -20, scale: 2, pivot: [0.1, 0.9] as [number, number] };
     const p = fxPlacement(d, 40, 100, 200, false, 0);

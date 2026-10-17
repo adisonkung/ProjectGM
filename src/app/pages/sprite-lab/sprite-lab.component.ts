@@ -14,6 +14,7 @@ import { kitOf } from '../../core/data/hero-skills';
 import { appliedStatusFx } from '../../core/data/sprites';
 import { STATUS_ICONS } from '../../core/data/visuals';
 import { groundFxCell } from '../../battle/render/fx-clip';
+import { FieldFxPlayback } from '../../battle/render/field-fx';
 import { skillReview } from './skill-review';
 
 type Action = 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
@@ -135,6 +136,15 @@ export class SpriteLabComponent implements OnDestroy {
   readonly blinked = signal<{ dc: number; ownFade: boolean } | null>(null);
   readonly anims = signal<Partial<Record<number, AnimState>>>({});
   readonly fx = signal<FxView[]>([]);
+  private fieldVisuals = new FieldFxPlayback({
+    spawn: (name, world, loop) => {
+      const id = ++this.id;
+      this.fx.update(l => [...l, { id, name, r: world.r, c: world.c, angle: 0,
+        offset: fxOffset(name), under: FX[name].layer === 'under', managed: true, loop }]);
+      return id;
+    },
+    remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
+  });
   readonly projectiles = signal<ProjectileView[]>([]);
   readonly floats = signal<FloatText[]>([]);
   readonly log = signal<{ t: string; text: string }[]>([]);
@@ -234,8 +244,8 @@ export class SpriteLabComponent implements OnDestroy {
     // Lab-only single-target projectile preview. Contact follows travel, just as in the combat engine.
     const singleProjectile = kitSkill?.delivery === 'PROJECTILE' && kitSkill.effects.some(e => e.type === 'DAMAGE' && e.area === 'SINGLE');
     if (this.engineReview && kitSkill && (kitSkill.delivery ?? 'INSTANT') === 'INSTANT') {
-      this.playEngineReview(a as SkillKind);
-      if (this.loop()) this.at(len + 0.8, () => this.play(a));
+      const duration = this.playEngineReview(a as SkillKind);
+      if (this.loop()) this.at(duration + 0.4, () => this.play(a));
       return;
     }
     if (clip?.move != null && kitSkill?.movement?.type === 'BLINK_BEHIND') {
@@ -336,7 +346,7 @@ export class SpriteLabComponent implements OnDestroy {
   }
 
   /** Optional isolated actual-engine review for instant skills; no duplicate imitation of Chill/Root rules. */
-  private playEngineReview(kind: SkillKind): void {
+  private playEngineReview(kind: SkillKind): number {
     const units = this.units();
     const me = units[0];
     const targets = units.filter(u => this.dummyIds.includes(u.id));
@@ -345,8 +355,12 @@ export class SpriteLabComponent implements OnDestroy {
     const id = (n: number) => review.ids.get(n)!;
     for (const sample of review.samples) this.at(sample.t, () => {
       this.reviewStatuses.set(sample.statuses);
+      this.fieldVisuals.advance(sample.t);
       for (const e of sample.events) {
-        if (e.type === 'animEvent') {
+        if (e.type === 'FIELD_STARTED' || e.type === 'FIELD_ENDED') {
+          this.note(sample.t, `${e.type}${e.type === 'FIELD_ENDED' ? ' · ' + e.reason : ''}`);
+          this.fieldVisuals.handle(e, this.hero().sprite, 0, sample.t);
+        } else if (e.type === 'animEvent') {
           this.note(sample.t, e.event);
           if (e.event !== 'DAMAGE' && e.event !== 'IMPACT') this.spawn(kind, { on: 'event', event: e.event, index: e.index });
         } else if (e.type === 'impact') {
@@ -371,6 +385,7 @@ export class SpriteLabComponent implements OnDestroy {
         }
       }
     });
+    return review.samples.at(-1)?.t ?? 0;
   }
 
   /** game seconds → real ms at the lab speed */
@@ -385,6 +400,7 @@ export class SpriteLabComponent implements OnDestroy {
   private clear(): void {
     this.timers.forEach(clearTimeout);
     this.timers = [];
+    this.fieldVisuals.clear();
     this.projectiles.set([]);
     this.fx.set([]);
     this.floats.set([]);

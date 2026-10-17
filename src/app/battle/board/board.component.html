@@ -62,7 +62,7 @@
 
   @for (f of fx(); track f.id) {
     <div class="fx-wrap" [style.transform]="pos(f.r, f.c)" [style.z-index]="f.under ? 5 : null" [attr.data-follow]="f.follow ?? null" [attr.data-fx]="f.id">
-      <app-fx-sprite [name]="f.name" [angle]="f.angle" [flip]="!!f.flip" [speed]="speed()" [offset]="f.offset" />
+      <app-fx-sprite [name]="f.name" [angle]="f.angle" [flip]="!!f.flip" [speed]="speed()" [offset]="f.offset" [loop]="!!f.loop" />
     </div>
   }
 

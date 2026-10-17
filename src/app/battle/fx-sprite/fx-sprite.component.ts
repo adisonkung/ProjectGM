@@ -1,4 +1,4 @@
-import { Component, ElementRef, afterNextRender, computed, inject, input, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, afterNextRender, computed, inject, input, viewChild } from '@angular/core';
 import { gridPosition, spriteUrl, stripGrid } from '../../core/data/sprite-files';
 import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 
@@ -22,6 +22,8 @@ export class FxSpriteComponent {
   /** ทิศทาง (องศา) สำหรับเอฟเฟกต์ที่พุ่ง; 0 = หันขวา */
   readonly angle = input(0);
   readonly speed = input(1);
+  /** A combat field owns this instance's lifetime; repeat without a wall-clock end. */
+  readonly loop = input(false);
   /** ผู้ใช้หันซ้าย: กลับภาพและค่า dx (ใช้กับเอฟเฟกต์ที่ตัวเอง) */
   readonly flip = input(false);
   /** resolved [dx, dy] (owner anchor + FX offset, `fxOffset()`); default = the FX's own dx / dy */
@@ -40,6 +42,7 @@ export class FxSpriteComponent {
   readonly pxToCell = PX_TO_CELL;
   readonly fxScale = FX_SCALE;
   private readonly host = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   private delay(): number {
     return (this.def().delayMs ?? 0) / this.speed();
   }
@@ -55,14 +58,15 @@ export class FxSpriteComponent {
       // repeat > 1 = a looping field: the strip plays `repeat` times back to back (then the optional fade-out)
       const k: Keyframe[] = Array.from({ length: d.frames }, (_, i) => ({ offset: i / d.frames, easing: 'steps(1, end)', backgroundPosition: pos(from + i), opacity: 1 }));
       k.push({ offset: 1, backgroundPosition: pos(from + d.frames - 1), opacity: 1 });
-      this.el().nativeElement.animate(k, {
+      const animation = this.el().nativeElement.animate(k, {
         duration: (d.frames * d.frameMs) / this.speed(),
-        iterations: Math.max(1, d.repeat ?? 1),
+        iterations: this.loop() ? Infinity : Math.max(1, d.repeat ?? 1),
         delay: this.delay(),
         fill: 'none',
       });
+      if (this.loop()) this.destroyRef.onDestroy(() => animation.cancel());
       // release-and-vanish FX: the last (peak) frame stays and fades out over fadeOutMs instead of collapsing
-      if (d.fadeOutMs) {
+      if (d.fadeOutMs && !this.loop()) {
         const play = (d.frames * d.frameMs * (d.repeat ?? 1)) / this.speed();
         const total = fxDuration(this.name(), this.speed());
         this.el().nativeElement.animate(

@@ -51,7 +51,7 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     for (const slot of ['skill', 'skill2', 'ult'] as const) expect(kitInterrupts(kit(), slot)).toBeFalse();
   });
 
-  it('registers S1/S2 review assets while keeping the unproduced ultimate on its previous base fallback', () => {
+  it('registers all supplied skill review assets without final choreography or a burst ultimate', () => {
     expect(HERO_ART['mirelle']).toEqual({ portrait: 'portraits/mirelle.webp' });
     const sheet = SHEETS['hero-mirelle.png'];
     expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH]).toEqual([20, 8, 260, 170]);
@@ -59,8 +59,9 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     expect([sheet.anims.skill!.row, sheet.anims.skill!.frames]).toEqual([5, 10]);
     expect(sheet.anims.skill!.steps).toBeUndefined(); // uniform review playback, no final choreography
     expect([sheet.anims.skill2!.row, sheet.anims.skill2!.frames]).toEqual([6, 20]);
-    expect(sheet.anims.ult).toBe(sheet.anims.attack);
-    expect(animTiming('hero-mirelle.png', 'ult')).toEqual(animTiming('hero-mirelle.png', 'attack'));
+    expect([sheet.anims.ult!.row, sheet.anims.ult!.frames]).toEqual([7, 20]);
+    expect(sheet.anims.ult!.steps).toBeUndefined();
+    expect(sheet.fieldFx?.loop).toBe('mf-ult-field');
     expect(sheet.projectile!.skill).toBe('mf-s1-projectile');
     expect(sheet.fx!.skill).toBe('mf-s1-impact');
     expect(MIRELLE_PRODUCTION.sourcesAvailableInWorkspace).toBeTrue();
@@ -71,10 +72,10 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     expect(s2.state).toBe('PROVISIONAL_REVIEW');
     for (const asset of s2.assets) expect(FX[asset.key].file).toBe(asset.file);
     for (const clip of [MIRELLE_PRODUCTION.clips.ult]) {
-      expect(clip.state).toBe('AWAITING_SKILL_REVIEW');
+      expect(clip.state).toBe('PROVISIONAL_REVIEW');
       expect(clip.events).toContain('CAST_START');
       expect(clip.events).toContain('ANIMATION_END');
-      for (const asset of clip.assets) expect(FX[asset.key]).toBeUndefined();
+      for (const asset of clip.assets) expect(FX[asset.key].file).toBe(asset.file);
     }
   });
 
@@ -265,6 +266,18 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     b.kill(b.caster);
     b.run(0.05);
     expect(b.e.fields.active.length).toBe(0);
+    expect(b.foes.every(f => f.hp === 1e6)).toBeTrue();
+  });
+
+  it('a dead caster never activates a field from the provisional Ultimate wind-up', () => {
+    const b = battle(2);
+    b.e.skills.use(b.caster, 'ult', kit().ult, b.foes[0]);
+    b.run(0.4);
+    b.kill(b.caster);
+    b.e.drainEvents();
+    b.run(2);
+    expect(b.e.fields.active.length).toBe(0);
+    expect(b.e.drainEvents().some(e => e.type === 'FIELD_STARTED')).toBeFalse();
     expect(b.foes.every(f => f.hp === 1e6)).toBeTrue();
   });
 

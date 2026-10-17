@@ -54,10 +54,12 @@ export function skillReview(heroId: string, slot: SkillKind, casterCell: Cell, t
     statuses: Object.fromEntries(engine.units.filter(u => ids.has(u.id)).map(u =>
       [ids.get(u.id)!, u.buffs.map(b => ({ id: b.def.id, left: b.remaining }))])) });
   snapshot();
-  engine.skills.use(caster, slot, kitOf(heroId, hero.cls)[slot], foes[0]);
+  const skill = kitOf(heroId, hero.cls)[slot];
+  engine.skills.use(caster, slot, skill, foes[0]);
   snapshot();
   // Combat's fixed 50 ms step, including status expiry; automatic attacks/movement stay frozen for the demo.
-  const seconds = Math.max(animTiming(hero.sprite, slot).total + 1, animTiming(hero.sprite, slot).hit + 4.2);
+  const fieldDuration = Math.max(0, ...skill.effects.filter(e => e.type === 'FIELD').map(e => e.field.duration));
+  const seconds = Math.max(animTiming(hero.sprite, slot).total + 1, animTiming(hero.sprite, slot).hit + Math.max(4.2, fieldDuration + 1.2));
   for (let i = 0; i < Math.ceil(seconds / 0.05); i++) { freeze(); engine.step(0.05); snapshot(); }
   return { ids, samples };
 }

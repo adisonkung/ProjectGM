@@ -41,6 +41,8 @@ export interface PixiFx {
   flip: boolean;
   offset?: [number, number];
   under: boolean;
+  managed?: boolean;
+  loop?: boolean;
 }
 
 /** one projectile (ProjectileView): from / to in board cells (x = column, y = row incl. scenery), flight ms at x1 */
@@ -238,7 +240,8 @@ export class PixiUnitLayer {
 
   /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
   private preloadFx(def: SheetDef): void {
-    const names = [...Object.values(def.fx ?? {}).flat(), ...Object.values(def.projectile ?? {})].filter((n): n is string => !!n);
+    const names = [...Object.values(def.fx ?? {}).flat(), ...Object.values(def.projectile ?? {}),
+      ...Object.values(def.appliedStatusFx ?? {}), ...Object.values(def.fieldFx ?? {})].filter((n): n is string => !!n);
     for (const n of names) {
       const d = FX[n];
       if (!d) continue;
@@ -256,7 +259,7 @@ export class PixiUnitLayer {
 
   /**
    * The FX for this frame (`now` = game clock). Returns the ids drawn (their DOM copy is hidden by the board).
-   * An id that left the list keeps playing at its last place until its clip ends.
+   * Legacy one-shots finish after leaving the list; runtime-managed field views stop as soon as their owner removes them.
    */
   private drawFx(list: PixiFx[], cell: number, now: number): Set<number> {
     const drawn = new Set<number>();
@@ -275,9 +278,13 @@ export class PixiUnitLayer {
       s.last = f;
     }
     for (const [id, s] of this.fxs) {
+      if (s.last.managed && !seen.has(id)) {
+        s.sprite.destroy(); this.fxs.delete(id); continue;
+      }
       const d = FX[s.name];
-      const pose = fxPoseAt(d, now - s.t0);
+      const pose = fxPoseAt(d, now - s.t0, !!s.last.loop);
       if (pose.done) {
+        if (s.last.managed && seen.has(id)) { s.sprite.visible = false; continue; }
         s.sprite.destroy();
         this.fxs.delete(id);
         continue;

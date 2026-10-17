@@ -41,4 +41,20 @@ describe('Glassbind isolated skill review and generic presentation', () => {
     expect(groundFxCell({ ...d, w: 999, h: 999 }, { r: 1, c: 5 }, { r: 1, c: 9 })).toEqual({ r: 1.5, c: 9.5 });
     expect(groundFxCell(FX['mf-s2-bind'], { r: 1, c: 5 }, { r: 2, c: 9 })).toEqual({ r: 2, c: 9 });
   });
+
+  it('Winterglass Field has exactly six light pulses on occupants, with no launch burst or damaging shatter', () => {
+    const review = skillReview('mirelle', 'ult', { r: 1, c: 5 }, targets);
+    const start = review.samples.find(s => s.events.some(e => e.type === 'FIELD_STARTED'))!;
+    expect(start).toBeDefined();
+    expect(review.samples.filter(s => s.t < start.t + 0.9).flatMap(s => s.events).some(e => e.type === 'damage')).toBeFalse();
+    const hits = review.samples.filter(s => s.events.some(e => e.type === 'damage'));
+    expect(hits.length).toBe(6);
+    expect(hits.flatMap(s => s.events).filter(e => e.type === 'damage').length).toBe(24);
+    const events = review.samples.flatMap(s => s.events);
+    const ends = events.filter(e => e.type === 'FIELD_ENDED');
+    expect(ends.length).toBe(1);
+    if (ends[0].type === 'FIELD_ENDED') expect(ends[0].reason).toBe('EXPIRED');
+    expect(events.filter(e => e.type === 'buff' && e.buff === 'root')).toEqual([]);
+    expect(events.filter(e => e.type === 'buff' && e.buff === 'frost_fatigue').length).toBe(24);
+  });
 });

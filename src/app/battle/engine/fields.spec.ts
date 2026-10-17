@@ -46,4 +46,17 @@ describe('generic persistent fields', () => {
       expect(() => fields.add(1, { r: 0, c: 0 }, { ...definition, interval }, () => undefined, () => true)).toThrow();
     }
   });
+
+  it('reports expiry, source death and clear distinctly without changing pulse behavior', () => {
+    const reasons: string[] = [];
+    let alive = true;
+    const fields = new FieldSystem((_f, state, reason) => { if (state === 'end') reasons.push(reason!); });
+    fields.add(1, { r: 1, c: 7 }, definition, () => undefined, () => true);
+    fields.tick(3);
+    fields.add(2, { r: 1, c: 7 }, definition, () => undefined, () => alive);
+    alive = false; fields.tick(0.05);
+    fields.add(3, { r: 1, c: 7 }, definition, () => undefined, () => true);
+    fields.clear(); fields.clear();
+    expect(reasons).toEqual(['EXPIRED', 'SOURCE_DIED', 'CLEARED']);
+  });
 });

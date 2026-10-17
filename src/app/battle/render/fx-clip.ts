@@ -45,11 +45,11 @@ export function fxLength(d: FxDef): number {
   return ((d.delayMs ?? 0) + d.frames * d.frameMs * (d.repeat ?? 1) + (d.fadeOutMs ?? 0)) / 1000;
 }
 
-export function fxPoseAt(d: FxDef, t: number): FxPose {
+export function fxPoseAt(d: FxDef, t: number, loop = false): FxPose {
   const from = d.from ?? 0;
   const delay = (d.delayMs ?? 0) / 1000;
   const per = d.frameMs / 1000;
-  const play = d.frames * per * (d.repeat ?? 1);
+  const play = loop ? Infinity : d.frames * per * (d.repeat ?? 1);
   const fade = (d.fadeOutMs ?? 0) / 1000;
   if (t < delay) return { frame: from, alpha: 0, visible: false, done: false };
   const u = t - delay;
