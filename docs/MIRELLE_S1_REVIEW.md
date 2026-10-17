@@ -16,8 +16,8 @@ User authorized S1 production and an in-game preview on 2026-10-17. This is the 
 The workbook is a supplied proposal, not a final timing approval or an instruction to implement physics/miss/network systems. Its source filenames and missing-impact notes are stale relative to this ZIP. Repository combat and the user's review workflow remain authoritative.
 
 - Character: `tools/sprites/mirelle.py`, 2×5 source poses → atlas row 5 with 10 poses. Match the approved base body height (78 px), root (130,155), shared torso stabilisation. Zero clipped pixels. The original five base rows are pixel-identical after padding to 10 columns. Atlas is now 2600×1360 (10×8, cells260×170); rows 6–7 stay empty.
-- Projectile: `tools/sprites/mirelle_s1.py` respects existing alpha (hidden green RGB is not an opaque backdrop), removes faint isolated dust, assigns connected components to source centres instead of equal-grid slicing. Source stages 1–2 are circular buildup; review flight uses stages 3–8. Needle tip stays at the flight point. Six flight frames plus a transparent terminal frame prevent a duplicate contact burst. Output `fx-mirelle-s1-projectile.png`, 7×68×30.
-- Impact: magenta-matte removal/unmix, 8 source stages, centred separate strip `fx-mirelle-s1-impact.png`, 8×36×36. Small scale, no large explosion or additional generated VFX.
+- Projectile: `tools/sprites/mirelle_s1.py` respects existing alpha (hidden green RGB is not an opaque backdrop), removes faint isolated dust, assigns connected components to source centres instead of equal-grid slicing. Source stages 1–2 are circular buildup; review flight uses stages 3–8. Needle tip stays at the flight point. Six flight frames plus a transparent terminal frame prevent a duplicate contact burst. Output `fx-mirelle-s1-projectile.png`, 7×116×50 (56 px peak visible width).
+- Impact: magenta-matte removal/unmix, 8 source stages, centred separate strip `fx-mirelle-s1-impact.png`, 8×68×68 (64 px peak visible width). No large explosion or additional generated VFX.
 - No redesigned character, recoloured costume, invented approved art, skill icon, or new charge asset.
 
 Bake from repository root (shared dependencies numpy/scipy/scikit-image/Pillow):
@@ -46,6 +46,12 @@ This cloud session uses `PYTHONPATH=/tmp/mirelle-python-deps` for the existing s
 The existing sprite lab now supports data-driven single-target PROJECTILE previews with the same board/projectile/FX renderers. It shows only the primary target's reaction at arrival, cancels scheduled visuals when switching/resetting, and can mirror/slow playback. `distance=1..5` is lab-only; fallback clips sharing the basic-attack object are omitted from produced-skill buttons. No save or combat changes.
 
 The lab is a visual demo, not a combat simulation; its floating damage number is an existing fixed sample. Gameplay correctness is checked in engine specs. Actual recordings in ignored `tmp/mirelle-s1-preview/` include normal-speed MP4/GIF, half-speed close-up GIF, and Pixi/DOM/right/left screenshots. Clips were captured from the running game, with no generated replacement scene.
+
+### Readability revision after user review
+
+The user reported blur and an undersized skill. The original close-up GIF came from CSS-resolution screenshots (896×281) despite a DPR2 browser; cropping and enlarging that raster plus GIF palette reduction made it a poor sharpness reference. The game character is still genuinely a small ~78 px body sprite; the preview cannot restore source-art face/costume detail lost in that established downsample. Visible RGB and alpha in the optimized character WebP are identical to the baked PNG (lossless), and the renderer uses nearest sampling for this sheet. No character redesign, global renderer change or character scale change was made.
+
+Rebake supplied S1 art at projectile peak width 56 px (previous32, ×1.75) and impact64 px (previous32, ×2). Existing runtime scale, frame count, event/recovery timing, projectile flight, kit and statuses are unchanged. New captures in `tmp/mirelle-s1-readable/` use device-resolution DPR2 PNG frames and native-resolution PNG close-ups/MP4, avoiding the old CSS-raster enlargement. Final S1 timing remains pending review.
 
 ## Validation and stop point
 

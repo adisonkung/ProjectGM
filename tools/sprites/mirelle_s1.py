@@ -85,8 +85,8 @@ def main():
     # Source frames 1–2 are circular build-up, not flying needles. Use 3–8 for flight.
     # Empty terminal frame prevents the flight strip becoming a second impact on arrival.
     report = {'state': 'PROVISIONAL_REVIEW',
-              'projectile': bake(projectile[2:], out, 'fx-mirelle-s1-projectile.png', 32, tip=True, blank_end=True),
-              'impact': bake(impact, out, 'fx-mirelle-s1-impact.png', 32)}
+              'projectile': bake(projectile[2:], out, 'fx-mirelle-s1-projectile.png', 56, tip=True, blank_end=True),
+              'impact': bake(impact, out, 'fx-mirelle-s1-impact.png', 64)}
     print(json.dumps(report, indent=2))
 
 

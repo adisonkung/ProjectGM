@@ -29,6 +29,7 @@ User uploaded `mirelle-source.zip`, accessible in this chat. Original PNGs copie
 - Pixi + DOM comparison: `/sprite-lab?hero=mirelle&compare=kael,garrick&enemy=forest_slime&bg=forest-1&render=pixi`. Generic optional lab parameters do not alter saves or combat.
 - Real screenshots (gitignored): `tmp/mirelle-preview/mirelle-in-game-{pixi,dom}.png` at DPR 2; idle/move/attack/hurt/death checked, no page errors.
 - S1 preview: add `distance=4` to that lab URL. Generic single-target PROJECTILE lab playback uses real board/projectile/FX renderers, primary-only arrival reaction, and clears pending visuals on reset. Existing fixed sample damage text is visual only. Real MP4/GIF/close-up/DOM/mirrored captures are in ignored `tmp/mirelle-s1-preview/`.
+- User review correction: old GIF used CSS-resolution frames enlarged to a close-up, contributing blur. Character body still78px, optimized visible RGB/alpha are lossless and sampling is nearest. S1 projectile rebaked peak32→56px (×1.75), impact32→64px (×2); no character, timing or gameplay changes. New device-resolution DPR2 PNG/MP4 captures: `tmp/mirelle-s1-readable/`. Continue to wait for S1 review before final Sync.
 
 Validation:
 - App/spec typechecks pass. Full Karma: 631/631 passed (includes 20 new cases).

@@ -705,11 +705,11 @@ for (const m of Object.values(MONSTERS)) {
 export const FX: Record<string, FxDef> = {
   // Mirelle S1 source cuts; review sizes/playback only, no final VFX timeline.
   'mf-s1-projectile': {
-    file: 'fx-mirelle-s1-projectile.png', frames: 7, w: 68, h: 30, frameMs: 50,
+    file: 'fx-mirelle-s1-projectile.png', frames: 7, w: 116, h: 50, frameMs: 50,
     at: 'target', scale: 1, angle0: 0,
   },
   'mf-s1-impact': {
-    file: 'fx-mirelle-s1-impact.png', frames: 8, w: 36, h: 36, frameMs: 50,
+    file: 'fx-mirelle-s1-impact.png', frames: 8, w: 68, h: 68, frameMs: 50,
     at: 'target', on: 'impact', dy: -8, scale: 0.7,
   },
   'mf-basic-crystal': {
