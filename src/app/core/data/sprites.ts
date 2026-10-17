@@ -715,8 +715,9 @@ for (const m of Object.values(MONSTERS)) {
 
 export const FX: Record<string, FxDef> = {
   'mf-ult-charge': {
-    file: 'fx-mirelle-ult-charge.png', frames: 10, w: 76, h: 170, frameMs: 100,
-    at: 'self', event: 'CHARGE_START', pivot: [0.5, 0.923529], dy: 27.25, scale: 0.65, layer: 'under',
+    // User readability revision (2026-10-17): about 40% larger, using a higher-resolution source cut.
+    file: 'fx-mirelle-ult-charge.png', frames: 10, w: 148, h: 335, frameMs: 100,
+    at: 'self', event: 'CHARGE_START', pivot: [0.5, 0.928358], dy: 27.25, fitCells: 1.3, layer: 'under',
   },
   'mf-ult-main': {
     file: 'fx-mirelle-ult-main.png', frames: 8, w: 204, h: 283, frameMs: 100,
@@ -727,8 +728,9 @@ export const FX: Record<string, FxDef> = {
     at: 'target', fitCells: 3, pivot: [0.5, 0.868526], dy: 27.25, layer: 'under', attach: false,
   },
   'mf-ult-shatter': {
-    file: 'fx-mirelle-ult-shatter.png', frames: 8, w: 124, h: 93, frameMs: 80,
-    at: 'target', fitCells: 1.4, pivot: [0.5, 0.795699], dy: 27.25, attach: false,
+    // User-requested larger visual finisher; gameplay remains the fixed 3x3 control field.
+    file: 'fx-mirelle-ult-shatter.png', frames: 8, w: 364, h: 267, frameMs: 80,
+    at: 'target', fitCells: 4.2, pivot: [0.5, 0.808989], dy: 27.25, attach: false,
   },
   'mf-ult-residual': {
     file: 'fx-mirelle-ult-residual.png', frames: 4, w: 154, h: 121, frameMs: 100, fadeOutMs: 250,

@@ -26,10 +26,11 @@ def main():
     loop = [formation[i] for i in [6, 7]]
     shatter = breaking + fragments[:3]
     report = {'state': 'PROVISIONAL_REVIEW',
-              'charge': bake_ground(charge, out, 'fx-mirelle-ult-charge.png', 72),
+              # Larger review presentation (user, 2026-10-17): retain more source resolution.
+              'charge': bake_ground(charge, out, 'fx-mirelle-ult-charge.png', 144),
               'main': bake_ground(formation, out, 'fx-mirelle-ult-main.png', 200),
               'field': bake_ground(loop, out, 'fx-mirelle-ult-field.png', 200),
-              'shatter': bake_ground(shatter, out, 'fx-mirelle-ult-shatter.png', 120),
+              'shatter': bake_ground(shatter, out, 'fx-mirelle-ult-shatter.png', 360),
               'residual': bake_ground(dissolve[3:], out, 'fx-mirelle-ult-residual.png', 150)}
     print(json.dumps(report, indent=2))
 

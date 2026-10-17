@@ -3,7 +3,7 @@
 Git is authoritative. Query current commit/tree with `git rev-parse HEAD HEAD^{tree}`; this note never records its containing commit as a sync base.
 
 Last task:
-Mirelle Frostglass — The Winter Scholar (Codex, 2026-10-17): Phase A, base art and S1/S2 provisional production complete. The user requested Ultimate next and supplied `mirelle-ult-source.zip`. Ultimate character/Charge/Main/field-loop/shatter/residual are integrated for individual visual review, with actual-engine DPR2 captures. Stop for Ultimate visual review. All S1/S2/Ult final timing/Sync Sheets remain pending.
+Mirelle Frostglass — The Winter Scholar (Codex, 2026-10-17): Phase A, base art and S1/S2/Ult provisional production complete. Latest user request enlarges Ultimate Charge and final Impact. Charge is now1.3 cells (~40% wider), ending shatter4.2 cells (×3), recut from the original sources at higher resolution. Only visual size/resolution changes; gameplay/timing unchanged. Stop for the revised Ultimate visual review. All S1/S2/Ult final timing/Sync Sheets remain pending.
 
 Branch:
 `wip/codex-hero-mirelle`. Fresh fetch now succeeds; origin/master remains the original base. No master or other task branch changed. Push was rejected by automatic approval review pending explicit confirmation of code export to adisonkung/ProjectGM. Do not bypass/retry that export until user approval.
@@ -36,6 +36,7 @@ User uploaded `mirelle-source.zip`, accessible in this chat. Original PNGs copie
 - Ultimate originals in read-only `art/incoming/mirelle/ult/`: four PNGs plus supplied draft XLSX. Actual character20 poses (8+6+6), not workbook placeholders10. Row7 now populated; earlier atlas rows pixel-identical. `mirelle_ult.py` cuts separate Charge10/Main8/field2/shatter8/residual4 strips; formed Main poses supply the loop, lower Main supplies residue, medium breaking Impact supplies visual-only shatter. No separate seamless loop source or generated substitute art; see `MIRELLE_ULT_REVIEW.md` for source hashes and exact mapping.
 - Generic field presentation: `FieldSystem` end metadata distinguishes EXPIRED/SOURCE_DIED/CLEARED without changing pulse/cancellation rules. Shared `FieldFxPlayback` consumes lifecycle events and `SheetDef.fieldFx`, retains the fixed world centre, reprojects with the camera and cleans up using combat time. Runtime `managed`/`loop` flags support persistent Pixi/DOM FX beyond character recovery. Natural expiry emits visual-only ending once; death/clear removes formation/loop without shatter. No hero engine conditionals.
 - Ultimate lab uses the same real-engine route with `combat=1&formation=square`; select Winterglass Field. Replay/loop duration includes the full field lifetime. Native DPR2 PNG/MP4 previews in ignored `tmp/mirelle-ult-preview/`, including normal speed and native cropped half-speed video. Icons/banner and dedicated seamless loop source remain pending; no final Sync Sheet.
+- Latest size revision: `mirelle_ult.py` Charge/shatter cuts peak144/360px →148×335/364×267 strips; corresponding FX use1.3/4.2-cell widths and regenerated pivots. Source frames/palette unchanged, Main/loop/residual/character unchanged. Revised DPR2 captures in ignored `tmp/mirelle-ult-larger/`.
 
 Validation:
 - App/spec typechecks pass. Full Karma: 631/631 passed (includes 20 new cases).
@@ -46,6 +47,7 @@ Validation:
 - S1 follow-up: app/spec typechecks pass, full Karma **635/635 passed**, production build and Mirelle-team 10-run/floor sim complete, sprites optimized. DPR2 Pixi/DOM/base actions/mirrored S1 have zero page errors. No engine change, kit retuning, or other hero rebalance.
 - S2: app/spec typechecks, **640/640 Karma**, production build and Mirelle-team sim passed. Main once, four Chill/one Root with pre-Chill; four Chill/no Root without it. Pixi all7 units, DOM/mirror/base/S1 regressions have zero page errors. No DoT/field mechanic, kit/rank change, or final timing.
 - Ultimate: app/spec typechecks, **650/650 Karma**, production build and Mirelle-team10-run/floor sim passed. Actual replay starts field at1.2s, pulses at2.2–7.2s, expires at7.2s; no added launch/finisher damage. Pixi/DOM/mirror/base/S1/S2 checks have zero page errors; managed field views0 after expiry, DOM loop cancels on reset. Source hashes/previous atlas rows/zero clipping checked, optimizer run.
+- Ultimate size revision: app/spec typechecks, **650/650 Karma** and production build passed again; optimized Charge/shatter have zero outer-edge clipping and unchanged alpha. Native Pixi/DOM/mirrored captures report zero page errors, views0 after expiry/reset. No gameplay/timing change or combat sim retuning.
 - Task commits are local only. Stop for Ultimate visual review; all three final timing/Sync Sheets remain pending.
 
 Details:
@@ -56,7 +58,7 @@ Next agent must inspect:
 - Current `HEROES`, `HERO_DEFINITIONS`, status/field/rank systems and Phase A tests.
 - Read-only original ZIP-derived PNGs before rebaking; base/S1/S2/Ult sources are available. No separate seamless Ult-loop source, icons or banner.
 - Stop boundary: S1 production → user review → S1 Timeline Sync → S2 production/review/sync → Ult production/review/sync. Do not skip reviews or create final timing in Phase A.
-- Latest user steering advanced through S2 to Ultimate source production; do not infer final S1/S2 timing approval from that. Stop at Ultimate preview and await individual review before final timings.
+- Latest user steering enlarges Ultimate Charge and final Impact after source production. Do not infer final skill timing approval from that. Stop at revised Ultimate preview and await individual review before final timings.
 
 Known pre-existing issues:
 Balance remains deferred until the roster is complete; shipped-roster F5/F7–F10 issues remain. `DEV_FLAGS.fullUltAtStart` remains ON. Tang Xun ult surround positioning issue is unchanged.

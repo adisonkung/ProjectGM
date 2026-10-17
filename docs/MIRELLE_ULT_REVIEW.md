@@ -16,7 +16,7 @@ Byte-identical, read-only copies are under ignored `art/incoming/mirelle/ult/`:
 
 The character actually has **20 poses, rows8+6+6**, unlike the workbook's 10 placeholders. Its proposed F5 activation and final-shatter suggestions are a draft, not final timing/gameplay authorization. Repository Mage skill IDs, 6-second field and existing cancellation policy remain authoritative.
 
-There is no separate `ult_field.png` or residual/shatter source. For this review, the loop reuses only the formed Main poses7–8 (not the formation/explosion sequence). Residual uses the last four lower-row Main frames. Shatter uses eight breaking/scattering frames from the second/third Impact rows at medium size; the large growing pillar sequence in its first row is unused. No replacement approved art, new design, recolour, meteor or added burst damage is generated. A dedicated seamless field-loop source may improve the final production after review.
+There is no separate `ult_field.png` or residual/shatter source. For this review, the loop reuses only the formed Main poses7–8 (not the formation/explosion sequence). Residual uses the last four lower-row Main frames. Shatter uses eight breaking/scattering frames from the second/third Impact rows; the large growing pillar sequence in its first row is unused. Its presentation was enlarged at the user's request below. No replacement approved art, new design, recolour, meteor or added burst damage is generated. A dedicated seamless field-loop source may improve the final production after review.
 
 ## Baking and review assets
 
@@ -25,10 +25,10 @@ There is no separate `ult_field.png` or residual/shatter source. For this review
 
 | Runtime strip | Frames | Cell | Role |
 |---|---:|---|---|
-| `fx-mirelle-ult-charge.png` | 10 | 76×170 | caster wind-up |
+| `fx-mirelle-ult-charge.png` | 10 | 148×335 | caster wind-up, 1.3-cell width |
 | `fx-mirelle-ult-main.png` | 8 | 204×283 | one formation at the fixed field centre |
 | `fx-mirelle-ult-field.png` | 2 | 204×251 | formed-field loop, 3-cell width |
-| `fx-mirelle-ult-shatter.png` | 8 | 124×93 | medium visual-only ending, 1.4-cell width |
+| `fx-mirelle-ult-shatter.png` | 8 | 364×267 | enlarged visual-only ending, 4.2-cell width |
 | `fx-mirelle-ult-residual.png` | 4 | 154×121 | brief ground residue/fade |
 
 ```bash
@@ -65,3 +65,11 @@ Validation: app/spec typechecks, full Karma **650/650**, production build and Mi
 Native-DPR2 PNG/MP4 recordings are in ignored `tmp/mirelle-ult-preview/`; prefer PNG/video for sharpness. The preview includes charge, formation, sustained field, actual damage/control pulses, expiry/shatter and cleared state; DOM, mirrored playback, reset and earlier actions are checked separately. Captures report zero page errors, zero managed field views after ending and zero DOM loops after reset. Video is native1792×562 at normal speed; the half-speed close-up crops960×562 without resizing.
 
 Stop after this Ultimate preview for user review. All three skills' final timing/Timeline Sync remain pending. Icons/banner and a dedicated seamless field loop are not supplied; do not fabricate them or claim final hero-art production is complete.
+
+## User readability revision — larger Charge and ending (2026-10-17)
+
+The user requested a slightly larger Charge and a much larger, more spectacular final Impact. Charge now spans1.3 cells (previously0.92625, about40% wider); ending shatter spans4.2 cells (previously1.4, three times wider). Their original source frames are recut at peak widths144/360 instead of72/120, retaining more detail at the larger on-screen size. Ground pivots are regenerated with the strips; source palette, frame selection and placement centre remain the same.
+
+Only visual size/resolution changes: field gameplay remains3×3, all skill timings and FX durations remain unchanged, no finishing damage is added. Main/loop/residual strips and the character atlas are unchanged. New native-DPR2 captures are in ignored `tmp/mirelle-ult-larger/`.
+
+Revision validation: app/spec typechecks, **650/650 Karma** and production build passed; sprites optimized. Charge/shatter dimensions match runtime cells, no outer-edge clipping, alpha unchanged by optimization (standard q90 FX colour). Pixi/DOM/mirrored captures have zero page errors; field views0 after expiry and DOM views0 after reset during both field and ending. Normal-speed1792×562 and cropped half-speed960×562 MP4s retain native capture resolution. No combat sim rerun is needed for these visual-only data changes.
