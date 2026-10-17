@@ -1,4 +1,4 @@
-"""Bake approved Mirelle base combat + portrait; no skill production/timeline.
+"""Bake approved Mirelle base combat + portrait and optional S1 character source.
 
 python3 tools/sprites/mirelle.py [source directory] [sprite output] [portrait output]
 Sources: base.png / reference.png, copied byte-for-byte from the user's mirelle-source.zip.
@@ -54,19 +54,26 @@ def main():
     for fr in groups['walk']:
         fr['root'] = (fr['root'][0], ground)
     scale = IDLE_BODY / A.body_h(groups['idle'][0])
-    probe = Image.new('RGBA', (260 * 7, 170 * 8))
-    for row, name in enumerate(NAMES):
+    names = list(NAMES)
+    scales = {name: scale for name in names}
+    if (SRC / 's1/s1_character.png').exists():
+        groups['skill'] = A.sheet_frames('s1/s1_character', [5, 5], False)
+        names.append('skill')
+        scales['skill'] = IDLE_BODY / A.body_h(groups['skill'][0])
+    cols = max(len(groups[name]) for name in names)
+    probe = Image.new('RGBA', (260 * cols, 170 * 8))
+    for row, name in enumerate(names):
         for col, fr in enumerate(groups[name]):
-            A.paste_frame(probe, fr, row, col, scale, (0, 0))
+            A.paste_frame(probe, fr, row, col, scales[name], (0, 0))
     alpha = np.array(probe)[..., 3]
     torso = {name: [A.torso_x(alpha[row * 170:(row + 1) * 170, col * 260:(col + 1) * 260])
-                    for col in range(len(groups[name]))] for row, name in enumerate(NAMES)}
+                    for col in range(len(groups[name]))] for row, name in enumerate(names)}
     shifts = A.stabilise(torso)
     sheet = Image.new('RGBA', probe.size)
     clipped = []
-    for row, name in enumerate(NAMES):
+    for row, name in enumerate(names):
         for col, fr in enumerate(groups[name]):
-            clipped.append(A.paste_frame(sheet, fr, row, col, scale, (shifts[name][col], 0)))
+            clipped.append(A.paste_frame(sheet, fr, row, col, scales[name], (shifts[name][col], 0)))
     if any(clipped):
         raise ValueError(f'Clipped character pixels: {clipped}')
     sheet.save(OUT / 'hero-mirelle.png', optimize=True)
@@ -88,7 +95,7 @@ def main():
     portrait = Image.new('RGBA', (288, 288), (24, 40, 67, 255))
     portrait.alpha_composite(face, ((288 - face.width) // 2, (288 - face.height) // 2))
     portrait.convert('RGB').save(PORTRAITS / 'mirelle.webp', quality=92)
-    print(json.dumps({'scale': scale, 'bodyHeight': IDLE_BODY, 'counts': COUNTS,
+    print(json.dumps({'scales': scales, 'bodyHeight': IDLE_BODY, 'counts': {n: len(groups[n]) for n in names},
                       'sheet': sheet.size, 'projectile': shard.size, 'clipped': sum(clipped)}, indent=2))
 
 

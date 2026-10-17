@@ -1,7 +1,8 @@
 import { Component, computed, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AnimState, BoardComponent, FloatText, FxView, UnitView } from '../../battle/board/board.component';
+import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView } from '../../battle/board/board.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
+import { projectileLife } from '../../battle/projectile/projectile.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
 import { SCENERY_ROWS } from '../../battle/engine/grid';
@@ -40,7 +41,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
         <p class="comparison">เทียบสัดส่วน: {{ comparisonNames }} · ตัวละครยืนบนเลนเดียวกัน</p>
       }
       <div class="stage" [class.anchors]="showAnchors()">
-        <app-board #board [background]="previewBackground" [units]="units()" [fx]="fx()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
+        <app-board #board [background]="previewBackground" [units]="units()" [fx]="fx()" [projectiles]="projectiles()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
         @if (showAnchors()) {
           <i class="mark root" [style.left]="mark().root.x" [style.top]="mark().root.y" title="root (feet)"></i>
           @for (t of mark().anchors; track t.name) { <i class="mark tip" [style.left]="t.x" [style.top]="t.y" [title]="t.name"><b>{{ t.name }}</b></i> }
@@ -97,6 +98,7 @@ export class SpriteLabComponent implements OnDestroy {
   readonly comparisonNames = this.comparisonHeroes.map(h => h.name).join(' / ');
   readonly previewBackground = BACKGROUNDS[this.qp.get('bg') ?? ''] ?? null;
   private readonly comparisonMonster = MONSTERS[this.qp.get('enemy') ?? ''];
+  private readonly targetDistance = Math.min(5, Math.max(1, Number(this.qp.get('distance')) || 1));
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
   readonly heroName = computed(() => this.hero()?.name ?? '');
@@ -116,6 +118,7 @@ export class SpriteLabComponent implements OnDestroy {
   readonly blinked = signal<{ dc: number; ownFade: boolean } | null>(null);
   readonly anims = signal<Partial<Record<number, AnimState>>>({});
   readonly fx = signal<FxView[]>([]);
+  readonly projectiles = signal<ProjectileView[]>([]);
   readonly floats = signal<FloatText[]>([]);
   readonly log = signal<{ t: string; text: string }[]>([]);
 
@@ -150,7 +153,7 @@ export class SpriteLabComponent implements OnDestroy {
         r: 1, c: hc - (i + 1) * 2 * (left ? -1 : 1), sprite: other.sprite, star: other.star, heroId: other.id, flip: left,
       })),
       ...DUMMY_IDS.map((id, i) => ({
-        ...base, id, side: 'enemy' as const, name: this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const, r: 1, c: left ? hc - 1 - i : hc + 1 + i,
+        ...base, id, side: 'enemy' as const, name: this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const, r: 1, c: hc + (this.targetDistance + i) * (left ? -1 : 1),
         sprite: this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: !left,
       })),
     ];
@@ -161,7 +164,8 @@ export class SpriteLabComponent implements OnDestroy {
     const h = this.hero();
     const kit = kitOf(h.id, h.cls);
     const list: { id: Action; label: string }[] = [{ id: 'idle', label: 'Idle' }, { id: 'walk', label: 'Move' }, { id: 'attack', label: 'Normal Attack' }];
-    for (const k of ['skill', 'skill2', 'ult'] as const) if (d?.anims[k]) list.push({ id: k, label: kit[k].label ?? k });
+    for (const k of ['skill', 'skill2', 'ult'] as const)
+      if (d?.anims[k] && d.anims[k] !== d.anims.attack) list.push({ id: k, label: kit[k].label ?? k });
     list.push({ id: 'hurt', label: 'Hurt' }, { id: 'die', label: 'Death' });
     return list;
   });
@@ -207,6 +211,8 @@ export class SpriteLabComponent implements OnDestroy {
 
     if (this.blinked()) this.blinked.set(null);
     const kitSkill = a === 'skill' || a === 'skill2' || a === 'ult' ? kitOf(this.hero().id, this.hero().cls)[a] : undefined;
+    // Lab-only single-target projectile preview. Contact follows travel, just as in the combat engine.
+    const singleProjectile = kitSkill?.delivery === 'PROJECTILE' && kitSkill.effects.some(e => e.type === 'DAMAGE' && e.area === 'SINGLE');
     if (clip?.move != null && kitSkill?.movement?.type === 'BLINK_BEHIND') {
       // blink skill: stand on the front dummy's cell (the back dummy is the target) from the clip's `move`, back after it
       const mt = clk!.at(clip.move);
@@ -221,6 +227,7 @@ export class SpriteLabComponent implements OnDestroy {
       const kind = a === 'attack' ? null : a;
       const hasImpact = list.some(e => e.event === 'IMPACT');
       for (const ev of list) {
+        if (singleProjectile && ev.event === 'IMPACT') continue; // contact is scheduled by flight, not the cast clip
         this.at(ev.t, () => {
           this.note(ev.t, `${ev.event}${ev.index ? ' #' + (ev.index + 1) : ''}${ev.event === 'ANIMATION_END' ? ' (end)' : ev.frame >= 0 ? ` (frame ${(ev.art ?? ev.frame) + 1})` : ''}`);
           if (!kind) {
@@ -230,6 +237,14 @@ export class SpriteLabComponent implements OnDestroy {
           if (ev.event !== 'DAMAGE' && ev.event !== 'IMPACT') this.spawn(kind, { on: 'event', event: ev.event, index: ev.index });
           this.feel(eventFeelOf(sprite, kind, ev.event));
           if (ev.event === 'DAMAGE') {
+            if (singleProjectile) {
+              this.launchSingleProjectile(kind, ev.t, () => {
+                const hits = this.hitDummies(kind, ev.index, true);
+                this.spawn(kind, { on: 'impact', hit: ev.index }, hits);
+                this.feel(impactFeelOf(sprite, kind, ev.index));
+              });
+              return;
+            }
             const hits = this.hitDummies(kind, ev.index);
             this.spawn(kind, { on: 'impact', hit: ev.index }, hits);
             if (!hasImpact) this.feel(impactFeelOf(sprite, kind, ev.index));
@@ -241,6 +256,21 @@ export class SpriteLabComponent implements OnDestroy {
     }
     if (this.loop() && a !== 'die') this.at(len + 0.6, () => this.play(a));
     if (this.loop() && a === 'die') this.at(len + 1.2, () => (this.set(HERO_ID, 'idle'), this.play('die')));
+  }
+
+  /** Presentation demo only: engine hero flight rule (0.1 + 0.06 × cell distance), not a fixed VFX delay. */
+  private launchSingleProjectile(kind: SkillKind, release: number, contact: () => void): void {
+    const name = this.sheet()?.projectile?.[kind];
+    const [me] = this.units();
+    const target = this.units().find(u => u.id === DUMMY_IDS[0])!;
+    const flight = 0.1 + 0.06 * Math.max(Math.abs(target.c - me.c), Math.abs(target.r - me.r));
+    if (name && FX[name]) {
+      const p: ProjectileView = { id: ++this.id, name,
+        from: { x: me.c, y: me.r + SCENERY_ROWS }, to: { x: target.c, y: target.r + SCENERY_ROWS }, flight: flight * 1000 };
+      this.projectiles.update(l => [...l, p]);
+      this.at(projectileLife(p.flight) / 1000, () => this.projectiles.update(l => l.filter(x => x.id !== p.id)));
+    }
+    this.at(flight, () => { this.note(release + flight, 'IMPACT · projectile arrival (visual preview)'); contact(); });
   }
 
   /** the FX layers bound to this trigger (same `fxFor` / `fxOffset` the battle page uses) */
@@ -257,21 +287,21 @@ export class SpriteLabComponent implements OnDestroy {
         const f: FxView = { id: ++this.id, r: u.r, c: u.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
           follow: fxAttached(name) ? u.id : undefined };
         this.fx.update(l => [...l, f]);
-        setTimeout(() => this.fx.update(l => l.filter(x => x.id !== f.id)), fxDuration(name, this.speed()) + 50);
+        this.at((fxDuration(name) + 50) / 1000, () => this.fx.update(l => l.filter(x => x.id !== f.id)));
       }
     }
   }
 
   /** dummies hit by this action (ult / sweep = both, thrust = both in the line, attack = the front one) → ids */
-  private hitDummies(kind: 'attack' | SkillKind, index = 0): number[] {
-    const targets = kind === 'attack' ? DUMMY_IDS.slice(0, 1) : DUMMY_IDS;
+  private hitDummies(kind: 'attack' | SkillKind, index = 0, single = false): number[] {
+    const targets = kind === 'attack' || single ? DUMMY_IDS.slice(0, 1) : DUMMY_IDS;
     const fl: FloatText[] = targets.map(id => {
       this.set(id, 'hurt', { force: true });
       const u = this.units().find(x => x.id === id)!;
       return { id: ++this.id, r: u.r, c: u.c, text: kind === 'attack' ? '-38' : kind === 'ult' ? `-${[45, 54, 81][index] ?? 50}` : '-68', kind: 'dmg' as const };
     });
     this.floats.update(l => [...l, ...fl]);
-    setTimeout(() => this.floats.update(l => l.filter(x => !fl.includes(x))), 900);
+    this.at(0.9, () => this.floats.update(l => l.filter(x => !fl.includes(x))));
     return targets;
   }
 
@@ -291,5 +321,8 @@ export class SpriteLabComponent implements OnDestroy {
   private clear(): void {
     this.timers.forEach(clearTimeout);
     this.timers = [];
+    this.projectiles.set([]);
+    this.fx.set([]);
+    this.floats.set([]);
   }
 }

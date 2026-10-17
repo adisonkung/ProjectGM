@@ -188,25 +188,36 @@ export const PX_TO_CELL = 165 / 132;
 export const FX_SCALE = 1.5;
 export const PROJECTILE_SCALE = 1.3;
 
+const MIRELLE_BASIC_ATTACK: AnimDef = {
+  row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
+};
+
 export const SHEETS: Record<string, SheetDef> = {
   // ศัตรู: แผ่นของมอนสเตอร์สร้างจาก MONSTERS[*].animation ด้านล่าง (monsterSheet) ไม่ต้องเขียนซ้ำที่นี่
   // ไป๋หลง (ทวนมังกรขาว) — tools/sprites/bailong.py จากภาพของผู้ใช้ (แผ่นตัวละคร ≠ แผ่น VFX)
   // ช่อง 220 × 132 (ทวนยื่นเกินตัวได้, สเกลพิกเซลเท่าเดิม) · root = เท้ากลางล่าง (110, 117) · หันขวา · ตัวใหญ่ขึ้น 10 % จากรอบแรก
   // แถว: 0 idle 6 · 1 walk 8 · 2 hurt 4 · 3 attack 6 (แทงทวน) · 4 die 7 · 5 Dragon Thrust 10
   //      6 Sweeping Moon 12 · 7 Nine Dragon Sequence 20 (ไอปราณรอบทวนวาดติดมากับตัว — เก็บแบบโปร่งแสง)
-  // Mirelle approved base combat only. Rows 5–7 remain empty: no authored S1/S2/Ult timings.
+  // Mirelle: approved base + S1 visual review. S1 timing is PROVISIONAL, no final Timeline Sync.
   'hero-mirelle.png': {
-    cols: 7, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5 },
       walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
       hurt: { row: 2, frames: 4, ms: 100 },
       // Normal attack only: book/focus gathers F4, ice shard releases F5; contact is projectile arrival.
-      attack: { row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 } },
+      attack: MIRELLE_BASIC_ATTACK,
       die: { row: 4, frames: 6, ms: 130 },
+      // Uniform review playback only. DAMAGE marks launch for PROJECTILE delivery; effects land on arrival.
+      skill: { row: 5, frames: 10, ms: 1000 / 12,
+        events: { CAST_START: 0, PROJECTILE_SPAWN: 6, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 8 } },
+      // Preserve the Phase A basic-attack fallback for unproduced skills; never inherit S1's new timing.
+      skill2: MIRELLE_BASIC_ATTACK,
+      ult: MIRELLE_BASIC_ATTACK,
     },
-    projectile: { attack: 'mf-basic-crystal' },
+    projectile: { attack: 'mf-basic-crystal', skill: 'mf-s1-projectile' },
+    fx: { skill: 'mf-s1-impact' },
   },
   // Yue Zheng — Iron Mountain Bastion (remodel #2, tools/sprites/yuezheng.py): base sheet + S1 (row 5) + S2 (row 6)
   // + ult (row 7). Cell 260 × 170 like Aurel v2
@@ -692,6 +703,15 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  // Mirelle S1 source cuts; review sizes/playback only, no final VFX timeline.
+  'mf-s1-projectile': {
+    file: 'fx-mirelle-s1-projectile.png', frames: 7, w: 68, h: 30, frameMs: 50,
+    at: 'target', scale: 1, angle0: 0,
+  },
+  'mf-s1-impact': {
+    file: 'fx-mirelle-s1-impact.png', frames: 8, w: 36, h: 36, frameMs: 50,
+    at: 'target', on: 'impact', dy: -8, scale: 0.7,
+  },
   'mf-basic-crystal': {
     file: 'fx-mirelle-basic-crystal.png', frames: 1, w: 25, h: 10, frameMs: 100,
     at: 'target', pixelated: true, scale: 0.65,

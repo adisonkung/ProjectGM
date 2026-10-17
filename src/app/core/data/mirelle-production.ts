@@ -1,27 +1,30 @@
 import { SemanticEvent } from '../models/monster';
 
-/** Production requirements only. NOT SheetDef / FxDef: no invented pixels, frame indices or VFX timings. */
+/** Production/review state only. Runtime presentation lives in sprites.ts; no final Timeline Sync here. */
 interface PendingClip {
   clip: 'skill' | 'skill2' | 'ult';
-  state: 'AWAITING_SKILL_REVIEW';
+  state: 'AWAITING_SKILL_REVIEW' | 'PROVISIONAL_REVIEW';
   events: SemanticEvent[];
   assets: { key: string; file: string; role: 'PROJECTILE' | 'CHARGE' | 'MAIN' | 'IMPACT' | 'FIELD' | 'RESIDUAL'; optional?: boolean }[];
 }
 
 export const MIRELLE_PRODUCTION = {
-  heroId: 'mirelle', phase: 'A', timing: 'PROVISIONAL_BASE_ATTACK_FALLBACK',
+  heroId: 'mirelle', phase: 'S1_REVIEW', timing: 'PROVISIONAL_S1_REVIEW',
   approvedReferences: [
     'ChatGPT Image Oct 17, 2026, 12_38_47 AM.png',
     'ChatGPT Image Oct 17, 2026, 12_39_00 AM.png',
   ],
   sourcesAvailableInWorkspace: true,
-  sourceSlots: { reference: 'art/incoming/mirelle/reference.png', base: 'art/incoming/mirelle/base.png' },
+  sourceSlots: {
+    reference: 'art/incoming/mirelle/reference.png', base: 'art/incoming/mirelle/base.png',
+    s1: 'art/incoming/mirelle/s1',
+  },
   expectedSheet: 'hero-mirelle.png',
   expectedPortrait: 'portraits/mirelle.webp',
   visualIdentity: 'Classic Western Fantasy / Kingdom Adventurers; approved face, hair, proportions, costume and silhouette; spellbook + floating crystal focus; navy / ice blue / muted silver',
   clips: {
     skill: {
-      clip: 'skill', state: 'AWAITING_SKILL_REVIEW',
+      clip: 'skill', state: 'PROVISIONAL_REVIEW',
       events: ['CAST_START', 'PROJECTILE_SPAWN', 'DAMAGE', 'IMPACT', 'RECOVERY_START', 'ANIMATION_END'],
       assets: [
         { key: 'mf-s1-projectile', file: 'fx-mirelle-s1-projectile.png', role: 'PROJECTILE' },

@@ -52,11 +52,11 @@ The initial Phase A used token fallback. The subsequent user-uploaded `mirelle-s
 
 - No approved source was fabricated, redrawn or overwritten.
 - Runtime registrations point only to baked assets; pending skill slots are not registered as FX.
-- Base-art follow-up: approved ZIP is now accessible. Mirelle uses the real base sheet and reference-cropped portrait. S1/S2/Ult have no authored clips; the existing animation fallback uses the basic attack provisionally.
+- Base-art follow-up: approved ZIP is now accessible. Mirelle uses the real base sheet and reference-cropped portrait. At the Phase A boundary, S1/S2/Ult used the basic attack provisionally. The subsequent user-authorized S1 review is recorded in `MIRELLE_S1_REVIEW.md`; S2/Ult retain their base fallback.
 - Do not create an empty atlas or copy another hero's art as Mirelle.
 - Source slots are `art/incoming/mirelle/reference.png` and `base.png` (read-only originals when available).
-- Base sheet cutting/normalization, portrait crop and actual runtime registrations remain pending source access. Run `sprites:optimize` after any PNG bake.
-- Skill character sheets, separate VFX, icons and banner are not supplied yet. Slot filenames in `mirelle-production.ts` are requirements only.
+- Base cutting/normalization, portrait crop and runtime registration are complete. Run `sprites:optimize` after any PNG bake.
+- S1 character/projectile/impact sources are now supplied for visual review. S2/Ult sheets/VFX, icons and banner remain missing; their slots are requirements only.
 - Do not register or synthesize final skill clips, final field art, or final shatter timing during Phase A.
 
 ## Production order after Phase A

@@ -5,7 +5,7 @@ import { MIRELLE_PRODUCTION } from '../../core/data/mirelle-production';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { MONSTERS } from '../../core/data/monsters';
 import { ENEMIES } from '../../core/data/enemies';
-import { FX, SHEETS } from '../../core/data/sprites';
+import { animEvents, animTiming, FX, SHEETS } from '../../core/data/sprites';
 import { STARTER_BENCH, STARTER_TEAM } from '../../core/data/starter';
 import { SkillSlot } from '../../core/models/combat';
 import { Cell } from '../../core/models/unit';
@@ -22,7 +22,7 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     const t = HERO_BY_ID['mirelle'];
     const spawns = Array.from({ length: count }, (_, i) => ({ enemy: 'forest_slime', r: i % 6, c: i % 3 }));
     const e = new BattleEngine({
-      allies: [{ name: t.name, cls: t.cls, heroId: t.id, pos: { r: 3, c: 1 },
+      allies: [{ name: t.name, cls: t.cls, heroId: t.id, sprite: t.sprite, pos: { r: 3, c: 1 },
         stats: { ...heroStats(t, { uid: 1, templateId: t.id, level: 1, potential: 'B' }), hp: 10000 } }],
       stage: { floor: 1, mode: 'eliminate', timeLimit: 999, enemies: spawns, ...(rounds ? { rounds: [spawns, spawns] } : {}) },
       enemyTemplates: ENEMIES, monsters: { ...MONSTERS }, seed: 7,
@@ -51,16 +51,24 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     for (const slot of ['skill', 'skill2', 'ult'] as const) expect(kitInterrupts(kit(), slot)).toBeFalse();
   });
 
-  it('records pending assets and semantic requirements without broken runtime registrations or final timings', () => {
+  it('registers S1 review assets while keeping unproduced skills on their previous base fallback', () => {
     expect(HERO_ART['mirelle']).toEqual({ portrait: 'portraits/mirelle.webp' });
     const sheet = SHEETS['hero-mirelle.png'];
-    expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH]).toEqual([7, 8, 260, 170]);
+    expect([sheet.cols, sheet.rows, sheet.cellW, sheet.cellH]).toEqual([10, 8, 260, 170]);
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => sheet.anims[k]!.frames)).toEqual([5, 7, 4, 7, 6]);
-    expect(sheet.anims.skill).toBeUndefined();
-    expect(sheet.anims.skill2).toBeUndefined();
-    expect(sheet.anims.ult).toBeUndefined();
+    expect([sheet.anims.skill!.row, sheet.anims.skill!.frames]).toEqual([5, 10]);
+    expect(sheet.anims.skill!.steps).toBeUndefined(); // uniform review playback, no final choreography
+    expect(sheet.anims.skill2).toBe(sheet.anims.attack);
+    expect(sheet.anims.ult).toBe(sheet.anims.attack);
+    expect(animTiming('hero-mirelle.png', 'skill2')).toEqual(animTiming('hero-mirelle.png', 'attack'));
+    expect(animTiming('hero-mirelle.png', 'ult')).toEqual(animTiming('hero-mirelle.png', 'attack'));
+    expect(sheet.projectile!.skill).toBe('mf-s1-projectile');
+    expect(sheet.fx!.skill).toBe('mf-s1-impact');
     expect(MIRELLE_PRODUCTION.sourcesAvailableInWorkspace).toBeTrue();
-    for (const clip of Object.values(MIRELLE_PRODUCTION.clips)) {
+    const s1 = MIRELLE_PRODUCTION.clips.skill;
+    expect(s1.state).toBe('PROVISIONAL_REVIEW');
+    for (const asset of s1.assets) expect(FX[asset.key].file).toBe(asset.file);
+    for (const clip of [MIRELLE_PRODUCTION.clips.skill2, MIRELLE_PRODUCTION.clips.ult]) {
       expect(clip.state).toBe('AWAITING_SKILL_REVIEW');
       expect(clip.events).toContain('CAST_START');
       expect(clip.events).toContain('ANIMATION_END');
@@ -95,11 +103,45 @@ describe('Mirelle Frostglass — Winter Scholar, Phase A', () => {
     const b = battle(1);
     b.e.skills.use(b.caster, 'skill', kit().skill, b.foes[0]);
     expect(hasStatus(b.foes[0], 'slow')).toBeFalse();
-    b.run(0.3); // token wind-up/flight are fallback only, not an authored Mirelle timeline
-    expect(b.e.drainEvents().some(e => e.type === 'projectile')).toBeTrue();
+    b.run(animTiming(b.caster.sprite, 'skill').hit + 0.05);
+    const launch = b.e.drainEvents();
+    expect(launch.filter(e => e.type === 'projectile').length).toBe(1);
+    expect(launch.some(e => e.type === 'damage')).toBeFalse();
     expect(hasStatus(b.foes[0], 'slow')).toBeFalse();
     b.run(1);
     expect(hasStatus(b.foes[0], 'slow')).toBeTrue();
+    const landed = b.e.drainEvents();
+    expect(landed.filter(e => e.type === 'damage' && e.dst === b.foes[0].id).length).toBe(1);
+    expect(landed.filter(e => e.type === 'impact').length).toBe(1);
+    expect(landed.filter(e => e.type === 'animEvent' && e.event === 'IMPACT').length).toBe(1);
+  });
+
+  it('S1 keeps one semantic release/contact and evaluates Chill at arrival, not cast start', () => {
+    const b = battle(2);
+    const events = animEvents(b.caster.sprite, 'skill');
+    expect(events.filter(e => e.event === 'PROJECTILE_SPAWN').length).toBe(1);
+    expect(events.filter(e => e.event === 'DAMAGE').length).toBe(1);
+    expect(events.find(e => e.event === 'PROJECTILE_SPAWN')!.t).toBe(animTiming(b.caster.sprite, 'skill').hit);
+    b.e.skills.use(b.caster, 'skill', kit().skill, b.foes[0]);
+    b.run(animTiming(b.caster.sprite, 'skill').hit + 0.05);
+    applyBuff(b.foes[0], STATUS_EFFECTS['chill'], b.caster.id);
+    b.run(0.5);
+    expect(modifier(b.foes[0], 'moveSpeedMultiplier')).toBe(0.55);
+    expect(b.foes[1].hp).toBe(1e6);
+    expect(hasStatus(b.foes[1], 'slow')).toBeFalse();
+  });
+
+  it('a target dying before S1 arrives takes no ghost damage, Slow or target impact', () => {
+    const b = battle(2);
+    b.e.skills.use(b.caster, 'skill', kit().skill, b.foes[0]);
+    b.run(animTiming(b.caster.sprite, 'skill').hit + 0.05);
+    b.kill(b.foes[0]);
+    b.e.drainEvents();
+    b.run(0.5);
+    const events = b.e.drainEvents();
+    expect(events.some(e => e.type === 'damage')).toBeFalse();
+    expect(hasStatus(b.foes[0], 'slow')).toBeFalse();
+    expect(events.filter(e => e.type === 'impact').every(e => e.type === 'impact' && (e.hits?.length ?? 0) === 0)).toBeTrue();
   });
 
   it('Glassbind hits stacked occupants in 2×2; only previously Chilled recipients Root, all hit recipients Chill', () => {

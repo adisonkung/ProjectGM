@@ -113,7 +113,7 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 - Source death cancels; target death does not. Engine quiesce clears fields at wave advance/stage end.
 - Engine emits generic `FIELD_STARTED` / `FIELD_ENDED` events; production FX consumers remain pending approved art.
 - `moveSpeedMultiplier` slows combat movement; status conditions snapshot pre-hit recipient status.
-- Pending Mirelle skill presentation slots live in `core/data/mirelle-production.ts`; approved base sheet/portrait are registered, while skills retain the existing basic-attack fallback until individual production review.
+- Mirelle production/review states live in `core/data/mirelle-production.ts`. Base art and the supplied S1 character/projectile/impact cuts are registered. S1 uses provisional review playback; unproduced S2/Ult explicitly reuse the original basic-attack clip so their timing does not inherit S1.
 
 ### Monsters
 
