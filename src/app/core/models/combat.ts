@@ -24,6 +24,8 @@ export interface StatusModifiers {
   damageMultiplier?: number;
   /** multiplies attacks per second */
   attackSpeedMultiplier?: number;
+  /** multiplies voluntary movement speed (Slow), without changing base stats */
+  moveSpeedMultiplier?: number;
   /** multiplies incoming damage (e.g. Taunt guard ×0.60) */
   damageTakenMultiplier?: number;
   /** chance (0–1) to evade an incoming attack */
@@ -63,6 +65,8 @@ export interface StatusEffectDefinition {
   duration: number;
   stackPolicy: StackPolicy;
   maxStacks?: number;
+  /** opt-in refresh: retain the lower (stronger reduction) value of each modifier */
+  refreshModifiers?: 'MINIMUM';
   modifiers: StatusModifiers;
   flags?: StatusFlag[];
   tick?: StatusTick;
@@ -91,6 +95,7 @@ export interface StatusEffectDefinition {
 /**
  * Standard areas (logical grid cells, 8-direction distance):
  * SINGLE        exactly one target
+ * SQUARE_2      primary + one column toward enemy, two lanes (previous lane at bottom edge)
  * ADJACENT_8    centre cell + the 8 around it (3×3)
  * CROSS_1       centre + up / down / forward / behind
  * LINE_2/LINE_3 primary + the next 1 / 2 cells behind it along the attack direction
@@ -106,7 +111,7 @@ export interface StatusEffectDefinition {
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'SQUARE_2' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';
@@ -155,7 +160,17 @@ export type SkillEffect = SkillEffectCore & {
    */
   onHits?: number[];
 };
+export interface FieldDefinition {
+  area: 'SQUARE_2' | 'ADJACENT_8';
+  /** combat seconds; first pulse after interval, final pulse may land at duration */
+  duration: number;
+  interval: number;
+  /** pulse damage/statuses only; geometry is the field area, no nested fields */
+  effects: Extract<SkillEffect, { type: 'DAMAGE' | 'APPLY_STATUS' }>[];
+}
+
 export type SkillEffectCore =
+  | { type: 'FIELD'; field: FieldDefinition }
   /** damage the units of `area`; the primary target takes `primary`, the others `secondary` (never both) */
   | {
       type: 'DAMAGE'; area: AreaPattern; center?: AreaCenter; primary: number; secondary?: number;
@@ -199,6 +214,8 @@ export type SkillEffectCore =
       area?: AreaPattern; center?: AreaCenter; team?: 'ENEMY' | 'ALLY';
       /** only when the previous DAMAGE hit at least this many units */
       minHits?: number;
+      /** recipient status BEFORE this hit's effects; absent = unconditional */
+      when?: { status: string; present: boolean };
       duration?: number;
       /** skill rank: DoT / HoT magnitude = final ATK × potency (default 1) */
       potency?: number;

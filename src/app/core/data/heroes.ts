@@ -10,6 +10,8 @@ export const HEROES: HeroTemplate[] = [
   { id: 'linxue',   name: 'หลินเสวี่ย', cls: 'healer',   star: 3, sprite: 'hero-linxue.png' },
   { id: 'garrick',  name: 'การ์ริก',   cls: 'tank',     star: 3, sprite: 'hero-garrick.png' },
   { id: 'kael',     name: 'เคล',      cls: 'fighter',  star: 3, sprite: 'hero-kael.png' },
+  // Phase A: approved design; source images not available in cloud yet (token fallback).
+  { id: 'mirelle', name: 'มิเรลล์ ฟรอสต์กลาส', cls: 'mage', star: 3 },
 ];
 
 export const HERO_BY_ID: Record<string, HeroTemplate> = Object.fromEntries(HEROES.map(h => [h.id, h]));

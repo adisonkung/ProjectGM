@@ -16,6 +16,17 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Mirelle Frostglass — Phase A (2026-10-17, Codex)
+
+เพิ่ม `mirelle` / มิเรลล์ ฟรอสต์กลาส เป็น Mage 3★ · Control DPS · Classic Western Fantasy / Kingdom Adventurers. ใช้ stats/อุปกรณ์/AI ของ Mage เดิม ไม่เพิ่มคลาส ไม่แจก starter bench และไม่แก้บาลานซ์ฮีโร่อื่น
+
+- Kit: Frost Needle (single-target magic + Slow, แรงขึ้นถ้า Chilled), Glassbind (2×2 + Chill; Root เฉพาะคนที่ Chilled อยู่ก่อน), Winterglass Field (สนามคงที่ 3×3, ดาเมจเวทเบาเป็นระยะ + Slow + ลดความเร็วโจมตี)
+- กลไกทั่วไป: `moveSpeedMultiplier`, conditional `APPLY_STATUS.when`, `SQUARE_2`, `FIELD` / `FieldSystem`, rank traversal ภายในสนาม · Root/immunity/Unstoppable ใช้ของเดิม
+- **ค่า gameplay เป็น provisional**; ยังไม่มี final skill timing/Timeline Sync/VFX timing. ใช้ `TOKEN_TIMING` สำรองของระบบเดิม
+- Approved master/base แสดงในแชท แต่ไฟล์ไม่อยู่บน cloud. ยังไม่ลง `sprite`, `SHEETS`, `HERO_ART` หรือ `FX` ที่ชี้ไฟล์ไม่มีจริง · slots/semantic requirements อยู่ใน `core/data/mirelle-production.ts`
+- รายละเอียดค่า/stack/lifecycle/asset dependencies: `docs/MIRELLE_PHASE_A.md` · tests: `winter-scholar.spec.ts`, `fields.spec.ts`
+- **หยุดหลัง Phase A**; ขั้นต่อไป S1 production → user review → S1 Timeline Sync แล้วค่อย S2/Ult ตามลำดับ
+
 ## กฎที่ล็อกไว้
 - **Roster remodel (2026-10):** ตัวละครเก่าทั้งหมดถูกลบออกจากเกม (template, kit, sprite sheet, FX, portrait, ไอคอน, สคริปต์ภาพ) · roster ปัจจุบัน = `HEROES` ใน `core/data/heroes.ts` (ดูจากโค้ดเสมอ — 2026-10-16: bailong, yuezheng, moye, tangxun, linxue, garrick, kael) · ทีมเริ่มต้น/ม้านั่ง = `STARTER_TEAM` / `STARTER_BENCH` ใน `core/data/starter.ts` (`addMissingStarters` เติมให้เซฟเก่า) · กาชา: ดาวที่ยังไม่มีฮีโร่ สุ่มจากทั้ง roster แทน · เซฟเก่า: `dropRemovedHeroes()` (save.service) ถอดฮีโร่ที่ไม่มี template — ของที่สวมกลับกระเป๋า, ทีม/Training Slot/Hero Memory ลืมตัวนั้น · **เทสต์/ซิม** ใช้ roster เก่าผ่าน fixture `src/testing/legacy-roster.ts` (ลงทะเบียนฮีโร่เก่าแบบไม่มี sprite + kit + ทีมเริ่มต้นเก่า เพื่อทดสอบกลไกคลาส) — โค้ดแอปห้าม import · `SHIPPED_*` ใน fixture = ของที่เกมส่งจริง (`core/data/roster-remodel.spec.ts`) · `tools/sprites/aurel_v2.py` + `aurel_{bash,rush,ult}_vfx.py` + `bailong.py` = ไลบรารีร่วมของสคริปต์ฮีโร่ทุกตัว (ห้ามลบ)
 - ไม่มีตายถาวร และไม่มีบาดเจ็บ (ระบบบาดเจ็บถูกถอดออกในเฟส 3 — ฮีโร่ที่ล้มลงสนามรอบต่อไปได้ทันที, เซฟเก่าลบค่า `injury` ตอนโหลด)

@@ -3,7 +3,7 @@ import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition
 import { Cell } from '../../core/models/unit';
 import type { BattleEvent, BattleUnit } from './battle-engine';
 import { resolveArea } from './area';
-import { buffRemaining, hasFlag, hasStatus, tauntSource } from './buffs';
+import { attackSpeedReduction, buffRemaining, effectiveMoveSpeed, hasFlag, hasStatus, tauntSource } from './buffs';
 import { effectiveAttack } from './damage-resolver';
 import { BOARD_COLS, distance } from './grid';
 import { selectTarget } from './targeting';
@@ -153,7 +153,7 @@ export class MonsterController {
     const def = this.def(u);
     s.stateTime += dt;
     s.aliveTime += dt;
-    s.attackCooldownRemaining = Math.max(0, s.attackCooldownRemaining - dt);
+    s.attackCooldownRemaining = Math.max(0, s.attackCooldownRemaining - dt * attackSpeedReduction(u));
     // skill cooldowns (u.castSkills) and u.moveCd are counted down by the engine's shared status tick
     s.thinkTimer -= dt;
 
@@ -253,7 +253,7 @@ export class MonsterController {
       if (d < min && s.retreatSteps < (def.ai.maxRetreatSteps ?? 0) && u.moveCd <= 0 && !hasFlag(u, 'root')) {
         if (this.ctx.stepAway(u, t.pos, t.pos, st.attackRange)) {
           s.retreatSteps++;
-          u.moveCd = 1 / st.moveSpeed;
+          u.moveCd = 1 / effectiveMoveSpeed(u);
           this.setState(s, 'MOVING', 'move');
           return;
         }
@@ -312,7 +312,7 @@ export class MonsterController {
     if (hasFlag(u, 'root')) return this.setState(s, 'IDLE', 'idle');
     this.setState(s, 'MOVING', 'move');
     if (u.moveCd > 0) return;
-    if (this.ctx.stepToward(u, to, goal)) u.moveCd = 1 / this.def(u).stats.moveSpeed;
+    if (this.ctx.stepToward(u, to, goal)) u.moveCd = 1 / effectiveMoveSpeed(u);
   }
 
   // ------------------------------------------------------------------ targeting

@@ -26,7 +26,10 @@ export function rankDef(skillId: string, rank: number): SkillRankDefinition | nu
 /** a copy of the skill with the rank's totals applied (rank 1 → an equal copy) */
 export function rankedSkill(base: SkillDefinition, rank: number): SkillDefinition {
   const def = rankDef(base.id, rank);
-  const s: SkillDefinition = { ...base, effects: base.effects.map(e => ({ ...e }) as SkillEffect) };
+  const copy = (e: SkillEffect): SkillEffect => e.type === 'FIELD'
+    ? { ...e, field: { ...e.field, effects: e.field.effects.map(x => ({ ...x })) } }
+    : { ...e };
+  const s: SkillDefinition = { ...base, effects: base.effects.map(copy) };
   if (!def) return s;
   const caps = SKILL_RANK_LIMITS.ccCap;
   for (const fx of def.upgradeEffects) {
@@ -42,6 +45,10 @@ export function rankedSkill(base: SkillDefinition, rank: number): SkillDefinitio
 }
 
 function applyToEffect(e: SkillEffect, fx: SkillRankDefinition['upgradeEffects'][number], caps: Record<string, number>): void {
+  if (e.type === 'FIELD') {
+    for (const child of e.field.effects) applyToEffect(child, fx, caps);
+    return;
+  }
   switch (fx.type) {
     case 'DAMAGE':
       if (e.type === 'DAMAGE') {
@@ -170,6 +177,10 @@ export function skillLines(s: SkillDefinition): string[] {
   const out: string[] = [];
   for (const e of s.effects) {
     switch (e.type) {
+      case 'FIELD':
+        out.push(`สนาม ${e.field.area === 'ADJACENT_8' ? '3×3' : '2×2'} นาน ${e.field.duration} วิ · ทุก ${e.field.interval} วิ`);
+        out.push(...skillLines({ ...s, cooldown: undefined, effects: e.field.effects }));
+        break;
       case 'DAMAGE':
         out.push(`ดาเมจ ${pct(e.primary)} ATK` + (e.secondary != null && e.secondary !== e.primary ? ` (รอบข้าง ${pct(e.secondary)})` : ''));
         if (e.breakPower) out.push(`Break ${e.breakPower}`);
@@ -191,6 +202,11 @@ export function skillLines(s: SkillDefinition): string[] {
         const dt = e.modifiers?.damageTakenMultiplier ?? d?.modifiers.damageTakenMultiplier;
         if (e.status === 'taunt_guard' && dt != null) line += ` · ลดดาเมจ ${pct(1 - dt)}`;
         if (d?.tick) line += ` · ${pct(d.tick.perSecond * (e.potency ?? 1))} ATK/วิ`;
+        const move = e.modifiers?.moveSpeedMultiplier ?? d?.modifiers.moveSpeedMultiplier;
+        const speed = e.modifiers?.attackSpeedMultiplier ?? d?.modifiers.attackSpeedMultiplier;
+        if (move != null) line += ` · ความเร็วเดิน ${pct(move)}`;
+        if (speed != null) line += ` · ความเร็วโจมตี ${pct(speed)}`;
+        if (e.when) line += ` · เมื่อ${e.when.present ? 'มี' : 'ไม่มี'} ${STATUS_EFFECTS[e.when.status]?.name ?? e.when.status}`;
         out.push(line);
         break;
       }

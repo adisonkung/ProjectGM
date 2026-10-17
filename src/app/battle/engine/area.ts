@@ -1,6 +1,6 @@
 import { AreaCenter, AreaPattern } from '../../core/models/combat';
 import { Cell } from '../../core/models/unit';
-import { distance } from './grid';
+import { distance, LANES } from './grid';
 
 /** What the resolver needs of a unit */
 export interface AreaUnit {
@@ -83,6 +83,14 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
     case 'SINGLE':
       hit = primary && candidates.includes(primary) ? [primary] : [];
       break;
+    case 'SQUARE_2': {
+      // Primary cell + one column toward the enemy; choose the next lane, or the previous at the bottom edge.
+      const dc = primary ? direction(caster.pos, primary.pos, facing).dc : facing;
+      const r0 = Math.max(0, Math.min(LANES - 2, centerCell.r));
+      hit = candidates.filter(u => u.pos.r >= r0 && u.pos.r <= r0 + 1 &&
+        (u.pos.c === centerCell.c || u.pos.c === centerCell.c + dc));
+      break;
+    }
     case 'ADJACENT_8':
       hit = candidates.filter(u => distance(u.pos, centerCell) <= 1);
       break;

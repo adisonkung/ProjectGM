@@ -82,7 +82,7 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
   - Look kits up with `kitOf(heroId, cls)`.
   - Ranks come from `rankedKit()` (`core/rules/skill-ranks.ts`).
 - **Stats:** `core/rules/stats.ts` (`heroStats`, `LEVEL_GROWTH`) and `core/data/classes.ts` (`HERO_CLASS_BASE`, `STAR_STAT_MULTIPLIER`, gauge constants).
-- **Owned state:** `GameState.roster: OwnedHero[]` (star, level, exp, breakthroughTier, gear, skillRanks).
+- **Owned state:** `GameState.heroes: OwnedHero[]` (star, level, exp, breakthroughTier, gear, skillRanks).
 - **Art:** `core/data/hero-art.ts` (`HERO_ART`).
 
 ### Skill system
@@ -105,6 +105,15 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
   - modifiers;
   - flags `stun`, `root`, `silence`, `untargetable`, `broken`, `unstoppable`;
   - `counterStatus`.
+
+### Persistent combat fields (Mirelle Phase A)
+
+- `battle/engine/fields.ts`: `FieldSystem`, fixed cells, pulse interval/duration on the combat clock.
+- Hero `FIELD` effects create fields at activation; pulse effects query current occupants via `SkillSystem`.
+- Source death cancels; target death does not. Engine quiesce clears fields at wave advance/stage end.
+- Engine emits generic `FIELD_STARTED` / `FIELD_ENDED` events; production FX consumers remain pending approved art.
+- `moveSpeedMultiplier` slows combat movement; status conditions snapshot pre-hit recipient status.
+- Pending Mirelle presentation slots live in `core/data/mirelle-production.ts`; token fallback has no missing runtime art references.
 
 ### Monsters
 

@@ -193,6 +193,48 @@ export const CLASS_KITS: Record<HeroClass, HeroKit> = { tank, fighter, assassin,
 // ------------------------------------------------------------------ heroes with their own kit
 
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
+  // Mirelle Frostglass — The Winter Scholar (user 2026-10-17): Phase A provisional gameplay.
+  // Mage ids/rank tables retained. No skill clips or final VFX timing until individual user review.
+  mirelle: {
+    id: 'mirelle', cls: 'mage', identity: 'Control DPS · Chill Setup · Slow · Root Conversion · Area Denial',
+    kit: {
+      ...mage,
+      skill: {
+        ...mage.skill, name: 'เข็มเหมันต์', label: 'Frost Needle', target: 'CURRENT', delivery: 'PROJECTILE',
+        effects: [
+          { type: 'DAMAGE', area: 'SINGLE', primary: 1.2, damageType: 'MAGIC' },
+          { type: 'APPLY_STATUS', status: 'slow', to: 'HIT', duration: 2,
+            when: { status: 'chill', present: false } },
+          { type: 'APPLY_STATUS', status: 'slow', to: 'HIT', duration: 2,
+            when: { status: 'chill', present: true }, modifiers: { moveSpeedMultiplier: 0.55 } },
+        ],
+        ai: { tier: 'NORMAL' },
+      },
+      skill2: {
+        ...mage.skill2, name: 'พันธนาการแก้วเยือกแข็ง', label: 'Glassbind',
+        target: 'CLUSTER', fallback: ['CURRENT'],
+        effects: [
+          { type: 'DAMAGE', area: 'SQUARE_2', primary: 0.8, secondary: 0.8, damageType: 'MAGIC' },
+          { type: 'APPLY_STATUS', status: 'root', to: 'HIT', duration: 1,
+            when: { status: 'chill', present: true } },
+          { type: 'APPLY_STATUS', status: 'chill', to: 'HIT', duration: 4 },
+        ],
+        ai: { tier: 'HIGH_VALUE', minTargets: 1, countArea: 'SQUARE_2' },
+      },
+      ult: {
+        ...mage.ult, name: 'อาณาเขตแก้วเหมันต์', label: 'Winterglass Field', delivery: 'INSTANT',
+        effects: [{ type: 'FIELD', field: {
+          area: 'ADJACENT_8', duration: 6, interval: 1,
+          effects: [
+            { type: 'DAMAGE', area: 'ADJACENT_8', primary: 0.15, secondary: 0.15, damageType: 'MAGIC' },
+            { type: 'APPLY_STATUS', status: 'slow', to: 'AREA', area: 'ADJACENT_8', duration: 1.1 },
+            { type: 'APPLY_STATUS', status: 'frost_fatigue', to: 'AREA', area: 'ADJACENT_8', duration: 1.1 },
+          ],
+        } }],
+        ai: { tier: 'HIGH_VALUE', minTargets: 1, countArea: 'ADJACENT_8' },
+      },
+    },
+  },
   // 2026-10 remodel: per-hero kits of the shipped roster (the old roster lives only in src/testing/legacy-roster.ts)
   // เยว่เจิ้ง (Iron Mountain Bastion, 3★ Tank, remodel #2): Tank baseline numbers (ids / rank tables unchanged) —
   // only the names follow the character · Stone Guardian Lion / Mountain Seal Qi visuals come with the skill art

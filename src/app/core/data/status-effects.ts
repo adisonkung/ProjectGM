@@ -5,6 +5,18 @@ import { StatusEffectDefinition } from '../models/combat';
  * Poison is one definition used by Shade and Corvin: same source refreshes, different sources coexist.
  */
 export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
+  // Mirelle Phase A (2026-10-17, user): provisional control values, no new class.
+  slow: {
+    id: 'slow', name: 'เชื่องช้า', duration: 2, stackPolicy: 'REFRESH_DURATION',
+    refreshModifiers: 'MINIMUM', modifiers: { moveSpeedMultiplier: 0.75 },
+  },
+  chill: {
+    id: 'chill', name: 'เย็นเยือก', duration: 4, stackPolicy: 'REFRESH_DURATION', modifiers: {},
+  },
+  frost_fatigue: {
+    id: 'frost_fatigue', name: 'ความเหน็บหนาว', duration: 1.1, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { attackSpeedMultiplier: 0.9 },
+  },
   // ---- control
   taunted: {
     id: 'taunted', name: 'ถูกยั่วยุ', duration: 3, stackPolicy: 'REFRESH_DURATION',

@@ -12,9 +12,10 @@ import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../.
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
 import { resolveArea } from './area';
-import { ActiveBuff, applyBuff, dodgeChance, hasFlag, hasStatus, modifier, tauntSource, tickStatuses } from './buffs';
+import { ActiveBuff, applyBuff, dodgeChance, effectiveMoveSpeed, hasFlag, hasStatus, modifier, tauntSource, tickStatuses } from './buffs';
 import { breakRequiredOf, canStopCast, priorityOf, rankOf, SkillHost, SkillSystem, StatusApplyOptions } from './skill-system';
-import type { DamageKind, InterruptPriority, SkillSlot, SkillUseMode } from '../../core/models/combat';
+import type { AreaPattern, DamageKind, InterruptPriority, SkillSlot, SkillUseMode } from '../../core/models/combat';
+import { FieldSystem } from './fields';
 import { BattleMetrics } from './metrics';
 import { isRanged, Positioning, SAFE_DANGER } from './positioning';
 import { FormationRuntime } from './stage/formation';
@@ -37,6 +38,7 @@ const MIST_HUNTER_WINDOW = 3;
 export type BattleResult = 'win' | 'lose' | 'timeout';
 
 export type BattleEvent =
+  | { type: 'FIELD_STARTED' | 'FIELD_ENDED'; fieldId: number; src: number; at: Cell; area: AreaPattern; duration: number }
   | { type: 'attack'; src: number; dst: number }
   | { type: 'cast'; src: number; skill: string; kind: SkillKind; dst?: number }
   | { type: 'move'; src: number }
@@ -319,6 +321,10 @@ export class BattleEngine {
   readonly grid = new Grid(STACK_CAP);
   /** colliding projectiles currently flying */
   readonly projectiles: RuntimeProjectile[] = [];
+  readonly fields = new FieldSystem((f, state) => this.events.push({
+    type: state === 'start' ? 'FIELD_STARTED' : 'FIELD_ENDED', fieldId: f.id, src: f.sourceId, at: { ...f.center },
+    area: f.definition.area, duration: f.definition.duration,
+  }));
   /** runs every data-driven monster (one shared state machine) */
   readonly monsterAI: MonsterController;
   /** hero skills: targeting, AI tiers, effects (data in core/data/hero-skills.ts) */
@@ -475,6 +481,7 @@ export class BattleEngine {
 
   /** one COMBAT tick: pending hits, projectiles, every unit's timers + AI, reinforcements, glide */
   private combatStep(dt: number): void {
+    this.fields.tick(dt);
     this.runPending();
     this.updateProjectiles(dt);
     this.fightTime += dt;
@@ -528,7 +535,7 @@ export class BattleEngine {
       // cruise at the unit's own step rate (one cell per step interval) so the body is still travelling when the next
       // logical step arrives — the old ×1.15 got there early and stood still for a moment every cell (stop-and-go).
       // Falls behind by more than a cell (diagonals, knock-ups) → catches up proportionally.
-      const step = Math.min(d, Math.max(u.moveSpeed, 1) * Math.max(1, d) * dt);
+      const step = Math.min(d, (modifier(u, 'moveSpeedMultiplier') !== 1 ? effectiveMoveSpeed(u) : Math.max(u.moveSpeed, 1)) * Math.max(1, d) * dt);
       u.x += ((tx - u.x) / d) * step;
       u.y += ((ty - u.y) / d) * step;
     }
@@ -564,6 +571,7 @@ export class BattleEngine {
   private quiesce(reason: 'advance' | 'end'): void {
     this.pending = [];
     this.projectiles.length = 0;
+    this.fields.clear();
     for (const u of this.units) {
       if (u.casting) this.cancelCast(u, 'end');
       u.castLock = 0;
@@ -919,7 +927,7 @@ export class BattleEngine {
         greedyStep(this.grid, u.pos, goal.pos, blocked);
       // assassin without an active dive: never the first to make contact — no step past the allied frontline
       if (step && this.assassinHeldBack(u, step)) {
-        u.moveCd = 1 / u.moveSpeed;
+        u.moveCd = 1 / effectiveMoveSpeed(u);
         return;
       }
       if (step) {
@@ -927,7 +935,7 @@ export class BattleEngine {
         u.pos = step;
         this.events.push({ type: 'move', src: u.id });
       }
-      u.moveCd = 1 / u.moveSpeed;
+      u.moveCd = 1 / effectiveMoveSpeed(u);
     }
   }
 
@@ -1071,7 +1079,7 @@ export class BattleEngine {
     if (!step) return false;
     this.grid.move(u.id, u.pos, step.c);
     u.pos = step.c;
-    u.moveCd = 1 / u.moveSpeed;
+    u.moveCd = 1 / effectiveMoveSpeed(u);
     this.events.push({ type: 'move', src: u.id });
     this.metrics.assassinRetreats++;
     return true;
@@ -1201,7 +1209,7 @@ export class BattleEngine {
       if (!step) return;
       this.grid.move(u.id, u.pos, step);
       u.pos = step;
-      u.moveCd = 1 / u.moveSpeed;
+      u.moveCd = 1 / effectiveMoveSpeed(u);
       this.events.push({ type: 'move', src: u.id });
       if (u.intent === 'focus' && here < SAFE_DANGER && P.threatCount(step, zones) > 0) this.metrics.unsafeFocusChaseCount++;
     };
@@ -1241,7 +1249,7 @@ export class BattleEngine {
     if (!step || nearest(step) <= nearest(u.pos)) return;
     this.grid.move(u.id, u.pos, step);
     u.pos = step;
-    u.moveCd = 1 / u.moveSpeed;
+    u.moveCd = 1 / effectiveMoveSpeed(u);
     this.events.push({ type: 'move', src: u.id });
   }
 
@@ -1988,6 +1996,7 @@ export class BattleEngine {
         else self.metrics.reservedSkillMisses++;
       },
       later: (d, u, fn) => self.later(d, u, fn),
+      createField: (u, center, definition, pulse) => self.fields.add(u.id, center, definition, pulse, () => u.alive),
       shoot: (u, t, slot, sky, onArrive) => {
         const flight = sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
         self.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: slot, flight, ...(sky ? { sky } : {}) });

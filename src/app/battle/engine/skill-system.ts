@@ -1,6 +1,6 @@
 import { kitOf } from '../../core/data/hero-skills';
 import { SKILL_RANK_LIMITS } from '../../core/data/skill-ranks';
-import type { StatusModifiers } from '../../core/models/combat';
+import type { FieldDefinition, StatusModifiers } from '../../core/models/combat';
 
 /** per-application status options from a ranked skill (DoT / HoT potency, overridden modifiers) */
 export interface StatusApplyOptions {
@@ -32,6 +32,7 @@ export interface SkillHost {
   focus(u: BattleUnit): BattleUnit | null;
   /** run `fn` after `delay` s unless `u` dies first */
   later(delay: number, u: BattleUnit, fn: () => void): void;
+  createField(u: BattleUnit, center: Cell, definition: FieldDefinition, pulse: () => void): void;
   /** arrival-based projectile: `onArrive` runs when it lands (even if the shooter died meanwhile) */
   shoot(u: BattleUnit, t: BattleUnit, slot: SkillSlot, sky: boolean, onArrive: () => void): void;
   /** one hit through DamageResolver (+ dodge); false = missed / target gone */
@@ -166,7 +167,7 @@ export class SkillSystem {
         return this.stoppableCasts(u, s, inRange)[0] ?? null;
       case 'CLUSTER': {
         const min = s.ai?.minTargets ?? 2;
-        const score = (t: BattleUnit) => foes.filter(f => distance(f.pos, t.pos) <= 1).length;
+        const score = (t: BattleUnit) => s.ai?.countArea ? this.areaUnits(u, s, t, 'ENEMY', s.ai.countArea).length : foes.filter(f => distance(f.pos, t.pos) <= 1).length;
         const best = foes.filter(inRange).sort((a, b) => score(b) - score(a) || Number(b === current) - Number(a === current) || a.id - b.id)[0];
         return best && score(best) >= min ? best : null;
       }
@@ -609,7 +610,10 @@ export class SkillSystem {
   }
 
   /** run a skill's effects in order (primary may have died: areas centre on its last cell) */
-  applyEffects(u: BattleUnit, s: SkillDefinition, slot: SkillSlot, primary: BattleUnit, at: Cell): BattleUnit[] {
+  applyEffects(u: BattleUnit, s: SkillDefinition, slot: SkillSlot, primary: BattleUnit, at: Cell, areaOrigin?: Cell): BattleUnit[] {
+    const caster = areaOrigin ? { ...u, pos: areaOrigin } : u;
+    const conditional = s.effects.some(e => e.type === 'APPLY_STATUS' && e.when);
+    const before = new Map(conditional ? [u, primary, ...this.h.foes(u), ...this.h.allies(u)].map(t => [t.id, new Set(t.buffs.map(b => b.def.id))]) : []);
     const ghost = { ...primary, pos: at } as BattleUnit;
     const focusOf = (p: BattleUnit) => (p.alive || p === u ? p : ghost);
     let hits: BattleUnit[] = [];
@@ -618,6 +622,18 @@ export class SkillSystem {
     this.travelled = false;
     for (const e of s.effects) {
       switch (e.type) {
+        case 'FIELD': {
+          const center = { ...at };
+          const origin = { ...u.pos };
+          // Never retain the aimed unit: even when it moves / dies, the field keeps this cell.
+          const anchor = { ...primary, pos: center, alive: false };
+          const pulse: SkillDefinition = { ...s, effects: e.field.effects.map(effect =>
+            effect.type === 'DAMAGE' || effect.to === 'AREA'
+              ? { ...effect, area: e.field.area, center: 'TARGET' } : effect),
+          };
+          this.h.createField(u, center, e.field, () => this.applyEffects(u, pulse, slot, anchor, center, origin));
+          break;
+        }
         case 'DAMAGE': {
           const foes = this.h.foes(u);
           const p = focusOf(primary);
@@ -649,7 +665,7 @@ export class SkillSystem {
             this.travelled = true;
             break;
           }
-          const targets = e.area === 'ALL_ENEMIES' ? foes : resolveArea({ pattern: e.area, caster: u, primary: p, center: e.center, candidates: foes });
+          const targets = e.area === 'ALL_ENEMIES' ? foes : resolveArea({ pattern: e.area, caster, primary: p, center: e.center, candidates: foes });
           hits = [];
           for (const [k, f] of targets.entries()) {
             // the pierced units further down the line: hit when the blade gets there (own impact event, index k)
@@ -686,7 +702,7 @@ export class SkillSystem {
           const targets =
             e.area === 'PRIMARY' ? (primary.alive && primary.side === u.side ? [primary] : [])
               : resolveArea({
-                pattern: e.area, caster: u, primary: e.center === 'TARGET' && primary.alive && primary.side === u.side ? primary : u,
+                pattern: e.area, caster, primary: e.center === 'TARGET' && primary.alive && primary.side === u.side ? primary : u,
                 center: e.center ?? 'SELF', candidates: allies,
               }).filter(a => !(e.skipPrimary && a === primary));
           const boost = rankPower(u, slot) * (u.mods?.healing ?? 1);
@@ -703,15 +719,18 @@ export class SkillSystem {
           else if (e.to === 'PRIMARY') targets = primary.alive ? [primary] : [];
           else {
             const pool = e.team === 'ALLY' ? this.h.allies(u) : this.h.foes(u);
-            targets = resolveArea({ pattern: e.area ?? 'SINGLE', caster: u, primary: focusOf(primary), center: e.center, candidates: pool });
+            targets = resolveArea({ pattern: e.area ?? 'SINGLE', caster, primary: focusOf(primary), center: e.center, candidates: pool });
           }
           const opts = e.potency != null || e.modifiers ? { potency: e.potency, modifiers: e.modifiers } : undefined;
-          for (const t of targets) this.h.applyStatus(t, e.status, u, e.duration, opts);
+          for (const t of targets) {
+            if (e.when && (before.get(t.id)?.has(e.when.status) ?? false) !== e.when.present) continue;
+            this.h.applyStatus(t, e.status, u, e.duration, opts);
+          }
           break;
         }
         case 'INTERRUPT': {
           const foes = this.h.foes(u);
-          for (const f of resolveArea({ pattern: e.area, caster: u, primary: focusOf(primary), center: e.center, candidates: foes })) {
+          for (const f of resolveArea({ pattern: e.area, caster, primary: focusOf(primary), center: e.center, candidates: foes })) {
             if (f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
           }
           break;

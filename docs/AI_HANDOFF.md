@@ -1,56 +1,43 @@
 # Current Development State
 
-**Git is authoritative.** This file is only a handoff note. Keep it short and update it at the end of every task (on the `wip/*` branch if the task is unfinished).
+Git is authoritative. Query current commit/tree with `git rev-parse HEAD HEAD^{tree}`; this note never records its containing commit as a sync base.
 
-Never take the current commit or tree from this file. Query it on each side:
-- `git rev-parse HEAD`
-- `git rev-parse HEAD^{tree}`
+Last task:
+Mirelle Frostglass — The Winter Scholar, Phase A (Codex, user-approved 2026-10-17): existing Mage, Control DPS, hero/kit registration, generic Slow/conditional status/2×2 area/persistent fields, provisional presentation slots and tests. No final S1/S2/Ult timing, skill art or Timeline Sync Sheet. Stop after Phase A.
 
-This note never stores the hash of the commit that contains it (see `docs/PROJECT_RULES.md` §5).
+Branch:
+`wip/codex-hero-mirelle`, created from cached `origin/master`. Fetch and initial branch push failed because the configured proxy could not connect. Latest GitHub state and the user's local clone cannot be verified here. No master branch was edited or pushed. No other task branch was changed.
 
-Last completed task:
-Rule update (user, 2026-10-16): GitHub `origin/master` is the shared remote handoff point. Agents work on task branches, push only the task branch, and `master` changes only by merge after review. This change is documentation only, on branch `feature/github-remote-handoff`.
+Last confirmed local commit (previously verified base, unchanged):
+`3a61ffba88f1004661f73e06d271adb6569d2396`
 
-Last commit:
-Query it with `git log -1`. Use `git log -1 -- docs/AI_HANDOFF.md` only to locate the last handoff-note commit. That commit is **not** automatically a confirmed sync point.
-
-Last confirmed local commit:
-`3a61ffba88f1004661f73e06d271adb6569d2396` (local `master`) — "docs: rule set approved by the user (canonical)". The local and cloud copies were both verified at this commit.
-
-Last confirmed common tree:
+Last confirmed common tree (previously verified base, unchanged):
 `fc3456568a99d3b449a21fce552f4b3b0800b83c`
 
-Agent:
-Claude (cloud copy → patch → `git am --3way` into `/Users/webuild/ProjectGM`)
+Implementation:
+- `HEROES` now has 8 shipped templates; Mirelle is `mirelle`, Mage 3★, no starter/bench grant.
+- Class IDs/rank tables retained. R1: Frost Needle 120% magic + Slow 25% (45% if Chilled); Glassbind 2×2 80% magic + Chill, previous Chill → Root 1 s; Winterglass Field 3×3, 6 s, 15% magic per second + Slow 25% / attack-speed reduction 10%.
+- All values are provisional gameplay parameters. No new class or existing hero/stage rebalance.
+- Generic `FIELD` / `FieldSystem`: fixed center, current occupants, combat-clock pulses, source-death cancellation, target-death independence, cleared on advance/end. Short control lingers at most 1.1 s after exit.
+- Negative attack-speed modifiers now slow the monster cooldown clock; legacy positive-haste behavior is preserved.
+- `mirelle-production.ts` contains pending asset/clip/event requirements only. Runtime uses existing token timing; no missing sprite/FX URLs are registered.
 
-Current branch:
-`feature/github-remote-handoff` (branched from local `master` 3a61ffb).
-- **Remote is stale:** GitHub `origin/master` is `3c23b91`, 35 commits behind local `master`. Until the user pushes local `master`, the latest reviewed work exists only in the local clone.
+Assets:
+User approved Master Character Reference and Base Combat images in chat. Neither original file is available in this cloud filesystem; `/Users/webuild/Downloads/...` is not mounted. Preserve the exact approved Western fantasy design. No replacement art was generated. Base-sprite cutting/portrait/runtime art registrations remain pending source access. No sprites changed, so optimizer is not required for this phase.
 
-Working tree expected:
-Clean.
+Validation:
+- App/spec typechecks pass. Full Karma: 631/631 passed (includes 20 new cases).
+- Default `hero-sim -- 10` passed: F1–4/F6 100%; F5/F7/F9/F10 0%; F8 AUTO 0% / TACTICAL 50%. Known balance issues preserved.
+- Production build blocked by unavailable Google Fonts/proxy. Offline development build and Mirelle-team sim validation in progress.
 
-Active WIP branches:
-- `feature/github-remote-handoff`: this rule update, waiting for the user's review and merge.
-
-Tests:
-- Docs-only change. No gameplay tests were run.
-- The last full run was Karma 611/611 with `tsc` app and spec clean, on 2026-10-16 before the documentation commits.
-
-Known issues:
-- Shipped-roster balance is deferred until the roster is complete:
-  - hero-sim F5 is 0 % (clip lengths);
-  - F7–F10 are ≈ 0 %.
-- `DEV_FLAGS.fullUltAtStart` is ON.
-- Tang Xun ult surround blades launch about 2.2 cells before the target, so they appear behind him when he stands 1 cell away. This predates the latest changes.
-
-Next suggested task:
-1. The user pushes local `master` to `origin` and reviews / merges `feature/github-remote-handoff`.
-2. Continue the hero roster. A new hero is a long task, so start a `wip/` branch first and read `HEROES` before choosing the next hero.
+Details:
+`docs/MIRELLE_PHASE_A.md`, `core/data/mirelle-production.ts`, `battle/engine/{fields,winter-scholar}.spec.ts`.
 
 Next agent must inspect:
-- `git rev-parse HEAD` and `git rev-parse HEAD^{tree}` on both sides;
-- `git fetch origin`, then `git rev-list --left-right --count master...origin/master` (is the remote up to date?);
-- `git log 3a61ffb..master` (local), i.e. the commits after the confirmed base;
-- `AGENTS.md`;
-- `docs/PROJECT_RULES.md` §2, §4 and §5.
+- Git branch/status/history and fresh remote refs; remote availability is unresolved.
+- Current `HEROES`, `HERO_DEFINITIONS`, status/field/rank systems and Phase A tests.
+- Approved source-image availability before baking any asset.
+- Stop boundary: S1 production → user review → S1 Timeline Sync → S2 production/review/sync → Ult production/review/sync. Do not skip reviews or create final timing in Phase A.
+
+Known pre-existing issues:
+Balance remains deferred until the roster is complete; shipped-roster F5/F7–F10 issues remain. `DEV_FLAGS.fullUltAtStart` remains ON. Tang Xun ult surround positioning issue is unchanged.

@@ -52,6 +52,13 @@ export function applyBuff(
         return 'stacked';
       default:
         // REFRESH_DURATION / INDEPENDENT_BY_SOURCE (same source)
+        if (def.refreshModifiers === 'MINIMUM') {
+          const modifiers: StatusModifiers = { ...def.modifiers };
+          for (const key of Object.keys(cur.def.modifiers) as (keyof StatusModifiers)[]) {
+            modifiers[key] = Math.min(cur.def.modifiers[key] ?? 1, modifiers[key] ?? 1);
+          }
+          cur.def = { ...def, modifiers };
+        }
         cur.remaining = duration;
         cur.sourceId = sourceId;
         cur.magnitude = magnitude || cur.magnitude;
@@ -115,3 +122,11 @@ export const tauntSource = (u: Buffable): number | null => {
   const t = u.buffs.filter(b => b.def.flags?.includes('taunted')).sort((a, b) => b.remaining - a.remaining)[0];
   return t ? t.sourceId : null;
 };
+
+/** Effective combat movement speed, shared by heroes, monsters and visual glide. */
+export const effectiveMoveSpeed = (u: Buffable & { moveSpeed: number }): number =>
+  Math.max(0.01, u.moveSpeed * modifier(u, 'moveSpeedMultiplier'));
+
+/** Monster controller preserves its legacy haste behavior; only negative status factors slow its cooldown clock. */
+export const attackSpeedReduction = (u: Buffable): number =>
+  u.buffs.reduce((m, b) => m * Math.pow(Math.min(1, b.def.modifiers.attackSpeedMultiplier ?? 1), b.stacks), 1);
