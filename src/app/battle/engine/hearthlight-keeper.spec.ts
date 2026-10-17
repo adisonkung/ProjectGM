@@ -95,6 +95,32 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     b.apply('skill2'); expect(b.caster.shield).toBe(1500);
   });
 
+  it('S2 grants once at activation and targets self correctly without healing or enemy damage', () => {
+    const b = battle(); b.caster.hp = 1000;
+    expect(b.e.skills.pickTarget(b.caster, kit().skill2, b.foe)).toBe(b.caster);
+    b.e.skills.use(b.caster, 'skill2', kit().skill2, b.caster);
+    b.run(0.45); expect(b.caster.shield).toBe(0);
+    b.run(0.05); expect(b.caster.shield).toBe(1500);
+    const events = b.e.drainEvents();
+    expect(events.filter(e => e.type === 'shield').length).toBe(1);
+    const impact = events.find(e => e.type === 'impact');
+    if (impact?.type !== 'impact') throw new Error('Missing shield impact');
+    expect(impact.hits).toEqual([b.caster.id]);
+    expect(events.some(e => e.type === 'heal' || e.type === 'damage' || e.type === 'projectile')).toBeFalse();
+    b.run(1.5); expect(b.e.drainEvents().some(e => e.type === 'shield')).toBeFalse();
+  });
+
+  it('S2 does not shield a dead recipient or grant protection when the caster dies during anticipation', () => {
+    for (const dies of ['target', 'caster']) {
+      const b = battle(), a = b.allies[1];
+      b.e.skills.use(b.caster, 'skill2', kit().skill2, a);
+      if (dies === 'target') { a.alive = false; a.hp = 0; } else { b.caster.alive = false; b.caster.hp = 0; }
+      b.run(0.65); expect(a.shield).toBe(0);
+      const events = b.e.drainEvents(); expect(events.some(e => e.type === 'shield')).toBeFalse();
+      for (const e of events) if (e.type === 'impact') expect(e.hits).toEqual([]);
+    }
+  });
+
   it('Ult protects exactly the home 6×3 occupants immediately and tracks movement without lingering buffs', () => {
     const b = battle(); b.apply('ult');
     const f = b.e.fields.active[0];

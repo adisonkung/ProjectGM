@@ -1,5 +1,7 @@
 # Elira Dawnmere — Keeper of the Hearthlight · Phase A
 
+Subsequent S2 integration:see `ELIRA_S2_REVIEW.md`; S1/S2 now have separate provisional clips, Ult remains on its base fallback.
+
 Subsequent S1 source integration (2026-10-18): see `ELIRA_S1_REVIEW.md`. S1 now has its supplied row/Main/Impact and provisional review timing; base-only fallback descriptions below are historical. S2/Ult and Final Timeline Sync remain pending.
 
 User authorized the reported foundation plan on 2026-10-17. Classic Fantasy — Kingdom Adventurers. This checkpoint delivers approved base art plus provisional gameplay; it is not finished skill/VFX production or Final Timeline Sync.

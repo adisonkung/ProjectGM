@@ -131,8 +131,8 @@ export type SkillPick = { slot: SkillSlot; skill: SkillDefinition; target: Battl
  * All numbers come from SkillDefinitions (core/data/hero-skills.ts); nothing here names a hero.
  */
 export class SkillSystem {
-  /** allies the last applyEffects healed (impact `hits` of a heal-only skill) */
-  private healed: BattleUnit[] = [];
+  /** allies the last applyEffects healed, shielded or selected for revival (support-only impact recipients) */
+  private supported: BattleUnit[] = [];
   /** the last applyEffects launched a travelling wave (it emits its own impacts per collision) */
   private travelled = false;
 
@@ -560,8 +560,8 @@ export class SkillSystem {
       const dst = primary.alive ? primary.id : undefined;
       const hits = this.applyEffects(u, skill, slot, primary, at);
       connected[index] = hits.includes(primary);
-      // a heal-only hit has no damaged units: its impact lists the allies it healed (per-ally heal FX)
-      const shown = hits.length ? hits : this.healed;
+      // a support-only hit has no damaged units: its impact lists the actual affected allies
+      const shown = hits.length ? hits : this.supported;
       // a travelling wave reports its own impacts per collision — none at the release
       if (slot !== 'attack' && !this.travelled) {
         // contact presentation after the effects resolved: which units this hit really damaged (impact FX per target)
@@ -625,7 +625,7 @@ export class SkillSystem {
     const focusOf = (p: BattleUnit) => (p.alive || p === u ? p : ghost);
     let hits: BattleUnit[] = [];
     const damaged = new Set<BattleUnit>();
-    this.healed = [];
+    this.supported = [];
     this.travelled = false;
     for (const e of s.effects) {
       switch (e.type) {
@@ -714,7 +714,7 @@ export class SkillSystem {
                 center: e.center ?? 'SELF', candidates: allies,
               }).filter(a => !(e.skipPrimary && a === primary));
           const boost = rankPower(u, slot) * (u.mods?.healing ?? 1);
-          for (const a of targets) if (!this.healed.includes(a)) this.healed.push(a);
+          for (const a of targets) if (!this.supported.includes(a)) this.supported.push(a);
           for (const a of targets) this.h.heal(a, (effectiveAttack(u) * e.atk + a.maxHp * (e.maxHpPct ?? 0)) * boost, u);
           if (slot === 'attack' && targets.length) this.h.basicGauge(u);
           break;
@@ -753,14 +753,16 @@ export class SkillSystem {
         }
         case 'SHIELD':
           for (const a of e.to === 'PRIMARY' ? (primary.alive && primary.side === u.side ? [primary] : []) : this.h.allies(u)) {
-            this.h.shield(u, a, Math.round(u.maxHp * (a === u ? e.selfPct : e.allyPct) * rankPower(u, slot) * (u.mods?.shieldPower ?? 1)), e.duration);
+            const amount = Math.round(u.maxHp * (a === u ? e.selfPct : e.allyPct) * rankPower(u, slot) * (u.mods?.shieldPower ?? 1));
+            this.h.shield(u, a, amount, e.duration);
+            if (amount > 0 && !this.supported.includes(a)) this.supported.push(a);
           }
           break;
         case 'REVIVE': {
           if (e.delay) {
             // REVIVE_TARGET slot: pick now (runtime rule = the host's dead-ally order), revive after the cue
             const picks = this.h.deadAllies(u).filter(d => this.h.canRevive?.(d) ?? true).slice(0, e.count);
-            for (const d of picks) if (!this.healed.includes(d)) this.healed.push(d);
+            for (const d of picks) if (!this.supported.includes(d)) this.supported.push(d);
             if (picks.length) this.h.later(e.delay, u, () => picks.forEach(d => this.h.revive(u, d, e.hpPct)));
             break;
           }

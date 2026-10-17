@@ -1,5 +1,7 @@
 # Elira — Hearthlight Blessing · S1 visual review
 
+Subsequent S2 integration:see `ELIRA_S2_REVIEW.md`. Combined rebakes now also require S2 source as the fifth directory argument. S1 art/timing/kit remain unchanged; historical S2-pending statements below describe the S1 checkpoint.
+
 2026-10-18, Codex. User supplied `elira_s1.zip` and requested Skill1. Continue the existing Elira WIP branch; S1 is provisional visual review, not Final Timeline Sync or balance approval.
 
 ## Reconciliation and source audit

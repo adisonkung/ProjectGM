@@ -254,3 +254,8 @@ Engine results become progression through `ProgressionService`.
 ### Spatial field auras (Elira Phase A, 2026-10-17)
 
 `FieldDefinition.anchor: HOME_ZONE` selects a fixed source-side home-zone anchor through shared `fieldAnchor()`. `RECT_6X3` resolves18 board cells; even-width integer anchors use columns−2 through+3. FieldSystem stores source side and resolves `aura` team/modifiers against current logical occupancy and living source on each query. Units expose `Buffable.auraModifiers`, composed with timed buffs by `modifier()`/`dodgeChance()` and the existing DamageResolver. No buff instance is copied to recipients, so entry/exit, source death and field clear leave no timed residue. Positive-field AUTO checks use the same anchor/area. Existing pulse damage fields keep their scheduler behavior; aura protection does not wait for a pulse. Elira has no registered dome art yet.
+
+
+### Support-only impacts and review vitals (Elira S2,2026-10-18)
+
+`SkillSystem` records positive SHIELD recipients alongside healed/revive-selected allies for support-only impact metadata. Grant amounts/counts remain on the existing shield host; presentation can target actual recipients including self. Sprite-lab `ReviewSample.vitals` snapshots real HP/shield percentages so one-shot ceremonies are independent of actual shield-bar expiry. Reset clears this lab state.

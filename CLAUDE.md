@@ -291,3 +291,8 @@ Generic FieldDefinition HOME_ZONE anchor/aura + RECT_6X3 area. Buffable live aur
 ### Elira S1 review (Codex, 2026-10-18)
 
 Supplied elira_s1.zip adds10 character poses plus8-stage caster Main and target Impact; no separate Charge. Atlas10×8,base rows pixel-identical,S2/Ult blank. Trial12FPS:MainF3(.1667s/engine.20),single HealF7(.50s),recoveryF9(.6667),end.8333. Prior heal.35s engine/end.595s,so this changes provisional combat timing. Main ground ring surrounds caster under character rather than floating at optional workbook staff-head;target Impact starts on real heal and lasts.6s beyond recovery. Kit values/CD/ranks unchanged. Generic sprite lab now creates real injured allied targets for LOWEST_HP_ALLY review,emits actual positive heal floats/log and uses real impact recipients. Final Sync and S2/Ult pending;see docs/ELIRA_S1_REVIEW.md.
+
+
+### Elira S2 review (Codex,2026-10-18)
+
+Supplied10 S2 poses/16-stage pastel Main/8-stage Impact. Atlasrow6,base+S1 pixels identical,Ult blank. Trial12FPS:one shieldF7/.50s,recovery.6667/end.8333,prior fallback.35s engine/end.595. Kit15%casterMaxHP/4s/CD15 and all S1/Ult/basic values/timings unchanged. Target ceremony16×118×148/1.333s,Impact8×80×103/.6s,follow recipient;both use actual positive shield recipients,not early workbookF5. Painted dividers removed only from derived bake;pastel matte recovery retains ribbons. No separate Charge/stable loop/DR/field. Generic support-only impact metadata now includes shielded allies,self included;lab snapshots real HP/shield bars and one PROTECTION_APPLY. Combined bake now requires S1+S2 sources. Final Sync pending;docs/ELIRA_S2_REVIEW.md.

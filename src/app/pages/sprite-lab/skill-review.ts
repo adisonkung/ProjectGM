@@ -13,6 +13,7 @@ export interface ReviewTarget { id: number; pos: Cell; statuses?: string[] }
 export interface ReviewSample {
   t: number;
   events: BattleEvent[];
+  vitals: Record<number, { hpPct: number; shieldPct: number }>;
   statuses: Record<number, { id: string; left: number; sourceId: number }[]>;
 }
 
@@ -48,8 +49,9 @@ export function skillReview(heroId: string, slot: SkillKind, casterCell: Cell, t
     place(u, targets[i].pos);
     ids.set(u.id, targets[i].id);
     // Training HP keeps all four targets visible; source hero uses its real 3★ Lv1 stats.
-    u.maxHp = 100000;
-    u.hp = alliedTargets ? (i === 0 ? 40000 : 70000) : u.maxHp;
+    // Keep realistic recipient HP for shields so their bar is visible; damage fixtures remain durable.
+    if (!alliedTargets || !skill.effects.some(e => e.type === 'SHIELD')) u.maxHp = 100000;
+    u.hp = alliedTargets ? u.maxHp * (i === 0 ? 0.4 : 0.7) : u.maxHp;
     for (const status of targets[i].statuses ?? []) {
       if (STATUS_EFFECTS[status]) applyBuff(u, STATUS_EFFECTS[status], caster.id);
     }
@@ -59,6 +61,8 @@ export function skillReview(heroId: string, slot: SkillKind, casterCell: Cell, t
   const start = engine.time;
   const samples: ReviewSample[] = [];
   const snapshot = () => samples.push({ t: engine.time - start, events: engine.drainEvents(),
+    vitals: Object.fromEntries(engine.units.filter(u => ids.has(u.id)).map(u =>
+      [ids.get(u.id)!, { hpPct: u.hp / u.maxHp * 100, shieldPct: u.shield / u.maxHp * 100 }])),
     statuses: Object.fromEntries(engine.units.filter(u => ids.has(u.id)).map(u =>
       [ids.get(u.id)!, u.buffs.map(b => ({ id: b.def.id, left: b.remaining, sourceId: ids.get(b.sourceId) ?? b.sourceId }))])) });
   snapshot();

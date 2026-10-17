@@ -112,6 +112,7 @@ export class SpriteLabComponent implements OnDestroy {
   readonly engineReview = this.qp.get('combat') === '1';
   readonly initialStatus = this.qp.get('status') ?? '';
   private readonly dummyIds = this.qp.get('formation') === 'square' ? [2, 3, 4, 5] : DUMMY_IDS;
+  private readonly reviewVitals = signal<Record<number, { hpPct: number; shieldPct: number }>>({});
   private readonly reviewStatuses = signal<Record<number, { id: string; left: number }[]>>({});
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
@@ -190,7 +191,7 @@ export class SpriteLabComponent implements OnDestroy {
     const hc = left ? 8 : 5;
     const b = this.blinked();
     return [
-      { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left,
+      { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left, ...(this.reviewVitals()[HERO_ID] ?? {}),
         blink: !!b, blinkFade: !b?.ownFade },
       ...this.comparisonHeroes.filter(other => other.id !== h.id).map((other, i) => ({
         ...base, id: 100 + i, side: 'ally' as const, name: other.name, cls: other.cls,
@@ -198,7 +199,8 @@ export class SpriteLabComponent implements OnDestroy {
       })),
       ...this.dummyIds.map((id, i) => ({
         ...base, id, side: support ? 'ally' as const : 'enemy' as const,
-        hpPct: support ? (i === 0 ? 40 : 70) : 100,
+        hpPct: this.reviewVitals()[id]?.hpPct ?? (support ? (i === 0 ? 40 : 70) : 100),
+        shieldPct: this.reviewVitals()[id]?.shieldPct ?? 0,
         name: support ? 'พันธมิตรฝึก' : this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
         r: this.dummyIds.length === 4 ? 1 + Math.floor(i / 2) : 1,
         c: hc + (this.targetDistance + (this.dummyIds.length === 4 ? i % 2 : i)) * (left ? -1 : 1),
@@ -374,6 +376,7 @@ export class SpriteLabComponent implements OnDestroy {
     const id = (n: number) => review.ids.get(n)!;
     for (const sample of review.samples) this.at(sample.t, () => {
       this.reviewStatuses.set(sample.statuses);
+      this.reviewVitals.set(sample.vitals);
       this.fieldVisuals.advance(sample.t);
       this.statusVisuals.sync(Object.entries(sample.statuses).flatMap(([target, buffs]) => buffs.filter(b => b.left > 0).map(b => ({
         target: Number(target), source: b.sourceId, status: b.id,
@@ -405,6 +408,12 @@ export class SpriteLabComponent implements OnDestroy {
           }
         } else if (e.type === 'impact') {
           this.spawn(kind, { on: 'impact', hit: e.index }, (e.hits ?? []).map(id));
+        } else if (e.type === 'shield') {
+          const target = units.find(u => u.id === id(e.dst))!;
+          const f: FloatText = { id: ++this.id, r: target.r, c: target.c, text: `+โล่ ${e.amount}`, kind: 'shield' };
+          this.floats.update(l => [...l, f]);
+          this.note(sample.t, `PROTECTION_APPLY → ${target.id} (+${e.amount})`);
+          this.at(0.9, () => this.floats.update(l => l.filter(x => x.id !== f.id)));
         } else if (e.type === 'heal') {
           const target = units.find(u => u.id === id(e.dst))!;
           const f: FloatText = { id: ++this.id, r: target.r, c: target.c, text: `+${e.amount}`, kind: 'heal' };
@@ -452,5 +461,6 @@ export class SpriteLabComponent implements OnDestroy {
     this.fx.set([]);
     this.floats.set([]);
     this.reviewStatuses.set({});
+    this.reviewVitals.set({});
   }
 }

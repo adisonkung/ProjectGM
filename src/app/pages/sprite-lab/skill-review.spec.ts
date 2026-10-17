@@ -143,3 +143,23 @@ describe('targeted support skill review', () => {
     expect(impact.hits!.map(id => review.ids.get(id))).toEqual([2]);
   });
 });
+
+describe('Sanctuary Veil support-only impact and shield lifetime', () => {
+  it('grants one shield to the actual selected ally at F7 and reports its expiry independently of the flare', () => {
+    const review = skillReview('elira', 'skill2', { r: 1, c: 5 }, [{ id: 2, pos: { r: 1, c: 8 } }, { id: 3, pos: { r: 1, c: 9 } }]);
+    const events = review.samples.flatMap(s => s.events);
+    const grants = review.samples.filter(s => s.events.some(e => e.type === 'shield'));
+    expect(grants.length).toBe(1); expect(grants[0].t).toBeCloseTo(0.5, 6);
+    const shield = events.find(e => e.type === 'shield')!;
+    if (shield.type !== 'shield') throw new Error('Missing shield');
+    expect(review.ids.get(shield.dst)).toBe(2);
+    expect(shield.amount).toBeGreaterThan(0);
+    const impacts = events.filter(e => e.type === 'impact');
+    expect(impacts.length).toBe(1);
+    if (impacts[0].type === 'impact') expect(impacts[0].hits!.map(id => review.ids.get(id))).toEqual([2]);
+    expect(events.some(e => e.type === 'damage' || e.type === 'heal' || e.type === 'projectile')).toBeFalse();
+    expect(review.samples.find(s => s.t >= 2)!.vitals[2].shieldPct).toBeGreaterThan(0);
+    expect(review.samples.at(-1)!.vitals[2].shieldPct).toBe(0);
+    expect(review.samples.at(-1)!.vitals[3].shieldPct).toBe(0);
+  });
+});

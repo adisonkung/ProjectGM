@@ -2,7 +2,20 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — Elira S1 visual review (Codex, 2026-10-18)
+## Latest follow-up — Elira S2 visual review (Codex,2026-10-18)
+
+User supplied elira_s2.zip and requested Skill2 next. Fresh master72a3f34/task1104816;clean tree. Preserve S1 local a905265 on wip/codex-hero-elira-s1-local;rebase onto identical-content published1104816 skipped duplicate. Continue fast-forward task-branch publication only;no master merge/deletion or new canonical-local sync claim.
+
+- Supplied S2 character10 poses,Main16 stages,Impact8 stages,provisional workbook. Row6/scale.26440678/body78px/260×170/root130,155;base+S1 pixels identical,Ult blank,other heroes/portrait/basic/S1FX unchanged. Combined bake now requires S1+S2 sources. Guide dividers removed only from derived strips;pastel matte recovery retains ivory/peach/lavender and gold instead of whitening the whole effect. Source PNG/XLSX hashes unchanged;docs/ELIRA_S2_REVIEW.md.
+- Trial12FPS:F7shield.50s,recovery.6667/end.8333(.85s engine). Prior fallback.34s nominal/.35s engine/end.595s;activation+.15s engine/cast-lock+.2383s. Kit15%casterMaxHP/4s/CD15,class cooldown/ranks/gear and all S1/Ult/basic timings/values unchanged.
+- Main16×118×148/pivot.5,.905405/fit1.25cells,recipient feet,under character/follow;Impact8×80×103/fit.85/body−22/follow. Both spawn only from actual positive shield recipients at activation. Main1.333s/Impact.6s are one-shot ceremonies,not stable loops or shield lifetime;no Charge/DR/field/extra grant invented.
+- Generic support-only impact metadata includes positive shield recipients,self included,alongside existing heal/revive recipients. Shield host/amount/grant count unchanged. Lab snapshots real HP/shieldPct,uses realistic recipient HP for shield fixtures,shows actual positive shield floats and one PROTECTION_APPLY. Reset clears vitals/views/timers. No player save change.
+- App/spec/sim checks,optimizer,703/703Karma and production build pass. New tests cover one F7 grant/self impact/dead target/dead caster,actual recipient/expiry beyond Main,no damage/heal/projectile;existing S1/healer/field/absorption regressions pass. Source/base+S1/lossless optimized character/blank Ult/FX guard checks pass;older optimized files unchanged.
+- Elira-team10-run/floor/bot smoke completed;results in ELIRA_S2_REVIEW.md/current session logs. No balance tuning. Native DPR2 Pixi/DOM left/right and reset-during-anticipation capture verifies one PROTECTION_APPLY,target shield still active after flare,zero after expiry,zero errors/missing assets/stale reset views. Normal/half-speed actual-canvas videos and verification.json:ignored tmp/elira-s2-preview. These are provisional visual recordings,not final Sync Sheets.
+
+Next:review S2 visuals before final S1/S2 Sync;Ultimate/dedicated UI sources remain pending. Inspect elira-production.ts,ELIRA_S2_REVIEW.md,skill-system.ts,skill-review.ts and sprites.ts;do not restore historical base fallbacks.
+
+## Previous follow-up — Elira S1 visual review (Codex, 2026-10-18)
 
 User supplied elira_s1.zip and requested Skill1. Fresh master remains72a3f34; task branch was clean at published d44110d. Preserved original local PhaseA7b7d440 on wip/codex-hero-elira-phase-a-local and rebased onto identical-content published d44110d (duplicate patch skipped). Continue wip/codex-hero-elira; only its fast-forward publication is authorized. Canonical-local confirmed synchronization metadata below stays unchanged.
 
