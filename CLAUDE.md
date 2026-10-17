@@ -18,6 +18,8 @@ Angular 19, standalone components, signals. เอกสารออกแบบ
 
 ## Sylvara Windwhisper — Phase A (2026-10-17, Codex)
 
+Final publication review (ผู้ใช้2026-10-17): ตรวจfull diffกับorigin/masterล่าสุดแล้วไม่พบblockingissueใหม่ · app/spec typechecks,684Karma,productionbuild,10-run/floor/botทีมSylvaraผ่านอีกครั้ง ผลsimเดิม · ตรวจPixi/DOMสองทิศ/reset/cleanup · ส่งเฉพาะbranch `wip/codex-hero-sylvara`; สถานะfinalSync/UIartเดิม
+
 Current visual revision (ผู้ใช้2026-10-17): Charge1.25→1.45cells(+16%); ascentหนึ่งดอกเดิม แก้Pixiไม่สร้างone-shotIDเดิมซ้ำหลังจบระหว่างรอhostcleanup · rain48frames/.8s/30ดอกสุ่มตำแหน่งและเวลาภายในพื้นที่(drop240pxเดิม160px,+50%),seed1729สำหรับrebakeเดิมได้,lead800ms · Impact/damage5pulse/activation/cast-lockเดิม · optimizerเปลี่ยนrainเป็น13×4WebP · 684tests/typechecks/buildผ่าน · พรีวิว `tmp/sylvara-ult-rain-review/` · ดูrevisionใน `docs/SYLVARA_ULT_REVIEW.md`
 
 Initial Ultimate follow-up (ผู้ใช้2026-10-17): `sylvara_ult_source.zip` → character10poses/row7,Charge8,ascent8,Field6,verticalRain8,Impact8; base/S1/S2pixelsเดิม · F6ยังมีศร/F7ปล่อยครั้งเดียว · trialweighted10poses1.4s/release.7s/ascent.5s/activate1.2s (เดิม.34/.595s มีผลต่อcombat) · FIELD3×2/5วิ/1วิ5pulse/60%เดิม ไม่มีlaunch/enddamage · `FIELD_PULSED` metadata + `FieldFxPlayback`waveทั่วไป:rainนำ400ms,Impact6cellsตามpulseจริง,dedup,camera,source-death/clear/resetcleanup,expireแล้วlastImpactจบ+Fieldlastposefade · Pixipreloadfield/status/wave และlabFIELDใช้engineจริงอัตโนมัติ · finalSyncทั้ง3สกิลยังรอรีวิว · ผล683tests/build/simและsourcehash/ข้อจำกัด/pipeline: `docs/SYLVARA_ULT_REVIEW.md`/handoff · บันทึกS1/S2/PhaseAด้านล่างเป็นประวัติ ไม่ใช่สถานะAWAITING_SOURCEปัจจุบัน

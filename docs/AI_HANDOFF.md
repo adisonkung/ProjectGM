@@ -3,6 +3,8 @@
 **Git is authoritative.** Query `git rev-parse HEAD` / `HEAD^{tree}` for current state; this note never stores its containing commit's hash.
 
 Last task (Codex, 2026-10-17):
+Final publication review requested by user after the visual revision. Reviewed the complete Sylvara diff against freshly fetched origin/master; no new blocking finding. Re-ran app/spec typechecks,684/684 Karma, production build and10-run/floor/bot Sylvara-team simulation on the4618bbe content checkpoint; all passed and simulation results match the prior run. Native Pixi/DOM/facing/reset checks confirm one release/five pulses and cleanup. Publication remains on `wip/codex-hero-sylvara`; final Timeline Sync/UI art scope is unchanged.
+
 Sylvara Ultimate Emerald Skyfall provisional visual review from `sylvara_ult_source.zip`. Character/Charge/one upward ascent/fixed3×2 Field/five vertical rain waves/cell Impacts and fade residue are integrated. User explicitly requested Ultimate next; final S1/S2/Ult Timeline Sync remains pending. Details: `docs/SYLVARA_ULT_REVIEW.md`.
 
 Branch:
