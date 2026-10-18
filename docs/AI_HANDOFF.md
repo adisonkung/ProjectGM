@@ -2,7 +2,16 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — Elira Ultimate visual review (Codex,2026-10-18)
+## Latest follow-up — character scale/registration review (Codex,2026-10-18)
+
+User authorized fixing the cross-roster audit findings. Fresh origin/master72a3f34, published Eliraba8eac4 (tree identical to localb1f9152), clean tree; fix/hero-scale-registration starts from published Elira and includes latest master. Only this task branch publication; Elira is an unmerged dependency. No new canonical-local sync claim.
+
+- All10 heroes reviewed with full-frame galleries, same-size before/after trials, body and head feature registration. Initial audit ratios were candidate estimates; trials on other heroes overshot comparable standing height because pose/costume proportions affect matching. Preserve their approved clips; docs/HERO_SCALE_REVIEW.md records every decision and remaining source-proportion limits.
+- Confirmed Elira: IdleF3/F4 shift up8/7atlas px. S1/Ultimate measure largest connected opened character body,median first/last standing extent vs Idle; one source scale per clip. Both now.2621803776 (was.2307692308/.2108108108); feature size ratios improve.866→.980 and.794→.985. S2 control.990 unchanged. Shared cutters/renderer/timelines/gameplay untouched.
+- Validation:app/spec typechecks,optimizer,707/707 Karma with software WebGL and production build pass; detached-ornament invariance,source rebake byte equality and optimized visible RGBA lossless checks pass.
+- Pixel guard: only IdleF3/F4 and rows5/7 change. Source art, all other heroes, remaining Elira clips, UI, projectile/VFX unchanged. Zero source clipping; repeated source bake/optimized lossless checks and native before/after validation recorded in HERO_SCALE_REVIEW.md/session artifacts. Final Sync/balance status unchanged.
+
+## Previous follow-up — Elira Ultimate visual review (Codex,2026-10-18)
 
 Fresh origin/master72a3f34 remains authoritative; task baseline91101f6,clean tree. Preserved local S2cc0ed98 on wip/codex-hero-elira-s2-local and rebased identical-content published S2. Only fast-forward task publication; no canonical-local synchronization claim or master merge.
 

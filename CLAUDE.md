@@ -300,3 +300,7 @@ Supplied10 S2 poses/16-stage pastel Main/8-stage Impact. Atlasrow6,base+S1 pixel
 ## Elira Ultimate visual follow-up (2026-10-18, Codex)
 
 Supplied Ultimate character row7/10poses and four VFX tracks integrated; all three skills now provisional visual review. F7=.5s/12FPS,cast.8333s; existing home6×3/20%DR/6s retained. Formation→persistent Loop→natural-expiry Dissolve; source-death/reset cancel. Truealpha preserved,derived wide board projection,original sources unchanged. Generic loopAfterStart opt-in and even-width field centre,mirrored home-zone lab. Final Sync/balance remain pending. Pipeline,hashes,validation:docs/ELIRA_ULT_REVIEW.md; latest handoff supersedes historical pending-source notes.
+
+## Character scale/registration correction (2026-10-18,Codex)
+
+User requested fixes after10-hero audit. Correct confirmed Elira IdleF3/F4 sinking by8/7px and S1/Ultimate body scaling via largest connected component and median standing endpoints. Both source scales.2621803776,ratios vs Idle≈.980/.985; one scale per whole clip. S2/base actions/other heroes/FX/timelines unchanged. Before/after trials rejected initial feature-only estimates for other heroes because uniform resize overshoots standing height; preserve poses/proportions. See docs/HERO_SCALE_REVIEW.md for all10 decisions and validation. fix/hero-scale-registration depends on unmerged published Elira branch.

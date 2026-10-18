@@ -68,3 +68,5 @@ Simulation:yuezheng,kael,sylvara,mirelle,elira,F1–3 both100%;F4 AUTO40%/TACTIC
 Native DPR2 Pixi/DOM left/right one-cast/reset checks and actual2×canvas normal/half-speed review videos live in ignored `tmp/elira-s1-preview/`; final results in AI_HANDOFF. They are gameplay captures, not replacement art or final Sync Sheets.
 
 Current Ultimate follow-up: supplied tracks are integrated for provisional review; see [ELIRA_ULT_REVIEW.md](ELIRA_ULT_REVIEW.md). Earlier pending-Ultimate statements above describe that earlier checkpoint.
+
+Current character-size correction supersedes earlier source scale numbers: see [HERO_SCALE_REVIEW.md](HERO_SCALE_REVIEW.md). Timing/VFX and Final Sync status are unchanged.

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from scipy import ndimage
 
 sys.path.insert(0, os.path.dirname(__file__))
 import aurel_v2 as A
@@ -25,6 +26,29 @@ B.SRC = str(SRC)
 B.CELL_W, B.CELL_H, B.ROOT_X, B.ROOT_Y = 260, 170, 130, 155
 NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
 COUNTS = [5, 7, 4, 7, 6]
+
+
+def body_extent(frame):
+    """Measure the connected character, excluding detached staff ornaments and sparks.
+
+    Opening alone is insufficient: a thick ornament can survive it above the head.
+    Use the largest opened component, and compare equivalent ready poses only.
+    """
+    mask = ndimage.binary_opening(frame['img'][..., 3] >= B.ALPHA_CUT,
+                                  structure=np.ones((9, 9)))
+    labels, count = ndimage.label(mask)
+    if not count:
+        raise ValueError('No connected character body to measure')
+    sizes = np.bincount(labels.ravel())
+    sizes[0] = 0
+    ys = np.nonzero(labels == sizes.argmax())[0]
+    return int(ys.max() - ys.min())
+
+
+def support_scale(reference, frames, base_scale):
+    # One scale for the entire clip. The first/last standing poses avoid raised-arm bias.
+    extent = np.median([body_extent(frames[0]), body_extent(frames[-1])])
+    return base_scale * body_extent(reference) / extent
 
 
 def main():
@@ -62,9 +86,9 @@ def main():
     B.SRC = str(SRC)
     names = NAMES + ['skill', 'skill2', 'ult']
     scales = {name: scale for name in NAMES}
-    scales['skill'] = 78 / A.body_h(groups['skill'][0])
+    scales['skill'] = support_scale(groups['idle'][0], groups['skill'], scale)
     scales['skill2'] = 78 / A.body_h(groups['skill2'][0])
-    scales['ult'] = 78 / A.body_h(groups['ult'][0])
+    scales['ult'] = support_scale(groups['idle'][0], groups['ult'], scale)
     probe = Image.new('RGBA', (260 * 10, 170 * 8))
     for row, name in enumerate(names):
         for col, fr in enumerate(groups[name]):
@@ -77,7 +101,10 @@ def main():
     clipped = []
     for row, name in enumerate(names):
         for col, fr in enumerate(groups[name]):
-            clipped.append(A.paste_frame(sheet, fr, row, col, scales[name], (shifts[name][col], 0)))
+            # Source Idle F3/F4 have a displaced root: same-size details sink 8/7 atlas px.
+            # Correct translation only; preserve the source breathing and all action poses.
+            dy = {2: -8, 3: -7}.get(col, 0) if name == 'idle' else 0
+            clipped.append(A.paste_frame(sheet, fr, row, col, scales[name], (shifts[name][col], dy)))
     if any(clipped):
         raise ValueError(f'Clipped source pixels: {clipped}')
     sheet.save(OUT / 'hero-elira.png', optimize=True)
