@@ -149,7 +149,7 @@ main { margin-top: 18px; }
   }
   .menu a { width: clamp(64px, 5.8vw, 94px); min-height: 88px; padding: 12px 4px 5px; gap: 3px; border-radius: 0;
     flex-direction: column; justify-content: center; color: #d1c5ae; border-left: 1px solid #ad8b542b;
-    font-size: 11px; letter-spacing: .02em;
+    font-size: 13px; letter-spacing: .02em;
     &:first-of-type { border-left: 0; }
     .glyph { width: 30px; height: 30px; border: 0; background: none; border-radius: 0; color: #dfc798; }
     .lbl { display: block; }
@@ -174,8 +174,8 @@ main { margin-top: 18px; }
 @media (min-width: 721px) and (max-width: 1100px) {
   .app.immersive .bar { width: calc(100% - 28px); grid-template-columns: minmax(130px, 1fr) auto minmax(180px, 1fr); gap: 14px;
     .word b { font-size: 20px; } .crest-wrap { display: none; } .word small { font-size: 7px; letter-spacing: .14em; }
-    .menu a { width: 58px; min-height: 80px; font-size: 10px; .nav-caption { font-size: 6px; } }
-    .coin-row { padding: 5px 8px; gap: 5px; b { font-size: 11px; } }
+    .menu a { width: 58px; min-height: 80px; font-size: 13px; .nav-caption { font-size: 6px; } }
+    .coin-row { padding: 5px 8px; gap: 5px; b { font-size: 13px; } }
     .purse { gap: 8px; } .acct { width: 35px; height: 35px; }
   }
 }
@@ -188,7 +188,7 @@ main { margin-top: 18px; }
     .brand { min-width: 0; } .crest-wrap { display: none; }
     .word { display: flex; } .word b { display: block; font-size: 17px; max-width: 125px; line-height: 1.05; }
     .word small { font-size: 6px; letter-spacing: .13em; margin-top: 5px; }
-    .treasury { gap: 5px; } .coin-row { padding: 5px 8px; gap: 5px; min-height: 30px; b { font-size: 11px; } }
+    .treasury { gap: 5px; } .coin-row { padding: 5px 8px; gap: 5px; min-height: 30px; b { font-size: 13px; } }
     .coin-row app-icon { width: 13px; } .purse { gap: 10px; }
     .acct { width: 32px; height: 32px; outline-offset: 2px; }
     .menu { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: 100%; grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -196,7 +196,7 @@ main { margin-top: 18px; }
       border-radius: 0; background: #0a111ef7; box-shadow: 0 -3px 18px #0008;
       &::before { display: none; }
     }
-    .menu a { width: auto; min-width: 0; min-height: 72px; padding: 7px 1px 5px; gap: 4px; font-size: 10px;
+    .menu a { width: auto; min-width: 0; min-height: 72px; padding: 7px 1px 5px; gap: 4px; font-size: 13px;
       .glyph { width: 27px; height: 25px; } .nav-caption { display: none; }
       &.on .glyph { transform: none; } &.on::after { display: none; }
       &.on::before { top: 0; bottom: auto; left: 18%; right: 18%; }
@@ -205,7 +205,7 @@ main { margin-top: 18px; }
 }
 @media (max-width: 360px) { .app.immersive .bar { padding-inline: 11px; gap: 6px;
   .word b { font-size: 14px; max-width: 85px; } .word small { display: none; }
-  .coin-row { padding-inline: 6px; b { font-size: 10px; } } .purse { gap: 7px; }
+  .coin-row { padding-inline: 6px; b { font-size: 13px; } } .purse { gap: 7px; }
 } }
 
 // phone in landscape, in a fight: no app chrome at all (the battle screen takes the whole display)

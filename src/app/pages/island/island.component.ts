@@ -98,6 +98,8 @@ export class IslandComponent implements OnInit, OnDestroy {
   readonly totalFloors = STAGES.length;
   readonly stageName = computed(() => islandStageName(this.island().islandProgressionStage));
   readonly progressExpanded = signal(false);
+  readonly enteringTower = signal(false);
+  private entranceTimer?: ReturnType<typeof setTimeout>;
   readonly partySlots = [0, 1, 2, 3, 4];
   readonly party = computed(() => {
     const s = this.save.state();
@@ -105,7 +107,7 @@ export class IslandComponent implements OnInit, OnDestroy {
       const h = s.heroes.find(hero => hero.uid === slot.uid);
       const t = h && HERO_BY_ID[h.templateId];
       if (!h || !t) return [];
-      return [{ uid: h.uid, id: t.id, name: t.name, level: this.roster.progress(h).level,
+      return [{ uid: h.uid, id: t.id, name: t.name, shortName: t.name.split(' ')[0], cls: t.cls, className: CLASS_NAME[t.cls], level: this.roster.progress(h).level,
         star: this.roster.star(h), power: this.roster.power(h), portrait: heroArt(t.id)?.portrait,
         icon: ({ tank: 'shield', fighter: 'sword', assassin: 'armory', archer: 'heroes', mage: 'crystal', healer: 'potion' })[t.cls] }];
     });
@@ -141,6 +143,7 @@ export class IslandComponent implements OnInit, OnDestroy {
     return out;
   });
   readonly focus = computed(() => {
+    if (this.enteringTower()) return SKY_PLOTS['tower'].focus;
     const ev = this.current();
     if (!ev?.buildingId) return null;
     if (this.isCity()) return SKY_PLOTS[ev.buildingId]?.focus ?? null;
@@ -231,6 +234,7 @@ export class IslandComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     cancelAnimationFrame(this.raf);
     clearTimeout(this.eventTimer);
+    clearTimeout(this.entranceTimer);
   }
 
   private buildSim(mainUid: number | null, stage: number): void {
@@ -289,6 +293,20 @@ export class IslandComponent implements OnInit, OnDestroy {
   }
   go(route: string, query?: Record<string, string | number>): void {
     this.router.navigate([route], { queryParams: query });
+  }
+  /** Cosmetic gate acknowledgement, then the existing tower route; cancel it when leaving Home. */
+  enterTower(): void {
+    if (this.enteringTower() || this.current()) return;
+    const floor = this.nextFloor();
+    this.closeSheets();
+    this.enteringTower.set(true);
+    const enter = () => {
+      void this.router.navigate(['/battle'], { queryParams: { floor, mode: 'tower' } })
+        .then(ok => { if (!ok) this.enteringTower.set(false); }, () => this.enteringTower.set(false));
+    };
+    const reduced = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced || !this.isCity()) enter();
+    else this.entranceTimer = setTimeout(enter, 480);
   }
   setMain(uid: number): void {
     this.isl.setMainHero(uid);

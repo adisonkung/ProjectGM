@@ -2,7 +2,16 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — reference-inspired fantasy Home lobby (Codex, 2026-10-19)
+## Latest follow-up — six-point lobby refinement (Codex, 2026-10-19)
+
+User requested keeping the layout while refining six details, using Dark Fantasy Premium chrome without darkening Dawnmere/other themed areas. Fresh master `455de5b`; clean tree. `feature/codex-lobby-polish` starts there and fast-forwards to explicitly continued published lobby `328b004` (tree identical to prior local `c2d4857`). Previous branch preserved; publish only the refinement branch. No new merge authorization or canonical-local sync claim.
+
+- Shorter translucent kingdom panel (progress/next unlock only), actual class/stars/levels/readiness and soft party hover/focus glow. Important Thai labels/balances/nav/party values 13px+. City name chips counter-scale to screen size, 14px active; backplates, registered action icons and ground halos replace thick text outlines. Touch retains status. Original hit geometry/unlocks/art stay unchanged.
+- Existing rAF/canvases provide bounded background-only mouse parallax; world/front/hit transforms remain aligned. Five subtle tower motes omitted for lite/reduced motion. CTA edge trace and captured-floor gate acknowledgement: one 480ms activation, cancelled on Home destruction; reduced-motion/classic instant, retry on cancelled navigation. No combat/save/economy changes.
+- App/spec checks,715/715 Karma/build pass. Native production-build responsive/navigation/hover/touch/six-star-party checks plus full/reduced-motion verification and actual tower-response recording: `/workspace/scratch/lobby-polish-review/`. Build size warnings remain without budget changes. Details: `docs/FANTASY_LOBBY_UI.md` six-point section.
+- Next: review this branch/screenshots before merging; inspect `sky-city.component.*`, `island.component.*`, `lobby.scss`, `tower-entry.spec.ts`. Skill final Sync/balance status remains unchanged. All older handoff entries below describe their historical checkpoints.
+
+## Previous follow-up — reference-inspired fantasy Home lobby (Codex, 2026-10-19)
 
 User requested the surrounding menus from the supplied Dawnmere lobby reference, keeping the existing floating island. Fresh master `455de5b` contains the explicitly authorized Elira merge (PR #1). Clean checkout; `feature/codex-fantasy-lobby` starts from that master. Publish this new task branch for visual review, with no new master-merge authorization or canonical-local synchronization claim. Prior confirmed sync metadata below is unchanged.
 

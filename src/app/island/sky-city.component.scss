@@ -70,13 +70,29 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 
 // ---------------------------------------------------------------- plates / taps
 .hit { border: 0; background: transparent; cursor: pointer; border-radius: 30px; outline-offset: 4px; }
-.hit:hover, .hit.sel { background: radial-gradient(ellipse at 50% 70%, #f6dfa01f, transparent 70%); }
-.plate { transform: translateX(-50%); display: grid; justify-items: center; pointer-events: none; white-space: nowrap; gap: 2px;
-  b { font: 700 25px var(--title); letter-spacing: .03em; color: #fff3d6;
-    text-shadow: 0 3px 0 #1a1030, 3px 0 0 #1a1030, -3px 0 0 #1a1030, 0 -2px 0 #1a1030, 0 0 12px #1a1030; }
-  small { font: 700 19px var(--body); color: #ffb0a8; text-shadow: 0 2px 0 #1a1030, 2px 0 0 #1a1030, -2px 0 0 #1a1030; }
-  .lv { color: #f6dfa0; font-family: var(--title); } .soon { color: #c9adff; } .open { color: #9fe6b6; }
-  &.locked b { color: #c4bad6; } }
+.plot-halo { position: absolute; bottom: 0; left: 10%; width: 80%; height: 28%; border-radius: 50%; border: 3px solid #f2d394;
+  background: radial-gradient(ellipse, #f5df9626, transparent 70%); box-shadow: 0 0 18px #f1d38a55, inset 0 0 12px #f1d38a33;
+  opacity: 0; transform: scale(.9); transition: opacity .18s, transform .18s; pointer-events: none; }
+.hit:is(:hover, :focus-visible, .sel) .plot-halo { opacity: 1; transform: scale(1); }
+.isle.ui > .plate { pointer-events: none; }
+.plate { transform: scale(var(--label-scale, 1)) translateX(-50%); transform-origin: 0 0; display: grid; justify-items: center; pointer-events: none; white-space: nowrap; gap: 3px;
+  padding: 4px 8px; border: 1px solid #d7ba7a33; border-radius: 3px; background: #0b1420b3; text-shadow: 0 1px 3px #000;
+  b { display: flex; align-items: center; gap: 6px; font: 500 13px/1.5 var(--body); color: #fff0cf; }
+  app-icon { color: #e0c28b; }
+  small { display: none; font: 500 13px/1.4 var(--body); color: #e4c8ac; }
+  .lv { color: #f6dfa0; } .soon { color: #d6c6ef; } .open { color: #bce6c8; }
+  &.locked b { color: #d7d1c9; } }
+.hit:is(:hover, :focus-visible, .sel) + .plate { border-color: #e8c87c; background: #101b2af2; box-shadow: 0 5px 14px #0005;
+  b { font-size: 14px; color: #fff3d6; } small { display: block; } }
+.tower-gate { z-index: 7; width: 108px; height: 120px; border-radius: 50% 50% 0 0; opacity: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 80%, #fff9da, #ffe1a1b3 35%, transparent 75%); }
+.entering .tower-gate { animation: gateOpen .48s ease-out both; }
+.gate-mote { z-index: 7; width: 5px; height: 5px; border-radius: 50%; background: #ffecc2; box-shadow: 0 0 8px #f4d39288;
+  pointer-events: none; animation: gateMote 6s linear infinite; }
+@keyframes gateMote { 0% { transform: translateY(0); opacity: 0; } 25% { opacity: .75; } 100% { transform: translateY(-170px); opacity: 0; } }
+@keyframes gateOpen { from { opacity: .1; transform: scale(.6, .8); } to { opacity: 1; transform: scale(1.8, 1.2); } }
+@media (hover: none) { .plate small { display: block; } }
+@media (prefers-reduced-motion: reduce) { .plot-halo { transition: none; } .gate-mote { display: none; } .entering .tower-gate { animation: none; opacity: .7; } }
 
 // ---------------------------------------------------------------- motion
 @keyframes spinFlat { to { transform: rotate(0deg); } }
