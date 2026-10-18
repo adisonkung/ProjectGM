@@ -111,7 +111,8 @@ export class SpriteLabComponent implements OnDestroy {
   private readonly targetDistance = Math.min(5, Math.max(1, Number(this.qp.get('distance')) || 1));
   readonly engineReview = this.qp.get('combat') === '1';
   readonly initialStatus = this.qp.get('status') ?? '';
-  private readonly dummyIds = this.qp.get('formation') === 'square' ? [2, 3, 4, 5] : DUMMY_IDS;
+  private readonly dummyIds = ['square', 'home', 'field'].includes(this.qp.get('formation') ?? '') ? [2, 3, 4, 5] : DUMMY_IDS;
+  private readonly reviewVitals = signal<Record<number, { hpPct: number; shieldPct: number }>>({});
   private readonly reviewStatuses = signal<Record<number, { id: string; left: number }[]>>({});
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
@@ -163,7 +164,7 @@ export class SpriteLabComponent implements OnDestroy {
   private readonly boardEl = viewChild(BoardComponent, { read: ElementRef });
 
   private enginePlayback(skill: SkillDefinition): boolean {
-    return this.engineReview || skill.effects.some(e => e.type === 'FIELD') || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
+    return this.engineReview || skill.target === 'LOWEST_HP_ALLY' || skill.effects.some(e => e.type === 'FIELD') || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
   }
 
   setRenderer(r: BoardRenderer): void {
@@ -184,21 +185,28 @@ export class SpriteLabComponent implements OnDestroy {
   readonly units = computed<UnitView[]>(() => {
     const h = this.hero();
     const left = this.faceLeft();
+    const action = this.last();
+    const fieldSupport = (action === 'skill' || action === 'skill2' || action === 'ult') && kitOf(h.id, h.cls)[action].effects.some(e => e.type === 'FIELD' && e.field.aura?.team === 'ALLY');
+    const centeredField = fieldSupport && (action === 'skill' || action === 'skill2' || action === 'ult') && kitOf(h.id, h.cls)[action].effects.some(e => e.type === 'FIELD' && e.field.area === 'RECT_6X3_CENTERED');
+    const support = fieldSupport || ((action === 'skill' || action === 'skill2' || action === 'ult') && kitOf(h.id, h.cls)[action].target === 'LOWEST_HP_ALLY');
     const base = { hpPct: 100, manaPct: 0, shieldPct: 0, alive: true, taunt: false };
-    const hc = left ? 8 : 5;
+    const hc = fieldSupport ? (left ? 12 : 3) : left ? 8 : 5;
     const b = this.blinked();
     return [
-      { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left,
+      { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left, ...(this.reviewVitals()[HERO_ID] ?? {}),
         blink: !!b, blinkFade: !b?.ownFade },
       ...this.comparisonHeroes.filter(other => other.id !== h.id).map((other, i) => ({
         ...base, id: 100 + i, side: 'ally' as const, name: other.name, cls: other.cls,
         r: 1, c: hc - (i + 1) * 2 * (left ? -1 : 1), sprite: other.sprite, star: other.star, heroId: other.id, flip: left,
       })),
       ...this.dummyIds.map((id, i) => ({
-        ...base, id, side: 'enemy' as const, name: this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
-        r: this.dummyIds.length === 4 ? 1 + Math.floor(i / 2) : 1,
-        c: hc + (this.targetDistance + (this.dummyIds.length === 4 ? i % 2 : i)) * (left ? -1 : 1),
-        sprite: this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: !left,
+        ...base, id, side: support ? 'ally' as const : 'enemy' as const,
+        hpPct: this.reviewVitals()[id]?.hpPct ?? (support ? (i === 0 ? 40 : 70) : 100),
+        shieldPct: this.reviewVitals()[id]?.shieldPct ?? 0,
+        name: support ? 'พันธมิตรฝึก' : this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
+        r: centeredField ? [1, 0, 2, 2][i] : fieldSupport ? [0, 1, 2, 2][i] : this.dummyIds.length === 4 ? 1 + Math.floor(i / 2) : 1,
+        c: centeredField ? (left ? 15 - [7, 6, 8, 3][i] : [7, 6, 8, 3][i]) : fieldSupport ? (left ? 15 - [1, 2, 4, 1][i] : [1, 2, 4, 1][i]) : hc + (this.targetDistance + (this.dummyIds.length === 4 ? i % 2 : i)) * (left ? -1 : 1),
+        sprite: support ? 'hero-bailong.png' : this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: support ? left : !left,
         statuses: (this.reviewStatuses()[id] ?? []).filter(b => STATUS_ICONS[b.id]).map(b => ({ ...b, icon: STATUS_ICONS[b.id] })),
       })),
     ];
@@ -366,10 +374,11 @@ export class SpriteLabComponent implements OnDestroy {
     const me = units[0];
     const targets = units.filter(u => this.dummyIds.includes(u.id));
     const review = skillReview(this.hero().id, kind, { r: me.r, c: me.c }, targets.map((u, i) =>
-      ({ id: u.id, pos: { r: u.r, c: u.c }, statuses: i === 0 && this.initialStatus ? [this.initialStatus] : [] })), this.qp.get('enemy') ?? 'forest_slime');
+      ({ id: u.id, pos: { r: u.r, c: u.c }, statuses: i === 0 && this.initialStatus ? [this.initialStatus] : [] })), this.qp.get('enemy') ?? 'forest_slime', this.faceLeft() && kitOf(this.hero().id, this.hero().cls)[kind].effects.some(e => e.type === 'FIELD' && e.field.aura?.team === 'ALLY') ? 'enemy' : 'ally');
     const id = (n: number) => review.ids.get(n)!;
     for (const sample of review.samples) this.at(sample.t, () => {
       this.reviewStatuses.set(sample.statuses);
+      this.reviewVitals.set(sample.vitals);
       this.fieldVisuals.advance(sample.t);
       this.statusVisuals.sync(Object.entries(sample.statuses).flatMap(([target, buffs]) => buffs.filter(b => b.left > 0).map(b => ({
         target: Number(target), source: b.sourceId, status: b.id,
@@ -401,6 +410,18 @@ export class SpriteLabComponent implements OnDestroy {
           }
         } else if (e.type === 'impact') {
           this.spawn(kind, { on: 'impact', hit: e.index }, (e.hits ?? []).map(id));
+        } else if (e.type === 'shield') {
+          const target = units.find(u => u.id === id(e.dst))!;
+          const f: FloatText = { id: ++this.id, r: target.r, c: target.c, text: `+โล่ ${e.amount}`, kind: 'shield' };
+          this.floats.update(l => [...l, f]);
+          this.note(sample.t, `PROTECTION_APPLY → ${target.id} (+${e.amount})`);
+          this.at(0.9, () => this.floats.update(l => l.filter(x => x.id !== f.id)));
+        } else if (e.type === 'heal') {
+          const target = units.find(u => u.id === id(e.dst))!;
+          const f: FloatText = { id: ++this.id, r: target.r, c: target.c, text: `+${e.amount}`, kind: 'heal' };
+          this.floats.update(l => [...l, f]);
+          this.note(sample.t, `HEAL_APPLY → ${target.id} (+${e.amount})`);
+          this.at(0.9, () => this.floats.update(l => l.filter(x => x.id !== f.id)));
         } else if (e.type === 'damage' || e.type === 'buff') {
           const target = units.find(u => u.id === id(e.dst))!;
           const f: FloatText = { id: ++this.id, r: target.r, c: target.c,
@@ -442,5 +463,6 @@ export class SpriteLabComponent implements OnDestroy {
     this.fx.set([]);
     this.floats.set([]);
     this.reviewStatuses.set({});
+    this.reviewVitals.set({});
   }
 }

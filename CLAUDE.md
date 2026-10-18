@@ -277,3 +277,38 @@ S1 follow-up (ผู้ใช้2026-10-17): `sylvara-s1-source.zip` มีchara
 
 ## Roadmap
 0 ตั้งโปรเจกต์ ✅ · 1 เอนจินต่อสู้ ✅ · 2 กระดานลากวาง + ภาพ ✅ · 3 หอคอยและโหมด ✅ (flow ไต่ชั้น + การ์ดผล + โหมดฟาร์ม, ไม่มีบาดเจ็บ) · 4 ฐาน/รายชื่อ ✅ (Home Island / Sky City + เมนู Phase 4) · 5 กาชา ✅ (ดาว 1–3★ + พัฒนาถึง 6★ ด้วย Memory) · Remodel roster (กำลังทำ) · 6 ปรับสมดุล (รอ roster ครบ)
+
+
+## Elira Dawnmere — Keeper of the Hearthlight (Codex, 2026-10-17)
+
+Phase A from supplied Elira_master_base.zip: existing healer/ID elira, provisional3★, roster10 after Mirelle/Sylvara. Base5/7/4/7/6 poses,78px body,7×8 atlas260×170/root130,155; separate supplied-star basic bolt and temporary reference portrait. No S1/S2/Ult/Dome/UI sources in this ZIP. Skill fallbacks use base poses at activation.34s/end.595s; final clips/FX/Sync remain pending in elira-production.ts.
+
+Provisional kit:Holy-themed Magic basic without Heal Bolt; S1 lowest ally HP% heal220% ATK+10% target Max HP/CD8s; S2 single-ally shield15% caster Max HP/4s/CD15s; Ult fixed home6×3/6s/20% damage reduction for current allied occupants. No inherited revive or instant Ult burst. Class IDs retained; HEAL rank effects do not scale shield/aura, S2 class cooldown progression remains. No starter grants or balance changes.
+
+Generic FieldDefinition HOME_ZONE anchor/aura + RECT_6X3 area. Buffable live auraModifiers queries ensure immediate entry/exit/death protection changes, normal status composition, no lingering timed buff and mirrored source-side zones. AUTO defensive-field checks use actual occupants; manual still allowed. Source death/wave-stage clear cancel, natural expiry ends once. Existing pulse fields unchanged. Details/rebuild/source hashes/production boundary:docs/ELIRA_PHASE_A.md.
+
+
+### Elira S1 review (Codex, 2026-10-18)
+
+Supplied elira_s1.zip adds10 character poses plus8-stage caster Main and target Impact; no separate Charge. Atlas10×8,base rows pixel-identical,S2/Ult blank. Trial12FPS:MainF3(.1667s/engine.20),single HealF7(.50s),recoveryF9(.6667),end.8333. Prior heal.35s engine/end.595s,so this changes provisional combat timing. Main ground ring surrounds caster under character rather than floating at optional workbook staff-head;target Impact starts on real heal and lasts.6s beyond recovery. Kit values/CD/ranks unchanged. Generic sprite lab now creates real injured allied targets for LOWEST_HP_ALLY review,emits actual positive heal floats/log and uses real impact recipients. Final Sync and S2/Ult pending;see docs/ELIRA_S1_REVIEW.md.
+
+
+### Elira S2 review (Codex,2026-10-18)
+
+Supplied10 S2 poses/16-stage pastel Main/8-stage Impact. Atlasrow6,base+S1 pixels identical,Ult blank. Trial12FPS:one shieldF7/.50s,recovery.6667/end.8333,prior fallback.35s engine/end.595. Kit15%casterMaxHP/4s/CD15 and all S1/Ult/basic values/timings unchanged. Target ceremony16×118×148/1.333s,Impact8×80×103/.6s,follow recipient;both use actual positive shield recipients,not early workbookF5. Painted dividers removed only from derived bake;pastel matte recovery retains ribbons. No separate Charge/stable loop/DR/field. Generic support-only impact metadata now includes shielded allies,self included;lab snapshots real HP/shield bars and one PROTECTION_APPLY. Combined bake now requires S1+S2 sources. Final Sync pending;docs/ELIRA_S2_REVIEW.md.
+
+## Elira Ultimate visual follow-up (2026-10-18, Codex)
+
+Supplied Ultimate character row7/10poses and four VFX tracks integrated; all three skills now provisional visual review. F7=.5s/12FPS,cast.8333s; existing home6×3/20%DR/6s retained. Formation→persistent Loop→natural-expiry Dissolve; source-death/reset cancel. Truealpha preserved,derived wide board projection,original sources unchanged. Generic loopAfterStart opt-in and even-width field centre,mirrored home-zone lab. Final Sync/balance remain pending. Pipeline,hashes,validation:docs/ELIRA_ULT_REVIEW.md; latest handoff supersedes historical pending-source notes.
+
+## Character scale/registration correction (2026-10-18,Codex)
+
+User requested fixes after10-hero audit. Correct confirmed Elira IdleF3/F4 sinking by8/7px and S1/Ultimate body scaling via largest connected component and median standing endpoints. Both source scales.2621803776,ratios vs Idle≈.980/.985; one scale per whole clip. S2/base actions/other heroes/FX/timelines unchanged. Before/after trials rejected initial feature-only estimates for other heroes because uniform resize overshoots standing height; preserve poses/proportions. See docs/HERO_SCALE_REVIEW.md for all10 decisions and validation. fix/hero-scale-registration depends on unmerged published Elira branch.
+
+## Elira Ultimate targeting (2026-10-18,Codex)
+
+User requested lowest-HP ally as Ultimate centre and confirmed fixed area at activation. LOWEST_HP_ALLY/Infinity includes self; recipient chosen on cast start,current cell captured at F7. Dead recipient before activation cancels without retargeting; after creation recipient movement/death does not move the field. Generic RECT_6X3_CENTERED clips offboard instead of shifting; aura/AI/render share centre. Dome dy27.25% aligns feet. Existing6s/20%DR,timing/FX/art unchanged; tooltip and field lab fixture updated. fix/elira-ultimate-target depends on unmerged scale-fix/Elira checkpoints. See docs/ELIRA_ULT_TARGETING.md and current handoff; earlier home-zone notes are historical.
+
+## Elira supplied UI art (2026-10-19, Codex)
+
+`Elira_icn.zip` supplies dedicated portrait, S1/S2/Ultimate icons and banner. Existing ID `elira`; `HERO_ART` registers portrait288²/icons160²/banner1400×788. Lanczos/WebP92 preserves complete composition; original opaque PNG bytes unchanged. `elira_art.py` handles standalone conversion; combined `elira.py` requires UI sources as its final optional path (default `art/incoming/elira/art`) before writing and never restores the old reference crop. Production UI status supplied; skill timing/final-sync flags unchanged. App/spec checks,711/711 Karma/build pass; combined bake keeps character/basic byte-identical and regenerates five UI files identically. DPR2 desktop/mobile checks pass. Details/hashes/rebuild: `docs/ELIRA_UI_ART.md`. Task branch continues unmerged targeted-Ultimate dependency; no master merge or UI redesign.

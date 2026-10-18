@@ -97,6 +97,8 @@ export interface StatusEffectDefinition {
  * SINGLE        exactly one target
  * SQUARE_2      primary + one column toward enemy, two lanes (previous lane at bottom edge)
  * RECT_3X2      three columns around primary, two lanes; footprint shifts inside board edges
+ * RECT_6X3      six columns across all lanes, clamped onto the board
+ * RECT_6X3_CENTERED exact target centre, six columns × three lanes; clips at board edges
  * ADJACENT_8    centre cell + the 8 around it (3×3)
  * CROSS_1       centre + up / down / forward / behind
  * LINE_2/LINE_3 primary + the next 1 / 2 cells behind it along the attack direction
@@ -112,7 +114,7 @@ export interface StatusEffectDefinition {
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'RECT_6X3_CENTERED' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';
@@ -162,7 +164,11 @@ export type SkillEffect = SkillEffectCore & {
   onHits?: number[];
 };
 export interface FieldDefinition {
-  area: 'SQUARE_2' | 'RECT_3X2' | 'ADJACENT_8';
+  area: 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'RECT_6X3_CENTERED' | 'ADJACENT_8';
+  /** Omitted: activation target cell. HOME_ZONE: fixed centre of the source side's formation zone. */
+  anchor?: 'HOME_ZONE';
+  /** Continuous occupancy-based protection; independent of pulse cadence and never leaves a lingering buff. */
+  aura?: { team: 'ALLY' | 'ENEMY'; modifiers: StatusModifiers };
   /** combat seconds; first pulse after interval, final pulse may land at duration */
   duration: number;
   interval: number;

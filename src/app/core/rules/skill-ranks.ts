@@ -27,7 +27,8 @@ export function rankDef(skillId: string, rank: number): SkillRankDefinition | nu
 export function rankedSkill(base: SkillDefinition, rank: number): SkillDefinition {
   const def = rankDef(base.id, rank);
   const copy = (e: SkillEffect): SkillEffect => e.type === 'FIELD'
-    ? { ...e, field: { ...e.field, effects: e.field.effects.map(x => ({ ...x })) } }
+    ? { ...e, field: { ...e.field, effects: e.field.effects.map(x => ({ ...x })),
+      ...(e.field.aura ? { aura: { ...e.field.aura, modifiers: { ...e.field.aura.modifiers } } } : {}) } }
     : { ...e };
   const s: SkillDefinition = { ...base, effects: base.effects.map(copy) };
   if (!def) return s;
@@ -178,7 +179,11 @@ export function skillLines(s: SkillDefinition): string[] {
   for (const e of s.effects) {
     switch (e.type) {
       case 'FIELD':
-        out.push(`สนาม ${{ ADJACENT_8: '3×3', SQUARE_2: '2×2', RECT_3X2: '3×2' }[e.field.area]} นาน ${e.field.duration} วิ · ทุก ${e.field.interval} วิ`);
+        out.push(`สนาม ${{ ADJACENT_8: '3×3', SQUARE_2: '2×2', RECT_3X2: '3×2', RECT_6X3: '6×3', RECT_6X3_CENTERED: '6×3' }[e.field.area]} นาน ${e.field.duration} วิ${e.field.effects.length ? ` · ทุก ${e.field.interval} วิ` : ''}`);
+        if (s.target === 'LOWEST_HP_ALLY' && e.field.area === 'RECT_6X3_CENTERED') out.push('ปักสนามที่พันธมิตร HP% ต่ำสุด');
+        if (e.field.aura?.modifiers.damageTakenMultiplier != null) {
+          out.push(`${e.field.aura.team === 'ALLY' ? 'พันธมิตร' : 'ศัตรู'}ในพื้นที่ · ลดดาเมจ ${pct(1 - e.field.aura.modifiers.damageTakenMultiplier)}`);
+        }
         out.push(...skillLines({ ...s, cooldown: undefined, effects: e.field.effects }));
         break;
       case 'DAMAGE':

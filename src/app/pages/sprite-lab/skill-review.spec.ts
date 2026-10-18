@@ -128,3 +128,54 @@ describe('Emerald Skyfall actual-engine five-wave review', () => {
     expect(review.samples.find(s => s.events.some(e => e.type === 'FIELD_ENDED'))!.t).toBeCloseTo(6.2, 8);
   });
 });
+
+describe('targeted support skill review', () => {
+  it('casts on a real injured ally once and shows no enemy damage/projectile', () => {
+    const review = skillReview('elira', 'skill', { r: 1, c: 5 }, [{ id: 2, pos: { r: 1, c: 9 } }, { id: 3, pos: { r: 1, c: 10 } }]);
+    const heal = review.samples.filter(s => s.events.some(e => e.type === 'heal'));
+    expect(heal.length).toBe(1); expect(heal[0].t).toBeCloseTo(0.5, 6);
+    const events = review.samples.flatMap(s => s.events);
+    const effect = events.find(e => e.type === 'heal')!;
+    if (effect.type === 'heal') { expect(review.ids.get(effect.dst)).toBe(2); expect(effect.amount).toBeGreaterThan(0); }
+    expect(events.some(e => e.type === 'damage' || e.type === 'projectile')).toBeFalse();
+    const impact = events.find(e => e.type === 'impact');
+    if (impact?.type !== 'impact') throw new Error('Missing heal impact');
+    expect(impact.hits!.map(id => review.ids.get(id))).toEqual([2]);
+  });
+});
+
+describe('Sanctuary Veil support-only impact and shield lifetime', () => {
+  it('grants one shield to the actual selected ally at F7 and reports its expiry independently of the flare', () => {
+    const review = skillReview('elira', 'skill2', { r: 1, c: 5 }, [{ id: 2, pos: { r: 1, c: 8 } }, { id: 3, pos: { r: 1, c: 9 } }]);
+    const events = review.samples.flatMap(s => s.events);
+    const grants = review.samples.filter(s => s.events.some(e => e.type === 'shield'));
+    expect(grants.length).toBe(1); expect(grants[0].t).toBeCloseTo(0.5, 6);
+    const shield = events.find(e => e.type === 'shield')!;
+    if (shield.type !== 'shield') throw new Error('Missing shield');
+    expect(review.ids.get(shield.dst)).toBe(2);
+    expect(shield.amount).toBeGreaterThan(0);
+    const impacts = events.filter(e => e.type === 'impact');
+    expect(impacts.length).toBe(1);
+    if (impacts[0].type === 'impact') expect(impacts[0].hits!.map(id => review.ids.get(id))).toEqual([2]);
+    expect(events.some(e => e.type === 'damage' || e.type === 'heal' || e.type === 'projectile')).toBeFalse();
+    expect(review.samples.find(s => s.t >= 2)!.vitals[2].shieldPct).toBeGreaterThan(0);
+    expect(review.samples.at(-1)!.vitals[2].shieldPct).toBe(0);
+    expect(review.samples.at(-1)!.vitals[3].shieldPct).toBe(0);
+  });
+});
+
+describe('Hearthlight Sanctuary isolated engine review', () => {
+  it('creates one six-second protective field at F7, no opening/tick/end damage or healing, centred on the lowest-HP ally on either side', () => {
+    for (const side of ['ally','enemy'] as const) {
+      const r = skillReview('elira','ult',{r:1,c:side==='ally'?3:12},[{id:2,pos:{r:0,c:side==='ally'?1:14}},{id:3,pos:{r:2,c:side==='ally'?4:11}}],'forest_slime',side);
+      const events=r.samples.flatMap(s=>s.events);
+      const starts=r.samples.filter(s=>s.events.some(e=>e.type==='FIELD_STARTED'));
+      expect(starts.length).toBe(1);expect(starts[0].t).toBeCloseTo(.5,6);
+      const start=events.find(e=>e.type==='FIELD_STARTED');if(start?.type!=='FIELD_STARTED')throw new Error('Missing field');
+      expect(start.at).toEqual({r:0,c:side==='ally'?1:14});
+      const ends=r.samples.filter(s=>s.events.some(e=>e.type==='FIELD_ENDED'));
+      expect(ends.length).toBe(1);expect(ends[0].t).toBeCloseTo(6.5,6);
+      expect(events.some(e=>e.type==='damage'||e.type==='heal'||e.type==='shield'||e.type==='projectile')).toBeFalse();
+    }
+  });
+});

@@ -86,6 +86,10 @@ export function rect3x2Center(primary: Cell): Cell {
     c: Math.max(1, Math.min(BOARD_COLS - 2, primary.c)) };
 }
 
+export function rect6x3Center(primary: Cell): Cell {
+  return { r: (LANES - 1) / 2, c: Math.max(0, Math.min(BOARD_COLS - 6, primary.c - 2)) + 2.5 };
+}
+
 export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
   const { pattern, caster, primary, candidates } = q;
   const centerCell = (q.center ?? 'TARGET') === 'SELF' || !primary ? caster.pos : primary.pos;
@@ -100,6 +104,19 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
       const dc = primary ? direction(caster.pos, primary.pos, facing).dc as 1 | -1 : facing;
       const at = square2Center(caster.pos, centerCell, dc);
       hit = candidates.filter(u => Math.abs(u.pos.r - at.r) <= 0.5 && Math.abs(u.pos.c - at.c) <= 0.5);
+      break;
+    }
+    case 'RECT_6X3_CENTERED': {
+      // A fixed six-cell-wide rectangle centred exactly on the activation point, without edge clamping.
+      // Half-open horizontal bounds give six columns on an integer grid; three lanes use half-cell edges.
+      hit = candidates.filter(u => u.pos.c >= centerCell.c - 3 && u.pos.c < centerCell.c + 3 &&
+        u.pos.r >= centerCell.r - 1.5 && u.pos.r < centerCell.r + 1.5);
+      break;
+    }
+    case 'RECT_6X3': {
+      // Even-width footprint: anchor is the left-middle cell; includes columns anchor-2 through anchor+3.
+      const left = Math.max(0, Math.min(BOARD_COLS - 6, centerCell.c - 2));
+      hit = candidates.filter(u => u.pos.r >= 0 && u.pos.r < LANES && u.pos.c >= left && u.pos.c < left + 6);
       break;
     }
     case 'RECT_3X2': {
