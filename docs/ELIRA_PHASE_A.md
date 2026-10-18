@@ -63,3 +63,5 @@ Other clones may use the default `art/incoming/elira` source slots. Dependencies
 - Final validation results and native Pixi/DOM captures are recorded in AI_HANDOFF after execution. No balance tuning is authorized.
 
 Next: supply S1 character/Healing Burst and optional Charge sources, then review S1 before proceeding through S2 and Ult. All four dome phases must follow actual field lifetime independently of character recovery. Dedicated UI sources and final skill Timeline Sync remain pending.
+
+Current Ultimate follow-up: supplied tracks are integrated for provisional review; see [ELIRA_ULT_REVIEW.md](ELIRA_ULT_REVIEW.md). Earlier pending-Ultimate statements above describe that earlier checkpoint.

@@ -259,3 +259,7 @@ Engine results become progression through `ProgressionService`.
 ### Support-only impacts and review vitals (Elira S2,2026-10-18)
 
 `SkillSystem` records positive SHIELD recipients alongside healed/revive-selected allies for support-only impact metadata. Grant amounts/counts remain on the existing shield host; presentation can target actual recipients including self. Sprite-lab `ReviewSample.vitals` snapshots real HP/shield percentages so one-shot ceremonies are independent of actual shield-bar expiry. Reset clears this lab state.
+
+### Persistent support-field presentation
+
+SheetDef.fieldFx.loopAfterStart optionally defers Loop until the start clip finishes; default retains existing simultaneous playback. FieldFxPlayback owns the pending transition and cancels it on field removal/reset. RECT_6X3 presentation uses the geometric midpoint (home2.5/enemy12.5,centre lane),independent of inclusive cell enumeration. Source-side mirrored home-zone fixtures run the same real-engine aura field in sprite lab.

@@ -1,6 +1,6 @@
 import { FX, SHEETS } from '../../core/data/sprites';
 import { Cell } from '../../core/models/unit';
-import { rect3x2Center } from '../engine/area';
+import { rect3x2Center, rect6x3Center } from '../engine/area';
 import { FieldLifecycleEvent } from '../engine/fields';
 import { fxLength } from './fx-clip';
 
@@ -11,6 +11,7 @@ interface Host {
 interface OwnedFx { world: Cell; expires: number; fieldId?: number }
 interface FieldView {
   sprite: string; world: Cell; ids: number[]; started: number; interval: number; duration: number;
+  loopAt?: number;
   nextRain: number; pulses: Set<number>; area: FieldLifecycleEvent['area'];
 }
 
@@ -33,12 +34,14 @@ export class FieldFxPlayback {
       if (this.fields.has(e.fieldId) || !sprite) return;
       const def = SHEETS[sprite]?.fieldFx;
       if (!def) return;
-      const center = e.area === 'RECT_3X2' ? rect3x2Center(e.at) : e.at;
+      const center = e.area === 'RECT_3X2' ? rect3x2Center(e.at) : e.area === 'RECT_6X3' ? rect6x3Center(e.at) : e.at;
       const world = { r: center.r, c: origin + center.c };
-      const ids = [this.spawn(def.start, world, false, clock, e.fieldId), this.spawn(def.loop, world, true, clock, e.fieldId)]
+      const loopAt = def.loopAfterStart && def.start && FX[def.start] ? clock + fxLength(FX[def.start]) : undefined;
+      const ids = [this.spawn(def.start, world, false, clock, e.fieldId),
+        loopAt == null ? this.spawn(def.loop, world, true, clock, e.fieldId) : undefined]
         .filter((id): id is number => id != null);
       this.fields.set(e.fieldId, { sprite, world, ids, started: clock, interval: e.interval ?? 0,
-        duration: e.duration, nextRain: 1, pulses: new Set(), area: e.area });
+        duration: e.duration, loopAt, nextRain: 1, pulses: new Set(), area: e.area });
     } else {
       const field = this.fields.get(e.fieldId);
       if (!field) return;
@@ -65,6 +68,11 @@ export class FieldFxPlayback {
   advance(clock: number): void {
     this.remove([...this.owned].filter(([, f]) => f.expires <= clock + 1e-9).map(([id]) => id));
     for (const [fieldId, f] of this.fields) {
+      if (f.loopAt != null && clock >= f.loopAt - 1e-9) {
+        const id = this.spawn(SHEETS[f.sprite]?.fieldFx?.loop, f.world, true, clock, fieldId);
+        if (id != null) f.ids.push(id);
+        f.loopAt = undefined;
+      }
       const wave = SHEETS[f.sprite]?.fieldFx?.wave;
       if (!wave || f.interval <= 0) continue;
       while (f.nextRain * f.interval <= f.duration + 1e-9 &&

@@ -163,3 +163,19 @@ describe('Sanctuary Veil support-only impact and shield lifetime', () => {
     expect(review.samples.at(-1)!.vitals[3].shieldPct).toBe(0);
   });
 });
+
+describe('Hearthlight Sanctuary isolated engine review', () => {
+  it('creates one six-second protective field at F7, no opening/tick/end damage or healing, with reflected home anchoring', () => {
+    for (const side of ['ally','enemy'] as const) {
+      const r = skillReview('elira','ult',{r:1,c:side==='ally'?3:12},[{id:2,pos:{r:0,c:side==='ally'?1:14}},{id:3,pos:{r:2,c:side==='ally'?4:11}}],'forest_slime',side);
+      const events=r.samples.flatMap(s=>s.events);
+      const starts=r.samples.filter(s=>s.events.some(e=>e.type==='FIELD_STARTED'));
+      expect(starts.length).toBe(1);expect(starts[0].t).toBeCloseTo(.5,6);
+      const start=events.find(e=>e.type==='FIELD_STARTED');if(start?.type!=='FIELD_STARTED')throw new Error('Missing field');
+      expect(start.at).toEqual({r:1,c:side==='ally'?2:12});
+      const ends=r.samples.filter(s=>s.events.some(e=>e.type==='FIELD_ENDED'));
+      expect(ends.length).toBe(1);expect(ends[0].t).toBeCloseTo(6.5,6);
+      expect(events.some(e=>e.type==='damage'||e.type==='heal'||e.type==='shield'||e.type==='projectile')).toBeFalse();
+    }
+  });
+});

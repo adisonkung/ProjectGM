@@ -86,6 +86,10 @@ export function rect3x2Center(primary: Cell): Cell {
     c: Math.max(1, Math.min(BOARD_COLS - 2, primary.c)) };
 }
 
+export function rect6x3Center(primary: Cell): Cell {
+  return { r: (LANES - 1) / 2, c: Math.max(0, Math.min(BOARD_COLS - 6, primary.c - 2)) + 2.5 };
+}
+
 export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
   const { pattern, caster, primary, candidates } = q;
   const centerCell = (q.center ?? 'TARGET') === 'SELF' || !primary ? caster.pos : primary.pos;

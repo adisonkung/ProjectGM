@@ -296,3 +296,7 @@ Supplied elira_s1.zip adds10 character poses plus8-stage caster Main and target 
 ### Elira S2 review (Codex,2026-10-18)
 
 Supplied10 S2 poses/16-stage pastel Main/8-stage Impact. Atlasrow6,base+S1 pixels identical,Ult blank. Trial12FPS:one shieldF7/.50s,recovery.6667/end.8333,prior fallback.35s engine/end.595. Kit15%casterMaxHP/4s/CD15 and all S1/Ult/basic values/timings unchanged. Target ceremony16×118×148/1.333s,Impact8×80×103/.6s,follow recipient;both use actual positive shield recipients,not early workbookF5. Painted dividers removed only from derived bake;pastel matte recovery retains ribbons. No separate Charge/stable loop/DR/field. Generic support-only impact metadata now includes shielded allies,self included;lab snapshots real HP/shield bars and one PROTECTION_APPLY. Combined bake now requires S1+S2 sources. Final Sync pending;docs/ELIRA_S2_REVIEW.md.
+
+## Elira Ultimate visual follow-up (2026-10-18, Codex)
+
+Supplied Ultimate character row7/10poses and four VFX tracks integrated; all three skills now provisional visual review. F7=.5s/12FPS,cast.8333s; existing home6×3/20%DR/6s retained. Formation→persistent Loop→natural-expiry Dissolve; source-death/reset cancel. Truealpha preserved,derived wide board projection,original sources unchanged. Generic loopAfterStart opt-in and even-width field centre,mirrored home-zone lab. Final Sync/balance remain pending. Pipeline,hashes,validation:docs/ELIRA_ULT_REVIEW.md; latest handoff supersedes historical pending-source notes.

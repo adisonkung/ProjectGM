@@ -66,3 +66,5 @@ App/spec/sim typechecks,optimizer,700Karma tests,production build and Elira-team
 Simulation:yuezheng,kael,sylvara,mirelle,elira,F1–3 both100%;F4 AUTO40%/TACTICAL0%;F5–10 both0%. Elira100% of team healing/10% AUTO damage aggregate. Previous PhaseA F4 AUTO50%; timing is provisional and no balance tuning follows from this smoke result.
 
 Native DPR2 Pixi/DOM left/right one-cast/reset checks and actual2×canvas normal/half-speed review videos live in ignored `tmp/elira-s1-preview/`; final results in AI_HANDOFF. They are gameplay captures, not replacement art or final Sync Sheets.
+
+Current Ultimate follow-up: supplied tracks are integrated for provisional review; see [ELIRA_ULT_REVIEW.md](ELIRA_ULT_REVIEW.md). Earlier pending-Ultimate statements above describe that earlier checkpoint.

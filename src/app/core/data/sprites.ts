@@ -97,6 +97,8 @@ export interface SheetDef {
   statusFx?: Record<string, { start?: string; loop: string }>;
   /** Presentation of this caster's fixed fields. Engine lifecycle events, not animation end, own their lifetime. */
   fieldFx?: { start?: string; loop: string; end?: string; residual?: string;
+    /** Defer loop playback until the formation finishes; default preserves existing overlays. */
+    loopAfterStart?: boolean;
     wave?: { rain: string; impact: string; leadMs: number; impactCells?: boolean } };
   /** กระสุน (คีย์ของ FX) ของการยิงแต่ละแบบ */
   projectile?: Partial<Record<'attack' | SkillKind, string>>;
@@ -206,14 +208,10 @@ const SYLVARA_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
 
-// Phase A only: basic poses are temporary skill fallbacks, not approved skill production.
+// Elira: supplied base and individual skill clips; all skill timings remain provisional review data.
 const ELIRA_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
-const ELIRA_SUPPORT_FALLBACK: AnimDef = {
-  row: 3, frames: 7, ms: 85, events: { CAST_START: 0, SKILL_ACTIVATE: 4, DAMAGE: 4, RECOVERY_START: 5 },
-};
-
 export const SHEETS: Record<string, SheetDef> = {
   'hero-elira.png': {
     cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
@@ -227,10 +225,12 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 0, VFX_SPAWN: 2, SKILL_ACTIVATE: 6, DAMAGE: 6, RECOVERY_START: 8 } },
       skill2: { row: 6, frames: 10, ms: 1000 / 12,
         events: { CAST_START: 0, SKILL_ACTIVATE: 6, DAMAGE: 6, RECOVERY_START: 8 } },
-      ult: ELIRA_SUPPORT_FALLBACK,
+      ult: { row: 7, frames: 10, ms: 1000 / 12,
+        events: { CAST_START: 0, CHARGE_START: 1, SKILL_ACTIVATE: 6, DAMAGE: 6, RECOVERY_START: 8 } },
     },
     projectile: { attack: 'el-basic-light' },
-    fx: { skill: ['el-s1-main', 'el-s1-impact'], skill2: ['el-s2-main', 'el-s2-impact'] },
+    fx: { skill: ['el-s1-main', 'el-s1-impact'], skill2: ['el-s2-main', 'el-s2-impact'], ult: 'el-ult-charge' },
+    fieldFx: { start: 'el-ult-main', loop: 'el-ult-field', end: 'el-ult-dissolve', loopAfterStart: true },
   },
   'hero-sylvara.png': {
     cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
@@ -778,6 +778,14 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  'el-ult-charge': { file: 'fx-elira-ult-charge.png', frames: 10, w: 112, h: 157, frameMs: 40,
+    at: 'self', event: 'CHARGE_START', pivot: [0.5, 0.89172], dy: 27.25, fitCells: 1.5, orient: 'flip', layer: 'under' },
+  'el-ult-main': { file: 'fx-elira-ult-main.png', frames: 8, w: 520, h: 440, frameMs: 100,
+    at: 'target', pivot: [0.5, 335 / 440], dy: 35, fitCells: 6, orient: 'flip', layer: 'under' },
+  'el-ult-field': { file: 'fx-elira-ult-field.png', frames: 8, w: 520, h: 440, frameMs: 100,
+    at: 'target', pivot: [0.5, 335 / 440], dy: 35, fitCells: 6, orient: 'flip', layer: 'under' },
+  'el-ult-dissolve': { file: 'fx-elira-ult-dissolve.png', frames: 8, w: 520, h: 440, frameMs: 100, fadeOutMs: 300,
+    at: 'target', pivot: [0.5, 335 / 440], dy: 35, fitCells: 6, orient: 'flip', layer: 'under' },
   'el-s2-main': { file: 'fx-elira-s2-main.png', frames: 16, w: 118, h: 148, frameMs: 1000 / 12,
     at: 'target', on: 'impact', perHit: 1, pivot: [0.5, 0.905405], dy: 27.25, fitCells: 1.25, orient: 'flip', attach: true, layer: 'under' },
   'el-s2-impact': { file: 'fx-elira-s2-impact.png', frames: 8, w: 80, h: 103, frameMs: 75,

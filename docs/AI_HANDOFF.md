@@ -2,7 +2,16 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — Elira S2 visual review (Codex,2026-10-18)
+## Latest follow-up — Elira Ultimate visual review (Codex,2026-10-18)
+
+Fresh origin/master72a3f34 remains authoritative; task baseline91101f6,clean tree. Preserved local S2cc0ed98 on wip/codex-hero-elira-s2-local and rebased identical-content published S2. Only fast-forward task publication; no canonical-local synchronization claim or master merge.
+
+- Supplied elira_ult.zip:10 character poses,Charge10,Formation8,Loop8,Dissolve8 and provisional Excel. Row7 completes combat atlas; prior base/S1/S2 pixels retained. Real alpha preserved; only opaque magenta tracks use chroma recovery. Derived dome uses common520×440/root260,335 and wide board projection; originals untouched. Rebuild/source hashes:docs/ELIRA_ULT_REVIEW.md.
+- Trial12FPS:chargeF2,fieldF7=.5s,recoveryF9/end.8333s. Existing RECT_6X3/HOME_ZONE/20%reduction/6s retained; no heal/revive/damage/shield/new balance values. Generic field playback defers Loop until Formation ends,keeps it after cast,then Dissolve on natural expiry. Source death/clear/reset cancel immediately. Even-width field centre corrected to2.5/12.5; mirrored real-engine lab supports home-zone field and four allies.
+- App/spec/sim typechecks,optimizer,707/707 Karma and production build pass. Elira-team10 runs/floor/bot:F1–3 both100%,F4 AUTO40%/TACTICAL0%,F5–10 both0%,no tuning. Native DPR2 Pixi/DOM both facings verify one field .5→6.5s,expiry,Charge/Formation/Loop reset,zero errors/missing assets. Recordings30FPS actual canvas and half-speed:ignored tmp/elira-ult-preview.
+- Final Sync/balance approval remain pending. See Ultimate review for validation and native preview artifacts. Prior S1/S2 notes below are historical,including references to an unavailable Ultimate.
+
+## Previous follow-up — Elira S2 visual review (Codex,2026-10-18)
 
 User supplied elira_s2.zip and requested Skill2 next. Fresh master72a3f34/task1104816;clean tree. Preserve S1 local a905265 on wip/codex-hero-elira-s1-local;rebase onto identical-content published1104816 skipped duplicate. Continue fast-forward task-branch publication only;no master merge/deletion or new canonical-local sync claim.
 

@@ -544,13 +544,12 @@ describe('Elira supplied base and pending production', () => {
     const sh = SHEETS['hero-elira.png'];
     expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([10, 8, 260, 170]);
     expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => sh.anims[k]!.frames)).toEqual([5, 7, 4, 7, 6]);
-    for (const k of ['ult'] as const) {
-      expect(sh.anims[k]!.row).toBe(3);
-      expect(animTiming('hero-elira.png', k).hit).toBeCloseTo(0.34, 6);
-      expect(animTiming('hero-elira.png', k).total).toBeCloseTo(0.595, 6);
-      expect(animEvents('hero-elira.png', k).some(e => e.event === 'PROJECTILE_SPAWN')).toBeFalse();
-    }
-    expect(sh.fieldFx).toBeUndefined();
+    expect(sh.anims.ult!.row).toBe(7);
+    expect(sh.anims.ult!.frames).toBe(10);
+    expect(animTiming('hero-elira.png', 'ult').hit).toBeCloseTo(0.5, 6);
+    expect(animTiming('hero-elira.png', 'ult').total).toBeCloseTo(10 / 12, 6);
+    expect(sh.fieldFx!.loopAfterStart).toBeTrue();
+    expect(fxFor('hero-elira.png', 'ult', { on: 'event', event: 'CHARGE_START' })).toEqual(['el-ult-charge']);
     expect(sh.fx!.skill).toEqual(['el-s1-main', 'el-s1-impact']);
     expect(sh.anims.skill2!.row).toBe(6);
     expect(sh.anims.skill2!.frames).toBe(10);

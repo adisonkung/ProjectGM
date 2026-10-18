@@ -1,7 +1,7 @@
-"""Elira: bake approved base/reference and supplied S1/S2 character without modifying sources.
+"""Elira: bake approved base/reference and supplied S1/S2/Ultimate character without modifying sources.
 
-python3 tools/sprites/elira.py [base source dir] [sprites out] [portraits out] [S1 source dir] [S2 source dir]
-Sources: base.png / reference.png from Elira_master_base.zip. S1/S2 character sources are required; Ult remains pending.
+python3 tools/sprites/elira.py [base source dir] [sprites out] [portraits out] [S1 source dir] [S2 source dir] [Ultimate source dir]
+Sources: base.png / reference.png from Elira_master_base.zip. S1/S2/Ultimate character sources are required.
 """
 import json
 import os
@@ -20,6 +20,7 @@ OUT = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
 PORTRAITS = Path(sys.argv[3] if len(sys.argv) > 3 else 'public/portraits')
 S1 = Path(sys.argv[4]) if len(sys.argv) > 4 else SRC / 's1'
 S2 = Path(sys.argv[5]) if len(sys.argv) > 5 else SRC / 's2'
+ULT = Path(sys.argv[6]) if len(sys.argv) > 6 else SRC / 'ult'
 B.SRC = str(SRC)
 B.CELL_W, B.CELL_H, B.ROOT_X, B.ROOT_Y = 260, 170, 130, 155
 NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
@@ -54,10 +55,16 @@ def main():
     B.SRC = str(S2)
     groups['skill2'] = A.sheet_frames('Skill 2 Character Action Only', [5, 5], False)
     B.SRC = str(SRC)
-    names = NAMES + ['skill', 'skill2']
+    if not (ULT / 'Ultimate Character Action Only.png').exists():
+        raise FileNotFoundError(f'Required Ultimate source: {ULT}')
+    B.SRC = str(ULT)
+    groups['ult'] = A.sheet_frames('Ultimate Character Action Only', [5, 5], False)
+    B.SRC = str(SRC)
+    names = NAMES + ['skill', 'skill2', 'ult']
     scales = {name: scale for name in NAMES}
     scales['skill'] = 78 / A.body_h(groups['skill'][0])
     scales['skill2'] = 78 / A.body_h(groups['skill2'][0])
+    scales['ult'] = 78 / A.body_h(groups['ult'][0])
     probe = Image.new('RGBA', (260 * 10, 170 * 8))
     for row, name in enumerate(names):
         for col, fr in enumerate(groups[name]):

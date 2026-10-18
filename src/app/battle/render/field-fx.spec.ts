@@ -93,3 +93,41 @@ describe('generic field visual lifecycle', () => {
     expect(s.spawned).toEqual([]);
   });
 });
+
+describe('Elira sequential dome field ownership', () => {
+  const start: FieldLifecycleEvent = { type: 'FIELD_STARTED', fieldId: 12, src: 1, at: { r: 1, c: 2 }, area: 'RECT_6X3', duration: 6, interval: 1 };
+  function scene() {
+    let id = 0;
+    const live = new Map<number, string>(); const spawned: string[] = [];
+    const player = new FieldFxPlayback({ spawn: (name) => { spawned.push(name); live.set(++id, name); return id; }, remove: ids => ids.forEach(n => live.delete(n)) });
+    return { player, live, spawned };
+  }
+  it('centres the even-width footprint, forms once then starts one loop after formation and dissolves once at expiry', () => {
+    const s = scene();s.player.handle(start, 'hero-elira.png', 16, .5);s.player.handle(start, 'hero-elira.png', 16, .5);
+    expect(s.spawned).toEqual(['el-ult-main']);
+    expect([...s.player.positions(16).values()]).toEqual([{ r: 1, c: 2.5 }]);
+    s.player.advance(1.29);expect(s.spawned).toEqual(['el-ult-main']);
+    s.player.advance(1.3);s.player.advance(4);
+    expect([...s.live.values()]).toEqual(['el-ult-field']);expect(s.spawned).toEqual(['el-ult-main', 'el-ult-field']);
+    const end: FieldLifecycleEvent = { ...start, type: 'FIELD_ENDED', reason: 'EXPIRED' };
+    s.player.handle(end, undefined, 0, 6.5);s.player.handle(end, undefined, 0, 6.5);
+    expect([...s.live.values()]).toEqual(['el-ult-dissolve']);
+    expect([...s.player.positions(20).values()]).toEqual([{ r: 1, c: -1.5 }]);
+    s.player.advance(7.6);expect(s.live.size).toBe(0);
+  });
+  it('cancels a pending loop on early death/clear/reset with no delayed dome or natural-expiry dissolve', () => {
+    for (const reason of ['SOURCE_DIED', 'CLEARED'] as const) {
+      const s = scene();s.player.handle(start,'hero-elira.png',0,0);
+      s.player.handle({...start,type:'FIELD_ENDED',reason},undefined,0,.2);s.player.advance(20);
+      expect(s.live.size).toBe(0);expect(s.spawned).toEqual(['el-ult-main']);
+    }
+    const s=scene();s.player.handle(start,'hero-elira.png',0,0);s.player.clear();s.player.advance(20);
+    expect(s.live.size).toBe(0);expect(s.spawned).toEqual(['el-ult-main']);
+  });
+  it('keeps the reflected right home zone at its true midpoint and clears an active loop', () => {
+    const s=scene();s.player.handle({...start,at:{r:1,c:12}},'hero-elira.png',0,0);s.player.advance(2);
+    expect([...s.player.positions(0).values()]).toEqual([{r:1,c:12.5}]);
+    s.player.handle({...start,type:'FIELD_ENDED',reason:'SOURCE_DIED'},undefined,99,2);
+    expect(s.live.size).toBe(0);expect(s.spawned).not.toContain('el-ult-dissolve');
+  });
+});

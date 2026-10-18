@@ -65,3 +65,5 @@ App/spec/sim typechecks,optimizer,**703/703 Karma**,production build and Elira-t
 Next:visual review before Final S1/S2 Sync;Ultimate/dedicated UI sources remain pending. Do not infer a stable loop,extra mitigation or altered shield expiry from the workbook or finished art stages.
 
 Simulation:yuezheng,kael,sylvara,mirelle,elira,F1–3 both100%;F4 AUTO40%/TACTICAL0%;F5–10 both0%. Elira100%healing/10%AUTOdamage aggregate. Smoke only,no tuning.
+
+Current Ultimate follow-up: supplied tracks are integrated for provisional review; see [ELIRA_ULT_REVIEW.md](ELIRA_ULT_REVIEW.md). Earlier pending-Ultimate statements above describe that earlier checkpoint.

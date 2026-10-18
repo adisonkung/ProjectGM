@@ -203,7 +203,7 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     expect(ranked.skill2.cooldown).toBe(14.25);
     expect(skillLines(kit().ult).join(' ')).toContain('6×3');
     expect(skillLines(kit().ult).join(' ')).toContain('20%');
-    expect(animTiming('hero-elira.png', 'ult').hit).toBeCloseTo(0.34, 6);
+    expect(animTiming('hero-elira.png', 'ult').hit).toBeCloseTo(0.5, 6);
   });
 });
 
