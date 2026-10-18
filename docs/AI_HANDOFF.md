@@ -2,7 +2,15 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — Elira targeted Ultimate (Codex,2026-10-18)
+## Latest follow-up — Elira supplied UI art (Codex, 2026-10-19)
+
+User supplied `Elira_icn.zip` and requested portrait, skill icons and banner. Fresh master `72a3f34`, clean tree; `feature/codex-elira-ui-art` was created from master then fast-forwarded to published targeted-Ultimate dependency `b3c6c04`. Elira remains unmerged. Publish this task branch only; preserve prior local branches. No master merge or new canonical-local synchronization claim; last confirmed metadata below remains unchanged.
+
+- Five supplied opaque PNGs, no embedded documents/instructions. Dedicated portrait 288², S1/S2/Ult icons 160², banner 1400×788 via Lanczos/WebP92, no crop/repaint. `HERO_ART.elira` and production inventory updated. `elira_art.py` handles standalone UI; combined `elira.py` requires the dedicated sources before writing and no longer restores the reference portrait. Inputs/hashes/rebuild: `docs/ELIRA_UI_ART.md`.
+- App/spec checks, 711/711 Karma and production build pass. Combined bake reproduces five UI outputs plus character/basic projectile byte-for-byte, zero clipping. DPR2 roster/team/detail/three skill icons on desktop/mobile: zero errors, missing images or detail overflow. Review captures: `/workspace/scratch/elira-ui-preview/`. Source bytes preserved. No gameplay, scale, final Sync, optimizer or balance changes.
+- Next: review supplied art and existing provisional animations; current Ult behavior remains in `ELIRA_ULT_TARGETING.md`. Older pending-UI statements below are historical and superseded by this entry. The cancelled overall UI redesign was not applied.
+
+## Previous follow-up — Elira targeted Ultimate (Codex,2026-10-18)
 
 User requested lowest-HP ally targeting and recipient-centred Ultimate,then explicitly chose a fixed field at the recipient position when activation occurs. Fresh origin/master72a3f34; published scale fix27edd69 has identical content to localaa76744. Clean tree; fix/elira-ultimate-target starts from published scale fix,including unmerged Elira and latest master. Publish only this task branch; no master merge or new canonical-local synchronization claim.
 

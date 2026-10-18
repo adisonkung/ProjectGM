@@ -17,5 +17,5 @@ export const ELIRA_PRODUCTION = {
       workbookSha256: 'e3b8ed82e24ddfc401ff881d1136761a05986eb654db1832c2a83a67c3d6375b',
       columns: 6, lanes: 3, assets: ['CHARGE', 'DOME_FORMATION', 'DOME_LOOP', 'DOME_DISSOLVE'] },
   },
-  uiArt: { portrait: 'REFERENCE_CROP', skillIcons: 'AWAITING_SOURCE', banner: 'AWAITING_SOURCE' },
+  uiArt: { portrait: 'SUPPLIED', skillIcons: 'SUPPLIED', banner: 'SUPPLIED', archive: 'Elira_icn.zip' },
 } as const;

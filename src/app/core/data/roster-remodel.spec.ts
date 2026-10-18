@@ -561,7 +561,8 @@ describe('Elira supplied base and pending production', () => {
     expect(animTiming('hero-elira.png', 'skill').total).toBeCloseTo(10 / 12, 6);
     expect(fxFor('hero-elira.png', 'skill', { on: 'event', event: 'VFX_SPAWN' })).toEqual(['el-s1-main']);
     expect(fxFor('hero-elira.png', 'skill', { on: 'impact' })).toEqual(['el-s1-impact']);
-    expect(HERO_ART['elira']).toEqual({ portrait: 'portraits/elira.webp' });
+    expect(HERO_ART['elira']).toEqual({ portrait: 'portraits/elira.webp', s1: 'skills/elira-s1.webp',
+      s2: 'skills/elira-s2.webp', ult: 'skills/elira-ult.webp', banner: 'banners/elira.webp' });
     expect(sh.projectile!.attack).toBe('el-basic-light');
   });
 });

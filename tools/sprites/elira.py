@@ -1,7 +1,7 @@
 """Elira: bake approved base/reference and supplied S1/S2/Ultimate character without modifying sources.
 
-python3 tools/sprites/elira.py [base source dir] [sprites out] [portraits out] [S1 source dir] [S2 source dir] [Ultimate source dir]
-Sources: base.png / reference.png from Elira_master_base.zip. S1/S2/Ultimate character sources are required.
+python3 tools/sprites/elira.py [base source dir] [sprites out] [portraits out] [S1 source dir] [S2 source dir] [Ultimate source dir] [UI art dir]
+Sources: base.png from Elira_master_base.zip. S1/S2/Ultimate and dedicated Elira_icn.zip UI sources are required.
 """
 import json
 import os
@@ -15,6 +15,7 @@ from scipy import ndimage
 sys.path.insert(0, os.path.dirname(__file__))
 import aurel_v2 as A
 import bailong as B
+from elira_art import SOURCES as UI_SOURCES, bake_ui
 
 SRC = Path(sys.argv[1] if len(sys.argv) > 1 else 'art/incoming/elira')
 OUT = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
@@ -22,6 +23,7 @@ PORTRAITS = Path(sys.argv[3] if len(sys.argv) > 3 else 'public/portraits')
 S1 = Path(sys.argv[4]) if len(sys.argv) > 4 else SRC / 's1'
 S2 = Path(sys.argv[5]) if len(sys.argv) > 5 else SRC / 's2'
 ULT = Path(sys.argv[6]) if len(sys.argv) > 6 else SRC / 'ult'
+ART = Path(sys.argv[7]) if len(sys.argv) > 7 else SRC / 'art'
 B.SRC = str(SRC)
 B.CELL_W, B.CELL_H, B.ROOT_X, B.ROOT_Y = 260, 170, 130, 155
 NAMES = ['idle', 'walk', 'hurt', 'attack', 'die']
@@ -52,6 +54,10 @@ def support_scale(reference, frames, base_scale):
 
 
 def main():
+    # Fail before writing outputs if dedicated art is missing; no reference-crop fallback.
+    for filename in UI_SOURCES.values():
+        if not (ART / filename).is_file():
+            raise FileNotFoundError(f'Required Elira UI art: {ART / filename}')
     OUT.mkdir(parents=True, exist_ok=True)
     PORTRAITS.mkdir(parents=True, exist_ok=True)
     base, _ = B.load('base')
@@ -108,10 +114,7 @@ def main():
     if any(clipped):
         raise ValueError(f'Clipped source pixels: {clipped}')
     sheet.save(OUT / 'hero-elira.png', optimize=True)
-    # Face close-up at bottom-right, avoiding expression panels and palette swatches.
-    reference, _ = B.load('reference')
-    portrait = Image.fromarray(reference[770:1070, 1110:1410]).resize((288, 288), Image.Resampling.LANCZOS)
-    portrait.save(PORTRAITS / 'elira.webp', quality=92)
+    bake_ui(ART, PORTRAITS.parent)
     print(json.dumps({'counts': COUNTS, 'scale': scale, 'bodyHeight': 78,
                       'scales': scales, 'sheet': sheet.size, 'clipped': sum(clipped)}, indent=2))
 
