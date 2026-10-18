@@ -1,26 +1,16 @@
+@use './lobby';
+
 .island { display: grid; gap: 14px; }
 
 /* the island IS the screen: locked full-viewport stage, the app bar / dock float over it (no page scroll at all) */
-:host { --ui-top: 84px; --ui-bottom: 0px; }
 .stage { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #140e2a; }
 app-island-scene { position: absolute; inset: 0; }
 .stage:fullscreen { --ui-top: 0px; --ui-bottom: 0px; }
 
 .hud { position: absolute; z-index: 2; display: grid; gap: 6px; pointer-events: none; > * { pointer-events: auto; } }
-.tl { top: calc(var(--ui-top) + 10px); left: 12px; }
-.tr { top: calc(var(--ui-top) + 10px); right: 12px; }
-.isle-name { justify-self: start; max-width: 62vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  font: 700 17px/1.1 var(--title); letter-spacing: .04em; color: var(--gold-hi); text-shadow: 0 1px 0 #000, 0 0 10px #000c, 0 0 18px #9b6bff66; }
-.stage-name, .tower-prog { display: inline-flex; align-items: center; gap: 6px; justify-self: start; padding: 4px 10px; border-radius: 99px;
-  background: #0b0914e0; border: 1px solid #d9b46466; font: 700 12px var(--title); color: var(--gold-hi); }
-.tower-prog { font: 600 11px var(--body); color: var(--muted); b { color: var(--gold-hi); font-family: var(--title); } }
-.pips { display: flex; gap: 2px; i { width: 7px; height: 7px; border-radius: 2px; background: #ffffff1f; &.on { background: var(--gold); box-shadow: 0 0 5px #d9b464aa; } } }
 .note { position: relative; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: var(--gold-hi);
   background: #0b0914cc; border: 1px solid #d9b46488; text-decoration: none;
   em { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--ember); color: #fff; font: 700 11px/18px var(--body); font-style: normal; text-align: center; } }
-.cta { position: absolute; z-index: 2; right: 14px; bottom: calc(var(--ui-bottom) + 14px); display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 99px;
-  border: 1px solid #f6dfa0; color: #211606; font: 800 14px var(--title); background: linear-gradient(180deg, #f8e4a8, #d9b464 45%, #a97c34);
-  box-shadow: 0 0 18px #d9b46466, 0 4px 12px #000a; }
 
 .event { position: absolute; z-index: 9; left: 50%; bottom: calc(var(--ui-bottom) + 18px); transform: translate(-50%, 16px); width: min(88%, 380px); opacity: 0; pointer-events: none;
   display: grid; justify-items: center; gap: 4px; text-align: center; padding: 14px 16px; border-radius: 16px;
@@ -44,10 +34,6 @@ app-island-scene { position: absolute; inset: 0; }
 @keyframes up { from { transform: translateY(20px); opacity: 0; } }
 .who { display: flex; gap: 12px; align-items: center; h2 { margin: 2px 0; } .main { color: var(--gold); } .pw { display: inline-flex; gap: 4px; align-items: center; font: 700 13px var(--title); color: #ffd2b0; app-icon { color: var(--ember); } } }
 
-@media (max-width: 720px) {
-  :host { --ui-top: 58px; --ui-bottom: calc(86px + env(safe-area-inset-bottom)); }
-}
-
 .theme-btn, .fs-btn { border: 1px solid #d9b46488; cursor: pointer; padding: 0; }
 .fs-btn { font-size: 16px; line-height: 1; }
 .themes-sheet { max-height: calc(100% - var(--ui-top) - var(--ui-bottom) - 20px); overflow: auto;
@@ -69,3 +55,5 @@ app-island-scene { position: absolute; inset: 0; }
   &:hover { border-color: #d9b46488; }
   &.on { border-color: var(--gold); box-shadow: 0 0 14px #d9b46455; } }
 .theme-line { margin: 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; b { color: var(--gold-hi); } .gm-btn { margin-left: auto; } }
+
+@include lobby.chrome;

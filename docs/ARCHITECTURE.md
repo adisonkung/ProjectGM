@@ -173,7 +173,8 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 ### UI / pages
 
 - **Routes:** `app.routes.ts`. All game routes sit under `islandNamedGuard`.
-- **Main nav (`MAIN_NAV`):** island, heroes, team, summon. Other features are reached from buildings on the island.
+- **Navigation:** `MAIN_NAV` retains island, heroes, team and summon on ordinary screens. Home uses `LOBBY_NAV`: Home, heroes, formation, equipment, summon and adventure, linking to existing F0 routes. Other features remain available through island buildings.
+- **Home lobby:** gilded navigation/resource chrome in `app.component`, with kingdom/progress, a live five-slot party strip, next-stage preview and tower CTA in `pages/island`. Party order/levels/power, currencies and progression derive from the current save/services. Mobile uses a six-item bottom dock and collapsible progress details; short phone landscape hides the party strip. Original City/classic scene assets, renderer, panning, building actions and progression events remain in use. The quality toggle sits on the right above the party strip. `lobby.scss` and `public/ui/lobby-frame.svg` supply the decorative chrome.
 - **Theme:** "Arcane Noir" in `styles.scss`, with shared classes `gm-*`.
 
 ### Save / load

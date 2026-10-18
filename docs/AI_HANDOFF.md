@@ -2,7 +2,16 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — Elira supplied UI art (Codex, 2026-10-19)
+## Latest follow-up — reference-inspired fantasy Home lobby (Codex, 2026-10-19)
+
+User requested the surrounding menus from the supplied Dawnmere lobby reference, keeping the existing floating island. Fresh master `455de5b` contains the explicitly authorized Elira merge (PR #1). Clean checkout; `feature/codex-fantasy-lobby` starts from that master. Publish this new task branch for visual review, with no new master-merge authorization or canonical-local synchronization claim. Prior confirmed sync metadata below is unchanged.
+
+- Gilded Home-only six-tile `LOBBY_NAV`, individual real gem/gold counters, kingdom/progression panel, live five-slot saved party/power, actual next-stage preview and large existing tower CTA. Other pages retain compact `MAIN_NAV`. Added shortcuts are existing F0 routes. No fabricated event, quest, mailbox, currency or rewards; existing building unlock/actions and save values preserved.
+- Desktop/tablet/phone/short-landscape layouts; mobile progress disclosure and bottom dock. Original City/classic art/renderer/pan/roam remain; quality toggle moves to the right. New original decorative vector: `public/ui/lobby-frame.svg`; styling: `pages/island/lobby.scss`. Hero/building taps close the theme sheet so new party controls cannot leave stacked sheets.
+- App/spec checks,712/712 Karma and production build pass. Native DPR2 responsive and interactive checks/artifacts described in `docs/FANTASY_LOBBY_UI.md`; `/workspace/scratch/fantasy-lobby-review/`. CSS size warnings remain; budgets unchanged. No combat, sprite, save-schema, final Sync or balance changes.
+- Next: review screenshots and new task branch before merging; inspect `app.component.*`, `pages/island/island.component.*`, `pages/island/lobby.scss`. The older note's "Elira unmerged" statements describe its earlier task state; PR #1 is now merged.
+
+## Previous follow-up — Elira supplied UI art (Codex, 2026-10-19)
 
 User supplied `Elira_icn.zip` and requested portrait, skill icons and banner. Fresh master `72a3f34`, clean tree; `feature/codex-elira-ui-art` was created from master then fast-forwarded to published targeted-Ultimate dependency `b3c6c04`. Elira remains unmerged. Publish this task branch only; preserve prior local branches. No master merge or new canonical-local synchronization claim; last confirmed metadata below remains unchanged.
 

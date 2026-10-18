@@ -20,15 +20,16 @@
         </span>
         <span class="word">
           <b>Summon Tower</b>
-          <small>{{ account.islandName() || 'Arcane Ascent' }}</small>
+          <small>{{ immersive() ? 'KEEPERS OF THE SKY' : account.islandName() || 'Arcane Ascent' }}</small>
         </span>
       </a>
 
       <nav class="menu" aria-label="เมนูหลัก">
-        @for (n of nav; track n.path) {
+        @for (n of nav(); track n.path) {
           <a [routerLink]="n.path" [attr.title]="n.label" [class.on]="active() === n.path" [attr.aria-current]="active() === n.path ? 'page' : null">
             <span class="glyph"><app-icon [name]="n.icon" [size]="20" /></span>
             <span class="lbl">{{ n.label }}</span>
+            @if (n.caption) { <small class="nav-caption">{{ n.caption }}</small> }
           </a>
         }
       </nav>

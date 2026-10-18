@@ -18,6 +18,7 @@ import { SKY_PLOTS } from '../../core/data/sky-city';
 import { IslandSim, SimHero } from '../../island/island-sim';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
+import { heroArt } from '../../core/data/hero-art';
 
 /** state a building showed before an event (pending events are revealed on screen one at a time) */
 function priorState(ev: IslandEvent): IslandBuildingState {
@@ -96,6 +97,21 @@ export class IslandComponent implements OnInit, OnDestroy {
   readonly cleared = computed(() => this.save.state().cleared);
   readonly totalFloors = STAGES.length;
   readonly stageName = computed(() => islandStageName(this.island().islandProgressionStage));
+  readonly progressExpanded = signal(false);
+  readonly partySlots = [0, 1, 2, 3, 4];
+  readonly party = computed(() => {
+    const s = this.save.state();
+    return s.team.flatMap(slot => {
+      const h = s.heroes.find(hero => hero.uid === slot.uid);
+      const t = h && HERO_BY_ID[h.templateId];
+      if (!h || !t) return [];
+      return [{ uid: h.uid, id: t.id, name: t.name, level: this.roster.progress(h).level,
+        star: this.roster.star(h), power: this.roster.power(h), portrait: heroArt(t.id)?.portrait,
+        icon: ({ tank: 'shield', fighter: 'sword', assassin: 'armory', archer: 'heroes', mage: 'crystal', healer: 'potion' })[t.cls] }];
+    });
+  });
+  readonly partyPower = computed(() => this.party().reduce((sum, h) => sum + h.power, 0).toLocaleString('en-US'));
+  readonly nextStage = computed(() => STAGES.find(stage => stage.floor === this.nextFloor()));
 
   // ---------------------------------------------------------------- progression events (one at a time)
   readonly events = computed(() => this.island().pendingEvents);
@@ -257,11 +273,13 @@ export class IslandComponent implements OnInit, OnDestroy {
   tapBuilding(id: string): void {
     if (this.current()) return; // an event is playing
     this.selectedHero.set(null);
+    this.themeSheet.set(false);
     this.selectedBuilding.set(id);
   }
   tapHero(uid: number): void {
     if (this.current()) return;
     this.selectedBuilding.set(null);
+    this.themeSheet.set(false);
     this.selectedHero.set(uid);
   }
   closeSheets(): void {

@@ -109,7 +109,7 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
   small { font: 600 12px var(--body); color: var(--muted); } }
 .bar { display: block; width: min(260px, 60vw); height: 6px; border-radius: 3px; background: #ffffff1a; overflow: hidden;
   em { display: block; height: 100%; background: linear-gradient(90deg, #9b6bff, #f6dfa0); transition: width .2s; } }
-.fxq { position: absolute; left: 14px; bottom: calc(var(--ui-bottom, 0px) + 14px); z-index: 5; padding: 6px 12px; border-radius: 99px; border: 1px solid #d9b46488;
+.fxq { position: absolute; right: 19px; top: calc(var(--ui-top, 0px) + 136px); z-index: 5; padding: 6px 12px; border-radius: 99px; border: 1px solid #d9b46488;
   background: #0b0914cc; color: var(--gold-hi); font: 700 12px var(--title); cursor: pointer; box-shadow: 0 4px 12px #0008;
   &:hover { border-color: var(--gold); } }
 .zoom { bottom: calc(var(--ui-bottom, 0px) + 54px); }
