@@ -2,7 +2,15 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — six-point lobby refinement (Codex, 2026-10-19)
+## Latest follow-up — character detail UI (Codex, 2026-10-19)
+
+User supplied a dark/gold Elira detail reference and requested implementing it. Reconciled clean `feature/codex-lobby-polish`, explicit fresh master fetch still `455de5b`; no local master branch. Created `feature/codex-hero-detail-ui` from master then fast-forwarded to explicitly continued published lobby `7d20460`. Previous branches preserved; only this task branch should be published. No master merge authorization; last confirmed canonical-local sync metadata below remains unchanged.
+
+- Full original key art; dark blue/gold identity plate with real stars/level/EXP/power, actual team/training/main status and four attack/skill shortcuts. Four accessible tabs (overview/stats/skills/equipment), arrow/Home/End keys, accurate panel relationships. Overview pairs stars/stats and equipment/growth; narrow screens stack. All real services/actions remain available.
+- Reference is visual direction only: keep the actual 6★ cap, three equipment slots and registered stat/skill names. No invented biography, normal-attack art, crit rows, English name records or balance changes. Existing hero art/registries, save schema, combat and other screens are unchanged.
+- App/spec checks,715/715 Karma and production build pass (size warnings retained); native six-size/all-ten-hero/action/max-state checks pass without page errors or missing assets. Scope and final verification: `docs/HERO_DETAIL_UI.md`. Native screenshots and disposable-browser verification: `/workspace/scratch/hero-detail-review/`. Review before merging. Skill Timeline Sync/balance status remains as previously recorded.
+
+## Previous follow-up — six-point lobby refinement (Codex, 2026-10-19)
 
 User requested keeping the layout while refining six details, using Dark Fantasy Premium chrome without darkening Dawnmere/other themed areas. Fresh master `455de5b`; clean tree. `feature/codex-lobby-polish` starts there and fast-forwards to explicitly continued published lobby `328b004` (tree identical to prior local `c2d4857`). Previous branch preserved; publish only the refinement branch. No new merge authorization or canonical-local sync claim.
 
