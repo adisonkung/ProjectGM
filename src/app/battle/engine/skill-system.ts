@@ -630,6 +630,8 @@ export class SkillSystem {
     for (const e of s.effects) {
       switch (e.type) {
         case 'FIELD': {
+          // A targeted ally must survive anticipation; do not redirect the cast onto another ally or a corpse.
+          if (s.target === 'LOWEST_HP_ALLY' && !primary.alive) break;
           // Home-zone fields keep their anchor even if the caster crosses the board mid-cast.
           const center = fieldAnchor(u.side, e.field, at);
           const origin = { ...u.pos };

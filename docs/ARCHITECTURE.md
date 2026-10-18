@@ -253,7 +253,7 @@ Engine results become progression through `ProgressionService`.
 
 ### Spatial field auras (Elira Phase A, 2026-10-17)
 
-`FieldDefinition.anchor: HOME_ZONE` selects a fixed source-side home-zone anchor through shared `fieldAnchor()`. `RECT_6X3` resolves18 board cells; even-width integer anchors use columns−2 through+3. FieldSystem stores source side and resolves `aura` team/modifiers against current logical occupancy and living source on each query. Units expose `Buffable.auraModifiers`, composed with timed buffs by `modifier()`/`dodgeChance()` and the existing DamageResolver. No buff instance is copied to recipients, so entry/exit, source death and field clear leave no timed residue. Positive-field AUTO checks use the same anchor/area. Existing pulse damage fields keep their scheduler behavior; aura protection does not wait for a pulse. Elira has no registered dome art yet.
+`FieldDefinition.anchor: HOME_ZONE` selects a fixed source-side home-zone anchor through shared `fieldAnchor()`. `RECT_6X3` resolves18 board cells; even-width integer anchors use columns−2 through+3. FieldSystem stores source side and resolves `aura` team/modifiers against current logical occupancy and living source on each query. Units expose `Buffable.auraModifiers`, composed with timed buffs by `modifier()`/`dodgeChance()` and the existing DamageResolver. No buff instance is copied to recipients, so entry/exit, source death and field clear leave no timed residue. Positive-field AUTO checks use the same anchor/area. Existing pulse damage fields keep their scheduler behavior; aura protection does not wait for a pulse. Elira now uses the supplied Charge/Formation/Loop/Dissolve tracks. Its current targeting is described below.
 
 
 ### Support-only impacts and review vitals (Elira S2,2026-10-18)
@@ -262,4 +262,10 @@ Engine results become progression through `ProgressionService`.
 
 ### Persistent support-field presentation
 
-SheetDef.fieldFx.loopAfterStart optionally defers Loop until the start clip finishes; default retains existing simultaneous playback. FieldFxPlayback owns the pending transition and cancels it on field removal/reset. RECT_6X3 presentation uses the geometric midpoint (home2.5/enemy12.5,centre lane),independent of inclusive cell enumeration. Source-side mirrored home-zone fixtures run the same real-engine aura field in sprite lab.
+SheetDef.fieldFx.loopAfterStart optionally defers Loop until the start clip finishes; default retains existing simultaneous playback. FieldFxPlayback owns the pending transition and cancels it on field removal/reset. RECT_6X3 presentation uses the geometric midpoint (home2.5/enemy12.5,centre lane),independent of inclusive cell enumeration. Mirrored support-field fixtures run the same real-engine aura field in sprite lab.
+
+### Targeted protective fields (Elira,2026-10-18)
+
+Elira Ultimate selects LOWEST_HP_ALLY with unlimited range,self included. The recipient is selected when casting starts; the field snapshots that recipient's current cell at activation and stays fixed. A dead recipient during anticipation cancels targeted ally-field creation; it does not redirect. Source death still cancels an active field; recipient movement/death afterwards does not move/remove it.
+
+RECT_6X3_CENTERED uses the exact activation cell as geometry and visual centre. It does not use the legacy RECT_6X3 midpoint/clamping. Half-open column bounds[c−3,c+3) and lane bounds[r−1.5,r+1.5) retain18 cells at interior integer centres; edges clip instead of shifting the centre. FieldSystem aura checks and healNeed AI checks share resolveArea. The existing home-zone/clamped pattern remains available and unchanged. Formation/Loop/Dissolve now align their common root to the recipient's feet at dy27.25%cell. Sprite lab formation=field puts the40%-HP recipient away from the full-health caster with inside/outside witnesses.

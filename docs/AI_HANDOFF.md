@@ -2,7 +2,15 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — character scale/registration review (Codex,2026-10-18)
+## Latest follow-up — Elira targeted Ultimate (Codex,2026-10-18)
+
+User requested lowest-HP ally targeting and recipient-centred Ultimate,then explicitly chose a fixed field at the recipient position when activation occurs. Fresh origin/master72a3f34; published scale fix27edd69 has identical content to localaa76744. Clean tree; fix/elira-ultimate-target starts from published scale fix,including unmerged Elira and latest master. Publish only this task branch; no master merge or new canonical-local synchronization claim.
+
+- Ultimate LOWEST_HP_ALLY/Infinity,self included; HP% and normal distance/ID ties. AUTO health thresholds unchanged. Select recipient at cast start,snapshot current recipient cell at F7=.5s; later HP changes do not redirect. If recipient dies during anticipation,no field; after creation recipient movement/death leaves the fixed field intact. Source death/expiry/clear policies unchanged.
+- New generic RECT_6X3_CENTERED uses exact target point; full6×3 interior,clips at edges with half-open horizontal bounds. Aura,AI occupancy and visual centre agree; legacy home-zone geometry unchanged. Same6s/20%reduction,cast lock,FX phase timings and art. Dome dy35→27.25 aligns shared root to recipient feet. UI describes target; formation=field lab separates recipient from caster.
+- Validation:app/spec checks,711/711 Karma,production build and10-run/floor/bot Elira-team smoke pass. Native Pixi/DOM both facings centre exactly on40%-HP target(7/8),away from caster(3/12),one lifecycle.5→6.5s,zero errors/missing/stale FX. No art changes/optimizer needed. Details:docs/ELIRA_ULT_TARGETING.md. Scale corrections from previous checkpoint remain. Historical home-zone references below describe the superseded behavior. Confirmed canonical-local sync metadata remains unchanged.
+
+## Previous follow-up — character scale/registration review (Codex,2026-10-18)
 
 User authorized fixing the cross-roster audit findings. Fresh origin/master72a3f34, published Eliraba8eac4 (tree identical to localb1f9152), clean tree; fix/hero-scale-registration starts from published Elira and includes latest master. Only this task branch publication; Elira is an unmerged dependency. No new canonical-local sync claim.
 

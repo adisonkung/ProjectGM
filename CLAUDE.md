@@ -304,3 +304,7 @@ Supplied Ultimate character row7/10poses and four VFX tracks integrated; all thr
 ## Character scale/registration correction (2026-10-18,Codex)
 
 User requested fixes after10-hero audit. Correct confirmed Elira IdleF3/F4 sinking by8/7px and S1/Ultimate body scaling via largest connected component and median standing endpoints. Both source scales.2621803776,ratios vs Idle≈.980/.985; one scale per whole clip. S2/base actions/other heroes/FX/timelines unchanged. Before/after trials rejected initial feature-only estimates for other heroes because uniform resize overshoots standing height; preserve poses/proportions. See docs/HERO_SCALE_REVIEW.md for all10 decisions and validation. fix/hero-scale-registration depends on unmerged published Elira branch.
+
+## Elira Ultimate targeting (2026-10-18,Codex)
+
+User requested lowest-HP ally as Ultimate centre and confirmed fixed area at activation. LOWEST_HP_ALLY/Infinity includes self; recipient chosen on cast start,current cell captured at F7. Dead recipient before activation cancels without retargeting; after creation recipient movement/death does not move the field. Generic RECT_6X3_CENTERED clips offboard instead of shifting; aura/AI/render share centre. Dome dy27.25% aligns feet. Existing6s/20%DR,timing/FX/art unchanged; tooltip and field lab fixture updated. fix/elira-ultimate-target depends on unmerged scale-fix/Elira checkpoints. See docs/ELIRA_ULT_TARGETING.md and current handoff; earlier home-zone notes are historical.

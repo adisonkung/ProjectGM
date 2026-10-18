@@ -106,6 +106,13 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
       hit = candidates.filter(u => Math.abs(u.pos.r - at.r) <= 0.5 && Math.abs(u.pos.c - at.c) <= 0.5);
       break;
     }
+    case 'RECT_6X3_CENTERED': {
+      // A fixed six-cell-wide rectangle centred exactly on the activation point, without edge clamping.
+      // Half-open horizontal bounds give six columns on an integer grid; three lanes use half-cell edges.
+      hit = candidates.filter(u => u.pos.c >= centerCell.c - 3 && u.pos.c < centerCell.c + 3 &&
+        u.pos.r >= centerCell.r - 1.5 && u.pos.r < centerCell.r + 1.5);
+      break;
+    }
     case 'RECT_6X3': {
       // Even-width footprint: anchor is the left-middle cell; includes columns anchor-2 through anchor+3.
       const left = Math.max(0, Math.min(BOARD_COLS - 6, centerCell.c - 2));

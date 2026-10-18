@@ -40,3 +40,5 @@ Mirrored lab swaps fixture side,wave and required-enemy membership together,prev
 App/spec/sim typechecks,optimizer,707/707 Karma,production build and Elira-team10-run/floor/bot smoke are recorded in the latest handoff. Tests cover sequential ownership/true midpoint/duplicate events/expiry/source death/reset,actual F7 field lifecycle in both home zones,no damage/healing/shield/projectile,plus prior healer and field regressions. Native DPR2 Pixi/DOM captures test both facings,expiry and reset during Charge/Formation/Loop. Review artifacts and verification.json live in ignored tmp/elira-ult-preview; recordings remain provisional visual reviews.
 
 Current character-size correction supersedes earlier source scale numbers: see [HERO_SCALE_REVIEW.md](HERO_SCALE_REVIEW.md). Timing/VFX and Final Sync status are unchanged.
+
+Current targeting supersedes the home-zone behavior above: lowest-HP% living ally is selected; the fixed field centres on their activation-time position. See [ELIRA_ULT_TARGETING.md](ELIRA_ULT_TARGETING.md).

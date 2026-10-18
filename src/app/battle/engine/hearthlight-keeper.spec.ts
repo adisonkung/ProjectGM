@@ -121,19 +121,58 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     }
   });
 
-  it('Ult protects exactly the home 6×3 occupants immediately and tracks movement without lingering buffs', () => {
-    const b = battle(); b.apply('ult');
+  it('Ult protects the target-centred 6×3 occupants immediately and leaves no lingering buffs on exit', () => {
+    const b = battle(), target = b.allies[2]; b.place(target, { r: 1, c: 7 }); b.apply('ult', target);
     const f = b.e.fields.active[0];
-    expect(f.center).toEqual({ r: 1, c: 2 });
-    for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) {
+    expect(f.center).toEqual({ r: 1, c: 7 });
+    for (let r = 0; r < 3; r++) for (let c = 4; c < 10; c++) {
       b.place(b.allies[1], { r, c }); expect(modifier(b.allies[1], 'damageTakenMultiplier')).toBe(0.8);
     }
-    b.place(b.allies[1], { r: 1, c: 6 }); expect(modifier(b.allies[1], 'damageTakenMultiplier')).toBe(1);
+    for (const c of [3, 10]) {
+      b.place(b.allies[1], { r: 1, c }); expect(modifier(b.allies[1], 'damageTakenMultiplier')).toBe(1);
+    }
     b.place(b.allies[1], { r: 1, c: 5 }); expect(modifier(b.allies[1], 'damageTakenMultiplier')).toBe(0.8);
     expect(b.allies[1].buffs.length).toBe(0);
     b.place(b.foe, { r: 1, c: 5 }); expect(modifier(b.foe, 'damageTakenMultiplier')).toBe(1);
-    b.place(b.caster, { r: 1, c: 9 }); expect(b.e.fields.active[0].center).toEqual(f.center);
+    b.place(target, { r: 2, c: 15 }); expect(b.e.fields.active[0].center).toEqual(f.center);
+    expect(modifier(target, 'damageTakenMultiplier')).toBe(1);
+    target.alive = false; target.hp = 0; b.run(.05);
+    expect(b.e.fields.active.length).toBe(1); // the field remains at the spot after the recipient leaves or dies
     expect(modifier(b.allies[1], 'damageTakenMultiplier')).toBe(0.8);
+  });
+
+  it('Ult chooses the lowest living ally HP percentage globally, including self, for AUTO and manual casts', () => {
+    const b = battle(), a = b.allies[1], other = b.allies[2];
+    b.caster.hp = 2500; b.caster.maxHp = 10000;
+    a.hp = 1000; a.maxHp = 2000; b.place(a, { r: 2, c: 15 });
+    expect(b.e.skills.chooseUltimate(b.caster, b.foe, false)).toBe(b.caster);
+    b.caster.hp = b.caster.maxHp;
+    expect(b.e.skills.chooseUltimate(b.caster, b.foe, false)).toBe(a);
+    expect(b.e.skills.chooseUltimate(b.caster, b.foe, true)).toBe(a);
+    other.alive = false; other.hp = 0;
+    expect(b.e.skills.pickTarget(b.caster, kit().ult, b.foe)).toBe(a);
+  });
+
+  it('Ult locks the selected ally but captures their position only at F7, with no earlier or duplicate field', () => {
+    const b = battle(), a = b.allies[1]; a.hp = 1000;
+    const chosen = b.e.skills.chooseUltimate(b.caster, b.foe, true)!;
+    b.e.skills.use(b.caster, 'ult', kit().ult, chosen);
+    b.run(.45); expect(b.e.fields.active.length).toBe(0);
+    b.place(a, { r: 2, c: 11 }); b.allies[2].hp = 1; // later injuries do not redirect an in-flight cast
+    b.run(.05); expect(b.e.fields.active[0].center).toEqual({ r: 2, c: 11 });
+    b.place(a, { r: 0, c: 0 }); b.run(1);
+    expect(b.e.fields.active[0].center).toEqual({ r: 2, c: 11 });
+    expect(b.e.drainEvents().filter(e => e.type === 'FIELD_STARTED').length).toBe(1);
+  });
+
+  it('Ult cancels when the recipient or caster dies during anticipation, without retargeting', () => {
+    for (const who of ['target', 'caster']) {
+      const b = battle(), a = b.allies[1]; a.hp = 1000;
+      b.e.skills.use(b.caster, 'ult', kit().ult, a);
+      const dead = who === 'target' ? a : b.caster; dead.alive = false; dead.hp = 0;
+      b.run(.65); expect(b.e.fields.active.length).toBe(0);
+      expect(b.e.drainEvents().some(e => e.type === 'FIELD_STARTED')).toBeFalse();
+    }
   });
 
   it('reduces resolved incoming damage and composes with existing status reduction without changing base DEF', () => {
@@ -158,20 +197,25 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     }
   });
 
-  it('mirrors a source-side sanctuary independently of caster location and leaves neutral/enemy occupants out', () => {
-    const b = battle(); b.caster.side = 'enemy'; b.place(b.caster, { r: 1, c: 4 }); b.apply('ult');
+  it('uses the same target-centred protection for an enemy caster, independent of home zones', () => {
+    const b = battle(); b.caster.side = 'enemy'; b.place(b.caster, { r: 1, c: 4 });
+    b.place(b.foe, { r: 1, c: 12 }); b.apply('ult', b.foe);
     expect(b.e.fields.active[0].center).toEqual({ r: 1, c: 12 });
-    for (let c = 10; c < 16; c++) { b.place(b.foe, { r: 2, c }); expect(modifier(b.foe, 'damageTakenMultiplier')).toBe(0.8); }
-    b.place(b.foe, { r: 1, c: 9 }); expect(modifier(b.foe, 'damageTakenMultiplier')).toBe(1);
+    for (let c = 9; c < 15; c++) { b.place(b.foe, { r: 2, c }); expect(modifier(b.foe, 'damageTakenMultiplier')).toBe(0.8); }
+    b.place(b.foe, { r: 1, c: 15 }); expect(modifier(b.foe, 'damageTakenMultiplier')).toBe(1);
     b.place(b.allies[1], { r: 1, c: 12 }); expect(modifier(b.allies[1], 'damageTakenMultiplier')).toBe(1);
+    expect(modifier(b.caster, 'damageTakenMultiplier')).toBe(1);
   });
 
-  it('AUTO protects injured occupants rather than allies outside the zone; manual casting remains available', () => {
+  it('AUTO protects the injured ally even outside the original home zone; manual casting remains available', () => {
     const b = battle(), a = b.allies[1];
     expect(b.e.skills.chooseUltimate(b.caster, b.foe, false)).toBeNull();
     a.hp = 1000;
-    expect(b.e.skills.chooseUltimate(b.caster, b.foe, false)).toBe(b.caster);
-    b.place(a, { r: 1, c: 6 });
+    expect(b.e.skills.chooseUltimate(b.caster, b.foe, false)).toBe(a);
+    b.place(a, { r: 1, c: 9 });
+    expect(b.e.skills.chooseUltimate(b.caster, b.foe, false)).toBe(a);
+    expect(b.e.skills.chooseUltimate(b.caster, b.foe, true)).toBe(a);
+    a.hp = a.maxHp;
     expect(b.e.skills.chooseUltimate(b.caster, b.foe, false)).toBeNull();
     expect(b.e.skills.chooseUltimate(b.caster, b.foe, true)).toBe(b.caster);
   });
@@ -183,13 +227,14 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     expect(a.shield).toBe(0); expect(a.hp).toBe(a.maxHp - 200);
   });
 
-  it('has an 18-cell geometry at both edges, independent of candidate ordering', () => {
-    const cells = Array.from({ length: 48 }, (_, id) => ({ id, pos: { r: Math.floor(id / 16), c: id % 16 } }));
-    for (const c of [0, 2, 12, 15]) {
-      const anchor = { id: 99, pos: { r: 1, c } };
-      const hits = resolveArea({ pattern: 'RECT_6X3', caster: anchor, primary: anchor, candidates: cells });
-      expect(hits.length).toBe(18);
-      expect(new Set(hits.map(u => u.id)).size).toBe(18);
+  it('keeps 18 cells around an interior target and clips at board edges without shifting the centre', () => {
+    const cells = Array.from({ length: 48 }, (_, i) => ({ id: i, pos: { r: Math.floor(i / 16), c: i % 16 } }));
+    for (const [pos, expected] of [[{ r: 1, c: 7 }, 18], [{ r: 0, c: 0 }, 6], [{ r: 2, c: 15 }, 8]] as const) {
+      const anchor = { id: 99, pos };
+      const hits = resolveArea({ pattern: 'RECT_6X3_CENTERED', caster: anchor, primary: anchor, candidates: cells });
+      expect(hits.length).toBe(expected);
+      expect(hits.some(u => u.pos.r === pos.r && u.pos.c === pos.c)).toBeTrue();
+      const b = battle(); b.place(b.caster, pos); b.apply('ult'); expect(b.e.fields.active[0].center).toEqual(pos);
     }
   });
 
@@ -203,6 +248,7 @@ describe('Elira Dawnmere — Keeper of the Hearthlight, Phase A', () => {
     expect(ranked.skill2.cooldown).toBe(14.25);
     expect(skillLines(kit().ult).join(' ')).toContain('6×3');
     expect(skillLines(kit().ult).join(' ')).toContain('20%');
+    expect(skillLines(kit().ult).join(' ')).toContain('HP% ต่ำสุด');
     expect(animTiming('hero-elira.png', 'ult').hit).toBeCloseTo(0.5, 6);
   });
 });

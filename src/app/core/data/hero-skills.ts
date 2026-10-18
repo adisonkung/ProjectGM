@@ -195,7 +195,7 @@ export const CLASS_KITS: Record<HeroClass, HeroKit> = { tank, fighter, assassin,
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
   // Elira Dawnmere — user-approved Phase A plan, 2026-10-17. Provisional R1 values, not final balance.
   elira: {
-    id: 'elira', cls: 'healer', identity: 'Team Healing · Targeted Shield · Home-zone Sanctuary',
+    id: 'elira', cls: 'healer', identity: 'Team Healing · Targeted Shield · Targeted Sanctuary',
     kit: {
       attack: healer.attack,
       skill: {
@@ -212,8 +212,9 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
       ult: {
         ...healer.ult, name: 'เขตพิทักษ์แสงอุ่น', label: 'Hearthlight Sanctuary', delivery: 'INSTANT',
+        target: 'LOWEST_HP_ALLY', range: Infinity,
         effects: [{ type: 'FIELD', field: {
-          area: 'RECT_6X3', anchor: 'HOME_ZONE', duration: 6, interval: 1, effects: [],
+          area: 'RECT_6X3_CENTERED', duration: 6, interval: 1, effects: [],
           aura: { team: 'ALLY', modifiers: { damageTakenMultiplier: 0.8 } },
         } }],
         ai: { tier: 'HEAL', allyHpBelow: 0.75, emergencyHpBelow: 0.35 },

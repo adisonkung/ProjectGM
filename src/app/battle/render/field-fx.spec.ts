@@ -131,3 +131,22 @@ describe('Elira sequential dome field ownership', () => {
     expect(s.live.size).toBe(0);expect(s.spawned).not.toContain('el-ult-dissolve');
   });
 });
+
+
+describe('target-centred sanctuary visuals', () => {
+  it('keeps Formation, Loop and Dissolve at the exact target point, including corners and camera movement', () => {
+    for (const at of [{ r: 1, c: 7 }, { r: 0, c: 0 }, { r: 2, c: 15 }]) {
+      let next = 0; const live = new Map<number, string>();
+      const p = new FieldFxPlayback({ spawn: name => { live.set(++next, name); return next; }, remove: ids => ids.forEach(id => live.delete(id)) });
+      const start: FieldLifecycleEvent = { type: 'FIELD_STARTED', fieldId: 1, src: 1, at, area: 'RECT_6X3_CENTERED', duration: 6, interval: 1 };
+      p.handle(start, 'hero-elira.png', 16, .5);
+      expect([...p.positions(16).values()]).toEqual([at]);
+      p.advance(1.3); expect([...live.values()]).toEqual(['el-ult-field']);
+      expect([...p.positions(18).values()]).toEqual([{ r: at.r, c: at.c - 2 }]);
+      p.handle({ ...start, type: 'FIELD_ENDED', reason: 'EXPIRED' }, undefined, 0, 6.5);
+      expect([...live.values()]).toEqual(['el-ult-dissolve']);
+      expect([...p.positions(16).values()]).toEqual([at]);
+      p.advance(7.6); expect(live.size).toBe(0);
+    }
+  });
+});

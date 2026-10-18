@@ -34,6 +34,7 @@ export class FieldFxPlayback {
       if (this.fields.has(e.fieldId) || !sprite) return;
       const def = SHEETS[sprite]?.fieldFx;
       if (!def) return;
+      // Target-centred rectangles already carry the exact centre; legacy grid footprints need their midpoint.
       const center = e.area === 'RECT_3X2' ? rect3x2Center(e.at) : e.area === 'RECT_6X3' ? rect6x3Center(e.at) : e.at;
       const world = { r: center.r, c: origin + center.c };
       const loopAt = def.loopAfterStart && def.start && FX[def.start] ? clock + fxLength(FX[def.start]) : undefined;

@@ -179,7 +179,8 @@ export function skillLines(s: SkillDefinition): string[] {
   for (const e of s.effects) {
     switch (e.type) {
       case 'FIELD':
-        out.push(`สนาม ${{ ADJACENT_8: '3×3', SQUARE_2: '2×2', RECT_3X2: '3×2', RECT_6X3: '6×3' }[e.field.area]} นาน ${e.field.duration} วิ${e.field.effects.length ? ` · ทุก ${e.field.interval} วิ` : ''}`);
+        out.push(`สนาม ${{ ADJACENT_8: '3×3', SQUARE_2: '2×2', RECT_3X2: '3×2', RECT_6X3: '6×3', RECT_6X3_CENTERED: '6×3' }[e.field.area]} นาน ${e.field.duration} วิ${e.field.effects.length ? ` · ทุก ${e.field.interval} วิ` : ''}`);
+        if (s.target === 'LOWEST_HP_ALLY' && e.field.area === 'RECT_6X3_CENTERED') out.push('ปักสนามที่พันธมิตร HP% ต่ำสุด');
         if (e.field.aura?.modifiers.damageTakenMultiplier != null) {
           out.push(`${e.field.aura.team === 'ALLY' ? 'พันธมิตร' : 'ศัตรู'}ในพื้นที่ · ลดดาเมจ ${pct(1 - e.field.aura.modifiers.damageTakenMultiplier)}`);
         }
