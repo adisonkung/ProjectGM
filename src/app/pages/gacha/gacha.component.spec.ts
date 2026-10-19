@@ -9,7 +9,7 @@ describe('Summon sanctum transactions', () => {
     localStorage.clear();
     TestBed.configureTestingModule({ imports: [GachaComponent], providers: [provideRouter([])] });
     // Exercise actual services and page transaction flow without running decorative/cinematic loops.
-    TestBed.overrideComponent(GachaComponent, { set: { template: '<dialog #infoDialog></dialog><dialog #resultsDialog></dialog>', imports: [] } });
+    TestBed.overrideComponent(GachaComponent, { set: { template: '<dialog #infoDialog></dialog><dialog #resultsDialog></dialog><dialog #confirmDialog></dialog>', imports: [] } });
   });
 
   it('charges once while the cinematic plays, then opens results without another pull', () => {
@@ -17,6 +17,9 @@ describe('Summon sanctum transactions', () => {
     f.detectChanges();
     const c = f.componentInstance, save = TestBed.inject(SaveService), before = save.state().gems;
     c.summon(10);
+    expect(save.state().gems).toBe(before);
+    c.confirmSummon();
+    c.confirmSummon();
     c.summon(10);
     expect(save.state().gems).toBe(before - GACHA.multi);
     expect(c.results().length).toBe(10);
@@ -26,6 +29,38 @@ describe('Summon sanctum transactions', () => {
     expect(c.resultsDialog().nativeElement.open).toBeTrue();
     expect(save.state().gems).toBe(before - GACHA.multi);
     c.resultsDialog().nativeElement.close();
+    f.destroy();
+  });
+
+  it('cancelling or dismissing confirmation spends nothing and leaves previous results intact', () => {
+    const f = TestBed.createComponent(GachaComponent);
+    f.detectChanges();
+    const c = f.componentInstance, save = TestBed.inject(SaveService);
+    const before = JSON.stringify(save.state());
+    c.summon(10);
+    expect(c.confirmDialog().nativeElement.open).toBeTrue();
+    expect(c.pending()).toBe(10);
+    c.cancelSummon();
+    c.confirmSummon();
+    expect(c.pending()).toBeNull();
+    expect(c.confirmDialog().nativeElement.open).toBeFalse();
+    expect(c.playing()).toBeFalse();
+    expect(JSON.stringify(save.state())).toBe(before);
+    f.destroy();
+  });
+
+  it('rechecks affordability on confirmation without spending or playing a cinematic', () => {
+    const f = TestBed.createComponent(GachaComponent);
+    f.detectChanges();
+    const c = f.componentInstance, save = TestBed.inject(SaveService);
+    c.summon(10);
+    save.update(s => ({ ...s, gems: 0 }));
+    const before = JSON.stringify(save.state());
+    c.confirmSummon();
+    expect(c.error()).toBe('เพชรไม่พอ');
+    expect(c.pending()).toBeNull();
+    expect(c.playing()).toBeFalse();
+    expect(JSON.stringify(save.state())).toBe(before);
     f.destroy();
   });
 
@@ -60,6 +95,7 @@ describe('GachaComponent', () => {
     const save = TestBed.inject(SaveService);
     const gems = save.state().gems;
     component.summon(10);
+    component.confirmSummon();
     fixture.detectChanges();
     // the summon cinematic plays first; the results grid shows once it ends / is skipped
     expect((fixture.nativeElement as HTMLElement).querySelector('app-summon-scene')).not.toBeNull();

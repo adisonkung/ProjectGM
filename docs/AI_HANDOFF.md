@@ -2,7 +2,15 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — public push and master merge authorized (Codex, 2026-10-19)
+## Latest task — confirmed summon and card reveal (Codex, 2026-10-19)
+
+Fresh origin/master `cdacdcd` already contains PR #2 and all earlier hero/UI work. Clean reconciliation; create local and remote `wip/codex-summon-reveal` before editing. User now requests supplied confirmation / skippable cinematic / sealed-card / reward references. Prior push/merge instruction applied to that completed work; publish this new task branch for review. Do not merge it without the user's review/instruction. Last confirmed canonical-local sync metadata below stays unchanged.
+
+- Native confirmation before one actual pull, cancel/dismiss spends nothing; consume intent before service, recheck funds, block repeated clicks. Full-screen native scene: large gold/purple central beam when actual received result has 3★, smaller flash otherwise, decorative cards fly toward camera in both variants. Current roster all3★, so ordinary production pulls always show grand beam.
+- Sealed cards: individual reveal with existing hero banner/name/class/stars/new/Memory, continue to unopened cards; reveal-all/skip/Escape opens full-screen actual results. Result summary can request another confirmed pull. Reduced-motion skips intro/flight; timers/listeners/dialogs cleaned up. No global key listener, no gacha/config/save/starter/combat changes.
+- Inspect `pages/gacha/gacha.component.*`, `summon-scene.component.*`, `docs/SUMMON_SANCTUM_UI.md`. Lower-star scene is isolated fixture-only verification. Browser saves disposable. App/spec typechecks and full 723/723 Karma pass. Production build passes with existing component-size/CommonJS warnings plus the new scene style warning (9.88kB); budgets remain unchanged. Native checks and actual-browser recording: `/workspace/scratch/summon-reveal-review/`.
+
+## Previous follow-up — public push and master merge authorized (Codex, 2026-10-19)
 
 User explicitly requested “Push และ merge เข้ามาสเตอเลย” after reviewing the latest small-card/flowing-energy preview. This authorizes publishing the completed feature files to the existing public `adisonkung/ProjectGM` origin and merging the current branch, resolving the previous automatic-review disclosure blocker. No additional approval is pending for this push/merge. Earlier pending/no-merge notes below describe historical checkpoints and are superseded by this instruction.
 
@@ -149,3 +157,5 @@ The user's canonical local clone has not been re-verified in this session. The E
 3. Review/produce S1 then S2 then Ult individually. Dome6×3/6s lifecycle is independent of character recovery; no instant burst.1024×704 export target must be checked against current renderer projection. No replacement approved art or fabricated final timing.
 4. Mirelle remains merged/FINAL_SYNC; see MIRELLE_FINAL_SYNC.md. Sylvara UI art complete; S1/S2/Ult final Timeline Sync remains pending. Preserve those implementations and original source bytes.
 5. No balancing until roster complete. DEV_FLAGS.fullUltAtStart remains unchanged. Prior combat-timeline coupling/Tang Xun close-target surround issues remain deferred.
+
+Native DPR2 checks pass at 1280×720,1440×1000,1024×768,768×1024,390×844,320×640 and844×390: cancel/no spend, rapid double-confirm/one charge, reveal/no spend, skip, latest results, repeat-confirmation, reachable scrolling actions and no horizontal scene overflow. Single pull, lower-star fixture, reduced motion and route cleanup pass; zero page errors or missing assets. `verification.json`, screenshots and actual-browser `summon-reveal.mp4` are in the review directory.

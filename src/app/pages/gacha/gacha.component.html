@@ -67,15 +67,25 @@
   }
 </dialog>
 <dialog #resultsDialog class="summon-dialog results-dialog" aria-labelledby="summon-results-title" (close)="showResults.set(false)" (click)="$event.target === resultsDialog && resultsDialog.close()">
-  <header class="dialog-heading"><h2 id="summon-results-title">ผลการอัญเชิญ</h2><button type="button" class="close" aria-label="ปิดผลอัญเชิญ" (click)="resultsDialog.close()" autofocus>×</button></header>
+  <header class="dialog-heading"><div><span class="eyebrow">THE CELESTIAL SANCTUM</span><h2 id="summon-results-title">ผลการอัญเชิญ</h2><p>วีรชนที่ตอบรับเสียงเรียกของคุณ</p></div><button type="button" class="close" aria-label="ปิดผลอัญเชิญ" (click)="resultsDialog.close()" autofocus>×</button></header>
   @if (showResults()) {
     <ul class="results" aria-label="ผลการอัญเชิญ">@for (r of results(); track $index) {
       <li class="res r{{ r.star }}" [class.new]="r.isNew">
-        <app-hero-portrait [heroId]="r.templateId" [size]="88" /><b>{{ r.name }}</b><span class="gm-stars">{{ stars(r.star) }}</span>
+        @if (portrait(r.templateId); as image) { <img class="result-portrait" [src]="image" alt="" /> } @else { <app-hero-portrait [heroId]="r.templateId" [size]="88" /> }<b>{{ r.name }}</b><span class="gm-stars">{{ stars(r.star) }}</span>
         @if (r.isNew) { <em class="tag">ใหม่!</em> } @else if (r.memory) { <small>ตัวซ้ำ → Hero Memory +{{ r.memory }}</small> } @else { <small>6★ แล้ว → Universal +{{ r.universal }}</small> }
         @if (r.uid) { <a class="more" [routerLink]="['/heroes', r.uid]" (click)="resultsDialog.close()">ดูฮีโร่ <app-icon name="arrow" [size]="13" /></a> }
       </li>
     }</ul>
     <p class="dialog-intro">เพิ่มฮีโร่และ Memory เข้าเซฟเรียบร้อยแล้ว</p>
+    <footer class="result-actions"><button type="button" class="gm-btn" (click)="resultsDialog.close()">ยืนยัน</button><button type="button" class="gm-btn primary" (click)="summon(lastCount())" [disabled]="gems() < (lastCount() === 10 ? G.multi : G.single)">อัญเชิญอีก {{ lastCount() }} ครั้ง · {{ lastCount() === 10 ? G.multi : G.single }} เพชร</button></footer>
   }
+</dialog>
+
+<dialog #confirmDialog class="summon-dialog confirm-dialog" aria-labelledby="confirm-title" (cancel)="$event.preventDefault(); cancelSummon()" (click)="$event.target === confirmDialog && cancelSummon()">
+  <header class="dialog-heading"><h2 id="confirm-title">ยืนยันการอัญเชิญ</h2><button type="button" class="close" aria-label="ยกเลิกอัญเชิญ" (click)="cancelSummon()">×</button></header>
+  <p class="confirm-copy">ต้องการใช้ <strong>{{ pendingCost() }} เพชร</strong> เพื่ออัญเชิญ <strong>{{ pending() }} ครั้ง</strong><br />ในตู้อัญเชิญปกติ ใช่หรือไม่?</p>
+  <div class="confirm-banner">@if (showcase) { <img [src]="showcase" alt="" /> }<div><small>STANDARD SUMMON</small><b>เสียงเรียกแห่งดวงดาว</b><span>เหล่าวีรชนแห่ง Dawnmere</span></div></div>
+  <div class="confirm-wallet"><span>ใช้จ่าย <strong><app-icon name="gem" [size]="18" /> {{ pendingCost() }}</strong></span><span>มีอยู่ <strong><app-icon name="gem" [size]="18" /> {{ gems() }}</strong></span></div>
+  <p class="confirm-note">เมื่อยืนยันจะใช้เพชรทันที และเพิ่มผลอัญเชิญเข้าเซฟ<br />การข้ามฉากจะไม่เปลี่ยนผลที่ได้รับ</p>
+  <footer class="confirm-actions"><button type="button" class="gm-btn" (click)="cancelSummon()" autofocus>ยกเลิก</button><button type="button" class="gm-btn primary" (click)="confirmSummon()" [disabled]="!pending() || gems() < pendingCost()">อัญเชิญ {{ pending() }} ครั้ง · {{ pendingCost() }} เพชร</button></footer>
 </dialog>
