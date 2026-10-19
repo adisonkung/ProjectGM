@@ -62,8 +62,8 @@ export class AppComponent {
   /** in a fight the mobile dock steps aside (the battle screen needs the height) */
   readonly fight = computed(() => /^\/(battle|lab)(\/|\?|$)/.test(this.url()));
   readonly onAccount = computed(() => this.url().startsWith('/account'));
-  /** home = the island fills the locked screen; the bar / dock float over it */
-  readonly immersive = computed(() => /^\/home([?#]|$)/.test(this.url()));
+  /** Home and summon sanctum fill the locked screen; chrome floats above the scene */
+  readonly immersive = computed(() => /^\/(home|gacha)([?#]|$)/.test(this.url()));
 
   readonly gems = computed(() => this.save.state().gems.toLocaleString('en-US'));
   readonly gold = computed(() => this.save.state().gold.toLocaleString('en-US'));

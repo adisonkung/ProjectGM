@@ -14,7 +14,7 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }])],
+      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }, { path: 'gacha', component: NavigationTestPage }])],
     }).compileComponents();
   });
 
@@ -31,7 +31,7 @@ describe('AppComponent', () => {
     for (const p of ['/tower', '/dungeons', '/forge', '/armory', '/battle', '/lab']) expect(island.match).withContext(p).toContain(p);
   });
 
-  it('uses the six lobby destinations only on Home, without exposing a floor-locked feature', async () => {
+  it('uses six destinations on Home and summon, without exposing a floor-locked feature', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     const router = TestBed.inject(Router);
     fixture.detectChanges();
@@ -44,6 +44,10 @@ describe('AppComponent', () => {
     for (const n of LOBBY_NAV.filter(n => !MAIN_NAV.some(core => core.path === n.path))) {
       expect(buildingActions.some(a => a.route === n.path && a.floor === 0)).withContext(n.path).toBeTrue();
     }
+    await router.navigateByUrl('/gacha');
+    fixture.detectChanges();
+    expect(links()).toEqual(LOBBY_NAV.map(n => n.path));
+    expect(fixture.nativeElement.querySelector('nav a[aria-current="page"]').getAttribute('href')).toBe('/gacha');
     await router.navigateByUrl('/heroes');
     fixture.detectChanges();
     expect(links()).toEqual(['/home', '/heroes', '/team', '/gacha']);

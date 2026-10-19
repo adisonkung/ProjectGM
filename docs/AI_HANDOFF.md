@@ -2,7 +2,32 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest follow-up — character detail UI (Codex, 2026-10-19)
+## Latest follow-up — public push and master merge authorized (Codex, 2026-10-19)
+
+User explicitly requested “Push และ merge เข้ามาสเตอเลย” after reviewing the latest small-card/flowing-energy preview. This authorizes publishing the completed feature files to the existing public `adisonkung/ProjectGM` origin and merging the current branch, resolving the previous automatic-review disclosure blocker. No additional approval is pending for this push/merge. Earlier pending/no-merge notes below describe historical checkpoints and are superseded by this instruction.
+
+Reconciled clean `feature/codex-summon-sanctum` at local `c8c0fae`; fresh master remains `455de5b`, remote task branch remains published UI dependency `b0ff2af`. The branch includes the user-requested Home/hero-detail UI dependencies plus the completed summon scene/refinement. App/spec checks,717/717 Karma, build and native visual/motion checks already pass; only documentation changes after that tested product tree. Publication/merge confirmation is determined from Git/GitHub, not a self-referential hash here. Last confirmed canonical-local sync metadata below remains unchanged; this workspace does not verify the user's canonical clone.
+
+- Publish only the completed task branch; merge through a PR with the checked head SHA, and attach the PR to this chat. No branch deletion or master overwrite is authorized/needed.
+- Verify the published task tree equals the local tree, and the merged master tree contains the same product/docs. Preserve previous local checkpoints. No gameplay/balance/sprite changes; no new simulations or repeated product tests needed for this documentation-only handoff.
+
+## Previous follow-up — summon energy visual refinement (Codex, 2026-10-19)
+
+User requested smaller gold-aura cards, a prettier central light and flowing energy paths instead of coils. Continue the same feature branch from local `50c2001`; fresh master still `455de5b`, clean tree. No new agent work found. Prior branch/ref metadata and last confirmed canonical-local sync remain unchanged.
+
+- Cards shrink about38% with a thin gold edge/glow and gentler bob/tilt. Gold light now has a tapered central shaft/soft altar bloom and five open cubic trails with travelling highlights arriving from sides/top. No looping/circular trail geometry. Only the two sanctum scene files alter presentation; current supplied images, menu/transactions and reduced-motion/cleanup behavior remain.
+- App/spec checks,717/717 Karma/build and native four-size/motion/reduced-motion checks pass; original size/CommonJS warnings retained. Review `docs/SUMMON_SANCTUM_UI.md`, `summon-sanctum.component.{ts,scss}` and native artifacts `/workspace/scratch/summon-energy-review/`. Final checks are recorded in the scope doc.
+- **Publication pending:** prior feature-tree upload was rejected by automatic approval review for missing explicit disclosure permission to the public `adisonkung/ProjectGM` repo, even after verifying owner/admin and existing remote doc SHAs. The user has not answered that permission question; this visual request does not authorize public disclosure. Keep both local feature commits in the workspace. Do not bypass with another tool/route. Remote task branch is at its earlier published UI dependency, not the completed gacha implementation.
+
+## Previous follow-up — summon sanctum UI (Codex, 2026-10-19)
+
+User supplied static hall/card art and requested the gacha reference with floating cards/moving gold light. Reconciled clean hero-detail branch; explicit fresh master `455de5b`. Created `feature/codex-summon-sanctum` from master and fast-forwarded to explicitly continued published UI dependency `b0ff2af`. Prior branches preserved. Publish only this task branch; no merge authorization or new canonical-local sync claim. Last confirmed sync metadata below remains unchanged.
+
+- `/gacha` shares the Home six-item immersive chrome. Original hall/card JPEGs copied unchanged; CSS exterior clip on cards, static fixed hall plus independent card bob/tilt and one capped-DPR/30fps gold-light canvas. Reduced-motion/live preference/hidden/destroy handling. Mobile centres the landscape crop and scrolls UI above the dock.
+- Actual standard pool, ten-hero roster/Memory/rate dialogs, live pity, 100/900 gem buttons and native results modal. Reuse existing pull service/config/save/cinematic, guard repeats during playback. Rates explain the current all-3★ roster fallback; no invented rate-up, countdown, currency or persistent history.
+- App/spec checks,717/717 Karma and build pass (size warnings retained); native eight-size/motion/dialog/x1/x10/pity/reduced-motion checks pass with no missing assets or page errors. Scope/provenance/final checks: `docs/SUMMON_SANCTUM_UI.md`. Native artifacts: `/workspace/scratch/summon-review/`. Review this branch/screenshots before merge. Skill Timeline Sync and balance status unchanged.
+
+## Previous follow-up — character detail UI (Codex, 2026-10-19)
 
 User supplied a dark/gold Elira detail reference and requested implementing it. Reconciled clean `feature/codex-lobby-polish`, explicit fresh master fetch still `455de5b`; no local master branch. Created `feature/codex-hero-detail-ui` from master then fast-forwarded to explicitly continued published lobby `7d20460`. Previous branches preserved; only this task branch should be published. No master merge authorization; last confirmed canonical-local sync metadata below remains unchanged.
 

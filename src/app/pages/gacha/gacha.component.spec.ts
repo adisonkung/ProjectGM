@@ -1,7 +1,47 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { GachaComponent } from './gacha.component';
+import { GACHA } from '../../core/data/stars';
 import { SaveService } from '../../core/services/save.service';
+import { GachaComponent } from './gacha.component';
+
+describe('Summon sanctum transactions', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    TestBed.configureTestingModule({ imports: [GachaComponent], providers: [provideRouter([])] });
+    // Exercise actual services and page transaction flow without running decorative/cinematic loops.
+    TestBed.overrideComponent(GachaComponent, { set: { template: '<dialog #infoDialog></dialog><dialog #resultsDialog></dialog>', imports: [] } });
+  });
+
+  it('charges once while the cinematic plays, then opens results without another pull', () => {
+    const f = TestBed.createComponent(GachaComponent);
+    f.detectChanges();
+    const c = f.componentInstance, save = TestBed.inject(SaveService), before = save.state().gems;
+    c.summon(10);
+    c.summon(10);
+    expect(save.state().gems).toBe(before - GACHA.multi);
+    expect(c.results().length).toBe(10);
+    expect(c.playing()).toBeTrue();
+    c.finishSummon();
+    expect(c.playing()).toBeFalse();
+    expect(c.resultsDialog().nativeElement.open).toBeTrue();
+    expect(save.state().gems).toBe(before - GACHA.multi);
+    c.resultsDialog().nativeElement.close();
+    f.destroy();
+  });
+
+  it('leaves the save unchanged when a pull cannot be afforded', () => {
+    const f = TestBed.createComponent(GachaComponent);
+    f.detectChanges();
+    const save = TestBed.inject(SaveService);
+    save.update(s => ({ ...s, gems: 0 }));
+    const before = JSON.stringify(save.state());
+    f.componentInstance.summon(1);
+    expect(f.componentInstance.playing()).toBeFalse();
+    expect(f.componentInstance.error()).toBe('เพชรไม่พอ');
+    expect(JSON.stringify(save.state())).toBe(before);
+    f.destroy();
+  });
+});
 
 describe('GachaComponent', () => {
   let component: GachaComponent;
@@ -23,7 +63,7 @@ describe('GachaComponent', () => {
     fixture.detectChanges();
     // the summon cinematic plays first; the results grid shows once it ends / is skipped
     expect((fixture.nativeElement as HTMLElement).querySelector('app-summon-scene')).not.toBeNull();
-    component.playing.set(false);
+    component.finishSummon();
     fixture.detectChanges();
     expect(save.state().gems).toBe(gems - 900);
     const res = component.results();
