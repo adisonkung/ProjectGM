@@ -9,8 +9,8 @@
     <div class="motes">@for (m of motes; track $index) { <i [style.left.%]="m.x" [style.--delay]="m.delay + 's'" [style.--duration]="m.duration + 's'"></i> }</div>
   </div>
   @if (phase() === 'burst') {
-    <div class="flying-cards" aria-hidden="true">@for (c of flights; track $index) {
-      <img src="/ui/summon-card.jpg" alt="" [style.--x]="c.x + 'vw'" [style.--y]="c.y + 'vh'" [style.--tilt]="c.tilt + 'deg'" [style.animation-delay.s]="c.delay" />
+    <div class="flying-cards" aria-hidden="true">@for (c of flights(); track $index) {
+      <img [src]="cardBack(c.star)" [class.three-star]="c.star >= 3" alt="" [style.--x]="c.x + 'vw'" [style.--y]="c.y + 'vh'" [style.--tilt]="c.tilt + 'deg'" [style.animation-delay.s]="c.delay" />
     }</div>
   }
   <header class="scene-heading"><span class="wordmark">SUMMON TOWER <small>DAWNMERE</small></span><button type="button" class="skip" (click)="finish()" autofocus>ข้าม <span>»</span></button></header>
@@ -23,7 +23,7 @@
         @for (r of results(); track $index) {
           <button type="button" class="sealed-card" [class.opened]="opened().has($index)" [class.rare]="opened().has($index) && r.star >= 3" [style.--order]="$index" (click)="reveal($index)" [disabled]="opened().has($index)" [attr.aria-label]="opened().has($index) ? r.name + ' เปิดแล้ว' : 'เปิดไพ่ใบที่ ' + ($index + 1)">
             @if (opened().has($index)) { <app-hero-portrait [heroId]="r.templateId" [size]="88" /><b>{{ r.name }}</b><span>{{ '★'.repeat(r.star) }}</span> }
-            @else { <img src="/ui/summon-card.jpg" alt="" draggable="false" /> }
+            @else { <img [src]="cardBack(r.star)" [class.three-star]="r.star >= 3" alt="" draggable="false" /> }
           </button>
         }
       </div>

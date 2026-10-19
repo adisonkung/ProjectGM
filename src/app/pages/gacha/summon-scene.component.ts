@@ -27,11 +27,13 @@ export class SummonSceneComponent implements AfterViewInit, OnDestroy {
   readonly banner = computed(() => heroArt(this.current()?.templateId ?? '')?.banner);
   readonly remaining = computed(() => this.results().length - this.opened().size);
   readonly motes = Array.from({ length: 26 }, (_, i) => ({ x: (i * 37) % 100, delay: -(i % 7) * .4, duration: 2 + (i % 5) * .4 }));
-  readonly flights = Array.from({ length: 12 }, (_, i) => ({
+  readonly cardBack = (star: number) => star >= 3 ? '/ui/summon-card-3star.jpg' : '/ui/summon-card.jpg';
+  readonly flights = computed(() => Array.from({ length: 12 }, (_, i) => ({
     x: Math.cos(i * Math.PI / 6 + .2) * (42 + i % 3 * 12),
     y: Math.sin(i * Math.PI / 6 + .2) * (38 + i % 4 * 10),
     tilt: i * 47 - 190, delay: i % 4 * .065,
-  }));
+    star: this.results()[i % this.results().length]?.star ?? 1,
+  })));
   private timers: ReturnType<typeof setTimeout>[] = [];
   private readonly motion = matchMedia('(prefers-reduced-motion: reduce)');
   private readonly onMotion = () => { if (this.motion.matches) this.showCards(); };

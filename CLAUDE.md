@@ -345,3 +345,10 @@ User explicitly requested pushing and merging the latest reviewed UI into master
 App/spec typechecks and full 723/723 Karma pass. Production build passes with existing component-size/CommonJS warnings plus the new scene style warning (9.88kB); budgets remain unchanged. Native checks and actual-browser recording: `/workspace/scratch/summon-reveal-review/`.
 
 Native DPR2 checks pass at 1280×720,1440×1000,1024×768,768×1024,390×844,320×640 and844×390: cancel/no spend, rapid double-confirm/one charge, reveal/no spend, skip, latest results, repeat-confirmation, reachable scrolling actions and no horizontal scene overflow. Single pull, lower-star fixture, reduced motion and route cleanup pass; zero page errors or missing assets. `verification.json`, screenshots and actual-browser `summon-reveal.mp4` are in the review directory.
+
+
+## Supplied 3-star card back — 2026-10-19
+
+User supplied `1000004534.jpg` and requested it for 3★. Continue the existing clean summon-review task branch; fresh master remains `cdacdcd`, remote feature head `cff713b6` has identical content to local checkpoint `f292702`. Copy the 853×1280 original JPEG byte-for-byte to `public/ui/summon-card-3star.jpg` (SHA256 `51612dcc6fb3cfcb9602d72e11bc29116399c607bcd6dbc4f1c0c180b82e4d4e`). No image regeneration/editing. A runtime-only polygon preserves the wider frame, corner gems and pointed tips. Sealed cards choose the supplied back from each actual result's star; decorative flying cards repeat the same actual result sequence. Lower stars retain the previous back. Neutral idle-scene cards retain their existing art. No pull/save/config changes. Publish only the current review branch; no master merge or canonical-local sync claim.
+
+3★ follow-up validation: app/spec typechecks, full723/723 Karma and production build pass (size/CommonJS warnings retained). Native desktop/mobile captures verify ten3★ cards use the supplied asset; isolated mixed1★/2★/3★ fixture verifies both sealed backs and all12 flying backs, with zero missing assets/page errors. Review artifacts: `/workspace/scratch/summon-3star-review/`. Source-copy SHA256 matches exactly.
