@@ -1,16 +1,20 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { AppComponent, MAIN_NAV } from './app.component';
+import { provideRouter, Router } from '@angular/router';
+import { AppComponent, LOBBY_NAV, MAIN_NAV } from './app.component';
 import { ISLAND_BUILDINGS } from './core/data/island-layout';
 import { FARM_DUNGEONS } from './core/data/economy';
 import { actionUnlockFloor } from './core/rules/island';
 import { DUNGEON_TYPES } from './pages/dungeons/dungeons.component';
 
+@Component({ template: '' })
+class NavigationTestPage {}
+
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }, { path: 'gacha', component: NavigationTestPage }])],
     }).compileComponents();
   });
 
@@ -25,6 +29,28 @@ describe('AppComponent', () => {
   it('island-hub pages (tower, dungeons, forge, armory, battle) light up the island tab', () => {
     const island = MAIN_NAV.find(n => n.path === '/home')!;
     for (const p of ['/tower', '/dungeons', '/forge', '/armory', '/battle', '/lab']) expect(island.match).withContext(p).toContain(p);
+  });
+
+  it('uses six destinations on Home and summon, without exposing a floor-locked feature', async () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const router = TestBed.inject(Router);
+    fixture.detectChanges();
+    await router.navigateByUrl('/home');
+    fixture.detectChanges();
+    const links = () => [...(fixture.nativeElement as HTMLElement).querySelectorAll('nav a')].map(a => a.getAttribute('href'));
+    expect(links()).toEqual(['/home', '/heroes', '/team', '/armory', '/gacha', '/tower']);
+    expect(fixture.nativeElement.querySelector('nav a[aria-current="page"]').getAttribute('href')).toBe('/home');
+    const buildingActions = ISLAND_BUILDINGS.flatMap(b => b.actions.map(a => ({ route: a.route, floor: actionUnlockFloor(b, a) })));
+    for (const n of LOBBY_NAV.filter(n => !MAIN_NAV.some(core => core.path === n.path))) {
+      expect(buildingActions.some(a => a.route === n.path && a.floor === 0)).withContext(n.path).toBeTrue();
+    }
+    await router.navigateByUrl('/gacha');
+    fixture.detectChanges();
+    expect(links()).toEqual(LOBBY_NAV.map(n => n.path));
+    expect(fixture.nativeElement.querySelector('nav a[aria-current="page"]').getAttribute('href')).toBe('/gacha');
+    await router.navigateByUrl('/heroes');
+    fixture.detectChanges();
+    expect(links()).toEqual(['/home', '/heroes', '/team', '/gacha']);
   });
 
   it('every page removed from the menu is still reachable from an island building', () => {

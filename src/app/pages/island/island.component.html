@@ -1,8 +1,8 @@
 <section class="island">
-  <div class="stage" #stage>
+  <div class="stage" #stage [class.entering]="enteringTower()">
     @if (isCity()) {
       <app-sky-city [buildings]="display()" [usable]="usableRuins()" [heroes]="heroViews()" [towerStage]="towerStage()"
-                    [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()"
+                    [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()" [enteringTower]="enteringTower()"
                     (buildingTap)="tapBuilding($event)" (heroTap)="tapHero($event)" />
     } @else {
       <app-island-scene [theme]="theme()" [buildings]="display()" [usable]="usableRuins()" [skinOverrides]="island().buildingSkinOverrides ?? {}" [heroes]="heroViews()"
@@ -10,16 +10,36 @@
                         (buildingTap)="tapBuilding($event)" (heroTap)="tapHero($event)" />
     }
 
-    <!-- essential HUD only: the island itself is the menu -->
-    <div class="hud tl">
-      @if (island().name; as n) { <b class="isle-name">{{ n }}</b> }
-      <span class="stage-name"><app-icon name="home" [size]="14" /> {{ stageName() }}</span>
-      <span class="tower-prog" [attr.aria-label]="'พิชิตหอคอย ' + cleared() + ' จาก ' + totalFloors + ' ชั้น'">
-        <app-icon name="tower" [size]="13" />
-        <span class="pips">@for (i of [1,2,3,4,5,6,7,8,9,10]; track i) { <i [class.on]="i <= cleared()"></i> }</span>
-        <b>{{ cleared() }}/{{ totalFloors }}</b>
-      </span>
-    </div>
+    <!-- Lobby chrome uses real progression and party data; the original island remains interactive. -->
+    <aside class="chapter-panel gilded" [class.expanded]="progressExpanded()" aria-label="อาณาจักรและความคืบหน้า">
+      <header class="chapter-art">
+        <span class="eyebrow">YOUR KINGDOM</span>
+        <h1>{{ island().name }}</h1>
+        <span class="realm-stage">{{ stageName() }}</span>
+        <button type="button" class="progress-toggle" (click)="progressExpanded.set(!progressExpanded())"
+                [attr.aria-expanded]="progressExpanded()" aria-controls="kingdom-details" aria-label="รายละเอียดความคืบหน้า">
+          {{ progressExpanded() ? '−' : '+' }}
+        </button>
+      </header>
+      <div class="tower-progress">
+        <div><a class="tower-route" routerLink="/tower">ความคืบหน้าหอคอย</a><b>{{ cleared() }} <small>/ {{ totalFloors }}</small></b></div>
+        <div class="progress-rail" role="progressbar" aria-label="ชั้นหอคอยที่พิชิตแล้ว" aria-valuemin="0" [attr.aria-valuemax]="totalFloors" [attr.aria-valuenow]="cleared()">
+          <i [style.width.%]="cleared() / totalFloors * 100"></i>
+        </div>
+        <app-icon name="tower" [size]="29" />
+      </div>
+      <div class="kingdom-details" id="kingdom-details">
+        @if (nextGoal(); as goal) {
+          <button type="button" class="kingdom-row" (click)="tapBuilding(goal.id)">
+            <span class="diamond"><app-icon name="lock" [size]="16" /></span>
+            <span><small>สิ่งก่อสร้างถัดไป</small><b>{{ goal.name }}</b></span>
+            <em>ชั้น {{ unlockFloorOf(goal) }}</em>
+          </button>
+        } @else {
+          <div class="kingdom-row"><span class="diamond"><app-icon name="crown" [size]="16" /></span><span><small>การพัฒนาอาณาจักร</small><b>ปลดล็อกสิ่งก่อสร้างครบแล้ว</b></span></div>
+        }
+      </div>
+    </aside>
     <div class="hud tr">
       @if (canFullscreen) {
         <button type="button" class="note fs-btn" (click)="toggleFullscreen()" [attr.aria-label]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'" [title]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'">{{ isFull() ? '🗗' : '⛶' }}</button>
@@ -29,11 +49,45 @@
         <a class="note" routerLink="/heroes" [attr.aria-label]="readyCount() + ' ฮีโร่พร้อมอัป'"><app-icon name="heroes" [size]="15" /><em>{{ readyCount() }}</em></a>
       }
     </div>
-    @if (!current()) {
-      <button type="button" class="cta" (click)="go('/battle', { floor: nextFloor(), mode: 'tower' })">
-        <app-icon name="sword" [size]="16" /> ชั้น {{ nextFloor() }}
-      </button>
-    }
+    <div class="lobby-bottom">
+      <section class="party-panel gilded" aria-label="ทีมปัจจุบัน">
+        <header><h2>MY PARTY</h2><span class="party-state" [class.ready]="party().length === 5">{{ party().length === 5 ? 'พร้อมออกผจญภัย' : 'ทีม ' + party().length + ' / 5' }}</span><span class="party-power"><app-icon name="armory" [size]="17" /><small>พลังรบ</small><b>{{ partyPower() }}</b></span></header>
+        <div class="party-lineup">
+          @for (i of partySlots; track i) {
+            @if (party()[i]; as h) {
+              <button type="button" class="party-card" [attr.data-class]="h.cls" (click)="tapHero(h.uid)" [attr.title]="h.name + ' · ' + h.className" [attr.aria-label]="h.name + ' ' + h.className + ' ' + h.star + ' ดาว เลเวล ' + h.level">
+                <span class="party-portrait">
+                  @if (h.portrait) { <img [src]="h.portrait" [alt]="h.name" draggable="false" /> }
+                  @else { <app-hero-portrait [heroId]="h.id" [star]="h.star" [size]="64" /> }
+                  <span class="party-class" [attr.title]="h.className"><app-icon [name]="h.icon" [size]="15" /></span>
+                  <span class="party-stars" aria-hidden="true">{{ '★'.repeat(h.star) }}</span>
+                  <span class="party-level">Lv. <b>{{ h.level }}</b></span>
+                </span>
+                <span class="party-name">{{ h.shortName }}</span>
+              </button>
+            } @else {
+              <a routerLink="/team" class="party-card empty-slot" [attr.aria-label]="'เพิ่มฮีโร่ ช่อง ' + (i + 1)"><span>+</span><small>เพิ่มฮีโร่</small></a>
+            }
+          }
+        </div>
+        <a class="party-edit" routerLink="/team"><app-icon name="team" [size]="19" /><span>จัดทัพ</span></a>
+      </section>
+      @if (nextStage(); as stage) {
+        <a class="destination gilded" routerLink="/team">
+          <img [src]="'backgrounds/' + stage.background + '.webp'" alt="" />
+          <span class="destination-copy"><small>NEXT ADVENTURE</small><b>{{ stage.name }}</b><span>เตรียมทีมสำหรับชั้น {{ nextFloor() }} <app-icon name="arrow" [size]="13" /></span></span>
+        </a>
+      }
+      @if (!current()) {
+        <button type="button" class="cta" (click)="enterTower()" [disabled]="enteringTower()" [attr.aria-busy]="enteringTower()">
+          <svg class="cta-light" viewBox="0 0 400 112" preserveAspectRatio="none" aria-hidden="true"><rect x="2" y="2" width="396" height="108" rx="5" pathLength="100" /></svg>
+          <span class="cta-emblem" aria-hidden="true"><app-icon name="tower" [size]="35" /></span>
+          <span class="cta-title">ENTER TOWER <app-icon name="arrow" [size]="25" /></span>
+          <span class="cta-thai" aria-live="polite">{{ enteringTower() ? 'กำลังเปิดประตู…' : 'เข้าสู่หอคอย' }}</span>
+          <span class="cta-floor"><app-icon name="tower" [size]="15" /><span class="floor-caption">{{ cleared() >= totalFloors ? 'ท้าซ้ำชั้น' : 'ชั้นถัดไป' }}</span><b>{{ nextFloor() }}</b><i>/ {{ totalFloors }}</i></span>
+        </button>
+      }
+    </div>
 
     <!-- progression event (one at a time) -->
     @if (current(); as ev) {

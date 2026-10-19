@@ -8,6 +8,7 @@ import { IslandBuildingState, Vec2 } from '../core/models/island';
 import { unlockFloorOf } from '../core/rules/island';
 import { IslandHeroComponent, IslandHeroView } from './island-hero.component';
 import { SkyCamera, SkyCanvasRenderer } from './sky-canvas';
+import { IconComponent } from '../shared/icon.component';
 
 /** spire look per tower visual stage (0 sealed … 5 conquered) — CSS filter on the spire overlay + which FX run */
 const SPIRE_STAGE = [
@@ -24,11 +25,11 @@ const SPIRE_STAGE = [
  * Layers (world px): sky gradient · stars · far islands (parallax) · back cloud sea → [island group, gently bobbing:
  * base art (empty plots) · waterfall / water / crystal FX (masks) · spire overlay + rune ring + glow · landmarks
  * (unlocked) and heroes depth-sorted by ground line · forge smoke · fountains] → front wisps · god rays · motes →
- * tap areas + name plates. Same inputs / outputs as the classic IslandSceneComponent.
+ * tap areas + name plates. Core inputs / outputs match the classic scene; City also accepts a cosmetic gate cue.
  */
 @Component({
   selector: 'app-sky-city',
-  imports: [IslandHeroComponent],
+  imports: [IslandHeroComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sky-city.component.html',
   styleUrl: './sky-city.component.scss',
@@ -41,6 +42,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly fxBuilding = input<string | null>(null);
   readonly selected = input<string | null>(null);
   readonly towerStage = input(0);
+  readonly enteringTower = input(false);
   readonly buildingTap = output<string>();
   readonly heroTap = output<number>();
 
@@ -50,6 +52,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly base = SKY_BASE;
   readonly spire = SKY_SPIRE;
   readonly fx = SKY_FX;
+  readonly towerPlot = SKY_PLOTS['tower'];
   readonly masks = SKY_MASKS;
   readonly heroScale = SKY_HERO_SCALE;
   readonly vp = viewChild.required<ElementRef<HTMLElement>>('vp');
@@ -102,7 +105,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
       const locked = !s?.isUnlocked;
       return {
         id: p.id, name: def?.name ?? p.id, hit: p.hit, plate: p.plate, locked, usable: locked && use.has(p.id),
-        future: !!def?.future, level: s?.progressionLevel ?? 0, requirement: def ? unlockFloorOf(def) : 0,
+        future: !!def?.future, level: s?.progressionLevel ?? 0, requirement: def ? unlockFloorOf(def) : 0, icon: def?.actions[0]?.icon ?? 'lock',
       };
     });
   });
@@ -208,7 +211,16 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   @HostListener('window:pointermove', ['$event'])
   onPointerMove(e: PointerEvent): void {
     const d = this.drag;
-    if (!d || e.pointerId !== d.id) return;
+    if (!d) {
+      const el = this.vp().nativeElement;
+      if (!this.still && !this.lite() && e.pointerType === 'mouse' && e.target instanceof Node && el.contains(e.target)) {
+        const r = el.getBoundingClientRect();
+        this.depthTarget = Math.max(-6, Math.min(6, ((e.clientX - r.left) / r.width - 0.5) * 12));
+      } else this.depthTarget = 0;
+      return;
+    }
+    this.depthTarget = 0;
+    if (e.pointerId !== d.id) return;
     const dx = e.clientX - d.x, dy = e.clientY - d.y;
     if (!d.moved && Math.hypot(dx, dy) > 6) d.moved = true;
     if (d.moved) this.setPan(d.px - dx, d.py - dy);
@@ -279,7 +291,9 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   private fp = { x: 0, y: 0 };
   private lastWorldTf = '';
   private lastBobTf = '';
-  private readonly still = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  readonly still = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  private depthTarget = 0;
+  private depth = 0;
 
   private frame(now: number): void {
     if (this.destroyed) return;
@@ -301,6 +315,8 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
       this.lastWorldTf = worldTf;
       this.worldEl().nativeElement.style.transform = worldTf;
       this.uiWorldEl().nativeElement.style.transform = worldTf;
+      // Keep labels at readable CSS-pixel size across map fit/focus scales.
+      this.uiWorldEl().nativeElement.style.setProperty('--label-scale', (1 / s).toFixed(5));
     }
     // the island bobs as one piece (driven here so the canvas FX on it stay glued)
     const bob = this.still ? 0 : -7 * (1 - Math.cos((2 * Math.PI * t) / 9));
@@ -319,7 +335,9 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
     const cam: SkyCamera = { s, tx, ty, panX: this.panX(), k, vw, vh, dpr };
     const bctx = back.getContext('2d'), fctx = front.getContext('2d');
     if (!bctx || !fctx) return;
-    this.renderer.drawBack(bctx, cam, t, this.lite());
+    this.depth += ((this.still || this.lite() ? 0 : this.depthTarget) - this.depth) * (1 - Math.exp(-dt * 5));
+    // Background only: world art, front effects, hit targets and labels remain aligned.
+    this.renderer.drawBack(bctx, { ...cam, panX: cam.panX + this.depth }, t, this.lite());
     this.renderer.drawFront(fctx, cam, t, bob, this.lite());
   }
 }

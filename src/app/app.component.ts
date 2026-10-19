@@ -11,6 +11,7 @@ export interface NavItem {
   path: string;
   label: string;
   icon: string;
+  caption?: string;
   /** url prefixes that light this tab up (island-hub pages count as the island) */
   match: string[];
 }
@@ -26,6 +27,16 @@ export const MAIN_NAV: NavItem[] = [
   { path: '/gacha', label: 'อัญเชิญ', icon: 'summon', match: ['/gacha'] },
 ];
 
+/** The lobby exposes existing F0 routes; other screens retain their compact core navigation. */
+export const LOBBY_NAV: NavItem[] = [
+  { path: '/home', label: 'หน้าหลัก', caption: 'HOME', icon: 'home', match: ['/home'] },
+  { path: '/heroes', label: 'ฮีโร่', caption: 'HEROES', icon: 'heroes', match: ['/heroes'] },
+  { path: '/team', label: 'จัดทัพ', caption: 'FORMATION', icon: 'armory', match: ['/team'] },
+  { path: '/armory', label: 'อุปกรณ์', caption: 'GEAR', icon: 'shield', match: ['/armory'] },
+  { path: '/gacha', label: 'อัญเชิญ', caption: 'SUMMON', icon: 'summon', match: ['/gacha'] },
+  { path: '/tower', label: 'ผจญภัย', caption: 'ADVENTURE', icon: 'tower', match: ['/tower'] },
+];
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, IconComponent],
@@ -36,7 +47,7 @@ export class AppComponent {
   readonly save = inject(SaveService);
   readonly account = inject(AccountService);
   private readonly router = inject(Router);
-  readonly nav = MAIN_NAV;
+  readonly nav = computed(() => this.immersive() ? LOBBY_NAV : MAIN_NAV);
 
   private readonly url = toSignal(
     this.router.events.pipe(filter(e => e instanceof NavigationEnd), map(e => (e as NavigationEnd).urlAfterRedirects)),
@@ -46,13 +57,13 @@ export class AppComponent {
   readonly bare = computed(() => this.url().startsWith('/welcome'));
   readonly active = computed(() => {
     const u = this.url().split(/[?#]/)[0];
-    return this.nav.find(n => n.match.some(m => u === m || u.startsWith(m + '/')))?.path ?? null;
+    return this.nav().find(n => n.match.some(m => u === m || u.startsWith(m + '/')))?.path ?? null;
   });
   /** in a fight the mobile dock steps aside (the battle screen needs the height) */
   readonly fight = computed(() => /^\/(battle|lab)(\/|\?|$)/.test(this.url()));
   readonly onAccount = computed(() => this.url().startsWith('/account'));
-  /** home = the island fills the locked screen; the bar / dock float over it */
-  readonly immersive = computed(() => /^\/home([?#]|$)/.test(this.url()));
+  /** Home and summon sanctum fill the locked screen; chrome floats above the scene */
+  readonly immersive = computed(() => /^\/(home|gacha)([?#]|$)/.test(this.url()));
 
   readonly gems = computed(() => this.save.state().gems.toLocaleString('en-US'));
   readonly gold = computed(() => this.save.state().gold.toLocaleString('en-US'));

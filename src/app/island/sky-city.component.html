@@ -2,7 +2,7 @@
   <!-- sky, clouds, far islands, whale, dragon: drawn on a screen-sized canvas (see sky-canvas.ts) -->
   <canvas class="cv" #back aria-hidden="true"></canvas>
   <div class="stage">
-    <div class="world" #world [style.width.px]="W" [style.height.px]="H" [class.gold]="gold()">
+    <div class="world" #world [style.width.px]="W" [style.height.px]="H" [class.gold]="gold()" [class.entering]="enteringTower()">
       <!-- ── the island (bobs gently as one piece) ── -->
       <div class="isle" #isle>
         <i class="isle-shadow" [style.top.px]="base.y + base.h * 0.62" [style.height.px]="base.h * 0.5"></i>
@@ -30,6 +30,12 @@
         }
         <img class="spire" [src]="spire.src" alt="" draggable="false" [style.filter]="sp.filter"
              [style.left.px]="spire.x" [style.top.px]="spire.y" [style.width.px]="spire.w" [style.height.px]="spire.h" />
+        <div class="tower-gate" [style.left.px]="towerPlot.plate.x - 54" [style.top.px]="towerPlot.plate.y - 135" aria-hidden="true"></div>
+        @if (!lite() && !still) {
+          @for (m of [0, 1, 2, 3, 4]; track m) {
+            <i class="gate-mote" [style.left.px]="towerPlot.plate.x - 80 + m * 40" [style.top.px]="towerPlot.plate.y - 15" [style.animation-delay.s]="-m * 1.2" aria-hidden="true"></i>
+          }
+        }
         @if (sp.ring) {
           <svg class="ring front" [style.left.px]="fx.spireRing.x - fx.spireRing.rx" [style.top.px]="fx.spireRing.y - fx.spireRing.ry"
                [style.width.px]="fx.spireRing.rx * 2" [style.height.px]="fx.spireRing.ry * 2" viewBox="-100 -24 200 48" preserveAspectRatio="none" aria-hidden="true">
@@ -90,9 +96,11 @@
       <div class="isle ui" #isleUi>
         @for (b of plates(); track b.id) {
           <button type="button" class="hit" [class.sel]="selected() === b.id" [attr.aria-label]="b.name + (b.locked && !b.usable ? ' (ล็อก)' : '')"
-                  [style.left.px]="b.hit.x" [style.top.px]="b.hit.y" [style.width.px]="b.hit.w" [style.height.px]="b.hit.h" (click)="tapBuilding(b.id)"></button>
+                  [style.left.px]="b.hit.x" [style.top.px]="b.hit.y" [style.width.px]="b.hit.w" [style.height.px]="b.hit.h" (click)="tapBuilding(b.id)">
+            <span class="plot-halo" aria-hidden="true"></span>
+          </button>
           <div class="plate" [class.locked]="b.locked && !b.usable" [style.left.px]="b.plate.x" [style.top.px]="b.plate.y">
-            <b>{{ b.name }}</b>
+            <b><app-icon [name]="b.icon" [size]="16" /> {{ b.name }}</b>
             @if (b.usable) { <small class="open">✦ ใช้งานได้</small> }
             @else if (b.locked) { <small>🔒 ชั้น {{ b.requirement }}</small> }
             @else if (b.future) { <small class="soon">เร็ว ๆ นี้</small> }

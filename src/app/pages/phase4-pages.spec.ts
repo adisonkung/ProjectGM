@@ -22,7 +22,7 @@ describe('Phase 4 pages', () => {
     expect(el.querySelectorAll('.card').length).toBe(heroes.filter(h => HERO_BY_ID[h.templateId].cls === 'tank').length);
   });
 
-  it('hero detail: key art + the hero from the route, its three skills and three gear slots on the second tab', async () => {
+  it('hero detail: route identity, overview gear, and accessible skill/stat navigation', async () => {
     await TestBed.configureTestingModule({
       imports: [HeroDetailComponent],
       providers: [provideRouter([]), { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ uid: '1' })) } }],
@@ -32,12 +32,19 @@ describe('Phase 4 pages', () => {
     const el: HTMLElement = f.nativeElement;
     const h = TestBed.inject(SaveService).state().heroes[0];
     expect(el.querySelector('h1')!.textContent).toContain(HERO_BY_ID[h.templateId].name);
-    // the full key art is shown when the hero has one; skills / gear live on the second tab
+    // Key art remains intact; overview includes the actual gear slots.
     expect(el.querySelectorAll('.show img.key').length).toBe(heroArt(h.templateId)?.banner ? 1 : 0);
     expect(el.querySelectorAll('.skill').length).toBe(0);
-    f.componentInstance.tab.set('kit');
+    expect(el.querySelectorAll('.gear-list > a').length).toBe(3);
+    (el.querySelector('#hero-tab-skills') as HTMLButtonElement).click();
     f.detectChanges();
     expect(el.querySelectorAll('.skill').length).toBe(3);
-    expect(el.querySelectorAll('.gear-list > div').length).toBe(3);
+    expect(el.querySelectorAll('.basic-attack').length).toBe(1);
+    expect(el.querySelector('#hero-panel')!.getAttribute('aria-labelledby')).toBe('hero-tab-skills');
+    el.querySelector('#hero-tab-skills')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    f.detectChanges();
+    expect(el.querySelector('#hero-tab-stats')!.getAttribute('aria-selected')).toBe('true');
+    expect(el.querySelectorAll('table.breakdown thead th').length).toBe(4);
+    expect(el.querySelectorAll('.skill').length).toBe(0);
   });
 });

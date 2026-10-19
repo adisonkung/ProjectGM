@@ -1,0 +1,12 @@
+:host { position: fixed; inset: 0; display: block; overflow: hidden; pointer-events: none; }
+.art { position: absolute; inset: 0; background: url('/ui/summon-sanctum.jpg') center / cover no-repeat; }
+.shade { position: absolute; inset: 0; background: linear-gradient(90deg,#070c1766,transparent 27%,transparent 78%,#070c1744),linear-gradient(0deg,#050a17a6,transparent 32%,transparent 83%,#050a1755); }
+canvas, .cards { position: absolute; inset: 0; width: 100%; height: 100%; }
+canvas { mix-blend-mode: screen; }
+.card-place { position: absolute; width: calc(clamp(48px,5.6vw,90px) * var(--size)); transform: translate(-50%,-50%) rotate(var(--tilt)); filter: drop-shadow(0 3px 5px #090a1688) drop-shadow(0 0 2px #ffe6acb3) drop-shadow(0 0 7px #eebe6655);
+  img { display: block; width: 100%; aspect-ratio: 853/1280; object-fit: contain; animation: cardFloat var(--duration) ease-in-out var(--delay) infinite;
+    clip-path: polygon(50% 1.5%,57% 3.7%,87% 3.7%,90% 6%,90% 92%,87% 94%,56% 94%,50% 98%,44% 94%,13% 94%,10% 92%,10% 6%,13% 4%,43% 4%); } }
+@keyframes cardFloat { 0%,100% { transform: translateY(-6px) rotate(-1.5deg); } 50% { transform: translateY(6px) rotate(1.5deg); } }
+:host-context(.summoning) .card-place img { animation-play-state: paused; }
+@media (max-width:720px) { .card-place { width: calc(58px * var(--size)); } .card-place:nth-child(1) { left: 36% !important; top: 39% !important; } .card-place:nth-child(2) { left: 66% !important; top: 43% !important; } .card-place:nth-child(3) { top: 29% !important; } .card-place:nth-child(4) { display: none; } }
+@media (prefers-reduced-motion:reduce) { .card-place img { animation: none; } }

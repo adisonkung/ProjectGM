@@ -26,11 +26,13 @@ const UPGRADE_ERROR: Record<SkillUpgradeError, string> = {
   MAX_RANK: 'ระดับสูงสุดแล้ว', RANK_CAP: 'ติดเพดานระดับ — ต้อง Breakthrough', NEED_LEVEL: 'เลเวลไม่ถึง',
   NEED_BREAKTHROUGH: 'ต้อง Breakthrough ก่อน', NEED_MATERIALS: 'Skill Tome ไม่พอ', NEED_GOLD: 'ทองไม่พอ', NO_HERO: '',
 };
+type DetailTab = 'overview' | 'stats' | 'skills' | 'gear';
+
 const RARITY_TIER: Record<Rarity, number> = { COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5 };
 const SLOT_LABEL: Record<EquipmentSlot, string> = { WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
 const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
 
-/** Hero detail: stats breakdown (base / gear), level · EXP · potions · breakthrough, skills with rank-up, gear, training slot */
+/** Hero detail: full key art, live identity/skill shortcuts, then overview · stats · skills · equipment. */
 @Component({
   selector: 'app-hero-detail',
   imports: [RouterLink, HeroPortraitComponent, IconComponent],
@@ -109,8 +111,27 @@ export class HeroDetailComponent {
 
   /** wide key art behind the header (heroes that have one) */
   readonly banner = computed(() => heroArt(this.t()?.id)?.banner);
-  /** lower half of the page in two tabs so the key art keeps the screen: growth (stars / stats / level) · kit (skills / gear) */
-  readonly tab = signal<'grow' | 'kit'>('grow');
+  readonly portrait = computed(() => heroArt(this.t()?.id)?.portrait);
+  readonly attack = computed(() => { const t = this.t(); return t ? kitOf(t.id, t.cls).attack : null; });
+  readonly tab = signal<DetailTab>('overview');
+  readonly statBreakdown = signal(false);
+  readonly tabs: { id: DetailTab; label: string; icon: string }[] = [
+    { id: 'overview', label: 'ข้อมูล', icon: 'heroes' },
+    { id: 'stats', label: 'ค่าสถานะ', icon: 'sword' },
+    { id: 'skills', label: 'สกิล', icon: 'bolt' },
+    { id: 'gear', label: 'อุปกรณ์', icon: 'armory' },
+  ];
+
+  onTabKey(event: KeyboardEvent): void {
+    const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+    if (!keys.includes(event.key)) return;
+    event.preventDefault();
+    const i = this.tabs.findIndex(t => t.id === this.tab());
+    const n = event.key === 'Home' ? 0 : event.key === 'End' ? this.tabs.length - 1
+      : (i + (event.key === 'ArrowRight' ? 1 : -1) + this.tabs.length) % this.tabs.length;
+    this.tab.set(this.tabs[n].id);
+    (event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('[role="tab"]')[n]?.focus();
+  }
 
   readonly skills = computed(() => {
     const h = this.hero(), t = this.t();

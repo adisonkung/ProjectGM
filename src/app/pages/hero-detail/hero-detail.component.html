@@ -2,91 +2,61 @@
   @let tp = t()!;
   @let p = progress()!;
   <section class="detail">
-    <nav class="crumbs">
-      <a routerLink="/heroes" class="gm-btn small ghost"><app-icon name="back" [size]="14" /> หอวีรชน</a>
+    <nav class="crumbs" aria-label="นำทางฮีโร่">
+      <a routerLink="/heroes" class="gm-btn small ghost"><app-icon name="back" [size]="16" /> กลับหอวีรชน</a>
       @if (siblings(); as sb) {
         <span class="step">
-          <button type="button" class="gm-btn small ghost" (click)="go(sb.prev)" aria-label="ฮีโร่ก่อนหน้า"><app-icon name="back" [size]="14" /></button>
-          <button type="button" class="gm-btn small ghost" (click)="go(sb.next)" aria-label="ฮีโร่ถัดไป"><app-icon name="arrow" [size]="14" /></button>
+          <button type="button" class="gm-btn small ghost" (click)="go(sb.prev)" aria-label="ฮีโร่ก่อนหน้า"><app-icon name="back" [size]="18" /></button>
+          <button type="button" class="gm-btn small ghost" (click)="go(sb.next)" aria-label="ฮีโร่ถัดไป"><app-icon name="arrow" [size]="18" /></button>
         </span>
       }
     </nav>
-
-    <!-- hero banner: with key art the whole image is shown (16:9, nothing cropped) and the info sits on a strip under it -->
-    @if (banner(); as bn) {
-      <header class="show gm-panel glow r{{ star() }}">
-        <img class="key" [src]="bn" [alt]="tp.name" />
-        <div class="plate">
-          <div class="who">
-            <span class="gm-class">{{ className(tp.cls) }} · #{{ h.uid }}</span>
-            <h1 class="gm-title">{{ tp.name }}</h1>
-            <span class="gm-stars big" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">{{ stars(star()) }}<span class="dim">{{ '☆'.repeat(MAX_STAR - star()) }}</span></span>
-          </div>
-          <div class="power"><app-icon name="flame" [size]="16" /><span>พลังรบ</span><b>{{ power() }}</b></div>
-          <div class="level">
-            <div class="lvnum"><small>LV</small><b>{{ p.level }}</b><small>/ {{ p.levelCap }}</small></div>
-            @if (p.state === 'MAX') {
-              <span class="gm-chip gold">เลเวลสูงสุด</span>
-            } @else {
-              <div class="gm-bar gold"><i [style.width.%]="pct(p.exp, p.expToNext)"></i></div>
-              <small class="exp">EXP {{ p.exp }} / {{ p.expToNext }}</small>
-            }
-          </div>
+    <header class="show">
+      @if (banner(); as bn) {
+        <div class="key-art"><img class="key" [src]="bn" [alt]="tp.name" fetchpriority="high" /></div>
+      } @else {
+        <div class="fallback-art"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="240" /></div>
+      }
+      <div class="plate">
+        <div class="identity">
+          <span class="eyebrow"><app-icon name="heroes" [size]="16" /> ฮีโร่หมายเลข #{{ h.uid }}</span>
+          <div class="name-line"><h1>{{ tp.name }}</h1><span class="hero-stars" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">{{ stars(star()) }}</span></div>
+          <span class="hero-class"><app-icon name="shield" [size]="19" /> {{ className(tp.cls) }}</span>
           <div class="chips">
-            @if (inTeam()) { <span class="gm-chip gold"><app-icon name="team" [size]="12" /> อยู่ในทีม</span> }
-            <span class="gm-chip">ศักยภาพ {{ h.potential }}</span>
-            <span class="gm-chip">BT {{ h.breakthroughTier ?? 0 }}/3</span>
-            @if (isMain()) {
-              <span class="gm-chip arcane"><app-icon name="crown" [size]="12" /> ฮีโร่หลัก</span>
-            } @else {
-              <button type="button" class="gm-btn small arcane" (click)="setMain()"><app-icon name="crown" [size]="12" /> ตั้งเป็นฮีโร่หลัก</button>
+            @if (inTeam()) { <span class="gm-chip gold"><app-icon name="team" [size]="13" /> อยู่ในทีม</span> }
+            <span class="gm-chip">ศักยภาพ {{ h.potential }}</span><span class="gm-chip">BT {{ h.breakthroughTier ?? 0 }}/3</span>
+            @if (isMain()) { <span class="gm-chip arcane"><app-icon name="crown" [size]="13" /> ฮีโร่หลักบนเกาะ</span> }
+            @else { <button type="button" class="gm-btn small arcane" (click)="setMain()"><app-icon name="crown" [size]="13" /> ตั้งเป็นฮีโร่หลัก</button> }
+          </div>
+          <div class="identity-note"><app-icon name="team" [size]="18" /><span>{{ training() ? 'กำลังฝึกฝนที่ Training Ground' : inTeam() ? 'พร้อมออกผจญภัยไปกับทีมของคุณ' : 'พร้อมเข้าร่วมทีม — จัดทัพเพื่อออกผจญภัย' }}</span></div>
+        </div>
+        <div class="hero-status">
+          <div class="level">
+            <div class="lvnum"><small>Lv.</small><b>{{ p.level }}</b><small>/ {{ p.levelCap }}</small></div>
+            <div class="gm-bar gold" role="progressbar" aria-label="ประสบการณ์ฮีโร่" aria-valuemin="0" [attr.aria-valuemax]="p.expToNext || 1" [attr.aria-valuenow]="p.state === 'MAX' ? 1 : (p.exp > p.expToNext ? p.expToNext : p.exp)"><i [style.width.%]="p.state === 'MAX' ? 100 : pct(p.exp, p.expToNext)"></i></div>
+            <small class="exp">{{ p.state === 'MAX' ? 'เลเวลสูงสุด' : 'EXP ' + p.exp + ' / ' + p.expToNext }}</small>
+          </div>
+          <div class="power"><app-icon name="flame" [size]="24" /><span>พลังรบ</span><b>{{ power() }}</b></div>
+          <div class="skill-shortcuts" aria-label="สกิลของฮีโร่">
+            <button type="button" (click)="tab.set('skills')" aria-controls="hero-panel" [attr.aria-label]="'ดูโจมตีปกติ ' + (attack()?.name || '')"><span class="skill-orb"><app-icon name="sword" [size]="28" /></span><b>โจมตีปกติ</b><small>{{ attack()?.name }}</small></button>
+            @for (v of skills(); track v.slot) {
+              <button type="button" (click)="tab.set('skills')" aria-controls="hero-panel" [attr.aria-label]="'ดู' + slotTag[v.slot] + ' ' + v.name"><span class="skill-orb">@if (v.icon) { <img [src]="v.icon" alt="" /> } @else { <app-icon [name]="v.slot === 'ult' ? 'bolt' : 'star'" [size]="28" /> }</span><b>{{ slotTag[v.slot] }}</b><small>{{ v.name }}</small></button>
             }
           </div>
         </div>
-      </header>
-    } @else {
-    <header class="hero gm-panel glow r{{ star() }}">
-      <div class="art"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="168" /></div>
-      <div class="who">
-        <span class="gm-class">{{ className(tp.cls) }} · #{{ h.uid }}</span>
-        <h1 class="gm-title">{{ tp.name }}</h1>
-        <span class="gm-stars big" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">{{ stars(star()) }}<span class="dim">{{ '☆'.repeat(MAX_STAR - star()) }}</span></span>
-        <div class="power"><app-icon name="flame" [size]="18" /><span>พลังรบ</span><b>{{ power() }}</b></div>
-        <div class="chips">
-          @if (inTeam()) { <span class="gm-chip gold"><app-icon name="team" [size]="12" /> อยู่ในทีม</span> }
-          <span class="gm-chip">ศักยภาพ {{ h.potential }}</span>
-          <span class="gm-chip">Breakthrough {{ h.breakthroughTier ?? 0 }}/3</span>
-          @if (isMain()) {
-            <span class="gm-chip arcane"><app-icon name="crown" [size]="12" /> ฮีโร่หลักบนเกาะ</span>
-          } @else {
-            <button type="button" class="gm-btn small arcane" (click)="setMain()"><app-icon name="crown" [size]="12" /> ตั้งเป็นฮีโร่หลัก</button>
-          }
-        </div>
-      </div>
-      <div class="level">
-        <div class="lvnum"><small>LEVEL</small><b>{{ p.level }}</b><small>/ {{ p.levelCap }}</small></div>
-        @if (p.state === 'MAX') {
-          <span class="gm-chip gold">เลเวลสูงสุด</span>
-        } @else {
-          <div class="gm-bar gold"><i [style.width.%]="pct(p.exp, p.expToNext)"></i></div>
-          <small class="exp">EXP {{ p.exp }} / {{ p.expToNext }}</small>
-        }
       </div>
     </header>
-    }
-
     @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
-
-    <div class="tabs" role="tablist">
-      <button type="button" role="tab" [attr.aria-selected]="tab() === 'grow'" [class.on]="tab() === 'grow'" (click)="tab.set('grow')"><app-icon name="star" [size]="15" /> พัฒนา · ค่าพลัง</button>
-      <button type="button" role="tab" [attr.aria-selected]="tab() === 'kit'" [class.on]="tab() === 'kit'" (click)="tab.set('kit')"><app-icon name="bolt" [size]="15" /> สกิล · อุปกรณ์</button>
+    <div class="tabs" role="tablist" aria-label="รายละเอียดฮีโร่" (keydown)="onTabKey($event)">
+      @for (item of tabs; track item.id) {
+        <button type="button" role="tab" [id]="'hero-tab-' + item.id" aria-controls="hero-panel" [attr.aria-selected]="tab() === item.id" [attr.tabindex]="tab() === item.id ? 0 : -1" [class.on]="tab() === item.id" (click)="tab.set(item.id)"><app-icon [name]="item.icon" [size]="19" /> {{ item.label }}</button>
+      }
     </div>
-
-    @if (tab() === 'grow') {
-    <!-- star development: Hero Memory (duplicates) + Universal Memory (gameplay) → up to 6★ -->
+    <div id="hero-panel" class="content-grid" role="tabpanel" [attr.aria-labelledby]="'hero-tab-' + tab()" tabindex="0" [class.single]="tab() !== 'overview'">
+@if (tab() === 'overview') {
     @if (starView(); as sv) {
       <section class="gm-panel stars-panel">
-        <h2 class="gm-h2">พัฒนาดาว <small>{{ star() }}★ / {{ MAX_STAR }}★ · ดาวเกิด {{ tp.star }}★</small></h2>
+        <h2 class="gm-h2"><app-icon name="star" [size]="23" /> พัฒนาดาว <small>{{ star() }}★ / {{ MAX_STAR }}★ · ดาวเกิด {{ tp.star }}★</small></h2>
         <div class="star-row">
           @for (n of [1, 2, 3, 4, 5, 6]; track n) {
             <span class="st r{{ n }}" [class.on]="n <= star()" [class.base]="n <= tp.star" [attr.title]="n + '★'">★</span>
@@ -96,6 +66,7 @@
           <p class="maxed"><app-icon name="crown" [size]="14" /> ถึง 6★ แล้ว — ตัวซ้ำจะกลายเป็น Universal Memory</p>
         } @else {
           <div class="mem">
+            <div class="memory-art">@if (portrait(); as pt) { <img [src]="pt" alt="" loading="lazy" /> } @else { <app-icon name="star" [size]="32" /> }</div>
             <div class="need">
               <span>ใช้ <b>{{ sv.cost }}</b> Memory เพื่อไป {{ star() + 1 }}★ <em>(+{{ nextStarGain() }}% HP/ATK/DEF)</em></span>
               <div class="gm-bar arcane"><i [style.width.%]="pct(sv.spendHero + sv.spendUniversal, sv.cost)"></i></div>
@@ -113,15 +84,15 @@
       </section>
     }
 
-    <div class="cols">
-      <!-- stats -->
+}
+@if (tab() === 'overview' || tab() === 'stats') {
       <section class="gm-panel stats">
-        <h2 class="gm-h2">ค่าพลัง</h2>
-        <table>
-          <thead><tr><th></th><th>พื้นฐาน</th><th>อุปกรณ์</th><th>รวม</th></tr></thead>
+        <header class="panel-heading"><h2 class="gm-h2">ค่าสถานะ <small>STATS</small></h2>@if (tab() === 'overview') { <button type="button" class="gm-btn small ghost" [attr.aria-expanded]="statBreakdown()" (click)="statBreakdown.set(!statBreakdown())">{{ statBreakdown() ? 'ย่อข้อมูล' : 'รายละเอียด' }}</button> }</header>
+        <table [class.breakdown]="tab() === 'stats' || statBreakdown()">
+          @if (tab() === 'stats' || statBreakdown()) { <thead><tr><th></th><th>พื้นฐาน</th><th>อุปกรณ์</th><th>รวม</th></tr></thead> }
           <tbody>
             @for (r of statRows(); track r.label) {
-              <tr><th><app-icon [name]="r.icon" [size]="13" /> {{ r.label }}</th><td>{{ r.base }}</td><td class="bonus">{{ r.bonus }}</td><td class="tot">{{ r.total }}</td></tr>
+              <tr><th><app-icon [name]="r.icon" [size]="13" /> {{ r.label }}</th>@if (tab() === 'stats' || statBreakdown()) { <td>{{ r.base }}</td><td class="bonus">{{ r.bonus || '—' }}</td> }<td class="tot">{{ r.total }}</td></tr>
             }
           </tbody>
         </table>
@@ -130,9 +101,29 @@
         }
       </section>
 
-      <!-- growth -->
+}
+@if (tab() === 'overview' || tab() === 'gear') {
+    <section class="gm-panel gear">
+      <header class="panel-heading"><h2 class="gm-h2"><app-icon name="armory" [size]="23" /> อุปกรณ์ <small>EQUIPMENT</small></h2><a class="gm-btn small ghost" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }">จัดการ <app-icon name="arrow" [size]="14" /></a></header>
+      <div class="gear-list">
+        @for (g of gear(); track g.slot) {
+          <a class="gear-slot" [class]="'gear-slot t' + g.tier + (g.item ? '' : ' empty')" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }" [attr.aria-label]="g.label + (g.item ? ' ' + gearName(g.item) : ' ว่าง — จัดการอุปกรณ์')">
+            <span class="gi"><app-icon [name]="g.icon" [size]="22" /></span>
+            <div>
+              <small>{{ g.label }}</small>
+              @if (g.item; as it) {
+                <b>{{ gearName(it) }}</b>
+                <span class="lines">{{ g.lines.join(' · ') }}</span>
+              } @else { <b class="none">+ เพิ่มอุปกรณ์</b> }
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+}
+@if (tab() === 'overview') {
       <section class="gm-panel grow">
-        <h2 class="gm-h2">การเติบโต</h2>
+        <h2 class="gm-h2"><app-icon name="crystal" [size]="23" /> การเติบโต <small>GROWTH</small></h2>
         @if (p.state === 'BREAKTHROUGH_READY') {
           <div class="bt">
             <b><app-icon name="crystal" [size]="16" /> ต้อง Breakthrough เพื่อไปต่อ</b>
@@ -163,7 +154,8 @@
         } @else {
           <p class="hint">เลเวลเต็มแล้ว — เพิ่มพลังด้วยสกิลและอุปกรณ์</p>
         }
-        <div class="gm-divider">✦</div>
+        <a class="growth-link" routerLink="/dungeons/training"><span><b>รับ EXP เพิ่มเติม</b><small>Training Ground · ยา EXP และช่องฝึก</small></span><app-icon name="arrow" [size]="18" /></a>
+        <a class="growth-link" routerLink="/dungeons/ascension"><span><b>วัสดุ Breakthrough</b><small>ตรวจเงื่อนไขและรางวัลที่ศาลเทพ</small></span><app-icon name="arrow" [size]="18" /></a>
         <div class="slot">
           <div>
             <b>ช่องฝึก</b>
@@ -178,12 +170,11 @@
           }
         </div>
       </section>
-    </div>
-
-    } @else {
-    <!-- skills -->
+}
+@if (tab() === 'skills') {
     <section class="gm-panel skills">
-      <h2 class="gm-h2">สกิล <small class="gold">ทอง {{ gold() }}</small></h2>
+      <h2 class="gm-h2"><app-icon name="bolt" [size]="23" /> สกิล <small class="gold">ทอง {{ gold() }}</small></h2>
+      @if (attack(); as a) { <article class="basic-attack"><app-icon name="sword" [size]="25" /><div><small>โจมตีปกติ</small><b>{{ a.name }}</b><span>{{ a.label }}</span></div></article> }
       <div class="skill-list">
         @for (v of skills(); track v.slot) {
           <article class="skill" [class.ult]="v.slot === 'ult'">
@@ -232,30 +223,9 @@
       </div>
     </section>
 
-    <!-- gear -->
-    <section class="gm-panel gear">
-      <h2 class="gm-h2">อุปกรณ์</h2>
-      <div class="gear-list">
-        @for (g of gear(); track g.slot) {
-          <div [class]="'piece t' + g.tier + (g.item ? '' : ' empty')">
-            <span class="gi"><app-icon [name]="g.icon" [size]="22" /></span>
-            <div>
-              <small>{{ g.label }}</small>
-              @if (g.item; as it) {
-                <b>{{ gearName(it) }}</b>
-                <span class="lines">{{ g.lines.join(' · ') }}</span>
-              } @else { <b class="none">ว่าง</b> }
-            </div>
-          </div>
-        }
-      </div>
-      <a class="gm-btn" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }"><app-icon name="armory" [size]="15" /> จัดการอุปกรณ์</a>
-    </section>
-    }
+}
+    </div>
   </section>
 } @else {
-  <section class="placeholder">
-    <h1>ไม่พบฮีโร่</h1>
-    <p><a routerLink="/heroes">กลับหอวีรชน</a></p>
-  </section>
+  <section class="placeholder"><h1>ไม่พบฮีโร่</h1><p><a routerLink="/heroes">กลับหอวีรชน</a></p></section>
 }
