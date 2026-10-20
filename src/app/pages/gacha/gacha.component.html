@@ -38,10 +38,11 @@
       </div>
       @if (error(); as e) { <p class="err" role="alert">{{ e }}</p> }
       <div class="acts">
-        <button type="button" class="summon-button single" (click)="summon(1)" [disabled]="playing() || gems() < G.single"><span class="price"><app-icon name="gem" [size]="15" /> {{ G.single }}</span><b>อัญเชิญ 1 ครั้ง</b><small>SUMMON ×1</small></button>
-        <button type="button" class="summon-button multi" (click)="summon(10)" [disabled]="playing() || gems() < G.multi"><span class="price"><app-icon name="gem" [size]="15" /> {{ G.multi }}</span><b>อัญเชิญ 10 ครั้ง</b><small>SUMMON ×10</small></button>
+        <button type="button" class="summon-button single" (click)="summon(1)" [disabled]="playing() || !canAfford(1)"><span class="price"><app-icon name="gem" [size]="15" /> {{ G.single }}</span><b>อัญเชิญ 1 ครั้ง</b><small>{{ freeSummons ? 'FREE TEST · ไม่หักเพชร' : 'SUMMON ×1' }}</small></button>
+        <button type="button" class="summon-button multi" (click)="summon(10)" [disabled]="playing() || !canAfford(10)"><span class="price"><app-icon name="gem" [size]="15" /> {{ G.multi }}</span><b>อัญเชิญ 10 ครั้ง</b><small>{{ freeSummons ? 'FREE TEST · ไม่หักเพชร' : 'SUMMON ×10' }}</small></button>
       </div>
-      @if (gems() < G.single) { <span class="funds-note">เพชรไม่พอสำหรับอัญเชิญ · ต้องใช้ {{ G.single }} เพชร</span> }
+      @if (freeSummons) { <span class="funds-note" role="status">อัญเชิญฟรีชั่วคราวสำหรับทดสอบ · แสดงราคาเดิม แต่ไม่หักเพชร</span> }
+      @if (!freeSummons && gems() < G.single) { <span class="funds-note">เพชรไม่พอสำหรับอัญเชิญ · ต้องใช้ {{ G.single }} เพชร</span> }
     </section>
   </div>
 </section>
@@ -60,6 +61,7 @@
     <a class="gm-btn primary" routerLink="/heroes" (click)="closeInfo()">ไปพัฒนาฮีโร่ <app-icon name="arrow" [size]="15" /></a>
   } @else {
     <p>อัญเชิญ 1 ครั้ง {{ G.single }} เพชร · 10 ครั้ง {{ G.multi }} เพชร</p>
+    @if (freeSummons) { <p class="pool-notice">เปิดอัญเชิญฟรีชั่วคราวสำหรับทดสอบ ราคาด้านบนเป็นราคาเดิม และจะไม่หักเพชร</p> }
     <table><caption>อัตราระดับการสุ่ม</caption><thead><tr><th>ระดับ</th><th>อัตรา</th><th>ฮีโร่ในระดับ</th></tr></thead><tbody>@for (r of rates; track r.star) { <tr><th>{{ stars(r.star) }}</th><td>{{ r.pct }}%</td><td>{{ r.count }} ตัว</td></tr> }</tbody></table>
     <p>การันตีสุ่มระดับ 3★ ภายใน {{ G.pity }} ครั้ง และอัญเชิญ ×10 ได้ระดับ 2★ ขึ้นไปอย่างน้อย 1 ครั้ง เกจเริ่มใหม่เมื่อสุ่มได้ระดับ 3★</p>
     <p class="pool-notice">รายชื่อปัจจุบันมีเฉพาะฮีโร่ 3★ หากระดับที่สุ่มได้ไม่มีฮีโร่ ระบบจะเลือกจากรายชื่อรวม ดาวของฮีโร่ที่ได้รับจึงเป็น 3★ ทั้งหมด ส่วนเกจการันตีนับจากระดับที่สุ่มได้</p>
@@ -67,15 +69,25 @@
   }
 </dialog>
 <dialog #resultsDialog class="summon-dialog results-dialog" aria-labelledby="summon-results-title" (close)="showResults.set(false)" (click)="$event.target === resultsDialog && resultsDialog.close()">
-  <header class="dialog-heading"><h2 id="summon-results-title">ผลการอัญเชิญ</h2><button type="button" class="close" aria-label="ปิดผลอัญเชิญ" (click)="resultsDialog.close()" autofocus>×</button></header>
+  <header class="dialog-heading"><div><span class="eyebrow">THE CELESTIAL SANCTUM</span><h2 id="summon-results-title">ผลการอัญเชิญ</h2><p>วีรชนที่ตอบรับเสียงเรียกของคุณ</p></div><button type="button" class="close" aria-label="ปิดผลอัญเชิญ" (click)="resultsDialog.close()" autofocus>×</button></header>
   @if (showResults()) {
     <ul class="results" aria-label="ผลการอัญเชิญ">@for (r of results(); track $index) {
       <li class="res r{{ r.star }}" [class.new]="r.isNew">
-        <app-hero-portrait [heroId]="r.templateId" [size]="88" /><b>{{ r.name }}</b><span class="gm-stars">{{ stars(r.star) }}</span>
+        @if (portrait(r.templateId); as image) { <img class="result-portrait" [src]="image" alt="" /> } @else { <app-hero-portrait [heroId]="r.templateId" [size]="88" /> }<b>{{ r.name }}</b><span class="gm-stars">{{ stars(r.star) }}</span>
         @if (r.isNew) { <em class="tag">ใหม่!</em> } @else if (r.memory) { <small>ตัวซ้ำ → Hero Memory +{{ r.memory }}</small> } @else { <small>6★ แล้ว → Universal +{{ r.universal }}</small> }
         @if (r.uid) { <a class="more" [routerLink]="['/heroes', r.uid]" (click)="resultsDialog.close()">ดูฮีโร่ <app-icon name="arrow" [size]="13" /></a> }
       </li>
     }</ul>
     <p class="dialog-intro">เพิ่มฮีโร่และ Memory เข้าเซฟเรียบร้อยแล้ว</p>
+    <footer class="result-actions"><button type="button" class="gm-btn" (click)="resultsDialog.close()">ยืนยัน</button><button type="button" class="gm-btn primary" (click)="summon(lastCount())" [disabled]="!canAfford(lastCount())">อัญเชิญอีก {{ lastCount() }} ครั้ง · {{ lastCount() === 10 ? G.multi : G.single }} เพชร</button></footer>
   }
+</dialog>
+
+<dialog #confirmDialog class="summon-dialog confirm-dialog" aria-labelledby="confirm-title" (cancel)="$event.preventDefault(); cancelSummon()" (click)="$event.target === confirmDialog && cancelSummon()">
+  <header class="dialog-heading"><h2 id="confirm-title">ยืนยันการอัญเชิญ</h2><button type="button" class="close" aria-label="ยกเลิกอัญเชิญ" (click)="cancelSummon()">×</button></header>
+  <p class="confirm-copy">@if (freeSummons) { ต้องการอัญเชิญฟรี <strong>{{ pending() }} ครั้ง</strong><br />สำหรับทดสอบ โดยไม่หักเพชร ใช่หรือไม่? } @else { ต้องการใช้ <strong>{{ pendingCost() }} เพชร</strong> เพื่ออัญเชิญ <strong>{{ pending() }} ครั้ง</strong><br />ในตู้อัญเชิญปกติ ใช่หรือไม่? }</p>
+  <div class="confirm-banner">@if (showcase) { <img [src]="showcase" alt="" /> }<div><small>STANDARD SUMMON</small><b>เสียงเรียกแห่งดวงดาว</b><span>เหล่าวีรชนแห่ง Dawnmere</span></div></div>
+  <div class="confirm-wallet"><span>{{ freeSummons ? 'ราคาเดิม' : 'ใช้จ่าย' }} <strong><app-icon name="gem" [size]="18" /> {{ pendingCost() }}</strong></span><span>มีอยู่ <strong><app-icon name="gem" [size]="18" /> {{ gems() }}</strong></span></div>
+  <p class="confirm-note">{{ freeSummons ? 'โหมดทดสอบ: ไม่หักเพชร แต่ยังได้รับฮีโร่และ Memory ตามปกติ' : 'เมื่อยืนยันจะใช้เพชรทันที และเพิ่มผลอัญเชิญเข้าเซฟ' }}<br />การข้ามฉากจะไม่เปลี่ยนผลที่ได้รับ</p>
+  <footer class="confirm-actions"><button type="button" class="gm-btn" (click)="cancelSummon()" autofocus>ยกเลิก</button><button type="button" class="gm-btn primary" (click)="confirmSummon()" [disabled]="!pending() || !canAfford(pending() ?? 1)">อัญเชิญ {{ pending() }} ครั้ง · {{ pendingCost() }} เพชร</button></footer>
 </dialog>

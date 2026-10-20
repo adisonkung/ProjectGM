@@ -1,0 +1,44 @@
+<dialog #stage class="scene" [class.grand]="grand()" [attr.data-phase]="phase()" aria-labelledby="scene-title" (cancel)="$event.preventDefault(); finish()">
+  <app-summon-sanctum />
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="light-stage" aria-hidden="true">
+    <div class="pillar-haze"></div><div class="pillar"></div><div class="altar-flare"></div>
+    <svg class="power-trails" viewBox="0 0 1280 720" preserveAspectRatio="none"><defs><linearGradient id="summon-energy"><stop stop-color="#bd8aff" stop-opacity="0"/><stop offset=".5" stop-color="#e3b4ff"/><stop offset="1" stop-color="#fff4b8"/></linearGradient></defs>
+      <path d="M0 500 C270 560 400 280 640 420 C880 560 1000 280 1280 210"/><path d="M0 180 C280 240 450 570 640 450 C850 330 1040 500 1280 430"/><path d="M410 0 C480 150 780 250 640 490 C560 610 740 640 850 720"/>
+    </svg>
+    <div class="motes">@for (m of motes; track $index) { <i [style.left.%]="m.x" [style.--delay]="m.delay + 's'" [style.--duration]="m.duration + 's'"></i> }</div>
+  </div>
+  @if (phase() === 'burst') {
+    <div class="flying-cards" aria-hidden="true">@for (c of flights(); track $index) {
+      <img [src]="cardBack(c.star)" [class.three-star]="c.star >= 3" alt="" [style.--x]="c.x + 'vw'" [style.--y]="c.y + 'vh'" [style.--tilt]="c.tilt + 'deg'" [style.animation-delay.s]="c.delay" />
+    }</div>
+  }
+  <header class="scene-heading"><span class="wordmark">SUMMON TOWER <small>DAWNMERE</small></span><button type="button" class="skip" (click)="finish()" autofocus>ข้าม <span>»</span></button></header>
+  @if (phase() === 'charge' || phase() === 'burst') {
+    <div class="intro-copy" role="status"><span>THE HEARTH OF DESTINY</span><h1 id="scene-title">{{ grand() ? 'แสงแห่งวีรชนกำลังตื่นขึ้น' : 'เสียงเรียกจากดวงดาว' }}</h1><p>การเดินทางครั้งใหม่กำลังเริ่มต้น</p></div>
+  }
+  @if (phase() === 'cards') {
+    <section class="reveal-layout"><header><span class="ornament">✦</span><h1 id="scene-title">การอัญเชิญ {{ results().length }} ครั้ง</h1><p>เลือกไพ่เพื่อพบกับวีรชนของคุณ · เหลือ {{ remaining() }} ใบ</p></header>
+      <div class="card-grid" [class.single]="results().length === 1">
+        @for (r of results(); track $index) {
+          <button type="button" class="sealed-card" [class.opened]="opened().has($index)" [class.rare]="opened().has($index) && r.star >= 3" [style.--order]="$index" (click)="reveal($index)" [disabled]="opened().has($index)" [attr.aria-label]="opened().has($index) ? r.name + ' เปิดแล้ว' : 'เปิดไพ่ใบที่ ' + ($index + 1)">
+            @if (opened().has($index)) { <app-hero-portrait [heroId]="r.templateId" [size]="88" /><b>{{ r.name }}</b><span>{{ '★'.repeat(r.star) }}</span> }
+            @else { <img [src]="cardBack(r.star)" [class.three-star]="r.star >= 3" alt="" draggable="false" /> }
+          </button>
+        }
+      </div>
+      <footer class="scene-actions"><button type="button" (click)="revealNext()">✧ เปิดทีละใบ</button><button type="button" class="primary" (click)="finish()">✦ เปิดทั้งหมด</button></footer>
+    </section>
+  }
+  @if (phase() === 'spotlight') {
+    @if (current(); as r) {
+      <section class="spotlight" [class.rare]="r.star >= 3" aria-labelledby="scene-title">
+        <div class="hero-art">@if (banner()) { <img [src]="banner()" alt="" /> } @else { <app-hero-portrait [heroId]="r.templateId" [size]="220" /> }</div>
+        <div class="hero-caption"><span class="rarity">{{ r.star }}★ HERO</span><h1 id="scene-title">{{ r.name }}</h1><p>{{ r.cls }}</p><div class="stars">{{ '★'.repeat(r.star) }}</div>
+          @if (r.isNew) { <strong class="new-tag">NEW · ฮีโร่ใหม่</strong> } @else if (r.memory) { <p>ตัวซ้ำ → Hero Memory +{{ r.memory }}</p> } @else { <p>6★ แล้ว → Universal Memory +{{ r.universal }}</p> }
+          <button type="button" class="primary continue" (click)="continue()">{{ remaining() ? 'เปิดไพ่ที่เหลือ' : 'ดูผลการอัญเชิญ' }} »</button>
+        </div>
+      </section>
+    }
+  }
+</dialog>

@@ -23,8 +23,14 @@ export class GachaComponent {
   private readonly gacha = inject(GachaService);
 
   readonly G = GACHA;
+  get freeSummons(): boolean { return this.gacha.freeSummons; }
+  canAfford(n: 1 | 10): boolean { return this.freeSummons || this.gems() >= (n === 10 ? GACHA.multi : GACHA.single); }
   readonly info = signal<'rates' | 'pool' | 'memory' | null>(null);
   readonly showResults = signal(false);
+  readonly pending = signal<1 | 10 | null>(null);
+  readonly confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>('confirmDialog');
+  readonly pendingCost = computed(() => this.pending() === 10 ? GACHA.multi : GACHA.single);
+  readonly lastCount = signal<1 | 10>(1);
   readonly pity = computed(() => this.save.state().pity ?? 0);
   readonly pool = HEROES.map(h => ({ ...h, portrait: heroArt(h.id)?.portrait, className: CLASS_NAME[h.cls] }));
   readonly preview = this.pool.slice(0, 5);
@@ -37,7 +43,7 @@ export class GachaComponent {
   }
   closeInfo(): void { this.infoDialog().nativeElement.close(); }
   openResults(): void {
-    if (!this.results().length || this.playing()) return;
+    if (!this.results().length || this.playing() || this.pending()) return;
     this.showResults.set(true);
     this.resultsDialog().nativeElement.showModal();
   }
@@ -56,7 +62,26 @@ export class GachaComponent {
   readonly error = signal<string | null>(null);
 
   summon(n: 1 | 10): void {
-    if (this.playing()) return;
+    if (this.playing() || this.pending()) return;
+    if (!this.canAfford(n)) {
+      this.error.set('เพชรไม่พอ');
+      return;
+    }
+    this.resultsDialog().nativeElement.close();
+    this.showResults.set(false);
+    this.error.set(null);
+    this.pending.set(n);
+    this.confirmDialog().nativeElement.showModal();
+  }
+  cancelSummon(): void {
+    this.pending.set(null);
+    this.confirmDialog().nativeElement.close();
+  }
+  confirmSummon(): void {
+    const n = this.pending();
+    if (!n || this.playing()) return;
+    // Consume the pending intent before spending; rapid clicks cannot repeat a transaction.
+    this.cancelSummon();
     const r = this.gacha.summon(n);
     if (!r) {
       this.error.set('เพชรไม่พอ');
@@ -66,7 +91,9 @@ export class GachaComponent {
     this.info.set(null);
     this.showResults.set(false);
     this.results.set(r.map(x => ({ ...x, name: HERO_BY_ID[x.templateId].name, cls: CLASS_NAME[HERO_BY_ID[x.templateId].cls] })));
+    this.lastCount.set(n);
     this.playing.set(true);
   }
+  readonly portrait = (id: string) => heroArt(id)?.portrait;
   readonly stars = (n: number) => '★'.repeat(n);
 }

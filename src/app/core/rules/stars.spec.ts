@@ -134,3 +134,29 @@ describe('Stars — rarity, development, Memory, gacha', () => {
     for (const t of Object.values(TOWER_REWARDS)) expect(t.clear.items?.some(i => i.itemId === UNIVERSAL_MEMORY) ?? false).toBeFalse();
   });
 });
+
+
+describe('Temporary free summons', () => {
+  it('allows singles and ten-pulls at zero gems without mutating the input save', () => {
+    for (const n of [1, 10] as const) {
+      const state = { ...newGameState(), gems: 0 };
+      const before = JSON.stringify(state);
+      const r = pull(state, n, mulberry32(24), { free: true })!;
+      expect(r.results.length).toBe(n);
+      expect(r.state.gems).toBe(0);
+      expect(JSON.stringify(state)).toBe(before);
+    }
+  });
+  it('keeps identical rewards, pity and hero progression to a paid pull with the same RNG', () => {
+    const s = { ...newGameState(), gems: 1000, pity: GACHA.pity - 1 };
+    const paid = pull(s, 10, mulberry32(73))!;
+    const free = pull(s, 10, mulberry32(73), { free: true })!;
+    expect(free.results).toEqual(paid.results);
+    expect(free.state).toEqual({ ...paid.state, gems: s.gems });
+  });
+  it('retains normal affordability and debit when free mode is absent or disabled', () => {
+    expect(pull({ ...newGameState(), gems: 0 }, 1)).toBeNull();
+    expect(pull({ ...newGameState(), gems: 0 }, 10, mulberry32(1), { free: false })).toBeNull();
+    expect(pull({ ...newGameState(), gems: 1000 }, 10, mulberry32(1), { free: false })!.state.gems).toBe(100);
+  });
+});

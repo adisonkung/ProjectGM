@@ -87,10 +87,10 @@ export function rollRarity(rng: () => number, pity: number, floor = 1): number {
 
 /**
  * n pulls (1 or 10). Spends gems, adds new heroes (Lv1, base star) or Memory for duplicates, updates pity.
- * null when the player can't afford it.
+ * null when the player can't afford it. Explicit free pulls retain the wallet and all normal reward/pity rules.
  */
-export function pull(s: GameState, n: 1 | 10, rng: () => number = Math.random): { state: GameState; results: PullResult[] } | null {
-  const cost = n === 10 ? GACHA.multi : GACHA.single * n;
+export function pull(s: GameState, n: 1 | 10, rng: () => number = Math.random, options: { free?: boolean } = {}): { state: GameState; results: PullResult[] } | null {
+  const cost = options.free ? 0 : n === 10 ? GACHA.multi : GACHA.single * n;
   if (s.gems < cost) return null;
   let state: GameState = { ...s, gems: s.gems - cost, heroes: [...s.heroes], heroMemory: { ...(s.heroMemory ?? {}) }, inventory: { ...s.inventory } };
   const results: PullResult[] = [];
