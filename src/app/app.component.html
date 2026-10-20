@@ -1,4 +1,4 @@
-<div class="app" [class.bare]="bare()" [class.fight]="fight()" [class.immersive]="immersive()">
+<div class="app" [class.bare]="bare()" [class.fight]="fight()" [class.immersive]="immersive()" [class.fantasy]="fantasy()" [class.collection]="collection()">
   @if (!bare()) {
     <header class="bar">
       <a class="brand" routerLink="/home" aria-label="Summon Tower — กลับเกาะ">
@@ -20,7 +20,7 @@
         </span>
         <span class="word">
           <b>Summon Tower</b>
-          <small>{{ immersive() ? 'KEEPERS OF THE SKY' : account.islandName() || 'Arcane Ascent' }}</small>
+          <small>{{ fantasy() ? 'KEEPERS OF THE SKY' : account.islandName() || 'Arcane Ascent' }}</small>
         </span>
       </a>
 

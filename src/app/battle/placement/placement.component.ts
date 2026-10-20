@@ -1,6 +1,6 @@
 import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, OnDestroy, signal } from '@angular/core';
 import { CLASS_NAME } from '../../core/data/classes';
 import { enemyInfo } from '../../core/data/enemies';
 import { MockVisual, mockVisualOf } from '../../core/data/visuals';
@@ -58,11 +58,14 @@ interface HeroView {
   templateUrl: './placement.component.html',
   styleUrl: './placement.component.scss',
 })
-export class PlacementComponent {
+export class PlacementComponent implements OnDestroy {
   private readonly team = inject(TeamService);
   private readonly roster = inject(RosterService);
 
-  /** ด่านที่ใช้แสดงตำแหน่งศัตรู (ไม่ใส่ = ครึ่งบนว่าง) */
+  /** Standalone editor crops to legal ally cells; battle preparation keeps both sides. */
+  readonly allyOnly = input(false);
+  readonly pendingCell = signal<AllyCell | null>(null);
+  /** ด่านที่ใช้แสดงตำแหน่งศัตรู */
   readonly stage = input<StageDef | null>(null);
   readonly background = computed(() => BACKGROUNDS[this.stage()?.background ?? ''] ?? null);
 
@@ -88,7 +91,7 @@ export class PlacementComponent {
     return map;
   });
 
-  /** ฮีโร่ในแต่ละช่อง คีย์ = r*7+c */
+  /** ฮีโร่ในแต่ละช่อง คีย์ = r*LANES+c */
   readonly occupied = computed(() => {
     const map = new Map<number, HeroView>();
     for (const s of this.team.slots()) {
@@ -128,6 +131,8 @@ export class PlacementComponent {
     return cells;
   });
 
+  ngOnDestroy(): void { clearTimeout(this.msgTimer); }
+
   private lastDrag = 0;
   private msgTimer?: ReturnType<typeof setTimeout>;
 
@@ -150,6 +155,7 @@ export class PlacementComponent {
   }
 
   dragStarted(uid: number): void {
+    this.pendingCell.set(null);
     this.selected.set(uid);
   }
 
@@ -160,10 +166,12 @@ export class PlacementComponent {
     const sel = this.selected();
     const here = this.at(cell);
     if (sel == null) {
-      if (here) this.selected.set(here.uid);
+      if (here) { this.pendingCell.set(null); this.selected.set(here.uid); }
+      else if (this.allyOnly()) this.pendingCell.set(cell);
       return;
     }
     if (here?.uid === sel) {
+      this.pendingCell.set(null);
       this.selected.set(null);
       return;
     }
@@ -173,6 +181,8 @@ export class PlacementComponent {
   tapHero(uid: number, ev: Event): void {
     ev.stopPropagation();
     if (this.justDragged()) return;
+    const destination = this.pendingCell();
+    if (destination) { this.placeAt(uid, destination); return; }
     this.selected.update(s => (s === uid ? null : uid));
   }
 
@@ -181,29 +191,33 @@ export class PlacementComponent {
     if (this.justDragged()) return;
     const sel = this.selected();
     if (sel != null && this.selectedInTeam()) this.team.remove(sel);
+    this.pendingCell.set(null);
     this.selected.set(null);
   }
 
   removeSelected(): void {
     const sel = this.selected();
     if (sel != null) this.team.remove(sel);
+    this.pendingCell.set(null);
     this.selected.set(null);
   }
 
   auto(): void {
     this.team.auto();
+    this.pendingCell.set(null);
     this.selected.set(null);
   }
 
   clear(): void {
     this.team.clear();
+    this.pendingCell.set(null);
     this.selected.set(null);
   }
 
   cellLabel(cell: AllyCell): string {
     const h = this.at(cell);
     const where = `เลน ${cell.c + 1} ลึก ${cell.r + 1}`;
-    return h ? `${where}: ${h.name} ${h.clsName}` : `${where}: ว่าง`;
+    return h ? `${where}: ${h.name} ${h.clsName}` : `${where}: ว่าง วางฮีโร่ได้`;
   }
 
   // ------------------------------------------------------------ ภายใน
@@ -215,6 +229,7 @@ export class PlacementComponent {
       this.flash(`ทีมเต็มแล้ว (${TEAM_SIZE} ตัว) ลากตัวใดตัวหนึ่งออกก่อน หรือวางทับเพื่อสลับ`);
       return;
     }
+    this.pendingCell.set(null);
     this.selected.set(null);
   }
 

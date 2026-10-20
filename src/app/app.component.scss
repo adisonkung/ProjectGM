@@ -129,7 +129,7 @@ main { margin-top: 18px; }
 .app.immersive main { margin-top: 0; }
 
 // Fantasy lobby: separate wordmark, six gilded navigation tiles and individual resource counters.
-.app.immersive .bar {
+.app.fantasy .bar {
   position: fixed; left: 0; right: 0; margin-inline: auto; backdrop-filter: none;
   top: 0; width: calc(100% - 40px); max-width: 1840px; padding: 0; min-height: 100px;
   grid-template-columns: minmax(180px, 1fr) auto minmax(235px, 1fr); gap: 24px;
@@ -172,7 +172,7 @@ main { margin-top: 18px; }
     outline: 1px solid #ac874759; outline-offset: 4px; }
 }
 @media (min-width: 721px) and (max-width: 1100px) {
-  .app.immersive .bar { width: calc(100% - 28px); grid-template-columns: minmax(130px, 1fr) auto minmax(180px, 1fr); gap: 14px;
+  .app.fantasy .bar { width: calc(100% - 28px); grid-template-columns: minmax(130px, 1fr) auto minmax(180px, 1fr); gap: 14px;
     .word b { font-size: 20px; } .crest-wrap { display: none; } .word small { font-size: 7px; letter-spacing: .14em; }
     .menu a { width: 58px; min-height: 80px; font-size: 13px; .nav-caption { font-size: 6px; } }
     .coin-row { padding: 5px 8px; gap: 5px; b { font-size: 13px; } }
@@ -181,8 +181,8 @@ main { margin-top: 18px; }
 }
 @media (max-width: 720px) {
   .app.immersive { padding: 0; }
-  .app.immersive .menu { backdrop-filter: none; }
-  .app.immersive .bar { top: 0; width: 100%; min-height: 77px; padding: 10px 16px; gap: 10px;
+  .app.fantasy .menu { backdrop-filter: none; }
+  .app.fantasy .bar { top: 0; width: 100%; min-height: 77px; padding: 10px 16px; gap: 10px;
     grid-template-columns: minmax(0, 1fr) auto;
     background: linear-gradient(180deg, #080f1bf7, #0b1322ed 80%, #0b1322c9); border-bottom: 1px solid #ae8c4b80;
     .brand { min-width: 0; } .crest-wrap { display: none; }
@@ -203,7 +203,7 @@ main { margin-top: 18px; }
     }
   }
 }
-@media (max-width: 360px) { .app.immersive .bar { padding-inline: 11px; gap: 6px;
+@media (max-width: 360px) { .app.fantasy .bar { padding-inline: 11px; gap: 6px;
   .word b { font-size: 14px; max-width: 85px; } .word small { display: none; }
   .coin-row { padding-inline: 6px; b { font-size: 13px; } } .purse { gap: 7px; }
 } }
@@ -213,4 +213,11 @@ main { margin-top: 18px; }
   .app.fight { padding: 0; max-width: none; }
   .app.fight .bar { display: none; }
   .app.fight main { margin-top: 0; }
+}
+
+// Scrolling collection pages keep the same chrome as the lobby.
+.app.collection { max-width: 1680px; padding: 120px 4.5% 48px; }
+.app.collection main { margin-top: 0; }
+@media (max-width: 720px) {
+  .app.collection { padding: 96px 16px calc(100px + env(safe-area-inset-bottom)); }
 }

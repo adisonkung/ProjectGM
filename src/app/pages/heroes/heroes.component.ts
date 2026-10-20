@@ -6,6 +6,7 @@ import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
+import { heroArt } from '../../core/data/hero-art';
 import { heroStar } from '../../core/rules/stars';
 
 export type HeroSort = 'power' | 'level' | 'star' | 'name';
@@ -25,6 +26,8 @@ export class HeroesComponent {
   readonly sorts: { id: HeroSort; label: string }[] = [
     { id: 'power', label: 'พลัง' }, { id: 'level', label: 'เลเวล' }, { id: 'star', label: 'ดาว' }, { id: 'name', label: 'ชื่อ' },
   ];
+  readonly layout = signal<'grid' | 'list'>('grid');
+  readonly classIcon = (c: HeroClass | 'all') => ({ all: 'heroes', tank: 'shield', fighter: 'sword', assassin: 'armory', archer: 'arrow', mage: 'star', healer: 'summon' })[c];
   readonly cls = signal<HeroClass | 'all'>('all');
   readonly sort = signal<HeroSort>('power');
 
@@ -39,7 +42,7 @@ export class HeroesComponent {
       const p = this.roster.progress(h);
       const skillReady = this.roster.skills(h).some(v => v.next && !v.blocked);
       return {
-        uid: h.uid, id: t.id, name: t.name, cls: t.cls, star: heroStar(h), level: h.level, cap: p.levelCap,
+        uid: h.uid, id: t.id, portrait: heroArt(t.id)?.portrait, name: t.name, cls: t.cls, star: heroStar(h), level: h.level, cap: p.levelCap,
         power: this.roster.power(h),
         inTeam: team.has(h.uid), training: slots.has(h.uid), isMain: h.uid === main,
         btReady: p.state === 'BREAKTHROUGH_READY', skillReady,

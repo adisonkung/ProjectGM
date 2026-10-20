@@ -1,31 +1,36 @@
-<div class="wrap" cdkDropListGroup>
+<div class="wrap" [class.own-team]="allyOnly()" cdkDropListGroup>
+  @if (allyOnly()) {
+    <div class="formation-labels" aria-hidden="true"><span><b>BACK</b>แนวหลัง · ระยะไกล</span><span><b>FRONT</b>แนวหน้า · ประชิด <i>→</i></span></div>
+  }
   <div class="board" [style.--cols]="cols" [style.--rows]="rows">
-    <app-field [bg]="background()" />
-    <!-- ฟอร์เมชัน: แถวหลัง | แถวหน้า (ฝั่งเรา) · แถวหน้า | แถวหลัง (ศัตรู) -->
-    <div class="lines" [style.top]="'calc(var(--cell) * ' + scenery + ')'">
-      <span class="div" [style.left]="'calc(var(--cell) * ' + frontDepth + ')'"></span>
-      <span class="div foe" [style.left]="'calc(var(--cell) * ' + (cols - frontDepth) + ')'"></span>
-      <b class="lbl" [style.left]="'calc(var(--cell) * ' + frontDepth / 2 + ')'">BACK</b>
-      <b class="lbl" [style.left]="'calc(var(--cell) * ' + frontDepth * 1.5 + ')'">FRONT</b>
-      <!-- โซนกลาง (NEUTRAL / BATTLE ZONE): วางตัวไม่ได้ เป็นพื้นที่ปะทะ -->
-      <span class="neutral" [style.left]="'calc(var(--cell) * ' + neutralStart + ')'" [style.width]="'calc(var(--cell) * ' + neutralCols + ')'"><b>NEUTRAL</b></span>
-    </div>
-    @for (cell of enemyCells(); track $index) {
-      <div class="cell enemy-half" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row + 1">
-        @if (cell.enemy; as e) {
-          <div class="unit foe" [title]="e.name">
-            <app-unit-sprite [cls]="e.cls" side="enemy" [sprite]="e.sprite" [boss]="e.boss" [mock]="e.mock" [flip]="true" />
-          </div>
-        }
+    @if (!allyOnly()) {
+      <app-field [bg]="background()" />
+      <!-- ฟอร์เมชัน: แถวหลัง | แถวหน้า (ฝั่งเรา) · แถวหน้า | แถวหลัง (ศัตรู) -->
+      <div class="lines" [style.top]="'calc(var(--cell) * ' + scenery + ')'">
+        <span class="div" [style.left]="'calc(var(--cell) * ' + frontDepth + ')'"></span>
+        <span class="div foe" [style.left]="'calc(var(--cell) * ' + (cols - frontDepth) + ')'"></span>
+        <b class="lbl" [style.left]="'calc(var(--cell) * ' + frontDepth / 2 + ')'">BACK</b>
+        <b class="lbl" [style.left]="'calc(var(--cell) * ' + frontDepth * 1.5 + ')'">FRONT</b>
+        <!-- โซนกลาง (NEUTRAL / BATTLE ZONE): วางตัวไม่ได้ เป็นพื้นที่ปะทะ -->
+        <span class="neutral" [style.left]="'calc(var(--cell) * ' + neutralStart + ')'" [style.width]="'calc(var(--cell) * ' + neutralCols + ')'"><b>NEUTRAL</b></span>
       </div>
+      @for (cell of enemyCells(); track $index) {
+        <div class="cell enemy-half" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row + 1">
+          @if (cell.enemy; as e) {
+            <div class="unit foe" [title]="e.name">
+              <app-unit-sprite [cls]="e.cls" side="enemy" [sprite]="e.sprite" [boss]="e.boss" [mock]="e.mock" [flip]="true" />
+            </div>
+          }
+        </div>
+      }
     }
 
     @for (cell of allyCells; track $index) {
-      <div class="cell ally" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row + 1" [class.target]="selected() !== null"
+      <div class="cell ally" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="allyOnly() ? cell.row - scenery : cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row + 1" [class.empty-slot]="!at(cell)" [class.chosen-slot]="pendingCell() === cell" [class.target]="selected() !== null"
            cdkDropList [cdkDropListData]="cell" cdkDropListSortingDisabled [cdkDropListEnterPredicate]="canEnterCell"
            (cdkDropListDropped)="dropOnCell($event)" (click)="tapCell(cell)"
            (keydown.enter)="tapCell(cell)" (keydown.space)="$event.preventDefault(); tapCell(cell)"
-           role="button" tabindex="0" [attr.aria-label]="cellLabel(cell)">
+           role="button" tabindex="0" [attr.aria-label]="cellLabel(cell)" [attr.aria-pressed]="pendingCell() === cell || (selected() !== null && selected() === at(cell)?.uid)">
         @if (at(cell); as h) {
           <div class="unit" cdkDrag [cdkDragData]="h.uid" (cdkDragStarted)="dragStarted(h.uid)"
                [class.selected]="selected() === h.uid">
@@ -33,6 +38,8 @@
             <span class="lv">{{ h.level }}</span>
             <span class="tag">{{ h.name }}</span>
           </div>
+        } @else if (allyOnly()) {
+          <span class="place-mark" aria-hidden="true"><b>+</b><small>วางฮีโร่</small></span>
         }
       </div>
     }
@@ -46,7 +53,7 @@
       <button type="button" (click)="removeSelected()">ถอดออก</button>
     }
     <button type="button" (click)="auto()">จัดอัตโนมัติ</button>
-    <button type="button" (click)="clear()" [disabled]="!count()">ล้าง</button>
+    <button type="button" (click)="clear()" [disabled]="!count()">ล้างทีม</button>
   </div>
 
   <p class="hint" aria-live="polite">
@@ -57,7 +64,8 @@
         <b>{{ h.name }}</b> · {{ h.clsName }} ★{{ h.star }} · Lv{{ h.level }} · ระยะ {{ h.range }} —
         {{ selectedInTeam() ? 'แตะช่องอื่นเพื่อย้าย/สลับ หรือแตะม้านั่งเพื่อถอด' : 'แตะช่องบนกระดานเพื่อวาง' }}
       } @else {
-        ลากฮีโร่ลงฝั่งซ้ายของกระดาน หรือแตะฮีโร่แล้วแตะช่อง
+        @if (pendingCell()) { เลือกช่องแล้ว · แตะฮีโร่ด้านล่างเพื่อวาง }
+        @else { {{ allyOnly() ? 'ช่อง + ทุกช่องวางฮีโร่ได้ · เลือกฮีโร่ด้านล่างแล้วแตะช่อง หรือลากลงช่อง' : 'ลากฮีโร่ลงฝั่งซ้ายของกระดาน หรือแตะฮีโร่แล้วแตะช่อง' }} }
       }
     }
   </p>

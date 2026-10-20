@@ -1,7 +1,9 @@
 <section class="forge">
   <header class="head">
     <div>
-      <h1 class="gm-title">โรงตีเหล็ก</h1>
+      <a class="back-link" routerLink="/armory"><app-icon name="back" [size]="16" /> กลับคลังอุปกรณ์</a>
+      <span class="eyebrow">THE CELESTIAL FORGE</span>
+      <h1 class="gm-title"><app-icon name="flame" [size]="31" /> โรงตีเหล็ก</h1>
       <p class="gm-sub">หลอมอุปกรณ์ใหม่จากเศษ · ตีบวกด้วย Enhancement Ore · ย่อยของที่ไม่ใช้เป็นวัตถุดิบ</p>
     </div>
     <div class="mats">
@@ -13,28 +15,29 @@
 
   <nav class="tabs" role="tablist" aria-label="โรงตีเหล็ก">
     @for (t of tabs; track t.id) {
-      <button type="button" role="tab" [attr.aria-selected]="tab() === t.id" [class.on]="tab() === t.id" (click)="setTab(t.id)">
-        <app-icon [name]="t.icon" [size]="18" /> {{ t.label }}
+      <button type="button" role="tab" [id]="'forge-tab-' + t.id" aria-controls="forge-panel" [attr.tabindex]="tab() === t.id ? 0 : -1" (keydown)="onTabKey($event)" [attr.aria-selected]="tab() === t.id" [class.on]="tab() === t.id" (click)="setTab(t.id)">
+        <app-icon [name]="t.icon" [size]="23" /><span>{{ t.label }}<small>{{ t.id === 'craft' ? 'CRAFT' : t.id === 'enhance' ? 'ENHANCE' : 'SALVAGE' }}</small></span>
       </button>
     }
   </nav>
 
   @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
 
+  <div id="forge-panel" role="tabpanel" [attr.aria-labelledby]="'forge-tab-' + tab()">
   @switch (tab()) {
     @case ('craft') {
       <div class="craft">
-        <section class="gm-panel steps">
-          <h2 class="gm-h2">1 · ระดับ</h2>
-          <div class="row">
+        <section class="equipment-panel steps">
+          <h2 class="gm-h2">1 · เลือกระดับความหายาก</h2>
+          <div class="rarities">
             @for (r of recipes; track r.rarity) {
               <button type="button" class="rar {{ r.rarity.toLowerCase() }}" [attr.aria-pressed]="craftRarity() === r.rarity" (click)="craftRarity.set(r.rarity)">
-                <b>{{ rarityName[r.rarity] }}</b><small>{{ r.fragments }} {{ itemName(r.fragmentId) }} · {{ r.gold }} ทอง</small>
+                <app-icon name="crystal" [size]="26" /><b>{{ rarityName[r.rarity] }}</b><small>{{ r.fragments }} {{ itemName(r.fragmentId) }} · {{ r.gold }} ทอง</small>
               </button>
             }
           </div>
-          <h2 class="gm-h2">2 · ประเภท</h2>
-          <div class="row">
+          <h2 class="gm-h2">2 · เลือกประเภทอุปกรณ์</h2>
+          <div class="slot-types">
             @for (s of slots; track s) {
               <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="slotFilter() === s" (click)="pickSlot(s)"><app-icon [name]="slotIcon[s]" [size]="13" /> {{ slotLabel[s] }}</button>
             }
@@ -46,21 +49,21 @@
               </button>
             }
           </div>
-          <h2 class="gm-h2">3 · ค่าหลัก</h2>
+          <h2 class="gm-h2">3 · เลือกค่าสถานะหลัก</h2>
           <div class="row">
             @for (m of mains(); track m) { <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="craftMain() === m" (click)="craftMain.set(m)">{{ statLabel(m) }}</button> }
           </div>
-          <p class="note">ค่ารองและ affix ยังสุ่มอยู่</p>
+          <p class="note"><app-icon name="star" [size]="14" /> ค่ารองและ affix จะถูกสุ่มเมื่อสร้างอุปกรณ์</p>
         </section>
 
-        <section class="gm-panel glow anvil">
-          <div class="sigil" aria-hidden="true"><app-icon name="flame" [size]="44" /></div>
-          <p class="pick r {{ craftRarity().toLowerCase() }}"><b class="nm">{{ rarityName[craftRarity()] }} {{ baseName() }}</b><small>ค่าหลัก {{ statLabel(craftMain()) }}</small></p>
-          <p class="cost">
-            <span [class.miss]="fragsHave() < recipe().fragments">{{ itemName(recipe().fragmentId) }} {{ fragsHave() }}/{{ recipe().fragments }}</span> ·
-            <span [class.miss]="gold() < recipe().gold">{{ recipe().gold }} ทอง</span>
+        <section class="equipment-panel anvil">
+          <div class="preview-gear"><app-equipment-art [definitionId]="craftBase()" [rarity]="craftRarity()" /></div>
+          <p class="pick r {{ craftRarity().toLowerCase() }}"><b class="nm">{{ rarityName[craftRarity()] }} {{ baseName() }}</b><small class="rarity-tag">{{ rarityName[craftRarity()] }} · {{ slotLabel[slotFilter()] }}</small><strong class="main-stat">{{ mainPreview() }}</strong></p>
+          <h3 class="cost-title">วัตถุดิบที่ต้องใช้</h3><p class="cost">
+            <span [class.miss]="fragsHave() < recipe().fragments"><app-icon name="crystal" [size]="24" /><b>{{ fragsHave() }} / {{ recipe().fragments }}</b><small>{{ itemName(recipe().fragmentId) }}</small></span>
+            <span [class.miss]="gold() < recipe().gold"><app-icon name="coin" [size]="24" /><b>{{ gold() }} / {{ recipe().gold }}</b><small>ทอง</small></span>
           </p>
-          <button type="button" class="gm-btn primary big" [disabled]="!canCraft()" (click)="craft()"><app-icon name="flame" [size]="16" /> หลอม</button>
+          <button type="button" class="gm-btn primary big" [disabled]="!canCraft()" (click)="craft()"><app-icon name="flame" [size]="16" /> หลอมสร้าง</button>
           @if (crafted(); as c) {
             <div class="result r {{ c.rarity.toLowerCase() }}">
               <small>ได้รับ</small>
@@ -75,7 +78,7 @@
     }
 
     @case ('enhance') {
-      <section class="gm-panel">
+      <section class="equipment-panel">
         <div class="row">
           @for (f of enhanceFilters; track f.id) {
             <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="enhanceSlot() === f.id" (click)="enhanceSlot.set(f.id)">{{ f.label }}</button>
@@ -85,7 +88,7 @@
           @for (x of enhanceList(); track x.item.instanceId) {
             @let it = x.item;
             <li class="r {{ it.rarity.toLowerCase() }}">
-              <span class="gi"><app-icon [name]="slotIconOf(it)" [size]="20" /></span>
+              <span class="gi"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /></span>
               <div class="info">
                 <b class="nm">{{ name(it) }} <small>/ +{{ cap(it) }}</small></b>
                 <small>{{ lines(it).join(' · ') }}</small>
@@ -104,12 +107,12 @@
     }
 
     @case ('salvage') {
-      <section class="gm-panel">
+      <section class="equipment-panel">
         <p class="note">ย่อยได้เฉพาะของในกระเป๋าที่ไม่ได้ล็อก (ของที่สวมอยู่ต้องถอดก่อน)</p>
         <ul class="items">
           @for (it of salvageList(); track it.instanceId) {
             <li class="r {{ it.rarity.toLowerCase() }}">
-              <span class="gi"><app-icon [name]="slotIconOf(it)" [size]="20" /></span>
+              <span class="gi"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /></span>
               <div class="info">
                 <b class="nm">{{ name(it) }}</b>
                 <small>ได้: {{ dismantleText(it) }}</small>
@@ -124,4 +127,5 @@
       </section>
     }
   }
+  </div>
 </section>

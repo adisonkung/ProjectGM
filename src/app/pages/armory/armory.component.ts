@@ -1,6 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
+import { heroArt } from '../../core/data/hero-art';
+import { CLASS_NAME } from '../../core/data/classes';
+import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 import { IconComponent } from '../../shared/icon.component';
 import { AFFIXES, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
 import { EquipmentInstance, EquipmentSlot, StatLine } from '../../core/models/equipment';
@@ -17,7 +20,7 @@ const ERR: Record<string, string> = {
 /** Equipment: hero gear (3 slots), bag with comparison, equip / unequip / lock / sell — crafting, enhancement and salvage live in the forge */
 @Component({
   selector: 'app-armory',
-  imports: [HeroPortraitComponent, IconComponent, RouterLink],
+  imports: [HeroPortraitComponent, IconComponent, EquipmentArtComponent, RouterLink],
   templateUrl: './armory.component.html',
   styleUrl: './armory.component.scss',
 })
@@ -36,11 +39,28 @@ export class ArmoryComponent {
   }
   readonly filter = signal<EquipmentSlot | 'ALL'>('ALL');
   readonly message = signal('');
+  readonly selectedId = signal<number | null>(null);
+  readonly sort = signal<'recent' | 'rarity' | 'upgrade'>('recent');
+  readonly className = CLASS_NAME;
+  readonly heroPortrait = computed(() => heroArt(this.hero()?.templateId ?? '')?.portrait);
   readonly hero = computed(() => this.save.state().heroes.find(h => h.uid === this.heroUid()) ?? null);
   readonly cls = computed(() => { const h = this.hero(); return h ? this.roster.template(h).cls : null; });
   readonly stats = computed(() => { const h = this.hero(); return h ? this.roster.stats(h) : null; });
   readonly totals = computed(() => { const h = this.hero(); return h ? heroGearTotals(h) : null; });
-  readonly bag = computed(() => this.eq.bag().filter(i => this.filter() === 'ALL' || slotOf(i) === this.filter()));
+  readonly bag = computed(() => {
+    const ranks = { COMMON: 0, UNCOMMON: 1, RARE: 2, ELITE: 3, EPIC: 4 };
+    return this.eq.bag().filter(i => this.filter() === 'ALL' || slotOf(i) === this.filter()).slice().sort((a, b) =>
+      (this.sort() === 'rarity' ? ranks[b.rarity] - ranks[a.rarity] : this.sort() === 'upgrade' ? b.upgradeLevel - a.upgradeLevel : 0) || b.instanceId - a.instanceId);
+  });
+  readonly selected = computed<EquipmentInstance | null>(() => {
+    const id = this.selectedId();
+    return this.bag().find(i => i.instanceId === id) ?? this.slots.map(s => this.hero()?.gear?.[s]).find(i => i?.instanceId === id) ?? this.bag()[0] ?? null;
+  });
+  readonly selectedWorn = computed(() => { const item = this.selected(); return !!item && this.slots.some(s => this.hero()?.gear?.[s]?.instanceId === item.instanceId); });
+  readonly slotOf = slotOf;
+  chooseSlot(slot: EquipmentSlot, item?: EquipmentInstance): void { this.filter.set(slot); this.selectedId.set(item?.instanceId ?? null); }
+  chooseFilter(slot: EquipmentSlot | 'ALL'): void { this.filter.set(slot); this.selectedId.set(null); }
+
   readonly gold = computed(() => this.save.state().gold);
 
   readonly name = itemName;
@@ -50,7 +70,7 @@ export class ArmoryComponent {
   readonly fmt = (l: StatLine) => `${STAT_LABEL[l.stat]} ${l.value >= 0 ? '+' : ''}${FLAT_STATS.includes(l.stat) ? l.value : (l.value * 100).toFixed(1) + ' %'}`;
   readonly usable = (i: EquipmentInstance) => { const c = this.cls(); return !!c && canEquip(c, i); };
   readonly slotLabel: Record<EquipmentSlot | 'ALL', string> = { ALL: 'ทั้งหมด', WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
-  readonly slotIcon: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
+  readonly slotIcon: Record<EquipmentSlot | 'ALL', string> = { ALL: 'heroes', WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
   readonly filters: (EquipmentSlot | 'ALL')[] = ['ALL', 'WEAPON', 'ARMOR', 'ACCESSORY'];
 
   compare(i: EquipmentInstance) {

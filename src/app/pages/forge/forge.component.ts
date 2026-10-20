@@ -5,10 +5,11 @@ import { ITEMS } from '../../core/data/economy';
 import { AFFIXES, CRAFT_RECIPES, EQUIPMENT_DEFS, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL, WEAPON_GROUP_OF } from '../../core/data/equipment';
 import { HeroClass } from '../../core/models/hero';
 import { EquipmentInstance, EquipmentSlot, EquipStat, Rarity, StatLine } from '../../core/models/equipment';
-import { dismantleRewards, itemLines, itemName, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
+import { dismantleRewards, mainBaseValue, itemLines, itemName, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
 import { EquipmentService } from '../../core/services/equipment.service';
 import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
+import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 import { IconComponent } from '../../shared/icon.component';
 
 export type ForgeTab = 'craft' | 'enhance' | 'salvage';
@@ -23,7 +24,7 @@ const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shie
 /** Blacksmith: targeted crafting, enhancement (+1, bag or equipped), salvage (dismantle bag items into materials) */
 @Component({
   selector: 'app-forge',
-  imports: [IconComponent, RouterLink],
+  imports: [IconComponent, EquipmentArtComponent, RouterLink],
   templateUrl: './forge.component.html',
   styleUrl: './forge.component.scss',
 })
@@ -65,6 +66,7 @@ export class ForgeComponent {
     return (this.save.state().inventory[r.fragmentId] ?? 0) >= r.fragments && this.gold() >= r.gold;
   });
   readonly fragsHave = computed(() => this.save.state().inventory[this.recipe().fragmentId] ?? 0);
+  readonly mainPreview = computed(() => this.fmt({ stat: this.craftMain(), value: mainBaseValue(EQUIPMENT_DEFS[this.craftBase()], this.craftMain(), this.craftRarity()) }));
   readonly baseName = computed(() => EQUIPMENT_DEFS[this.craftBase()]?.name ?? '');
   readonly crafted = signal<EquipmentInstance | null>(null);
   /** which classes wield a weapon base (armor / accessories: everyone) */
@@ -119,5 +121,13 @@ export class ForgeComponent {
   readonly affixName = (id?: string) => (id ? AFFIXES[id].name + ' — ' + AFFIXES[id].description : '');
   readonly dismantleText = (i: EquipmentInstance) => dismantleRewards(i).map(r => `${ITEMS[r.itemId].name} ×${r.count}`).join(', ');
   private say(err: string | null, ok: string) { this.message.set({ text: err ? ERR[err] ?? err : ok, ok: !err }); }
+  onTabKey(event: KeyboardEvent): void {
+    const index = this.tabs.findIndex(t => t.id === this.tab());
+    const next = event.key === 'ArrowRight' ? (index + 1) % this.tabs.length : event.key === 'ArrowLeft' ? (index + this.tabs.length - 1) % this.tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? this.tabs.length - 1 : -1;
+    if (next < 0) return;
+    event.preventDefault();
+    this.setTab(this.tabs[next].id);
+    (event.currentTarget as HTMLElement).closest('nav')?.querySelector<HTMLButtonElement>('#forge-tab-' + this.tab())?.focus();
+  }
   setTab(t: ForgeTab) { this.tab.set(t); this.message.set(null); }
 }
