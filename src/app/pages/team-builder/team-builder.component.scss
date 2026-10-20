@@ -1,9 +1,10 @@
 :host { display: block; position: relative; isolation: isolate; }
-:host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, #060c1540, #060c1566), url('/ui/formation-court.png') center / cover; }
-.team { display: grid; gap: 20px; max-width: 1440px; margin-inline: auto; }
-.head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; text-shadow: 0 2px 8px #000; }
-.eyebrow { font: 600 11px var(--title); letter-spacing: .24em; color: #e3cc9d; }
-.gm-title { font-size: clamp(28px, 3vw, 42px); color: #ffe2a0; }
-.gm-sub { color: #dfdbea; }
-.presets { display: grid; gap: 12px; background: #09101de8; border-color: #b99b62; box-shadow: inset 0 0 0 3px #b99b6212, 0 8px 24px #0006; }
-@media (max-width: 720px) { .presets { order: 2; } .team { gap: 14px; } .head .gm-btn { font-size: 12px; padding: 6px 10px; } }
+:host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, #070e201a 5%, #070e201a 40%, #050c1b99), url('/ui/formation-open-court.png') center / cover; }
+.team { display: grid; gap: 12px; max-width: 1480px; margin-inline: auto; }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-shadow: 0 2px 8px #000; }
+.eyebrow { font: 500 9px var(--title); letter-spacing: .3em; color: #d6bd88; }
+.gm-title { font-size: clamp(27px, 2.6vw, 39px); color: #ffe2a0; margin: 0; }
+.gm-sub { color: #e0d6e8; margin: 0; font-size: 12px; }
+.head .gm-btn { background: #0b1525b3; border-color: #b89b5d80; border-radius: 7px; font-size: 12px; padding: 8px 12px; }
+.presets { width: min(590px, 100%); min-width: 0; }
+@media (max-width: 720px) { .team { gap: 10px; } .presets { width: 100%; } .head .gm-btn { font-size: 11px; gap: 6px; padding: 7px 9px; } }

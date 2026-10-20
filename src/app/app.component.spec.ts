@@ -14,7 +14,7 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }, { path: 'gacha', component: NavigationTestPage }])],
+      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }, { path: 'gacha', component: NavigationTestPage }, { path: 'tower', component: NavigationTestPage }, { path: 'dungeons/:type', component: NavigationTestPage }])],
     }).compileComponents();
   });
 
@@ -53,6 +53,16 @@ describe('AppComponent', () => {
     expect(links()).toEqual(LOBBY_NAV.map(n => n.path));
     expect(fixture.componentInstance.immersive()).toBeFalse();
     expect(fixture.componentInstance.collection()).toBeTrue();
+  });
+
+  it('keeps adventure navigation active and document scrolling on tower and dungeon pages', async () => {
+    const fixture = TestBed.createComponent(AppComponent); fixture.detectChanges();
+    for (const route of ['/tower', '/dungeons/hunt']) {
+      await TestBed.inject(Router).navigateByUrl(route); fixture.detectChanges();
+      expect(fixture.componentInstance.fantasy()).toBeTrue();
+      expect(fixture.componentInstance.immersive()).toBeFalse();
+      expect(fixture.nativeElement.querySelector('nav a[aria-current="page"]').getAttribute('href')).toBe('/tower');
+    }
   });
 
   it('every page removed from the menu is still reachable from an island building', () => {

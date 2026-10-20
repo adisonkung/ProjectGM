@@ -34,7 +34,7 @@ export const LOBBY_NAV: NavItem[] = [
   { path: '/team', label: 'จัดทัพ', caption: 'FORMATION', icon: 'armory', match: ['/team'] },
   { path: '/armory', label: 'อุปกรณ์', caption: 'GEAR', icon: 'shield', match: ['/armory', '/forge'] },
   { path: '/gacha', label: 'อัญเชิญ', caption: 'SUMMON', icon: 'summon', match: ['/gacha'] },
-  { path: '/tower', label: 'ผจญภัย', caption: 'ADVENTURE', icon: 'tower', match: ['/tower'] },
+  { path: '/tower', label: 'ผจญภัย', caption: 'ADVENTURE', icon: 'tower', match: ['/tower', '/dungeons'] },
 ];
 
 @Component({
@@ -65,8 +65,8 @@ export class AppComponent {
   /** Home and summon sanctum fill the locked screen; chrome floats above the scene */
   readonly immersive = computed(() => /^\/(home|gacha)([?#]|$)/.test(this.url()));
 
-  /** Collection and formation share the lobby chrome but keep normal document scrolling. */
-  readonly collection = computed(() => /^\/(heroes|team|armory|forge)([?#]|$)/.test(this.url()));
+  /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
+  readonly collection = computed(() => /^\/(heroes|team|armory|forge)([?#]|$)/.test(this.url()) || /^\/(tower|dungeons)(\/|[?#]|$)/.test(this.url()));
   readonly fantasy = computed(() => this.immersive() || this.collection());
 
   readonly gems = computed(() => this.save.state().gems.toLocaleString('en-US'));

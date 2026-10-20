@@ -1,6 +1,10 @@
 <div class="wrap" [class.own-team]="allyOnly()" cdkDropListGroup>
   @if (allyOnly()) {
-    <div class="formation-labels" aria-hidden="true"><span><b>BACK</b>แนวหลัง · ระยะไกล</span><span><b>FRONT</b>แนวหน้า · ประชิด <i>→</i></span></div>
+    <div class="formation-overview">
+      <ng-content select="[formation-presets]" />
+      <div class="team-totals" aria-label="ภาพรวมทีม"><span><app-icon name="team" [size]="20" /><b>{{ count() }}</b><small>/ {{ teamSize }}</small></span><span><app-icon name="armory" [size]="20" />พลังทีม <b>{{ totalPower() }}</b></span></div>
+    </div>
+    <div class="formation-labels" aria-hidden="true"><span>แนวหลัง <small>/ BACK</small></span><span>แนวหน้า <small>/ FRONT</small></span></div>
   }
   <div class="board" [style.--cols]="cols" [style.--rows]="rows">
     @if (!allyOnly()) {
@@ -26,7 +30,7 @@
     }
 
     @for (cell of allyCells; track $index) {
-      <div class="cell ally" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="allyOnly() ? cell.row - scenery : cell.row" [style.grid-column]="cell.col" [style.z-index]="cell.row + 1" [class.empty-slot]="!at(cell)" [class.chosen-slot]="pendingCell() === cell" [class.target]="selected() !== null"
+      <div class="cell ally" [class.odd]="(cell.row + cell.col) % 2 === 1" [style.grid-row]="allyOnly() ? cell.row - scenery : cell.row" [style.grid-column]="cell.col" [style.z-index]="allyOnly() ? null : cell.row + 1" [style.--lane]="cell.c" [class.empty-slot]="!at(cell)" [class.chosen-slot]="pendingCell() === cell" [class.target]="selected() !== null"
            cdkDropList [cdkDropListData]="cell" cdkDropListSortingDisabled [cdkDropListEnterPredicate]="canEnterCell"
            (cdkDropListDropped)="dropOnCell($event)" (click)="tapCell(cell)"
            (keydown.enter)="tapCell(cell)" (keydown.space)="$event.preventDefault(); tapCell(cell)"
@@ -36,24 +40,29 @@
                [class.selected]="selected() === h.uid">
             <app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [star]="h.star" />
             <span class="lv">{{ h.level }}</span>
-            <span class="tag">{{ h.name }}</span>
+            <span class="tag">@if (allyOnly()) { <small>Lv.{{ h.level }}</small> }<b>{{ h.name }}</b>@if (allyOnly()) { <app-icon [name]="classIcon(h.cls)" [size]="12" /> }</span>
           </div>
         } @else if (allyOnly()) {
-          <span class="place-mark" aria-hidden="true"><b>+</b><small>วางฮีโร่</small></span>
+          <span class="place-mark" aria-hidden="true"><b>+</b></span>
         }
       </div>
     }
   </div>
 
   <div class="bar">
-    <span class="count" [class.full]="count() >= teamSize">ทีม <b>{{ count() }}</b>/{{ teamSize }}</span>
-    <span class="pow">พลัง <b>{{ totalPower() }}</b></span>
-    <span class="spacer"></span>
-    @if (selectedInTeam()) {
-      <button type="button" (click)="removeSelected()">ถอดออก</button>
+    @if (allyOnly()) {
+      <div class="class-filters" role="group" aria-label="กรองฮีโร่สำรองตามคลาส">
+        @for (cls of benchClasses; track cls) { <button type="button" [attr.aria-pressed]="benchClass() === cls" (click)="setBenchClass(cls)" [attr.aria-label]="benchClassName(cls)"><app-icon [name]="classIcon(cls)" [size]="15" /><span>{{ benchClassName(cls) }}</span><small>{{ benchClassCount(cls) }}</small></button> }
+      </div>
+      <label class="class-select"><app-icon [name]="classIcon(benchClass())" [size]="16" /><select aria-label="กรองคลาสฮีโร่สำรอง" [value]="benchClass()" (change)="setBenchClass($any($event.target).value)">@for (cls of benchClasses; track cls) { <option [value]="cls">{{ benchClassName(cls) }} ({{ benchClassCount(cls) }})</option> }</select></label>
+    } @else {
+      <span class="count" [class.full]="count() >= teamSize">ทีม <b>{{ count() }}</b>/{{ teamSize }}</span><span class="pow">พลัง <b>{{ totalPower() }}</b></span><span class="spacer"></span>
     }
-    <button type="button" (click)="auto()">จัดอัตโนมัติ</button>
-    <button type="button" (click)="clear()" [disabled]="!count()">ล้างทีม</button>
+    <div class="formation-actions">
+      @if (selectedInTeam() && !allyOnly()) { <button type="button" (click)="removeSelected()">ถอดออก</button> }
+      <button type="button" class="auto-action" (click)="auto()">@if (allyOnly()) { <app-icon name="team" [size]="16" /> }จัดอัตโนมัติ</button>
+      <button type="button" class="clear-action" aria-label="ล้างทีม" (click)="clear()" [disabled]="!count()">@if (allyOnly()) { <app-icon name="restart" [size]="15" /> }<span>ล้างทีม</span></button>
+    </div>
   </div>
 
   <p class="hint" aria-live="polite">
@@ -63,16 +72,18 @@
       @if (selectedHero(); as h) {
         <b>{{ h.name }}</b> · {{ h.clsName }} ★{{ h.star }} · Lv{{ h.level }} · ระยะ {{ h.range }} —
         {{ selectedInTeam() ? 'แตะช่องอื่นเพื่อย้าย/สลับ หรือแตะม้านั่งเพื่อถอด' : 'แตะช่องบนกระดานเพื่อวาง' }}
+        @if (allyOnly() && selectedInTeam()) { <button type="button" class="remove-action" (click)="removeSelected()">ถอดออก</button> }
       } @else {
         @if (pendingCell()) { เลือกช่องแล้ว · แตะฮีโร่ด้านล่างเพื่อวาง }
-        @else { {{ allyOnly() ? 'ช่อง + ทุกช่องวางฮีโร่ได้ · เลือกฮีโร่ด้านล่างแล้วแตะช่อง หรือลากลงช่อง' : 'ลากฮีโร่ลงฝั่งซ้ายของกระดาน หรือแตะฮีโร่แล้วแตะช่อง' }} }
+        @else { {{ allyOnly() ? 'เลือกฮีโร่ แล้วแตะวง + เพื่อวาง · ลากเพื่อย้ายหรือสลับตำแหน่ง' : 'ลากฮีโร่ลงฝั่งซ้ายของกระดาน หรือแตะฮีโร่แล้วแตะช่อง' }} }
       }
     }
   </p>
 
+  @if (allyOnly()) { <div class="bench-heading"><span><app-icon name="heroes" [size]="19" />ฮีโร่สำรอง</span><small>{{ filteredBench().length }} / {{ bench().length }} คน</small></div> }
   <div class="bench" cdkDropList cdkDropListOrientation="mixed" cdkDropListSortingDisabled
        (cdkDropListDropped)="dropOnBench($event)" (click)="tapBench()" [class.drop-out]="selectedInTeam()">
-    @for (h of bench(); track h.uid) {
+    @for (h of filteredBench(); track h.uid) {
       <button type="button" class="card" cdkDrag [cdkDragData]="h.uid"
               (cdkDragStarted)="dragStarted(h.uid)" (click)="tapHero(h.uid, $event)"
               [class.selected]="selected() === h.uid"
@@ -85,7 +96,7 @@
         </span>
       </button>
     } @empty {
-      <p class="empty">{{ selectedInTeam() ? 'แตะที่นี่เพื่อถอดออกจากทีม' : 'ฮีโร่ทุกตัวอยู่บนกระดานแล้ว · ลากมาไว้ตรงนี้เพื่อถอดออก' }}</p>
+      <p class="empty">{{ selectedInTeam() ? 'แตะที่นี่เพื่อถอดออกจากทีม' : bench().length ? 'ไม่มีฮีโร่สำรองคลาสนี้ · ลองเลือกคลาสอื่นหรือทั้งหมด' : 'ฮีโร่ทุกตัวอยู่บนกระดานแล้ว · ลากมาไว้ตรงนี้เพื่อถอดออก' }}</p>
     }
   </div>
 </div>

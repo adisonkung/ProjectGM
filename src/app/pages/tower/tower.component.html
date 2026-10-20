@@ -1,31 +1,36 @@
-<section class="tower">
+<app-adventure-scene kind="tower" />
+<section class="tower adventure">
   <header class="head">
-    <div>
-      <h1 class="gm-title">หอคอยอัญเชิญ</h1>
-      <p class="gm-sub">พิชิตแล้ว <b>{{ cleared() }}</b> / {{ floors.length }} ชั้น · ชนะแล้วฮีโร่ที่ลงสนามได้ EXP (เคลียร์ครั้งแรกได้โบนัส)</p>
-    </div>
+    <div class="heading"><span class="heading-crest" aria-hidden="true"><app-icon name="tower" [size]="27" /></span><div><span class="eyebrow">THE CELESTIAL SPIRE</span><h1 class="gm-title">หอคอยอัญเชิญ</h1><p class="gm-sub">ก้าวผ่านผู้พิทักษ์ สู่ยอดหอคอยเหนือหมู่เมฆ</p></div></div>
+    <div class="head-links"><a class="gm-btn" routerLink="/team"><app-icon name="team" [size]="16" /> จัดทัพ</a><a class="gm-btn" routerLink="/dungeons"><app-icon name="scroll" [size]="16" /> ดันเจี้ยน <app-icon name="arrow" [size]="14" /></a></div>
   </header>
-
-  <ol class="spire" aria-label="ชั้นของหอคอย">
-    @for (f of floorsDesc; track f.floor) {
-      <li [class.done]="f.floor <= cleared()" [class.next]="f.floor === cleared() + 1" [class.locked]="f.floor > cleared() + 1" [class.boss]="f.floor === 10 || f.floor === 7">
-        <span class="n">{{ f.floor }}</span>
-        <span class="name">{{ f.name }}<small>Lv{{ f.band.levels[0] }}–{{ f.band.levels[1] }} · {{ f.band.role }}</small></span>
-        <span class="exp">EXP {{ f.reward.clear.heroExp }}@if (f.floor > cleared()) { <em>+{{ f.reward.firstClear.heroExp }} ครั้งแรก</em> }</span>
+  <div class="tower-layout">
+    <div class="vista">
+      <div class="progress-badge"><app-icon name="tower" [size]="24" /><span>เส้นทางแห่งการพิชิต<b>{{ cleared() }} <small>/ {{ floors.length }} ชั้น</small></b><span class="progress-pips" aria-hidden="true">@for (floor of floors; track floor.floor) { <i [class.complete]="floor.floor <= cleared()"></i> }</span></span></div>
+      @let f = selected();
+      <article class="floor-preview frame" aria-label="รายละเอียดชั้นที่เลือก">
+        <span class="floor-watermark" aria-hidden="true">{{ f.floor < 10 ? '0' + f.floor : f.floor }}</span>
+        <span class="eyebrow">FLOOR {{ f.floor }} @if (f.floor === 7 || f.floor === 10) { · BOSS ENCOUNTER }</span>
+        <h2>{{ f.name }}</h2><p>Lv{{ f.band.levels[0] }}–{{ f.band.levels[1] }} · {{ f.band.role }}</p>
+        <div class="rewards"><span><app-icon name="heroes" [size]="17" /> EXP ฮีโร่ <b>{{ f.reward.clear.heroExp }}</b></span>@if (f.floor > cleared()) { <span class="first">ครั้งแรก <b>+{{ f.reward.firstClear.heroExp }} EXP</b></span> }</div>
         @if (f.floor <= cleared() + 1) {
-          <a class="gm-btn small" [class.primary]="f.floor === cleared() + 1" [routerLink]="['/battle']" [queryParams]="{ floor: f.floor, mode: 'tower' }">
-            {{ f.floor <= cleared() ? 'สู้อีก' : 'ท้าชิง' }}
-          </a>
-        } @else {
-          <span class="lock"><app-icon name="lock" [size]="14" /></span>
+          <a class="gm-btn primary enter" [routerLink]="['/battle']" [queryParams]="{floor: f.floor, mode: 'tower'}"><app-icon name="sword" [size]="18" /> {{ f.floor <= cleared() ? 'สู้อีกครั้ง' : 'ท้าชิงชั้น ' + f.floor }} <app-icon name="arrow" [size]="16" /></a>
+        } @else { <p class="locked-note"><app-icon name="lock" [size]="15" /> พิชิตชั้น {{ f.floor - 1 }} เพื่อปลดล็อก</p> }
+      </article>
+    </div>
+    <section class="floor-panel frame" aria-label="เลือกชั้นหอคอย">
+      <header class="frame-head"><div><span class="eyebrow">PATH OF ASCENSION</span><h2>เส้นทางหอคอย</h2></div><small>พิชิตแล้ว {{ cleared() }} / {{ floors.length }}</small></header>
+      <ol class="spire" aria-label="ชั้นของหอคอย">
+        @for (f of floorsDesc; track f.floor) {
+          <li [class.done]="f.floor <= cleared()" [class.next]="f.floor === cleared() + 1" [class.locked]="f.floor > cleared() + 1" [class.boss]="f.floor === 10 || f.floor === 7">
+            <button type="button" class="floor-select" [class.selected]="selected().floor === f.floor" [attr.aria-pressed]="selected().floor === f.floor" (click)="focusedFloor.set(f.floor)">
+              <span class="n"><b>{{ f.floor < 10 ? '0' + f.floor : f.floor }}</b></span><span class="name">{{ f.name }}<small>Lv{{ f.band.levels[0] }}–{{ f.band.levels[1] }} · @if (f.floor === 7 || f.floor === 10) { BOSS } @else { {{ f.band.role }} }</small></span>
+              <span class="status">@if (f.floor <= cleared()) { <app-icon name="star" [size]="16" /> ผ่านแล้ว } @else if (f.floor === cleared() + 1) { <span class="next-mark"></span> ท้าชิง } @else { <app-icon name="lock" [size]="15" /> }</span>
+            </button>
+          </li>
         }
-      </li>
-    }
-  </ol>
-
-  <a class="gm-panel more" routerLink="/dungeons">
-    <app-icon name="scroll" [size]="22" />
-    <span><b>ดันเจี้ยนฟาร์ม</b><small>Training · Ascension · Hunt · Skill Trial — ปลดล็อกตามชั้นที่ผ่าน</small></span>
-    <app-icon name="arrow" [size]="16" />
-  </a>
+      </ol>
+      <p class="floor-tip">เลือกชั้นเพื่อดูรายละเอียด · ฮีโร่ที่ลงสนามจะได้รับ EXP เมื่อชนะ</p>
+    </section>
+  </div>
 </section>

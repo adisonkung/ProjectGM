@@ -1,0 +1,20 @@
+:host { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; --light: #a58dff; }
+:host([data-scene='training']) { --light: #81caff; }
+:host([data-scene='ascension']) { --light: #ffd58c; }
+:host([data-scene='hunt']) { --light: #f9c66e; }
+:host([data-scene='trial']) { --light: #b49aff; }
+.landscape, .veil, .rays, .glow, .mist, .motes { position: absolute; inset: 0; }
+.landscape { background-position: 35% center; background-size: cover; transform: scale(1.04); filter: saturate(.8); }
+.veil { background: radial-gradient(ellipse at 28% 42%, transparent 15%, #050a1838 75%), linear-gradient(90deg, #080f2033, #080f201a 36%, #060d1aa6 85%), linear-gradient(0deg, #070c19f2, transparent 80%); }
+.rays { inset: -25%; background: conic-gradient(from 145deg at 35% 0%, transparent 0deg, #d5c1ff0c 10deg, transparent 18deg, #e5d5ff12 24deg, transparent 32deg); transform-origin: 35% 0; animation: ray-sway 18s ease-in-out infinite alternate; }
+.glow { background: radial-gradient(ellipse at 30% 40%, color-mix(in srgb, var(--light) 12%, transparent), transparent 48%); animation: light-breath 7s ease-in-out infinite alternate; }
+.mist { inset: 30% -20% -20%; background: radial-gradient(ellipse at 20% 70%, #b5b7f51c, transparent 40%), radial-gradient(ellipse at 70% 90%, color-mix(in srgb, var(--light) 16%, transparent), transparent 42%); animation: mist-drift 24s ease-in-out infinite alternate; }
+.mist-front { inset: 60% -25% -30%; opacity: .65; animation-duration: 33s; animation-direction: alternate-reverse; }
+.motes i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff1ce; box-shadow: 0 0 8px 2px var(--light); opacity: 0; animation: mote-rise 15s linear infinite; }
+@keyframes mist-drift { from { transform: translate3d(-4%, 2%, 0); } to { transform: translate3d(5%, -3%, 0); } }
+@keyframes ray-sway { from { transform: rotate(-3deg); opacity: .45; } to { transform: rotate(4deg); opacity: .9; } }
+@keyframes light-breath { from { opacity: .4; } to { opacity: 1; } }
+@keyframes mote-rise { 0% { opacity: 0; transform: translate3d(0, 35px, 0); } 20%, 70% { opacity: .7; } 100% { opacity: 0; transform: translate3d(24px, -100px, 0); } }
+:host(.paused) * { animation-play-state: paused !important; }
+@media (max-width: 720px) { .veil { background: linear-gradient(#060d2033, #050a16c9 65%, #050a16f0); } .motes i:nth-child(n+9) { display: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } .motes { display: none; } .glow, .rays { opacity: .45; } }

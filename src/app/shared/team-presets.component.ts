@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { TeamService } from '../core/services/team.service';
 import { IconComponent } from './icon.component';
 import { HeroPortraitComponent } from './hero-portrait.component';
@@ -7,6 +7,7 @@ import { SaveService } from '../core/services/save.service';
 /** three saved team setups: load (one tap), save the current placement over one, rename */
 @Component({
   selector: 'app-team-presets',
+  host: { '[class.compact]': 'compact()' },
   imports: [IconComponent, HeroPortraitComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -55,10 +56,22 @@ import { SaveService } from '../core/services/save.service';
     .name-in { flex: 1; min-width: 0; font: 600 13px var(--body); color: var(--text); background: #0008; border: 1px solid var(--gold); border-radius: 8px; padding: 4px 8px; }
     .ok { position: absolute; right: 8px; top: -9px; font: 600 10px var(--body); font-style: normal; color: #9fe6b6; background: #10251a; border: 1px solid #56c07a80; padding: 0 6px; border-radius: 99px; animation: fade 1.6s forwards; }
     @keyframes fade { 70% { opacity: 1; } to { opacity: 0; } }
+    :host(.compact) { display: block; min-width: 0; }
+    :host(.compact) .presets { gap: 8px; }
+    :host(.compact) .preset { border-radius: 7px; background: #091326d6; padding: 3px; }
+    :host(.compact) .preset.active { background: linear-gradient(120deg, #ab82422b, #101a32e8); }
+    :host(.compact) .load { padding: 6px 8px; }
+    :host(.compact) .name { font-size: 13px; }
+    :host(.compact) .faces { display: none; }
+    :host(.compact) .tools { display: flex; gap: 1px; align-items: center; }
+    :host(.compact) .ico { width: 25px; height: 29px; border-color: transparent; background: none; }
+    :host(.compact) .name-in { width: 45px; }
+    @media (max-width: 560px) { :host(.compact) .presets { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; } :host(.compact) .load { padding: 5px; } :host(.compact) .tools { display: grid; } :host(.compact) .ico { width: 22px; height: 22px; } }
     @media (max-width: 560px) { .presets { grid-template-columns: 1fr; } }
   `],
 })
 export class TeamPresetsComponent {
+  readonly compact = input(false);
   readonly team = inject(TeamService);
   private readonly save = inject(SaveService);
   readonly editing = signal<number | null>(null);

@@ -1,8 +1,9 @@
 @let t = type();
-<section class="dungeons">
+<app-adventure-scene [kind]="t.id" />
+<section class="dungeons adventure">
   <header class="head">
-    <h1 class="gm-title">ดันเจี้ยน</h1>
-    <p class="gm-sub">ด่านฟาร์มแยกตามประเภท แต่ละแบบมีกติกาของตัวเอง · โบนัสรายวัน ×1.5 หมดแล้วยังเล่นได้ (Training 55% · อื่น ๆ 60%)</p>
+    <div class="heading"><span class="heading-crest" aria-hidden="true"><app-icon name="scroll" [size]="27" /></span><div><span class="eyebrow">REALMS OF ADVENTURE</span><h1 class="gm-title">ดันเจี้ยน</h1><p class="gm-sub">เลือกเส้นทางท้าทาย เพื่อเสริมพลังให้ทีมของคุณ</p></div></div>
+    <div class="head-links"><a class="gm-btn" routerLink="/team"><app-icon name="team" [size]="16" /> จัดทัพ</a><a class="gm-btn" routerLink="/tower"><app-icon name="tower" [size]="16" /> หอคอย <app-icon name="arrow" [size]="14" /></a></div>
   </header>
 
   <nav class="types" aria-label="ประเภทดันเจี้ยน">
@@ -16,24 +17,30 @@
     }
   </nav>
 
-  <article class="hero gm-panel glow {{ t.tone }}">
-    <span class="big"><app-icon [name]="t.icon" [size]="40" /></span>
+  <div class="dungeon-layout {{ t.tone }}">
+  <article class="hero">
+    <div class="realm-emblem" aria-hidden="true"><span class="big">
+      <svg class="sigil" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="90" /><circle cx="100" cy="100" r="82" stroke-dasharray="1 7" /><circle cx="100" cy="100" r="68" /><path d="m100 4 14 22-14 16-14-16z m0 154 14 16-14 22-14-22z M4 100l22-14 16 14-16 14z m154 0 16-14 22 14-22 14z M45 45l110 110M45 155 155 45" /><path d="m100 39 61 61-61 61-61-61z" /></svg>
+      <app-icon [name]="t.icon" [size]="43" />
+    </span><span class="realm-caption">{{ t.name }}</span></div>
     <div class="txt">
-      <small class="gm-class">{{ t.mode }}</small>
+      <small class="eyebrow">{{ t.mode }}</small>
       <h2>{{ t.name }}</h2>
       <p>{{ t.blurb }}</p>
-      <ul>@for (r of t.rules; track r) { <li>{{ r }}</li> }</ul>
+      <details class="rules"><summary>กติกาการท้าทาย</summary><ul>@for (r of t.rules; track r) { <li>{{ r }}</li> }</ul></details>
     </div>
     <div class="meta">
-      <small>โบนัสวันนี้</small>
+      <small>โบนัสรางวัลวันนี้ ×1.5</small>
       <span class="pips">@for (on of bonus().pips; track $index) { <i [class.on]="on"></i> }</span>
       <b>{{ bonus().left }}/{{ bonus().max }}</b>
       <small class="rw">ได้: {{ t.reward }}</small>
     </div>
   </article>
 
+  <section class="tier-panel frame" aria-label="เลือกระดับดันเจี้ยน">
+  <header class="frame-head"><div><span class="eyebrow">CHOOSE YOUR CHALLENGE</span><h2>เลือกระดับความท้าทาย</h2></div><small>{{ tiers().length }} ระดับ</small></header>
   @if (t.id === 'ascension') {
-    <section class="gm-panel target guardians">
+    <section class="target guardians">
       <span><b>ผู้พิทักษ์ประจำวัน</b><small>สลับตัวตามวันในสัปดาห์</small></span>
       <div class="row">
         @for (g of guardians; track g.id) {
@@ -44,7 +51,7 @@
   }
 
   @if (t.id === 'hunt') {
-    <section class="gm-panel target">
+    <section class="target">
       <span><b>เป้าหมาย Hunt</b><small>ช่องที่ดรอปบ่อยขึ้น</small></span>
       <div class="row">
         @for (x of targets; track x) {
@@ -56,8 +63,8 @@
 
   <ul class="tiers">
     @for (d of tiers(); track d.id) {
-      <li class="tier gm-panel {{ t.tone }}" [class.locked]="!open(d)">
-        <span class="rn">{{ roman(d) }}</span>
+      <li class="tier {{ t.tone }}" [class.locked]="!open(d)">
+        <span class="rn"><small>TIER</small><b>{{ roman(d) }}</b></span>
         <div class="body">
           <b>{{ d.name }} <small>Lv{{ d.recommendedLevel[0] }}–{{ d.recommendedLevel[1] }}</small></b>
           <span class="goal">{{ d.stage.special?.goal }}</span>
@@ -84,4 +91,7 @@
       </li>
     }
   </ul>
+  <p class="repeat-note">โบนัสหมดแล้วยังเล่นได้ · รางวัลหลังโบนัส: Training 55% · อื่น ๆ 60%</p>
+  </section>
+  </div>
 </section>
