@@ -1,15 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { GACHA } from '../../core/data/stars';
+import { GachaService } from '../../core/services/gacha.service';
 import { SaveService } from '../../core/services/save.service';
 import { GachaComponent } from './gacha.component';
 
 describe('Summon sanctum transactions', () => {
+  let freeMode: jasmine.Spy;
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({ imports: [GachaComponent], providers: [provideRouter([])] });
     // Exercise actual services and page transaction flow without running decorative/cinematic loops.
     TestBed.overrideComponent(GachaComponent, { set: { template: '<dialog #infoDialog></dialog><dialog #resultsDialog></dialog><dialog #confirmDialog></dialog>', imports: [] } });
+    freeMode = spyOnProperty(TestBed.inject(GachaService), 'freeSummons', 'get').and.returnValue(false);
   });
 
   it('charges once while the cinematic plays, then opens results without another pull', () => {
@@ -29,6 +32,27 @@ describe('Summon sanctum transactions', () => {
     expect(c.resultsDialog().nativeElement.open).toBeTrue();
     expect(save.state().gems).toBe(before - GACHA.multi);
     c.resultsDialog().nativeElement.close();
+    f.destroy();
+  });
+
+  it('free test mode accepts repeated zero-gem pulls and prevents double-confirm rewards', () => {
+    freeMode.and.returnValue(true);
+    const f = TestBed.createComponent(GachaComponent);
+    f.detectChanges();
+    const c = f.componentInstance, save = TestBed.inject(SaveService);
+    save.update(s => ({ ...s, gems: 0 }));
+    c.summon(10); c.confirmSummon();
+    const after = JSON.stringify(save.state());
+    c.confirmSummon(); c.summon(10);
+    expect(JSON.stringify(save.state())).toBe(after);
+    expect(c.results().length).toBe(10);
+    expect(save.state().gems).toBe(0);
+    c.finishSummon();
+    c.summon(1); c.confirmSummon();
+    expect(c.results().length).toBe(1);
+    expect(c.playing()).toBeTrue();
+    expect(save.state().gems).toBe(0);
+    expect(c.error()).toBeNull();
     f.destroy();
   });
 
@@ -81,10 +105,12 @@ describe('Summon sanctum transactions', () => {
 describe('GachaComponent', () => {
   let component: GachaComponent;
   let fixture: ComponentFixture<GachaComponent>;
+  let freeMode: jasmine.Spy;
 
   beforeEach(async () => {
     localStorage.clear();
     await TestBed.configureTestingModule({ imports: [GachaComponent], providers: [provideRouter([])] }).compileComponents();
+    freeMode = spyOnProperty(TestBed.inject(GachaService), 'freeSummons', 'get').and.returnValue(false);
     TestBed.inject(SaveService).reset();
     fixture = TestBed.createComponent(GachaComponent);
     component = fixture.componentInstance;
@@ -107,6 +133,23 @@ describe('GachaComponent', () => {
     expect(res.every(r => r.star >= 1 && r.star <= 3)).toBeTrue();
     expect(res.some(r => r.star >= 2)).toBeTrue();
     expect((fixture.nativeElement as HTMLElement).querySelectorAll('.res').length).toBe(10);
+  });
+
+  it('shows original prices and enables both buttons at zero gems in free test mode', () => {
+    freeMode.and.returnValue(true);
+    TestBed.inject(SaveService).update(s => ({ ...s, gems: 0 }));
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const buttons = [...el.querySelectorAll<HTMLButtonElement>('.summon-button')];
+    expect(buttons.every(b => !b.disabled)).toBeTrue();
+    expect(buttons[0].querySelector('.price')?.textContent).toContain(String(GACHA.single));
+    expect(buttons[1].querySelector('.price')?.textContent).toContain(String(GACHA.multi));
+    component.summon(10); fixture.detectChanges();
+    expect(el.querySelector('.confirm-wallet')?.textContent).toContain('ราคาเดิม');
+    expect(el.querySelector('.confirm-wallet')?.textContent).toContain(String(GACHA.multi));
+    expect(el.querySelector('.confirm-note')?.textContent).toContain('ไม่หักเพชร');
+    expect(el.querySelector<HTMLButtonElement>('.confirm-actions .primary')?.disabled).toBeFalse();
+    component.cancelSummon();
   });
 
   it('not enough gems → error, nothing spent', () => {

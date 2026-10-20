@@ -23,6 +23,8 @@ export class GachaComponent {
   private readonly gacha = inject(GachaService);
 
   readonly G = GACHA;
+  get freeSummons(): boolean { return this.gacha.freeSummons; }
+  canAfford(n: 1 | 10): boolean { return this.freeSummons || this.gems() >= (n === 10 ? GACHA.multi : GACHA.single); }
   readonly info = signal<'rates' | 'pool' | 'memory' | null>(null);
   readonly showResults = signal(false);
   readonly pending = signal<1 | 10 | null>(null);
@@ -61,7 +63,7 @@ export class GachaComponent {
 
   summon(n: 1 | 10): void {
     if (this.playing() || this.pending()) return;
-    if (this.gems() < (n === 10 ? GACHA.multi : GACHA.single)) {
+    if (!this.canAfford(n)) {
       this.error.set('เพชรไม่พอ');
       return;
     }
