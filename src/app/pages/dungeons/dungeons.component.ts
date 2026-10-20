@@ -9,6 +9,7 @@ import { FarmDungeonDefinition } from '../../core/models/economy';
 import { EquipmentService } from '../../core/services/equipment.service';
 import { ProgressionService } from '../../core/services/progression.service';
 import { SaveService } from '../../core/services/save.service';
+import { AdventureSceneComponent } from '../../shared/adventure-scene.component';
 import { IconComponent } from '../../shared/icon.component';
 
 /** one farm dungeon family = one menu (its own page, own mode) */
@@ -54,7 +55,7 @@ export const DUNGEON_TYPES: DungeonType[] = [
 /** Farm dungeons menu: one tab per dungeon type, each with its tiers (I–V) */
 @Component({
   selector: 'app-dungeons',
-  imports: [RouterLink, IconComponent],
+  imports: [RouterLink, IconComponent, AdventureSceneComponent],
   templateUrl: './dungeons.component.html',
   styleUrl: './dungeons.component.scss',
 })

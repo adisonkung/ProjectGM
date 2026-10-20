@@ -77,6 +77,38 @@ describe('TeamBuilderComponent', () => {
     expect(save.state().team.some(t => t.uid === bench.uid)).toBeTrue();
   });
 
+  it('class filters affect reserves without altering deployed heroes or the save', () => {
+    const editor = fixture.debugElement.query(By.directive(PlacementComponent)).componentInstance as PlacementComponent;
+    const save = TestBed.inject(SaveService), before = save.state();
+    const reserve = editor.bench().find(h => h.cls === 'fighter')!;
+    editor.tapHero(reserve.uid, new Event('click'));
+    editor.setBenchClass('tank'); fixture.detectChanges();
+    expect(editor.selected()).toBeNull();
+    expect(editor.filteredBench().length).toBe(1);
+    expect(editor.filteredBench().every(h => h.cls === 'tank')).toBeTrue();
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('.bench .card').length).toBe(1);
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('.cell .unit').length).toBe(5);
+    expect(save.state()).toBe(before);
+    const emptyClass = editor.benchClasses.find(c => c !== 'all' && editor.benchClassCount(c) === 0)!;
+    editor.setBenchClass(emptyClass); fixture.detectChanges();
+    expect(editor.filteredBench().length).toBe(0);
+    expect((fixture.nativeElement as HTMLElement).querySelector('.bench .empty')!.textContent).toContain('ไม่มีฮีโร่สำรองคลาสนี้');
+  });
+
+  it('keeps deployed selection and full-roster auto placement available while filtered', () => {
+    const editor = fixture.debugElement.query(By.directive(PlacementComponent)).componentInstance as PlacementComponent;
+    const occupied = editor.allyCells.find(c => editor.at(c))!;
+    editor.tapCell(occupied); const uid = editor.selected();
+    editor.setBenchClass('mage');
+    expect(editor.selected()).toBe(uid);
+    expect(editor.selectedInTeam()).toBeTrue();
+    editor.clear(); editor.auto(); fixture.detectChanges();
+    expect(editor.count()).toBe(5);
+    expect(editor.filteredBench().every(h => h.cls === 'mage')).toBeTrue();
+    editor.setBenchClass('all');
+    expect(editor.filteredBench().length).toBe(TestBed.inject(SaveService).state().heroes.length - 5);
+  });
+
   it('tap a hero then tap an empty cell to move it', () => {
     const el: HTMLElement = fixture.nativeElement;
     const cells = el.querySelectorAll<HTMLElement>('.cell.ally');

@@ -12,6 +12,7 @@ import { RosterService } from '../../core/services/roster.service';
 import { TeamService } from '../../core/services/team.service';
 import { BOARD_COLS, BOARD_ROWS, FRONT_DEPTH, NEUTRAL_COLS, SCENERY_ROWS, toBoard } from '../engine/grid';
 import { FieldComponent } from '../field/field.component';
+import { IconComponent } from '../../shared/icon.component';
 import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
 
 /** ช่องในฝั่งเรา (r = ความลึก 0 หน้าสุด ติดเส้นกลาง, c = เลน) พร้อมตำแหน่งบนกระดาน */
@@ -54,7 +55,7 @@ interface HeroView {
  */
 @Component({
   selector: 'app-placement',
-  imports: [CdkDropListGroup, CdkDropList, CdkDrag, UnitSpriteComponent, FieldComponent],
+  imports: [CdkDropListGroup, CdkDropList, CdkDrag, UnitSpriteComponent, FieldComponent, IconComponent],
   templateUrl: './placement.component.html',
   styleUrl: './placement.component.scss',
 })
@@ -107,6 +108,18 @@ export class PlacementComponent implements OnDestroy {
       .filter(h => !inTeam.has(h.uid))
       .sort((a, b) => b.star - a.star || b.power - a.power);
   });
+
+  readonly benchClass = signal<HeroClass | 'all'>('all');
+  readonly benchClasses: (HeroClass | 'all')[] = ['all', 'tank', 'fighter', 'assassin', 'archer', 'mage', 'healer'];
+  readonly benchClassName = (cls: HeroClass | 'all') => cls === 'all' ? 'ทั้งหมด' : CLASS_NAME[cls];
+  readonly classIcon = (cls: HeroClass | 'all') => ({ all: 'heroes', tank: 'shield', fighter: 'sword', assassin: 'armory', archer: 'arrow', mage: 'star', healer: 'summon' })[cls];
+  readonly benchClassCount = (cls: HeroClass | 'all') => cls === 'all' ? this.bench().length : this.bench().filter(h => h.cls === cls).length;
+  readonly filteredBench = computed(() => this.bench().filter(h => !this.allyOnly() || this.benchClass() === 'all' || h.cls === this.benchClass()));
+  setBenchClass(cls: HeroClass | 'all'): void {
+    this.benchClass.set(cls);
+    // A selected reserve must remain visible. Moving a deployed hero stays available across filters.
+    if (this.selectedHero() && !this.selectedInTeam() && cls !== 'all' && this.selectedHero()!.cls !== cls) this.selected.set(null);
+  }
 
   readonly count = computed(() => this.team.slots().length);
   readonly totalPower = computed(() => this.team.slots().reduce((a, s) => a + (this.heroes().get(s.uid)?.power ?? 0), 0));
