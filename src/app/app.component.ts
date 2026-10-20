@@ -27,12 +27,12 @@ export const MAIN_NAV: NavItem[] = [
   { path: '/gacha', label: 'อัญเชิญ', icon: 'summon', match: ['/gacha'] },
 ];
 
-/** The lobby exposes existing F0 routes; other screens retain their compact core navigation. */
+/** The lobby and collection pages expose existing F0 routes; other screens retain compact navigation. */
 export const LOBBY_NAV: NavItem[] = [
   { path: '/home', label: 'หน้าหลัก', caption: 'HOME', icon: 'home', match: ['/home'] },
   { path: '/heroes', label: 'ฮีโร่', caption: 'HEROES', icon: 'heroes', match: ['/heroes'] },
   { path: '/team', label: 'จัดทัพ', caption: 'FORMATION', icon: 'armory', match: ['/team'] },
-  { path: '/armory', label: 'อุปกรณ์', caption: 'GEAR', icon: 'shield', match: ['/armory'] },
+  { path: '/armory', label: 'อุปกรณ์', caption: 'GEAR', icon: 'shield', match: ['/armory', '/forge'] },
   { path: '/gacha', label: 'อัญเชิญ', caption: 'SUMMON', icon: 'summon', match: ['/gacha'] },
   { path: '/tower', label: 'ผจญภัย', caption: 'ADVENTURE', icon: 'tower', match: ['/tower'] },
 ];
@@ -47,7 +47,7 @@ export class AppComponent {
   readonly save = inject(SaveService);
   readonly account = inject(AccountService);
   private readonly router = inject(Router);
-  readonly nav = computed(() => this.immersive() ? LOBBY_NAV : MAIN_NAV);
+  readonly nav = computed(() => this.fantasy() ? LOBBY_NAV : MAIN_NAV);
 
   private readonly url = toSignal(
     this.router.events.pipe(filter(e => e instanceof NavigationEnd), map(e => (e as NavigationEnd).urlAfterRedirects)),
@@ -64,6 +64,10 @@ export class AppComponent {
   readonly onAccount = computed(() => this.url().startsWith('/account'));
   /** Home and summon sanctum fill the locked screen; chrome floats above the scene */
   readonly immersive = computed(() => /^\/(home|gacha)([?#]|$)/.test(this.url()));
+
+  /** Collection and formation share the lobby chrome but keep normal document scrolling. */
+  readonly collection = computed(() => /^\/(heroes|team|armory|forge)([?#]|$)/.test(this.url()));
+  readonly fantasy = computed(() => this.immersive() || this.collection());
 
   readonly gems = computed(() => this.save.state().gems.toLocaleString('en-US'));
   readonly gold = computed(() => this.save.state().gold.toLocaleString('en-US'));

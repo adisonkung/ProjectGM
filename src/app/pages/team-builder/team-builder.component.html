@@ -1,33 +1,15 @@
 <section class="team">
   <header class="head">
     <div>
+      <span class="eyebrow">YOUR FORMATION</span>
       <h1 class="gm-title">จัดทัพ</h1>
-      <p class="gm-sub">วางฮีโร่ได้ 5 ตัว · แถวหน้าโดนสายประชิดตีก่อน · แถวหลังปลอดภัยกว่า แต่นักฆ่าจะพุ่งหา</p>
+      <p class="gm-sub">จัดทีมของคุณได้สูงสุด 5 คน · เลือกฮีโร่แล้วแตะช่อง + หรือเลือกช่องก่อนเลือกฮีโร่</p>
     </div>
-    <div class="cta">
-      @if (canRun()) {
-        <a class="gm-btn primary" routerLink="/battle" [queryParams]="{ floor: floor(), mode: 'tower' }"><app-icon name="sword" [size]="15" /> ท้าชิงชั้น {{ floor() }}</a>
-      }
-      <a class="gm-btn small ghost" routerLink="/lab" [queryParams]="{ floor: floor() }"><app-icon name="lab" [size]="14" /> ทดลองสู้</a>
-    </div>
+    <a class="gm-btn ghost" routerLink="/tower"><app-icon name="tower" [size]="17" /> ไปหอคอย</a>
   </header>
-
   <section class="gm-panel presets">
     <h2 class="gm-h2">ทีมที่บันทึกไว้</h2>
     <app-team-presets />
   </section>
-
-  <div class="floors" role="group" aria-label="ดูศัตรูของชั้น">
-    <span>ศัตรูชั้น</span>
-    @for (s of stages; track s.floor) {
-      <button type="button" [attr.aria-pressed]="floor() === s.floor" [class.surv]="s.mode === 'survive'"
-              (click)="floor.set(s.floor)">{{ s.floor }}</button>
-    }
-  </div>
-  <p class="mode" [class.surv]="stage().mode === 'survive'">
-    <b>{{ stage().name }}</b> ·
-    {{ stage().mode === 'eliminate' ? 'กำจัดศัตรู ' + (1 + (stage().rounds?.length ?? 0)) + ' เวฟ (ภาพนี้คือเวฟแรก)' : 'เอาตัวรอด (มีศัตรูเสริมเป็นระลอก)' }} · {{ stage().timeLimit }} วิ
-  </p>
-
-  <app-placement [stage]="stage()" />
+  <app-placement [allyOnly]="true" />
 </section>

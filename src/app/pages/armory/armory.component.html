@@ -1,79 +1,66 @@
 <section class="armory">
   <header class="head">
-    <div>
-      <h1 class="gm-title">คลังอุปกรณ์</h1>
-      <p class="gm-sub">สวมใส่ เทียบค่า ล็อก และขายอุปกรณ์ · ตีบวก / คราฟต์ / ย่อย ที่ <a routerLink="/forge">โรงตีเหล็ก</a></p>
-    </div>
-    <div class="mats">
-      <span class="gm-chip gold"><app-icon name="coin" [size]="12" /> {{ gold() }}</span>
-      <a class="gm-btn small" routerLink="/forge"><app-icon name="flame" [size]="13" /> โรงตีเหล็ก</a>
-    </div>
+    <div><span class="eyebrow">THE ROYAL ARMORY</span><h1 class="gm-title">คลังอุปกรณ์</h1><p class="gm-sub">สวมใส่ เทียบค่า ล็อก และขายอุปกรณ์ · คราฟต์ / ตีบวก / ย่อย ที่โรงตีเหล็ก</p></div>
+    <a class="gm-btn forge-link" routerLink="/forge"><app-icon name="flame" [size]="23" /> โรงตีเหล็ก <app-icon name="arrow" [size]="18" /></a>
   </header>
-
-  <div class="heroes" role="group" aria-label="เลือกฮีโร่">
+  <div #heroPicker id="armory-heroes" tabindex="-1" class="heroes" role="group" aria-label="เลือกฮีโร่">
     @for (h of roster.heroes(); track h.uid) {
       <button type="button" class="pick" [attr.aria-pressed]="heroUid() === h.uid" (click)="heroUid.set(h.uid)" [attr.aria-label]="roster.template(h).name">
-        <app-hero-portrait [heroId]="h.templateId" [size]="46" />
-        <small>Lv{{ h.level }}</small>
+        <app-hero-portrait [heroId]="h.templateId" [star]="roster.star(h)" [size]="58" /><small>Lv.{{ h.level }}</small>
       </button>
     }
   </div>
-
-  @if (hero(); as h) {
-    <section class="gm-panel glow equipped">
-      <div class="who">
-        <b>{{ roster.template(h).name }}</b>
-        @if (stats(); as s) { <small>HP {{ s.hp }} · ATK {{ s.atk }} · DEF {{ s.def }} · AS {{ s.atkSpeed.toFixed(2) }}</small> }
-      </div>
-      <div class="gear">
-        @for (slot of slots; track slot) {
-          @let it = h.gear?.[slot];
-          <div class="slot {{ it ? 'r ' + it.rarity.toLowerCase() : 'empty' }}">
-            <span class="si"><app-icon [name]="slotIcon[slot]" [size]="20" /></span>
-            <div class="info">
-              <small class="lab">{{ slotLabel[slot] }}</small>
-              @if (it) {
-                <b class="nm">{{ name(it) }}</b>
-                @for (l of lines(it); track $index) { <small>{{ fmt(l) }}</small> }
-                @if (it.affix) { <small class="affix">{{ affixName(it.affix) }}</small> }
-                <span class="row">
-                  <a class="gm-btn small" routerLink="/forge" [queryParams]="{ tab: 'enhance' }"><app-icon name="bolt" [size]="12" /> ตีบวก</a>
-                  <button type="button" class="gm-btn small ghost" (click)="unequip(slot)">ถอด</button>
-                  <button type="button" class="gm-btn small ghost" (click)="toggleLock(it)" [attr.aria-pressed]="it.locked" [attr.aria-label]="it.locked ? 'ปลดล็อก' : 'ล็อก'"><app-icon name="lock" [size]="13" /></button>
-                </span>
-              } @else { <b class="none">ว่าง</b> }
-            </div>
-          </div>
-        }
-      </div>
-    </section>
-  }
   @if (message()) { <p class="msg" role="status">{{ message() }}</p> }
-
-  <div class="bagwrap">
-    <section class="gm-panel">
-      <h2 class="gm-h2">กระเป๋า <small>{{ eq.bag().length }}</small></h2>
-      <div class="row">
-        @for (f of filters; track f) { <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="filter() === f" (click)="filter.set(f)">{{ slotLabel[f] }}</button> }
+  <div class="workbench">
+    @if (hero(); as h) {
+      <section class="equipment-panel equipped" aria-label="อุปกรณ์ของฮีโร่">
+        <div class="identity">
+          <div class="hero-art">@if (heroPortrait(); as art) { <img [src]="art" [alt]="roster.template(h).name" /> } @else { <app-hero-portrait [heroId]="h.templateId" [size]="120" /> }</div>
+          <div class="who"><span class="gm-stars">{{ '★'.repeat(roster.star(h)) }}</span><h2>{{ roster.template(h).name }}</h2><p>Lv.{{ h.level }} <span>{{ className[roster.template(h).cls] }}</span></p><button type="button" class="gm-btn small ghost" (click)="heroPicker.focus()">เปลี่ยนฮีโร่ ↔</button></div>
+        </div>
+        @if (stats(); as s) { <div class="stat-strip"><span>HP <b>{{ s.hp }}</b></span><span>ATK <b>{{ s.atk }}</b></span><span>DEF <b>{{ s.def }}</b></span><span>AS <b>{{ s.atkSpeed.toFixed(2) }}</b></span></div> }
+        <div class="gear">
+          @for (slot of slots; track slot) {
+            @let it = h.gear?.[slot];
+            <div class="gear-slot" [class.empty]="!it">
+              <h3><app-icon [name]="slotIcon[slot]" [size]="18" /> {{ slotLabel[slot] }}</h3>
+              @if (it) {
+                <button type="button" class="slot-art" (click)="chooseSlot(slot, it)" [attr.aria-label]="'ดู ' + name(it)"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /></button>
+                <b class="nm">{{ name(it) }}</b><small>{{ fmt(lines(it)[0]) }}</small>
+                <div class="slot-actions"><button type="button" class="gm-btn small ghost" (click)="unequip(slot)">ถอด</button><a class="gm-btn small ghost" routerLink="/forge" [queryParams]="{ tab: 'enhance' }">ตีบวก</a></div>
+              } @else {
+                <button type="button" class="empty-art" (click)="chooseSlot(slot)" [attr.aria-label]="'เลือก' + slotLabel[slot] + 'จากกระเป๋า'"><app-icon [name]="slotIcon[slot]" [size]="43" /><b>+</b></button><small>ยังไม่ได้สวมใส่</small>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+    <section class="equipment-panel bag-panel" aria-label="กระเป๋าอุปกรณ์">
+      <header class="bag-head"><h2>กระเป๋าอุปกรณ์ <small>{{ eq.bag().length }} ชิ้น</small></h2><label class="sort">เรียงตาม<select [value]="sort()" (change)="sort.set($any($event.target).value)" aria-label="เรียงอุปกรณ์"><option value="recent">ล่าสุด</option><option value="rarity">ระดับ</option><option value="upgrade">ตีบวก</option></select></label></header>
+      <div class="filters" role="group" aria-label="ประเภทอุปกรณ์">
+        @for (f of filters; track f) { <button type="button" [attr.aria-pressed]="filter() === f" (click)="chooseFilter(f)"><app-icon [name]="slotIcon[f]" [size]="17" /> {{ slotLabel[f] }}</button> }
       </div>
-      <ul class="bag">
-        @for (it of bag(); track it.instanceId) {
-          <li class="r {{ it.rarity.toLowerCase() }}">
-            <b class="nm">{{ name(it) }} <small>/ +{{ cap(it) }}</small></b>
-            @for (l of lines(it); track $index) { <small>{{ fmt(l) }}</small> }
-            @if (it.affix) { <small class="affix">{{ affixName(it.affix) }}</small> }
-            @if (usable(it)) {
-              <small class="cmp">เทียบกับที่ใส่: @for (d of compare(it); track $index) { <span [class.up]="d.includes('+')">{{ d }}</span> } @empty { ไม่เปลี่ยน }</small>
-            } @else { <small class="cmp">สายนี้ใช้ไม่ได้</small> }
-            <span class="row">
-              @if (usable(it)) { <button type="button" class="gm-btn small primary" (click)="equip(it)">สวม</button> }
-              <button type="button" class="gm-btn small ghost" (click)="toggleLock(it)" [attr.aria-pressed]="it.locked"><app-icon name="lock" [size]="13" /> {{ it.locked ? 'ล็อก' : '' }}</button>
-              <button type="button" class="gm-btn small ghost" (click)="sell(it)" [disabled]="it.locked">ขาย</button>
-            </span>
-          </li>
-        } @empty { <li class="none"><small>ว่าง — ลง Equipment Hunt ในเมนูดันเจี้ยน หรือคราฟต์ที่โรงตีเหล็ก</small></li> }
-      </ul>
+      <div class="inventory">
+        <ul class="bag">
+          @for (it of bag(); track it.instanceId) {
+            <li><button type="button" class="item-tile" (click)="selectedId.set(it.instanceId)" [attr.aria-pressed]="selected()?.instanceId === it.instanceId" [attr.aria-label]="name(it)"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /><span>{{ rarityName[it.rarity] }}</span>@if (it.locked) { <app-icon class="locked" name="lock" [size]="13" /> }</button></li>
+          } @empty { <li class="bag-empty"><app-icon name="shield" [size]="40" /><b>ไม่มีอุปกรณ์{{ filter() === 'ALL' ? '' : 'ประเภทนี้' }}</b><small>หาได้จาก Equipment Hunt หรือคราฟต์ที่โรงตีเหล็ก</small><a class="gm-btn small" routerLink="/forge">ไปคราฟต์อุปกรณ์</a></li> }
+        </ul>
+        @if (selected(); as it) {
+          <aside class="item-detail" aria-label="รายละเอียดอุปกรณ์">
+            <div class="detail-title"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /><div><span class="eyebrow">{{ rarityName[it.rarity] }}</span><h3>{{ name(it) }}</h3><small>สูงสุด +{{ cap(it) }} @if (it.locked) { · ล็อกอยู่ }</small></div></div>
+            <div class="item-lines">@for (l of lines(it); track $index) { <p><app-icon [name]="$index === 0 ? slotIcon[slotOf(it)] : 'star'" [size]="15" /> {{ fmt(l) }}</p> }</div>
+            @if (it.affix) { <p class="affix">{{ affixName(it.affix) }}</p> }
+            @if (!selectedWorn()) {
+              @if (usable(it)) { <div class="comparison"><small>เปลี่ยนแปลงเมื่อสวมใส่</small>@for (d of compare(it); track $index) { <span [class.up]="d.includes('+')">{{ d }}</span> } @empty { <span>ค่าพลังเท่าเดิม</span> }</div> }
+              @else { <p class="incompatible">ฮีโร่สายนี้ใช้อาวุธนี้ไม่ได้</p> }
+              <button type="button" class="gm-btn primary equip-action" (click)="equip(it)" [disabled]="!usable(it)">สวมใส่</button>
+            } @else { <p class="worn">สวมใส่อยู่กับ {{ roster.template(hero()!).name }}</p><button type="button" class="gm-btn equip-action" (click)="unequip(slotOf(it))">ถอดอุปกรณ์</button> }
+            <div class="detail-actions"><button type="button" class="gm-btn small ghost" (click)="sell(it)" [disabled]="it.locked || selectedWorn()"><app-icon name="coin" [size]="14" /> ขาย</button><button type="button" class="gm-btn small ghost" (click)="toggleLock(it)" [attr.aria-pressed]="it.locked"><app-icon name="lock" [size]="14" /> {{ it.locked ? 'ปลดล็อก' : 'ล็อก' }}</button></div>
+          </aside>
+        } @else { <aside class="detail-empty"><app-icon name="gem" [size]="32" /><p>เลือกอุปกรณ์เพื่อดูค่าพลัง<br />และเปรียบเทียบก่อนสวมใส่</p></aside> }
+      </div>
     </section>
-
   </div>
 </section>

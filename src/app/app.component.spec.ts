@@ -31,7 +31,7 @@ describe('AppComponent', () => {
     for (const p of ['/tower', '/dungeons', '/forge', '/armory', '/battle', '/lab']) expect(island.match).withContext(p).toContain(p);
   });
 
-  it('uses six destinations on Home and summon, without exposing a floor-locked feature', async () => {
+  it('uses six destinations on Home, summon and collection pages, without exposing a floor-locked feature', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     const router = TestBed.inject(Router);
     fixture.detectChanges();
@@ -50,7 +50,9 @@ describe('AppComponent', () => {
     expect(fixture.nativeElement.querySelector('nav a[aria-current="page"]').getAttribute('href')).toBe('/gacha');
     await router.navigateByUrl('/heroes');
     fixture.detectChanges();
-    expect(links()).toEqual(['/home', '/heroes', '/team', '/gacha']);
+    expect(links()).toEqual(LOBBY_NAV.map(n => n.path));
+    expect(fixture.componentInstance.immersive()).toBeFalse();
+    expect(fixture.componentInstance.collection()).toBeTrue();
   });
 
   it('every page removed from the menu is still reachable from an island building', () => {

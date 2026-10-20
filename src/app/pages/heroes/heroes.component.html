@@ -1,7 +1,8 @@
 <section class="heroes">
   <header class="head">
     <div>
-      <h1 class="gm-title">หอวีรชน</h1>
+      <span class="eyebrow">HERO COLLECTION</span>
+      <h1 class="gm-title">ฮีโร่</h1>
       <p class="gm-sub">ฮีโร่ทั้งหมด {{ cards().length }} ตน · แตะการ์ดเพื่อดูค่าพลัง อัปเลเวล สกิล และอุปกรณ์</p>
     </div>
   </header>
@@ -10,7 +11,7 @@
     <div class="filters" role="group" aria-label="กรองตามสาย">
       @for (c of classes; track c) {
         <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="cls() === c" (click)="cls.set(c)">
-          {{ className(c) }} <small>{{ count(c) }}</small>
+          <app-icon [name]="classIcon(c)" [size]="20" /> {{ className(c) }} <small>{{ count(c) }}</small>
         </button>
       }
     </div>
@@ -20,14 +21,20 @@
         @for (s of sorts; track s.id) { <option [value]="s.id">{{ s.label }}</option> }
       </select>
     </label>
+    <div class="view-switch" role="group" aria-label="รูปแบบรายการ">
+      <button type="button" (click)="layout.set('grid')" [attr.aria-pressed]="layout() === 'grid'" aria-label="แสดงแบบการ์ด">▦</button>
+      <button type="button" (click)="layout.set('list')" [attr.aria-pressed]="layout() === 'list'" aria-label="แสดงแบบรายการ">☷</button>
+    </div>
   </div>
 
-  <ul class="grid">
+  <ul class="grid" [class.list]="layout() === 'list'">
     @for (h of shown(); track h.uid) {
       <li>
         <a class="card r{{ h.star }}" [routerLink]="['/heroes', h.uid]" [attr.aria-label]="h.name + ' เลเวล ' + h.level">
           <span class="art">
-            <app-hero-portrait [heroId]="h.id" [star]="h.star" [size]="112" />
+            @if (h.portrait) { <img class="hero-art" [src]="h.portrait" [alt]="h.name" loading="lazy" draggable="false" /> }
+            @else { <app-hero-portrait [heroId]="h.id" [star]="h.star" [size]="112" /> }
+            <span class="class-seal" [attr.title]="classLabel(h.cls)"><app-icon [name]="classIcon(h.cls)" [size]="22" /></span>
             <span class="lv">Lv<b>{{ h.level }}</b></span>
             @if (h.isMain) { <span class="flag main" title="ฮีโร่หลักบนเกาะ"><app-icon name="crown" [size]="13" /></span> }
             @if (h.inTeam) { <span class="flag team" title="อยู่ในทีม"><app-icon name="team" [size]="13" /></span> }
