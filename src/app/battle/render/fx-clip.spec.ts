@@ -1,11 +1,24 @@
 import { FX, FX_SCALE, FxDef, PX_TO_CELL } from '../../core/data/sprites';
 import { fxDuration } from '../fx-sprite/fx-sprite.component';
 import { projectileLife } from '../projectile/projectile.component';
-import { easeIn, fxLength, fxPlacement, fxPoseAt, PROJECTILE_HOLD, projectilePlacement, projectilePoseAt } from './fx-clip';
+import { easeIn, fxLength, fxPivot, fxPlacement, fxPoseAt, PROJECTILE_HOLD, projectilePlacement, projectilePoseAt } from './fx-clip';
 
 /** the Pixi renderer's FX: one clock in, frame / alpha / place out — the same rules as the DOM FX sprite */
 describe('fxPoseAt / fxPlacement (one-clock skill FX)', () => {
   const base: FxDef = { file: 'x.png', frames: 6, w: 100, h: 50, frameMs: 50, at: 'self' };
+
+  it('grounds all Ultimate charge/reappearance/Impact source frames at the visible alpha edge, independent of scale',()=>{
+    for(const name of ['vn-ult-retreat','vn-ult-charge','vn-ult-loop','vn-ult-vanish','vn-ult-return-full','vn-ult-impact']) {
+      const d=FX[name];
+      for(let frame=0;frame<d.ground!.length;frame++) for(const scale of [.8,1,1.3]) {
+        const p=fxPivot(d,frame),at=fxPlacement(d,80,160,240,false,0,undefined,scale);
+        const top=at.y-p[1]*at.height;
+        expect(top+d.ground![frame]/d.h*at.height).toBeCloseTo(240+80*(.5+d.dy!/100),7);
+      }
+    }
+    expect(fxPivot(FX['vn-ult-impact'],2)[1]).toBe(212/248);
+    expect(fxPivot(FX['vn-ult-impact'],8)[1]).toBe(209/248);
+  });
 
   it('plays the strip at frameMs per frame, then is done', () => {
     expect(fxPoseAt(base, 0)).toEqual({ frame: 0, alpha: 1, visible: true, done: false });
@@ -77,10 +90,23 @@ describe('fxPoseAt / fxPlacement (one-clock skill FX)', () => {
   it('Kael Ult charge glow is additive light', () => {
     expect(FX['kl-ult-charge'].blend).toBe('add');
   });
+
+  it('registers every Vaelric S2 visible floor at the actor feet, independent of facing and cell size', () => {
+    for (const name of ['vn-s2-impact-1', 'vn-s2-impact-2', 'vn-s2-impact-3']) {
+      const d = FX[name];
+      for (const cell of [40, 72]) for (const left of [false, true]) {
+        const p = fxPlacement(d, cell, 200, 100, left, 0);
+        // Generated24-pose registration uses row120. Actor feet: cell96% minus15 atlas px.
+        const floor = p.y - d.pivot![1] * p.height + 120 * p.width / d.w;
+        const feet = 100 + cell * .96 - 15 * cell * 1.65 / 132;
+        expect(floor).toBeCloseTo(feet, 8);
+      }
+    }
+  });
 });
 
 describe('fxPlacement matches the DOM FX box', () => {
-  for (const [name, flip] of [['kl-ult-wave', false], ['kl-ult-wave', true], ['kl-ult-impact', true], ['kl-ult-charge', false]] as const) {
+  for (const [name, flip] of [['kl-ult-wave', false], ['kl-ult-wave', true], ['kl-ult-impact', true], ['kl-ult-charge', false], ['vn-s2-impact-1',false], ['vn-s2-impact-3',true]] as const) {
     it(`${name}${flip ? ' (flipped)' : ''}`, async () => {
       const { TestBed } = await import('@angular/core/testing');
       const { FxSpriteComponent } = await import('../fx-sprite/fx-sprite.component');
@@ -174,5 +200,32 @@ describe('FxDef.mirror (art drawn facing left)', () => {
     fixture.componentRef.setInput('flip', true);
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.fx')!.style.transform).not.toContain('scaleX(-1)');
+  });
+});
+
+describe('DOM/Pixi authored FX track parity', () => {
+  it('samples identical opacity at both speeds on the board clock and allocates no independent animations', async () => {
+    const { TestBed }=await import('@angular/core/testing');
+    const { sequenceFx }=await import('./sequence-fx');
+    const { FxSpriteComponent }=await import('../fx-sprite/fx-sprite.component');
+    const plan=sequenceFx('hero-vaelric.png','ult',1,2,7,()=>({r:1,c:6}));
+    for (const speed of [1,2]) {
+      const body=plan.find(f=>f.role==='phantom')!;
+      const fixture=TestBed.createComponent(FxSpriteComponent);
+      for (const [key,value] of Object.entries({name:body.name,track:body.track,delayMs:body.delayMs,speed,offset:body.offset,flip:body.flip})) fixture.componentRef.setInput(key,value);
+      fixture.detectChanges();await fixture.whenStable();
+      const el=(fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.fx')!;
+      expect(el.getAnimations().length).toBe(0);
+      for (const t of [1.8,1.95,3.32,3.6,3.93,4.15,4.34]) {
+        fixture.componentInstance.drawTrack(t*1000);
+        const pixi=fxPoseAt(FX[body.name],t-body.delayMs!/1000,false,body.track);
+        expect(Number(getComputedStyle(el).opacity)).withContext(`${speed}x at${t}`).toBeCloseTo(pixi.alpha,4);
+      }
+      expect(el.classList.contains('pixelated')).toBeTrue();
+      const held=getComputedStyle(el).opacity;
+      fixture.componentInstance.drawTrack(3200);const paused=getComputedStyle(el).opacity;
+      expect(paused).toBe('0.68');expect(held).toBe('0');
+      fixture.destroy();
+    }
   });
 });

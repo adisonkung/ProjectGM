@@ -1,3 +1,6 @@
+import { fxPivot, fxPoseAt } from '../render/fx-clip';
+import { FxTrack } from '../../core/models/fx';
+import type { OutwardPose } from '../render/fx-anchor';
 import { Component, DestroyRef, ElementRef, afterNextRender, computed, inject, input, viewChild } from '@angular/core';
 import { gridPosition, spriteUrl, stripGrid } from '../../core/data/sprite-files';
 import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
@@ -6,9 +9,10 @@ import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 @Component({
   selector: 'app-fx-sprite',
   template: `<div #el class="fx" [style.background-image]="'url(' + url() + ')'"
-    [style.background-size]="grid().cols * 100 + '% ' + grid().rows * 100 + '%'" [style.width.%]="def().fitCells ? def().fitCells! * 100 : def().w * pxToCell * (def().scale ?? 1) * fxScale"
+    [style.background-size]="grid().cols * 100 + '% ' + grid().rows * 100 + '%'" [style.width.%]="def().fitCells ? def().fitCells! * 100 * scale() : def().w * pxToCell * (def().scale ?? 1) * fxScale * scale()"
+    [style.height.%]="def().fitRows != null ? def().fitRows! * 100 : null"
     [style.aspect-ratio]="def().w + ' / ' + def().h" [style.left]="'calc(50% + ' + (offset()?.[0] ?? def().dx ?? 0) * (flip() ? -1 : 1) + '%)'"
-    [style.top]="'calc(50% + ' + (offset()?.[1] ?? def().dy ?? 0) + '%)'" [style.transform-origin]="origin()" [class.pixelated]="!!def().pixelated" [class.add]="def().blend === 'add'"
+    [style.top]="'calc(50% + ' + (offset()?.[1] ?? def().dy ?? 0) + '%)'" [style.transform-origin]="origin()" [class.pixelated]="!!def().pixelated || !!track()" [class.add]="def().blend === 'add' || additive()"
     [style.transform]="'translate(' + -pivot()[0] * 100 + '%, ' + -pivot()[1] * 100 + '%) rotate(' + angle() + 'deg)' + (flip() !== !!def().mirror ? ' scaleX(-1)' : '')"></div>`,
   styles: `
     :host { position: absolute; inset: 0; pointer-events: none; }
@@ -19,11 +23,17 @@ import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 })
 export class FxSpriteComponent {
   readonly name = input.required<string>();
+  readonly instanceId = input(0);
+  readonly role = input('');
   /** ทิศทาง (องศา) สำหรับเอฟเฟกต์ที่พุ่ง; 0 = หันขวา */
   readonly angle = input(0);
   readonly speed = input(1);
   /** A combat field owns this instance's lifetime; repeat without a wall-clock end. */
   readonly loop = input(false);
+  readonly delayMs = input(0);
+  readonly scale = input(1);
+  readonly track = input<FxTrack | undefined>();
+  readonly additive = input(false);
   /** ผู้ใช้หันซ้าย: กลับภาพและค่า dx (ใช้กับเอฟเฟกต์ที่ตัวเอง) */
   readonly flip = input(false);
   /** resolved [dx, dy] (owner anchor + FX offset, `fxOffset()`); default = the FX's own dx / dy */
@@ -44,7 +54,35 @@ export class FxSpriteComponent {
   private readonly host = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private delay(): number {
-    return (this.def().delayMs ?? 0) / this.speed();
+    return ((this.def().delayMs ?? 0) + this.delayMs()) / this.speed();
+  }
+
+  private trackFrame = -1;
+
+  /** Same pure sampler as Pixi. Board game time already includes pause, hit-stop and speed. */
+  drawTrack(elapsedMs: number, outward?: OutwardPose): void {
+    const track = this.track();
+    if (!track) return;
+    const d = this.def(), el = this.el().nativeElement;
+    const pose = fxPoseAt(d, (elapsedMs - this.delayMs()) / 1000, false, track);
+    const position = gridPosition(pose.frame, this.grid());
+    const alpha = String(Math.round(pose.alpha * 1e5) / 1e5);
+    const flip = outward && this.role() !== 'trail' ? outward.flip : this.flip();
+    const left = `${Math.round((50 + ((this.offset()?.[0] ?? d.dx ?? 0) + (pose.dx ?? 0)) * (flip ? -1 : 1)) * 1e5) / 1e5}%`;
+    const top = `${Math.round((50 + (this.offset()?.[1] ?? d.dy ?? 0) + (pose.dy ?? 0) * (outward?.dySign ?? 1)) * 1e5) / 1e5}%`;
+    const scale = String(Math.round((pose.scale ?? 1) * 1e5) / 1e5);
+    if (this.trackFrame !== pose.frame) { el.style.backgroundPosition = position; this.trackFrame = pose.frame; }
+    if (el.style.opacity !== alpha) el.style.opacity = alpha;
+    if (el.style.left !== left) el.style.left = left;
+    if (el.style.top !== top) el.style.top = top;
+    if (el.style.scale !== scale) el.style.scale = scale;
+    if (track.reveal) el.style.clipPath = `inset(0 ${(1-(pose.reveal ?? 1))*100}% 0 0)`;
+    if (outward || d.ground) {
+      const pivot=fxPivot(d,pose.frame);
+      el.style.transformOrigin = `${pivot[0]*100}% ${pivot[1]*100}%`;
+      const angle = this.role() === 'trail' && outward ? outward.angle : this.angle();
+      el.style.transform = `translate(${-pivot[0]*100}%, ${-pivot[1]*100}%) rotate(${angle}deg)${flip !== !!d.mirror ? ' scaleX(-1)' : ''}`;
+    }
   }
 
   constructor() {
@@ -53,6 +91,8 @@ export class FxSpriteComponent {
       const g = this.grid();
       const from = d.from ?? 0;
       const pos = (i: number) => gridPosition(i, g);
+      // Scripted layers are sampled by the existing board clock, not independent wall-clock animations.
+      if (this.track()) return;
       // one keyframe per frame held for frameMs (steps(1, end)) — a strip or a re-packed grid alike
       // delayMs: hidden (base opacity 0) until it starts
       // repeat > 1 = a looping field: the strip plays `repeat` times back to back (then the optional fade-out)
@@ -68,7 +108,7 @@ export class FxSpriteComponent {
       // release-and-vanish FX: the last (peak) frame stays and fades out over fadeOutMs instead of collapsing
       if (d.fadeOutMs && !this.loop()) {
         const play = (d.frames * d.frameMs * (d.repeat ?? 1)) / this.speed();
-        const total = fxDuration(this.name(), this.speed());
+        const total = fxDuration(this.name(), this.speed()) + this.delayMs() / this.speed();
         this.el().nativeElement.animate(
           [
             { backgroundPosition: pos(from + d.frames - 1), opacity: 1, offset: 0 },

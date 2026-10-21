@@ -1,4 +1,5 @@
 import { HeroClass } from './hero';
+import type { SemanticEvent } from './monster';
 
 /**
  * Data model of the hero combat systems (skills, areas, status effects).
@@ -18,6 +19,8 @@ import { HeroClass } from './hero';
 export type StackPolicy = 'NONE' | 'REFRESH_DURATION' | 'STACK_DURATION' | 'STACK_MAGNITUDE' | 'INDEPENDENT_BY_SOURCE';
 
 export interface StatusModifiers {
+  /** multiplies physical DEF; also the DEF fallback when no explicit magicDefense exists */
+  defenseMultiplier?: number;
   /** multiplies effective attack (e.g. Alpha Howl ×1.25) */
   attackMultiplier?: number;
   /** multiplies all outgoing damage (e.g. Blood Rage ×1.25) */
@@ -108,13 +111,14 @@ export interface StatusEffectDefinition {
  * FRONT_COLUMN_3 ground: the column in front (lane −1 / 0 / +1), all main
  * FRONT_CROSS   ground: main in front, splash above / below it and one cell further
  * FRONT_T3      ground: main in front, splash on the cells above / below it
+ * FRONT_RECT_2X3 ground: two columns strictly forward, lane −1 / 0 / +1; front cell main
  * FRONT_LINE_4  ground: the 4 cells straight ahead, all main (sword wave down the lane)
  * FRONT_ARC     short cone in front of the caster: 1–2 columns ahead, ±1 lane
  * RADIUS_2/3    within 2 / 3 cells of the centre
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'RECT_6X3_CENTERED' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'RECT_6X3_CENTERED' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_RECT_2X3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';
@@ -247,12 +251,14 @@ export type SkillEffectCore =
 
 /** Positioning part of a skill (happens at the animation's move frame) */
 export type SkillMovement =
+  /** straight committed dash: cross distance-1 cells, mark unique crossed foes, damage them once after arrival */
+  | { type: 'DASH_PATH'; distance: number; duration: number }
   /** teleport next to the target, on the side away from the caster */
   | { type: 'BLINK_BEHIND' }
   /** dash up to the target (adjacent cell) before the hit */
   | { type: 'CHARGE' }
-  /** after the hit, pass through the primary target and land behind it (nearest valid cell otherwise) */
-  | { type: 'DASH_THROUGH' };
+  /** after the hit, pass through the primary target; firstHitOnly prevents repeated crossings in a multi-hit cast */
+  | { type: 'DASH_THROUGH'; firstHitOnly?: boolean };
 
 /**
  * When the AI uses a skill (the hero AI walks the tiers in order: EMERGENCY → INTERRUPT → HEAL → HIGH_VALUE → NORMAL)
@@ -295,6 +301,13 @@ export interface SkillDefinition {
   /** the status the MARKED target rule looks for (e.g. 'open_wound') */
   markStatus?: string;
   movement?: SkillMovement;
+  /** Opt-in action lock: absolute semantic hit times, explicit interruption and optional authored retreat/finishing turn. */
+  action?: { type: 'STATIONARY'; interruptible: boolean; lockedTarget?: boolean;
+    /** Optional opening blink on a semantic event; a blocked retreat keeps the original cell. */
+    retreat?: { event: SemanticEvent; cells: number };
+    /** Turn once before a finishing pose, then keep the action's facing lock. */
+    faceAway?: { event: SemanticEvent; index?: number };
+  };
   /** default AI use mode (heroes may override per slot) — AUTO when omitted */
   useMode?: SkillUseMode;
   /** INSTANT (hit frame) · PROJECTILE (flies from the caster, effects on arrival) · SKY (falls onto the target) */

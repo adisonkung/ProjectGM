@@ -7,16 +7,17 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { dropRemovedHeroes, prepare } from '../services/save.service';
 import { GameState } from '../models/game-state';
 import { newGameState } from './starter';
+import { VAELRIC_PRODUCTION } from './vaelric-production';
 import { SYLVARA_PRODUCTION } from './sylvara-production';
 
 /** 2026-10 roster remodel: the old roster left the game — Bai Long is the only hero and the template for the new ones */
 describe('Roster remodel — Bai Long lead + new heroes', () => {
   it('ships the remodelled roster, keeps the starter team/bench and registers only supplied hero art', () => {
-    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara', 'elira']);
+    expect(SHIPPED_HERO_IDS).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara', 'elira', 'vaelric']);
     expect(SHIPPED_STARTER_TEAM).toEqual(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue']);
     expect(SHIPPED_STARTER_BENCH).toEqual(['garrick', 'kael']);
-    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-elira.png', 'hero-garrick.png', 'hero-kael.png', 'hero-linxue.png', 'hero-mirelle.png', 'hero-moye.png', 'hero-sylvara.png', 'hero-tangxun.png', 'hero-yuezheng.png']);
-    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'elira', 'garrick', 'kael', 'linxue', 'mirelle', 'moye', 'sylvara', 'tangxun', 'yuezheng']);
+    expect(Object.keys(SHEETS).filter(k => k.startsWith('hero-')).sort()).toEqual(['hero-bailong.png', 'hero-elira.png', 'hero-garrick.png', 'hero-kael.png', 'hero-linxue.png', 'hero-mirelle.png', 'hero-moye.png', 'hero-sylvara.png', 'hero-tangxun.png', 'hero-vaelric.png', 'hero-yuezheng.png']);
+    expect(Object.keys(HERO_ART).sort()).toEqual(['bailong', 'elira', 'garrick', 'kael', 'linxue', 'mirelle', 'moye', 'sylvara', 'tangxun', 'vaelric', 'yuezheng']);
   });
 
   it('an old save drops heroes whose template is gone: gear back to the bag, team / slots / memory forget them', () => {
@@ -564,5 +565,28 @@ describe('Elira supplied base and pending production', () => {
     expect(HERO_ART['elira']).toEqual({ portrait: 'portraits/elira.webp', s1: 'skills/elira-s1.webp',
       s2: 'skills/elira-s2.webp', ult: 'skills/elira-ult.webp', banner: 'banners/elira.webp' });
     expect(sh.projectile!.attack).toBe('el-basic-light');
+  });
+});
+
+
+describe('Vaelric supplied base art and pending skill production', () => {
+  it('keeps all 25 base poses and explicit user-approved baked basic FX, without registering missing assets', () => {
+    const sh = SHEETS['hero-vaelric.png'];
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH]).toEqual([25, 8, 260, 170]);
+    expect((['idle', 'walk', 'hurt', 'attack', 'die'] as const).map(k => sh.anims[k]!.frames)).toEqual([25,25,25,25,25]);
+    expect(HERO_ART['vaelric']).toEqual({ portrait: 'portraits/vaelric.webp', s1: 'skills/vaelric-s1.webp',
+      s2: 'skills/vaelric-s2.webp', ult: 'skills/vaelric-ult.webp', banner: 'banners/vaelric.webp' });
+    expect(Object.keys(FX).filter(k => k.startsWith('vn-s')).sort()).toEqual(['vn-s1-impact', 'vn-s1-loop', 'vn-s1-main', 'vn-s2-impact-1', 'vn-s2-impact-2', 'vn-s2-impact-3']);
+    expect(VAELRIC_PRODUCTION.base.bakedBasicFx).toBe('PRESERVE_USER_APPROVED_2026_10_20');
+    expect(sh.anims.skill2!.row).toBe(6);
+    expect(animTiming('hero-vaelric.png', 'skill2').hits).toEqual([.4, .65, .9]);
+    expect(sh.anims.skill!.row).toBe(5);
+    expect(VAELRIC_PRODUCTION.clips.skill.state).toBe('PROVISIONAL_REVIEW');
+    expect(animTiming('hero-vaelric.png', 'skill').hits).toEqual([0.6]);
+    for (const k of ['ult'] as const) {
+      expect(sh.anims[k]!.row).toBe(7);
+      expect(VAELRIC_PRODUCTION.clips[k].state).toBe('SUPPLIED_TIMELINE_REVIEW');
+      expect(animEvents('hero-vaelric.png', k).filter(e => e.event === 'DAMAGE').length).toBe(1);
+    }
   });
 });

@@ -1,9 +1,10 @@
+import { FxTrack } from '../../core/models/fx';
 import type { Application, ColorMatrixFilter, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { particleDef, ParticleShape } from '../../core/data/particles';
 import { gridCell, spriteUrl, stripGrid } from '../../core/data/sprite-files';
 import { FX, SHEETS, SheetDef } from '../../core/data/sprites';
 import type { AdvancedBloomFilter, GlowFilter } from 'pixi-filters';
-import { fxLength, fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
+import { fxLength, fxPivot, fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
 import { Emitter, particleRng } from './particles';
 import { ClipRequest, UnitClip } from './unit-clip';
 import { frameChunk } from './tex-chunks';
@@ -32,6 +33,11 @@ export interface PixiUnit {
 
 /** one skill FX on the board this frame (FxView, positions in board px) */
 export interface PixiFx {
+  motionY?: number;
+  track?: FxTrack;
+  additive?: boolean;
+  delayMs?: number;
+  scale?: number;
   id: number;
   name: string;
   /** top-left of the cell it sits on (board px) — the unit's drawn cell for an attached FX */
@@ -95,11 +101,14 @@ export class PixiUnitLayer {
   private readonly reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   private readonly textures = new Map<string, Texture | 'loading' | 'failed'>();
   private readonly frames = new Map<string, Texture>();
-  private readonly fxs = new Map<number, { sprite: Sprite; name: string; t0: number; seq: number; last: PixiFx; sparked: boolean }>();
+  private readonly fxs = new Map<number, { sprite: Sprite; name: string; t0: number; seq: number; last: PixiFx; sparked: boolean; reveal?: Texture }>();
   private readonly bolts = new Map<number, { sprite: Sprite; t0: number; last: PixiBolt }>();
   private readonly chunks = new Map<string, Texture>();
   /** FX drawn over the units sit in one container with a bloom (bright pixels glow) */
   private readonly overFx: Container;
+  private readonly crispFx: Container;
+  private readonly fxPool: Sprite[] = [];
+  private readonly crispTextures = new Map<string, Texture>();
   private readonly bloom?: AdvancedBloomFilter;
   private readonly partLayer: Container;
   private readonly partSprites: Sprite[] = [];
@@ -126,6 +135,10 @@ export class PixiUnitLayer {
       this.overFx.filters = [this.bloom];
     }
     stage.addChild(this.overFx);
+    this.crispFx = new pixi.Container();
+    this.crispFx.sortableChildren = true;
+    this.crispFx.zIndex = Z_OVER - .5;
+    stage.addChild(this.crispFx);
     this.partLayer = new pixi.Container();
     this.partLayer.zIndex = Z_PARTICLES;
     stage.addChild(this.partLayer);
@@ -177,7 +190,12 @@ export class PixiUnitLayer {
   }
 
   destroy(): void {
+    for (const fx of this.fxs.values()) fx.reveal?.destroy();
+    for (const sprite of this.fxPool) sprite.destroy();
+    this.fxPool.length = 0;
     this.app.destroy(true, { children: true });
+    for (const texture of this.crispTextures.values()) texture.destroy(true);
+    this.crispTextures.clear();
     for (const t of this.chunks.values()) t.destroy(true);
     for (const t of this.partTex.values()) t.destroy(true);
     this.partTex.clear();
@@ -189,7 +207,18 @@ export class PixiUnitLayer {
   }
 
   /** the sheet's texture (loaded on first use; null until ready) */
-  private texture(file: string, def: { pixelated?: boolean }): Texture | null {
+  private texture(file: string, def: { pixelated?: boolean }, crisp = false): Texture | null {
+    if (crisp) {
+      const cached = this.crispTextures.get(file);
+      if (cached) return cached;
+      const base = this.texture(file, def);
+      if (!base) return null;
+      // A private sampler shares the decoded image, without changing legacy FX using the same file.
+      const source = new this.pixi.ImageSource({ resource: base.source.resource as ImageBitmap, scaleMode: 'nearest' });
+      const texture = new this.pixi.Texture({ source });
+      this.crispTextures.set(file, texture);
+      return texture;
+    }
     const t = this.textures.get(file);
     if (t === 'loading' || t === 'failed') return null;
     if (t) return t;
@@ -206,7 +235,7 @@ export class PixiUnitLayer {
 
   /** frame (col, row) of a grid of fw × fh cells — a sub-texture, or of a chunk when the image is over the GPU limit */
   private cellTex(file: string, base: Texture, pixelated: boolean | undefined, fw: number, fh: number, col: number, row: number): Texture {
-    const k = `${file}|${fw}|${fh}|${col}|${row}`;
+    const k = `${file}|${fw}|${fh}|${col}|${row}|${pixelated ? 1 : 0}`;
     let f = this.frames.get(k);
     if (f) return f;
     const src = base.source;
@@ -216,7 +245,7 @@ export class PixiUnitLayer {
       f = new this.pixi.Texture({ source: src, frame: new this.pixi.Rectangle(col * fw, row * fh, fw, fh) });
     } else {
       const c = frameChunk(col, row, fw, fh, W, H, this.maxTex);
-      const ck = `${file}|${fw}|${fh}|${c.cx}|${c.cy}`;
+      const ck = `${file}|${fw}|${fh}|${c.cx}|${c.cy}|${pixelated ? 1 : 0}`;
       let chunk = this.chunks.get(ck);
       if (!chunk) {
         const canvas = document.createElement('canvas');
@@ -241,8 +270,10 @@ export class PixiUnitLayer {
   /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
   private preloadFx(def: SheetDef): void {
     const names = [...Object.values(def.fx ?? {}).flat(), ...Object.values(def.projectile ?? {}),
+      ...Object.values(def.motionFx ?? {}).flatMap(f => [f.start, f.loop]),
       ...Object.values(def.appliedStatusFx ?? {}), ...Object.values(def.statusFx ?? {}).flatMap(f => [f.start, f.loop]),
-      ...[def.fieldFx?.start, def.fieldFx?.loop, def.fieldFx?.end, def.fieldFx?.residual, def.fieldFx?.wave?.rain, def.fieldFx?.wave?.impact]].filter((n): n is string => !!n);
+      ...[def.fieldFx?.start, def.fieldFx?.loop, def.fieldFx?.end, def.fieldFx?.residual, def.fieldFx?.wave?.rain, def.fieldFx?.wave?.impact],
+      ...Object.values(def.sequenceFx ?? {}).flatMap(cues => cues.flatMap(cue => [...cue.names, ...Object.values(cue.variants ?? {}).flat(), ...(cue.outward?.trails ?? [])]))].filter((n): n is string => !!n);
     for (const n of names) {
       const d = FX[n];
       if (!d) continue;
@@ -270,9 +301,9 @@ export class PixiUnitLayer {
       let s = this.fxs.get(f.id);
       if (!s) {
         if (!FX[f.name]) continue;
-        const sprite = new this.pixi.Sprite();
+        const sprite = f.track ? this.fxPool.pop() ?? new this.pixi.Sprite() : new this.pixi.Sprite();
         sprite.visible = false;
-        (f.under ? this.stage : this.overFx).addChild(sprite);
+        (f.under ? this.stage : f.track ? this.crispFx : this.overFx).addChild(sprite);
         s = { sprite, name: f.name, t0: now, seq: ++this.fxSeq, last: f, sparked: false };
         this.fxs.set(f.id, s);
       }
@@ -280,34 +311,47 @@ export class PixiUnitLayer {
     }
     for (const [id, s] of this.fxs) {
       if (s.last.managed && !seen.has(id)) {
-        s.sprite.destroy(); this.fxs.delete(id); continue;
+        s.reveal?.destroy(); this.retireFx(s.sprite, !!s.last.track); this.fxs.delete(id); continue;
       }
       const d = FX[s.name];
-      const pose = fxPoseAt(d, now - s.t0, !!s.last.loop);
+      const pose = fxPoseAt(d, now - s.t0 - (s.last.delayMs ?? 0) / 1000, !!s.last.loop, s.last.track);
       if (pose.done) {
         // Retain completed instances while the host still lists them; otherwise they restart as new one-shots.
         if (seen.has(id)) { s.sprite.visible = false; continue; }
-        s.sprite.destroy();
+        s.reveal?.destroy(); this.retireFx(s.sprite, !!s.last.track);
         this.fxs.delete(id);
         continue;
       }
-      const base = this.texture(d.file, d);
+      const base = this.texture(d.file, d, !!s.last.track);
       const sp = s.sprite;
       if (!base) {
         sp.visible = false;
         continue;
       }
       const f = s.last;
-      const at = fxPlacement(d, cell, f.x, f.y, f.flip, f.angle, f.offset);
-      const tex = this.fxFrame(d.file, base, d.stripFrames ?? d.frames, pose.frame, d.pixelated);
-      sp.texture = tex;
-      const piv = d.pivot ?? [0.5, 0.5];
-      sp.anchor.set(piv[0], piv[1]);
+      const at = fxPlacement(d, cell, f.x, f.y, f.flip, f.angle, f.offset, (f.scale ?? 1) * (pose.scale ?? 1));
+      at.x += (pose.dx ?? 0) * (f.flip ? -1 : 1) / 100 * cell;
+      at.y += (pose.dy ?? 0) * (f.motionY ?? 1) / 100 * cell;
+      const tex = this.fxFrame(d.file, base, d.stripFrames ?? d.frames, pose.frame, d.pixelated || !!f.track);
+      // A per-instance cropped view reveals the original ribbon; cached/shared textures stay immutable.
+      let shown = tex;
+      const reveal = f.track?.reveal ? Math.max(.001, Math.min(1, pose.reveal ?? 1)) : 1;
+      if (f.track?.reveal) {
+        const crop = s.reveal ??= new this.pixi.Texture({ source: tex.source, frame: tex.frame.clone(), orig: tex.orig.clone(), dynamic: true });
+        crop.frame.x = tex.frame.x; crop.frame.y = tex.frame.y;
+        crop.frame.width = Math.max(1, Math.round(tex.frame.width * reveal));
+        crop.frame.height = tex.frame.height;
+        crop.orig.width = crop.frame.width; crop.orig.height = crop.frame.height;
+        crop.update(); shown = crop;
+      }
+      sp.texture = shown;
+      const piv = fxPivot(d, pose.frame);
+      sp.anchor.set(piv[0] * tex.frame.width / shown.frame.width, piv[1]);
       sp.position.set(at.x, at.y);
       sp.rotation = at.rotation;
       sp.scale.set(((at.flip ? -1 : 1) * at.width) / tex.frame.width, at.height / tex.frame.height);
       sp.alpha = pose.alpha;
-      sp.blendMode = d.blend === 'add' ? 'add' : 'normal';
+      sp.blendMode = d.blend === 'add' || f.additive ? 'add' : 'normal';
       sp.zIndex = f.under ? Z_UNDER + s.seq : s.seq;
       sp.visible = pose.visible;
       // particles start with the FX (after its delay), at its pivot, mirrored with it
@@ -321,6 +365,15 @@ export class PixiUnitLayer {
       if (seen.has(id)) drawn.add(id);
     }
     return drawn;
+  }
+
+  /** Recycle only bounded, action-owned choreography; legacy FX retain their play-out behavior. */
+  private retireFx(sprite: Sprite, reusable: boolean): void {
+    if (reusable && this.fxPool.length < 64) {
+      sprite.visible = false;
+      sprite.parent?.removeChild(sprite);
+      this.fxPool.push(sprite);
+    } else sprite.destroy();
   }
 
   /** projectiles: fly from → to on the game clock, impact frame on arrival; the same play-out rule as the FX */

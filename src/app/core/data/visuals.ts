@@ -58,6 +58,7 @@ export const mockVisualOf = (id: string | undefined): MockVisual | undefined => 
 
 /** status → small icon over the head (mock mode and real art alike) */
 export const STATUS_ICONS: Record<string, string> = {
+  curse_mark: '☠',
   slow: '❄', chill: '❄', frost_fatigue: '❄',
   poison: '☠', bleed: '🩸', corruption: '☣', root: '🌿', stun: '💫', untargetable: '👻', boss_seal: '🔒',
   dark_fog: '🌫', soul_link: '🔗', broken: '💥', healing_reduction: '💔', panther_frenzy: '⚡', ancient_rage: '😡',

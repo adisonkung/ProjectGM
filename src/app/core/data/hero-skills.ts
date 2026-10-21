@@ -193,6 +193,37 @@ export const CLASS_KITS: Record<HeroClass, HeroKit> = { tank, fighter, assassin,
 // ------------------------------------------------------------------ heroes with their own kit
 
 export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
+  // User 2026-10-20: Phantom Executioner. Phase A numbers/timing are provisional, no new class or starter grant.
+  vaelric: {
+    id: 'vaelric', cls: 'assassin', identity: 'Melee Burst · Dash-through · Curse Mark · Delayed Execution',
+    kit: {
+      attack: { ...meleeAttack, name: 'ชักดาบเงาคำสาป', label: 'Phantom Draw' },
+      skill: {
+        ...assassin.skill, name: 'ก้าวข้ามเงา', label: 'Phantom Crossing', target: 'NEAREST_ENEMY', range: 2,
+        movement: { type: 'DASH_PATH', distance: 3, duration: 0.3 },
+        repeat: { count: 3, gap: 0.05, weights: [1 / 3, 1 / 3, 1 / 3], keepAfterKill: true },
+        effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 2.2 }],
+      },
+      skill2: {
+        ...assassin.skill2, name: 'บทส่งวิญญาณกลวง', label: 'Hollow Requiem', range: 2, action: { type: 'STATIONARY', interruptible: true },
+        repeat: { count: 3, gap: 0.25, weights: [0.25, 0.25, 0.5], keepAfterKill: true },
+        effects: [
+          { type: 'DAMAGE', area: 'FRONT_RECT_2X3', center: 'SELF', primary: 2, secondary: 1.2 },
+          { type: 'APPLY_STATUS', status: 'curse_mark', to: 'HIT', onHits: [2] },
+        ],
+      },
+      ult: {
+        ...assassin.ult, name: 'พิธีศพพันคมดาบ', label: 'Funeral of a Thousand Cuts', range: 3, movement: undefined,
+        repeat: undefined, action: { type: 'STATIONARY', interruptible: true, lockedTarget: true,
+          retreat: { event: 'VANISH_START', cells: 1 }, faceAway: { event: 'REAPPEAR_START', index: 1 } },
+        effects: [
+          // Workbook leaves balance TBD: retain existing total coefficients and ADJACENT_8 geometry.
+          { type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 3, secondary: 1.5,
+            executeBonus: { hpBelow: 0.3, mul: 1.3 } },
+        ],
+      },
+    },
+  },
   // Elira Dawnmere — user-approved Phase A plan, 2026-10-17. Provisional R1 values, not final balance.
   elira: {
     id: 'elira', cls: 'healer', identity: 'Team Healing · Targeted Shield · Targeted Sanctuary',

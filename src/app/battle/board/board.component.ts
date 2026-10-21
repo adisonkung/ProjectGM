@@ -1,6 +1,8 @@
+import { FxTrack } from '../../core/models/fx';
+import { FxAnchors } from '../render/fx-anchor';
 import { MockVisual } from '../../core/data/visuals';
 import { BackgroundDef } from '../../core/data/backgrounds';
-import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, input, NgZone, output, untracked } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, input, NgZone, output, untracked, viewChildren } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
@@ -115,6 +117,17 @@ export interface FloatText {
 
 /** เอฟเฟกต์สกิลที่กำลังเล่นบนกระดาน */
 export interface FxView {
+  /** Requested outward vector in cells; resolved against visible bounds at the attack's actual start. */
+  outward?: [number, number];
+  track?: FxTrack;
+  additive?: boolean;
+  /** Stop following after this many visible ms; the frozen anchor then moves only with the camera. */
+  lockAfterMs?: number;
+  role?: string;
+  /** Per-cast presentation overrides, independent of the shared FX definition. */
+  delayMs?: number;
+  scale?: number;
+  owner?: number;
   id: number;
   r: number;
   c: number;
@@ -127,6 +140,8 @@ export interface FxView {
   under?: boolean;
   /** unit id this FX rides on (an attached aura): the frame loop moves it with that unit's drawn position */
   follow?: number;
+  /** Optional independent vertical ground reference (e.g. target X, caster feet Y). */
+  followY?: number;
   /** Runtime-owned field visuals stop immediately when removed; loops run until their owner ends them. */
   managed?: boolean;
   loop?: boolean;
@@ -177,6 +192,8 @@ export class BoardComponent {
   readonly speed = input(1);
   /** แตะศัตรู (เลือกเพื่อโฟกัส) */
   readonly pick = output<number>();
+  readonly finishedFx = output<number[]>();
+  private readonly zone = inject(NgZone);
   /** camera x in cells (background parallax follows it continuously) */
   readonly scroll = input(0);
   /** ภาพพื้นหลังของด่าน */
@@ -269,6 +286,8 @@ export class BoardComponent {
   private raf = 0;
   /** ONE visual game clock (s): advances × battle speed, stands still while frozen · idle breath clock (real s) */
   private vclock = 0;
+  private readonly fxSprites = viewChildren(FxSpriteComponent);
+  private readonly fxAnchors = new FxAnchors(SCENERY_ROWS);
   private idleClock = 0;
   private pixi: PixiUnitLayer | null = null;
   private pixiPending = false;
@@ -290,6 +309,7 @@ export class BoardComponent {
     afterNextRender(() => zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(this.frame))));
     inject(DestroyRef).onDestroy(() => {
       cancelAnimationFrame(this.raf);
+      this.fxAnchors.clear();
       this.resizeObs?.disconnect();
       this.pixi?.destroy();
       this.pixi = null;
@@ -382,16 +402,18 @@ export class BoardComponent {
     }
     // skill FX: the cell they were placed on, or (attached auras) their unit's drawn cell this frame
     const fx: PixiFx[] = this.fx().map(f => {
+      const anchor = this.fxAnchors.at(f.id);
       const s = f.follow != null ? this.st.get(f.follow) : undefined;
       const o = f.follow != null ? this.off.get(f.follow) : undefined;
       return {
         id: f.id,
         name: f.name,
-        x: s ? ((s.draw[0] + (o?.cur[0] ?? 0)) / 100) * cell : f.c * cell,
-        y: s ? ((s.draw[1] + (o?.cur[1] ?? 0)) / 100) * cell : (f.r + SCENERY_ROWS) * cell,
-        angle: f.angle,
-        flip: !!f.flip,
-        offset: f.offset,
+        x: anchor && (f.lockAfterMs != null || f.followY != null) ? anchor.x / 100 * cell : s ? ((s.draw[0] + (o?.cur[0] ?? 0)) / 100) * cell : f.c * cell,
+        y: anchor && (f.lockAfterMs != null || f.followY != null) ? anchor.y / 100 * cell : s ? ((s.draw[1] + (o?.cur[1] ?? 0)) / 100) * cell : (f.r + SCENERY_ROWS) * cell,
+        angle: anchor?.outward && f.role === 'trail' ? anchor.outward.angle : f.angle,
+        flip: anchor?.outward && f.role !== 'trail' ? anchor.outward.flip : !!f.flip,
+        motionY: anchor?.outward?.dySign,
+        offset: f.offset, delayMs: f.delayMs, scale: f.scale, track: f.track, additive: f.additive,
         under: !!f.under,
         managed: !!f.managed,
         loop: !!f.loop,
@@ -501,11 +523,30 @@ export class BoardComponent {
         this.drawn.set(id, tf);
       }
     }
+    this.fxAnchors.sync(this.fx(), this.vclock, this.cam.draw * 100, id => {
+      const s = this.st.get(id), o = this.off.get(id);
+      return s ? { x: s.draw[0] + (o?.cur[0] ?? 0), y: s.draw[1] + (o?.cur[1] ?? 0) } : undefined;
+    });
     if (this.pixi) this.drawPixi(Array.from(els));
+    let completed: number[] | undefined;
+    for (const sprite of this.fxSprites()) {
+      if (!sprite.track()) continue;
+      const anchor = this.fxAnchors.at(sprite.instanceId());
+      if (anchor) {
+        const elapsed = (this.vclock - anchor.born) * 1000;
+        sprite.drawTrack(elapsed, anchor.outward);
+        if (elapsed >= sprite.delayMs() + sprite.track()!.durationMs && this.fxAnchors.complete(sprite.instanceId())) {
+          (completed ??= []).push(sprite.instanceId());
+        }
+      }
+    }
+    if (completed) this.zone.run(() => this.finishedFx.emit(completed!));
     // attached FX (auras / guards / fields) ride on their unit: same drawn transform as the unit this frame
-    const riders = this.host.nativeElement.querySelectorAll<HTMLElement>('.fx-wrap[data-follow]');
+    const riders = this.host.nativeElement.querySelectorAll<HTMLElement>('.fx-wrap[data-fx]');
     for (const el of Array.from(riders)) {
-      const tf = this.drawn.get(Number(el.dataset['follow']));
+      const anchor = this.fxAnchors.at(Number(el.dataset['fx']));
+      const tf = anchor && (anchor.freezes || anchor.axis) ? `translate(${anchor.x.toFixed(2)}%, ${anchor.y.toFixed(2)}%)`
+        : anchor?.follow != null ? this.drawn.get(anchor.follow) : undefined;
       if (tf && el.style.transform !== tf) el.style.transform = tf;
     }
     // camera: background parallax reads --shift from the board (FieldComponent [live])

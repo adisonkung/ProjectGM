@@ -6,6 +6,7 @@ import { BOARD_COLS, distance, LANES } from './grid';
 export interface AreaUnit {
   id: number;
   pos: Cell;
+  actionFacing?: { left: boolean };
 }
 
 export interface AreaQuery<T extends AreaUnit> {
@@ -40,7 +41,7 @@ function direction(from: Cell, to: Cell, facing: 1 | -1): { dc: number; dr: numb
  */
 export function frontCell<T extends AreaUnit>(caster: T, primary: T | null, candidates: T[]): Cell {
   const facing: 1 | -1 = candidates.some(c => c.pos.c > caster.pos.c) || !candidates.length ? 1 : -1;
-  const dc = primary ? direction(caster.pos, primary.pos, facing).dc : facing;
+  const dc = caster.actionFacing ? (caster.actionFacing.left ? -1 : 1) : primary ? direction(caster.pos, primary.pos, facing).dc : facing;
   return { r: caster.pos.r, c: caster.pos.c + dc };
 }
 
@@ -60,6 +61,8 @@ export const GROUND_SHAPES: Partial<Record<AreaPattern, [number, number, boolean
   FRONT_CROSS: [[1, 0, true], [1, -1, false], [1, 1, false], [2, 0, false]],
   // main in front, splash on the cells above / below it (Garrick Hammerfall)
   FRONT_T3: [[1, 0, true], [1, -1, false], [1, 1, false]],
+  // Two columns strictly forward, ±1 lane; the directly adjacent front cell remains the main cell.
+  FRONT_RECT_2X3: [[1, 0, true], [1, -1, false], [1, 1, false], [2, 0, false], [2, -1, false], [2, 1, false]],
   // the 4 cells straight ahead, all main (Kael Ashen Rupture: one sword wave down the lane)
   FRONT_LINE_4: [[1, 0, true], [2, 0, true], [3, 0, true], [4, 0, true]],
 };
@@ -146,6 +149,7 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
     case 'FRONT_COLUMN_3':
     case 'FRONT_CROSS':
     case 'FRONT_T3':
+    case 'FRONT_RECT_2X3':
     case 'FRONT_LINE_4':
       // ground-targeted: every unit in the shape's cells (any number stacked), main cells first
       hit = candidates.filter(u => groundCell(pattern, caster, primary, candidates, u) !== null);

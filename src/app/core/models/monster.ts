@@ -24,7 +24,9 @@ export type SemanticEvent =
   /** longer hero clips: wind-up peak · charge (ultimate preparation) · start of each strike of a multi-hit skill · last wind-up */
   | 'ANTICIPATION_PEAK' | 'CHARGE_START' | 'CHARGE_PEAK' | 'STRIKE_START' | 'FINAL_ANTICIPATION'
   /** blink skills: the caster starts to fade out · comes back at the destination (FX layers bound to them) */
-  | 'VANISH_START' | 'REAPPEAR_START';
+  | 'VANISH_START' | 'REAPPEAR_START'
+  /** committed path movement; its arrival, not a looping visual, authorizes contact damage */
+  | 'DASH_START' | 'DASH_END';
 
 export interface MonsterStats {
   maxHp: number;

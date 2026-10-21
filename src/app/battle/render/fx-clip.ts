@@ -1,9 +1,16 @@
+import { FxTrack } from '../../core/models/fx';
+import { trackPoseAt } from './fx-track';
 import { FX_SCALE, FxDef, PROJECTILE_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 import { Cell } from '../../core/models/unit';
 import { square2Center } from '../engine/area';
 
 /** Ground footprint placement uses logical cells, never the art bounds or number of occupants. */
-export function groundFxCell(d: FxDef, caster: Cell, target: Cell): Cell {
+export function groundFxCell(d: FxDef, caster: Cell, target: Cell, left?: boolean): Cell {
+  if (d.groundArea === 'FRONT_RECT_2X3') {
+    // Nominal footprint: board clipping trims cells outside the battlefield, without shifting it.
+    const direction = (left ?? target.c < caster.c) ? -1 : 1;
+    return { r: caster.r, c: caster.c + direction * 1.5 };
+  }
   return d.groundArea === 'SQUARE_2' ? square2Center(caster, target) : target;
 }
 
@@ -14,6 +21,10 @@ export function groundFxCell(d: FxDef, caster: Cell, target: Cell): Cell {
  * Pause, hit-stop and x2 / x4 are only how the board clock advances (renderer: `render/pixi-units.ts`).
  */
 export interface FxPose {
+  reveal?: number;
+  dx?: number;
+  dy?: number;
+  scale?: number;
   /** frame index in the file (from + i) */
   frame: number;
   alpha: number;
@@ -45,7 +56,15 @@ export function fxLength(d: FxDef): number {
   return ((d.delayMs ?? 0) + d.frames * d.frameMs * (d.repeat ?? 1) + (d.fadeOutMs ?? 0)) / 1000;
 }
 
-export function fxPoseAt(d: FxDef, t: number, loop = false): FxPose {
+export function fxPoseAt(d: FxDef, t: number, loop = false, track?: FxTrack): FxPose {
+  if (track) {
+    const ms = (t - (d.delayMs ?? 0) / 1000) * 1000;
+    const p = trackPoseAt(track, ms);
+    const stripEnd = ((d.delayMs ?? 0) + d.frames * d.frameMs * (d.repeat ?? 1)) / 1000;
+    let frame = fxPoseAt(d, Math.min(t, stripEnd - 1e-7), loop).frame;
+    for (const [at, index] of track.frames ?? []) if (ms >= at) frame = index;
+    return { ...p, frame, visible: p.alpha > .001 };
+  }
   const from = d.from ?? 0;
   const delay = (d.delayMs ?? 0) / 1000;
   const per = d.frameMs / 1000;
@@ -63,6 +82,12 @@ export function fxPoseAt(d: FxDef, t: number, loop = false): FxPose {
     return { frame: last, alpha: a, visible: a > 0.001, done: false };
   }
   return { frame: last, alpha: 0, visible: false, done: true };
+}
+
+/** The art's actual visible lower edge anchors to the floor, including reverse/segmented frames. */
+export function fxPivot(d: FxDef, frame = d.from ?? 0): [number,number] {
+  const p = d.pivot ?? [.5,.5];
+  return d.ground?.[frame] != null ? [p[0],d.ground[frame]/d.h] : p;
 }
 
 /** where the FX frame sits (board px): the DOM `.fx-wrap` is one cell at (x, y), the `.fx` box inside it */
@@ -90,9 +115,10 @@ export function fxPlacement(
   flip: boolean,
   angle: number,
   offset?: [number, number],
+  scale = 1,
 ): FxPlacement {
-  const width = d.fitCells ? d.fitCells * cell : ((d.w * PX_TO_CELL * (d.scale ?? 1) * FX_SCALE) / 100) * cell;
-  const height = (width * d.h) / d.w;
+  const width = (d.fitCells ? d.fitCells * cell : ((d.w * PX_TO_CELL * (d.scale ?? 1) * FX_SCALE) / 100) * cell) * scale;
+  const height = d.fitRows != null ? d.fitRows * cell : (width * d.h) / d.w;
   const [dx, dy] = offset ?? [d.dx ?? 0, d.dy ?? 0];
   return {
     x: x + cell / 2 + ((dx * (flip ? -1 : 1)) / 100) * cell,

@@ -178,3 +178,33 @@ describe('Sprite lab engine-backed area/status review', () => {
     lab.reset();
   }));
 });
+
+describe('Sprite lab committed phantom Ultimate review', () => {
+  let fixture: ComponentFixture<SpriteLabComponent>;
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [SpriteLabComponent], providers: [
+      { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ hero: 'vaelric', render: 'dom' }) } } },
+    ] });
+    fixture = TestBed.createComponent(SpriteLabComponent);
+  });
+  afterEach(() => fixture.destroy());
+  it('prepares exact delayed visual cues, damages once, finishes recovery and clears every layer', fakeAsync(() => {
+    const lab = fixture.componentInstance;
+    lab.play('ult');
+    expect(lab.fx().length).toBe(30);
+    tick(3901); expect(lab.floats()).toEqual([]);
+    expect(lab.log().some(l => l.text.includes('no VFX'))).toBeFalse();
+    tick(50); expect(lab.log().filter(l => l.text === 'DAMAGE').length).toBe(1);
+    tick(450); expect(lab.fx().every(f=>!!f.track)).toBeTrue();
+    // Character end must not truncate a renderer whose visual clock is still completing the fade.
+    lab.onFxFinished(lab.fx().map(f=>f.id)); expect(lab.fx()).toEqual([]);
+    expect(lab.log().filter(l => l.text === 'ANIMATION_END').length).toBe(1);
+    lab.reset(); tick(10000); expect(lab.fx()).toEqual([]);
+  }));
+  it('switching actions cancels pending phantoms, impact and damage without leaving a hidden actor', fakeAsync(() => {
+    const lab = fixture.componentInstance;
+    lab.play('ult'); tick(1800); lab.play('idle'); tick(10000);
+    expect(lab.fx()).toEqual([]); expect(lab.floats()).toEqual([]);
+    expect(lab.anims()[1]!.anim).toBe('idle');
+  }));
+});
