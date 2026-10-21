@@ -9,7 +9,7 @@
     "types": []
   },
   "files": [
-    "tools/simulate.ts", "tools/dev/mirelle-sync.ts",
+    "tools/simulate.ts", "tools/dev/mirelle-sync.ts", "tools/dev/vaelric-s2-sync.ts", "tools/dev/vaelric-ult-sync.ts",
     "tools/dev/trace.ts",
     "tools/dev/balance.ts", "tools/dev/economy.ts", "tools/dev/gear-economy.ts", "tools/dev/skill-economy.ts", "tools/dev/account-economy.ts", "tools/dev/bailong-ult-sim.ts", "tools/dev/hero-sim.ts", "tools/dev/sprite-dump.ts"
   ]

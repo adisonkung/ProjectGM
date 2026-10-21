@@ -20,6 +20,8 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
+  // Supplied v_icon.zip (2026-10-21): dedicated portrait, all skill icons and banner.
+  vaelric: { ...art('vaelric'), banner: 'banners/vaelric.webp' },
   // Supplied Elira_icn.zip (2026-10-19): dedicated portrait, all skill icons and banner.
   elira: { ...art('elira'), banner: 'banners/elira.webp' },
   // Supplied sylvana_icon.zip (2026-10-17): preserve the existing Sylvara entity ID.

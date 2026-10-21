@@ -4,6 +4,7 @@
  * เอฟเฟกต์ใช้สเกลพิกเซลเดียวกับตัวละคร (1 px ต้นฉบับ = 1.25% ของความกว้างช่องกระดาน)
  */
 
+import type { FxTrack } from '../models/fx';
 import type { ParticleRef } from './particles';
 import { AnimationConfig, SemanticEvent } from '../models/monster';
 import { MONSTERS, PROJECTILES } from './monsters';
@@ -76,7 +77,25 @@ export interface ImpactFeel {
   zoomPct?: number;
 }
 
+/** Authored presentation cues; per-cast visual RNG never consumes combat randomness. */
+export interface SequenceFxCue {
+  at: number;
+  names: string[];
+  /** Optional review variant; omitted in combat. */
+  variants?: Record<string, string[]>;
+  offset?: [number, number];
+  scale?: [number, number];
+  track?: FxTrack;
+  role?: string;
+  floor?: 'source';
+  freezeAtStart?: boolean;
+  outward?: { cells: number; peak: number; fadeMs: number; attackMs: number; trails: string[] };
+}
+
 export interface SheetDef {
+  sequenceFx?: Partial<Record<SkillKind, SequenceFxCue[]>>;
+  /** Event-owned dash visuals; both layers follow the caster and stop on actual DASH_END or cancellation. */
+  motionFx?: Partial<Record<SkillKind, { start?: string; loop: string }>>;
   cols: number;
   rows: number;
   anims: Partial<Record<SpriteAnim, AnimDef>>;
@@ -113,6 +132,8 @@ export interface SheetDef {
 }
 
 export interface FxDef {
+  /** Visible lower alpha edge for each source frame (pixels); use as the ground pivot. */
+  ground?: number[];
   file: string;
   frames: number;
   /** ขนาดช่องของเอฟเฟกต์ในแผ่น (px ต้นฉบับ) */
@@ -122,8 +143,8 @@ export interface FxDef {
   /** เล่นที่ตัวผู้ใช้ หรือที่เป้าหมาย (หมุนตามทิศที่พุ่งไป) */
   /** 'allies' = centre of the caster's living team formation (team-wide field, e.g. a healer's ritual) */
   at: 'self' | 'target' | 'allies';
-  /** Place a target ground effect at the logical footprint centre, independent of its PNG dimensions. */
-  groundArea?: 'SQUARE_2';
+  /** Place a ground effect at the logical footprint centre, independent of its PNG dimensions. */
+  groundArea?: 'SQUARE_2' | 'FRONT_RECT_2X3';
   /** เลื่อนจากกลางช่อง เป็น % ของช่อง (+x ขวา, +y ลง) */
   dx?: number;
   dy?: number;
@@ -148,7 +169,9 @@ export interface FxDef {
   /** on 'impact': only the n-th hit of a multi-hit skill (0-based) */
   hitIndex?: number;
   /** on 'impact' at 'target': one copy on each unit the hit damaged, at most this many (primary first) */
-  perHit?: number;
+  perHit?: number | 'all';
+  /** Contact layers may require actual affected recipients, without an extra aimed primary. */
+  hitsOnly?: boolean;
   /** with perHit: leave the primary out (e.g. the light splash heal around the healed ally — the primary has its own FX) */
   exceptPrimary?: boolean;
   /** placed on the owner's named anchor (SheetDef.anchors) + dx/dy */
@@ -170,6 +193,8 @@ export interface FxDef {
   attach?: boolean;
   /** size the frame to this many board cells wide (e.g. an area burst matching the skill's hit area), instead of w × scale */
   fitCells?: number;
+  /** Optional independent height in board cells for a rectangular area layer. */
+  fitRows?: number;
   /** 'under' = drawn below the units (ground aura), default above them */
   layer?: 'under' | 'over';
   /** Pixi renderer: particle presets spawned at the FX's pivot when it starts (data/particles.ts) */
@@ -213,6 +238,68 @@ const ELIRA_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
 export const SHEETS: Record<string, SheetDef> = {
+  // Supplied base clips, S1, S2 and Ultimate; original baked normal-attack FX remain intact.
+  // User 2026-10-20: retain the original baked basic slash/flash, no destructive separation.
+  'hero-vaelric.png': {
+    cols: 25, rows: 8, cellW: 260, cellH: 170, pixelated: true,
+    anims: {
+      idle: { row: 0, frames: 25, ms: 85 }, walk: { row: 1, frames: 25, ms: 35, pace: 1.5 },
+      hurt: { row: 2, frames: 25, ms: 25 }, die: { row: 4, frames: 25, ms: 65 },
+      attack: { row: 3, frames: 25, ms: 35, events: { DAMAGE: 8, IMPACT: 8, RECOVERY_START: 15 } },
+      // Supplied S1, provisional review: F8 is held for the complete 300ms timed dash; F9 starts on arrival.
+      skill: { row: 5, frames: 25, ms: 30, seq: Array.from({ length: 25 }, (_, i) => i),
+        steps: [40, 40, 40, 40, 40, 50, 50, 300, ...Array(17).fill(30)], move: 7,
+        events: { CAST_START: 0, DASH_START: 7, DASH_END: 8, DAMAGE: 8, IMPACT: 8, RECOVERY_START: 15 } },
+      skill2: { row: 6, frames: 25, ms: 50,
+        events: { CAST_START: 0, STRIKE_START: 7, DAMAGE: [8, 13, 18], IMPACT: [8, 13, 18], RECOVERY_START: 19 } },
+      // User 2026-10-21: prepare during the reverse retreat; charge immediately at its800ms end.
+      // F10 silence is exactly300ms; recovery and the12-frame final Impact run independently.
+      ult: { row: 7, frames: 17, ms: 50, seq: Array.from({ length: 17 }, (_, i) => i),
+        steps: [450, ...Array(6).fill(50), 2570, 150, 300, ...Array(7).fill(50)],
+        opacity: [[0,1],[.319999/.45,1],[.32/.45,0],[.399999/.45,0],[.4/.45,.12],[6.4,1],
+          [7+.77/2.57,1],[7+.93/2.57,0],[7.999999,0],[8,1],[17,1]],
+        // Stage the one finishing turn before F9 so the50ms engine cannot reveal it facing inward.
+        events: { CAST_START: 0, VANISH_START: .32/.45, REAPPEAR_START: [.4/.45,7+2.52/2.57],
+          CHARGE_START: 7+.05/2.57, VFX_SPAWN: 10, DAMAGE: 13.2, IMPACT: 13.2, RECOVERY_START: 10 } },
+    },
+    sequenceFx: { ult: [
+      { at: 0, names: ['vn-ult-retreat'], role: 'retreat', freezeAtStart: true,
+        track: { durationMs: 400, frames: [[0,0],[80,1],[160,2],[240,3],[320,4]], alpha: [[0,1],[400,1]] } },
+      { at: .4, names: ['vn-ult-retreat'], role: 'retreat', freezeAtStart: true,
+        track: { durationMs: 400, frames: [[0,4],[80,3],[160,2],[240,1],[320,0]], alpha: [[0,1],[400,1]] } },
+      { at: .8, names: ['vn-ult-charge'], role: 'charge', track: { durationMs: 240, alpha: [[0,1],[240,1]] } },
+      { at: 1.04, names: ['vn-ult-loop'], role: 'charge', track: { durationMs: 480, alpha: [[0,1],[480,1]] } },
+      { at: 1.52, names: ['vn-ult-vanish'], role: 'vanish', track: { durationMs: 400, alpha: [[0,1],[400,1]] } },
+      { at: 1.92, names: ['vn-ult-aura'], role: 'aura', track: {
+        durationMs: 2410,
+        alpha: [[0,.025],[180,.045],[360,.065],[580,.09],[820,.13],[1050,.18],
+          [1400,.18],[1550,.18],[1680,.20],[1850,.18],[2010,.4],[2050,.32],[2210,.12],[2330,.025],[2410,0]],
+        scale: [[0,.97],[360,1],[650,1.02],[900,.99],[1220,1.03],[1400,1],
+          [1550,.99],[1680,1.02],[1850,1],[2010,1.04],[2410,1.08]],
+      } },
+      ...[0,.18,.36,.58,.82,1.05].map(beat => ({ at: 1.92+beat,
+        names: Array.from({ length: 6 }, (_, n) => `vn-ult-phantom-${n+1}`),
+        scale: [.9,1] as [number,number],
+        outward: { cells: 2, peak: 3.93, fadeMs: 400, attackMs: 120,
+          trails: Array.from({length:5},(_,n)=>`vn-ult-dash-${n+1}`) },
+      })),
+      { at: 1.92, names: ['vn-ult-cuts'], role: 'cut', track: { durationMs: 2410,
+        frames: [[0,0],[180,1],[360,2],[580,3],[820,4],[1050,5]],
+        alpha: [[0,.92],[120,.66],[1050,.83],[2009,.83],[2010,1],[2050,.78],[2210,.34],[2330,.07],[2410,0]],
+      } },
+      { at: 3.32, names: ['vn-ult-return-full'], variants: { short: ['vn-ult-return-short'] }, role: 'return',
+        track: { durationMs: 240, alpha: [[0,.9],[160,.85],[240,0]] } },
+      { at: 3.77, names: ['vn-ult-impact'], role: 'impact', floor: 'source',
+        track: { durationMs: 480, alpha: [[0,1],[480,1]] } },
+      ...[0,1,2].map(i => ({ at: 3.95+i*.02, names: ['vn-ult-residual'], role: 'residual',
+        offset: [(i-1)*20,-20-i*9] as [number,number],
+        track: { durationMs: 380-i*20, alpha: [[0,.2],[120,.13],[380-i*20,0]] as [number,number][],
+          motion: [[0,0,0],[380-i*20,(i-1)*9,-12]] as [number,number,number][] },
+      })),
+    ] },
+    motionFx: { skill: { start: 'vn-s1-main', loop: 'vn-s1-loop' } },
+    fx: { skill: ['vn-s1-impact'], skill2: ['vn-s2-impact-1', 'vn-s2-impact-2', 'vn-s2-impact-3'] },
+  },
   'hero-elira.png': {
     cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
@@ -778,6 +865,65 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 export const FX: Record<string, FxDef> = {
+  // V5 supplied retreat, six accumulated states and five whole ribbons (runtime reveal).
+  'vn-ult-retreat': { ground: [203,204,204,205,205], file: 'fx-vaelric-ult-retreat.png', frames: 5, w: 204, h: 220,
+    frameMs: 80, at: 'self', scale: .6, pivot: [.5,208/220], dy: 27.25, pixelated: true, attach: true },
+  'vn-ult-cuts': { file: 'fx-vaelric-ult-cuts.png', frames: 6, w: 256, h: 400,
+    frameMs: 180, at: 'target', scale: .4, pivot: [.5,.5], dy: -18, pixelated: true, attach: true },
+  ...Object.fromEntries(Array.from({ length: 5 }, (_, i) => [`vn-ult-dash-${i+1}`, {
+    file: `fx-vaelric-ult-dash-${i+1}.png`, frames: 1, w: 560, h: 64, frameMs: 120,
+    at: 'target' as const, fitCells: 2/(1-.05625), pivot: [.05625,.5] as [number,number],
+    dy: -18, pixelated: true, attach: true,
+  }])),
+  // Reuse original strips as held runtime layers; no new/baked artwork.
+  'vn-ult-cut': { file: 'fx-vaelric-s1-impact.png', frames: 1, from: 3, stripFrames: 8,
+    w: 96, h: 255, frameMs: 40, at: 'target', scale: .34, pixelated: true,
+    pivot: [.5,.5200276243], dy: -22.125, attach: true },
+  'vn-ult-residual': { file: 'fx-vaelric-ult-vanish.png', frames: 1, from: 8, stripFrames: 10,
+    w: 238, h: 201, frameMs: 80, at: 'target', scale: .22, pixelated: true,
+    pivot: [.5,.5], attach: true, blend: 'add' },
+  'vn-ult-aura': { file: 'fx-vaelric-ult-vanish.png', frames: 1, from: 3, stripFrames: 10,
+    w: 238, h: 201, frameMs: 80, at: 'target', scale: .68, pixelated: true,
+    pivot: [.5,0.8606965174129353], dy: 27.25, attach: true, layer: 'under' },
+  // Reuse the approved Crimson Vanish tail for a short reappearance flash; review both frame ranges.
+  'vn-ult-return-full': { ground: [174,172,174,172,173,173,173,173,174,173], file: 'fx-vaelric-ult-vanish.png', frames: 3, stripFrames: 10, from: 7,
+    w: 238, h: 201, frameMs: 80, at: 'self', scale: .62, pixelated: true,
+    pivot: [.5,0.8606965174129353], dy: 28.5, attach: true },
+  'vn-ult-return-short': { ground: [174,172,174,172,173,173,173,173,174,173], file: 'fx-vaelric-ult-vanish.png', frames: 2, stripFrames: 10, from: 8,
+    w: 238, h: 201, frameMs: 80, at: 'self', scale: .62, pixelated: true,
+    pivot: [.5,0.8606965174129353], dy: 28.5, attach: true },
+  'vn-ult-charge': { ground: [174,172,174,172,173,173,173,173,174,173], file: 'fx-vaelric-ult-vanish.png', frames: 3, stripFrames: 10, from: 0,
+    w: 238, h: 201, frameMs: 80, at: 'self', scale: .6, pivot: [.5, 0.8606965174129353], dy: 28.5, attach: true },
+  'vn-ult-loop': { ground: [174,172,174,172,173,173,173,173,174,173], file: 'fx-vaelric-ult-vanish.png', frames: 2, stripFrames: 10, from: 3, repeat: 2,
+    w: 238, h: 201, frameMs: 120, at: 'self', scale: .6, pivot: [.5, 0.8606965174129353], dy: 28.5, attach: true },
+  'vn-ult-vanish': { ground: [174,172,174,172,173,173,173,173,174,173], file: 'fx-vaelric-ult-vanish.png', frames: 5, stripFrames: 10, from: 5,
+    w: 238, h: 201, frameMs: 80, at: 'self', scale: .6, pivot: [.5, 0.8606965174129353], dy: 28.5, attach: true },
+  'vn-ult-impact': { ground: [211,211,212,211,211,211,211,212,209,212,211,211], file: 'fx-vaelric-ult-impact.png', frames: 12,
+    w: 308, h: 248, frameMs: 40, at: 'target', scale: .8, pivot: [.5, 0.8508064516129032], dy: 28.5, attach: true },
+  ...Object.fromEntries(Array.from({ length: 6 }, (_, i) => [`vn-ult-phantom-${i + 1}`, {
+    file: `fx-vaelric-ult-phantom-${i + 1}.png`, frames: 1, w: 300, h: 220,
+    frameMs: 80, fadeOutMs: 40, at: 'target' as const, scale: 2/3,
+    pivot: [.5, 190/220] as [number, number], dy: 27.25, attach: true,
+  }])),
+
+  // Content-cut s2.zip poses with transparent gutters; preserve reviewed world pixels-per-cell while restoring full extents.
+  'vn-s2-impact-1': { file: 'fx-vaelric-s2-impact-1.png', frames: 8, w: 197, h: 145, frameMs: 1000 / 24,
+    at: 'self', groundArea: 'FRONT_RECT_2X3', on: 'impact', hitIndex: 0, attach: false, orient: 'flip',
+    pivot: [0.5, 120 / 145], fitCells: 197 * 2.25 / 126, dy: 27.25 },
+  'vn-s2-impact-2': { file: 'fx-vaelric-s2-impact-2.png', frames: 8, w: 197, h: 145, frameMs: 1000 / 24,
+    at: 'self', groundArea: 'FRONT_RECT_2X3', on: 'impact', hitIndex: 1, attach: false, orient: 'flip',
+    pivot: [0.5, 120 / 145], fitCells: 197 * 2.25 / 126, dy: 27.25 },
+  'vn-s2-impact-3': { file: 'fx-vaelric-s2-impact-3.png', frames: 8, w: 197, h: 145, frameMs: 1000 / 24,
+    at: 'self', groundArea: 'FRONT_RECT_2X3', on: 'impact', hitIndex: 2, attach: false, orient: 'flip',
+    pivot: [0.5, 120 / 145], fitCells: 197 * 2.25 / 126, dy: 27.25 },
+  // Supplied s1.zip: event-owned Main/Loop end on actual dash arrival.
+  'vn-s1-main': { file: 'fx-vaelric-s1-main.png', frames: 8, w: 131, h: 350, frameMs: 12.5,
+    at: 'self', dy: -22.125, pivot: [0.5, 0.4716850829], scale: 1 / 1.5, attach: true },
+  'vn-s1-loop': { file: 'fx-vaelric-s1-loop.png', frames: 8, w: 104, h: 277, frameMs: 25,
+    at: 'self', dy: -22.125, pivot: [0.5, 0.4806629834], scale: 1 / 1.5, attach: true },
+  'vn-s1-impact': { file: 'fx-vaelric-s1-impact.png', frames: 8, w: 96, h: 255, frameMs: 40,
+    at: 'target', on: 'impact', hitIndex: 0, perHit: 'all', hitsOnly: true, dy: -22.125,
+    pivot: [0.5, 0.5200276243], scale: 1 / 1.5, attach: true, orient: 'flip' },
   'el-ult-charge': { file: 'fx-elira-ult-charge.png', frames: 10, w: 112, h: 157, frameMs: 40,
     at: 'self', event: 'CHARGE_START', pivot: [0.5, 0.89172], dy: 27.25, fitCells: 1.5, orient: 'flip', layer: 'under' },
   'el-ult-main': { file: 'fx-elira-ult-main.png', frames: 8, w: 520, h: 440, frameMs: 100,

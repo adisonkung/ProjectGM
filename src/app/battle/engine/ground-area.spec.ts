@@ -28,3 +28,17 @@ describe('ground-targeted areas', () => {
     expect(hits('FRONT_LINE_2', c)).toEqual([1, 2]);
   });
 });
+
+describe('locked forward 2×3 footprint', () => {
+  it('includes six forward cells and stacked units, excluding own/behind/third columns at either facing', () => {
+    for (const left of [false, true]) {
+      const direction = left ? -1 : 1;
+      const caster = { id: 1, pos: { r: 1, c: 8 }, actionFacing: { left } };
+      const candidates = [0,1,2].flatMap(r => [1,2].map(n => ({ id: r * 2 + n + 1, pos: { r, c: 8 + n * direction } })));
+      const outside = [{ id: 20, pos: { r: 1, c: 8 } }, { id: 21, pos: { r: 1, c: 8 - direction } }, { id: 22, pos: { r: 1, c: 8 + 3 * direction } }];
+      const stacked = { id: 23, pos: { r: 1, c: 8 + direction } };
+      const hits = resolveArea({ pattern: 'FRONT_RECT_2X3', caster, primary: outside[1], candidates: [...candidates, ...outside, stacked] });
+      expect(hits.map(h => h.id).sort()).toEqual([...candidates, stacked].map(h => h.id).sort());
+    }
+  });
+});

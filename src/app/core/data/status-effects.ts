@@ -5,6 +5,11 @@ import { StatusEffectDefinition } from '../models/combat';
  * Poison is one definition used by Shade and Corvin: same source refreshes, different sources coexist.
  */
 export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
+  // Vaelric Phase A, user 2026-10-20: provisional DEF reduction; refresh never compounds it.
+  curse_mark: {
+    id: 'curse_mark', name: 'ตราคำสาป', duration: 4, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { defenseMultiplier: 0.8 },
+  },
   // Mirelle Phase A (2026-10-17, user): provisional control values, no new class.
   slow: {
     id: 'slow', name: 'เชื่องช้า', duration: 2, stackPolicy: 'REFRESH_DURATION',

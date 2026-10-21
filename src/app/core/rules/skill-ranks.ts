@@ -211,6 +211,8 @@ export function skillLines(s: SkillDefinition): string[] {
         const speed = e.modifiers?.attackSpeedMultiplier ?? d?.modifiers.attackSpeedMultiplier;
         if (move != null) line += ` · ความเร็วเดิน ${pct(move)}`;
         if (speed != null) line += ` · ความเร็วโจมตี ${pct(speed)}`;
+        const defense = e.modifiers?.defenseMultiplier ?? d?.modifiers.defenseMultiplier;
+        if (defense != null) line += ` · DEF ${pct(defense)}`;
         if (e.when) line += ` · เมื่อ${e.when.present ? 'มี' : 'ไม่มี'} ${STATUS_EFFECTS[e.when.status]?.name ?? e.when.status}`;
         out.push(line);
         break;

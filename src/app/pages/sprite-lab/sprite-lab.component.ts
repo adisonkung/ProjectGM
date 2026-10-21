@@ -1,3 +1,4 @@
+import { sequenceFx } from '../../battle/render/sequence-fx';
 import { Component, computed, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView } from '../../battle/board/board.component';
@@ -16,6 +17,7 @@ import { STATUS_ICONS } from '../../core/data/visuals';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
 import { StatusFxPlayback } from '../../battle/render/status-fx';
+import { MotionFxPlayback } from '../../battle/render/motion-fx';
 import { skillReview } from './skill-review';
 import { SkillDefinition } from '../../core/models/combat';
 
@@ -51,7 +53,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
         <p class="comparison">ทดสอบหนึ่งครั้งด้วยระบบต่อสู้ · เป้าแรก{{ initialStatus ? ' มี ' + initialStatus + ' ก่อนร่าย' : ' ยังไม่มีสถานะก่อนร่าย' }} · จังหวะสำหรับรีวิว</p>
       }
       <div class="stage" [class.anchors]="showAnchors()">
-        <app-board #board [background]="previewBackground" [units]="units()" [fx]="fx()" [projectiles]="projectiles()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
+        <app-board #board (finishedFx)="onFxFinished($event)" [background]="previewBackground" [units]="units()" [fx]="fx()" [projectiles]="projectiles()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
         @if (showAnchors()) {
           <i class="mark root" [style.left]="mark().root.x" [style.top]="mark().root.y" title="root (feet)"></i>
           @for (t of mark().anchors; track t.name) { <i class="mark tip" [style.left]="t.x" [style.top]="t.y" [title]="t.name"><b>{{ t.name }}</b></i> }
@@ -102,6 +104,11 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
 })
 export class SpriteLabComponent implements OnDestroy {
   readonly spriteHeroes = HEROES.filter(h => h.sprite && SHEETS[h.sprite]);
+  onFxFinished(ids: number[]): void {
+    const done = new Set(ids);
+    this.fx.update(list => list.filter(f => !done.has(f.id)));
+  }
+
   private readonly qp = inject(ActivatedRoute).snapshot.queryParamMap;
   /** Optional lab-only comparison uses real roster sheets, never changes saves or combat. */
   readonly comparisonHeroes = HEROES.filter(h => (this.qp.get('compare') ?? '').split(',').includes(h.id) && h.sprite && SHEETS[h.sprite]).slice(0, 2);
@@ -111,8 +118,19 @@ export class SpriteLabComponent implements OnDestroy {
   private readonly targetDistance = Math.min(5, Math.max(1, Number(this.qp.get('distance')) || 1));
   readonly engineReview = this.qp.get('combat') === '1';
   readonly initialStatus = this.qp.get('status') ?? '';
-  private readonly dummyIds = ['square', 'home', 'field'].includes(this.qp.get('formation') ?? '') ? [2, 3, 4, 5] : DUMMY_IDS;
+  private readonly dummyIds = this.qp.get('formation') === 'front2x3' ? [2, 3, 4, 5, 6, 7] : ['square', 'home', 'field'].includes(this.qp.get('formation') ?? '') ? [2, 3, 4, 5] : DUMMY_IDS;
   private readonly reviewVitals = signal<Record<number, { hpPct: number; shieldPct: number }>>({});
+  private readonly reviewPositions = signal<Partial<Record<number, { r: number; c: number; flip?: boolean }>>>({});
+  private readonly motionVisuals = new MotionFxPlayback({
+    spawn: (name, source, loop) => {
+      const u = this.units().find(u => u.id === source)!;
+      const id = ++this.id;
+      this.fx.update(l => [...l, { id, name, r: u.r, c: u.c, angle: 0, flip: u.flip,
+        offset: fxOffset(name), under: FX[name].layer === 'under', follow: source, managed: true, loop }]);
+      return id;
+    },
+    remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
+  });
   private readonly reviewStatuses = signal<Record<number, { id: string; left: number }[]>>({});
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
@@ -164,7 +182,7 @@ export class SpriteLabComponent implements OnDestroy {
   private readonly boardEl = viewChild(BoardComponent, { read: ElementRef });
 
   private enginePlayback(skill: SkillDefinition): boolean {
-    return this.engineReview || skill.target === 'LOWEST_HP_ALLY' || skill.effects.some(e => e.type === 'FIELD') || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
+    return this.engineReview || skill.action?.type === 'STATIONARY' || skill.movement?.type === 'DASH_PATH' || skill.target === 'LOWEST_HP_ALLY' || skill.effects.some(e => e.type === 'FIELD') || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
   }
 
   setRenderer(r: BoardRenderer): void {
@@ -194,7 +212,7 @@ export class SpriteLabComponent implements OnDestroy {
     const b = this.blinked();
     return [
       { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left, ...(this.reviewVitals()[HERO_ID] ?? {}),
-        blink: !!b, blinkFade: !b?.ownFade },
+        blink: !!b, blinkFade: !b?.ownFade, ...(this.reviewPositions()[HERO_ID] ?? {}) },
       ...this.comparisonHeroes.filter(other => other.id !== h.id).map((other, i) => ({
         ...base, id: 100 + i, side: 'ally' as const, name: other.name, cls: other.cls,
         r: 1, c: hc - (i + 1) * 2 * (left ? -1 : 1), sprite: other.sprite, star: other.star, heroId: other.id, flip: left,
@@ -204,8 +222,8 @@ export class SpriteLabComponent implements OnDestroy {
         hpPct: this.reviewVitals()[id]?.hpPct ?? (support ? (i === 0 ? 40 : 70) : 100),
         shieldPct: this.reviewVitals()[id]?.shieldPct ?? 0,
         name: support ? 'พันธมิตรฝึก' : this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
-        r: centeredField ? [1, 0, 2, 2][i] : fieldSupport ? [0, 1, 2, 2][i] : this.dummyIds.length === 4 ? 1 + Math.floor(i / 2) : 1,
-        c: centeredField ? (left ? 15 - [7, 6, 8, 3][i] : [7, 6, 8, 3][i]) : fieldSupport ? (left ? 15 - [1, 2, 4, 1][i] : [1, 2, 4, 1][i]) : hc + (this.targetDistance + (this.dummyIds.length === 4 ? i % 2 : i)) * (left ? -1 : 1),
+        r: this.dummyIds.length === 6 ? Math.floor(i / 2) : centeredField ? [1, 0, 2, 2][i] : fieldSupport ? [0, 1, 2, 2][i] : this.dummyIds.length === 4 ? 1 + Math.floor(i / 2) : 1,
+        c: centeredField ? (left ? 15 - [7, 6, 8, 3][i] : [7, 6, 8, 3][i]) : fieldSupport ? (left ? 15 - [1, 2, 4, 1][i] : [1, 2, 4, 1][i]) : hc + (this.targetDistance + (this.dummyIds.length >= 4 ? i % 2 : i)) * (left ? -1 : 1),
         sprite: support ? 'hero-bailong.png' : this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: support ? left : !left,
         statuses: (this.reviewStatuses()[id] ?? []).filter(b => STATUS_ICONS[b.id]).map(b => ({ ...b, icon: STATUS_ICONS[b.id] })),
       })),
@@ -335,14 +353,14 @@ export class SpriteLabComponent implements OnDestroy {
   private spawn(kind: SkillKind, trig: FxTrigger, hits: number[] = []): void {
     const sprite = this.hero().sprite;
     const names = fxFor(sprite, kind, trig);
-    if (!names.length && trig.on === 'event' && trig.event === 'VFX_SPAWN') this.note(-1, 'no VFX for VFX_SPAWN → skipped (combat unaffected)');
+    if (!names.length && !SHEETS[sprite ?? '']?.sequenceFx?.[kind]?.length && trig.on === 'event' && trig.event === 'VFX_SPAWN') this.note(-1, 'no VFX for VFX_SPAWN → skipped (combat unaffected)');
     const units = this.units();
     const me = units[0];
     for (const name of names) {
       const def = FX[name];
-      const at = def.at === 'target' ? (trig.on === 'event' ? this.dummyIds.slice(0, 1) : hits).slice(def.exceptPrimary ? 1 : 0).slice(0, def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
+      const at = def.at === 'target' ? (trig.on === 'event' ? this.dummyIds.slice(0, 1) : hits).slice(def.exceptPrimary ? 1 : 0).slice(0, def.perHit === 'all' ? undefined : def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
       for (const u of at) {
-        const cell = groundFxCell(def, { r: me.r, c: me.c }, { r: u.r, c: u.c });
+        const cell = groundFxCell(def, { r: me.r, c: me.c }, { r: u.r, c: u.c }, !!me.flip);
         const f: FxView = { id: ++this.id, r: cell.r, c: cell.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
           follow: fxAttached(name) ? u.id : undefined };
         this.fx.update(l => [...l, f]);
@@ -373,11 +391,18 @@ export class SpriteLabComponent implements OnDestroy {
     const units = this.units();
     const me = units[0];
     const targets = units.filter(u => this.dummyIds.includes(u.id));
+    const sequence = sequenceFx(this.hero().sprite, kind, me.id, this.dummyIds[0], this.key,
+      id => { const u = units.find(x => x.id === id)!; return { r: u.r, c: u.c }; }, !!me.flip, this.qp.get('fxVariant') ?? undefined)
+      .map(f => ({ ...f, id: ++this.id }));
+    this.fx.update(list => [...list, ...sequence]);
+    for (const f of sequence) if (!f.track) this.at((fxDuration(f.name) + (f.delayMs ?? 0) + 50) / 1000,
+      () => this.fx.update(list => list.filter(x => x.id !== f.id)));
     const review = skillReview(this.hero().id, kind, { r: me.r, c: me.c }, targets.map((u, i) =>
       ({ id: u.id, pos: { r: u.r, c: u.c }, statuses: i === 0 && this.initialStatus ? [this.initialStatus] : [] })), this.qp.get('enemy') ?? 'forest_slime', this.faceLeft() && kitOf(this.hero().id, this.hero().cls)[kind].effects.some(e => e.type === 'FIELD' && e.field.aura?.team === 'ALLY') ? 'enemy' : 'ally');
     const id = (n: number) => review.ids.get(n)!;
     for (const sample of review.samples) this.at(sample.t, () => {
       this.reviewStatuses.set(sample.statuses);
+      this.reviewPositions.set(sample.positions);
       this.reviewVitals.set(sample.vitals);
       this.fieldVisuals.advance(sample.t);
       this.statusVisuals.sync(Object.entries(sample.statuses).flatMap(([target, buffs]) => buffs.filter(b => b.left > 0).map(b => ({
@@ -391,12 +416,19 @@ export class SpriteLabComponent implements OnDestroy {
           this.note(sample.t, `${e.type}${e.type === 'FIELD_ENDED' ? ' · ' + e.reason : e.type === 'FIELD_PULSED' ? ' · ' + (e.index + 1) : ''}`);
           this.fieldVisuals.handle(e, this.hero().sprite, 0, sample.t);
         } else if (e.type === 'animEvent') {
+          this.motionVisuals.handle(id(e.src), this.hero().sprite, e.kind, e.event);
           // Engine launch + authored clip may describe the same marker in one step; present it only once.
           const marker = `${e.event}:${e.kind ?? kind}:${e.index ?? 0}`;
           if (markers.has(marker)) continue;
           markers.add(marker);
           this.note(sample.t, e.event);
           if (e.event !== 'DAMAGE' && e.event !== 'IMPACT') this.spawn(kind, { on: 'event', event: e.event, index: e.index });
+        } else if (e.type === 'blink' && id(e.src) === HERO_ID) {
+          this.blinked.set({ dc: 0, ownFade: !!SHEETS[this.hero().sprite ?? '']?.anims[kind]?.opacity });
+          this.at(.1, () => this.blinked.set(null));
+          this.note(sample.t, 'BLINK');
+        } else if (e.type === 'dashMark') {
+          this.note(sample.t, `MARK ${id(e.dst)}`);
         } else if (e.type === 'projectile') {
           const from = units.find(u => u.id === id(e.src))!;
           const to = units.find(u => u.id === id(e.dst))!;
@@ -459,10 +491,12 @@ export class SpriteLabComponent implements OnDestroy {
     this.timers = [];
     this.fieldVisuals.clear();
     this.statusVisuals.clear();
+    this.motionVisuals.clear();
     this.projectiles.set([]);
     this.fx.set([]);
     this.floats.set([]);
     this.reviewStatuses.set({});
     this.reviewVitals.set({});
+    this.reviewPositions.set({});
   }
 }

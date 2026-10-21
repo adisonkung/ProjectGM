@@ -56,7 +56,7 @@ export interface SkillHost {
   /** a free cell next to `at`, away from `from` (null = nobody can land there) */
   freeCellNear(at: Cell, from: Cell): Cell | null;
   /** teleport / dash the unit to a cell (dash = fast visible slide, teleport = instant) */
-  relocate(u: BattleUnit, cell: Cell, how: 'blink' | 'dash'): void;
+  relocate(u: BattleUnit, cell: Cell, how: 'blink' | 'dash', duration?: number): void;
   canLand(cell: Cell): boolean;
   /** +3 gauge for a basic action that landed */
   basicGauge(u: BattleUnit): void;
@@ -153,7 +153,9 @@ export class SkillSystem {
   private resolveRule(u: BattleUnit, s: SkillDefinition, rule: TargetRule, current: BattleUnit | null): BattleUnit | null {
     const range = this.rangeOf(u, s);
     const foes = this.h.foes(u);
-    const inRange = (t: BattleUnit) => distance(t.pos, u.pos) <= range;
+    const path = s.movement?.type === 'DASH_PATH' ? s.movement : undefined;
+    const inRange = (t: BattleUnit) => distance(t.pos, u.pos) <= range && (!path ||
+      (t.pos.r === u.pos.r && Math.abs(t.pos.c - u.pos.c) > 0 && Math.abs(t.pos.c - u.pos.c) < path.distance));
     const blink = s.movement?.type === 'BLINK_BEHIND';
     const landable = (t: BattleUnit) => !blink || distance(t.pos, u.pos) <= 1 || !!this.h.freeCellNear(t.pos, u.pos);
     const byHp = (a: BattleUnit, b: BattleUnit) => hpPct(a) - hpPct(b) || distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id;
@@ -528,6 +530,14 @@ export class SkillSystem {
       this.h.emit({ type: 'cast', src: u.id, skill: s.name, kind: kind as SkillKind, dst: target.id });
       u.castLock = Math.max(u.castLock, tm.total, SKILL_LOCK);
     }
+    if (s.movement?.type === 'DASH_PATH' && slot !== 'attack') {
+      this.pathDash(u, slot, s, target, tm);
+      return;
+    }
+    if (s.action?.type === 'STATIONARY' && slot !== 'attack') {
+      this.stationaryAction(u, slot, s, target, tm);
+      return;
+    }
     // semantic clip events (sheets that author `events`): presentation only — DAMAGE stays on tm.hit below and
     // IMPACT fires where the hit really lands (land); a dead caster drops the rest (later). Events before the hit
     // are queued now, the ones at / after it once the hit is queued (same-time order: DAMAGE → IMPACT → RECOVERY…)
@@ -568,7 +578,7 @@ export class SkillSystem {
         if (authoredImpact) this.h.emit({ type: 'animEvent', src: u.id, event: 'IMPACT', name: `${s.id.toUpperCase()}_IMPACT`, kind: kind as SkillKind, index });
         this.h.emit({ type: 'impact', src: u.id, dst, kind: kind as SkillKind, index, hits: shown.map(f => f.id) });
       }
-      if (mv?.type === 'DASH_THROUGH') this.dashThrough(u, primary, at);
+      if (mv?.type === 'DASH_THROUGH' && (!mv.firstHitOnly || index === 0)) this.dashThrough(u, primary, at);
     };
     // multi-hit: the clip's DAMAGE events place the hits (else `repeat.gap`); `weights` split the multipliers
     const shots = s.repeat?.count ?? 1;
@@ -663,7 +673,7 @@ export class SkillSystem {
                   let mul = (main ? e.primary : e.secondary ?? e.primary) * rankPower(u, slot);
                   if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
                   if (e.bonusVsGuard && this.h.guarded(f)) mul *= e.bonusVsGuard;
-                  if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
+                  if (e.interrupt && (f.casting || f.skillAction)) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
                   else if (e.breakPower && f.casting) this.h.breakCast(u, f, breakPowerOf(e.breakPower, u, slot));
                   const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);
                   if (this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot })) now.push(f);
@@ -684,14 +694,14 @@ export class SkillSystem {
               const mul = (e.secondary ?? e.primary) * rankPower(u, slot);
               this.h.later(delay, u, () => {
                 if (!f.alive) return;
-                if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
+                if (e.interrupt && (f.casting || f.skillAction)) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
                 const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);
                 const ok = this.h.hit(u, f, mul, { crit, damageType: e.damageType, sourceId: s.id, slot });
                 if (slot !== 'attack') this.h.emit({ type: 'impact', src: u.id, dst: f.id, kind: slot as SkillKind, index: k, hits: ok ? [f.id] : [] });
               });
               continue;
             }
-            if (e.interrupt && f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
+            if (e.interrupt && (f.casting || f.skillAction)) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
             else if (e.breakPower && f.casting) this.h.breakCast(u, f, breakPowerOf(e.breakPower, u, slot));
             // ground-targeted areas: everyone in the front cell takes the primary multiplier (no unit is "the" target)
             const g = groundCell(e.area, u, p, foes, f);
@@ -741,7 +751,7 @@ export class SkillSystem {
         case 'INTERRUPT': {
           const foes = this.h.foes(u);
           for (const f of resolveArea({ pattern: e.area, caster, primary: focusOf(primary), center: e.center, candidates: foes })) {
-            if (f.casting) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
+            if (f.casting || f.skillAction) this.h.interrupt(u, f, breakPowerOf(e.breakPower, u, slot));
           }
           break;
         }
@@ -779,6 +789,131 @@ export class SkillSystem {
       }
     }
     return [...damaged];
+  }
+
+  /** Committed path: unique marks, an arrival-based weighted burst, facing held through recovery. */
+  private pathDash(u: BattleUnit, kind: SkillKind, s: SkillDefinition, target: BattleUnit, tm: ReturnType<typeof animTiming>): void {
+    const movement = s.movement;
+    if (movement?.type !== 'DASH_PATH') return;
+    const start = animEvents(u.sprite, kind).find(e => e.event === 'DASH_START')?.t ?? tm.move;
+    const direction = Math.sign(target.pos.c - u.pos.c) || (u.side === 'ally' ? 1 : -1);
+    const facing = { left: direction < 0, kind, motion: true };
+    u.actionFacing = facing;
+    u.targetId = target.id;
+    const marked = new Set<number>();
+    let from: Cell = { ...u.pos }, destination = { ...u.pos }, previous = 0, started = false;
+    const semantic = (event: 'DASH_START' | 'DASH_END' | 'DAMAGE' | 'IMPACT', index?: number) =>
+      this.h.emit({ type: 'animEvent', src: u.id, kind, event, index, name: `${s.id.toUpperCase()}_${event}` });
+    // Keep ordinary anticipation/recovery events; movement owns DASH_START/END and the actual contact markers.
+    for (const ev of animEvents(u.sprite, kind)) {
+      if (['DASH_START', 'DASH_END', 'DAMAGE', 'IMPACT'].includes(ev.event)) continue;
+      this.h.later(ev.t, u, () => this.h.emit({ type: 'animEvent', src: u.id, kind,
+        event: ev.event, index: ev.index, name: `${s.id.toUpperCase()}_${ev.event}` }));
+    }
+    this.h.later(start, u, () => {
+      from = { ...u.pos };
+      destination = { ...from };
+      // Existing landing policy: an in-bounds empty cell. Shorten only along the locked path, never turn sideways.
+      for (let n = movement.distance; n > 0; n--) {
+        const at = { r: from.r, c: from.c + direction * n };
+        if (this.h.canLand(at)) { destination = at; break; }
+      }
+      started = true;
+      semantic('DASH_START');
+      if (destination.c !== from.c) this.h.relocate(u, destination, 'dash', movement.duration);
+    });
+    const scans = Math.max(1, Math.ceil(movement.duration / 0.05));
+    for (let i = 1; i <= scans; i++) this.h.later(start + movement.duration * i / scans, u, () => {
+      if (!started) return;
+      const length = Math.abs(destination.c - from.c), passed = length * i / scans;
+      for (const foe of this.h.foes(u)) {
+        const along = (foe.pos.c - from.c) * direction;
+        if (foe.pos.r !== from.r || along <= 0 || along >= length || along <= previous + 1e-9 || along > passed + 1e-9 || marked.has(foe.id)) continue;
+        marked.add(foe.id);
+        this.h.emit({ type: 'dashMark', src: u.id, dst: foe.id });
+      }
+      previous = passed;
+    });
+    this.h.later(start + movement.duration, u, () => {
+      if (!started) return;
+      // Arrive before F9's effects, including when the engine's last glide sample was on the previous tick.
+      if (u.dashMotion) {
+        u.x = u.dashMotion.toX; u.y = u.dashMotion.toY; delete u.dashMotion;
+      }
+      semantic('DASH_END');
+    });
+    // Schedule against the original action clock: no nested-step drift, no damage before arrival.
+    for (let index = 0; index < (s.repeat?.count ?? 1); index++) this.h.later(
+      start + movement.duration + index * (s.repeat?.gap ?? 0), u, () => {
+      if (!started) return;
+      semantic('DAMAGE', index);
+      const valid = new Map(this.h.foes(u).map(f => [f.id, f]));
+      const hits: number[] = [];
+      const weighted = repeatHit(s, index);
+      const single: SkillDefinition = { ...weighted, movement: undefined, repeat: undefined,
+        effects: weighted.effects.map(e => e.type === 'DAMAGE' ? { ...e, area: 'SINGLE', center: 'TARGET' } : e) };
+      for (const id of marked) {
+        const foe = valid.get(id);
+        if (foe) hits.push(...this.applyEffects(u, single, kind, foe, { ...foe.pos }).map(f => f.id));
+      }
+      semantic('IMPACT', index);
+      this.h.emit({ type: 'impact', src: u.id, kind, index, hits: [...new Set(hits)] });
+    });
+    this.h.later(tm.total, u, () => {
+      // A later action may own facing by now; never release another action's lock.
+      if (u.actionFacing !== facing) return;
+      delete u.actionFacing;
+      const foes = this.h.foes(u);
+      const next = foes.find(f => f.id === u.targetId) ?? this.h.focus(u) ??
+        foes.sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0];
+      u.targetId = next?.id ?? null;
+    });
+  }
+
+  /** Locked action: collect live recipients at authored hits; optional semantic retreat/finishing turn never chases a target. */
+  private stationaryAction(u: BattleUnit, kind: SkillKind, s: SkillDefinition, target: BattleUnit, tm: ReturnType<typeof animTiming>): void {
+    const action = { id: s.id, name: s.name, kind, interruptible: s.action!.interruptible };
+    const facing = { left: (Math.sign(target.pos.c - u.pos.c) || (u.side === 'ally' ? 1 : -1)) < 0, kind };
+    u.skillAction = action;
+    u.actionFacing = facing;
+    u.targetId = target.id;
+    const at = (time: number, fn: () => void) => this.h.later(time, u, () => {
+      if (u.skillAction === action) fn();
+    });
+    for (const event of animEvents(u.sprite, kind)) {
+      if (event.event === 'DAMAGE' || event.event === 'IMPACT') continue;
+      at(event.t, () => {
+        const retreat = s.action?.retreat;
+        if (retreat?.event === event.event) {
+          const cell = { r: u.pos.r, c: u.pos.c + (facing.left ? 1 : -1) * retreat.cells };
+          if (this.h.canLand(cell)) this.h.relocate(u, cell, 'blink');
+        }
+        const turn = s.action?.faceAway;
+        if (turn?.event === event.event && (turn.index ?? 0) === event.index) {
+          const dx = target.pos.c - u.pos.c;
+          if (dx !== 0) facing.left = dx > 0;
+        }
+        this.h.emit({ type: 'animEvent', src: u.id, kind, event: event.event,
+          index: event.index, dst: target.alive ? target.id : undefined, name: `${s.id.toUpperCase()}_${event.event}` });
+      });
+    }
+    for (const [index, time] of tm.hits.entries()) at(time, () => {
+      // Locked executions never redirect or splash around an invalid/dead primary.
+      if (s.action?.lockedTarget && !this.h.foes(u).some(f => f.id === target.id)) return;
+      this.h.emit({ type: 'animEvent', src: u.id, kind, event: 'DAMAGE', index, name: `${s.id.toUpperCase()}_HIT_${index + 1}` });
+      const hits = this.applyEffects(u, repeatHit(s, index), kind, target, { ...target.pos });
+      this.h.emit({ type: 'animEvent', src: u.id, kind, event: 'IMPACT', index, name: `${s.id.toUpperCase()}_IMPACT_${index + 1}` });
+      this.h.emit({ type: 'impact', src: u.id, kind, index, hits: hits.map(f => f.id) });
+    });
+    at(tm.total, () => {
+      delete u.skillAction;
+      if (u.actionFacing !== facing) return;
+      delete u.actionFacing;
+      const foes = this.h.foes(u);
+      const next = foes.find(f => f.id === u.targetId) ?? this.h.focus(u) ??
+        foes.sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0];
+      u.targetId = next?.id ?? null;
+    });
   }
 
   /** Ghost Dash: pass through the primary target and land behind it (nearest valid cell otherwise) */

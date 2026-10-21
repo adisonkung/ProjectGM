@@ -12,6 +12,8 @@
     "balance": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/balance.js",
     "sprites:optimize": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/sprite-dump.js > dist/sprite-dump.json && python3 tools/sprites/optimize.py dist/sprite-dump.json",
     "mirelle-sync": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/mirelle-sync.js > dist/mirelle-sync-runtime.json && python3 tools/sprites/mirelle_sync.py dist/mirelle-sync-runtime.json",
+    "vaelric-s2-sync": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/vaelric-s2-sync.js > dist/vaelric-s2-runtime.json && python3 tools/sprites/vaelric_s2_sync.py dist/vaelric-s2-runtime.json",
+    "vaelric-ult-sync": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/vaelric-ult-sync.js",
     "hero-sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/hero-sim.js",
     "bailong-ult-sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/bailong-ult-sim.js",
     "economy": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/economy.js",

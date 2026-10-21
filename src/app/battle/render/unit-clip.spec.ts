@@ -54,6 +54,30 @@ describe('UnitClip (one-clock character animation)', () => {
     expect(tl.frameAt(startF6 + 0.31)).toBe(ult.seq![6]);
   });
 
+  it('Phantom Crossing holds F8 throughout movement and preserves every recovery pose before Idle', () => {
+    const sheet = SHEETS['hero-vaelric.png'];
+    const tl = clipTimeline(sheet.anims.skill!, 'skill', { anim: 'skill' });
+    expect(tl.frameAt(.30 + 1e-7)).toBe(7);
+    expect(tl.frameAt(.599999)).toBe(7);
+    expect(tl.frameAt(.600001)).toBe(8);
+    for (let frame = 9; frame <= 25; frame++) {
+      expect(tl.frameAt(.6 + (frame - 9) * .03 + .015)).toBe(frame - 1);
+    }
+    const c = new UnitClip(sheet, 0);
+    c.request({ anim: 'skill' }, 1, 0, false);
+    c.request({ anim: 'hurt' }, 2, .7, false);
+    expect(c.pose(1.109, 0, false)).toEqual(jasmine.objectContaining({ row: 5, col: 24 }));
+    c.pose(1.111, 0, false);
+    expect(c.name).toBe('idle');
+  });
+
+  it('Hollow Requiem plays all25 poses at20FPS without hit pauses, then returns to Idle', () => {
+    const sheet = SHEETS['hero-vaelric.png'];
+    const c = new UnitClip(sheet,0); c.request({anim:'skill2'},1,0,false);
+    for (let frame=0;frame<25;frame++) expect(c.pose(frame*.05+.025,0,false)).toEqual(jasmine.objectContaining({row:6,col:frame}));
+    c.pose(1.251,0,false);expect(c.name).toBe('idle');
+  });
+
   it('root motion and opacity curves are sampled on the clip clock (Mo Ye Phantom Step)', () => {
     const s2 = SHEETS['hero-moye.png'].anims.skill2!;
     const tl = clipTimeline(s2, 'skill2', { anim: 'skill2' });

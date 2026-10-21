@@ -46,3 +46,16 @@ describe('Pixi one-shot ownership', () => {
     expect(sprite.destroy).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('scripted FX sprite reuse', () => {
+  it('recycles bounded owned sprites, detaches them immediately, and keeps legacy disposal unchanged', () => {
+    const layer=Object.create(PixiUnitLayer.prototype) as {fxPool:unknown[];retireFx(sprite:unknown,reusable:boolean):void};
+    layer.fxPool=[];
+    const sprites=Array.from({length:65},()=>({visible:true,parent:{removeChild:jasmine.createSpy()},destroy:jasmine.createSpy()}));
+    sprites.forEach(s=>layer.retireFx(s,true));
+    expect(layer.fxPool.length).toBe(64);
+    expect(sprites[0].visible).toBeFalse();expect(sprites[0].parent.removeChild).toHaveBeenCalledWith(sprites[0]);
+    expect(sprites[64].destroy).toHaveBeenCalledTimes(1);
+    const legacy={destroy:jasmine.createSpy()};layer.retireFx(legacy,false);expect(legacy.destroy).toHaveBeenCalledTimes(1);
+  });
+});

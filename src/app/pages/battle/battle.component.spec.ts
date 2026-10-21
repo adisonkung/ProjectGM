@@ -86,9 +86,11 @@ describe('BattleComponent', () => {
   it('stage end: a short outro on the battle screen before the result popup', fakeAsync(() => {
     component.start();
     component.setSpeed(4);
+    component.fx.set([{id:99999,r:1,c:5,name:'vn-ult-phantom-1',angle:0,owner:99999,managed:true}]);
     const step = () => (component as unknown as { tick(): void }).tick();
     for (let i = 0; i < 6000 && !component.ending(); i++) step();
     expect(component.ending()).toBeTrue();
+    expect(component.fx().some(f=>f.owner===99999)).toBeFalse();
     expect(component.result()).toBeNull();
     expect(component.outcome()).not.toBeNull(); // rewards already granted
     fixture.detectChanges();
@@ -126,6 +128,29 @@ describe('BattleComponent', () => {
     tick(2000);
     component.ngOnDestroy();
     discardPeriodicTasks();
+  }));
+
+  it('cleans all pending/lingering execution layers on cancel, death, interrupt, normal end and wave transitions', fakeAsync(() => {
+    component.start();component.openMenu();
+    const host=component as unknown as {engine:BattleEngine;handleEvents(events:BattleEvent[]):void};
+    const caster=host.engine.units.find(u=>u.side==='ally')!, target=host.engine.units.find(u=>u.side==='enemy')!;
+    caster.sprite='hero-vaelric.png';
+    const cast:BattleEvent={type:'cast',src:caster.id,dst:target.id,kind:'ult',skill:'Funeral of a Thousand Cuts'};
+    const endings:BattleEvent[]=[
+      {type:'castCancel',src:caster.id,skill:'ult',reason:'phase'},
+      {type:'death',dst:caster.id},{type:'interrupt',src:target.id,dst:caster.id,skill:'interrupt'},
+      {type:'ADVANCE_STARTED',from:0,to:1,duration:1}, {type:'REGROUP_STARTED',heroes:[caster.id]},
+    ];
+    for(const end of endings) {
+      host.handleEvents([cast]);expect(component.fx().filter(f=>f.owner===caster.id).length).toBe(30);
+      host.handleEvents([end]);expect(component.fx().filter(f=>f.owner===caster.id)).toEqual([]);
+    }
+    host.handleEvents([cast]);
+    host.handleEvents([{type:'animEvent',src:caster.id,kind:'ult',event:'ANIMATION_END',name:'ULT_END'}]);
+    expect(component.fx().every(f=>!!f.track)).toBeTrue();expect(component.fx().length).toBe(30);
+    component.onFxFinished(component.fx().map(f=>f.id));expect(component.fx()).toEqual([]);
+    host.handleEvents([cast]);component.exitStage();expect(component.fx()).toEqual([]);
+    tick(5000);component.ngOnDestroy();discardPeriodicTasks();
   }));
 
   it('field events own the managed loop and only natural expiry produces the visual shatter', fakeAsync(() => {

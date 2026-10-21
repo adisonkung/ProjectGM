@@ -16,6 +16,8 @@ export const HEROES: HeroTemplate[] = [
   { id: 'sylvara', name: 'ซิลวารา วินด์วิสเปอร์', cls: 'archer', star: 3, sprite: 'hero-sylvara.png' },
   // User 2026-10-17: Keeper of the Hearthlight; existing Healer, provisional 3★.
   { id: 'elira', name: 'เอลิรา ดอว์นเมียร์', cls: 'healer', star: 3, sprite: 'hero-elira.png' },
+  // User 2026-10-20: Phantom Executioner, existing Assassin; Phase A with provisional kit/timing.
+  { id: 'vaelric', name: 'เวลริค น็อกธาร์', cls: 'assassin', star: 3, sprite: 'hero-vaelric.png' },
 ];
 
 export const HERO_BY_ID: Record<string, HeroTemplate> = Object.fromEntries(HEROES.map(h => [h.id, h]));

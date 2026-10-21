@@ -42,7 +42,7 @@
   } @else {
     <div class="arena" [class.paused]="paused()">
       <div class="screen" [class.boss]="!!bossBar()">
-        <app-board [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
+        <app-board (finishedFx)="onFxFinished($event)" [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
                    [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
 
         <!-- top HUD (scenery rows only — never over the lanes' units) -->

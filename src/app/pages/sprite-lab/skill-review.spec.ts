@@ -2,6 +2,31 @@ import { appliedStatusFx, FX, fxFor } from '../../core/data/sprites';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { skillReview } from './skill-review';
 
+describe('Phantom Crossing actual-engine review', () => {
+  it('exports movement, three arrival contacts without early damage, and facing only after recovery in either direction', () => {
+    for (const direction of [1, -1]) {
+      const start = direction === 1 ? 5 : 8;
+      const review = skillReview('vaelric', 'skill', { r: 1, c: start }, [1, 2].map((n, i) =>
+        ({ id: i + 2, pos: { r: 1, c: start + direction * n } })));
+      const during = review.samples.find(s => Math.abs(s.t - .4) < 1e-7)!;
+      expect(during.positions[1].c).toBeCloseTo(start + direction * 1, 7);
+      expect(during.positions[1].flip).toBe(direction < 0);
+      const contact = review.samples.filter(s => s.events.some(e => e.type === 'damage'));
+      expect(contact.length).toBe(3);
+      expect(contact.map(s => Number(s.t.toFixed(2)))).toEqual([.6, .65, .7]);
+      expect(contact[0].t).toBeCloseTo(.6, 7);
+      expect(contact[0].events.filter(e => e.type === 'damage').length).toBe(2);
+      expect(contact.flatMap(s => s.events).filter(e => e.type === 'damage').length).toBe(6);
+      expect(fxFor('hero-vaelric.png', 'skill', { on: 'impact', hit: 0 })).toEqual(['vn-s1-impact']);
+      expect(fxFor('hero-vaelric.png', 'skill', { on: 'impact', hit: 1 })).toEqual([]);
+      expect(fxFor('hero-vaelric.png', 'skill', { on: 'impact', hit: 2 })).toEqual([]);
+      expect(contact[0].positions[1].c).toBe(start + direction * 3);
+      expect(review.samples.find(s => Math.abs(s.t - 1) < 1e-7)!.positions[1].flip).toBe(direction < 0);
+      expect(review.samples.find(s => Math.abs(s.t - 1.15) < 1e-7)!.positions[1].flip).toBe(direction > 0);
+    }
+  });
+});
+
 describe('Glassbind isolated skill review and generic presentation', () => {
   const targets = [
     { id: 2, pos: { r: 1, c: 9 } }, { id: 3, pos: { r: 1, c: 10 } },
@@ -177,5 +202,36 @@ describe('Hearthlight Sanctuary isolated engine review', () => {
       expect(ends.length).toBe(1);expect(ends[0].t).toBeCloseTo(6.5,6);
       expect(events.some(e=>e.type==='damage'||e.type==='heal'||e.type==='shield'||e.type==='projectile')).toBeFalse();
     }
+  });
+});
+
+
+describe('Hollow Requiem actual-engine sync', () => {
+  it('has three exact contacts and third-only Curse, with one shared area layer per hit', () => {
+    const targets = [0,1,2].flatMap(r => [6,7].map(c => ({ id: 2 + r*2 + c-6, pos: { r,c } })));
+    const review = skillReview('vaelric', 'skill2', { r:1,c:5 }, targets);
+    const contacts = review.samples.filter(s => s.events.some(e => e.type === 'damage'));
+    expect(contacts.map(s => Number(s.t.toFixed(2)))).toEqual([.4,.65,.9]);
+    expect(contacts.map(s => s.events.filter(e => e.type === 'damage').length)).toEqual([6,6,6]);
+    expect(contacts.slice(0,2).some(s => s.events.some(e => e.type === 'buff'))).toBeFalse();
+    expect(contacts[2].events.filter(e => e.type === 'buff' && e.buff === 'curse_mark').length).toBe(6);
+    expect(review.samples.every(s => s.positions[1].c === 5 && s.positions[1].r === 1)).toBeTrue();
+    for (let hit=0;hit<3;hit++) {
+      const names = fxFor('hero-vaelric.png','skill2',{on:'impact',hit});
+      expect(names).toEqual([`vn-s2-impact-${hit+1}`]);
+      expect(FX[names[0]].frames).toBe(8); expect(FX[names[0]].frameMs).toBeCloseTo(1000/24,8);
+      expect(FX[names[0]].at).toBe('self'); expect(FX[names[0]].attach).toBeFalse();
+      expect(FX[names[0]].perHit).toBeUndefined();
+      expect(FX[names[0]].groundArea).toBe('FRONT_RECT_2X3');
+    }
+  });
+
+  it('centres the shared layer on the locked forward rectangle, regardless of target/occupant movement', () => {
+    const d = FX['vn-s2-impact-1'];
+    expect(groundFxCell(d, {r:1,c:5}, {r:0,c:4}, false)).toEqual({r:1,c:6.5});
+    expect(groundFxCell(d, {r:1,c:8}, {r:2,c:9}, true)).toEqual({r:1,c:6.5});
+    // Edge rectangles clip at the board, never shift toward a recipient or back onto the caster.
+    expect(groundFxCell(d, {r:0,c:14}, {r:2,c:15}, false)).toEqual({r:0,c:15.5});
+    expect(groundFxCell({...d,w:900,h:1}, {r:2,c:1}, {r:0,c:0}, true)).toEqual({r:2,c:-.5});
   });
 });

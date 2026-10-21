@@ -59,8 +59,9 @@ export const DamageResolver = {
     const crit = !!req.crit;
     if (crit) raw *= req.critMultiplier ?? CRIT_MULTIPLIER;
     raw *= modifier(req.target, 'damageTakenMultiplier');
+    const physicalDefense = req.target.def * modifier(req.target, 'defenseMultiplier');
     const defense =
-      req.damageType === 'TRUE' ? 0 : req.damageType === 'MAGIC' ? (req.target.magicDefense ?? req.target.def) : req.target.def;
+      req.damageType === 'TRUE' ? 0 : req.damageType === 'MAGIC' ? (req.target.magicDefense ?? physicalDefense) : physicalDefense;
     const mitigation = 100 / (100 + defense * (1 - (req.attacker.defenseIgnore ?? 0)));
     return { amount: Math.max(1, Math.round(raw * mitigation)), crit, damageType: req.damageType, sourceId: req.sourceId };
   },

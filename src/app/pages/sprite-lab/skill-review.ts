@@ -15,6 +15,7 @@ export interface ReviewSample {
   events: BattleEvent[];
   vitals: Record<number, { hpPct: number; shieldPct: number }>;
   statuses: Record<number, { id: string; left: number; sourceId: number }[]>;
+  positions: Record<number, { r: number; c: number; flip?: boolean }>;
 }
 
 /** Isolated training targets, one actual engine cast. Never reads/writes the player's save or changes kit data. */
@@ -67,6 +68,11 @@ export function skillReview(heroId: string, slot: SkillKind, casterCell: Cell, t
   const start = engine.time;
   const samples: ReviewSample[] = [];
   const snapshot = () => samples.push({ t: engine.time - start, events: engine.drainEvents(),
+    positions: Object.fromEntries(engine.units.filter(u => ids.has(u.id)).map(u => {
+      const target = engine.units.find(t => t.id === u.targetId && t.alive);
+      const flip = u.actionFacing?.left ?? (target && target.pos.c !== u.pos.c ? target.pos.c < u.pos.c : u.side === 'enemy');
+      return [ids.get(u.id)!, { r: u.y, c: u.x, flip }];
+    })),
     vitals: Object.fromEntries(engine.units.filter(u => ids.has(u.id)).map(u =>
       [ids.get(u.id)!, { hpPct: u.hp / u.maxHp * 100, shieldPct: u.shield / u.maxHp * 100 }])),
     statuses: Object.fromEntries(engine.units.filter(u => ids.has(u.id)).map(u =>

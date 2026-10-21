@@ -1,3 +1,4 @@
+import { sequenceFx } from '../../battle/render/sequence-fx';
 import { itemName as itemNameOf } from '../../core/rules/equipment';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { Component, computed, effect, ElementRef, HostListener, inject, isDevMode, NgZone, OnDestroy, signal, untracked, viewChild } from '@angular/core';
@@ -20,6 +21,7 @@ import { DEV_FLAGS } from '../../core/data/dev-flags';
 import { kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { hasStatus } from '../../battle/engine/buffs';
 import { StatusFxPlayback } from '../../battle/render/status-fx';
+import { MotionFxPlayback } from '../../battle/render/motion-fx';
 import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
@@ -56,6 +58,11 @@ const TICK = 0.05;
   styleUrl: './battle.component.scss',
 })
 export class BattleComponent implements OnDestroy {
+  onFxFinished(ids: number[]): void {
+    const done = new Set(ids);
+    this.fx.update(list => list.filter(f => !done.has(f.id)));
+  }
+
   private readonly team = inject(TeamService);
   readonly progression = inject(ProgressionService);
   /** sandbox (no rewards), a tower run (clear EXP) or a farm dungeon run (?farm=training_1) */
@@ -179,6 +186,17 @@ export class BattleComponent implements OnDestroy {
       const id = ++this.floatId;
       this.fx.update(l => [...l, { id, name, ...at, angle: 0, offset: fxOffset(name),
         under: FX[name].layer === 'under', follow: target, managed: true, loop }]);
+      return id;
+    },
+    remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
+  });
+  private motionVisuals = new MotionFxPlayback({
+    spawn: (name, source, loop) => {
+      const u = this.engine.units.find(u => u.id === source)!;
+      const id = ++this.floatId;
+      this.fx.update(l => [...l, { id, name, ...this.screenOf(u), angle: 0,
+        flip: u.actionFacing?.left ?? this.facing.get(source), offset: fxOffset(name),
+        under: FX[name].layer === 'under', follow: source, managed: true, loop }]);
       return id;
     },
     remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
@@ -411,6 +429,7 @@ export class BattleComponent implements OnDestroy {
     this.castAim.clear();
     this.fieldVisuals.clear();
     this.statusVisuals.clear();
+    this.motionVisuals.clear();
     this.blinkUntil.clear();
     this.ownFade.clear();
     this.snapshot();
@@ -583,6 +602,7 @@ export class BattleComponent implements OnDestroy {
   private endTimers: ReturnType<typeof setTimeout>[] = [];
   static readonly OUTRO_MS = 2400;
   private finishSoon(): void {
+    this.fx.update(list => list.filter(f => f.owner == null));
     const win = this.engine.result === 'win';
     this.ending.set(true);
     // rewards are saved right away (leaving during the outro loses nothing); only the popup waits
@@ -673,7 +693,8 @@ export class BattleComponent implements OnDestroy {
       const dx = u.x - (this.lastFacingX.get(u.id) ?? u.x);
       this.lastFacingX.set(u.id, u.x);
       // transitions: face where you walk (heroes default forward) · combat: face the target
-      if (!combat && Math.abs(dx) > 1e-3) this.facing.set(u.id, dx < 0);
+      if (u.actionFacing) this.facing.set(u.id, u.actionFacing.left);
+      else if (!combat && Math.abs(dx) > 1e-3) this.facing.set(u.id, dx < 0);
       else if (!combat && isPlayerUnit(u) && u.life === 'ALIVE' && e.phase !== BattlePhase.REGROUPING) this.facing.set(u.id, false);
       else if (t && t.pos.c !== u.pos.c) this.facing.set(u.id, t.pos.c < u.pos.c);
       else if (!this.facing.has(u.id)) this.facing.set(u.id, u.side === 'enemy');
@@ -888,7 +909,7 @@ export class BattleComponent implements OnDestroy {
         const target = dst ?? aim?.id;
         // contact FX on every unit the hit damaged (capped, primary first) — or the primary only
         const at = def.at === 'target'
-          ? (def.perHit ? [...new Set([target, ...(hits ?? [])].filter((x): x is number => x != null && !(def.exceptPrimary && x === target) && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit) : target != null ? [target] : [src])
+          ? (def.perHit ? [...new Set([...(def.hitsOnly ? [] : [target]), ...(hits ?? [])].filter((x): x is number => x != null && !(def.exceptPrimary && x === target) && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit === 'all' ? undefined : def.perHit) : target != null ? [target] : [src])
           : [src];
         if (def.at === 'allies') {
           // team field: the centre of the caster's living formation (lanes / columns averaged), never rotated
@@ -901,7 +922,8 @@ export class BattleComponent implements OnDestroy {
         }
         for (const id of at) {
           const q = id === src ? p : posOf(id);
-          const areaCell = groundFxCell(def, unitOf(src).pos, aim?.at ?? unitOf(id).pos);
+          const areaCell = groundFxCell(def, unitOf(src).pos, aim?.at ?? unitOf(id).pos,
+            unitOf(src).actionFacing?.left ?? this.facing.get(src));
           const cell = def.groundArea
             ? { r: areaCell.r, c: areaCell.c + this.engine.formation.originPosition - this.engine.cameraX }
             : q;
@@ -938,12 +960,15 @@ export class BattleComponent implements OnDestroy {
           if (!e.final) this.showBanner(`เคลียร์เวฟ ${e.wave + 1}/${e.totalWaves}!`, 900);
           break;
         case 'ADVANCE_STARTED':
+          fx.length = 0;
           this.fx.set([]);
           this.floats.set([]);
           this.projectiles.set([]);
           this.showBanner(`เดินหน้า… ไปเวฟ ${this.wave() + 2}/${this.totalWaves()}`, e.duration * 1000);
           break;
         case 'REGROUP_STARTED':
+          fx.length = 0;
+          this.motionVisuals.clear();
           this.fx.set([]);
           this.projectiles.set([]);
           break;
@@ -966,6 +991,8 @@ export class BattleComponent implements OnDestroy {
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
           addFx(e.src, e.dst, e.kind, { on: 'cast' });
+          fx.push(...sequenceFx(unitOf(e.src).sprite, e.kind, e.src, e.dst, this.animKey, posOf, unitOf(e.src).actionFacing?.left ?? !!this.facing.get(e.src))
+            .map(f => ({ ...f, id: ++this.floatId })));
           break;
         }
         case 'impact': {
@@ -979,6 +1006,11 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'animEvent':
+          if (e.event === 'ANIMATION_END') {
+            this.fx.update(list => list.filter(f => f.owner !== e.src || !!f.track));
+            fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.src || !!f.track));
+          }
+          this.motionVisuals.handle(e.src, unitOf(e.src)?.sprite, e.kind, e.event);
           // hero clip events (VFX_SPAWN, CHARGE_START, STRIKE_START …): the FX layers bound to them; missing FX = no-op
           if (e.kind) {
             addFx(e.src, e.dst, e.kind, { on: 'event', event: e.event, index: e.index });
@@ -1158,6 +1190,8 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'interrupt': {
+          this.fx.update(list => list.filter(f => f.owner !== e.dst));
+          fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.dst));
           this.dropZones(e.dst);
           this.interrupted.add(e.dst);
           const p = posOf(e.dst);
@@ -1172,9 +1206,13 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'castCancel':
+          this.fx.update(list => list.filter(f => f.owner !== e.src));
+          fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.src));
           this.dropZones(e.src);
           break;
         case 'death':
+          this.fx.update(list => list.filter(f => f.owner !== e.dst));
+          fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.dst));
           this.dropZones(e.dst);
           set(e.dst, 'die');
           break;
@@ -1183,7 +1221,7 @@ export class BattleComponent implements OnDestroy {
     this.anims.set(anims);
     for (const f of fx) {
       this.fx.update(list => [...list, f]);
-      setTimeout(() => this.fx.update(list => list.filter(x => x.id !== f.id)), fxDuration(f.name, this.speed()) + 50);
+      if (f.owner == null) setTimeout(() => this.fx.update(list => list.filter(x => x.id !== f.id)), fxDuration(f.name, this.speed()) + (f.delayMs ?? 0) / this.speed() + 50);
     }
     if (floats.length) {
       this.floats.update(f => [...f, ...floats].slice(-40));

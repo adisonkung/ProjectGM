@@ -42,6 +42,8 @@ export type BattleEvent =
   | { type: 'attack'; src: number; dst: number }
   | { type: 'cast'; src: number; skill: string; kind: SkillKind; dst?: number }
   | { type: 'move'; src: number }
+  /** one unique live enemy intersected by a committed path dash; not a status or a damage event */
+  | { type: 'dashMark'; src: number; dst: number }
   /** จังหวะที่สกิลโดนจริง (ตรงเฟรม hit ของท่า) — ใช้เล่นเอฟเฟกต์ที่เป้าหมาย */
   | { type: 'impact'; src: number; dst?: number; kind: SkillKind; index?: number; hits?: number[] }
   /** ย้ายตัวแบบวาร์ป (ไม่ต้องเลื่อนตัวบนจอ) */
@@ -231,6 +233,12 @@ export interface BattleUnit {
   lastGaugeHitAt: number;
   /** charge / dash / knock-back: the visual position slides fast until this time */
   dashUntil: number;
+  /** Exact-duration visual motion; combat contact waits for its destination. */
+  dashMotion?: { fromX: number; fromY: number; toX: number; toY: number; start: number; duration: number };
+  /** A committed action keeps its facing through the final recovery frame. */
+  actionFacing?: { left: boolean; kind?: SkillKind; motion?: boolean };
+  /** Identity also serves as the cancellation token for an opt-in stationary hero action. */
+  skillAction?: { id: string; name: string; kind: SkillKind; interruptible: boolean };
   /** false while dead / reviving (future: untargetable phases) */
   targetable: boolean;
   /** cells — projectile collision */
@@ -531,6 +539,12 @@ export class BattleEngine {
     for (const u of this.units) {
       // dead units stop where they fell (movement cancelled)
       if (!u.visible || (u.life !== 'ALIVE' && u.life !== 'REVIVING')) continue;
+      if (u.dashMotion) {
+        const m = u.dashMotion, t = Math.min(1, Math.max(0, (this.time - m.start) / m.duration));
+        u.x = m.fromX + (m.toX - m.fromX) * t; u.y = m.fromY + (m.toY - m.fromY) * t;
+        if (t >= 1) delete u.dashMotion;
+        continue;
+      }
       const tx = origin + u.pos.c;
       const ty = u.pos.r;
       const d = Math.hypot(tx - u.x, ty - u.y);
@@ -577,6 +591,10 @@ export class BattleEngine {
     this.fields.clear();
     for (const u of this.units) {
       if (u.casting) this.cancelCast(u, 'end');
+      if (u.dashMotion || u.actionFacing?.motion) this.events.push({ type: 'animEvent', src: u.id, kind: u.actionFacing?.kind, event: 'DASH_END', name: 'DASH_CANCELLED' });
+      delete u.skillAction;
+      delete u.dashMotion;
+      delete u.actionFacing;
       u.castLock = 0;
     }
     this.clearFocus(reason);
@@ -1602,6 +1620,20 @@ export class BattleEngine {
 
   /** สกิลที่ตัดได้โดนตัวที่กำลังร่าย → ยกเลิกการร่าย สกิลนั้นเข้าคูลดาวน์เต็ม */
   private tryInterrupt(src: BattleUnit, dst: BattleUnit, breakPower = 0): void {
+    const action = dst.skillAction;
+    if (action && dst.alive) {
+      if (!action.interruptible) {
+        this.events.push({ type: 'immune', src: src.id, dst: dst.id, skill: action.name });
+        return;
+      }
+      delete dst.skillAction;
+      delete dst.actionFacing;
+      dst.castLock = CAST_LOCK;
+      this.metrics.interruptSuccesses++;
+      this.events.push({ type: 'interrupt', src: src.id, dst: dst.id, skill: action.name });
+      this.events.push({ type: 'CAST_INTERRUPTED', src: src.id, dst: dst.id, skill: action.id });
+      return;
+    }
     const c = dst.casting;
     if (!c || !dst.alive) return;
     if (!isPlayerUnit(dst) && canStopCast(c.def)) this.metrics.interruptAttempts++;
@@ -1937,7 +1969,7 @@ export class BattleEngine {
   }
 
   /** move a unit on the combat grid: blink = instant (fade in), dash = fast visible slide */
-  private relocate(u: BattleUnit, cell: Cell, how: 'blink' | 'dash'): void {
+  private relocate(u: BattleUnit, cell: Cell, how: 'blink' | 'dash', duration?: number): void {
     this.grid.move(u.id, u.pos, cell);
     u.pos = cell;
     if (how === 'blink') {
@@ -1945,6 +1977,8 @@ export class BattleEngine {
       u.y = cell.r;
       this.events.push({ type: 'blink', src: u.id });
     } else {
+      if (duration != null && duration > 0) u.dashMotion = { fromX: u.x, fromY: u.y,
+        toX: this.flow.formation.originPosition + cell.c, toY: cell.r, start: this.time, duration };
       u.dashUntil = this.time + 0.4;
       this.events.push({ type: 'move', src: u.id });
     }
@@ -2029,7 +2063,7 @@ export class BattleEngine {
       revive: (src, dead, hpPct) =>
         self.reviveHero({ unitId: dead.id, reviveHpPercent: hpPct, sourceUnitId: src.id, sourceId: `ult:${src.heroId ?? src.cls}`, countsTowardLimit: true }).ok,
       freeCellNear: (at, from) => self.freeCellNear(at, from),
-      relocate: (u, cell, how) => self.relocate(u, cell, how),
+      relocate: (u, cell, how, duration) => self.relocate(u, cell, how, duration),
       canLand: cell => Grid.inBounds(cell) && self.grid.isFree(cell),
       basicGauge: u => self.gainMana(u, MANA_PER_ATTACK),
     };
@@ -2105,6 +2139,10 @@ export class BattleEngine {
       // death: no targeting / moving / attacking / casting; channel + ult cancelled; out of the targeting pools
       dst.hp = 0;
       dst.alive = false;
+      if (dst.dashMotion || dst.actionFacing?.motion) this.events.push({ type: 'animEvent', src: dst.id, kind: dst.actionFacing?.kind, event: 'DASH_END', name: 'DASH_CANCELLED' });
+      delete dst.skillAction;
+      delete dst.dashMotion;
+      delete dst.actionFacing;
       dst.targetable = false;
       this.cancelCast(dst, 'death');
       if (dst.monster) this.monsterAI.markDead(dst);

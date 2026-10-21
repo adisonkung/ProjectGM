@@ -42,4 +42,31 @@ describe('BoardComponent', () => {
     expect(aura.style.transform).toBe(u.style.transform);
     expect(wave.style.transform).toBe(component.pos(0, 1));
   });
+  it('freezes a lingering strike independently of a target that moves while attached marks follow it', async () => {
+    fixture.componentRef.setInput('frozen',()=>true);
+    const clock=component as unknown as {vclock:number;fxAnchors:{at(id:number):unknown}};
+    const unit={id:7,side:'ally',name:'k',r:0,c:1,hp:1,maxHp:1,alive:true} as unknown as UnitView;
+    fixture.componentRef.setInput('units',[unit]);
+    fixture.componentRef.setInput('fx',[
+      {id:1,r:0,c:1,name:'vn-ult-phantom-1',angle:0,follow:7,lockAfterMs:65},
+      {id:2,r:0,c:1,name:'vn-ult-cut',angle:0,follow:7},
+    ]);
+    fixture.detectChanges();
+    for(let i=0;i<30&&!clock.fxAnchors.at(1);i++) await new Promise<void>(r=>requestAnimationFrame(()=>r()));
+    expect(clock.fxAnchors.at(1)).toBeDefined();
+    clock.vclock+=.1;
+    await new Promise<void>(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>r())));
+    const el=fixture.nativeElement as HTMLElement;
+    const ghost=el.querySelector<HTMLElement>('.fx-wrap[data-fx="1"]')!;
+    const mark=el.querySelector<HTMLElement>('.fx-wrap[data-fx="2"]')!;
+    const frozen=ghost.style.transform;
+    fixture.componentRef.setInput('units',[{...unit,c:4}]);fixture.detectChanges();
+    await new Promise(r=>setTimeout(r,400));
+    expect(ghost.style.transform).toBe(frozen);
+    expect(mark.style.transform).toBe(el.querySelector<HTMLElement>('.unit[data-uid="7"]')!.style.transform);
+    expect(mark.style.transform).not.toBe(frozen);
+    fixture.componentRef.setInput('fx',[]);fixture.detectChanges();
+    expect(el.querySelectorAll('.fx-wrap').length).toBe(0);
+  });
+
 });
