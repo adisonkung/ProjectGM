@@ -48,8 +48,10 @@ describe('Settle before casting + shared run cadence', () => {
     expect(SHEETS['hero-draeven.png'].anims.walk!.pace).toBe(1.7);
     for (const h of HEROES.filter(x => x.sprite?.startsWith('hero-') && SHEETS[x.sprite])) {   // legacy fixtures have no sheet
       const w = SHEETS[h.sprite!].anims.walk!;
-      const stride = w.pace! * (w.frames * (w.ms ?? 85)) / 1000;
+      const stride = w.pace! * (w.frames * (w.ms ?? 85)) / 1000 / (w.cycles ?? 1);
       expect(Math.abs(stride - RUN_STRIDE)).withContext(h.id).toBeLessThan(0.02);
+      // at a normal combat walk (1.5–2 cells/s) the playback rate stays inside the 0.55–1.7 clamp → same steps / s
+      for (const v of [1.5, 2]) expect(v / w.pace!).withContext(h.id).toBeGreaterThan(0.55);
     }
   });
 });

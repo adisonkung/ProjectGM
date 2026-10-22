@@ -24,6 +24,9 @@ export interface AnimDef {
    * by the unit's real speed / pace so the feet keep up with the ground (no moonwalk, no skating). None = fixed rate.
    */
   pace?: number;
+  /** walk rows: how many full stride cycles (2 steps each) the row's frames contain — default 1. Vaelric's run row
+   *  holds 4 cycles in 25 frames, so one pass of the row covers 4 × RUN_STRIDE of ground */
+  cycles?: number;
   /** เฟรมที่ดาเมจเข้า (ตัวเลขดาเมจ/เอฟเฟกต์ที่เป้าขึ้นตรงนี้) */
   hit?: number;
   /** เฟรมที่ตัวละครย้ายตำแหน่ง (วาร์ป) */
@@ -241,10 +244,12 @@ const ELIRA_BASIC_ATTACK: AnimDef = {
  * Shared run cadence (user 2026-10-22: every hero runs with Draeven's rhythm). One walk cycle covers RUN_STRIDE cells of
  * ground, so at the same ground speed every hero completes a cycle in the same time (Draeven: 8 × 85 ms at 1.7 cells/s
  * = 1.156 cells per cycle). `pace` = the ground speed at which the clip plays at its authored rate; the battle page sets
- * playbackRate = measured ground speed / pace.
+ * playbackRate = measured ground speed / pace (clamped 0.55–1.7). A row holding several stride cycles passes `cycles`, and
+ * its frame time is set so the rate stays inside that clamp (Vaelric: 25 frames = 4 cycles at 92 ms → pace ≈ 2).
  */
 export const RUN_STRIDE = 1.156;
-export const runPace = (frames: number, ms: number): number => Math.round((RUN_STRIDE / (frames * ms / 1000)) * 100) / 100;
+export const runPace = (frames: number, ms: number, cycles = 1): number =>
+  Math.round((RUN_STRIDE * cycles / (frames * ms / 1000)) * 100) / 100;
 export const SHEETS: Record<string, SheetDef> = {
   // Draeven Morcant Phase A (user 2026-10-22, tools/sprites/draeven.py): Autosprite sheets mapped to one body scale
   // (idle 80 px), soft alpha (painted art, not pixelated). Skill VFX not supplied yet — all skill timings provisional.
@@ -277,7 +282,7 @@ export const SHEETS: Record<string, SheetDef> = {
   'hero-vaelric.png': {
     cols: 25, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anims: {
-      idle: { row: 0, frames: 25, ms: 85 }, walk: { row: 1, frames: 25, ms: 35, pace: runPace(25, 35) },
+      idle: { row: 0, frames: 25, ms: 85 }, walk: { row: 1, frames: 25, ms: 92, cycles: 4, pace: runPace(25, 92, 4) },
       hurt: { row: 2, frames: 25, ms: 25 }, die: { row: 4, frames: 25, ms: 65 },
       attack: { row: 3, frames: 25, ms: 35, events: { DAMAGE: 8, IMPACT: 8, RECOVERY_START: 15 } },
       // Supplied S1, provisional review: F8 is held for the complete 300ms timed dash; F9 starts on arrival.
