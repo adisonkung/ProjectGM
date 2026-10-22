@@ -312,6 +312,8 @@ const DASH_SPEED = 14;
 /** STEP 9: AI คิดเลือกเป้าทุก 0.25 วิ · เปลี่ยนเป้าแล้วล็อกอย่างน้อย 0.6 วิ (ยกเว้นเป้าตาย/โฟกัสเปลี่ยน) */
 const THINK = 0.25;
 const TARGET_LOCK = 0.6;
+/** a unit counts as arrived in its cell when the glide is within this distance (cells) — skills wait for it */
+const SETTLE_EPS = 0.05;
 /**
  * Assassin post-dive safety (encounter spec §22): after a blink the hero may stay on its dive target for the skill
  * lock + DIVE_WINDOW (one follow-up hit); more than ASSASSIN_SAFE_THREAT hostile melee threat zones on its cell
@@ -535,6 +537,13 @@ export class BattleEngine {
       if (!b.boss || !b.alive) continue;
       for (const st of b.buffs) if (st.def.buff) m.bossStatusTime[st.def.id] = (m.bossStatusTime[st.def.id] ?? 0) + dt;
     }
+  }
+
+  /** still travelling into its logical cell (not a dash, which is part of a skill clip) */
+  private gliding(u: BattleUnit): boolean {
+    if (u.dashMotion) return false;
+    const tx = this.flow.formation.originPosition + u.pos.c;
+    return Math.hypot(tx - u.x, u.pos.r - u.y) > SETTLE_EPS;
   }
 
   /** visual positions follow the logical cells continuously (no cell-centre locking on screen) */
@@ -880,11 +889,16 @@ export class BattleEngine {
 
     // SILENCE (Arcane Seal): no skills / ultimates — basic attacks and movement only
     const silenced = hasFlag(u, 'silence');
+    // SETTLE BEFORE CASTING: a skill / ultimate that is ready while the body is still gliding into its cell waits until
+    // it has arrived (no new step is taken meanwhile) — the clip never plays while the unit slides across the ground.
+    // Interrupts are exempt: a cast bar won't wait (and interrupt reservations between heroes depend on reacting now)
+    const settling = this.gliding(u);
     // player-ordered skill (any mode): fire at the skill's own target rules
     if (!silenced && u.skillQueued && (u.skillQueued === 'skill' ? u.cd1 : u.cd2) <= 0) {
       const slot = u.skillQueued;
       const s = this.skills.kit(u)[slot];
       const t = this.skills.pickTarget(u, s, current);
+      if (t && settling) return;
       if (t) {
         u.skillQueued = null;
         this.skills.use(u, slot, s, t);
@@ -897,6 +911,8 @@ export class BattleEngine {
     const ultMode = this.skills.mode(u, 'ult');
     const autoOk = this.autoUlt && ultMode !== 'MANUAL' && (ultMode !== 'RESERVE' || this.skills.reserveUltReady(u));
     const wantsUlt = u.ultQueued || !isPlayerUnit(u) || autoOk;
+    if (!silenced && u.mana >= u.maxMana && wantsUlt && settling
+      && this.skills.chooseUltimate(u, this.units.find(x => x.id === u.targetId) ?? null, u.ultQueued)) return;
     if (!silenced && u.mana >= u.maxMana && wantsUlt && this.tryUltimate(u, u.ultQueued)) {
       u.ultQueued = false;
       return;
@@ -920,6 +936,7 @@ export class BattleEngine {
     if (u.atkCd <= 0 && !chase) {
       // skill AI tiers: emergency → interrupt → heal → high value → normal (SkillSystem), else the basic action
       const pick = silenced ? null : this.skills.chooseSkill(u, current);
+      if (pick && settling) return;
       if (pick) {
         // an interrupt skill spent on damage (AUTO fallback) is not an interrupt: no intent / target lock for it
         const stopping = pick.tier === 'INTERRUPT' && pick.target.side !== u.side && !!pick.target.casting && canStopCast(pick.target.casting.def);

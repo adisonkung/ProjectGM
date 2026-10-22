@@ -88,18 +88,19 @@ describe('UnitClip (one-clock character animation)', () => {
   });
 
   it('the walk loop advances with the ground speed (pace) — slower legs at a slower walk, no restart', () => {
+    const P = a.walk!.pace!;
     const fast = new UnitClip(kael, 0);
     const slow = new UnitClip(kael, 0);
-    fast.pose(0, 0, true, 2.3);
-    slow.pose(0, 0, true, 1.15);
+    fast.pose(0, 0, true, P);
+    slow.pose(0, 0, true, P / 2);
     const frames = a.walk!.frames;
     const cycle = (frames * (a.walk!.ms ?? 85)) / 1000;
     for (let t = 1 / 60; t < cycle * 0.5; t += 1 / 60) {
-      fast.pose(t, 0, true, 2.3);
-      slow.pose(t, 0, true, 1.15);
+      fast.pose(t, 0, true, P);
+      slow.pose(t, 0, true, P / 2);
     }
-    const f = fast.pose(cycle * 0.5, 0, true, 2.3).col;
-    const s = slow.pose(cycle * 0.5, 0, true, 1.15).col;
+    const f = fast.pose(cycle * 0.5, 0, true, P).col;
+    const s = slow.pose(cycle * 0.5, 0, true, P / 2).col;
     expect(f).toBeGreaterThan(s);
     expect(f).toBe(Math.floor(frames * 0.5));
   });

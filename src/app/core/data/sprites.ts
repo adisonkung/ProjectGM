@@ -237,13 +237,21 @@ const SYLVARA_BASIC_ATTACK: AnimDef = {
 const ELIRA_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
+/**
+ * Shared run cadence (user 2026-10-22: every hero runs with Draeven's rhythm). One walk cycle covers RUN_STRIDE cells of
+ * ground, so at the same ground speed every hero completes a cycle in the same time (Draeven: 8 × 85 ms at 1.7 cells/s
+ * = 1.156 cells per cycle). `pace` = the ground speed at which the clip plays at its authored rate; the battle page sets
+ * playbackRate = measured ground speed / pace.
+ */
+export const RUN_STRIDE = 1.156;
+export const runPace = (frames: number, ms: number): number => Math.round((RUN_STRIDE / (frames * ms / 1000)) * 100) / 100;
 export const SHEETS: Record<string, SheetDef> = {
   // Draeven Morcant Phase A (user 2026-10-22, tools/sprites/draeven.py): Autosprite sheets mapped to one body scale
   // (idle 80 px), soft alpha (painted art, not pixelated). Skill VFX not supplied yet — all skill timings provisional.
   'hero-draeven.png': {
     cols: 28, rows: 7, cellW: 260, cellH: 170,
     anims: {
-      idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: 1.7 },
+      idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
       // provisional: the stagger at the start of the death sheet (no hurt clip supplied)
       hurt: { row: 2, frames: 3, ms: 90, seq: [0, 1, 2, 1, 0], steps: [60, 80, 140, 80, 80] },
       // 19 of the 21 attack frames (the held thrust 12 / 14 skipped) = 0.8 s · damage on the slash F9 (0.34 s)
@@ -269,7 +277,7 @@ export const SHEETS: Record<string, SheetDef> = {
   'hero-vaelric.png': {
     cols: 25, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anims: {
-      idle: { row: 0, frames: 25, ms: 85 }, walk: { row: 1, frames: 25, ms: 35, pace: 1.5 },
+      idle: { row: 0, frames: 25, ms: 85 }, walk: { row: 1, frames: 25, ms: 35, pace: runPace(25, 35) },
       hurt: { row: 2, frames: 25, ms: 25 }, die: { row: 4, frames: 25, ms: 65 },
       attack: { row: 3, frames: 25, ms: 35, events: { DAMAGE: 8, IMPACT: 8, RECOVERY_START: 15 } },
       // Supplied S1, provisional review: F8 is held for the complete 300ms timed dash; F9 starts on arrival.
@@ -330,7 +338,7 @@ export const SHEETS: Record<string, SheetDef> = {
     cols: 10, rows: 8, cellW: 260, cellH: 170, pixelated: true,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
-      idle: { row: 0, frames: 5 }, walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
+      idle: { row: 0, frames: 5 }, walk: { row: 1, frames: 7, ms: 85, pace: runPace(7, 85) },
       hurt: { row: 2, frames: 4, ms: 100 }, attack: ELIRA_BASIC_ATTACK,
       die: { row: 4, frames: 6, ms: 130 },
       // Supplied 10 poses, trial 12 FPS: one heal at F7; S2/Ult retain base fallbacks.
@@ -350,7 +358,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22], ultNock: [30, -55] },
     anims: {
       idle: { row: 0, frames: 5 },
-      walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
+      walk: { row: 1, frames: 7, ms: 85, pace: runPace(7, 85) },
       hurt: { row: 2, frames: 4, ms: 100 },
       attack: SYLVARA_BASIC_ATTACK,
       die: { row: 4, frames: 6, ms: 130 },
@@ -384,7 +392,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5 },
-      walk: { row: 1, frames: 7, ms: 85, pace: 1.5 },
+      walk: { row: 1, frames: 7, ms: 85, pace: runPace(7, 85) },
       hurt: { row: 2, frames: 4, ms: 100 },
       // Normal attack only: book/focus gathers F4, ice shard releases F5; contact is projectile arrival.
       attack: MIRELLE_BASIC_ATTACK,
@@ -415,7 +423,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
-      walk: { row: 1, frames: 8, ms: 80, pace: 2.0 },
+      walk: { row: 1, frames: 8, ms: 80, pace: runPace(8, 80) },
       hurt: { row: 2, frames: 4 },
       // ready → raise the dao (F2–F3) → slash extended F4 = damage → recover to the shield stance
       attack: { row: 3, frames: 7, ms: 95, events: { DAMAGE: 3, RECOVERY_START: 5 } },
@@ -475,7 +483,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -20] },
     anims: {
       idle: { row: 0, frames: 6 },
-      walk: { row: 1, frames: 8, ms: 70, pace: 1.5 },
+      walk: { row: 1, frames: 8, ms: 70, pace: runPace(8, 70) },
       hurt: { row: 2, frames: 4 },
       // ready → step in → big blade raised F3 → cut extended F4 = damage → small-blade follow-through F5–F7 → guard F8
       attack: { row: 3, frames: 8, ms: 80, events: { DAMAGE: 3, RECOVERY_START: 6 } },
@@ -542,7 +550,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 6 },
-      walk: { row: 1, frames: 8, ms: 70, pace: 1.6 },
+      walk: { row: 1, frames: 8, ms: 70, pace: runPace(8, 70) },
       hurt: { row: 2, frames: 3, ms: 110 },
       // ready → draw F2 → wind-up F3 → arm extended F4 → release F5 (the knife leaves = projectile spawns) → recover F6–F8
       attack: { row: 3, frames: 8, ms: 80, events: { DAMAGE: 4, RECOVERY_START: 6 } },
@@ -608,7 +616,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5, ms: 170 },
-      walk: { row: 1, frames: 7, ms: 95, pace: 2.2 },
+      walk: { row: 1, frames: 7, ms: 95, pace: runPace(7, 95) },
       hurt: { row: 2, frames: 4, ms: 100 },
       // ready F1 → wind back F2 → hammer overhead F3–F4 → slam into the ground F5 (spark) → follow-through F6–F7
       attack: { row: 3, frames: 7, ms: 85, events: { DAMAGE: 4, RECOVERY_START: 5 } },
@@ -666,7 +674,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 5, ms: 170 },
-      walk: { row: 1, frames: 7, ms: 85, pace: 2.3 },
+      walk: { row: 1, frames: 7, ms: 85, pace: runPace(7, 85) },
       hurt: { row: 2, frames: 4, ms: 100 },
       // ready F1 → sword raised F2 → overhead cut F3 (arc) → forward thrust F4 (arc = contact) → extended F5 → recover F6–F7
       attack: { row: 3, frames: 7, ms: 80, events: { DAMAGE: 3, RECOVERY_START: 5 } },
@@ -728,7 +736,7 @@ export const SHEETS: Record<string, SheetDef> = {
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     anims: {
       idle: { row: 0, frames: 3, ms: 180 },
-      walk: { row: 1, frames: 6, ms: 90, pace: 2.2 },
+      walk: { row: 1, frames: 6, ms: 90, pace: runPace(6, 90) },
       hurt: { row: 2, frames: 3, ms: 110 },
       // raise staff F1–F3 → lotus released F4 (projectile) → recover F5–F6
       attack: { row: 3, frames: 6, ms: 85, events: { DAMAGE: 3, RECOVERY_START: 4 } },
@@ -801,7 +809,7 @@ export const SHEETS: Record<string, SheetDef> = {
     },
     anims: {
       idle: { row: 0, frames: 6 },
-      walk: { row: 1, frames: 8, ms: 75, pace: 1.9 },
+      walk: { row: 1, frames: 8, ms: 75, pace: runPace(8, 75) },
       hurt: { row: 2, frames: 4 },
       attack: { row: 3, frames: 6, events: { DAMAGE: 3, RECOVERY_START: 5 } },
       die: { row: 4, frames: 7, ms: 110 },

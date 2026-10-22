@@ -1,3 +1,4 @@
+import { SHEETS } from '../../core/data/sprites';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UnitSpriteComponent } from './unit-sprite.component';
@@ -31,9 +32,10 @@ describe('UnitSpriteComponent', () => {
   });
 
   it('walk cycle follows the ground speed: pace / AnimDef.pace, clamped, updated without restarting', () => {
-    fixture.componentRef.setInput('sprite', 'hero-garrick.png');                  // walk drawn for 2.2 cells/s
+    const P = SHEETS['hero-garrick.png'].anims.walk!.pace!;                     // shared run cadence (runPace)
+    fixture.componentRef.setInput('sprite', 'hero-garrick.png');
     fixture.componentRef.setInput('moving', true);
-    fixture.componentRef.setInput('pace', 2.2);
+    fixture.componentRef.setInput('pace', P);
     fixture.detectChanges();
     const sheet = fixture.nativeElement.querySelector('.sheet') as HTMLElement;
     const walk = () => sheet.getAnimations()[0];
@@ -42,7 +44,7 @@ describe('UnitSpriteComponent', () => {
     fixture.componentRef.setInput('pace', 1.5);                                  // his combat walk: legs slow down
     fixture.detectChanges();
     expect(walk()).toBe(first);
-    expect(walk().playbackRate).toBeCloseTo(1.5 / 2.2, 2);
+    expect(walk().playbackRate).toBeCloseTo(1.5 / P, 2);
     fixture.componentRef.setInput('pace', 0.2);
     fixture.detectChanges();
     expect(walk().playbackRate).toBeCloseTo(0.55, 2);
