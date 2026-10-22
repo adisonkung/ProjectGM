@@ -66,6 +66,10 @@ export type BattleEvent =
   | { type: 'reflect'; src: number; dst: number; amount: number }
   /** a counter stance fired: `dst` (the attacker) gets `status` */
   | { type: 'counter'; src: number; dst: number; status: string }
+  /** RETALIATION stack gained (`stacks` / `hits`) on `src` from `dst`'s hit */
+  | { type: 'retaliateStack'; src: number; dst: number; stacks: number; hits: number; status: string }
+  /** RETALIATION erupted around `src`: `targets` hit, `healed` HP restored */
+  | { type: 'retaliate'; src: number; status: string; stacks: number; targets: number[]; healed: number }
   /** ฟื้นคืนชีพ */
   | { type: 'revive'; src: number; dst: number; amount: number }
   /** ได้โล่ (src = ผู้ให้) */
@@ -2133,6 +2137,21 @@ export class BattleEngine {
         this.applyStatus(src, c.def.counterStatus!.status, dst, c.def.counterStatus!.duration);
       }
     }
+    // DRAIN (Blood Brand): the status source heals for a share of what it dealt to the carrier
+    if (src && src.alive && src !== dst && amount > 0) {
+      const d = dst.buffs.find(b => b.def.drainToSource && b.sourceId === src.id);
+      if (d) this.heal(src, amount * d.def.drainToSource!, src);
+    }
+    // RETALIATION (Blood Debt): each direct foe hit adds a stack; the threshold erupts once and ends the status
+    if (!poison && !noTransfer && src && src !== dst && src.side !== dst.side && amount + blocked > 0 && dst.hp > 0) {
+      const r = dst.buffs.find(b => b.def.retaliation);
+      if (r) {
+        const rt = r.def.retaliation!;
+        r.debt = (r.debt ?? 0) + 1;
+        this.events.push({ type: 'retaliateStack', src: dst.id, dst: src.id, stacks: r.debt, hits: rt.hits, status: r.def.id });
+        if (r.debt >= rt.hits) this.retaliate(dst, r);
+      }
+    }
     const hurt = !poison && dst.hp > 0 && (dst.monster ? this.monsterAI.onHit(dst) : true);
     this.events.push({ type: 'damage', dst: dst.id, amount, crit, blocked, hurt, ...(poison ? { poison } : {}) });
     if (dst.hp <= 0) {
@@ -2165,6 +2184,18 @@ export class BattleEngine {
       }
       if (dst.boss) for (const o of this.units.filter(x => x.alive && x.summonedBy === dst.id)) this.applyDamage(o, o.hp, false, true);
     }
+  }
+
+  /** RETALIATION eruption: damage foes around the holder, capped self-heal, the status ends */
+  private retaliate(u: BattleUnit, b: ActiveBuff): void {
+    const rt = b.def.retaliation!;
+    const stacks = b.debt ?? 0;
+    this.removeStatus(u, b.def.id);
+    const foes = this.units.filter(t => this.isValidTarget(u, t) && distance(t.pos, u.pos) <= rt.radius);
+    for (const t of foes) this.hit(u, t, rt.damage, { damageType: rt.damageType ?? 'PHYSICAL', sourceId: b.def.id });
+    const before = u.hp;
+    this.heal(u, u.maxHp * Math.min(rt.healCap, rt.healPerStack * stacks), u);
+    this.events.push({ type: 'retaliate', src: u.id, status: b.def.id, stacks, targets: foes.map(t => t.id), healed: u.hp - before });
   }
 
   private heal(dst: BattleUnit, amount: number, src?: BattleUnit): void {

@@ -171,6 +171,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-yuezheng-ult-field-front.png': { url: 'opt/fx-yuezheng-ult-field-front.webp' },
   'fx-yuezheng-ult-impact.png': { url: 'opt/fx-yuezheng-ult-impact.webp' },
   'hero-bailong.png': { url: 'opt/hero-bailong.webp' },
+  'hero-draeven.png': { url: 'opt/hero-draeven.webp' },
   'hero-elira.png': { url: 'opt/hero-elira.webp' },
   'hero-garrick.png': { url: 'opt/hero-garrick.webp' },
   'hero-kael.png': { url: 'opt/hero-kael.webp' },

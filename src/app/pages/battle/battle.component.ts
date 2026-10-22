@@ -1179,6 +1179,12 @@ export class BattleComponent implements OnDestroy {
           if (text) floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: 'buff' });
           break;
         }
+        case 'retaliate': {
+          // Blood Reprisal (Crimson Spike Eruption — VFX pending): label the eruption on the holder
+          const p = posOf(e.src);
+          floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'โลหิตตอบแทน', kind: 'dmg' });
+          break;
+        }
         case 'reflect': {
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: `สะท้อน -${e.amount}`, kind: 'dmg' });

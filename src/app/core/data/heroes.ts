@@ -18,6 +18,8 @@ export const HEROES: HeroTemplate[] = [
   { id: 'elira', name: 'เอลิรา ดอว์นเมียร์', cls: 'healer', star: 3, sprite: 'hero-elira.png' },
   // User 2026-10-20: Phantom Executioner, existing Assassin; Phase A with provisional kit/timing.
   { id: 'vaelric', name: 'เวลริค น็อกธาร์', cls: 'assassin', star: 3, sprite: 'hero-vaelric.png' },
+  // User 2026-10-22: The Bloodwrought Sovereign — Tank / Fighter label, existing Tank class; Phase A, provisional 3★.
+  { id: 'draeven', name: 'เดรเวน มอร์แคนต์', cls: 'tank', star: 3, sprite: 'hero-draeven.png' },
 ];
 
 export const HERO_BY_ID: Record<string, HeroTemplate> = Object.fromEntries(HEROES.map(h => [h.id, h]));

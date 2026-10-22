@@ -88,6 +88,14 @@ export interface StatusEffectDefinition {
   /** COUNTER (Garrick Brace for Impact): the first direct hit from a foe while this status is up puts `status` on the
    *  attacker (once per application — a refresh re-arms it) */
   counterStatus?: { status: string; duration?: number };
+  /**
+   * RETALIATION (Draeven Blood Debt): every direct hit a foe lands on the carrier adds one stack; at `hits` stacks the
+   * carrier erupts once — `damage` × own ATK to every valid foe within `radius` cells (8-direction) — heals
+   * `healPerStack` × max HP per stack, capped at `healCap` × max HP — and the status ends
+   */
+  retaliation?: { hits: number; radius: number; damage: number; damageType?: 'PHYSICAL' | 'MAGIC'; healPerStack: number; healCap: number };
+  /** DRAIN (Draeven Blood Brand): damage the status source deals to the carrier heals the source by this share */
+  drainToSource?: number;
   /** stance statuses (Mirror Stance) end at once when the unit is stunned or knocked back */
   endOnControl?: boolean;
   /** DoT / HoT ticks can't crit; they ignore DEF (direct damage) — documented, always true for now */

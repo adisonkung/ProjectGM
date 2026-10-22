@@ -238,6 +238,32 @@ const ELIRA_BASIC_ATTACK: AnimDef = {
   row: 3, frames: 7, ms: 85, events: { PROJECTILE_SPAWN: 4, DAMAGE: 4, RECOVERY_START: 5 },
 };
 export const SHEETS: Record<string, SheetDef> = {
+  // Draeven Morcant Phase A (user 2026-10-22, tools/sprites/draeven.py): Autosprite sheets mapped to one body scale
+  // (idle 80 px), soft alpha (painted art, not pixelated). Skill VFX not supplied yet — all skill timings provisional.
+  'hero-draeven.png': {
+    cols: 28, rows: 7, cellW: 260, cellH: 170,
+    anims: {
+      idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: 1.7 },
+      // provisional: the stagger at the start of the death sheet (no hurt clip supplied)
+      hurt: { row: 2, frames: 3, ms: 90, seq: [0, 1, 2, 1, 0], steps: [60, 80, 140, 80, 80] },
+      // 19 of the 21 attack frames (the held thrust 12 / 14 skipped) = 0.8 s · damage on the slash F9 (0.34 s)
+      attack: { row: 3, frames: 21, ms: 40, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19, 20],
+        steps: [45, 40, 40, 40, 40, 40, 35, 30, 30, 35, 60, 55, 45, 45, 40, 40, 40, 40, 60],
+        events: { DAMAGE: 9, IMPACT: 9, RECOVERY_START: 12 } },
+      die: { row: 4, frames: 14, ms: 80 },
+      // S1 Blood Debt: open-hand beckon taunt (28 frames × 57 ms = 1.6 s); the taunt lands at the full beckon F12
+      skill: { row: 5, frames: 28, ms: 57, events: { CAST_START: 0, SKILL_ACTIVATE: 12, DAMAGE: 12, RECOVERY_START: 21 } },
+      // S2 Sovereign's Reprisal (provisional source reuse): raise → release the sword forward F13 → recover
+      skill2: { row: 6, frames: 26, ms: 50,
+        events: { CAST_START: 0, STRIKE_START: 11, DAMAGE: 13, IMPACT: 13, RECOVERY_START: 15 } },
+      // Ult (attack row reinterpreted): momentum raise → HOLD / CHARGE at the raised sword F5 (0.6 s) → one heavy
+      // downward FINAL HIT F9 → recovery. Not a two-hit combo
+      ult: { row: 3, frames: 21, ms: 40, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19, 20],
+        steps: [70, 60, 60, 60, 60, 600, 50, 40, 40, 45, 120, 80, 60, 50, 45, 45, 45, 45, 70],
+        events: { CAST_START: 0, CHARGE_START: 5, CHARGE_PEAK: 5.9, STRIKE_START: 6, DAMAGE: 9, IMPACT: 9, RECOVERY_START: 12 },
+        impact: { hitStopMs: 90, shakePx: 8, shakeMs: 240, flashMs: 120 } },
+    },
+  },
   // Supplied base clips, S1, S2 and Ultimate; original baked normal-attack FX remain intact.
   // User 2026-10-20: retain the original baked basic slash/flash, no destructive separation.
   'hero-vaelric.png': {

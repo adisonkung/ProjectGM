@@ -488,6 +488,49 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
     },
   },
+  // เดรเวน มอร์แคนต์ (Draeven Morcant — The Bloodwrought Sovereign, 3★ Tank / Fighter label → Tank class, Phase A
+  // 2026-10-22): Blood Retaliation / Sustain Bruiser — keyword PUNISH (Yue Zheng = PROTECT, Garrick = STOP). Tank class
+  // ids + cooldowns (rank tables apply); no shield, no ally interception, no stun / knockback / Break, no team heal.
+  // Provisional numbers, no balance run:
+  // S1 Blood Debt = taunt foes within 2 + Blood Debt on himself (he keeps fighting): 5 foe hits → Blood Reprisal
+  // (Crimson Spike Eruption) 140 % ATK to foes within 1 cell + 3 % max HP per stack, cap 15 %
+  // S2 Sovereign's Reprisal = forward blood wave on the 2 columns ahead (front cell main) + Blood Brand (ATK −15 %,
+  // his hits on branded foes heal him 12 % of the damage)
+  // Ult = one heavy committed downward strike (front cell + above / below), Blood Brand on the hit, then Sovereign's
+  // Dominion (−20 % damage taken 6 s) and Blood Debt re-armed with a fresh taunt
+  draeven: {
+    id: 'draeven', cls: 'tank', identity: 'Tank / Fighter · Blood Retaliation · Self Sustain · ATK Suppression',
+    kit: {
+      ...tank,
+      skill: {
+        ...tank.skill, name: 'หนี้เลือด', label: 'Blood Debt',
+        effects: [
+          { type: 'APPLY_STATUS', status: 'taunted', to: 'AREA', area: 'RADIUS_2', center: 'SELF', team: 'ENEMY' },
+          { type: 'APPLY_STATUS', status: 'blood_debt', to: 'SELF' },
+        ],
+      },
+      skill2: {
+        ...tank.skill2, name: 'การตอบแทนแห่งราชัน', label: "Sovereign's Reprisal", range: 1, target: 'CURRENT',
+        fallback: undefined, movement: undefined,
+        effects: [
+          { type: 'DAMAGE', area: 'FRONT_RECT_2X3', primary: 1.6, secondary: 1.0 },
+          { type: 'APPLY_STATUS', status: 'blood_brand', to: 'HIT' },
+        ],
+        ai: { tier: 'NORMAL', minTargets: 1 },
+      },
+      ult: {
+        ...tank.ult, name: 'ประหารแห่งจอมราชันโลหิต', label: 'Bloodwrought Execution', range: 1, target: 'CURRENT',
+        effects: [
+          { type: 'DAMAGE', area: 'FRONT_T3', primary: 2.8, secondary: 1.2 },
+          { type: 'APPLY_STATUS', status: 'blood_brand', to: 'HIT' },
+          { type: 'APPLY_STATUS', status: 'sovereign_dominion', to: 'SELF' },
+          { type: 'APPLY_STATUS', status: 'taunted', to: 'AREA', area: 'RADIUS_2', center: 'SELF', team: 'ENEMY' },
+          { type: 'APPLY_STATUS', status: 'blood_debt', to: 'SELF' },
+        ],
+        ai: { tier: 'NORMAL', minTargets: 1 },
+      },
+    },
+  },
   // เคล แอชเชน แวนการ์ด (Kael Ashen Vanguard, 3★ Fighter / Frontline DPS · Guard Breaker, remodel #7): Steel /
   // Martial Force · hand-and-a-half longsword · Classic Fantasy (Kingdom Adventurers) · Fighter class ids + cooldowns
   // (rank tables apply; same slot swap as Bai Long), effects arranged to his kit — provisional numbers, no balance run:

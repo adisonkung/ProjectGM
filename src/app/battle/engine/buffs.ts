@@ -19,6 +19,8 @@ export interface ActiveBuff {
   tickTimer: number;
   /** counterStatus already spent for this application */
   counterUsed?: boolean;
+  /** retaliation stacks gathered by this application */
+  debt?: number;
 }
 
 export interface Buffable {
