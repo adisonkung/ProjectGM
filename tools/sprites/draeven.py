@@ -13,7 +13,7 @@ Downscale = premultiplied INTER_AREA with the soft alpha kept (no 0/255 threshol
 cut makes the edges shimmer frame to frame.
 
 S2 / Ult sources (2026-10-22): user sheets on a white background, saved as JPEG (no alpha) → `key_white` on load. The S2
-release frames carry a baked wave / burst / impact disc; only the body is kept (the separate VFX layer comes later).
+release frames keep their baked wave / burst / impact disc as drawn (user: "ใส่มาให้ครบ"); white-hot cores re-filled.
 The Ult sheet keeps its baked white motion smears (part of the swing, like Vaelric's baked slash).
 """
 import hashlib
@@ -26,7 +26,7 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-CELL_W, CELL_H, ROOT_X, ROOT_Y = 260, 170, 130, 155
+CELL_W, CELL_H, ROOT_X, ROOT_Y = 290, 170, 145, 155  # 290 wide (2026-10-22): the S2 burst / disc reach 140 px ahead of the feet
 BODY_PX = 80
 # idle F0 (768 px cells): body head → feet = 690 px, feet centre x 415, ground y 732
 IDLE_BODY, IDLE_FEET_X, IDLE_GROUND = 690, 415, 732
@@ -55,11 +55,11 @@ ROWS = [
     ('skill', 's1', list(range(0, 56, 2))),                      # 28 · S1 Blood Debt taunt (hand beckon)
     # 27 · S2 Sovereign's Reprisal: raise → sword drawn back F17 → forward release F18–F24 (baked wave / burst stripped) → recover
     ('skill2', 's2', [2, 4, 6, 8, 10, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30, 32, 34, 36, 38, 40, 42]),
-    # 28 · Ult Bloodwrought Execution: raise → crouch + spin (momentum, no hit) → overhead HOLD F30 → ONE downward slam F34–F36
-    ('ult', 'ult', [7, 10, 13, 16, 18, 19, 20, 21, 22, 23, 24, 25, 27, 30, 33, 34, 35, 36, 37, 38, 39, 40, 42, 44, 46, 48, 51, 54]),
+    # 28 · Ult Bloodwrought Execution: raise → crouch + spin (momentum, no hit) → sword lowered behind the head to the
+    # horizontal wind-up F33 = the charge HOLD (aura around the blade) → ONE downward slam F34–F36 → recover
+    ('ult', 'ult', [7, 10, 13, 16, 18, 19, 20, 21, 22, 23, 24, 25, 27, 29, 31, 33, 34, 35, 36, 37, 38, 39, 40, 42, 44, 46, 48, 54]),
 ]
-# S2 sheet frames whose forward release carries a baked crimson wave / burst / grey impact disc (the VFX comes as its own
-# layer later): only the body is kept — the crouch silhouette of the clean F25 (dilated) plus the cape on the left
+# S2 sheet frames whose forward release carries the baked crimson wave / burst / impact disc — kept as drawn
 S2_VFX_FRAMES = range(18, 25)
 COLS = max(len(r[2]) for r in ROWS)
 
@@ -81,38 +81,43 @@ def key_white(rgb: np.ndarray) -> np.ndarray:
     return np.dstack([np.clip(col, 0, 255), alpha * 255]).astype(np.uint8)
 
 
-def strip_release_vfx(frames: list) -> list:
-    """S2 release frames: keep the body only (see S2_VFX_FRAMES)"""
-    ref = frames[25][..., 3] > 76
-    hull = ndimage.binary_dilation(ref, iterations=14)
-    h, w = ref.shape
-    yy, xx = np.mgrid[0:h, 0:w]
-    cape = (xx < 470) & (yy >= 640)
+def fill_glow_cores(frames: list, raw: list) -> list:
+    """S2 release frames keep the baked wave / burst (user 2026-10-22: "ใส่มาให้ครบ"). Their white-hot cores are as white
+    as the background, so keying empties them; holes enclosed by the glow (right of the body) are filled back opaque"""
     out = list(frames)
     for i in S2_VFX_FRAMES:
         f = frames[i].copy()
-        f[..., 3] = np.where(hull | cape, f[..., 3], 0)
-        lab, n = ndimage.label(f[..., 3] > 0)
-        touching = np.unique(lab[ref & (lab > 0)])  # wave leftovers floating by the cape never reach the body itself
-        f[..., 3] = np.where(np.isin(lab, touching), f[..., 3], 0)
+        m = f[..., 3] > 64
+        h, w = m.shape
+        sealed = m
+        if i >= 20:  # the spiky burst / disc frames: seal the gaps between the rays first
+            grown = ndimage.distance_transform_edt(~m) <= 16  # round closing (a square one leaves boxy corners)
+            sealed = ndimage.distance_transform_edt(grown) > 16
+        holes = ndimage.binary_fill_holes(sealed) & ~m & (np.mgrid[0:h, 0:w][1] > 640)
+        holes = ndimage.binary_dilation(holes, iterations=2) & (f[..., 3] < 255)
+        f[..., :3] = np.where(holes[..., None], raw[i][..., :3], f[..., :3])
+        f[..., 3] = np.where(holes, 255, f[..., 3])
         out[i] = f
     return out
 
 
-def cells(path: Path, cols: int):
+def cells(path: Path, cols: int, with_raw: bool = False):
     im = Image.open(path)
     keyed = path.suffix.lower() in ('.jpg', '.jpeg')
     im = im.convert('RGB' if keyed else 'RGBA')
     size = im.width // cols
     out = []
+    raw = []
     for i in range(cols * (im.height // size)):
         r, c = divmod(i, cols)
         f = np.array(im.crop((c * size, r * size, c * size + size, r * size + size)))
+        src = f
         if keyed:
             f = key_white(f)
         if (f[..., 3] > 0).sum() >= 500:
             out.append(f)
-    return out
+            raw.append(src)
+    return (out, raw) if with_raw else out
 
 
 def to_cell(frame: np.ndarray, sim) -> np.ndarray:
@@ -158,9 +163,9 @@ def main():
     for name, (file, cols, sim) in SHEETS.items():
         path = src / file
         hashes[file] = hashlib.sha256(path.read_bytes()).hexdigest()
-        fr = cells(path, cols)
+        fr, raw = cells(path, cols, with_raw=True)
         if name == 's2':
-            fr = strip_release_vfx(fr)
+            fr = fill_glow_cores(fr, raw)
         frames[name] = (fr, sim)
     atlas = np.zeros((CELL_H * len(ROWS), CELL_W * COLS, 4), np.uint8)
     meta = {}

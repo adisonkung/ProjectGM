@@ -37,7 +37,7 @@ Tank class skill ids / cooldowns kept (rank tables apply). No interrupt, no Brea
 
 ## Art pipeline
 
-`python3 tools/sprites/draeven.py` → `public/sprites/hero-draeven.png` (28 × 8 cells 260 × 170, root 130,155, idle body
+`python3 tools/sprites/draeven.py` → `public/sprites/hero-draeven.png` (28 × 8 cells 290 × 170, root 130,155, idle body
 80 px, soft alpha / not pixelated) + temporary portrait `public/portraits/draeven.webp` (cropped from the master
 reference). Then `npm run sprites:optimize`.
 
@@ -50,8 +50,9 @@ Sources (user Autosprite sheets, tracked, do not edit): `assets/heroes/Draeven/`
 | `base/draeven_attack.png` | 5 × 5 @ 1024 | basic attack (21 frames, 19 played, 0.8 s, damage 0.34 s) · Ult reuses this row |
 | `base/draeven_death.png` | 8 × 7 @ 768 | die (14) · hurt (provisional: the opening stagger, 3 frames) |
 | `skill/draeven_s1_taunt.png` | 8 × 7 @ 512 | S1 taunt beckon (56 → 28 frames, 1.6 s) — user-approved "final" |
-| `skill/draeven_s2_release_v2.jpg` | 8 × 7 @ 1000, white bg JPEG | **S2 (user 2026-10-22)**: 27 frames (raise → draw back → forward release → crouch → stance); keyed from white; the baked wave / burst / grey disc on F18–F24 stripped (body only) |
-| `skill/draeven_ult.jpg` | 8 × 7 @ 1000, white bg JPEG | **Ult (user 2026-10-22)**: 28 frames (raise → crouch + spin → overhead hold → one slam → recover); baked white motion smears kept |
+| `skill/draeven_s2_release_v2.jpg` | 8 × 7 @ 1000, white bg JPEG | **S2 (user 2026-10-22)**: 27 frames (raise → draw back → forward release → crouch → stance); keyed from white; the baked wave / burst / impact disc kept as drawn (user: stripped looked chipped), white burst cores re-filled |
+| `skill/draeven_ult.jpg` | 8 × 7 @ 1000, white bg JPEG | **Ult (user 2026-10-22)**: 28 frames (raise → crouch + spin → horizontal wind-up hold 1.5 s → one slam → recover); baked white motion smears kept |
+| `vfx/draeven_ult_charge_aura.png` | 8 frames, magenta key | Ult charge aura around the blade (`draeven_ult_vfx.py` → `fx-draeven-ult-charge.png`: f1–f8 once, then f6–f8 cycle, exactly the hold length; gone at STRIKE_START) |
 | `skill/draeven_s2_sword_release.png` | 12 × 11 @ 512 | superseded (kept as source, no longer baked) |
 | `reference/draeven_master_reference.png` | 1254² magenta | visual authority + portrait crop |
 
@@ -61,8 +62,9 @@ Each sheet is mapped into idle space with one similarity transform (SIFT vs idle
 
 - **VFX — none supplied yet:** S1 Taunt Activation / Taunt Loop / Crimson Spike Eruption; S2 Charge / Main Wave /
   Impact; Ult Charge / Final-hit slash + impact. Missing FX are skipped (gameplay unaffected).
-- **Hurt clip** (provisional stagger). S2 (row 6, 1.43 s, release F9, damage F11) and Ult (row 7, 2.07 s, charge hold F13
-  0.6 s, single slam damage F17) now use the user's own sheets (2026-10-22); their VFX layers + Timeline Sync are pending.
+- **Hurt clip** (provisional stagger). S2 (row 6, 1.43 s, release F9, damage F11, baked wave kept) and Ult (row 7, 2.97 s, charge hold
+  F15 1.5 s with the blade aura, single slam damage F18) use the user's own sheets (2026-10-22); Timeline Sync pending.
+  Cell is 290 wide (root 145) so the S2 burst is not clipped.
   Both sheets open / close on a raised-sword stance that differs from the idle (sword low) — a small pose change at the
   start / end of the clips.
 - Skill icons + banner (portrait is a temporary crop). Final Timeline Sync for all three skills.

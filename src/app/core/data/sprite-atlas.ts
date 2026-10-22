@@ -42,6 +42,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-crescent-iaido.png': { url: 'opt/fx-crescent-iaido.webp' },
   'fx-crystal-shell.png': { url: 'opt/fx-crystal-shell.png' },
   'fx-devour.png': { url: 'opt/fx-devour.png' },
+  'fx-draeven-ult-charge.png': { url: 'opt/fx-draeven-ult-charge.png' },
   'fx-dummy-bolt.png': { url: 'opt/fx-dummy-bolt.png' },
   'fx-elira-basic-light.png': { url: 'opt/fx-elira-basic-light.webp' },
   'fx-elira-s1-impact.png': { url: 'opt/fx-elira-s1-impact.webp' },

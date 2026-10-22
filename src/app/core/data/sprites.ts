@@ -254,7 +254,9 @@ export const SHEETS: Record<string, SheetDef> = {
   // Draeven Morcant Phase A (user 2026-10-22, tools/sprites/draeven.py): Autosprite sheets mapped to one body scale
   // (idle 80 px), soft alpha (painted art, not pixelated). Skill VFX not supplied yet — all skill timings provisional.
   'hero-draeven.png': {
-    cols: 28, rows: 8, cellW: 260, cellH: 170,
+    // cell 290 wide (root 145, 155): the S2 burst / impact disc reach 140 px ahead of the feet
+    cols: 28, rows: 8, cellW: 290, cellH: 170,
+    fx: { ult: 'dr-ult-charge' },
     anims: {
       idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
       // provisional: the stagger at the start of the death sheet (no hurt clip supplied)
@@ -272,11 +274,12 @@ export const SHEETS: Record<string, SheetDef> = {
         steps: [50, 50, 50, 50, 50, 50, 50, 60, 90, 40, 40, 50, 60, 60, 50, 50, 50, 50, 55, 55, 55, 55, 55, 55, 55, 55, 60],
         events: { CAST_START: 0, STRIKE_START: 9, VFX_SPAWN: 9, DAMAGE: 11, IMPACT: 11, RECOVERY_START: 16 },
         impact: { hitStopMs: 50, shakePx: 4, shakeMs: 140 } },
-      // Ult Bloodwrought Execution (user sheet 2026-10-22, VFX + Timeline Sync pending): raise → crouch + spin for
-      // momentum (no hit) → overhead HOLD / CHARGE F13 (0.6 s) → ONE downward slam, contact F17 → recovery. 2.07 s
+      // Ult Bloodwrought Execution (user sheet 2026-10-22, Timeline Sync pending): raise → crouch + spin for momentum
+      // (no hit) → sword lowered behind the head to the horizontal wind-up F15 = HOLD / CHARGE 1.5 s (user: hold longer;
+      // the charge aura wraps the blade, ending as the slash starts) → ONE downward slam, contact F18 → recovery. 2.97 s
       ult: { row: 7, frames: 28, ms: 50, seq: Array.from({ length: 28 }, (_, i) => i),
-        steps: [70, 70, 70, 45, 45, 45, 45, 45, 45, 45, 45, 45, 60, 600, 60, 40, 40, 90, 50, 50, 50, 50, 60, 60, 60, 60, 60, 60],
-        events: { CAST_START: 0, CHARGE_START: 13, CHARGE_PEAK: 13.9, STRIKE_START: 15, DAMAGE: 17, IMPACT: 17, RECOVERY_START: 19 },
+        steps: [70, 70, 70, 45, 45, 45, 45, 45, 45, 45, 45, 45, 60, 60, 60, 1500, 40, 40, 90, 50, 50, 50, 50, 60, 60, 60, 60, 60],
+        events: { CAST_START: 0, CHARGE_START: 15, CHARGE_PEAK: 15.9, STRIKE_START: 16, DAMAGE: 18, IMPACT: 18, RECOVERY_START: 20 },
         impact: { hitStopMs: 90, shakePx: 8, shakeMs: 240, flashMs: 120 } },
     },
   },
@@ -1245,6 +1248,13 @@ export const FX: Record<string, FxDef> = {
   // through the held F6 — user 2026-10, drawn into the sword on the cut) · the ground wave from VFX_SPAWN (30 FPS strip, ~1.9 × his height, its travel along
   // the front line baked in at the kit's 7 cells/s — leading edge reaches cell k at (k − 0.5) / 7 s, when that cell's
   // damage resolves) · a burst (~1.6 × body) on every unit each collision hit (one impact event per cell)
+  // Draeven Ult charge aura (user 2026-10-22): wraps the blade of the 1.5 s hold — f1–f8 once, then f6–f8 cycle until
+  // STRIKE_START, where the strip ends (tools/sprites/draeven_ult_vfx.py bakes it to the hold length). Centre = blade centre
+  // of the hold pose (atlas 147, 63.5 → feet 145, 155): dx 2 px, dy −91.5 px from the feet (feet = dy 27.25 %)
+  'dr-ult-charge': {
+    file: 'fx-draeven-ult-charge.png', frames: 25, w: 156, h: 90, frameMs: 60, at: 'self', orient: 'flip',
+    event: 'CHARGE_START', pivot: [0.5, 0.5], dx: 2.5, dy: 27.25 - 91.5 * 1.25, scale: 1 / 3,
+  },
   'kl-ult-charge': {
     particles: ['ember-rise'],
     file: 'fx-kael-ult-charge.png', frames: 30, w: 232, h: 268, frameMs: 33.33, at: 'self', orient: 'flip',

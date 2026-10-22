@@ -2,7 +2,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_KITS, kitInterrupts, kitOf } from '../../core/data/hero-skills';
 import { HERO_ART } from '../../core/data/hero-art';
-import { animEvents, SHEETS } from '../../core/data/sprites';
+import { animEvents, FX, SHEETS } from '../../core/data/sprites';
 import { OwnedHero } from '../../core/models/hero';
 import { EnemyPlacement, StageDef } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
@@ -15,7 +15,7 @@ import { hasStatus, modifier } from './buffs';
 describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
   it('28 × 8 atlas 260 × 170: idle 12 · walk 8 · hurt 3 · attack 21 (19 played) · die 14 · S1 28 · S2 27 · Ult 28', () => {
     const sh = SHEETS['hero-draeven.png'];
-    expect([sh.cols, sh.rows, sh.cellW, sh.cellH, !!sh.pixelated]).toEqual([28, 8, 260, 170, false]);
+    expect([sh.cols, sh.rows, sh.cellW, sh.cellH, !!sh.pixelated]).toEqual([28, 8, 290, 170, false]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die', 'skill', 'skill2', 'ult'] as const).map(k => [a[k]!.row, a[k]!.frames]))
       .toEqual([[0, 12], [1, 8], [2, 3], [3, 21], [4, 14], [5, 28], [6, 27], [7, 28]]);
@@ -23,7 +23,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(HERO_ART['draeven']).toEqual({ portrait: 'portraits/draeven.webp' });
   });
 
-  it('timings: attack 0.8 s (damage 0.34 s) · S1 1.6 s · S2 one hit · ult holds the raised sword 0.6 s, then ONE final hit', () => {
+  it('timings: attack 0.8 s (damage 0.34 s) · S1 1.6 s · S2 one hit · ult holds the charge 1.5 s, then ONE final hit', () => {
     const sum = (k: 'attack' | 'ult') => SHEETS['hero-draeven.png'].anims[k]!.steps!.reduce((x, y) => x + y, 0);
     expect(sum('attack')).toBe(800);
     const at = (k: 'attack' | 'skill' | 'skill2' | 'ult', ev: string) => animEvents('hero-draeven.png', k).filter(e => e.event === ev).map(e => e.t);
@@ -32,7 +32,11 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(at('skill2', 'DAMAGE').length).toBe(1);
     expect(at('ult', 'DAMAGE').length).toBe(1);
     expect(at('ult', 'CHARGE_START')[0]).toBeLessThan(at('ult', 'DAMAGE')[0]);
-    expect(Math.max(...SHEETS['hero-draeven.png'].anims.ult!.steps!)).toBe(600);
+    expect(Math.max(...SHEETS['hero-draeven.png'].anims.ult!.steps!)).toBe(1500);
+    // the charge aura spans the hold exactly: it starts at CHARGE_START and its strip ends at STRIKE_START
+    const aura = FX['dr-ult-charge'];
+    expect(aura.event).toBe('CHARGE_START');
+    expect(at('ult', 'STRIKE_START')[0] - at('ult', 'CHARGE_START')[0]).toBeCloseTo((aura.frames * aura.frameMs) / 1000, 3);
   });
 
   it('kit keeps the Tank class ids + cooldowns, and stays PUNISH: no shield, no interrupt, no stun / knockback / Break', () => {
