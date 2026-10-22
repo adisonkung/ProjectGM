@@ -254,7 +254,7 @@ export const SHEETS: Record<string, SheetDef> = {
   // Draeven Morcant Phase A (user 2026-10-22, tools/sprites/draeven.py): Autosprite sheets mapped to one body scale
   // (idle 80 px), soft alpha (painted art, not pixelated). Skill VFX not supplied yet — all skill timings provisional.
   'hero-draeven.png': {
-    cols: 28, rows: 7, cellW: 260, cellH: 170,
+    cols: 28, rows: 8, cellW: 260, cellH: 170,
     anims: {
       idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
       // provisional: the stagger at the start of the death sheet (no hurt clip supplied)
@@ -266,14 +266,17 @@ export const SHEETS: Record<string, SheetDef> = {
       die: { row: 4, frames: 14, ms: 80 },
       // S1 Blood Debt: open-hand beckon taunt (28 frames × 57 ms = 1.6 s); the taunt lands at the full beckon F12
       skill: { row: 5, frames: 28, ms: 57, events: { CAST_START: 0, SKILL_ACTIVATE: 12, DAMAGE: 12, RECOVERY_START: 21 } },
-      // S2 Sovereign's Reprisal (provisional source reuse): raise → release the sword forward F13 → recover
-      skill2: { row: 6, frames: 26, ms: 50,
-        events: { CAST_START: 0, STRIKE_START: 11, DAMAGE: 13, IMPACT: 13, RECOVERY_START: 15 } },
-      // Ult (attack row reinterpreted): momentum raise → HOLD / CHARGE at the raised sword F5 (0.6 s) → one heavy
-      // downward FINAL HIT F9 → recovery. Not a two-hit combo
-      ult: { row: 3, frames: 21, ms: 40, seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19, 20],
-        steps: [70, 60, 60, 60, 60, 600, 50, 40, 40, 45, 120, 80, 60, 50, 45, 45, 45, 45, 70],
-        events: { CAST_START: 0, CHARGE_START: 5, CHARGE_PEAK: 5.9, STRIKE_START: 6, DAMAGE: 9, IMPACT: 9, RECOVERY_START: 12 },
+      // S2 Sovereign's Reprisal (user sheet 2026-10-22, VFX + Timeline Sync pending): raise → sword drawn back F8 →
+      // forward release F9 (STRIKE / VFX) → the wave lands F11 → crouched follow-through → back to stance. 1.43 s
+      skill2: { row: 6, frames: 27, ms: 50, seq: Array.from({ length: 27 }, (_, i) => i),
+        steps: [50, 50, 50, 50, 50, 50, 50, 60, 90, 40, 40, 50, 60, 60, 50, 50, 50, 50, 55, 55, 55, 55, 55, 55, 55, 55, 60],
+        events: { CAST_START: 0, STRIKE_START: 9, VFX_SPAWN: 9, DAMAGE: 11, IMPACT: 11, RECOVERY_START: 16 },
+        impact: { hitStopMs: 50, shakePx: 4, shakeMs: 140 } },
+      // Ult Bloodwrought Execution (user sheet 2026-10-22, VFX + Timeline Sync pending): raise → crouch + spin for
+      // momentum (no hit) → overhead HOLD / CHARGE F13 (0.6 s) → ONE downward slam, contact F17 → recovery. 2.07 s
+      ult: { row: 7, frames: 28, ms: 50, seq: Array.from({ length: 28 }, (_, i) => i),
+        steps: [70, 70, 70, 45, 45, 45, 45, 45, 45, 45, 45, 45, 60, 600, 60, 40, 40, 90, 50, 50, 50, 50, 60, 60, 60, 60, 60, 60],
+        events: { CAST_START: 0, CHARGE_START: 13, CHARGE_PEAK: 13.9, STRIKE_START: 15, DAMAGE: 17, IMPACT: 17, RECOVERY_START: 19 },
         impact: { hitStopMs: 90, shakePx: 8, shakeMs: 240, flashMs: 120 } },
     },
   },

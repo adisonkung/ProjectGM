@@ -12,8 +12,9 @@ cell root (130, 155) — the game's 260 × 170 hero cell, matching Mirelle / Syl
 Downscale = premultiplied INTER_AREA with the soft alpha kept (no 0/255 threshold) — the frames are painted art, a hard
 cut makes the edges shimmer frame to frame.
 
-S2 source: Draeven's ungloved fingertip is pink in the raw sheet; it is dyed to the glove colour (only small pink /
-beige components that stick out of the dark glove into the background — the gold gauntlet trim is never touched).
+S2 / Ult sources (2026-10-22): user sheets on a white background, saved as JPEG (no alpha) → `key_white` on load. The S2
+release frames carry a baked wave / burst / impact disc; only the body is kept (the separate VFX layer comes later).
+The Ult sheet keeps its baked white motion smears (part of the swing, like Vaelric's baked slash).
 """
 import hashlib
 import json
@@ -38,7 +39,11 @@ SHEETS = {
     'attack': ('base/draeven_attack.png', 5, (1.974, -599.7, -1162.7)),
     'death': ('base/draeven_death.png', 8, (1.33, -127.1, -129.4)),
     's1': ('skill/draeven_s1_taunt.png', 8, (1.5, -0.136, -0.207)),
-    's2': ('skill/draeven_s2_sword_release.png', 12, (1.501, -0.283, -0.273)),
+    # 2026-10-22 supplied S2 / Ult sheets: 8 × 7 cells of 1000 px on a WHITE background (JPEG, no alpha) → keyed on load.
+    # Mapped by matching the head → feet height of the opening stance (261 px → idle 686 px ≈ ×2.6, the stance differs from
+    # idle F0 so SIFT has too few inliers) and putting the mid-feet on the idle feet
+    's2': ('skill/draeven_s2_release_v2.jpg', 8, (2.6, -907.1, -1527.4)),
+    'ult': ('skill/draeven_ult.jpg', 8, (2.6, -860.3, -1556.0)),
 }
 # atlas rows (frame indices into each sheet's non-empty cells, reading order)
 ROWS = [
@@ -48,46 +53,66 @@ ROWS = [
     ('attack', 'attack', list(range(21))),                       # 21 · basic attack (ult reuses this row)
     ('die', 'death', [5, 7, 9, 11, 13, 14, 16, 18, 21, 24, 26, 28, 29, 30]),  # 14
     ('skill', 's1', list(range(0, 56, 2))),                      # 28 · S1 Blood Debt taunt (hand beckon)
-    ('skill2', 's2', list(range(76, 127, 2))),                   # 26 · S2 provisional: sword raised and released forward
+    # 27 · S2 Sovereign's Reprisal: raise → sword drawn back F17 → forward release F18–F24 (baked wave / burst stripped) → recover
+    ('skill2', 's2', [2, 4, 6, 8, 10, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30, 32, 34, 36, 38, 40, 42]),
+    # 28 · Ult Bloodwrought Execution: raise → crouch + spin (momentum, no hit) → overhead HOLD F30 → ONE downward slam F34–F36
+    ('ult', 'ult', [7, 10, 13, 16, 18, 19, 20, 21, 22, 23, 24, 25, 27, 30, 33, 34, 35, 36, 37, 38, 39, 40, 42, 44, 46, 48, 51, 54]),
 ]
+# S2 sheet frames whose forward release carries a baked crimson wave / burst / grey impact disc (the VFX comes as its own
+# layer later): only the body is kept — the crouch silhouette of the clean F25 (dilated) plus the cape on the left
+S2_VFX_FRAMES = range(18, 25)
 COLS = max(len(r[2]) for r in ROWS)
 
 
+def key_white(rgb: np.ndarray) -> np.ndarray:
+    """white-background (JPEG) cell → RGBA: the enclosed body is opaque, soft edges and light motion smears are unmixed
+    from white (alpha = how far the darkest channel is from white); enclosed near-white gaps stay transparent"""
+    a = rgb.astype(np.float32)
+    mn = a.min(-1)
+    alpha = np.clip((255 - mn) / 45.0, 0, 1)
+    solid = ndimage.binary_erosion(ndimage.binary_fill_holes(mn < 200) & (mn < 236), iterations=2)
+    alpha = np.where(solid, 1.0, alpha)
+    # JPEG ringing leaves a pale rim around the dark outline: pull light edge pixels in by ~3 px
+    rim = (ndimage.grey_erosion(alpha, size=7) < alpha) & (mn > 120)
+    alpha = np.where(rim, ndimage.grey_erosion(alpha, size=7), alpha)
+    alpha[alpha < 0.06] = 0
+    al = alpha[..., None]
+    col = np.where(al > 0, (a - (1 - al) * 255) / np.maximum(al, 1e-3), 0)
+    return np.dstack([np.clip(col, 0, 255), alpha * 255]).astype(np.uint8)
+
+
+def strip_release_vfx(frames: list) -> list:
+    """S2 release frames: keep the body only (see S2_VFX_FRAMES)"""
+    ref = frames[25][..., 3] > 76
+    hull = ndimage.binary_dilation(ref, iterations=14)
+    h, w = ref.shape
+    yy, xx = np.mgrid[0:h, 0:w]
+    cape = (xx < 470) & (yy >= 640)
+    out = list(frames)
+    for i in S2_VFX_FRAMES:
+        f = frames[i].copy()
+        f[..., 3] = np.where(hull | cape, f[..., 3], 0)
+        lab, n = ndimage.label(f[..., 3] > 0)
+        touching = np.unique(lab[ref & (lab > 0)])  # wave leftovers floating by the cape never reach the body itself
+        f[..., 3] = np.where(np.isin(lab, touching), f[..., 3], 0)
+        out[i] = f
+    return out
+
+
 def cells(path: Path, cols: int):
-    im = Image.open(path).convert('RGBA')
+    im = Image.open(path)
+    keyed = path.suffix.lower() in ('.jpg', '.jpeg')
+    im = im.convert('RGB' if keyed else 'RGBA')
     size = im.width // cols
     out = []
     for i in range(cols * (im.height // size)):
         r, c = divmod(i, cols)
         f = np.array(im.crop((c * size, r * size, c * size + size, r * size + size)))
+        if keyed:
+            f = key_white(f)
         if (f[..., 3] > 0).sum() >= 500:
             out.append(f)
     return out
-
-
-def dye_fingers(a: np.ndarray) -> np.ndarray:
-    """pink / beige fingertip components sticking out of the dark glove → glove colour (luminance kept)"""
-    a = a.astype(np.float32)
-    r, g, b, al = (a[..., k] for k in range(4))
-    h, w = r.shape
-    yy, xx = np.mgrid[0:h, 0:w]
-    skin = (al > 0) & (r > 110) & (g > 55) & (b > g - 75) & (r - g > 6) & (xx > 335) & (yy < 330)
-    dark = (al > 0) & (a[..., :3].max(-1) < 90)
-    near = ndimage.binary_dilation(dark, iterations=5)
-    bgn = ndimage.binary_dilation(al == 0, iterations=3)
-    lab, _ = ndimage.label(skin, np.ones((3, 3)))
-    m = np.zeros_like(skin)
-    for j, sl in enumerate(ndimage.find_objects(lab), 1):
-        comp = lab[sl] == j
-        if comp.shape[0] <= 60 and comp.shape[1] <= 60 and comp.sum() >= 4 and (near[sl] & comp).any() \
-                and (bgn[sl] & comp).sum() >= 0.35 * comp.sum():
-            m[sl] |= comp
-    m = ndimage.binary_dilation(m, iterations=1) & (al > 0) & ~dark
-    lum = 0.3 * r + 0.59 * g + 0.11 * b
-    t = np.clip((lum - 70) / 150, 0, 1)[..., None]
-    dark_c, light_c = np.array([30, 22, 12], np.float32), np.array([105, 84, 62], np.float32)
-    a[..., :3] = np.where(m[..., None], dark_c + (light_c - dark_c) * t, a[..., :3])
-    return a.astype(np.uint8)
 
 
 def to_cell(frame: np.ndarray, sim) -> np.ndarray:
@@ -135,7 +160,7 @@ def main():
         hashes[file] = hashlib.sha256(path.read_bytes()).hexdigest()
         fr = cells(path, cols)
         if name == 's2':
-            fr = [dye_fingers(f) for f in fr]
+            fr = strip_release_vfx(fr)
         frames[name] = (fr, sim)
     atlas = np.zeros((CELL_H * len(ROWS), CELL_W * COLS, 4), np.uint8)
     meta = {}
