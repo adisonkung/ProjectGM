@@ -38,7 +38,7 @@ import { IconComponent } from './icon.component';
     :host { display: grid; gap: 8px; }
     .lbl { font-size: 12.5px; color: var(--muted); }
     .code { width: 100%; box-sizing: border-box; resize: vertical; min-height: 64px; padding: 8px 10px; border-radius: 10px;
-      background: #0b0914; border: 1px solid var(--line); color: var(--text); font: 12px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; }
+      background: #0a130f; border: 1px solid var(--line); color: var(--text); font: 12px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; }
     .code:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px #d9b46433; }
     .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .or { color: var(--muted); font-size: 12px; }

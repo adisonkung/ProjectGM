@@ -3,18 +3,18 @@
 .island { display: grid; gap: 14px; }
 
 /* the island IS the screen: locked full-viewport stage, the app bar / dock float over it (no page scroll at all) */
-.stage { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #140e2a; }
+.stage { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #14241d; }
 app-island-scene { position: absolute; inset: 0; }
 .stage:fullscreen { --ui-top: 0px; --ui-bottom: 0px; }
 
 .hud { position: absolute; z-index: 2; display: grid; gap: 6px; pointer-events: none; > * { pointer-events: auto; } }
 .note { position: relative; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: var(--gold-hi);
-  background: #0b0914cc; border: 1px solid #d9b46488; text-decoration: none;
+  background: #0a130fcc; border: 1px solid #d9b46488; text-decoration: none;
   em { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--ember); color: #fff; font: 700 11px/18px var(--body); font-style: normal; text-align: center; } }
 
 .event { position: absolute; z-index: 9; left: 50%; bottom: calc(var(--ui-bottom) + 18px); transform: translate(-50%, 16px); width: min(88%, 380px); opacity: 0; pointer-events: none;
   display: grid; justify-items: center; gap: 4px; text-align: center; padding: 14px 16px; border-radius: 16px;
-  background: radial-gradient(ellipse 80% 70% at 50% 0%, #d9b46433, transparent 70%), #0d0a18ee; border: 1px solid var(--gold);
+  background: radial-gradient(ellipse 80% 70% at 50% 0%, #d9b46433, transparent 70%), #0c1611ee; border: 1px solid var(--gold);
   box-shadow: 0 0 30px #d9b46444, 0 10px 30px #000c; transition: opacity 0.3s, transform 0.3s;
   &.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
   small { font: 700 11px var(--title); letter-spacing: 0.2em; color: var(--arcane-hi); text-transform: uppercase; }
@@ -23,7 +23,7 @@ app-island-scene { position: absolute; inset: 0; }
   .ev-acts { display: flex; gap: 6px; margin-top: 4px; } }
 
 .sheet { position: absolute; z-index: 8; left: 0; right: 0; margin-inline: auto; width: min(620px, calc(100% - 20px)); box-sizing: border-box; bottom: calc(var(--ui-bottom) + 10px); display: grid; gap: 8px; padding: 14px 16px; border-radius: 16px;
-  background: linear-gradient(180deg, #1c1630f2, #0e0b17f5); border: 1px solid #d9b46488; box-shadow: 0 -6px 30px #000b; animation: up 0.2s ease-out;
+  background: linear-gradient(180deg, #192d24f2, #0c1611f5); border: 1px solid #d9b46488; box-shadow: 0 -6px 30px #000b; animation: up 0.2s ease-out;
   header { display: grid; gap: 2px; padding-right: 26px; }
   h2 { margin: 0; font: 800 20px var(--title); color: var(--gold-hi); .lv { font: 700 12px var(--title); color: var(--arcane-hi); margin-left: 6px; } }
   p { margin: 0; font-size: 13px; color: var(--text); }
@@ -39,14 +39,14 @@ app-island-scene { position: absolute; inset: 0; }
 .themes-sheet { max-height: calc(100% - var(--ui-top) - var(--ui-bottom) - 20px); overflow: auto;
   .tnote { font-size: 12px; color: var(--muted); } }
 .map-card { position: relative; width: 100%; display: grid; grid-template-columns: 160px 1fr; gap: 10px; align-items: center; padding: 6px; margin-bottom: 8px;
-  border-radius: 12px; text-align: left; cursor: pointer; background: #0b0914cc; border: 1px solid #ffffff1f; color: var(--text);
+  border-radius: 12px; text-align: left; cursor: pointer; background: #0a130fcc; border: 1px solid #ffffff1f; color: var(--text);
   .pv { display: block; height: 72px; border-radius: 8px; background-size: cover; background-position: center; }
   .txt { display: grid; gap: 2px; } b { font: 700 15px var(--title); color: var(--gold-hi); } small { font-size: 11.5px; color: var(--muted); }
   em { position: absolute; top: 10px; right: 10px; padding: 1px 7px; border-radius: 99px; font: 700 10px var(--body); font-style: normal; color: #211606; background: var(--gold); }
   &:hover { border-color: #d9b46488; } &.on { border-color: var(--gold); box-shadow: 0 0 14px #d9b46455; } }
 .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .theme-card { position: relative; display: grid; gap: 3px; align-content: start; padding: 6px; border-radius: 12px; text-align: left; cursor: pointer;
-  background: #0b0914cc; border: 1px solid #ffffff1f; color: var(--text);
+  background: #0a130fcc; border: 1px solid #ffffff1f; color: var(--text);
   .pv { position: relative; display: block; height: 70px; border-radius: 8px; overflow: hidden; background-size: cover; background-position: 30% 40%; image-rendering: pixelated;
     img { position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); height: 78px; image-rendering: pixelated; } }
   b { font: 700 13px var(--title); color: var(--gold-hi); }

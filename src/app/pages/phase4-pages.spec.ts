@@ -22,6 +22,26 @@ describe('Phase 4 pages', () => {
     expect(el.querySelectorAll('.card').length).toBe(heroes.filter(h => HERO_BY_ID[h.templateId].cls === 'tank').length);
   });
 
+  it('roster search composes with class filters and an empty result can be cleared', async () => {
+    await TestBed.configureTestingModule({ imports: [HeroesComponent], providers: [provideRouter([])] }).compileComponents();
+    const f = TestBed.createComponent(HeroesComponent); f.detectChanges();
+    const el: HTMLElement = f.nativeElement;
+    const search = el.querySelector('input[type="search"]') as HTMLInputElement;
+    const hero = TestBed.inject(SaveService).state().heroes[0];
+    const template = HERO_BY_ID[hero.templateId];
+    const enter = (text: string) => { search.value = text; search.dispatchEvent(new Event('input')); f.detectChanges(); };
+    enter(`  ${template.id.toUpperCase()}  `);
+    expect(el.querySelectorAll('.card').length).toBe(1);
+    expect(el.querySelector('.card')!.textContent).toContain(template.name);
+    f.componentInstance.cls.set(template.cls === 'tank' ? 'mage' : 'tank'); f.detectChanges();
+    expect(el.querySelectorAll('.card').length).toBe(0);
+    (el.querySelector('.none button') as HTMLButtonElement).click(); f.detectChanges();
+    expect(search.value).toBe('');
+    expect(el.querySelectorAll('.card').length).toBe(TestBed.inject(SaveService).state().heroes.length);
+    enter(template.name);
+    expect(el.querySelectorAll('.card').length).toBe(1);
+  });
+
   it('hero detail: route identity, overview gear, and accessible skill/stat navigation', async () => {
     await TestBed.configureTestingModule({
       imports: [HeroDetailComponent],

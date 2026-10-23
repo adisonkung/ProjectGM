@@ -66,6 +66,7 @@ export function suggestIslandName(rng: () => number = Math.random): string {
 
 // ------------------------------------------------------------------ save transfer (code / file)
 
+/** Stable legacy save identifier; the Eldervane display name does not change save compatibility. */
 export const SAVE_APP_ID = 'summon-tower';
 export const SAVE_FORMAT = 1;
 
@@ -167,7 +168,7 @@ export async function decodeSaveText(text: string): Promise<DecodeResult> {
   } catch {
     return { ok: false, error: 'อ่านข้อมูลเซฟไม่ได้' };
   }
-  if (env?.app !== SAVE_APP_ID || typeof env.format !== 'number' || !env.state) return { ok: false, error: 'ไม่ใช่เซฟของ Summon Tower' };
+  if (env?.app !== SAVE_APP_ID || typeof env.format !== 'number' || !env.state) return { ok: false, error: 'ไม่ใช่เซฟของ Eldervane' };
   if (env.format > SAVE_FORMAT) return { ok: false, error: 'เซฟนี้มาจากเกมเวอร์ชันใหม่กว่า — อัปเดตเกมก่อน' };
   return { ok: true, envelope: env as SaveEnvelope };
 }

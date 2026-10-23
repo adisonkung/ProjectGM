@@ -41,7 +41,7 @@ import { SaveService } from '../core/services/save.service';
   styles: [`
     .presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
     .preset { position: relative; display: flex; align-items: stretch; gap: 4px; padding: 4px; border-radius: 12px;
-      background: linear-gradient(180deg, #1c1630, #110d1c); border: 1px solid var(--line); min-width: 0; }
+      background: linear-gradient(180deg, #192d24, #0f1a15); border: 1px solid var(--line); min-width: 0; }
     .preset.active { border-color: var(--gold); box-shadow: 0 0 0 1px #d9b46455, 0 0 16px #d9b46433; }
     .load { flex: 1; min-width: 0; display: grid; gap: 3px; text-align: left; padding: 4px 6px; border: 0; background: none; border-radius: 8px; }
     .load:hover:not(:disabled) { background: #ffffff08; }
@@ -58,8 +58,8 @@ import { SaveService } from '../core/services/save.service';
     @keyframes fade { 70% { opacity: 1; } to { opacity: 0; } }
     :host(.compact) { display: block; min-width: 0; }
     :host(.compact) .presets { gap: 8px; }
-    :host(.compact) .preset { border-radius: 7px; background: #091326d6; padding: 3px; }
-    :host(.compact) .preset.active { background: linear-gradient(120deg, #ab82422b, #101a32e8); }
+    :host(.compact) .preset { border-radius: 7px; background: #111e18d6; padding: 3px; }
+    :host(.compact) .preset.active { background: linear-gradient(120deg, #ab82422b, #172b22e8); }
     :host(.compact) .load { padding: 6px 8px; }
     :host(.compact) .name { font-size: 13px; }
     :host(.compact) .faces { display: none; }
