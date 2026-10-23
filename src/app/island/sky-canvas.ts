@@ -62,7 +62,7 @@ export class SkyCanvasRenderer {
   private darkWing: HTMLCanvasElement | null = null;
   private fx: { falls?: FxLayer; water?: FxLayer; crystals?: HTMLCanvasElement } = {};
 
-  constructor(private readonly img: ImgLookup) {}
+  constructor(private readonly img: ImgLookup, private readonly daylight = false) {}
 
   // ------------------------------------------------------------------ public
   /** sky, sun, stars, far islands, cloud bank, whale, dragon, back cloud sea */
@@ -132,6 +132,16 @@ export class SkyCanvasRenderer {
     this.at(ctx, cam, 0.04);
     ctx.globalAlpha = 1;
     ctx.drawImage(im, bx + (bw - dw) * 0.3, H - dh, dw, dh);
+    if (this.daylight) {
+      // Grade only the sky layer: creatures and painted floating islands keep their own colors.
+      const daylight = ctx.createLinearGradient(0, -400, 0, H);
+      daylight.addColorStop(0, '#6babda'); daylight.addColorStop(.55, '#b3d7e8'); daylight.addColorStop(1, '#ffcfb4');
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = daylight;
+      ctx.fillRect(bx, -400, bw, bh);
+      ctx.restore();
+    }
   }
 
   private sun(ctx: CanvasRenderingContext2D, cam: SkyCamera, t: number): void {

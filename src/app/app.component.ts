@@ -6,6 +6,9 @@ import { AccountService } from './core/services/account.service';
 import { PreloadService } from './core/services/preload.service';
 import { SaveService } from './core/services/save.service';
 import { IconComponent } from './shared/icon.component';
+import { CitadelFrameComponent } from './shared/citadel-frame.component';
+import { CitadelIconComponent } from './shared/citadel-icon.component';
+import { formatCurrency } from './shared/format-currency';
 
 export interface NavItem {
   path: string;
@@ -39,7 +42,7 @@ export const LOBBY_NAV: NavItem[] = [
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, IconComponent],
+  imports: [RouterOutlet, RouterLink, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -68,9 +71,12 @@ export class AppComponent {
   /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
   readonly collection = computed(() => /^\/(heroes|team|armory|forge|account)(\/|[?#]|$)/.test(this.url()) || /^\/(tower|dungeons)(\/|[?#]|$)/.test(this.url()));
   readonly fantasy = computed(() => this.immersive() || this.collection());
+  readonly homeChrome = computed(() => this.active() === '/home');
 
-  readonly gems = computed(() => this.save.state().gems.toLocaleString('en-US'));
-  readonly gold = computed(() => this.save.state().gold.toLocaleString('en-US'));
+  readonly gemsFull = computed(() => this.save.state().gems.toLocaleString('en-US'));
+  readonly goldFull = computed(() => this.save.state().gold.toLocaleString('en-US'));
+  readonly gems = computed(() => formatCurrency(this.save.state().gems));
+  readonly gold = computed(() => formatCurrency(this.save.state().gold));
 
   constructor() {
     // start decoding the island art right away (the home screen is the island)

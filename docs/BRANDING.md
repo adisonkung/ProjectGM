@@ -36,3 +36,7 @@ The user explicitly authorized public publication of the UI, game-name and logo 
 ## Validation
 
 App/spec TypeScript checks pass; full Karma807/807 and production build pass. Native Chromium on the production build verifies full-logo welcome layouts at360/390/768/1440px, header layouts at360/390/768/1024/1440/1920px, Home-link navigation and the summon-dialog logo. No document overflow, header overlap or page errors. A narrow-screen form min-content overflow discovered at360px is fixed with bounded grid tracks. Runtime compact WebP matches its built copy byte-for-byte. Screenshots/results are local under `work/logo-review/`. Build retains existing component-style/Pixi warnings; budgets are unchanged.
+
+## Champagne/ivory revision — review only (2026-10-24 Bangkok)
+
+User approved applying the previewed champagne/ivory recolors. New transparent delivery files `eldervane-logo-champagne.webp` (1738×863) and `eldervane-wordmark-champagne.webp` (2023×456) are cropped/encoded from generated PNGs `exec-43968c18-83e7-49a9-9211-128d5797ed93.png` and `exec-b5ad1ec3-0763-4650-8e35-fc6fabb1cf72.png`. Original masters and original WebPs remain available. Shared navigation and summon heading use the compact version; welcome uses the full floating-tower logo. Home fits the complete wordmark with contain, removing the earlier full-logo crop. The latest explicit no-deploy instruction supersedes the historical deployment authorization above for this review.

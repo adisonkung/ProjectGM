@@ -461,8 +461,6 @@ describe('Home Island — page', () => {
     save.update(s => ({ ...s, cleared, island: { ...s.island!, map: 'classic' } }));
     const f = TestBed.createComponent(IslandComponent);
     f.detectChanges();
-    f.nativeElement.querySelector('.map-toggle').click();
-    f.detectChanges();
     return { f, el: f.nativeElement as HTMLElement, save, isl: TestBed.inject(IslandService) };
   }
 

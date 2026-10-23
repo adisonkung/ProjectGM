@@ -18,6 +18,8 @@ import { SKY_PLOTS } from '../../core/data/sky-city';
 import { IslandSim, SimHero } from '../../island/island-sim';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
+import { CitadelIconComponent } from '../../shared/citadel-icon.component';
 import { heroArt } from '../../core/data/hero-art';
 
 /** state a building showed before an event (pending events are revealed on screen one at a time) */
@@ -44,7 +46,7 @@ const EVENT_TITLE: Record<IslandEvent['type'], string> = {
  */
 @Component({
   selector: 'app-island',
-  imports: [IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, RouterLink],
+  imports: [IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent, RouterLink],
   templateUrl: './island.component.html',
   styleUrl: './island.component.scss',
 })
@@ -69,20 +71,15 @@ export class IslandComponent implements OnInit, OnDestroy {
     this.isFull.set(!!document.fullscreenElement);
   }
   readonly theme = computed(() => themeOf(this.island().themeId));
-  /** Presentation only; the original interactive maps remain available from the HUD. */
-  readonly panorama = signal(true);
-  readonly buildings = ISLAND_BUILDINGS;
   /** cosmetic themes the player can switch between (visual only) */
   readonly themes = Object.values(ISLAND_THEMES);
   setTheme(id: string): void {
-    this.panorama.set(false);
     this.isl.setTheme(id);
   }
   /** Sky City (default) or the classic island */
   readonly isCity = this.isl.isCity;
   readonly towerStage = computed(() => this.island().towerVisualStage);
   setMap(m: 'city' | 'classic'): void {
-    this.panorama.set(false);
     this.isl.setMap(m);
   }
   readonly themeSheet = signal(false);
@@ -102,7 +99,6 @@ export class IslandComponent implements OnInit, OnDestroy {
   readonly cleared = computed(() => this.save.state().cleared);
   readonly totalFloors = STAGES.length;
   readonly stageName = computed(() => islandStageName(this.island().islandProgressionStage));
-  readonly progressExpanded = signal(false);
   readonly enteringTower = signal(false);
   private entranceTimer?: ReturnType<typeof setTimeout>;
   readonly partySlots = [0, 1, 2, 3, 4];
@@ -256,7 +252,7 @@ export class IslandComponent implements OnInit, OnDestroy {
   private frame(t: number): void {
     const dt = this.last ? Math.min(0.1, (t - this.last) / 1000) : 0;
     this.last = t;
-    if (!this.panorama() && this.sim && dt > 0 && document.visibilityState !== 'hidden') {
+    if (this.sim && dt > 0 && document.visibilityState !== 'hidden') {
       this.sim.step(dt);
       this.cycle += dt;
       this.acc += dt;

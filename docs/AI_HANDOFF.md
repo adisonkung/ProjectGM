@@ -2,6 +2,19 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Latest task — Home visual reference review (Codex, 2026-10-24 Bangkok)
+
+User asked for a close match to reference colors/gloss/corners/icons and actual screenshots before review, explicitly **no deployment**. Local task branch `wip/codex-home-reference-match` starts from fetched origin/master e94d853 and carries the18-board reference archive first. No local master exists and no new other-agent source commits were observed.
+
+- Open `docs/design/eldervane-ui/README.md` and actual images01/14/16, then `docs/HOME_REFERENCE_REVIEW.md`.
+- Home-only implementation uses continuous SVG metal contours, solid icons, a generated blank crimson CTA skin, live game data and the original playable City/classic map. Removed the failed static panorama/toggle. Daylight sky grading leaves creatures/islands ungraded; sealed tower state keeps its FX rules. Mobile scene fit accommodates the panels.
+- New global-looking chrome is scoped to Home; other pages await separate review. Do not copy mocked stats, illustrations or formation geometry from reference pictures.
+- Review artifacts/scripts/logs are ignored under `work/home-reference/`. Actual runtime screenshots, not another generated design board, must be shown to the user. Reference art and actual island/portrait assets differ; no pixel-identical art claim.
+- Validation: app/spec typechecks, Karma807/807 and production build pass; native production Chromium passes10 viewport cases plus actual building/hero/theme actions, saved gameplay invariance, scoped header and tower entry in both motion modes. No page errors/missing local assets. Style warning budgets are unchanged.
+- User review follow-up: reuse the original luminous logo on Home, add a lacquer/engraved/glossy selected tab, and replace the hard underline/diamond with a blended red shadow. See the follow-up in HOME_REFERENCE_REVIEW and header-refinement artifacts; other routes keep their current wordmark.
+- Latest party follow-up: desktop party docks16px from the bottom; formation action is a small44px target inside the top-right of the frame, also available on phones. No detached wide button. Five browser sizes and real formation navigation pass, with power/action spacing checked. Logo contrast A/ivory and B/silver previews are not runtime changes; user choice is pending.
+- This task stays local under the explicit no-deploy instruction: no remote publication or merge/Cloudflare request. Older completed-task publication approvals do not authorize this deployment. Last confirmed canonical-local sync metadata below is unchanged.
+
 ## Tower and dungeon adventure UI — Codex, 2026-10-20
 
 Fetched `origin/master` is still `537420c`. Started `wip/codex-adventure-ui` there, then carried the explicitly continued formation redesign and nameplate correction as `5d00c3b` and `86a909c`; original branch remains intact. No local `master` exists in this managed clone, so no ahead-of-origin local master was observed. User requested matching tower/dungeon menus with moving background effects.
@@ -283,3 +296,11 @@ User approved implementing the reviewed Japanese/Korean fantasy drafts across ev
 ## Refined Citadel publication authorized — 2026-10-23
 
 User explicitly answered “อนุญาต” to public publication of the new UI source/docs/art and master merge for Cloudflare. Supersedes the previous automatic-approval blocker for this complete task. Product validation at425a05f is green; only authorization documentation changes afterwards. Use connected repository owner, preserve local history/task branches, verify source trees and the exact merge commit's Cloudflare check. No new canonical-local sync claim; authorization alone is not a deployment-success claim.
+
+Party refinement: smaller desktop count/power,22px power glyph, raised gold-framed44px upper-right formation action with hover/press/focus and reduced-motion support. Champagne/ivory logo recolors remain previews only. See HOME_REFERENCE_REVIEW latest follow-up. No deployment.
+
+Header follow-up: user approved champagne/ivory logos in runtime (compact shared navigation/summon heading, full welcome). Team corner action inset increases7px desktop/5px mobile. Home lower gold rail is brighter with layered metal and resource gloss. Wallet formats exact values below100k and truncated k/m/b above, with full accessible/title values; saved balances unchanged. Fixed wallet widths reserve six characters across breakpoints. No deployment; current screenshots/checks live under ignored work/home-reference/*wallet*.
+
+Header seam refinement: replace the heavy multi-line gold rail with a single1px warm metal edge, restrained inset highlight, irregular specular glints and a6px translucent reflection fading into the sky. Removes the detached opaque brown/gold lower stripe. Pointer-transparent decoration, no changes to dimensions/navigation/currency behavior. No deployment.
+
+Home deployment authorization (2026-10-24 Bangkok): user approved the reviewed Home and explicitly requested deployment, then the next page. This supersedes no-deploy statements above for the completed Home changes only. Publish the reviewed Home snapshot through a task branch/PR, verify the remote tree before merge, inspect Cloudflare status for the actual merged commit. Next page: hero collection, use reference02/14/18 and real hero data; show screenshots before deploying that next page.
