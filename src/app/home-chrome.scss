@@ -1,0 +1,59 @@
+// Only the reviewed Home pass uses this chrome; other routes await their own comparison.
+.reference-home {
+  .bar { height: 72px; min-height: 72px; gap: 0; padding: 0 14px 0 26px; grid-template-columns: minmax(150px,16%) minmax(0,1fr) auto; background: linear-gradient(115deg,#171c20,#0f1418 65%,#1b2024); border-bottom: 2px solid #d5b470; box-shadow: 0 2px 0 #111,0 3px 0 #80602e,0 5px 15px #0005; }
+  .brand { width: 100%; max-width: 220px; padding-right: 10px; height: 62px; }
+  .menu { height: 72px; }
+  .menu a { isolation: isolate; clip-path: none; border: 0; background: transparent; flex: 1; min-width: 0; padding: 0 17px; min-height: 72px; font-size: clamp(12px,1.1vw,18px); gap: 12px; margin-left: -11px; .glyph { color: #f4deaa; } &.on { background: transparent; color: #fff5de; .glyph { color: #ffe6b3; } &::after { left: 50%; right: auto; bottom: -4px; width: 8px; height: 8px; border: 1px solid #ffe3b3; background: #d30519; transform: rotate(45deg); box-shadow: 0 0 5px #ff3c21; } } &:hover { background: transparent; filter: brightness(1.25); } }
+  .purse { padding-left: 7px; gap: 3px; }
+  .treasury { gap: 1px; }
+  .sep { display: none; }
+  .coin-row { position: relative; isolation: isolate; height: 39px; padding: 0 15px; min-width: 94px; justify-content: center; gap: 5px; b { color: #fff7e5; font-size: 15px; font-weight: 500; } }
+  .gem { color: #51c7ff; filter: drop-shadow(0 0 2px #169eff); } .gold { color: #ffc853; }
+  .acct { isolation: isolate; position: relative; width: 43px; height: 43px; border: 0; background: transparent; border-radius: 0; color: #f8db9a; &:hover { background: transparent; filter: brightness(1.2); } }
+  @media (min-width: 721px) and (max-width: 1150px) { .bar { padding-inline: 12px; grid-template-columns: minmax(120px,14%) minmax(0,1fr) auto; } .brand { padding-right: 7px; } .menu a { padding-inline: 12px; gap: 6px; flex-direction: column; font-size: 11px; margin-left: -7px; .glyph { scale: .8; margin-bottom: -4px; } } .coin-row { min-width: 72px; padding-inline: 10px; b { font-size: 12px; } app-citadel-icon { width: 17px; scale: .75; transform-origin: left center; } } .acct { width: 35px; } }
+  @media (max-width: 720px) {
+    .bar { min-height: 60px; height: 60px; padding: 0 8px; grid-template-columns: minmax(0,1fr) auto; }
+    .brand { width: 143px; max-width: 100%; height: 52px; padding: 0 8px 0 0; }
+    .purse { gap: 1px; padding-left: 0; } .treasury { flex-direction: row; gap: 0; }
+    .coin-row { min-width: 70px; padding: 0 9px; height: 34px; gap: 2px; b { font-size: 12px; } app-citadel-icon { width: 18px; scale: .8; transform-origin: left center; } }
+    .acct { width: 34px; height: 36px; app-citadel-icon { scale: .85; } }
+    .menu { height: auto; padding: 0 3px calc(3px + env(safe-area-inset-bottom)); background: linear-gradient(135deg,#1c2125,#101519); border: 0; border-top: 2px solid #d5b16a; box-shadow: 0 -2px #16100a,0 -3px #815c2c; grid-template-columns: repeat(6,minmax(0,1fr)); }
+    .menu a { min-height: 62px; margin: -1px -3px 0; padding: 7px 1px 6px; font-size: 10px; gap: 3px; flex-direction: column; .glyph { scale: .75; height: 26px; } &.on::after { display: none; } }
+  }
+  @media (max-width: 350px) { .coin-row { min-width: 58px; padding-inline: 8px; b { font-size: 11px; } } .brand { width: 121px; } .acct { width: 30px; } }
+}
+.reference-home {
+  @media (min-width: 721px) { .menu a { margin-left: -28px; padding-left: 29px; } .menu a:first-child { margin-left: -15px; } }
+  @media (min-width: 721px) and (max-width: 1150px) { .menu a { margin-left: -21px; padding-left: 22px; } }
+}
+
+// Review refinement: use the original luminous logo and red lacquer instead of flat red.
+.reference-home {
+  .bar { border-bottom: 1px solid #b38d51; box-shadow: 0 5px 16px #11060a66; }
+  .brand-logo { width: 100%; height: 100%; object-fit: contain; object-position: center; filter: drop-shadow(0 1px 2px #0009); }
+  .menu a.on {
+    filter: drop-shadow(0 2px 4px #af061b33);
+    .glyph { filter: drop-shadow(0 0 4px #f2ae7755); }
+    &::after { content: ''; left: 18%; right: 18%; bottom: -1px; width: auto; height: 9px; border: 0; border-radius: 50%; background: radial-gradient(ellipse,#df223c80 0%,#aa0b2440 45%,transparent 76%); box-shadow: none; transform: none; filter: blur(4px); pointer-events: none; }
+    &:hover { filter: brightness(1.12) drop-shadow(0 2px 5px #af061b44); }
+  }
+  @media (max-width: 720px) { .brand-logo { object-position: center; } .menu a.on::after { display: block; bottom: 1px; left: 16%; right: 16%; height: 7px; } }
+}
+
+// A single fine metal edge joins the header to the sky; the reflection fades into the scene.
+.reference-home {
+  .bar { border-bottom: 1px solid #c7a360; box-shadow: inset 0 -1px 0 #f7d99530,0 1px 2px #34231366,0 4px 9px #2a1b1226; }
+  .bar::before { content: ''; position: absolute; inset: auto 0 -1px; height: 1px; pointer-events: none; background: linear-gradient(90deg,transparent 2%,#ffedbc80 12%,transparent 22%,#ffcf9440 28%,transparent 40%,#ffedbc70 66%,transparent 81%,#ffe5a970 94%,transparent); }
+  .bar::after { content: ''; position: absolute; inset: auto 0 -7px; height: 6px; pointer-events: none; background: radial-gradient(ellipse at 19% 0,#d8a45638,transparent 66%),linear-gradient(#84643c22,transparent); }
+  .menu .glyph { filter: drop-shadow(0 1px 1px #000b); }
+  .coin-row { width: 100px; min-width: 100px; flex-shrink: 0; padding-inline: 11px; gap: 5px;
+    b { min-width: 6ch; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; }
+    &::before { content: ''; position: absolute; z-index: -1; inset: 7px 9px; clip-path: polygon(5px 0,calc(100% - 5px) 0,100% 50%,calc(100% - 5px) 100%,5px 100%,0 50%); background: linear-gradient(155deg,#e9d49726,transparent 48%,#d5ab4d12); border-bottom: 1px solid #e4c77e66; }
+    app-citadel-icon { flex-shrink: 0; }
+  }
+  .gold { filter: drop-shadow(0 0 3px #e7ad3b66); }
+  .acct { filter: drop-shadow(0 1px 2px #0008); }
+  @media (min-width: 721px) and (max-width: 1150px) { .coin-row { width: 83px; min-width: 83px; padding-inline: 9px; gap: 2px; b { font-size: 12px; } } }
+  @media (max-width: 720px) { .coin-row { width: 78px; min-width: 78px; padding-inline: 8px; b { font-size: 11px; } } }
+  @media (max-width: 350px) { .coin-row { width: 71px; min-width: 71px; padding-inline: 6px; gap: 1px; b { font-size: 10px; } } .brand { min-width: 0; } }
+}

@@ -2,6 +2,8 @@ import {
   AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, input, NgZone, OnDestroy, output, signal, untracked, viewChild,
 } from '@angular/core';
 import { BUILDING_BY_ID } from '../core/data/island-layout';
+import { CitadelFrameComponent } from '../shared/citadel-frame.component';
+import { CitadelIconComponent } from '../shared/citadel-icon.component';
 import { PreloadService } from '../core/services/preload.service';
 import { SKY_ZOOM, SKY_BASE, SKY_FX, SKY_HERO_SCALE, SKY_MASKS, SKY_NODES, SKY_PAD, SKY_PLOTS, SKY_SPAWN, SKY_SPIRE, SKY_WORLD } from '../core/data/sky-city';
 import { IslandBuildingState, Vec2 } from '../core/models/island';
@@ -29,7 +31,7 @@ const SPIRE_STAGE = [
  */
 @Component({
   selector: 'app-sky-city',
-  imports: [IslandHeroComponent, IconComponent],
+  imports: [IslandHeroComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sky-city.component.html',
   styleUrl: './sky-city.component.scss',
@@ -43,6 +45,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly selected = input<string | null>(null);
   readonly towerStage = input(0);
   readonly enteringTower = input(false);
+  readonly referenceLook = input(false);
   readonly buildingTap = output<string>();
   readonly heroTap = output<number>();
 
@@ -79,7 +82,12 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   readonly zoomMin = SKY_ZOOM.min;
   readonly zoomMax = SKY_ZOOM.max;
 
-  readonly spireLook = computed(() => SPIRE_STAGE[Math.max(0, Math.min(5, this.towerStage()))]);
+  readonly spireLook = computed(() => {
+    const stage = Math.max(0, Math.min(5, this.towerStage()));
+    const look = SPIRE_STAGE[stage];
+    // The sealed spire stays sealed; the daytime palette lifts its dark stone without enabling FX.
+    return this.referenceLook() && stage < 2 ? { ...look, filter: stage === 0 ? 'brightness(.8) saturate(.65)' : 'brightness(.9) saturate(.8)' } : look;
+  });
   readonly gold = computed(() => this.towerStage() >= 5);
 
   /** landmarks to draw (unlocked ones; the one being revealed rises) */
@@ -125,7 +133,7 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.preload.warmCity().then(() => this.fxAuto && this.probeFps());
-    this.renderer = new SkyCanvasRenderer(src => this.preload.image(src));
+    this.renderer = new SkyCanvasRenderer(src => this.preload.image(src), this.referenceLook());
     if (typeof requestAnimationFrame !== 'undefined') this.zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(t => this.frame(t))));
     const el = this.vp().nativeElement;
     this.zone.runOutsideAngular(() => {
@@ -157,7 +165,8 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
     this.vpW.set(w);
     this.vpH.set(h);
     this.topInset = Math.min(top, h * 0.3);
-    this.fitK.set(Math.max((h - this.topInset) / this.H, w / this.W));
+    const sceneHeight = (h - this.topInset) * (this.referenceLook() && w <= 720 ? .68 : 1);
+    this.fitK.set(Math.max(sceneHeight / this.H, w / this.W));
     if (!first) this.panTo(cx, cy, false);
   }
   private topInset = 0;

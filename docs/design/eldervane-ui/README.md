@@ -1,0 +1,65 @@
+# Eldervane — UX/UI design references
+
+ชุดภาพออกแบบ 18 แผ่น เก็บ PNG ต้นฉบับครบโดยไม่ย่อหรือแปลงไฟล์ (2026-10-23)
+
+**สถานะ:** ภาพอ้างอิงการออกแบบสำหรับงานปรับ UI รอบถัดไป ไม่ใช่ screenshot เกมที่พัฒนาแล้ว และไม่ใช่หลักฐานว่าทุกหน้าได้รับอนุมัติทีละหน้า ผู้ใช้ไม่พอใจกับความเหมือนของ UI ที่ deploy ก่อนหน้านี้ จึงขอภาพให้ครอบคลุมทุกหน้า ก่อนกลับไปแก้ implementation
+
+## วิธีใช้สำหรับ AI
+
+1. อ่านกฎใน `AGENTS.md` และ `docs/PROJECT_RULES.md` ก่อนเริ่มงานตามปกติ
+2. เปิดดูภาพจริงของหน้าที่จะแก้จากสารบัญด้านล่าง ด้วยเครื่องมือดูภาพ อย่าอาศัยชื่อไฟล์หรือคำบรรยายอย่างเดียว หากมองภาพไม่ได้ให้แจ้งข้อจำกัด
+3. ยึดภาพเป็นแนวทางด้านองค์ประกอบ กรอบ ปุ่ม สี และลำดับความสำคัญ ใช้ข้อมูลและกติกาจาก repo ปัจจุบัน ไม่คัดลอกตัวเลข/ตัวละคร/ระบบที่ภาพอาจวาดขึ้น
+4. ทำงานตามหน้าที่ผู้ใช้สั่ง ตรวจ desktop/mobile และ interaction เดิม แล้วถ่าย screenshot จริงเปรียบเทียบกับภาพอ้างอิงก่อนรายงานความเหมือน
+5. ชุดนี้ไม่อนุญาตให้แก้เกมอัตโนมัติหรือ deploy การแก้ UI รอบใหม่ ผู้ใช้ต้องได้เห็น screenshot ของ implementation จริงก่อนขึ้นเว็บ ตามที่รับปากไว้
+
+ตัวอย่างคำสั่งสำหรับงานถัดไป:
+
+> อ่าน docs/design/eldervane-ui/README.md แล้วเปิดภาพหน้าที่เกี่ยวข้อง ปรับหน้า [ชื่อหน้า] ให้ตรงกับภาพ โดยรักษาข้อมูลและพฤติกรรมจริงของเกม ส่ง screenshot จริงให้ตรวจ ก่อน deploy
+
+หากภาพอยู่บน task branch ที่ยังไม่ merge ต้อง checkout branch นั้น หรือดึงเฉพาะโฟลเดอร์เข้ามาบน task branch ใหม่อย่างมีการตรวจ diff; AI ที่อ่านเฉพาะ master จะยังไม่เห็นไฟล์เหล่านี้
+
+## แนวทางภาพร่วมกัน
+
+- แฟนตาซีญี่ปุ่น–เกาหลี สวยหรู แต่ยังเท่และหนักแน่น: charcoal/ดำ แดงเข้ม ทองเก่า และท้องฟ้าสว่าง หลีกเลี่ยงม่วงดำและ western grimdark
+- ปุ่มหลักทรงหกเหลี่ยมยาว มุมเฉียงตื้น ขอบทองสองเส้นต่อเนื่องครบด้านเฉียง กรอบแผงตัดมุม และตัวอักษรไทยอ่านง่าย
+- Home ต้องมีเกาะลอยฟ้าเดิมที่โต้ตอบได้ อาคาร หอคอย น้ำตก และจุดกด ไม่แทนด้วย panorama จนเกาะหาย
+- แอนิเมชันลื่นไหลและเคารพ reduced-motion; ภาพนิ่งชุดนี้ไม่ได้กำหนด timing หรือแสดงแอนิเมชันจริง
+- ใช้ชื่อ Eldervane / เอลเดอร์เวย์น และทรัพยากร/ภาพฮีโร่จริงของโปรเจกต์เมื่อ implement
+
+## สารบัญ
+
+เครื่องหมาย `#tab` ด้านล่างใช้บอกแท็บ/สถานะในหน้า ไม่ใช่การเพิ่ม URL หรือ route ใหม่
+
+| แผ่น | เปิดภาพ | หน้าที่ครอบคลุม | Route / state |
+| --- | --- | --- | --- |
+| 01 | [01-home.png](01-home.png) | หน้าหลักและเกาะลอยฟ้า | `/home` · `/island` |
+| 02 | [02-hero-collection-overview.png](02-hero-collection-overview.png) | รายการฮีโร่และภาพรวมรายละเอียด | `/heroes` · `/lobby` · `/heroes/:uid#overview` |
+| 03 | [03-hero-stats-skills.png](03-hero-stats-skills.png) | ค่าสถานะและสกิล | `/heroes/:uid#stats` · `/heroes/:uid#skills` |
+| 04 | [04-hero-equipment-team.png](04-hero-equipment-team.png) | อุปกรณ์ฮีโร่และจัดทัพ | `/heroes/:uid#equipment` · `/team` |
+| 05 | [05-armory-forge-craft.png](05-armory-forge-craft.png) | คลังอุปกรณ์และสร้างอุปกรณ์ | `/armory` · `/forge#craft` |
+| 06 | [06-forge-enhance-salvage.png](06-forge-enhance-salvage.png) | เสริมพลังและแยกชิ้นส่วน | `/forge#enhance` · `/forge#salvage` |
+| 07 | [07-tower-training.png](07-tower-training.png) | หอคอยและฝึกฝน | `/tower` · `/dungeons/training` |
+| 08 | [08-ascension-equipment-hunt.png](08-ascension-equipment-hunt.png) | เลื่อนขั้นและล่าอุปกรณ์ | `/dungeons/ascension` · `/dungeons/hunt` |
+| 09 | [09-skill-trial-summon.png](09-skill-trial-summon.png) | ทดสอบสกิลและประตูอัญเชิญ | `/dungeons/trial` · `/gacha` |
+| 10 | [10-summon-flow.png](10-summon-flow.png) | ยืนยันอัญเชิญ แอนิเมชัน เปิดไพ่ ผลลัพธ์ | `/gacha` |
+| 11 | [11-battle-preparation-combat.png](11-battle-preparation-combat.png) | เตรียมทีมและต่อสู้ | `/battle` |
+| 12 | [12-welcome-account.png](12-welcome-account.png) | เริ่มเกม ตั้งชื่อ และบัญชี/นำเข้าเซฟ | `/welcome` · `/account` |
+| 13 | [13-dialogs.png](13-dialogs.png) | ชนะ แพ้ หยุดเกม เปลี่ยนชื่อ นำเข้า ยืนยันขาย | `/battle` · `/account` · `/armory` |
+| 14 | [14-mobile.png](14-mobile.png) | ตัวอย่างมือถือ: หน้าหลัก ฮีโร่ อัญเชิญ | `/home` · `/heroes` · `/gacha` |
+| 15 | [15-development-labs.png](15-development-labs.png) | เครื่องมือทดสอบต่อสู้และแอนิเมชัน | `/lab` · `/sprite-lab` |
+| 16 | [16-island-details-themes.png](16-island-details-themes.png) | รายละเอียดอาคาร ล็อกอาคาร โปรไฟล์ฮีโร่ ธีมเกาะ | `/home` |
+| 17 | [17-summon-information-reveal.png](17-summon-information-reveal.png) | รายชื่อฮีโร่ อัตราอัญเชิญ Memory เปิดตัวฮีโร่ | `/gacha` |
+| 18 | [18-list-empty-error-states.png](18-list-empty-error-states.png) | รายการฮีโร่ ค้นหาว่าง คลังว่าง รหัสเซฟผิด | `/heroes` · `/armory` · `/account` |
+
+## ข้อจำกัดที่ต้องระวังตอน implement
+
+- จำนวนช่องจัดทัพที่ภาพบางแผ่นวาดไม่ตรง **ห้ามนำไปเปลี่ยนกติกา**: ใช้ ally grid 3 แถว × 6 คอลัมน์ วางได้ 5 ฮีโร่; สนามต่อสู้รวม 5 × 16 โดย 2 แถวบนเป็นฉาก
+- รูปฮีโร่ในภาพเป็น illustration reference ไม่ใช่ asset replacement ที่อนุมัติ ห้ามเปลี่ยนเพศ/รูปลักษณ์/ชื่อ/คลาสของฮีโร่จริงตามการวาดคลาดเคลื่อน
+- ค่าเงิน เลเวล ดาว พลัง จำนวนฮีโร่ ราคา reward และเงื่อนไขปลดล็อกที่วาดเป็นตัวอย่าง ต้องอ่านค่าจริงจาก registries/services
+- ภาพมือถือบางตำแหน่งมีข้อความฟรีรายวันซึ่งไม่ใช่ข้อกำหนดเกม ห้ามเพิ่ม daily free summon หรือระบบที่ไม่มีอยู่ ปัจจุบัน free-test flag และ nominal costs ให้อ่านจากโค้ดจริง
+- หน้าอัตราสุ่มและ Memory ต้องใช้กติกาจริง รวมถึง empty-tier fallback และการแสดงโหมดทดสอบ อย่าอนุมานสูตรจากภาพ
+- ภาพแสดงชื่อพร้อม error หรือหลาย state ในแผ่นเดียวเพื่ออธิบายหน้าตา ไม่ได้หมายถึงต้องแสดง state ที่ขัดกันพร้อมกันในเกม
+- หน้ามือถือแผ่น 14 เป็นตัวอย่าง 3 หน้าหลัก หน้าอื่นยังต้องทำ responsive จากโครงเดียวกันและตรวจ screenshot จริง ไม่ได้มีภาพมือถือเฉพาะครบทุก route
+- ปุ่ม เพิ่มเงิน หรือ ornament ที่โมเดลวาดขึ้น ไม่อนุมัติให้สร้างร้านค้า/monetization/ระบบใหม่
+
+`manifest.json` บันทึกชื่อไฟล์ ขนาดภาพ จำนวนไบต์ SHA-256 และ route coverage เพื่อให้ตรวจความครบถ้วนได้ ไฟล์ทั้งหมดอยู่ใต้ docs จึงไม่ถูกคัดลอกเป็น runtime assets โดย Angular configuration ปัจจุบัน

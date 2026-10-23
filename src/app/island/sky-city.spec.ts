@@ -94,12 +94,8 @@ describe('Sky City — map choice', () => {
     c.skipEvents();
     f.detectChanges();
     const el = f.nativeElement as HTMLElement;
-    expect(el.querySelector('.citadel-vista')).not.toBeNull();
-    expect(el.querySelectorAll('.building-access button').length).toBe(ISLAND_BUILDINGS.length);
-    const beforeMap = JSON.stringify(save.state());
-    el.querySelector<HTMLButtonElement>('.map-toggle')!.click();
-    f.detectChanges();
-    expect(JSON.stringify(save.state())).toBe(beforeMap);
+    // The playable city must be visible immediately; the former panorama hid every plot.
+    expect(el.querySelector('.citadel-vista')).toBeNull();
     expect(el.querySelector('app-sky-city')).not.toBeNull();
     expect(el.querySelector('app-island-scene')).toBeNull();
     expect(el.querySelector('img.base[src*="sky_city/base"]')).not.toBeNull();
@@ -114,9 +110,12 @@ describe('Sky City — map choice', () => {
     c.phase.set('reveal');
     f.detectChanges();
     expect(el.querySelector('img.landmark.rise[src*="training_ground"]')).not.toBeNull();
-    el.querySelector<HTMLButtonElement>('.map-toggle')!.click();
+    // Cosmetic map switching keeps progression intact and exposes the chosen playable scene.
+    const beforeSwitch = { ...save.state().island, map: null };
+    c.setMap('classic');
     f.detectChanges();
-    expect(el.querySelector('.citadel-vista')).not.toBeNull();
+    expect({ ...save.state().island, map: null }).toEqual(beforeSwitch);
+    expect(el.querySelector('app-island-scene')).not.toBeNull();
     expect(el.querySelector('app-sky-city')).toBeNull();
     f.destroy();
   });

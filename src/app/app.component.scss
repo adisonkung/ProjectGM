@@ -1,3 +1,4 @@
+@use "./home-chrome";
 @use './shared/fantasy-ui' as fantasy;
 .app { max-width: 1200px; margin: 0 auto; padding: 104px 28px 48px; }
 .app.bare { padding: 16px 24px; }

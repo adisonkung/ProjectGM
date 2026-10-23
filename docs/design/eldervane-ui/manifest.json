@@ -1,0 +1,242 @@
+{
+  "game": "Eldervane / เอลเดอร์เวย์น",
+  "created": "2026-10-23",
+  "status": "design-reference-only; not implemented screenshots",
+  "tabNotation": "# suffixes describe UI tabs/states; they are not new router URLs",
+  "sheets": [
+    {
+      "sheet": 1,
+      "file": "01-home.png",
+      "title": "หน้าหลักและเกาะลอยฟ้า",
+      "routes": [
+        "/home",
+        "/island"
+      ],
+      "width": 1586,
+      "height": 992,
+      "bytes": 3177793,
+      "sha256": "aba9052b165f6e48d3a78578634d48228a1eb7ba800de96d848ef0ade7f0168f"
+    },
+    {
+      "sheet": 2,
+      "file": "02-hero-collection-overview.png",
+      "title": "รายการฮีโร่และภาพรวมรายละเอียด",
+      "routes": [
+        "/heroes",
+        "/lobby",
+        "/heroes/:uid#overview"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 3016228,
+      "sha256": "14476401b6144110dda3cfa39e23ee4c1f8694d60accefd568c517c02ec6bf9d"
+    },
+    {
+      "sheet": 3,
+      "file": "03-hero-stats-skills.png",
+      "title": "ค่าสถานะและสกิล",
+      "routes": [
+        "/heroes/:uid#stats",
+        "/heroes/:uid#skills"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2746411,
+      "sha256": "2fe36503817c280b56ec50d4eb777288ab14837c5e89257921ce43c6b2a869b0"
+    },
+    {
+      "sheet": 4,
+      "file": "04-hero-equipment-team.png",
+      "title": "อุปกรณ์ฮีโร่และจัดทัพ",
+      "routes": [
+        "/heroes/:uid#equipment",
+        "/team"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 3157986,
+      "sha256": "2aa6e199a9f620443a6614a5874faa67eb048a0eab98b041fef70797fa6009fc"
+    },
+    {
+      "sheet": 5,
+      "file": "05-armory-forge-craft.png",
+      "title": "คลังอุปกรณ์และสร้างอุปกรณ์",
+      "routes": [
+        "/armory",
+        "/forge#craft"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2879079,
+      "sha256": "cc4357e7784d18dee9f0256858cfa2bd8ebe09d31c5cd5ee9693f289361f89b1"
+    },
+    {
+      "sheet": 6,
+      "file": "06-forge-enhance-salvage.png",
+      "title": "เสริมพลังและแยกชิ้นส่วน",
+      "routes": [
+        "/forge#enhance",
+        "/forge#salvage"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2826180,
+      "sha256": "51dfcae6641c065e1e584f7a20109a589c8c5e8b5a4d4662be2aecb074248c92"
+    },
+    {
+      "sheet": 7,
+      "file": "07-tower-training.png",
+      "title": "หอคอยและฝึกฝน",
+      "routes": [
+        "/tower",
+        "/dungeons/training"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2957214,
+      "sha256": "a82afc4f6fbff9272aa1b0ce7f16826a271f3254913f9fd0d0fcbe8e167c20aa"
+    },
+    {
+      "sheet": 8,
+      "file": "08-ascension-equipment-hunt.png",
+      "title": "เลื่อนขั้นและล่าอุปกรณ์",
+      "routes": [
+        "/dungeons/ascension",
+        "/dungeons/hunt"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2991812,
+      "sha256": "429c7cf9926635176e241f968dcd0ce0fa423e4f104de2e82828cbd359f367b0"
+    },
+    {
+      "sheet": 9,
+      "file": "09-skill-trial-summon.png",
+      "title": "ทดสอบสกิลและประตูอัญเชิญ",
+      "routes": [
+        "/dungeons/trial",
+        "/gacha"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 3318310,
+      "sha256": "73b1afeb86e05e4316894f5b054e0186809c2f39a4cf5fbb163526921dd19335"
+    },
+    {
+      "sheet": 10,
+      "file": "10-summon-flow.png",
+      "title": "ยืนยันอัญเชิญ แอนิเมชัน เปิดไพ่ ผลลัพธ์",
+      "routes": [
+        "/gacha"
+      ],
+      "width": 1585,
+      "height": 992,
+      "bytes": 3122899,
+      "sha256": "7e554fce07a5696bf6ba2fe05a5102f9a7e4a7956ab54fbe5b0207b3cf6ab793"
+    },
+    {
+      "sheet": 11,
+      "file": "11-battle-preparation-combat.png",
+      "title": "เตรียมทีมและต่อสู้",
+      "routes": [
+        "/battle"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 3340926,
+      "sha256": "aa76f728787ba52dd79716429cf0f6cfc2645e41d4104dddbf351e1f3d52b00e"
+    },
+    {
+      "sheet": 12,
+      "file": "12-welcome-account.png",
+      "title": "เริ่มเกม ตั้งชื่อ และบัญชี/นำเข้าเซฟ",
+      "routes": [
+        "/welcome",
+        "/account"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2765561,
+      "sha256": "e80d67d779ee4371f5c92252206121b79ed845bd87157e8ba9ab7524208c34c0"
+    },
+    {
+      "sheet": 13,
+      "file": "13-dialogs.png",
+      "title": "ชนะ แพ้ หยุดเกม เปลี่ยนชื่อ นำเข้า ยืนยันขาย",
+      "routes": [
+        "/battle",
+        "/account",
+        "/armory"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2344858,
+      "sha256": "c39f5028f22040830a85794a65069f2f3aeefc4fa3a1799a456b4c945a2c0703"
+    },
+    {
+      "sheet": 14,
+      "file": "14-mobile.png",
+      "title": "ตัวอย่างมือถือ: หน้าหลัก ฮีโร่ อัญเชิญ",
+      "routes": [
+        "/home",
+        "/heroes",
+        "/gacha"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3134859,
+      "sha256": "69bf4316a3bd09f4460842afa48ea2b70fc0e904ab6b2047a22be3d849d05066"
+    },
+    {
+      "sheet": 15,
+      "file": "15-development-labs.png",
+      "title": "เครื่องมือทดสอบต่อสู้และแอนิเมชัน",
+      "routes": [
+        "/lab",
+        "/sprite-lab"
+      ],
+      "width": 1024,
+      "height": 1536,
+      "bytes": 2958801,
+      "sha256": "dd54f888d4f8d9995095487a13c9505c0743dc5c147ff18000e79b1389436e33"
+    },
+    {
+      "sheet": 16,
+      "file": "16-island-details-themes.png",
+      "title": "รายละเอียดอาคาร ล็อกอาคาร โปรไฟล์ฮีโร่ ธีมเกาะ",
+      "routes": [
+        "/home"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2857856,
+      "sha256": "8d8344d4c9c5b2d0b004911ca0421a39b6aff413e3557bd2ab15c17c88300cc2"
+    },
+    {
+      "sheet": 17,
+      "file": "17-summon-information-reveal.png",
+      "title": "รายชื่อฮีโร่ อัตราอัญเชิญ Memory เปิดตัวฮีโร่",
+      "routes": [
+        "/gacha"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3052245,
+      "sha256": "64f954d062a827c85543b0a099317de56b20b2fd200cfdcd6495653a57f8cb70"
+    },
+    {
+      "sheet": 18,
+      "file": "18-list-empty-error-states.png",
+      "title": "รายการฮีโร่ ค้นหาว่าง คลังว่าง รหัสเซฟผิด",
+      "routes": [
+        "/heroes",
+        "/armory",
+        "/account"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2969973,
+      "sha256": "ed1fa18204bd3320bba2a78955140825e39a4b2c58d93a8d17c3ed77637ead0e"
+    }
+  ]
+}

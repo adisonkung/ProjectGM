@@ -1,10 +1,8 @@
 <section class="island">
-  <div class="stage" #stage [class.entering]="enteringTower()" [class.panorama]="panorama()">
-    @if (panorama()) {
-      <div class="citadel-vista" aria-hidden="true"></div>
-    } @else if (isCity()) {
+  <div class="stage" #stage [class.entering]="enteringTower()">
+    @if (isCity()) {
       <app-sky-city [buildings]="display()" [usable]="usableRuins()" [heroes]="heroViews()" [towerStage]="towerStage()"
-                    [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()" [enteringTower]="enteringTower()"
+                    [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()" [enteringTower]="enteringTower()" [referenceLook]="true"
                     (buildingTap)="tapBuilding($event)" (heroTap)="tapHero($event)" />
     } @else {
       <app-island-scene [theme]="theme()" [buildings]="display()" [usable]="usableRuins()" [skinOverrides]="island().buildingSkinOverrides ?? {}" [heroes]="heroViews()"
@@ -12,91 +10,92 @@
                         (buildingTap)="tapBuilding($event)" (heroTap)="tapHero($event)" />
     }
 
-    <!-- Real progression and party data; the original interactive maps are available in the HUD. -->
-    <aside class="chapter-panel gilded" [class.expanded]="progressExpanded()" aria-label="อาณาจักรและความคืบหน้า">
+    <aside class="chapter-panel gilded" aria-label="อาณาจักรและความคืบหน้า">
+      <app-citadel-frame shape="chapter" [cut]="30" />
+      <div class="chapter-illustration" aria-hidden="true"></div>
       <header class="chapter-art">
-        <span class="eyebrow">ELDERVANE · YOUR KINGDOM</span>
         <h1>{{ island().name }}</h1>
         <span class="realm-stage">{{ stageName() }}</span>
-        <button type="button" class="progress-toggle" (click)="progressExpanded.set(!progressExpanded())"
-                [attr.aria-expanded]="progressExpanded()" aria-controls="kingdom-details" aria-label="รายละเอียดความคืบหน้า">
-          {{ progressExpanded() ? '−' : '+' }}
-        </button>
+        <a class="progress-toggle" routerLink="/tower" aria-label="รายละเอียดความคืบหน้าหอคอย">
+          <app-citadel-icon name="arrow" [size]="18" />
+        </a>
       </header>
       <div class="tower-progress">
-        <div><a class="tower-route" routerLink="/tower">ความคืบหน้าหอคอย</a><b>{{ cleared() }} <small>/ {{ totalFloors }}</small></b></div>
-        <div class="progress-rail" role="progressbar" aria-label="ชั้นหอคอยที่พิชิตแล้ว" aria-valuemin="0" [attr.aria-valuemax]="totalFloors" [attr.aria-valuenow]="cleared()">
-          <i [style.width.%]="cleared() / totalFloors * 100"></i>
+        <app-citadel-icon name="tower" [size]="39" />
+        <div class="progress-copy">
+          <a class="tower-route" routerLink="/tower">หอคอย <b>{{ cleared() }} / {{ totalFloors }}</b></a>
+          <div class="progress-rail" role="progressbar" aria-label="ชั้นหอคอยที่พิชิตแล้ว" aria-valuemin="0" [attr.aria-valuemax]="totalFloors" [attr.aria-valuenow]="cleared()">
+            <i [style.width.%]="cleared() / totalFloors * 100"></i><span class="progress-origin" aria-hidden="true"></span>
+          </div>
         </div>
-        <app-icon name="tower" [size]="29" />
       </div>
       <div class="kingdom-details" id="kingdom-details">
         @if (nextGoal(); as goal) {
           <button type="button" class="kingdom-row" (click)="tapBuilding(goal.id)">
-            <span class="diamond"><app-icon name="lock" [size]="16" /></span>
-            <span><small>สิ่งก่อสร้างถัดไป</small><b>{{ goal.name }}</b></span>
-            <em>ชั้น {{ unlockFloorOf(goal) }}</em>
+            <app-citadel-icon name="home" [size]="21" />
+            <span>ปลดล็อกถัดไป : {{ goal.name }} · ชั้น {{ unlockFloorOf(goal) }}</span>
           </button>
         } @else {
-          <div class="kingdom-row"><span class="diamond"><app-icon name="crown" [size]="16" /></span><span><small>การพัฒนาอาณาจักร</small><b>ปลดล็อกสิ่งก่อสร้างครบแล้ว</b></span></div>
+          <div class="kingdom-row"><app-citadel-icon name="home" [size]="21" /><span>ปลดล็อกสิ่งก่อสร้างครบแล้ว</span></div>
         }
       </div>
     </aside>
     <div class="hud tr">
-      <button type="button" class="note map-toggle" (click)="panorama.set(!panorama())" [attr.aria-pressed]="!panorama()" [attr.aria-label]="panorama() ? 'เปิดแผนที่สิ่งก่อสร้าง' : 'กลับหน้าล็อบบี้'" [title]="panorama() ? 'แผนที่สิ่งก่อสร้าง' : 'หน้าล็อบบี้'"><app-icon name="home" [size]="19" /><span>{{ panorama() ? 'แผนที่' : 'ล็อบบี้' }}</span></button>
       @if (canFullscreen) {
-        <button type="button" class="note fs-btn" (click)="toggleFullscreen()" [attr.aria-label]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'" [title]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'">{{ isFull() ? '🗗' : '⛶' }}</button>
+        <button type="button" class="note fs-btn" (click)="toggleFullscreen()" [attr.aria-label]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'" [title]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'"><app-citadel-frame shape="hex" [cut]="10" /><app-citadel-icon name="fullscreen" [size]="18" /></button>
       }
-      <button type="button" class="note theme-btn" (click)="openThemes()" aria-label="เปลี่ยนธีมเกาะ" title="ธีมเกาะ"><app-icon name="palette" [size]="17" /></button>
+      <button type="button" class="note theme-btn" (click)="openThemes()" aria-label="เปลี่ยนธีมเกาะ" title="ธีมเกาะ"><app-citadel-frame shape="hex" [cut]="10" /><app-citadel-icon name="palette" [size]="18" /></button>
       @if (readyCount()) {
         <a class="note" routerLink="/heroes" [attr.aria-label]="readyCount() + ' ฮีโร่พร้อมอัป'"><app-icon name="heroes" [size]="15" /><em>{{ readyCount() }}</em></a>
       }
     </div>
-    @if (panorama()) {
-      <nav class="building-access" aria-label="สิ่งก่อสร้างในอาณาจักร">
-        @for (b of buildings; track b.id) {
-          <button type="button" (click)="tapBuilding(b.id)" [disabled]="!!current()" [attr.title]="b.name" [attr.aria-label]="b.name"><app-icon [name]="b.id === 'tower' ? 'tower' : b.id === 'forge' ? 'flame' : 'home'" [size]="19" /><span>{{ b.name }}</span></button>
-        }
-      </nav>
-    }
     <div class="lobby-bottom">
       <section class="party-panel gilded" aria-label="ทีมปัจจุบัน">
-        <header><h2>ทีมของคุณ</h2><span class="party-state" [class.ready]="party().length === 5">{{ party().length }} / 5</span><span class="party-power"><app-icon name="armory" [size]="17" /><small>พลังรบ</small><b>{{ partyPower() }}</b></span></header>
+        <app-citadel-frame [cut]="28" />
+        <header>
+          <app-citadel-icon name="people" [size]="30" /><h2>ทีมของคุณ</h2>
+          <span class="party-state" [class.ready]="party().length === 5">{{ party().length }}/5</span>
+          <span class="party-power"><app-citadel-icon name="armory" [size]="22" /><small>พลังทีม</small><b>{{ partyPower() }}</b></span>
+          <a class="party-edit" routerLink="/team" aria-label="จัดทัพ" title="จัดทัพ"><app-citadel-frame shape="hex" [cut]="9" /><app-citadel-icon name="armory" [size]="21" /></a>
+        </header>
         <div class="party-lineup">
           @for (i of partySlots; track i) {
             @if (party()[i]; as h) {
               <button type="button" class="party-card" [attr.data-class]="h.cls" (click)="tapHero(h.uid)" [attr.title]="h.name + ' · ' + h.className" [attr.aria-label]="h.name + ' ' + h.className + ' ' + h.star + ' ดาว เลเวล ' + h.level">
+                <app-citadel-frame [cut]="9" />
                 <span class="party-portrait">
                   @if (h.portrait) { <img [src]="h.portrait" [alt]="h.name" draggable="false" /> }
                   @else { <app-hero-portrait [heroId]="h.id" [star]="h.star" [size]="64" /> }
-                  <span class="party-class" [attr.title]="h.className"><app-icon [name]="h.icon" [size]="15" /></span>
+                  <span class="party-class" [attr.title]="h.className"><app-citadel-icon [name]="h.cls === 'archer' ? 'bow' : h.cls === 'healer' ? 'healer' : h.icon" [size]="25" /></span>
                   <span class="party-stars" aria-hidden="true">{{ '★'.repeat(h.star) }}</span>
-                  <span class="party-level">Lv. <b>{{ h.level }}</b></span>
+                  <span class="party-level">Lv. {{ h.level }}</span>
                 </span>
                 <span class="party-name">{{ h.shortName }}</span>
               </button>
             } @else {
-              <a routerLink="/team" class="party-card empty-slot" [attr.aria-label]="'เพิ่มฮีโร่ ช่อง ' + (i + 1)"><span>+</span><small>เพิ่มฮีโร่</small></a>
+              <a routerLink="/team" class="party-card empty-slot" [attr.aria-label]="'เพิ่มฮีโร่ ช่อง ' + (i + 1)"><app-citadel-frame [cut]="9" /><span>+</span><small>เพิ่มฮีโร่</small></a>
             }
           }
         </div>
-        <a class="party-edit" routerLink="/team"><app-icon name="team" [size]="19" /><span>จัดทัพ</span></a>
       </section>
-      @if (nextStage(); as stage) {
-        <a class="destination gilded" routerLink="/team">
-          <img [src]="'backgrounds/' + stage.background + '.webp'" alt="" />
-          <span class="destination-copy"><small>NEXT ADVENTURE</small><b>{{ stage.name }}</b><span>เตรียมทีมสำหรับชั้น {{ nextFloor() }} <app-icon name="arrow" [size]="13" /></span></span>
-        </a>
-      }
-      @if (!current()) {
-        <button type="button" class="cta" (click)="enterTower()" [disabled]="enteringTower()" [attr.aria-busy]="enteringTower()">
-          <svg class="cta-light" viewBox="0 0 400 112" preserveAspectRatio="none" aria-hidden="true"><rect x="2" y="2" width="396" height="108" rx="5" pathLength="100" /></svg>
-          <span class="cta-emblem" aria-hidden="true"><app-icon name="tower" [size]="35" /></span>
-          <span class="cta-title" aria-live="polite">{{ enteringTower() ? 'กำลังเปิดประตู…' : 'เข้าสู่หอคอย' }} <app-icon name="arrow" [size]="25" /></span>
-          <span class="cta-thai">TOWER OF TRIALS</span>
-          <span class="cta-floor"><app-icon name="tower" [size]="15" /><span class="floor-caption">{{ cleared() >= totalFloors ? 'ท้าซ้ำชั้น' : 'ชั้นถัดไป' }}</span><b>{{ nextFloor() }}</b><i>/ {{ totalFloors }}</i></span>
-        </button>
-      }
+      <div class="adventure-panel">
+        @if (nextStage(); as stage) {
+          <a class="destination gilded" routerLink="/tower">
+            <app-citadel-frame shape="tab" [cut]="48" />
+            <img [src]="'backgrounds/' + stage.background + '.webp'" alt="" />
+            <app-citadel-icon name="tower" [size]="55" />
+            <span class="destination-copy"><b>หอคอยแห่งบททดสอบ</b><span>{{ cleared() >= totalFloors ? 'ท้าซ้ำชั้นที่' : 'ชั้นที่' }} {{ nextFloor() }} / {{ totalFloors }}</span></span>
+          </a>
+        }
+        @if (!current()) {
+          <button type="button" class="cta" (click)="enterTower()" [disabled]="enteringTower()" [attr.aria-busy]="enteringTower()">
+            <app-citadel-frame shape="hex" [crimson]="true" [cut]="45" />
+            <span class="cta-emblem" aria-hidden="true"><app-citadel-icon name="tower" [size]="66" /></span>
+            <span class="cta-title" aria-live="polite">{{ enteringTower() ? 'กำลังเปิดประตู…' : 'เข้าสู่หอคอย' }}</span>
+            <app-citadel-icon class="cta-arrow" name="arrow" [size]="40" />
+          </button>
+        }
+      </div>
     </div>
 
     <!-- progression event (one at a time) -->
@@ -106,15 +105,15 @@
         <b>{{ eventText(ev) }}</b>
         @if (events().length > 1) { <span class="more">อีก {{ events().length - 1 }} เหตุการณ์</span> }
         <span class="ev-acts">
-          <button type="button" class="gm-btn small primary" (click)="nextEvent()">{{ events().length > 1 ? 'ถัดไป' : 'เยี่ยม!' }}</button>
-          @if (events().length > 2) { <button type="button" class="gm-btn small ghost" (click)="skipEvents()">ข้ามทั้งหมด</button> }
+          <button type="button" class="gm-btn small primary" (click)="nextEvent()"><app-citadel-frame shape="hex" [cut]="16" [crimson]="true" />{{ events().length > 1 ? 'ถัดไป' : 'เยี่ยม!' }}</button>
+          @if (events().length > 2) { <button type="button" class="gm-btn small ghost" (click)="skipEvents()"><app-citadel-frame shape="hex" [cut]="16" [crimson]="false" />ข้ามทั้งหมด</button> }
         </span>
       </div>
     }
 
     <!-- building sheet -->
     @if (buildingSheet(); as b) {
-      <div class="sheet" role="dialog" [attr.aria-label]="b.def.name">
+      <div class="sheet" role="dialog" [attr.aria-label]="b.def.name"><app-citadel-frame [cut]="25" />
         <button type="button" class="x" (click)="closeSheets()" aria-label="ปิด">✕</button>
         <header>
           <small class="gm-class">{{ b.st.isUnlocked || b.anyOpen ? b.stageLabel : 'ยังไม่เปิด' }}</small>
@@ -131,9 +130,9 @@
             <div class="acts">
               @for (a of b.actions; track a.label) {
                 @if (a.open) {
-                  <button type="button" class="gm-btn" [class.primary]="$first" (click)="go(a.route, a.query)"><app-icon [name]="a.icon" [size]="15" /> {{ a.label }}</button>
+                  <button type="button" class="gm-btn" [class.primary]="$first" (click)="go(a.route, a.query)"><app-citadel-frame shape="hex" [cut]="16" [crimson]="$first" /><app-icon [name]="a.icon" [size]="15" /> {{ a.label }}</button>
                 } @else {
-                  <button type="button" class="gm-btn ghost" disabled [attr.aria-label]="a.label + ' ปลดที่ชั้น ' + a.floor"><app-icon name="lock" [size]="14" /> {{ a.label }} · ชั้น {{ a.floor }}</button>
+                  <button type="button" class="gm-btn ghost" disabled [attr.aria-label]="a.label + ' ปลดที่ชั้น ' + a.floor"><app-citadel-frame shape="hex" [cut]="16" [crimson]="false" /><app-icon name="lock" [size]="14" /> {{ a.label }} · ชั้น {{ a.floor }}</button>
                 }
               }
             </div>
@@ -145,7 +144,7 @@
 
     <!-- hero sheet -->
     @if (heroSheet(); as s) {
-      <div class="sheet hero" role="dialog" [attr.aria-label]="s.t.name">
+      <div class="sheet hero" role="dialog" [attr.aria-label]="s.t.name"><app-citadel-frame [cut]="25" />
         <button type="button" class="x" (click)="closeSheets()" aria-label="ปิด">✕</button>
         <div class="who">
           <app-hero-portrait [heroId]="s.t.id" [size]="64" />
@@ -156,23 +155,23 @@
           </div>
         </div>
         <div class="acts">
-          <button type="button" class="gm-btn primary" (click)="go('/heroes/' + s.h.uid)"><app-icon name="heroes" [size]="15" /> รายละเอียด</button>
-          <button type="button" class="gm-btn" (click)="go('/armory', { hero: s.h.uid })"><app-icon name="armory" [size]="15" /> อุปกรณ์</button>
-          <button type="button" class="gm-btn" (click)="go('/heroes/' + s.h.uid)"><app-icon name="book" [size]="15" /> สกิล</button>
-          @if (!s.isMain) { <button type="button" class="gm-btn arcane" (click)="setMain(s.h.uid)"><app-icon name="crown" [size]="15" /> ตั้งเป็นฮีโร่หลัก</button> }
+          <button type="button" class="gm-btn primary" (click)="go('/heroes/' + s.h.uid)"><app-citadel-frame shape="hex" [cut]="16" [crimson]="true" /><app-icon name="heroes" [size]="15" /> รายละเอียด</button>
+          <button type="button" class="gm-btn" (click)="go('/armory', { hero: s.h.uid })"><app-citadel-frame shape="hex" [cut]="16" [crimson]="false" /><app-icon name="armory" [size]="15" /> อุปกรณ์</button>
+          <button type="button" class="gm-btn" (click)="go('/heroes/' + s.h.uid)"><app-citadel-frame shape="hex" [cut]="16" [crimson]="false" /><app-icon name="book" [size]="15" /> สกิล</button>
+          @if (!s.isMain) { <button type="button" class="gm-btn arcane" (click)="setMain(s.h.uid)"><app-citadel-frame shape="hex" [cut]="16" [crimson]="true" /><app-icon name="crown" [size]="15" /> ตั้งเป็นฮีโร่หลัก</button> }
         </div>
       </div>
     }
     <!-- theme picker (visual only) -->
     @if (themeSheet()) {
-      <div class="sheet themes-sheet" role="dialog" aria-label="ธีมเกาะ">
+      <div class="sheet themes-sheet" role="dialog" aria-label="ธีมเกาะ"><app-citadel-frame [cut]="25" />
         <button type="button" class="x" (click)="closeSheets()" aria-label="ปิด">✕</button>
         <header>
           <small class="gm-class">แผนที่ & ธีมเกาะ</small>
           <h2>เปลี่ยนหน้าตาเกาะ</h2>
           <p class="tnote">เปลี่ยนแค่ภาพ — สิ่งก่อสร้าง ค่าพลัง และรางวัลเหมือนเดิมทุกอย่าง</p>
         </header>
-        <button type="button" class="map-card" [class.on]="isCity()" [attr.aria-pressed]="isCity()" (click)="setMap('city')">
+        <button type="button" class="map-card" [class.on]="isCity()" [attr.aria-pressed]="isCity()" (click)="setMap('city')"><app-citadel-frame [cut]="14" />
           <span class="pv" [style.background-image]="'url(island/sky_city/thumb.webp)'"></span>
           <span class="txt"><b>นครลอยฟ้า</b><small>เมืองแฟนตาซีบนเกาะลอยฟ้า — แผนที่หลัก</small></span>
           @if (isCity()) { <em>ใช้อยู่</em> }
@@ -180,7 +179,7 @@
         <p class="tnote">เกาะคลาสสิก (pixel art) + ธีม</p>
         <div class="theme-grid">
           @for (t of themes; track t.id) {
-            <button type="button" class="theme-card" [class.on]="!isCity() && t.id === theme().id" [attr.aria-pressed]="!isCity() && t.id === theme().id" (click)="setTheme(t.id)">
+            <button type="button" class="theme-card" [class.on]="!isCity() && t.id === theme().id" [attr.aria-pressed]="!isCity() && t.id === theme().id" (click)="setTheme(t.id)"><app-citadel-frame [cut]="14" />
               <span class="pv" [style.background-image]="previewOf(t)">
                 @if (towerOf(t); as tw) { <img [src]="tw" alt="" /> }
               </span>

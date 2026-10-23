@@ -131,3 +131,14 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .zoom { bottom: calc(var(--ui-bottom, 0px) + 54px); }
 // lite: the canvases skip dragon / birds / motes / stars / god rays / mist and render at 1× (sky-canvas.ts); here only DOM extras
 .vp.lite { .rise-mote, .smoke, .glint { display: none; } .circle { animation: none; } }
+
+// The Home reference pass keeps this scene's real plots, camera and progression layers.
+.vp.reference-look { background: linear-gradient(180deg,#9ecce9,#e4e8e8 58%,#f5d4bf); }
+.reference-look .plate { isolation: isolate; padding: 10px 23px; background: transparent; border: 0; border-radius: 0; color: #ffedbb; b { font-size: 15px; gap: 10px; } app-citadel-icon { color: #f4dba1; } small { position: absolute; top: calc(100% - 1px); padding: 2px 8px; background: #12171bec; border: 1px solid #b8924a88; } }
+.reference-look .hit:is(:hover,:focus-visible,.sel) + .plate { background: transparent; border: 0; box-shadow: none; filter: brightness(1.22); b { font-size: 15px; } }
+.reference-look .circle { .c1 { stroke: #d4f2ff; } .c3 { fill: #9cd9ff15; } &.live { filter: drop-shadow(0 0 6px #91dcff); } }
+.reference-look .aura { background: radial-gradient(ellipse,#9bdfff44,transparent 70%); }
+.reference-look .fxq { background: #12181dee; }
+.reference-look .plate.locked, .reference-look .plate.future { opacity: 0; }
+.reference-look .hit:is(:hover,:focus-visible,.sel) + .plate { opacity: 1; }
+@media (max-width: 720px) { .vp.reference-look { --ui-top: 170px; } .reference-look .plate b { font-size: 12px; } }

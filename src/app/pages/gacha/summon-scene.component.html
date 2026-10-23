@@ -13,7 +13,7 @@
       <img [src]="cardBack(c.star)" [class.three-star]="c.star >= 3" alt="" [style.--x]="c.x + 'vw'" [style.--y]="c.y + 'vh'" [style.--tilt]="c.tilt + 'deg'" [style.animation-delay.s]="c.delay" />
     }</div>
   }
-  <header class="scene-heading"><span class="wordmark"><img src="/ui/branding/eldervane-wordmark.webp" alt="Eldervane" width="900" height="315" decoding="async" /></span><button type="button" class="skip" (click)="finish()" autofocus>ข้าม <span>»</span></button></header>
+  <header class="scene-heading"><span class="wordmark"><img src="/ui/branding/eldervane-wordmark-champagne.webp" alt="Eldervane" width="2023" height="456" decoding="async" /></span><button type="button" class="skip" (click)="finish()" autofocus>ข้าม <span>»</span></button></header>
   @if (phase() === 'charge' || phase() === 'burst') {
     <div class="intro-copy" role="status"><span>THE HEARTH OF DESTINY</span><h1 id="scene-title">{{ grand() ? 'แสงแห่งวีรชนกำลังตื่นขึ้น' : 'เสียงเรียกจากดวงดาว' }}</h1><p>การเดินทางครั้งใหม่กำลังเริ่มต้น</p></div>
   }

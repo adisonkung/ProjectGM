@@ -1,15 +1,19 @@
 <a class="skip-link" href="#game-content">ข้ามไปเนื้อหา</a>
-<div class="app" [class.bare]="bare()" [class.fight]="fight()" [class.immersive]="immersive()" [class.fantasy]="fantasy()" [class.collection]="collection()">
+<div class="app" [class.bare]="bare()" [class.fight]="fight()" [class.immersive]="immersive()" [class.fantasy]="fantasy()" [class.collection]="collection()" [class.reference-home]="homeChrome()">
   @if (!bare()) {
     <header class="bar">
       <a class="brand" routerLink="/home" aria-label="Eldervane — กลับเกาะ">
-        <img class="brand-logo" src="/ui/branding/eldervane-wordmark.webp" alt="Eldervane" width="900" height="315" decoding="async" fetchpriority="high" />
+        <img class="brand-logo" src="/ui/branding/eldervane-wordmark-champagne.webp" alt="Eldervane" width="2023" height="456" decoding="async" fetchpriority="high" />
       </a>
 
       <nav class="menu" aria-label="เมนูหลัก">
         @for (n of nav(); track n.path) {
           <a [routerLink]="n.path" [attr.title]="n.label" [class.on]="active() === n.path" [attr.aria-current]="active() === n.path ? 'page' : null">
-            <span class="glyph"><app-icon [name]="n.icon" [size]="20" /></span>
+            @if (homeChrome()) { <app-citadel-frame shape="tab" [cut]="30" [crimson]="active() === n.path" [lacquer]="active() === n.path" /> }
+            <span class="glyph">
+              @if (homeChrome()) { <app-citadel-icon [name]="n.path === '/tower' ? 'compass' : n.icon" [size]="28" /> }
+              @else { <app-icon [name]="n.icon" [size]="20" /> }
+            </span>
             <span class="lbl">{{ n.label }}</span>
             @if (n.caption) { <small class="nav-caption" aria-hidden="true">{{ n.caption }}</small> }
           </a>
@@ -18,11 +22,22 @@
 
       <div class="purse">
         <span class="treasury" aria-label="ทรัพย์สิน">
-          <span class="coin-row" title="เพชร"><app-icon name="gem" class="gem" [size]="15" /><b>{{ gems() }}</b></span>
+          <span class="coin-row" [attr.title]="'เพชร ' + gemsFull()" [attr.aria-label]="'เพชร ' + gemsFull()">
+            @if (homeChrome()) { <app-citadel-frame shape="hex" [cut]="12" /><app-citadel-icon name="gem" class="gem" [size]="24" /> }
+            @else { <app-icon name="gem" class="gem" [size]="15" /> }
+            <b>{{ gems() }}</b>
+          </span>
           <i class="sep" aria-hidden="true"></i>
-          <span class="coin-row" title="ทอง"><app-icon name="coin" class="gold" [size]="15" /><b>{{ gold() }}</b></span>
+          <span class="coin-row" [attr.title]="'ทอง ' + goldFull()" [attr.aria-label]="'ทอง ' + goldFull()">
+            @if (homeChrome()) { <app-citadel-frame shape="hex" [cut]="12" /><app-citadel-icon name="coin" class="gold" [size]="24" /> }
+            @else { <app-icon name="coin" class="gold" [size]="15" /> }
+            <b>{{ gold() }}</b>
+          </span>
         </span>
-        <a class="acct" routerLink="/account" [class.on]="onAccount()" aria-label="บัญชี & ย้ายเซฟ" title="บัญชี & ย้ายเซฟ"><app-icon name="gear" [size]="18" /></a>
+        <a class="acct" routerLink="/account" [class.on]="onAccount()" aria-label="บัญชี & ย้ายเซฟ" title="บัญชี & ย้ายเซฟ">
+          @if (homeChrome()) { <app-citadel-frame shape="hex" [cut]="12" /><app-citadel-icon name="gear" [size]="23" /> }
+          @else { <app-icon name="gear" [size]="18" /> }
+        </a>
       </div>
     </header>
   }
