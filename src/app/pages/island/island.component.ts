@@ -69,15 +69,20 @@ export class IslandComponent implements OnInit, OnDestroy {
     this.isFull.set(!!document.fullscreenElement);
   }
   readonly theme = computed(() => themeOf(this.island().themeId));
+  /** Presentation only; the original interactive maps remain available from the HUD. */
+  readonly panorama = signal(true);
+  readonly buildings = ISLAND_BUILDINGS;
   /** cosmetic themes the player can switch between (visual only) */
   readonly themes = Object.values(ISLAND_THEMES);
   setTheme(id: string): void {
+    this.panorama.set(false);
     this.isl.setTheme(id);
   }
   /** Sky City (default) or the classic island */
   readonly isCity = this.isl.isCity;
   readonly towerStage = computed(() => this.island().towerVisualStage);
   setMap(m: 'city' | 'classic'): void {
+    this.panorama.set(false);
     this.isl.setMap(m);
   }
   readonly themeSheet = signal(false);
@@ -251,7 +256,7 @@ export class IslandComponent implements OnInit, OnDestroy {
   private frame(t: number): void {
     const dt = this.last ? Math.min(0.1, (t - this.last) / 1000) : 0;
     this.last = t;
-    if (this.sim && dt > 0 && document.visibilityState !== 'hidden') {
+    if (!this.panorama() && this.sim && dt > 0 && document.visibilityState !== 'hidden') {
       this.sim.step(dt);
       this.cycle += dt;
       this.acc += dt;

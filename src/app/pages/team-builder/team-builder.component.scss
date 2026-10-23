@@ -1,10 +1,11 @@
-:host { display: block; position: relative; isolation: isolate; }
-:host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, #0e19141a 5%, #0e19141a 40%, #0b151099), url('/ui/formation-open-court.png') center / cover; }
-.team { display: grid; gap: 12px; max-width: 1480px; margin-inline: auto; }
-.head { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-shadow: 0 2px 8px #000; }
-.eyebrow { font: 500 9px var(--title); letter-spacing: .3em; color: #d6bd88; }
-.gm-title { font-size: clamp(27px, 2.6vw, 39px); color: #ffe2a0; margin: 0; }
-.gm-sub { color: #dee5d9; margin: 0; font-size: 12px; }
-.head .gm-btn { background: #111f19b3; border-color: #b89b5d80; border-radius: 7px; font-size: 12px; padding: 8px 12px; }
-.presets { width: min(590px, 100%); min-width: 0; }
-@media (max-width: 720px) { .team { gap: 10px; } .presets { width: 100%; } .head .gm-btn { font-size: 11px; gap: 6px; padding: 7px 9px; } }
+@use '../../shared/fantasy-ui' as fantasy;
+@include fantasy.backdrop('/ui/eldervane/sanctum.webp');
+.team { display: grid; gap: 18px; max-width: 1480px; margin-inline: auto; }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-shadow: 0 2px 8px #16202b; }
+.eyebrow { font: 500 10px var(--title); letter-spacing: .2em; color: #eed4a3; }
+.gm-title { font-size: clamp(30px,3vw,42px); color: #fff0d2; }
+.gm-sub { color: #f2e9dc; font-size: 14px; }
+.head .gm-btn { background: #202a39ed; }
+.presets { width: min(590px,100%); min-width: 0; }
+.team-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px 18px; background: #202a39ed; border-block: 1px solid #d4b67a66; > span { color: #d4d1c9; font-size: 13px; } .gm-btn { min-width: 230px; min-height: 58px; font-size: 19px; } }
+@media (max-width:720px) { .presets { width: 100%; } .head .gm-btn { font-size: 12px; padding-inline: 16px; } .team-footer { padding: 12px; > span { display: none; } .gm-btn { width: 100%; } } }

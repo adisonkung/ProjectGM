@@ -1,69 +1,62 @@
-/* Jade Court shell. Ivory limestone, brushed brass and patinated green. */
-.app { max-width: 1120px; margin: 0 auto; padding: 112px 24px 48px; }
+@use './shared/fantasy-ui' as fantasy;
+.app { max-width: 1200px; margin: 0 auto; padding: 104px 28px 48px; }
 .app.bare { padding: 16px 24px; }
-main { margin: 0; }
+main { margin: 0; outline: none; }
 .bar {
-  position: fixed; top: 12px; left: 20px; right: 20px; z-index: 40;
-  max-width: 1800px; margin-inline: auto; min-height: 78px;
-  display: grid; grid-template-columns: minmax(180px,1fr) auto minmax(210px,1fr); align-items: center; gap: 20px;
-  padding: 8px 16px; border: 1px solid #e2d5b8; border-radius: 12px;
-  color: #244433; background: #f4efdf;
-  box-shadow: inset 0 1px #fffaf0, 0 4px 24px #0a271b24;
+  position: fixed; inset: 0 0 auto; z-index: 40; min-height: 76px;
+  display: grid; grid-template-columns: minmax(140px, .9fr) auto minmax(185px, .9fr); align-items: center; gap: 12px;
+  padding: 0 24px; color: var(--text); background: linear-gradient(100deg, #1c2431fa, #242d3bf5 65%, #1c2431fa);
+  border-bottom: 1px solid #d4b67a99; box-shadow: 0 5px 24px #11182133;
 }
-.brand { display: flex; align-items: center; min-width: 0; width: min(230px, 100%); height: 54px; overflow: hidden; text-decoration: none; color: inherit; }
-.brand-logo { display: block; flex: none; width: 100%; height: auto; }
-.menu { display: flex; gap: 4px; padding: 3px; min-width: 0; }
+.brand { display: flex; align-items: center; min-width: 0; width: min(210px,100%); height: 60px; text-decoration: none; }
+.brand-logo { display: block; width: 100%; height: auto; }
+.menu { display: flex; gap: 0; min-width: 0; }
 .menu a {
-  display: grid; grid-template-columns: 23px auto; align-items: center; align-content: center; justify-content: center; gap: 0 7px;
-  position: relative; min-height: 54px; padding: 7px 13px; border-radius: 7px;
-  font: 500 14px/1.5 var(--body); color: #5e6b59; text-decoration: none; white-space: nowrap;
-  transition: color 160ms, background-color 160ms, box-shadow 160ms;
-  .glyph { display: grid; place-items: center; grid-row: span 2; color: #8c764a; transition: color 160ms, transform 200ms var(--ease-out); }
-  .nav-caption { font: 500 7px/1.7 var(--body); letter-spacing: .12em; color: #7b826c; }
-  &:hover { background: #e6e6d4; color: #234934; .glyph { transform: translateY(-1px); } }
-  &.on { color: #fff4d7; background: #28533e; box-shadow: inset 0 1px #ffffff18, 0 2px 5px #153e2720;
-    .glyph { color: #dfc38b; } .nav-caption { color: #c2d0b8; }
-    &::after { content: ''; position: absolute; left: 30%; right: 30%; bottom: 4px; height: 2px; border-radius: 2px; background: #dbbc7f; }
+  @include fantasy.angled;
+  display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; min-height: 76px; min-width: 92px; padding-inline: 20px;
+  font: 500 14px/1.5 var(--body); color: #e6dcc7; text-decoration: none; white-space: nowrap;
+  background: linear-gradient(110deg, #d4b67a22 1px, transparent 1px); border-block: 1px solid transparent;
+  transition: color 160ms, background-color 160ms;
+  .glyph { display: grid; place-items: center; color: #d4b67a; transition: transform 180ms var(--ease-out); }
+  .nav-caption { display: none; }
+  &:hover { background-color: #ffffff0b; color: #fff6df; .glyph { transform: translateY(-1px); } }
+  &.on { color: #fff1df; background: linear-gradient(115deg, #681f36, #9d2c45 70%, #7e2339); border-color: #d4b67ab3;
+    .glyph { color: #f8dfb2; }
+    &::after { content: ''; position: absolute; left: 30%; right: 30%; bottom: 7px; height: 2px; background: #f0d19b; }
   }
 }
-.purse { display: flex; align-items: center; gap: 14px; justify-self: end; min-width: 0; }
-.treasury { display: flex; align-items: center; gap: 12px; }
-.coin-row { display: flex; align-items: center; gap: 6px;
-  b { font: 600 14px var(--body); font-variant-numeric: tabular-nums; color: #38503b; white-space: nowrap; }
+.purse { display: flex; align-items: center; gap: 10px; justify-self: end; min-width: 0; }
+.treasury { display: flex; align-items: center; gap: 13px; }
+.coin-row { display: flex; align-items: center; gap: 6px; b { font: 500 13px var(--body); font-variant-numeric: tabular-nums; white-space: nowrap; color: #f1e8d7; } }
+.sep { width: 1px; height: 22px; background: #d4b67a40; }
+.gem { color: #87cde9; } .gold { color: #e3bb72; }
+.acct { display: grid; place-items: center; width: 40px; height: 44px; flex: none; border: 1px solid #c6ac7566; background: #232c39; color: #e3c995; border-radius: 3px;
+  &:hover, &.on { border-color: #f0d19b; background: #3b3440; }
 }
-.sep { width: 1px; height: 24px; background: #c9c6ab; }
-.gem { color: #39856c; } .gold { color: #ac7d31; }
-.acct { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border: 1px solid #c9c9ac; border-radius: 50%; background: #e7e7d6; color: #4f6851;
-  &:hover, &.on { color: #244833; border-color: #799b7e; background: #dce5d4; }
-}
-.app.collection { max-width: 1560px; padding: 128px 4.5% 48px; }
+.app.collection { max-width: 1560px; padding: 110px 4% 48px; }
 .app.immersive { max-width: none; padding: 0; }
-.app.fight { padding-top: 112px; }
+.app.fight { padding-top: 100px; }
 @media (min-width: 721px) and (max-width: 1250px) {
-  .bar { left: 14px; right: 14px; gap: 10px; grid-template-columns: minmax(120px,1fr) auto minmax(170px,1fr); padding-inline: 12px; }
-  .menu a { padding-inline: 10px; grid-template-columns: 1fr; justify-items: center; min-width: 58px; gap: 2px; font-size: 12px; .glyph { grid-row: auto; } .nav-caption { display: none; } }
-  .brand { width: min(175px, 100%); }
-  .purse { gap: 10px; } .treasury { gap: 7px; } .coin-row b { font-size: 12px; } .acct { width: 36px; height: 36px; }
+  .bar { padding-inline: 14px; gap: 8px; grid-template-columns: minmax(115px,1fr) auto minmax(158px,1fr); }
+  .brand { width: min(175px,100%); }
+  .menu a { flex-direction: column; min-width: 62px; padding-inline: 10px; gap: 3px; font-size: 12px; }
+  .purse, .treasury { gap: 7px; } .coin-row { gap: 4px; b { font-size: 11px; } } .acct { width: 32px; }
 }
-@media (min-width: 721px) and (max-width: 850px) { .brand { width: min(150px,100%); } .menu a { min-width: 51px; padding-inline: 6px; } .bar { gap: 8px; } }
+@media (min-width: 721px) and (max-width: 850px) { .menu a { min-width: 55px; padding-inline: 7px; } .sep { display: none; } .treasury { flex-direction: column; gap: 0; } }
 @media (max-width: 720px) {
-  .app, .app.collection { padding: 96px 16px calc(104px + env(safe-area-inset-bottom)); }
+  .app, .app.collection { padding: 94px 16px calc(104px + env(safe-area-inset-bottom)); }
   .app.bare { padding: 12px 18px; } .app.immersive { padding: 0; }
-  .bar { top: 0; left: 0; right: 0; border-width: 0 0 1px; border-radius: 0; min-height: 76px; padding: 10px 16px; gap: 10px; grid-template-columns: minmax(0,1fr) auto; }
-  .brand { width: min(155px, 100%); height: 36px; }
-  .purse { gap: 10px; } .treasury { gap: 8px; } .sep { display: none; }
-  .coin-row { gap: 4px; b { font-size: 12px; } app-icon { width: 13px; } } .acct { width: 36px; height: 36px; }
-  .menu {
-    position: fixed; z-index: 60; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 2px;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: #f4efdf; border-top: 1px solid #d1c7a8; box-shadow: 0 -4px 20px #0c2d1e17;
+  .bar { min-height: 72px; padding: 8px 14px; gap: 10px; grid-template-columns: minmax(0,1fr) auto; }
+  .brand { width: min(160px,100%); height: 44px; }
+  .purse { gap: 8px; } .treasury { gap: 8px; } .sep { display: none; }
+  .coin-row { gap: 4px; b { font-size: 12px; } } .acct { width: 34px; }
+  .menu { position: fixed; z-index: 60; inset: auto 0 0; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0;
+    padding: 4px 4px calc(5px + env(safe-area-inset-bottom)); background: #1e2633fa; border-top: 1px solid #d4b67a80; box-shadow: 0 -4px 20px #11182133;
   }
   .fantasy .menu { grid-template-columns: repeat(6,minmax(0,1fr)); }
-  .menu a { grid-template-columns: 1fr; justify-items: center; gap: 4px; padding: 7px 1px; min-height: 62px; font-size: 12px; border-radius: 6px;
-    .glyph { grid-row: auto; } .nav-caption { display: none; }
-    &.on::after { bottom: 3px; }
-  }
+  .menu a { flex-direction: column; gap: 6px; padding: 7px 1px; min-width: 0; min-height: 64px; font-size: 11px; clip-path: polygon(7px 0,100% 0,calc(100% - 7px) 100%,0 100%); &.on::after { bottom: 3px; } }
   .app.fight { padding-bottom: 20px; .menu { display: none; } }
 }
-@media (max-width: 390px) { .bar { padding-inline: 11px; gap: 5px; } .brand { width: min(137px,100%); } .purse { gap: 8px; } }
+@media (max-width: 390px) { .bar { padding-inline: 10px; gap: 5px; } .brand { width: min(136px,100%); } .purse { gap: 6px; } .treasury { gap: 6px; } .coin-row b { font-size: 11px; } .menu a { font-size: 10px; } }
 @media (orientation: landscape) and (max-height: 500px) { .app.fight { padding: 0; max-width: none; .bar { display: none; } } }
 @media (prefers-reduced-motion: reduce) { .menu a:hover .glyph { transform: none; } }

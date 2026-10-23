@@ -37,14 +37,14 @@ import { IconComponent } from './icon.component';
   styles: [`
     :host { display: grid; gap: 8px; }
     .lbl { font-size: 12.5px; color: var(--muted); }
-    .code { width: 100%; box-sizing: border-box; resize: vertical; min-height: 64px; padding: 8px 10px; border-radius: 10px;
-      background: #0a130f; border: 1px solid var(--line); color: var(--text); font: 12px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; }
+    .code { width: 100%; box-sizing: border-box; resize: vertical; min-height: 64px; padding: 8px 10px; border-radius: 3px;
+      background: #0f1218; border: 1px solid var(--line); color: var(--text); font: 12px/1.4 ui-monospace, Menlo, monospace; word-break: break-all; }
     .code:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px #d9b46433; }
     .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .or { color: var(--muted); font-size: 12px; }
     .file { position: relative; overflow: hidden; cursor: pointer; }
     .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-    .preview { display: grid; gap: 4px; padding: 12px; border-radius: 12px; background: #56c07a12; border: 1px solid #56c07a55; }
+    .preview { display: grid; gap: 4px; padding: 12px; border-radius: 3px; background: #56c07a12; border: 1px solid #56c07a55; }
     .preview b { font: 700 16px var(--title); color: var(--gold-hi); }
     .preview span { font-size: 13px; }
     .preview small { color: var(--muted); font-size: 11.5px; }

@@ -40,10 +40,10 @@ import { SaveService } from '../core/services/save.service';
     </div>`,
   styles: [`
     .presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    .preset { position: relative; display: flex; align-items: stretch; gap: 4px; padding: 4px; border-radius: 12px;
-      background: linear-gradient(180deg, #192d24, #0f1a15); border: 1px solid var(--line); min-width: 0; }
+    .preset { position: relative; display: flex; align-items: stretch; gap: 4px; padding: 4px; border-radius: 3px;
+      background: linear-gradient(180deg, #1b212b, #101419); border: 1px solid var(--line); min-width: 0; }
     .preset.active { border-color: var(--gold); box-shadow: 0 0 0 1px #d9b46455, 0 0 16px #d9b46433; }
-    .load { flex: 1; min-width: 0; display: grid; gap: 3px; text-align: left; padding: 4px 6px; border: 0; background: none; border-radius: 8px; }
+    .load { flex: 1; min-width: 0; display: grid; gap: 3px; text-align: left; padding: 4px 6px; border: 0; background: none; border-radius: 2px; }
     .load:hover:not(:disabled) { background: #ffffff08; }
     .load:disabled { cursor: default; }
     .name { font: 700 13px var(--title); letter-spacing: 0.04em; color: var(--gold-hi); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -51,22 +51,22 @@ import { SaveService } from '../core/services/save.service';
     .faces { display: flex; gap: 2px; min-height: 24px; align-items: center; overflow: hidden; }
     .faces small { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tools { display: grid; gap: 3px; align-content: center; }
-    .ico { display: grid; place-items: center; width: 28px; height: 26px; border-radius: 7px; border: 1px solid var(--line); background: #0006; color: var(--muted); }
+    .ico { display: grid; place-items: center; width: 28px; height: 26px; border-radius: 2px; border: 1px solid var(--line); background: #0006; color: var(--muted); }
     .ico:hover { color: var(--gold-hi); border-color: #d9b46480; }
-    .name-in { flex: 1; min-width: 0; font: 600 13px var(--body); color: var(--text); background: #0008; border: 1px solid var(--gold); border-radius: 8px; padding: 4px 8px; }
-    .ok { position: absolute; right: 8px; top: -9px; font: 600 10px var(--body); font-style: normal; color: #9fe6b6; background: #10251a; border: 1px solid #56c07a80; padding: 0 6px; border-radius: 99px; animation: fade 1.6s forwards; }
+    .name-in { flex: 1; min-width: 0; font: 600 13px var(--body); color: var(--text); background: #0008; border: 1px solid var(--gold); border-radius: 2px; padding: 4px 8px; }
+    .ok { position: absolute; right: 8px; top: -9px; font: 600 10px var(--body); font-style: normal; color: #9fe6b6; background: #141921; border: 1px solid #56c07a80; padding: 0 6px; border-radius: 99px; animation: fade 1.6s forwards; }
     @keyframes fade { 70% { opacity: 1; } to { opacity: 0; } }
     :host(.compact) { display: block; min-width: 0; }
     :host(.compact) .presets { gap: 8px; }
-    :host(.compact) .preset { border-radius: 7px; background: #111e18d6; padding: 3px; }
-    :host(.compact) .preset.active { background: linear-gradient(120deg, #ab82422b, #172b22e8); }
+    :host(.compact) .preset { border-radius: 2px; background: #12161dd6; padding: 3px; }
+    :host(.compact) .preset.active { background: linear-gradient(120deg, #ab82422b, #191f29e8); }
     :host(.compact) .load { padding: 6px 8px; }
     :host(.compact) .name { font-size: 13px; }
     :host(.compact) .faces { display: none; }
     :host(.compact) .tools { display: flex; gap: 1px; align-items: center; }
-    :host(.compact) .ico { width: 25px; height: 29px; border-color: transparent; background: none; }
+    :host(.compact) .ico { width: 32px; height: 44px; border-color: transparent; background: none; }
     :host(.compact) .name-in { width: 45px; }
-    @media (max-width: 560px) { :host(.compact) .presets { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; } :host(.compact) .load { padding: 5px; } :host(.compact) .tools { display: grid; } :host(.compact) .ico { width: 22px; height: 22px; } }
+    @media (max-width: 560px) { :host(.compact) .presets { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; } :host(.compact) .load { padding: 5px; } :host(.compact) .tools { display: grid; } :host(.compact) .ico { width: 28px; height: 36px; } }
     @media (max-width: 560px) { .presets { grid-template-columns: 1fr; } }
   `],
 })

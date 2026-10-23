@@ -1,11 +1,12 @@
+@use '../../shared/fantasy-ui' as fantasy;
 @use '../../shared/equipment-ui' as equipment;
-@include equipment.scene('/ui/forge-hall.jpg');
+@include equipment.scene('/ui/eldervane/sanctum.webp');
 .forge { display: grid; gap: 18px; }
 .head > div:first-child { display: grid; gap: 4px; }
 .back-link { display: inline-flex; gap: 5px; align-items: center; justify-self: start; color: #ead2a0; text-decoration: none; font-size: 12px; margin-bottom: 3px; }
-.mats { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; margin-top: 5px; .gm-chip { padding: 7px 12px; background: #0f1c16db; border-color: #aa8ea177; color: #e0e6db; font-size: 12px; } b { color: #f6d492; } }
-.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #bd9d60; border-radius: 8px; overflow: hidden; background: #0f1c16e8;
-  button { display: flex; gap: 14px; align-items: center; justify-content: center; padding: 12px; background: none; border: 0; border-left: 1px solid #bb9e614a; color: #afbba5; font: 600 18px var(--title); }
+.mats { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; margin-top: 5px; .gm-chip { padding: 7px 12px; background: #11151adb; border-color: #aa8ea177; color: #e5e2dc; font-size: 12px; } b { color: #f6d492; } }
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid #bd9d60; border-radius: 8px; overflow: hidden; background: #11151ae8;
+  button { display: flex; gap: 14px; align-items: center; justify-content: center; padding: 12px; background: none; border: 0; border-left: 1px solid #bb9e614a; color: #bbb3a5; font: 600 18px var(--title); }
   small { display: block; font: 400 9px var(--title); letter-spacing: .12em; margin-top: 2px; }
   .on { color: #ffe0a1; background: linear-gradient(0deg, #8d593a5c, #46314733); box-shadow: inset 0 0 0 1px #d9b464ad; app-icon { color: #ffce85; filter: drop-shadow(0 0 7px #ed9853); } }
   button:focus-visible { outline-offset: -4px; }
@@ -13,32 +14,37 @@
 .craft { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
 .steps { display: grid; gap: 14px; align-content: start; .gm-h2 { font-size: 16px; color: #eed6a5; } }
 .rarities { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.rar { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 7px; padding: 13px 9px; min-width: 0; text-align: left; border: 1px solid color-mix(in srgb, var(--rc) 60%, transparent); border-radius: 7px; background: #0d1813bf;
-  b { font: 600 12px var(--title); color: var(--rc); } small { grid-column: 1 / -1; font-size: 10px; line-height: 1.7; } app-icon { color: var(--rc); }
-  &[aria-pressed='true'] { border-color: var(--rc); box-shadow: 0 0 0 1px var(--rc), 0 0 16px color-mix(in srgb, var(--rc) 40%, transparent); background: color-mix(in srgb, var(--rc) 15%, #101d17); }
+.rar { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 7px; padding: 13px 9px; min-width: 0; text-align: left; border: 1px solid color-mix(in srgb, var(--rc) 60%, transparent); border-radius: 7px; background: #0f1218bf;
+  b { font: 600 12px var(--title); color: var(--rc); } small { grid-column: 1 / -1; font-size: 12px; line-height: 1.7; } app-icon { color: var(--rc); }
+  &[aria-pressed='true'] { border-color: var(--rc); box-shadow: 0 0 0 1px var(--rc), 0 0 16px color-mix(in srgb, var(--rc) 40%, transparent); background: color-mix(in srgb, var(--rc) 15%, #11151c); }
 }
 .slot-types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; button { padding: 10px; justify-content: center; min-height: 46px; } }
 .bases { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
-.base { display: grid; text-align: left; gap: 5px; min-width: 0; padding: 9px 12px; background: #0d1914e8; border: 1px solid #82948b66; border-radius: 6px; color: #e1d8cb; b { font: 600 13px var(--title); } small { font-size: 11px; } }
+.base { display: grid; text-align: left; gap: 5px; min-width: 0; padding: 9px 12px; background: #0f1218e8; border: 1px solid #948d8266; border-radius: 6px; color: #e1d8cb; b { font: 600 13px var(--title); } small { font-size: 12px; } }
 [aria-pressed='true'].base, .steps .gm-btn[aria-pressed='true'] { background: linear-gradient(#7d63424d, #b2985924); border-color: #e0c583; color: #ffdfa4; box-shadow: inset 0 0 0 1px #d9b46450, 0 0 12px #d9b46422; }
 .steps .row .gm-btn { flex: 1; justify-content: center; min-height: 45px; }
 .note { display: flex; gap: 7px; align-items: start; }
-.anvil { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-content: center; align-items: center; text-align: center; background: linear-gradient(#13221b9c, #0d1713e3), url('/ui/forge-hall.jpg') center / cover; }
+.anvil { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-content: center; align-items: center; text-align: center; background: linear-gradient(#1419219c, #0f1218e3), url('/ui/eldervane/sanctum.webp') center / cover; }
 .preview-gear { grid-column: 1; grid-row: 1 / 5; position: relative; width: 100%; max-width: 240px; justify-self: center; padding: 10px 5px 30px; filter: drop-shadow(0 0 18px #b7dcca66);
   &::after { content: ''; position: absolute; bottom: 0; left: 8%; width: 84%; height: 25px; border: 2px solid #e7c27d; border-radius: 50%; background: radial-gradient(ellipse, #bfe0d077, transparent 70%); box-shadow: 0 0 20px #ffa46c88, inset 0 0 14px #c3e2d399; }
 }
 .pick { display: grid; gap: 12px; margin: 0; min-width: 0; .nm { font: 700 clamp(17px, 1.7vw, 25px) var(--title); line-height: 1.5; } }
-.rarity-tag { justify-self: center; padding: 3px 10px; border: 1px solid var(--rc); color: var(--rc); border-radius: 5px; font-size: 11px; }
-.main-stat { display: block; padding: 12px; background: #0c1712e6; border: 1px solid #c4aa6e80; border-radius: 7px; color: #ffdfac; font: 600 23px var(--title); }
+.rarity-tag { justify-self: center; padding: 3px 10px; border: 1px solid var(--rc); color: var(--rc); border-radius: 5px; font-size: 12px; }
+.main-stat { display: block; padding: 12px; background: #0f1218e6; border: 1px solid #c4aa6e80; border-radius: 7px; color: #ffdfac; font: 600 23px var(--title); }
 .cost-title { margin: 0; color: #edcb8b; font: 600 13px var(--title); text-align: left; }
-.cost { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; span { display: grid; justify-items: center; gap: 6px; padding: 10px 5px; border: 1px solid #ae916680; background: #0f1b16e6; border-radius: 6px; color: #e4d4b4; } b { font-size: 12px; } small { font-size: 9px; } }
+.cost { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; span { display: grid; justify-items: center; gap: 6px; padding: 10px 5px; border: 1px solid #ae916680; background: #10141ae6; border-radius: 6px; color: #e4d4b4; } b { font-size: 12px; } small { font-size: 9px; } }
 .big { width: 100%; justify-content: center; min-height: 54px; font-size: 19px; }
-.result { grid-column: 1 / -1; display: grid; gap: 8px; padding: 14px; background: #111f19f5; border: 1px solid var(--rc); border-radius: 8px; .gm-btn { justify-self: center; } }
-.items { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 10px; li { display: flex; gap: 14px; align-items: center; padding: 12px; border: 1px solid color-mix(in srgb, var(--rc, #a7b89a) 60%, transparent); border-radius: 7px; background: #0d1713cc; } }
+.result { grid-column: 1 / -1; display: grid; gap: 8px; padding: 14px; background: #12171ef5; border: 1px solid var(--rc); border-radius: 8px; .gm-btn { justify-self: center; } }
+.items { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 10px; li { display: flex; gap: 14px; align-items: center; padding: 12px; border: 1px solid color-mix(in srgb, var(--rc, #b7ad9b) 60%, transparent); border-radius: 7px; background: #0f1218cc; } }
 .gi { width: 66px; flex: none; }
 .info { flex: 1; min-width: 0; display: grid; gap: 6px; .nm { font-size: 14px; } .worn { color: #e5c990; } }
 .act { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: end; }
-.none { color: #bdc9b3; justify-content: center; min-height: 110px; }
+.none { color: #c8c1b4; justify-content: center; min-height: 110px; }
 @media (max-width: 1150px) { .anvil { grid-template-columns: 1fr; align-content: start; } .preview-gear { grid-row: auto; max-width: 170px; } .cost-title { text-align: center; } }
 @media (max-width: 950px) { .craft { grid-template-columns: 1fr; } .anvil { grid-template-columns: 1fr 1fr; } .preview-gear { grid-row: 1 / 5; max-width: 240px; } }
-@media (max-width: 720px) { .forge { gap: 14px; } .mats { gap: 5px; .gm-chip { font-size: 10px; padding: 6px 8px; } } .tabs button { gap: 8px; padding: 10px 5px; font-size: 15px; } .rarities { grid-template-columns: repeat(2, minmax(0, 1fr)); } .slot-types { gap: 5px; button { padding-inline: 5px; font-size: 11px; } } .steps .gm-h2 { font-size: 14px; } .anvil { grid-template-columns: 1fr; } .preview-gear { grid-row: auto; max-width: 180px; } .items li { flex-wrap: wrap; gap: 10px; } .act { width: 100%; } .gi { width: 50px; } }
+@media (max-width: 720px) { .forge { gap: 14px; } .mats { gap: 5px; .gm-chip { font-size: 12px; padding: 6px 8px; } } .tabs button { gap: 8px; padding: 10px 5px; font-size: 15px; } .rarities { grid-template-columns: repeat(2, minmax(0, 1fr)); } .slot-types { gap: 5px; button { padding-inline: 5px; font-size: 12px; } } .steps .gm-h2 { font-size: 14px; } .anvil { grid-template-columns: 1fr; } .preview-gear { grid-row: auto; max-width: 180px; } .items li { flex-wrap: wrap; gap: 10px; } .act { width: 100%; } .gi { width: 50px; } }
+
+.tabs { border-radius: 0; border-color: #c6ac7580; padding: 3px; gap: 3px; background: #202a39ed; }
+.tabs button { @include fantasy.angled; min-height: 58px; font-family: var(--body); padding-inline: 16px; border: 1px solid transparent; }
+.tabs .on { background: linear-gradient(115deg,#702338,#9c2a42); border-color: #d4b67a99; box-shadow: none; app-icon { color: #f0d8aa; filter: none; } }
+.base, .rar, .main-stat, .result, .items li { border-radius: 3px; }

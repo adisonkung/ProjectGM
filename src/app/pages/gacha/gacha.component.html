@@ -1,5 +1,6 @@
 <section class="gate" [class.summoning]="playing()" aria-label="วิหารอัญเชิญ">
   <app-summon-sanctum [paused]="playing()" />
+  @if (showcase) { <div class="summon-showcase" aria-hidden="true"><img [src]="showcase" alt="" decoding="async" /></div> }
   <div class="summon-ui">
     <aside class="banner-menu" aria-label="เมนูอัญเชิญ">
       <a class="back-link" routerLink="/home"><app-icon name="back" [size]="15" /> กลับเกาะ</a>
@@ -17,7 +18,7 @@
     </nav>
     <section class="hero-pool" aria-label="ตัวอย่างฮีโร่ในตู้">
       <span class="eyebrow">THE CELESTIAL SANCTUM</span>
-      <h1>อัญเชิญดวงดาว</h1>
+      <h1>ประตูอัญเชิญ</h1>
       <p>เรียกวีรชนร่วมเดินทาง สู่ยอดหอคอย</p>
       <div class="hero-lineup">
         @for (h of preview; track h.id) {

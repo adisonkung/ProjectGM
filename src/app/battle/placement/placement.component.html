@@ -49,6 +49,20 @@
     }
   </div>
 
+  @if (allyOnly()) {
+    <aside class="formation-roster" aria-label="รายละเอียดทีมปัจจุบัน">
+      <h2>รายละเอียดทีม</h2>
+      <div class="roster-power"><app-icon name="armory" [size]="22" /><span>พลังทีม</span><b>{{ totalPower() }}</b></div>
+      @for (h of occupied().values(); track h.uid) {
+        <button type="button" (click)="tapHero(h.uid, $event)" [attr.aria-pressed]="selected() === h.uid">
+          @if (h.portrait) { <img [src]="h.portrait" alt="" /> }
+          <span><b>{{ h.name }}</b><small>{{ h.clsName }} · Lv.{{ h.level }}</small><em>{{ '★'.repeat(h.star) }}</em></span>
+        </button>
+      }
+      <p><app-icon name="save" [size]="16" /> บันทึกตำแหน่งอัตโนมัติ</p>
+    </aside>
+  }
+
   <div class="bar">
     @if (allyOnly()) {
       <div class="class-filters" role="group" aria-label="กรองฮีโร่สำรองตามคลาส">

@@ -1,0 +1,15 @@
+// Eldervane: light fantasy worlds, charcoal glass, fine gold and crimson actions.
+@mixin surface {
+  border: 1px solid var(--line-gold); border-radius: 3px; color: var(--text);
+  background: var(--panel-bg); box-shadow: inset 0 1px #fff4d412, 0 12px 32px #11182133;
+}
+@mixin angled {
+  border-radius: 0; clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%); padding-inline: 22px;
+  &:focus-visible { outline-offset: -4px; }
+}
+@mixin backdrop($image: '/ui/eldervane/citadel.webp') {
+  :host { display: block; position: relative; isolation: isolate; }
+  :host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: linear-gradient(180deg, #141b2626, #141b2640 45%, #141b268c), url($image) center / cover;
+  }
+}
