@@ -29,7 +29,10 @@ export class HeroesComponent {
   readonly layout = signal<'grid' | 'list'>('grid');
   readonly classIcon = (c: HeroClass | 'all') => ({ all: 'heroes', tank: 'shield', fighter: 'sword', assassin: 'armory', archer: 'arrow', mage: 'star', healer: 'summon' })[c];
   readonly cls = signal<HeroClass | 'all'>('all');
+  readonly query = signal('');
   readonly sort = signal<HeroSort>('power');
+  readonly teamCount = computed(() => this.cards().filter(h => h.inTeam).length);
+  readonly readyCount = computed(() => this.cards().filter(h => h.btReady || h.skillReady || h.canLevel).length);
 
   readonly cards = computed(() => {
     const s = this.save.state();
@@ -54,7 +57,8 @@ export class HeroesComponent {
 
   readonly shown = computed(() => {
     const c = this.cls();
-    const list = this.cards().filter(x => c === 'all' || x.cls === c);
+    const q = this.query().trim().toLocaleLowerCase('th');
+    const list = this.cards().filter(x => (c === 'all' || x.cls === c) && (!q || `${x.name} ${x.id}`.toLocaleLowerCase('th').includes(q)));
     const by: Record<HeroSort, (a: (typeof list)[0], b: (typeof list)[0]) => number> = {
       power: (a, b) => b.power - a.power,
       level: (a, b) => b.level - a.level || b.power - a.power,

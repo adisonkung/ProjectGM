@@ -1,223 +1,69 @@
-// ---------------------------------------------------------------- shell: one command bar (desktop) · top bar + bottom dock (mobile)
-.app { max-width: 1080px; margin: 0 auto; padding-inline: 16px; padding-block: 12px 64px; }
-.app.bare { padding-block: 12px; }
-main { margin-top: 18px; }
-.app.bare main { margin-top: 0; }
-
+/* Jade Court shell. Ivory limestone, brushed brass and patinated green. */
+.app { max-width: 1120px; margin: 0 auto; padding: 112px 24px 48px; }
+.app.bare { padding: 16px 24px; }
+main { margin: 0; }
 .bar {
-  position: sticky; top: 8px; z-index: 40;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px;
-  padding: 7px 10px 7px 8px; border-radius: 18px;
-  background:
-    linear-gradient(180deg, #ffffff0d, transparent 40%),
-    radial-gradient(ellipse 60% 120% at 50% 0%, #6b3fd62e, transparent 70%),
-    linear-gradient(180deg, #1a1430f2, #0c0916f2);
-  border: 1px solid #d9b46438;
-  box-shadow: inset 0 1px 0 #fff1c21f, inset 0 0 0 1px #0008, 0 14px 34px #000c, 0 0 40px #6b3fd61a;
-  backdrop-filter: blur(10px);
-  // gilded rim + corner jewels
-  &::before { content: ''; position: absolute; left: 18%; right: 18%; top: -1px; height: 1px; pointer-events: none;
-    background: linear-gradient(90deg, transparent, var(--gold-hi), transparent); box-shadow: 0 0 10px var(--gold); }
-  &::after { content: ''; position: absolute; inset: 4px; border-radius: 14px; pointer-events: none;
-    border: 1px solid transparent;
-    background: linear-gradient(90deg, #d9b46455, transparent 18%, transparent 82%, #d9b46455) border-box;
-    -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  position: fixed; top: 12px; left: 20px; right: 20px; z-index: 40;
+  max-width: 1800px; margin-inline: auto; min-height: 78px;
+  display: grid; grid-template-columns: minmax(180px,1fr) auto minmax(210px,1fr); align-items: center; gap: 20px;
+  padding: 8px 16px; border: 1px solid #e2d5b8; border-radius: 12px;
+  color: #244433; background: #f4efdf;
+  box-shadow: inset 0 1px #fffaf0, 0 4px 24px #0a271b24;
 }
-
-// ---------------------------------------------------------------- brand
-.brand { display: flex; align-items: center; gap: 10px; min-width: 0; text-decoration: none; justify-self: start; }
-.crest-wrap { position: relative; flex: none; display: grid; place-items: center; width: 46px; height: 46px;
-  &::before { content: ''; position: absolute; inset: 2px; border-radius: 50%;
-    background: radial-gradient(circle, #9b6bff55, transparent 68%); animation: breathe 5s ease-in-out infinite; } }
-.crest { position: relative; width: 42px; height: 42px; filter: drop-shadow(0 2px 3px #000) drop-shadow(0 0 8px #9b6bff66); transition: transform .3s; }
-.brand:hover .crest { transform: translateY(-1px) scale(1.04); }
-.word { display: flex; flex-direction: column; min-width: 0; line-height: 1;
-  b { font: 800 19px/1 var(--title); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
-    background: var(--foil); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 1px 0 #000a); }
-  small { margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font: 600 11.5px/1.2 var(--body); letter-spacing: .06em; color: var(--arcane-hi); opacity: .9; }
-}
-@keyframes breathe { 50% { opacity: .45; transform: scale(.9); } }
-
-// ---------------------------------------------------------------- main menu
-.menu { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: #07050dcc; border: 1px solid #2c2442;
-  box-shadow: inset 0 2px 6px #000c; }
+.brand { display: flex; align-items: center; min-width: 0; width: min(230px, 100%); height: 54px; overflow: hidden; text-decoration: none; color: inherit; }
+.brand-logo { display: block; flex: none; width: 100%; height: auto; }
+.menu { display: flex; gap: 4px; padding: 3px; min-width: 0; }
 .menu a {
-  position: relative; display: flex; align-items: center; gap: 8px; padding: 9px 16px 9px 12px; border-radius: 10px;
-  text-decoration: none; color: #a79bbf; font: 600 14px var(--body); letter-spacing: .02em; white-space: nowrap;
-  transition: color .18s, background .18s, box-shadow .18s;
-  .glyph { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #ffffff08;
-    border: 1px solid #ffffff10; transition: all .18s; app-icon { opacity: .8; } }
-  &:hover { color: var(--text); .glyph { border-color: #d9b46455; app-icon { opacity: 1; } } }
-  &.on {
-    color: var(--gold-hi);
-    background: radial-gradient(ellipse 100% 120% at 50% 110%, #9b6bff3d, transparent 70%), linear-gradient(180deg, #2b2148, #17112a);
-    box-shadow: inset 0 0 0 1px #d9b4644d, 0 4px 14px #000a;
-    .glyph { color: #1a1030; border-color: #fff1c2aa; background: linear-gradient(160deg, #fff1c2, #d9b464 55%, #9a6f2c);
-      box-shadow: 0 0 12px #d9b46488; app-icon { opacity: 1; } }
-    // jewel under the active tab
-    &::after { content: ''; position: absolute; left: 50%; bottom: -5px; width: 8px; height: 8px; transform: translateX(-50%) rotate(45deg);
-      background: linear-gradient(135deg, #fff1c2, #d9b464); box-shadow: 0 0 10px var(--gold); border: 1px solid #120d20; }
+  display: grid; grid-template-columns: 23px auto; align-items: center; align-content: center; justify-content: center; gap: 0 7px;
+  position: relative; min-height: 54px; padding: 7px 13px; border-radius: 7px;
+  font: 500 14px/1.5 var(--body); color: #5e6b59; text-decoration: none; white-space: nowrap;
+  transition: color 160ms, background-color 160ms, box-shadow 160ms;
+  .glyph { display: grid; place-items: center; grid-row: span 2; color: #8c764a; transition: color 160ms, transform 200ms var(--ease-out); }
+  .nav-caption { font: 500 7px/1.7 var(--body); letter-spacing: .12em; color: #7b826c; }
+  &:hover { background: #e6e6d4; color: #234934; .glyph { transform: translateY(-1px); } }
+  &.on { color: #fff4d7; background: #28533e; box-shadow: inset 0 1px #ffffff18, 0 2px 5px #153e2720;
+    .glyph { color: #dfc38b; } .nav-caption { color: #c2d0b8; }
+    &::after { content: ''; position: absolute; left: 30%; right: 30%; bottom: 4px; height: 2px; border-radius: 2px; background: #dbbc7f; }
   }
 }
-
-// ---------------------------------------------------------------- purse + account
-.purse { display: flex; align-items: center; gap: 8px; justify-self: end; min-width: 0; }
-.treasury { display: flex; align-items: center; gap: 10px; padding: 6px 14px 6px 10px; border-radius: 999px;
-  background: linear-gradient(180deg, #1d1731, #0d0a17); border: 1px solid #d9b46466;
-  box-shadow: inset 0 1px 0 #fff1c224, inset 0 -6px 12px #0006, 0 2px 10px #0009; }
+.purse { display: flex; align-items: center; gap: 14px; justify-self: end; min-width: 0; }
+.treasury { display: flex; align-items: center; gap: 12px; }
 .coin-row { display: flex; align-items: center; gap: 6px;
-  b { font: 700 14px var(--title); font-variant-numeric: tabular-nums; color: var(--gold-hi); letter-spacing: .02em; } }
-.sep { width: 1px; height: 16px; background: linear-gradient(180deg, transparent, #d9b46488, transparent); }
-.gem { color: #7fe0f0; filter: drop-shadow(0 0 5px #5ec8e0bb); }
-.gold { color: var(--gold); filter: drop-shadow(0 0 5px #d9b464bb); }
-.acct { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: #b7abd0;
-  background: radial-gradient(circle at 50% 30%, #2a2146, #120d20); border: 1px solid #d9b46455;
-  box-shadow: inset 0 1px 0 #fff1c21a, 0 2px 8px #000a; transition: color .18s, box-shadow .18s, transform .4s;
-  &:hover { color: var(--gold-hi); transform: rotate(45deg); }
-  &.on { color: var(--gold-hi); box-shadow: 0 0 0 1px var(--gold), 0 0 14px #d9b46466; } }
-
-// ---------------------------------------------------------------- medium: icon-only menu
-@media (max-width: 980px) {
-  .menu a { padding: 7px; .lbl { display: none; } }
+  b { font: 600 14px var(--body); font-variant-numeric: tabular-nums; color: #38503b; white-space: nowrap; }
 }
-
-// ---------------------------------------------------------------- mobile: bottom dock
+.sep { width: 1px; height: 24px; background: #c9c6ab; }
+.gem { color: #39856c; } .gold { color: #ac7d31; }
+.acct { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border: 1px solid #c9c9ac; border-radius: 50%; background: #e7e7d6; color: #4f6851;
+  &:hover, &.on { color: #244833; border-color: #799b7e; background: #dce5d4; }
+}
+.app.collection { max-width: 1560px; padding: 128px 4.5% 48px; }
+.app.immersive { max-width: none; padding: 0; }
+.app.fight { padding-top: 112px; }
+@media (min-width: 721px) and (max-width: 1250px) {
+  .bar { left: 14px; right: 14px; gap: 10px; grid-template-columns: minmax(120px,1fr) auto minmax(170px,1fr); padding-inline: 12px; }
+  .menu a { padding-inline: 10px; grid-template-columns: 1fr; justify-items: center; min-width: 58px; gap: 2px; font-size: 12px; .glyph { grid-row: auto; } .nav-caption { display: none; } }
+  .brand { width: min(175px, 100%); }
+  .purse { gap: 10px; } .treasury { gap: 7px; } .coin-row b { font-size: 12px; } .acct { width: 36px; height: 36px; }
+}
+@media (min-width: 721px) and (max-width: 850px) { .brand { width: min(150px,100%); } .menu a { min-width: 51px; padding-inline: 6px; } .bar { gap: 8px; } }
 @media (max-width: 720px) {
-  .app { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
-  // no backdrop-filter here: it would make the fixed dock position against the bar instead of the screen
-  .bar { grid-template-columns: minmax(0, 1fr) auto; top: 6px; padding: 5px 6px 5px 5px; border-radius: 16px; backdrop-filter: none; }
-  .crest-wrap { width: 38px; height: 38px; } .crest { width: 34px; height: 34px; }
-  // phone: the island's own name is the title
-  .word b { display: none; }
-  .word small { margin: 0; font: 700 15px/1.2 var(--title); letter-spacing: .03em; color: var(--gold-hi); opacity: 1; text-shadow: 0 0 12px #9b6bff55; }
-  .treasury { gap: 7px; padding: 5px 10px 5px 8px; }
-  .coin-row b { font-size: 12.5px; }
-  .acct { width: 34px; height: 34px; }
-
+  .app, .app.collection { padding: 96px 16px calc(104px + env(safe-area-inset-bottom)); }
+  .app.bare { padding: 12px 18px; } .app.immersive { padding: 0; }
+  .bar { top: 0; left: 0; right: 0; border-width: 0 0 1px; border-radius: 0; min-height: 76px; padding: 10px 16px; gap: 10px; grid-template-columns: minmax(0,1fr) auto; }
+  .brand { width: min(155px, 100%); height: 36px; }
+  .purse { gap: 10px; } .treasury { gap: 8px; } .sep { display: none; }
+  .coin-row { gap: 4px; b { font-size: 12px; } app-icon { width: 13px; } } .acct { width: 36px; height: 36px; }
   .menu {
-    position: fixed; z-index: 60; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom));
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 6px; border-radius: 20px;
-    background: linear-gradient(180deg, #1c1532f5, #0b0914f8); border: 1px solid #d9b46444;
-    box-shadow: inset 0 1px 0 #fff1c21c, 0 -6px 30px #000d, 0 0 30px #6b3fd622; backdrop-filter: blur(12px);
-    &::before { content: ''; position: absolute; left: 22%; right: 22%; top: -1px; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold-hi), transparent); }
+    position: fixed; z-index: 60; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 2px;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: #f4efdf; border-top: 1px solid #d1c7a8; box-shadow: 0 -4px 20px #0c2d1e17;
   }
-  .menu a { flex-direction: column; justify-content: center; gap: 3px; padding: 6px 2px 5px; font-size: 11px;
-    .lbl { display: block; }
-    .glyph { width: 34px; height: 30px; }
-    &.on { background: radial-gradient(ellipse 90% 100% at 50% 100%, #9b6bff33, transparent 72%); box-shadow: none;
-      .glyph { transform: translateY(-3px); }
-      &::after { bottom: 1px; width: 6px; height: 6px; } }
+  .fantasy .menu { grid-template-columns: repeat(6,minmax(0,1fr)); }
+  .menu a { grid-template-columns: 1fr; justify-items: center; gap: 4px; padding: 7px 1px; min-height: 62px; font-size: 12px; border-radius: 6px;
+    .glyph { grid-row: auto; } .nav-caption { display: none; }
+    &.on::after { bottom: 3px; }
   }
+  .app.fight { padding-bottom: 20px; .menu { display: none; } }
 }
-@media (max-width: 720px) {
-  .app.fight { padding-bottom: 24px; }
-  .app.fight .menu { display: none; }
-}
-@media (max-width: 380px) {
-  .word { display: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .crest-wrap::before { animation: none; }
-  .acct:hover { transform: none; }
-}
-
-// ---------------------------------------------------------------- island home: locked full screen, chrome floats over the map
-// (no backdrop-filter here: blurring the animated map behind the bar / dock every frame is expensive)
-.app.immersive { padding: 0; max-width: none; }
-.app.immersive main { margin-top: 0; }
-
-// Fantasy lobby: separate wordmark, six gilded navigation tiles and individual resource counters.
-.app.fantasy .bar {
-  position: fixed; left: 0; right: 0; margin-inline: auto; backdrop-filter: none;
-  top: 0; width: calc(100% - 40px); max-width: 1840px; padding: 0; min-height: 100px;
-  grid-template-columns: minmax(180px, 1fr) auto minmax(235px, 1fr); gap: 24px;
-  border: 0; border-radius: 0; background: none; box-shadow: none;
-  &::before, &::after { display: none; }
-  .brand { gap: 8px; filter: drop-shadow(0 3px 4px #000); }
-  .crest-wrap { width: 32px; height: 58px; &::before { display: none; } }
-  .crest { width: 32px; height: 42px; filter: drop-shadow(0 0 8px #e3bd7138); }
-  .word b { font-size: clamp(20px, 1.85vw, 32px); letter-spacing: .02em; white-space: normal; line-height: 1.05; }
-  .word small { margin-top: 8px; font: 500 8px/1.2 var(--title); color: #d8c39d; letter-spacing: .3em; }
-  .menu {
-    position: relative; border-radius: 0 0 12px 12px; padding: 0 10px 6px; gap: 0; align-self: start;
-    background: linear-gradient(180deg, #09101eeb, #090e19f5); border: 0; border-bottom: 1px solid #d0ac6c;
-    box-shadow: 0 5px 20px #0009; overflow: visible;
-    &::before { content: ''; position: absolute; inset: -3px -7px -6px; pointer-events: none; border: 25px solid transparent;
-      border-image: url('/ui/lobby-frame.svg') 40 / 28px / 0 stretch; }
-  }
-  .menu a { width: clamp(64px, 5.8vw, 94px); min-height: 88px; padding: 12px 4px 5px; gap: 3px; border-radius: 0;
-    flex-direction: column; justify-content: center; color: #d1c5ae; border-left: 1px solid #ad8b542b;
-    font-size: 13px; letter-spacing: .02em;
-    &:first-of-type { border-left: 0; }
-    .glyph { width: 30px; height: 30px; border: 0; background: none; border-radius: 0; color: #dfc798; }
-    .lbl { display: block; }
-    .nav-caption { font: 500 8px/1.5 var(--title); letter-spacing: .05em; opacity: .75; }
-    &:hover { background: #d9b46410; color: #ffebc6; }
-    &.on { background: linear-gradient(0deg, #8673ce40, transparent 75%); color: #fff3d2; box-shadow: none;
-      .glyph { background: none; border: 0; color: #e7e0ff; box-shadow: none; filter: drop-shadow(0 0 8px #b89eff); }
-      &::after { bottom: -8px; width: 6px; height: 6px; box-shadow: 0 0 10px #e8cd8d; }
-      &::before { content: ''; position: absolute; height: 2px; bottom: -6px; left: 9%; right: 9%; background: #f5dfa4; box-shadow: 0 0 10px #e8cd8d; }
-    }
-  }
-  .purse { gap: 12px; }
-  .treasury { padding: 0; gap: 8px; border: 0; background: none; box-shadow: none; }
-  .sep { display: none; }
-  .coin-row { min-height: 35px; padding: 6px 12px; border-radius: 30px; border: 1px solid #c4a166; background: #080d18ec;
-    box-shadow: inset 0 0 0 3px #121c2a, 0 3px 8px #0009; gap: 8px;
-    b { font-size: 13px; color: #fff1d8; }
-  }
-  .acct { width: 44px; height: 44px; color: #e8cf9d; background: #0c1524; border-color: #c7a46a;
-    outline: 1px solid #ac874759; outline-offset: 4px; }
-}
-@media (min-width: 721px) and (max-width: 1100px) {
-  .app.fantasy .bar { width: calc(100% - 28px); grid-template-columns: minmax(130px, 1fr) auto minmax(180px, 1fr); gap: 14px;
-    .word b { font-size: 20px; } .crest-wrap { display: none; } .word small { font-size: 7px; letter-spacing: .14em; }
-    .menu a { width: 58px; min-height: 80px; font-size: 13px; .nav-caption { font-size: 6px; } }
-    .coin-row { padding: 5px 8px; gap: 5px; b { font-size: 13px; } }
-    .purse { gap: 8px; } .acct { width: 35px; height: 35px; }
-  }
-}
-@media (max-width: 720px) {
-  .app.immersive { padding: 0; }
-  .app.fantasy .menu { backdrop-filter: none; }
-  .app.fantasy .bar { top: 0; width: 100%; min-height: 77px; padding: 10px 16px; gap: 10px;
-    grid-template-columns: minmax(0, 1fr) auto;
-    background: linear-gradient(180deg, #080f1bf7, #0b1322ed 80%, #0b1322c9); border-bottom: 1px solid #ae8c4b80;
-    .brand { min-width: 0; } .crest-wrap { display: none; }
-    .word { display: flex; } .word b { display: block; font-size: 17px; max-width: 125px; line-height: 1.05; }
-    .word small { font-size: 6px; letter-spacing: .13em; margin-top: 5px; }
-    .treasury { gap: 5px; } .coin-row { padding: 5px 8px; gap: 5px; min-height: 30px; b { font-size: 13px; } }
-    .coin-row app-icon { width: 13px; } .purse { gap: 10px; }
-    .acct { width: 32px; height: 32px; outline-offset: 2px; }
-    .menu { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: 100%; grid-template-columns: repeat(6, minmax(0, 1fr));
-      min-height: 73px; gap: 0; padding: 0 9px env(safe-area-inset-bottom); border: 0; border-top: 1px solid #b19359;
-      border-radius: 0; background: #0a111ef7; box-shadow: 0 -3px 18px #0008;
-      &::before { display: none; }
-    }
-    .menu a { width: auto; min-width: 0; min-height: 72px; padding: 7px 1px 5px; gap: 4px; font-size: 13px;
-      .glyph { width: 27px; height: 25px; } .nav-caption { display: none; }
-      &.on .glyph { transform: none; } &.on::after { display: none; }
-      &.on::before { top: 0; bottom: auto; left: 18%; right: 18%; }
-    }
-  }
-}
-@media (max-width: 360px) { .app.fantasy .bar { padding-inline: 11px; gap: 6px;
-  .word b { font-size: 14px; max-width: 85px; } .word small { display: none; }
-  .coin-row { padding-inline: 6px; b { font-size: 13px; } } .purse { gap: 7px; }
-} }
-
-// phone in landscape, in a fight: no app chrome at all (the battle screen takes the whole display)
-@media (orientation: landscape) and (max-height: 500px) {
-  .app.fight { padding: 0; max-width: none; }
-  .app.fight .bar { display: none; }
-  .app.fight main { margin-top: 0; }
-}
-
-// Scrolling collection pages keep the same chrome as the lobby.
-.app.collection { max-width: 1680px; padding: 120px 4.5% 48px; }
-.app.collection main { margin-top: 0; }
-@media (max-width: 720px) {
-  .app.collection { padding: 96px 16px calc(100px + env(safe-area-inset-bottom)); }
-}
+@media (max-width: 390px) { .bar { padding-inline: 11px; gap: 5px; } .brand { width: min(137px,100%); } .purse { gap: 8px; } }
+@media (orientation: landscape) and (max-height: 500px) { .app.fight { padding: 0; max-width: none; .bar { display: none; } } }
+@media (prefers-reduced-motion: reduce) { .menu a:hover .glyph { transform: none; } }

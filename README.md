@@ -1,4 +1,8 @@
-# ProjectGM
+# Eldervane / เอลเดอร์เวย์น
+
+A fantasy gacha, team-building and auto-battle game. Official English name: **Eldervane**. Official Thai name: **เอลเดอร์เวย์น** (user decision, 2026-10-23).
+
+The technical project/repository name remains `ProjectGM`; older documents use the former display name `Summon Tower`.
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.13.
 

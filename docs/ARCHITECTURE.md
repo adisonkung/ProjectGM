@@ -3,6 +3,8 @@
 > **Status: APPROVED** (user, 2026-10-16) as the descriptive reference. It follows the code; keep it updated when the code changes.
 > **Descriptive** document: it describes the current code. When it disagrees with the code, the code wins and this file is updated (`docs/PROJECT_RULES.md` §2).
 
+**Product identity (user decision, 2026-10-23): Eldervane / เอลเดอร์เวย์น.** `ProjectGM` remains the technical project name. Save identifiers remain backward compatible.
+
 ## Folder map
 
 ```
@@ -171,6 +173,10 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 - **Impact feel:** `battle/impact-feel/impact-feel.ts` (hit-stop, shake, flash, zoom).
 
 ### UI / pages
+
+- **Eldervane logo (2026-10-23):** transparent full/compact PNG masters and WebP delivery assets under `public/ui/branding/`. Welcome uses the full floating-tower lockup on an ivory masthead; shared navigation and summon heading use the optimized compact wordmark. The generic crest/SVG and old summon wordmark are replaced, with semantic title/Home labeling preserved. See `BRANDING.md`.
+
+- **Jade Court presentation (2026-10-23):** `src/styles.scss` defines jade/sage surfaces, warm ivory/brass accents, shared button/page/dialog motion and reduced-motion handling. `app.component` uses an ivory shell and extends six-item navigation to hero detail/account. Home kingdom/party and collection cards use ivory folios; original scene and hero art remain. `HeroesComponent` combines name/ID search with existing class filters and shows live roster/team/development counts. The phone filter rail scrolls inside the available width. Native dialogs progressively animate discrete open/close; full-screen summon choreography and combat/sprite clocks are excluded. See `JADE_COURT_UI.md`; the older feature descriptions below describe the functional layout before this visual refresh.
 
 - **Routes:** `app.routes.ts`. All game routes sit under `islandNamedGuard`.
 - **Navigation:** `MAIN_NAV` retains island, heroes, team and summon on ordinary screens. Home, the summon sanctum, hero collection, standalone formation, armory, forge, tower and farm dungeons use `LOBBY_NAV`: Home, heroes, formation, equipment, summon and adventure, linking to existing F0 routes. Other features remain available through island buildings.

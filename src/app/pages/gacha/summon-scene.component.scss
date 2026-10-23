@@ -8,7 +8,7 @@ button:hover { border-color: #ffe5ad; filter: brightness(1.12); }
 button:focus-visible { outline: 2px solid #fff0c0; outline-offset: 5px; }
 .primary { color: #30200d; background: radial-gradient(ellipse at top,#fff5c4,transparent),linear-gradient(#efcf8a,#bd8a3d); border-color: #ffdfa0; }
 .scene-heading { position: relative; z-index: 3; display: flex; align-items: start; justify-content: space-between; padding: max(20px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)); pointer-events: none; .skip { pointer-events: auto; } }
-.wordmark { font: 500 clamp(16px,2.3vw,30px) var(--title); letter-spacing: .11em; color: #efd7a1; text-shadow: 0 3px 10px #000; small { display: block; font-size: 10px; letter-spacing: .4em; margin-top: 3px; } }
+
 .skip { min-width: 105px; min-height: 40px; padding: 5px 18px; span { font-size: 24px; margin-left: 10px; } }
 .light-stage { position: fixed; inset: 0; z-index: -2; pointer-events: none; transition: opacity .7s; }
 .pillar { position: absolute; top: -15%; left: 50%; height: 87%; width: 45px; transform: translateX(-50%); background: linear-gradient(90deg,transparent,#efbc7366,#fff4d7,#fff,#fff0c7,#d7a0ff77,transparent); opacity: .45; filter: blur(1px); }
@@ -57,3 +57,6 @@ button:focus-visible { outline: 2px solid #fff0c0; outline-offset: 5px; }
 // Supplied 3-star art has a wider gold frame; retain its corner gems and pointed tips.
 .flying-cards img.three-star, .sealed-card > img.three-star { clip-path: polygon(50% .5%,56% 2.5%,90% 2.5%,95% 5%,95% 44%,98% 47%,95% 50%,95% 91%,91% 94%,54% 94%,50% 98%,46% 94%,9% 94%,5% 91%,5% 50%,2% 47%,5% 44%,5% 5%,10% 2.5%,44% 2.5%); }
 .sealed-card > img.three-star { inset: -4% 0; width: 100%; object-fit: fill; }
+
+.wordmark { display: block; width: clamp(140px,20vw,260px); padding: 8px 12px; border: 1px solid #c8b17a; border-radius: 5px; background: #f4efdf; text-shadow: none; }
+.wordmark img { display: block; width: 100%; height: clamp(28px,4vw,48px); object-fit: cover; object-position: center; }

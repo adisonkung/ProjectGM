@@ -1,11 +1,13 @@
-# Project Rules — Summon Tower (ProjectGM)
+# Project Rules — Eldervane / เอลเดอร์เวย์น (ProjectGM)
 
 > **Status: CANONICAL** · approved by the user on 2026-10-16 (after review). Change only with the user's approval.
 > It applies to **every** agent: Claude, Codex and future agents.
 
 ## 1. Project overview
 
-Summon Tower is a gacha, team-building and auto-battle game in the style of TFT.
+**Official game name (user decision, 2026-10-23): Eldervane / เอลเดอร์เวย์น.** Use `Eldervane` in English and `เอลเดอร์เวย์น` in Thai. This replaces the former display name `Summon Tower`. `ProjectGM` remains the technical project/repository name.
+
+Eldervane is a gacha, team-building and auto-battle game in the style of TFT.
 
 - **Board:** horizontal, 5 rows × 16 columns. The top 2 rows are scenery; units stand on the 3 bottom lanes.
 - **Zones:** our zone is columns 0–5, the neutral zone is 6–9 (no placement), the enemy zone is 10–15.

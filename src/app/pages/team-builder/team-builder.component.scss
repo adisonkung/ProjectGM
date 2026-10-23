@@ -1,10 +1,10 @@
 :host { display: block; position: relative; isolation: isolate; }
-:host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, #070e201a 5%, #070e201a 40%, #050c1b99), url('/ui/formation-open-court.png') center / cover; }
+:host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, #0e19141a 5%, #0e19141a 40%, #0b151099), url('/ui/formation-open-court.png') center / cover; }
 .team { display: grid; gap: 12px; max-width: 1480px; margin-inline: auto; }
 .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-shadow: 0 2px 8px #000; }
 .eyebrow { font: 500 9px var(--title); letter-spacing: .3em; color: #d6bd88; }
 .gm-title { font-size: clamp(27px, 2.6vw, 39px); color: #ffe2a0; margin: 0; }
-.gm-sub { color: #e0d6e8; margin: 0; font-size: 12px; }
-.head .gm-btn { background: #0b1525b3; border-color: #b89b5d80; border-radius: 7px; font-size: 12px; padding: 8px 12px; }
+.gm-sub { color: #dee5d9; margin: 0; font-size: 12px; }
+.head .gm-btn { background: #111f19b3; border-color: #b89b5d80; border-radius: 7px; font-size: 12px; padding: 8px 12px; }
 .presets { width: min(590px, 100%); min-width: 0; }
 @media (max-width: 720px) { .team { gap: 10px; } .presets { width: 100%; } .head .gm-btn { font-size: 11px; gap: 6px; padding: 7px 9px; } }

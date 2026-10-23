@@ -1,27 +1,9 @@
+<a class="skip-link" href="#game-content">ข้ามไปเนื้อหา</a>
 <div class="app" [class.bare]="bare()" [class.fight]="fight()" [class.immersive]="immersive()" [class.fantasy]="fantasy()" [class.collection]="collection()">
   @if (!bare()) {
     <header class="bar">
-      <a class="brand" routerLink="/home" aria-label="Summon Tower — กลับเกาะ">
-        <span class="crest-wrap">
-          <svg class="crest" viewBox="0 0 48 48" aria-hidden="true">
-            <defs>
-              <linearGradient id="crestGold" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#fff1c2" /><stop offset=".45" stop-color="#e2bf6d" /><stop offset="1" stop-color="#9a6f2c" />
-              </linearGradient>
-              <radialGradient id="crestCore" cx=".5" cy=".45" r=".5">
-                <stop offset="0" stop-color="#c9adff" /><stop offset=".55" stop-color="#6b3fd6" /><stop offset="1" stop-color="#1a1030" />
-              </radialGradient>
-            </defs>
-            <path d="M24 2l18 8v12c0 11-7.6 19.6-18 24C13.6 41.6 6 33 6 22V10z" fill="#120d20" stroke="url(#crestGold)" stroke-width="2" />
-            <path d="M17 36V20l-2-2v-5h3v2h2v-2h8v2h2v-2h3v5l-2 2v16z" fill="url(#crestCore)" stroke="url(#crestGold)" stroke-width="1.2" stroke-linejoin="round" />
-            <path d="M22 36v-5a2 2 0 0 1 4 0v5" fill="#0b0716" stroke="url(#crestGold)" stroke-width="1" />
-            <circle cx="24" cy="24" r="1.8" fill="#f6dfa0" />
-          </svg>
-        </span>
-        <span class="word">
-          <b>Summon Tower</b>
-          <small>{{ fantasy() ? 'KEEPERS OF THE SKY' : account.islandName() || 'Arcane Ascent' }}</small>
-        </span>
+      <a class="brand" routerLink="/home" aria-label="Eldervane — กลับเกาะ">
+        <img class="brand-logo" src="/ui/branding/eldervane-wordmark.webp" alt="Eldervane" width="900" height="315" decoding="async" fetchpriority="high" />
       </a>
 
       <nav class="menu" aria-label="เมนูหลัก">
@@ -29,7 +11,7 @@
           <a [routerLink]="n.path" [attr.title]="n.label" [class.on]="active() === n.path" [attr.aria-current]="active() === n.path ? 'page' : null">
             <span class="glyph"><app-icon [name]="n.icon" [size]="20" /></span>
             <span class="lbl">{{ n.label }}</span>
-            @if (n.caption) { <small class="nav-caption">{{ n.caption }}</small> }
+            @if (n.caption) { <small class="nav-caption" aria-hidden="true">{{ n.caption }}</small> }
           </a>
         }
       </nav>
@@ -44,5 +26,5 @@
       </div>
     </header>
   }
-  <main><router-outlet /></main>
+  <main id="game-content" tabindex="-1"><router-outlet /></main>
 </div>

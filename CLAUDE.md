@@ -1,4 +1,4 @@
-# ProjectGM — Summon Tower
+# Eldervane / เอลเดอร์เวย์น — ProjectGM
 
 > **Status of the shared rule set: CANONICAL** — ผู้ใช้อนุมัติ 2026-10-16 · กฎร่วมกับ Codex อยู่ใน `AGENTS.md` + `docs/*` (แก้กฎได้เมื่อผู้ใช้อนุมัติเท่านั้น)
 >
@@ -436,3 +436,23 @@ User requested a more premium treatment for the same tower/dungeon work. Continu
 ### Publication and merge authorized — 2026-10-20
 
 The user explicitly instructed “Push merge เลย” after reviewing the premium adventure changes. This authorizes publishing the complete pending formation/tower/dungeon source, generated backgrounds and task documentation to public `adisonkung/ProjectGM`, and merging `wip/codex-adventure-ui` into master. Supersedes local-only/no-new-merge statements above for this completed task. Final product at `3e20daa` passed app/spec typechecks,742/742 Karma,production build and native browser checks; only this authorization note changes afterwards. CLI push was rejected for runtime identity `webuilddeveloper`; use the connected owner account. Verify the remote task and merged master trees against finished local HEAD. Retain existing task branches; no new canonical-local synchronization claim.
+
+## Jade Court UI (2026-10-23, Codex)
+
+User requested modern, readable, luxurious game UI and smooth interactions without the violet-black theme. `wip/codex-jade-court-ui` from fresh `origin/master`1eeba94 adds an ivory/jade/brass shell, six-destination continuity on hero/account detail, ivory Home/collection folios, shared jade controls across menu pages and larger phone equipment labels. Hero collection adds live roster/team/development counts and composable Thai-name/hero-ID search with resettable empty states. Shared CSS provides short press/page/dialog transitions, progressive native-dialog exit and reduced-motion support without new loops or changes to full-screen summon choreography. Original scene/hero art, combat/sprite timing, saves, costs, odds and unlocks are unchanged. App/spec checks pass; baseline full Karma805/805 plus updated shell/page10/10; production build passes with existing style/Pixi warnings; native browser40 menu route-size combinations plus battle prep/start at3 sizes and search/dialog/cancel/reduced-motion checks pass without overflow, page errors or missing local assets. Details: `docs/JADE_COURT_UI.md`. No master merge or new canonical-local synchronization claim.
+
+## Official game name — Eldervane / เอลเดอร์เวย์น (2026-10-23, user decision)
+
+English: **Eldervane**; Thai: **เอลเดอร์เวย์น**. Replaces the display name Summon Tower. Canonical product identity is recorded in `docs/PROJECT_RULES.md` §1 and README. Header/welcome, browser and route titles, invalid-save copy and downloaded save filenames now use the new name. `ProjectGM`, repository/package identity, local-storage keys, `SAVE_APP_ID = 'summon-tower'`, envelope format and `ST1Z.` transfer prefix remain unchanged for existing saves. Historical feature notes can retain the old name as history. Branch `feature/eldervane-game-name` is stacked on the completed local Jade Court UI commit3056e38; publication remains pending the user's explicit approval.
+
+Naming validation: app/spec typechecks, full Karma807/807 and native390px welcome/shell/route-title check pass.
+
+## Eldervane logo integration (2026-10-23, Codex)
+
+User selected a supplied blackened-steel/gold/ice-blue wordmark with a floating tower behind the right half, then authorized refinement and in-game installation. Full and compact transparent generated PNG masters + WebP delivery assets live in `public/ui/branding/`. Full replaces welcome's generic island SVG; compact replaces shell crest/text and summon scene's stale SUMMON TOWER heading. Semantic h1, accessible Home link and responsive complete-wordmark display are retained. Compact WebP900×315≈85KiB; full1774×887≈449KiB; masters are unchanged. No gameplay, timing or save changes. Branch `feature/eldervane-logo` continues local UI/name commits3056e38/e19e6ad. User confirms Cloudflare is connected to `adisonkung/ProjectGM` branch `master`; publication/merge approval must be resolved before claiming a live update. Reference/assets/placement: `docs/BRANDING.md`.
+
+Logo validation: app/spec checks, Karma807/807 and production build pass. Production-browser10 responsive logo cases plus Home-link and summon-logo checks pass with no page errors/overlap/overflow. Welcome's360px form intrinsic-width issue is fixed with minmax(0,1fr) tracks. Public publication/master merge remains a separate final approval step; live deployment has not been claimed.
+
+## UI, name and logo publication authorized — 2026-10-23
+
+The user answered “อนุญาต” to the explicit request to publish the UI, game-name and logo source/images/documentation to public `adisonkung/ProjectGM` and merge into `master` for the connected Cloudflare Worker. This authorizes the complete reviewed local stack3056e38,e19e6ad,6001d53 and supersedes earlier pending-approval statements for those changes. Source is complete: app/spec checks,Karma807/807,production build and native responsive/UI/logo checks pass. Runtime CLI identity cannot push; use the connected repository owner. Verify published and local trees before merge; retain task branches. Merge/deployment status must be queried from GitHub/Cloudflare and must not be inferred from this authorization note. No new canonical-local synchronization claim.

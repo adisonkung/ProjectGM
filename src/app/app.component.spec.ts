@@ -14,7 +14,7 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }, { path: 'gacha', component: NavigationTestPage }, { path: 'tower', component: NavigationTestPage }, { path: 'dungeons/:type', component: NavigationTestPage }])],
+      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }, { path: 'heroes/:uid', component: NavigationTestPage }, { path: 'account', component: NavigationTestPage }, { path: 'gacha', component: NavigationTestPage }, { path: 'tower', component: NavigationTestPage }, { path: 'dungeons/:type', component: NavigationTestPage }])],
     }).compileComponents();
   });
 
@@ -62,6 +62,17 @@ describe('AppComponent', () => {
       expect(fixture.componentInstance.fantasy()).toBeTrue();
       expect(fixture.componentInstance.immersive()).toBeFalse();
       expect(fixture.nativeElement.querySelector('nav a[aria-current="page"]').getAttribute('href')).toBe('/tower');
+    }
+  });
+
+  it('retains the six destinations and scrolling when opening a hero or account', async () => {
+    const fixture = TestBed.createComponent(AppComponent); fixture.detectChanges();
+    for (const route of ['/heroes/1', '/account']) {
+      await TestBed.inject(Router).navigateByUrl(route); fixture.detectChanges();
+      expect(fixture.componentInstance.collection()).toBeTrue();
+      expect(fixture.componentInstance.immersive()).toBeFalse();
+      expect(fixture.nativeElement.querySelectorAll('nav.menu a').length).toBe(6);
+      expect(fixture.componentInstance.active()).toBe(route.startsWith('/heroes') ? '/heroes' : null);
     }
   });
 

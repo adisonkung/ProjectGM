@@ -30,7 +30,7 @@ export class AccountService {
 
   fileName(): string {
     const n = (this.islandName() || 'island').replace(/[^\p{L}\p{M}\p{N}_-]+/gu, '_');
-    return `summon-tower_${n}_${new Date().toISOString().slice(0, 10)}.json`;
+    return `eldervane_${n}_${new Date().toISOString().slice(0, 10)}.json`;
   }
 
   decode(text: string): Promise<DecodeResult> {
