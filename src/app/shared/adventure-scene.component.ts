@@ -20,8 +20,8 @@ export class AdventureSceneComponent {
   private readonly document = inject(DOCUMENT);
   readonly paused = signal(this.document.hidden);
   readonly backgrounds: Record<string, string> = {
-    tower: '/ui/adventure-tower.png', training: '/ui/formation-open-court.png',
-    ascension: '/ui/heroes-hall.png', hunt: '/ui/adventure-vault.png', trial: '/ui/summon-sanctum.jpg',
+    tower: '/ui/eldervane/citadel.webp', training: '/ui/eldervane/sanctum.webp',
+    ascension: '/ui/eldervane/sanctum.webp', hunt: '/ui/adventure-vault.png', trial: '/ui/eldervane/sanctum.webp',
   };
   readonly motes = Array.from({ length: 16 }, (_, i) => ({ x: (i * 37 + 9) % 100, y: (i * 23 + 18) % 100, delay: -i * 2.7, duration: 12 + i % 7 }));
   @HostListener('document:visibilitychange') visibilityChanged(): void { this.paused.set(this.document.hidden); }

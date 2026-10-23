@@ -24,7 +24,7 @@ WebP encodes use quality92,alpha quality100; compact is scaled from its PNG mast
 ## Placement
 
 - `app.component`: compact logo replaces the generic tower crest and text brand. The link retains its accessible Home label. Centering and vertical overflow handling hide transparent top/bottom padding while preserving the complete horizontal wordmark at phone/tablet/desktop sizes.
-- `welcome.component`: full logo on an ivory masthead replaces the generic floating-island SVG. The page retains a semantic, visually hidden Eldervane h1; nearby Thai welcome copy gives the localized name.
+- `welcome.component`: full logo on an transparent masthead over the citadel environment replaces the generic floating-island SVG. The page retains a semantic, visually hidden Eldervane h1; nearby Thai welcome copy gives the localized name.
 - `summon-scene.component`: compact logo replaces the stale SUMMON TOWER label. Only the heading is changed; summon timing, cards, actions and probabilities are unchanged.
 
 No gameplay, save format, hero art, economic values or battle/sprite timing changes. No new production dependencies, animation loops or changes to build budgets.

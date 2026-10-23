@@ -1,6 +1,8 @@
 <section class="island">
-  <div class="stage" #stage [class.entering]="enteringTower()">
-    @if (isCity()) {
+  <div class="stage" #stage [class.entering]="enteringTower()" [class.panorama]="panorama()">
+    @if (panorama()) {
+      <div class="citadel-vista" aria-hidden="true"></div>
+    } @else if (isCity()) {
       <app-sky-city [buildings]="display()" [usable]="usableRuins()" [heroes]="heroViews()" [towerStage]="towerStage()"
                     [focus]="focus()" [fxBuilding]="fxBuilding()" [selected]="selectedBuilding()" [enteringTower]="enteringTower()"
                     (buildingTap)="tapBuilding($event)" (heroTap)="tapHero($event)" />
@@ -10,10 +12,10 @@
                         (buildingTap)="tapBuilding($event)" (heroTap)="tapHero($event)" />
     }
 
-    <!-- Lobby chrome uses real progression and party data; the original island remains interactive. -->
+    <!-- Real progression and party data; the original interactive maps are available in the HUD. -->
     <aside class="chapter-panel gilded" [class.expanded]="progressExpanded()" aria-label="อาณาจักรและความคืบหน้า">
       <header class="chapter-art">
-        <span class="eyebrow">YOUR KINGDOM</span>
+        <span class="eyebrow">ELDERVANE · YOUR KINGDOM</span>
         <h1>{{ island().name }}</h1>
         <span class="realm-stage">{{ stageName() }}</span>
         <button type="button" class="progress-toggle" (click)="progressExpanded.set(!progressExpanded())"
@@ -41,6 +43,7 @@
       </div>
     </aside>
     <div class="hud tr">
+      <button type="button" class="note map-toggle" (click)="panorama.set(!panorama())" [attr.aria-pressed]="!panorama()" [attr.aria-label]="panorama() ? 'เปิดแผนที่สิ่งก่อสร้าง' : 'กลับหน้าล็อบบี้'" [title]="panorama() ? 'แผนที่สิ่งก่อสร้าง' : 'หน้าล็อบบี้'"><app-icon name="home" [size]="19" /><span>{{ panorama() ? 'แผนที่' : 'ล็อบบี้' }}</span></button>
       @if (canFullscreen) {
         <button type="button" class="note fs-btn" (click)="toggleFullscreen()" [attr.aria-label]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'" [title]="isFull() ? 'ออกจากเต็มจอ' : 'เต็มจอ'">{{ isFull() ? '🗗' : '⛶' }}</button>
       }
@@ -49,9 +52,16 @@
         <a class="note" routerLink="/heroes" [attr.aria-label]="readyCount() + ' ฮีโร่พร้อมอัป'"><app-icon name="heroes" [size]="15" /><em>{{ readyCount() }}</em></a>
       }
     </div>
+    @if (panorama()) {
+      <nav class="building-access" aria-label="สิ่งก่อสร้างในอาณาจักร">
+        @for (b of buildings; track b.id) {
+          <button type="button" (click)="tapBuilding(b.id)" [disabled]="!!current()" [attr.title]="b.name" [attr.aria-label]="b.name"><app-icon [name]="b.id === 'tower' ? 'tower' : b.id === 'forge' ? 'flame' : 'home'" [size]="19" /><span>{{ b.name }}</span></button>
+        }
+      </nav>
+    }
     <div class="lobby-bottom">
       <section class="party-panel gilded" aria-label="ทีมปัจจุบัน">
-        <header><h2>MY PARTY</h2><span class="party-state" [class.ready]="party().length === 5">{{ party().length === 5 ? 'พร้อมออกผจญภัย' : 'ทีม ' + party().length + ' / 5' }}</span><span class="party-power"><app-icon name="armory" [size]="17" /><small>พลังรบ</small><b>{{ partyPower() }}</b></span></header>
+        <header><h2>ทีมของคุณ</h2><span class="party-state" [class.ready]="party().length === 5">{{ party().length }} / 5</span><span class="party-power"><app-icon name="armory" [size]="17" /><small>พลังรบ</small><b>{{ partyPower() }}</b></span></header>
         <div class="party-lineup">
           @for (i of partySlots; track i) {
             @if (party()[i]; as h) {
@@ -82,8 +92,8 @@
         <button type="button" class="cta" (click)="enterTower()" [disabled]="enteringTower()" [attr.aria-busy]="enteringTower()">
           <svg class="cta-light" viewBox="0 0 400 112" preserveAspectRatio="none" aria-hidden="true"><rect x="2" y="2" width="396" height="108" rx="5" pathLength="100" /></svg>
           <span class="cta-emblem" aria-hidden="true"><app-icon name="tower" [size]="35" /></span>
-          <span class="cta-title">ENTER TOWER <app-icon name="arrow" [size]="25" /></span>
-          <span class="cta-thai" aria-live="polite">{{ enteringTower() ? 'กำลังเปิดประตู…' : 'เข้าสู่หอคอย' }}</span>
+          <span class="cta-title" aria-live="polite">{{ enteringTower() ? 'กำลังเปิดประตู…' : 'เข้าสู่หอคอย' }} <app-icon name="arrow" [size]="25" /></span>
+          <span class="cta-thai">TOWER OF TRIALS</span>
           <span class="cta-floor"><app-icon name="tower" [size]="15" /><span class="floor-caption">{{ cleared() >= totalFloors ? 'ท้าซ้ำชั้น' : 'ชั้นถัดไป' }}</span><b>{{ nextFloor() }}</b><i>/ {{ totalFloors }}</i></span>
         </button>
       }

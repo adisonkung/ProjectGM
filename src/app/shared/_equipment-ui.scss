@@ -1,23 +1,24 @@
+@use './fantasy-ui' as fantasy;
 @mixin scene($image) {
   :host { display: block; position: relative; isolation: isolate; }
-  :host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(#0c171235, #0c171270), url($image) center / cover; }
+  :host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(#0f121835, #0f121870), url($image) center / cover; }
   .head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; text-shadow: 0 2px 8px #000; }
   .eyebrow { display: block; font: 600 10px var(--title); letter-spacing: .2em; color: #e0c38b; }
   .gm-title { color: #ffe3a0; font-size: clamp(27px, 2.8vw, 39px); display: flex; align-items: center; gap: 12px; }
-  .gm-sub { color: #e0e6db; }
-  .equipment-panel { position: relative; padding: 18px; min-width: 0; border: 1px solid #bd9d60; border-radius: 10px; background: linear-gradient(140deg, #15251eef, #0c1611f2); box-shadow: 0 8px 22px #0006, inset 0 0 0 3px #c8a9691a;
+  .gm-sub { color: #e5e2dc; }
+  .equipment-panel { @include fantasy.surface; position: relative; padding: 18px; min-width: 0; border: 1px solid #bd9d60; border-radius: 3px; background: var(--panel-bg); box-shadow: inset 0 1px #fff4d412, 0 12px 32px #11182133;
   }
-  .gm-btn { border-color: #bda46a80; color: #f4dca5; min-height: 36px; }
-  .gm-btn.primary { background: linear-gradient(#ffe8ac, #c79849); color: #291a0b; box-shadow: inset 0 0 0 2px #f9db8a3a, 0 2px 14px #dca73b40; }
-  button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid #ffe4ab; outline-offset: 3px; }
+  .gm-btn { @include fantasy.angled; border-color: #bda46a80; color: #f4dca5; min-height: 44px; }
+  .gm-btn.primary { background: linear-gradient(115deg,#762238,#a82c46); color: #fff0dc; box-shadow: inset 0 1px #ffc1b52b; }
+  button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid #ffe4ab; outline-offset: -4px; }
   button:disabled { cursor: not-allowed; opacity: .45; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .nm { color: #f4dfb5; overflow-wrap: anywhere; }
-  small, .note { color: #c3cfba; font-size: 12px; }
+  small, .note { color: #cec7bb; font-size: 12px; }
   .note { margin: 0; }
   .affix { color: #c7e3d5; font-size: 12px; line-height: 1.6; }
   .msg { margin: 0; padding: 10px 14px; background: #132835ef; border: 1px solid #86bdad; border-radius: 8px; color: #d1eee1; font-size: 13px; &.bad { border-color: #e58e8e; color: #ffb8ae; background: #351521e8; } }
-  .r, .rar { --rc: #9ba6b5; &.uncommon { --rc: #7dc998; } &.rare { --rc: #88c7ff; } &.elite { --rc: #cb9cf5; } &.epic { --rc: #f2c879; } }
+  .r, .rar { --rc: #9ba6b5; &.uncommon { --rc: #7dc998; } &.rare { --rc: #88c7ff; } &.elite { --rc: #dba6b6; } &.epic { --rc: #f2c879; } }
   .miss { color: #ffafa3 !important; }
   @media (max-width: 720px) { .equipment-panel { padding: 14px; } .head { gap: 10px; } .gm-sub { font-size: 12px; } }
 }

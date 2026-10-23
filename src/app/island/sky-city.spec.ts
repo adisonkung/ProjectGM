@@ -94,6 +94,12 @@ describe('Sky City — map choice', () => {
     c.skipEvents();
     f.detectChanges();
     const el = f.nativeElement as HTMLElement;
+    expect(el.querySelector('.citadel-vista')).not.toBeNull();
+    expect(el.querySelectorAll('.building-access button').length).toBe(ISLAND_BUILDINGS.length);
+    const beforeMap = JSON.stringify(save.state());
+    el.querySelector<HTMLButtonElement>('.map-toggle')!.click();
+    f.detectChanges();
+    expect(JSON.stringify(save.state())).toBe(beforeMap);
     expect(el.querySelector('app-sky-city')).not.toBeNull();
     expect(el.querySelector('app-island-scene')).toBeNull();
     expect(el.querySelector('img.base[src*="sky_city/base"]')).not.toBeNull();
@@ -108,6 +114,10 @@ describe('Sky City — map choice', () => {
     c.phase.set('reveal');
     f.detectChanges();
     expect(el.querySelector('img.landmark.rise[src*="training_ground"]')).not.toBeNull();
+    el.querySelector<HTMLButtonElement>('.map-toggle')!.click();
+    f.detectChanges();
+    expect(el.querySelector('.citadel-vista')).not.toBeNull();
+    expect(el.querySelector('app-sky-city')).toBeNull();
     f.destroy();
   });
 });
