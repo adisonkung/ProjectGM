@@ -6,6 +6,10 @@ The technical project/repository name remains `ProjectGM`; older documents use t
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.13.
 
+## UI design references
+
+ภาพออกแบบ Eldervane 18 แผ่นและแนวทางสำหรับ AI อยู่ที่ [docs/design/eldervane-ui/README.md](docs/design/eldervane-ui/README.md) เปิดภาพที่เกี่ยวข้องก่อนปรับหน้าจอ ตัวเลขในภาพเป็นตัวอย่าง ไม่ใช่ข้อมูลเกมจริง
+
 ## Development server
 
 To start a local development server, run:
