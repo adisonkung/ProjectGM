@@ -76,7 +76,7 @@
           @if (x.wearer) { <p class="note">สวมอยู่: {{ x.wearer }}</p> }
           <div class="upgrade-comparison"><div><small>ปัจจุบัน +{{ it.upgradeLevel }}</small>@for (l of lines(it); track $index) { <b>{{ l }}</b> }</div><app-icon name="arrow" [size]="24" /><div><small>{{ cost(it) ? 'หลังตีบวก +' + (it.upgradeLevel + 1) : 'ระดับสูงสุด' }}</small>@for (l of upgradePreview(it); track $index) { <b>{{ l }}</b> }</div></div>
           @if (cost(it); as c) {
-            <div class="enhancement-cost"><span [class.miss]="ore() < c.ore">Enhancement Ore <b>{{ ore() }} / {{ c.ore }}</b></span><span [class.miss]="gold() < c.gold">ทอง <b>{{ gold() }} / {{ c.gold }}</b></span></div>
+            <div class="enhancement-cost"><span [class.miss]="ore() < c.ore"><app-icon name="enhancement_ore" [size]="26" />Enhancement Ore <b>{{ ore() }} / {{ c.ore }}</b></span><span [class.miss]="gold() < c.gold"><app-icon name="coin" [size]="26" />ทอง <b>{{ gold() }} / {{ c.gold }}</b></span></div>
             <button type="button" class="gm-btn primary big citadel-surface citadel-control" (click)="upgrade(it)" [disabled]="ore() < c.ore || gold() < c.gold"><app-citadel-frame shape="hex" [cut]="16" [crimson]="true" [lacquer]="true" /><app-icon name="enhance" [size]="24" />ตีบวก +{{ it.upgradeLevel + 1 }}</button>
           } @else { <p class="gm-chip gold">ตีบวกถึงระดับสูงสุดแล้ว</p> }
         } @else { <p class="preview-empty"><app-icon name="armory" [size]="50" />ยังไม่มีอุปกรณ์ให้ตีบวก<a class="gm-btn citadel-surface citadel-control" routerLink="/dungeons/hunt"><app-citadel-frame shape="hex" [cut]="14" />ไป Equipment Hunt</a></p> }

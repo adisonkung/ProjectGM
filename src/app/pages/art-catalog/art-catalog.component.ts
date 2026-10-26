@@ -30,5 +30,5 @@ export class ArtCatalogComponent {
   readonly visible = computed(() => this.all.filter(a => this.group() === 'all' || a.group === this.group()));
   readonly families = [{ id: 'sword', label: 'ดาบ', base: 'heavy_blade' }, { id: 'armor', label: 'เกราะ', base: 'guard_armor' }, { id: 'necklace', label: 'สร้อย', base: 'trinket' }, { id: 'ring', label: 'แหวน', base: 'trinket' }] as const;
   readonly tiers = ['COMMON', 'UNCOMMON', 'RARE', 'ELITE', 'EPIC'] as const;
-  readonly statusLabel: Record<string, string> = { active: 'เชื่อมใช้งานแล้ว', example_paused: 'ตัวอย่างไป๋หลง · พักรอเปลี่ยน Portrait', concept_only: 'แบบร่าง · ยังไม่ใช่ไอเทมใช้งาน', superseded: 'แบบเก่า · ถูกแทนด้วยดาบแล้ว' };
+  readonly statusLabel: Record<string, string> = { active: 'เชื่อมใช้งานแล้ว', example_paused: 'ตัวอย่างไป๋หลง · พักรอเปลี่ยน Portrait', concept_only: 'แบบร่าง · ยังไม่ใช่ไอเทมใช้งาน', superseded: 'แบบเก่า · มีชุดใหม่แทนแล้ว' };
 }

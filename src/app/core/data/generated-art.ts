@@ -841,7 +841,7 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "label": "palace-forge",
     "group": "environment",
     "url": "/ui/generated/equipment/palace-forge.webp",
-    "status": "active"
+    "status": "superseded"
   },
   {
     "id": "concepts/equipment-tier-board",

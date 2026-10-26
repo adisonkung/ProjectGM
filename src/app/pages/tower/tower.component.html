@@ -13,7 +13,7 @@
         <div class="floor-identity"><div class="floor-number"><small>FLOOR</small><b>{{ f.floor < 10 ? '0' + f.floor : f.floor }}</b></div><div class="floor-name"><h2>{{ f.name }}</h2><p>Lv {{ f.band.levels[0] }}–{{ f.band.levels[1] }} <span>· {{ roleLabel[f.band.role] }}</span></p></div></div>
         <div class="reward-strip">
           <div class="goal"><app-icon name="sword" [size]="23" /><span><small>{{ f.mode === 'survive' ? 'เอาตัวรอด' : 'กำจัดศัตรูทุกเวฟ' }}</small><b>{{ f.timeLimit }} <em>วินาที</em></b></span></div>
-          <div><span class="exp-crest">EXP</span><span><small>EXP ที่ได้รับ</small><b>{{ f.reward.clear.heroExp }}</b></span></div>
+          <div><app-icon name="exp" [size]="30" /><span><small>EXP ที่ได้รับ</small><b>{{ f.reward.clear.heroExp }}</b></span></div>
           @if (f.floor > cleared()) {
             <div class="first-exp"><app-icon name="star" [size]="25" /><span><small>ผ่านครั้งแรก</small><b>+{{ f.reward.firstClear.heroExp }} <em>EXP</em></b></span></div>
             <div class="first-clear-items">@for (it of f.reward.firstClear.items ?? []; track it.itemId) { <div><app-icon [name]="it.itemId.startsWith('bt_') ? 'crystal' : it.itemId" [size]="25" /><span><small>{{ itemName(it.itemId) }}</small><strong>×{{ it.count }}</strong></span></div> }</div>

@@ -1,0 +1,51 @@
+{
+  "errors": [],
+  "missing": [],
+  "screenshots": [
+    "materials-desktop",
+    "materials-mobile",
+    "training-desktop",
+    "training-mobile",
+    "trial-desktop",
+    "trial-mobile",
+    "hunt-desktop",
+    "hunt-mobile",
+    "ascension-desktop",
+    "ascension-mobile",
+    "tower-exp-desktop",
+    "enhancement-cost-desktop",
+    "pause-desktop"
+  ],
+  "checks": [
+    "15 actual materials with15 unique generated URLs, live save counts incl3/7/9tome fragments and0stock",
+    "Desktop1440x1000/mobile390x844: no horizontal overflow; collapse/reopen stock works",
+    "Training/trial/hunt reward cards use generated art; ascension retains neutral BT fallback as requested",
+    "Tower EXP, enhancement ore/gold and large pause badge use generated art",
+    "Viewing routes does not change save",
+    "All119catalog entries decode;97active/12superseded/6paused/4concept"
+  ],
+  "materialUrls": [
+    "/ui/generated/items/materials/enhancement_ore.webp",
+    "/ui/generated/items/materials/equip_frag_basic.webp",
+    "/ui/generated/items/materials/equip_frag_rare.webp",
+    "/ui/generated/items/materials/equip_frag_elite.webp",
+    "/ui/generated/items/materials/equip_frag_epic.webp",
+    "/ui/generated/items/materials/exp_potion_s.webp",
+    "/ui/generated/items/materials/exp_potion_m.webp",
+    "/ui/generated/items/materials/exp_potion_l.webp",
+    "/ui/generated/items/materials/skill_tome_1.webp",
+    "/ui/generated/items/materials/skill_tome_2.webp",
+    "/ui/generated/items/materials/skill_tome_3.webp",
+    "/ui/generated/items/materials/skill_tome_frag_1.webp",
+    "/ui/generated/items/materials/skill_tome_frag_2.webp",
+    "/ui/generated/items/materials/skill_tome_frag_3.webp",
+    "/ui/generated/items/materials/universal_memory.webp"
+  ],
+  "ascensionFallbacks": 3,
+  "catalog": {
+    "active": 97,
+    "example_paused": 6,
+    "concept_only": 4,
+    "superseded": 12
+  }
+}
