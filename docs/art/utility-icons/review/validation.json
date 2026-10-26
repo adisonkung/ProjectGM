@@ -1,0 +1,22 @@
+{
+  "errors": [],
+  "missing": [],
+  "screens": [
+    "symbols-desktop",
+    "symbols-mobile",
+    "account-desktop",
+    "account-mobile",
+    "home-tools-desktop",
+    "home-themes-desktop",
+    "hero-growth-desktop",
+    "hero-skills-desktop"
+  ],
+  "checks": [
+    "18 unique UI symbol cells at72/28/18px",
+    "Account export/import/check and Home theme controls use atlas art",
+    "Hero growth/crystal and skill/tome UI retain real data",
+    "Approved fighter class artwork remains existing full image",
+    "Desktop1440x1000 and mobile390x844 no overflow or missing image requests",
+    "Browsing/cancelling dialogs does not change save"
+  ]
+}

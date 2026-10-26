@@ -93,3 +93,5 @@
 }
 @media(max-width:650px){:host .forge .stage-name{bottom:9px;}:host .forge .slot-types .gm-btn{font-size:15px;}}
 @media(max-width:650px){:host .forge .stage-item{width:76%;left:12%;}}
+
+:host .forge .affix{display:flex;align-items:center;gap:12px;margin:12px 0;padding:10px 12px;color:#efce86;background:#0d171ecc;border:1px solid #92723b66;line-height:1.65;font-size:13px;overflow-wrap:anywhere;}

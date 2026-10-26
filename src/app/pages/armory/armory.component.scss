@@ -148,3 +148,5 @@
 }
 
 .inspect-art { width: min(240px,90%); margin: 6px auto 14px; aspect-ratio:1; background:radial-gradient(ellipse,#34465555,transparent 70%); }
+
+:host .affix{display:flex;align-items:center;gap:12px;line-height:1.65;overflow-wrap:anywhere;}

@@ -207,8 +207,8 @@ app-projectile.px { visibility: hidden; }
 
 /* ---- Stage 4–10 mock mode: statuses, labels, zones, states */
 .sts {
-  position: absolute; left: 50%; top: -34%; transform: translateX(-50%); display: flex; gap: 1px;
-  font-size: 10px; line-height: 1; pointer-events: none; filter: drop-shadow(0 1px 1px #000);
+  position: absolute; left: 50%; top: -34%; transform: translateX(-50%); display: flex; justify-content:center; flex-wrap:wrap; gap: 2px; width:max-content; max-width:94px;
+  line-height: 1; pointer-events: auto;
 }
 .mock-label {
   position: absolute; left: 50%; bottom: -12%; transform: translateX(-50%); white-space: nowrap;

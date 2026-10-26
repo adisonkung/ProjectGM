@@ -1,3 +1,5 @@
+import { UI_SYMBOL_ART } from '../core/data/ui-symbol-art';
+import { UiSymbolComponent } from './ui-symbol.component';
 import { GENERATED_ICONS } from '../core/data/generated-art';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
@@ -39,14 +41,16 @@ export const ICON_PATHS: Record<string, string> = {
 
 /** inline SVG glyph: `<app-icon name="tower" />` — size follows font-size (1em) unless `size` is set */
 @Component({
+  imports: [UiSymbolComponent],
   selector: 'app-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `@if (art(); as src) { <img [src]="src" [style.width]="size() === null ? '1em' : size() + 'px'" [style.height]="size() === null ? '1em' : size() + 'px'" alt="" aria-hidden="true" decoding="async" /> } @else { <svg viewBox="0 0 24 24" [attr.width]="size() ?? '1em'" [attr.height]="size() ?? '1em'" fill="none" stroke="currentColor"
+  template: `@if (art(); as src) { <img [src]="src" [style.width]="size() === null ? '1em' : size() + 'px'" [style.height]="size() === null ? '1em' : size() + 'px'" alt="" aria-hidden="true" decoding="async" /> } @else if (symbol()) { <app-ui-symbol [name]="name()" [size]="size()" /> } @else { <svg viewBox="0 0 24 24" [attr.width]="size() ?? '1em'" [attr.height]="size() ?? '1em'" fill="none" stroke="currentColor"
     [attr.stroke-width]="stroke()" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path [attr.d]="d()" /></svg> }`,
   styles: ['img { object-fit: contain; transform: scale(1.3); pointer-events: none; } :host { display: inline-flex; line-height: 0; flex: none; }'],
 })
 export class IconComponent {
   readonly name = input.required<string>();
+  readonly symbol = computed(() => UI_SYMBOL_ART[this.name()]);
   readonly art = computed(() => GENERATED_ICONS[this.name()]);
   readonly size = input<number | null>(null);
   readonly stroke = input(1.7);

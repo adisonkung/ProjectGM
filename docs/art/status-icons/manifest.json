@@ -1,0 +1,272 @@
+{
+  "date": "2026-10-26",
+  "count": 31,
+  "format": "Four transparent 3x3 atlases; unused cells remain empty; CSS displays complete cells without cropping",
+  "atlases": [
+    {
+      "id": "afflictions",
+      "path": "/ui/status/afflictions.webp",
+      "source": "/workspace/generated_images/exec-dd8524fc-36db-4efe-a149-5c84702ada7c.png",
+      "sourceSha256": "a1f93a6afbdc652a91aae0d05ce1da989b3793a9b8f5ec092cbbe4690d0e77b9",
+      "sha256": "88f4707ca93b5df4cefb66b9ade74517b3ffb0df7d2532bd46b5cd51c932a1a1",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "icons": [
+        {
+          "id": "curse_mark",
+          "label": "ตราคำสาป",
+          "design": "violet cursed skull with a small cracked forehead rune",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "blood_debt",
+          "label": "หนี้โลหิต",
+          "design": "deep crimson blood drop pierced by a silver hook",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "id": "blood_brand",
+          "label": "ตราโลหิต",
+          "design": "crimson angular three-point ritual brand, not a droplet",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "id": "sovereign_dominion",
+          "label": "อาณาจักรราชัน",
+          "design": "ruby royal crown above a narrow silver sword",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "id": "slow",
+          "label": "เชื่องช้า",
+          "design": "ice blue boot held by a tiny frost chain",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "id": "chill",
+          "label": "เย็นเยือก",
+          "design": "sharp cyan six-point ice crystal",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "id": "frost_fatigue",
+          "label": "อ่อนล้าจากน้ำแข็ง",
+          "design": "pale blue fractured icy hourglass",
+          "col": 0,
+          "row": 2
+        },
+        {
+          "id": "poison",
+          "label": "พิษ",
+          "design": "vivid emerald venom droplet with one tiny skull",
+          "col": 1,
+          "row": 2
+        }
+      ]
+    },
+    {
+      "id": "control",
+      "path": "/ui/status/control.webp",
+      "source": "/workspace/generated_images/exec-abcb3c08-f19b-4aeb-aab8-df2564481d17.png",
+      "sourceSha256": "2017e54fed61ba4d659a224807e101bc673a99f03f26854d4126df484224e583",
+      "sha256": "6bacf16dca82878ac88d0c2146c60ea978aeade61223c6c1243241d952f0aa18",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "icons": [
+        {
+          "id": "bleed",
+          "label": "เลือดไหล",
+          "design": "three red diagonal claw cuts with one suspended blood bead",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "corruption",
+          "label": "มลทิน",
+          "design": "acid chartreuse twisted thorn spiral with dark corrupt core",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "id": "root",
+          "label": "ตรึงราก",
+          "design": "bright green roots binding a silver boot",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "id": "stun",
+          "label": "มึนงง",
+          "design": "amber four-point impact star with small orbit arc",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "id": "untargetable",
+          "label": "ไม่ตกเป็นเป้า",
+          "design": "teal spectral silhouette fading into a broken circle",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "id": "boss_seal",
+          "label": "ผนึกบอส",
+          "design": "antique gold padlock with red central rune",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "id": "dark_fog",
+          "label": "หมอกมืด",
+          "design": "smoky indigo cloud with a silver crescent eye",
+          "col": 0,
+          "row": 2
+        },
+        {
+          "id": "soul_link",
+          "label": "สายใยวิญญาณ",
+          "design": "two luminous teal souls connected by silver chain",
+          "col": 1,
+          "row": 2
+        }
+      ]
+    },
+    {
+      "id": "wards",
+      "path": "/ui/status/wards.webp",
+      "source": "/workspace/generated_images/exec-03197a16-118b-4723-bad9-36cbad1f0bc8.png",
+      "sourceSha256": "cf94448bec53f80e645b3a9c5abf511e4607accd5af6763b3538cbdb9274be63",
+      "sha256": "8f40a495f6f19554a30934271eed46f7591556d8168e7d77e47d9f50075dc9ca",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "icons": [
+        {
+          "id": "broken",
+          "label": "เกราะแตก",
+          "design": "orange silver shield split diagonally into two pieces",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "healing_reduction",
+          "label": "ลดการรักษา",
+          "design": "rose heart slashed through by a muted red bar",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "id": "panther_frenzy",
+          "label": "คลั่งเสือดำ",
+          "design": "purple-black panther head with blazing yellow eyes",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "id": "ancient_rage",
+          "label": "โทสะโบราณ",
+          "design": "amber horned ancient face with burning eyes",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "id": "guardian_empowered",
+          "label": "ผู้พิทักษ์เสริมพลัง",
+          "design": "blood-red winged guardian crest with a radiant central gem",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "id": "ancient_protection",
+          "label": "คุ้มครองโบราณ",
+          "design": "emerald gold shield encircled by two old leaves",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "id": "guardian_enrage",
+          "label": "ผู้พิทักษ์คลั่ง",
+          "design": "red-orange flaming spiked helmet",
+          "col": 0,
+          "row": 2
+        },
+        {
+          "id": "stone_skin",
+          "label": "ผิวศิลา",
+          "design": "slate gray layered stone chest plate with small cyan cracks",
+          "col": 1,
+          "row": 2
+        }
+      ]
+    },
+    {
+      "id": "fury",
+      "path": "/ui/status/fury.webp",
+      "source": "/workspace/generated_images/exec-16ca5fa8-b2ec-4708-a407-7edaed80c22b.png",
+      "sourceSha256": "113e372622ba56cc60fcc0eb25f00a594c98b15acffbc8e8481cff2453ee8ed0",
+      "sha256": "a8aa02a5ba74c040f4d57692be383ed9cdee935aa9e58f0a45708bbd50de350d",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "icons": [
+        {
+          "id": "sentinel_fury",
+          "label": "โทสะผู้เฝ้าประตู",
+          "design": "burnt orange angular golem fist with amber cracks",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "pack_fury",
+          "label": "ฝูงหมาป่าคลั่ง",
+          "design": "two crimson wolf profiles facing outward",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "id": "lord_frenzy",
+          "label": "เจ้าแห่งฝูงคลั่ง",
+          "design": "silver wolf head in front of a pale blue full moon",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "id": "duel_enrage",
+          "label": "คลั่งประลอง",
+          "design": "two orange-red crossed dueling blades with small flame",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "id": "taunted",
+          "label": "ยั่วยุ",
+          "design": "bold amber exclamation point inside an open crimson challenge ring",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "id": "alpha_howl_buff",
+          "label": "เสียงหอนจ่าฝูง",
+          "design": "azure wolf howling into three silver sound arcs",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "id": "blood_rage",
+          "label": "คลั่งโลหิต",
+          "design": "ruby horned berserker mask in a red flame",
+          "col": 0,
+          "row": 2
+        }
+      ]
+    }
+  ]
+}

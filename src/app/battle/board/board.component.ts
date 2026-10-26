@@ -1,3 +1,4 @@
+import { StatusIconComponent } from '../../shared/status-icon.component';
 import { FxTrack } from '../../core/models/fx';
 import { FxAnchors } from '../render/fx-anchor';
 import { MockVisual } from '../../core/data/visuals';
@@ -178,7 +179,7 @@ export interface AnimState {
 
 @Component({
   selector: 'app-board',
-  imports: [UnitSpriteComponent, FxSpriteComponent, FieldComponent, ProjectileComponent, CastBarComponent, FocusMarkComponent],
+  imports: [StatusIconComponent, UnitSpriteComponent, FxSpriteComponent, FieldComponent, ProjectileComponent, CastBarComponent, FocusMarkComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
 })

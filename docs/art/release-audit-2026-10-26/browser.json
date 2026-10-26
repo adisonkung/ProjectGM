@@ -1,0 +1,637 @@
+{
+  "errors": [],
+  "missing": [],
+  "views": [
+    {
+      "label": "home-desktop",
+      "url": "http://127.0.0.1:4610/home",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 38,
+      "symbolCount": 5,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "heroes-desktop",
+      "url": "http://127.0.0.1:4610/heroes",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 45,
+      "symbolCount": 1,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "team-desktop",
+      "url": "http://127.0.0.1:4610/team",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 47,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "armory-desktop",
+      "url": "http://127.0.0.1:4610/armory",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 69,
+      "symbolCount": 4,
+      "affixCount": 1,
+      "statusCount": 0
+    },
+    {
+      "label": "forge-desktop",
+      "url": "http://127.0.0.1:4610/forge",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 35,
+      "symbolCount": 1,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "enhance-desktop",
+      "url": "http://127.0.0.1:4610/forge?tab=enhance",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 48,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "salvage-desktop",
+      "url": "http://127.0.0.1:4610/forge?tab=salvage",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 63,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "summon-desktop",
+      "url": "http://127.0.0.1:4610/gacha",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 26,
+      "symbolCount": 3,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "tower-desktop",
+      "url": "http://127.0.0.1:4610/tower",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 37,
+      "symbolCount": 5,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "training-desktop",
+      "url": "http://127.0.0.1:4610/dungeons/training",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 44,
+      "symbolCount": 2,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "ascension-desktop",
+      "url": "http://127.0.0.1:4610/dungeons/ascension",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 26,
+      "symbolCount": 12,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hunt-desktop",
+      "url": "http://127.0.0.1:4610/dungeons/hunt",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 69,
+      "symbolCount": 2,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "trial-desktop",
+      "url": "http://127.0.0.1:4610/dungeons/trial",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 54,
+      "symbolCount": 2,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "account-desktop",
+      "url": "http://127.0.0.1:4610/account",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 16,
+      "symbolCount": 5,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "lab-desktop",
+      "url": "http://127.0.0.1:4610/sprite-lab?hero=garrick&render=dom",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 11,
+      "symbolCount": 1,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-overview-desktop",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 39,
+      "symbolCount": 7,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-stats-desktop",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 36,
+      "symbolCount": 4,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-skills-desktop",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 39,
+      "symbolCount": 6,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-growth-desktop",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 32,
+      "symbolCount": 6,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-gear-desktop",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 36,
+      "symbolCount": 5,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "catalog-status-icons-desktop",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 8,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 108
+    },
+    {
+      "label": "catalog-ui-symbols-desktop",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 8,
+      "symbolCount": 54,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "catalog-affix-icons-desktop",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 8,
+      "symbolCount": 0,
+      "affixCount": 39,
+      "statusCount": 0
+    },
+    {
+      "label": "catalog-equipment-tiered-desktop",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 43,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "paused-examples-desktop",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 14,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "home-mobile",
+      "url": "http://127.0.0.1:4610/home",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 38,
+      "symbolCount": 5,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "heroes-mobile",
+      "url": "http://127.0.0.1:4610/heroes",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 45,
+      "symbolCount": 1,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "team-mobile",
+      "url": "http://127.0.0.1:4610/team",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 47,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "armory-mobile",
+      "url": "http://127.0.0.1:4610/armory",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 69,
+      "symbolCount": 4,
+      "affixCount": 1,
+      "statusCount": 0
+    },
+    {
+      "label": "forge-mobile",
+      "url": "http://127.0.0.1:4610/forge",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 35,
+      "symbolCount": 1,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "enhance-mobile",
+      "url": "http://127.0.0.1:4610/forge?tab=enhance",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 48,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "salvage-mobile",
+      "url": "http://127.0.0.1:4610/forge?tab=salvage",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 63,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "summon-mobile",
+      "url": "http://127.0.0.1:4610/gacha",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 26,
+      "symbolCount": 3,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "tower-mobile",
+      "url": "http://127.0.0.1:4610/tower",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 37,
+      "symbolCount": 5,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "training-mobile",
+      "url": "http://127.0.0.1:4610/dungeons/training",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 44,
+      "symbolCount": 2,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "ascension-mobile",
+      "url": "http://127.0.0.1:4610/dungeons/ascension",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 26,
+      "symbolCount": 12,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hunt-mobile",
+      "url": "http://127.0.0.1:4610/dungeons/hunt",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 69,
+      "symbolCount": 2,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "trial-mobile",
+      "url": "http://127.0.0.1:4610/dungeons/trial",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 54,
+      "symbolCount": 2,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "account-mobile",
+      "url": "http://127.0.0.1:4610/account",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 16,
+      "symbolCount": 5,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "lab-mobile",
+      "url": "http://127.0.0.1:4610/sprite-lab?hero=garrick&render=dom",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 11,
+      "symbolCount": 1,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-overview-mobile",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 39,
+      "symbolCount": 7,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-stats-mobile",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 36,
+      "symbolCount": 4,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-skills-mobile",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 39,
+      "symbolCount": 6,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-growth-mobile",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 32,
+      "symbolCount": 6,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "hero-gear-mobile",
+      "url": "http://127.0.0.1:4610/heroes/1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 36,
+      "symbolCount": 5,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "catalog-status-icons-mobile",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 8,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 108
+    },
+    {
+      "label": "catalog-ui-symbols-mobile",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 8,
+      "symbolCount": 54,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "catalog-affix-icons-mobile",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 8,
+      "symbolCount": 0,
+      "affixCount": 39,
+      "statusCount": 0
+    },
+    {
+      "label": "catalog-equipment-tiered-mobile",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 43,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "paused-examples-mobile",
+      "url": "http://127.0.0.1:4610/art-catalog",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "imageCount": 14,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    },
+    {
+      "label": "battle-pause",
+      "url": "http://127.0.0.1:4610/battle?floor=1&mode=tower",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imageCount": 39,
+      "symbolCount": 0,
+      "affixCount": 0,
+      "statusCount": 0
+    }
+  ],
+  "screenshots": [
+    "home-desktop",
+    "materials-stock",
+    "owned-affix",
+    "forge-desktop",
+    "trial-desktop",
+    "account-desktop",
+    "battle-pause"
+  ],
+  "checks": [
+    "148 old/new runtime files decode, including20large equipment variants",
+    "128catalog entries:106active/12superseded/6paused/4concept",
+    "36status/18symbol/13affix atlas cells;20equipment variants and15materials visible",
+    "All shared literal icon names have a generated mapping; approved class/full-image priority retained",
+    "Old dungeon reward mock renderers replaced where art exists; BT neutral placeholders retained per user hold",
+    "Browsing pages/catalog does not change save; only isolated real battle pause starts combat",
+    "Desktop/mobile routes+hero subtabs+fourcatalog categories+paused examples, no overflow/JSerrors/missingrequests"
+  ],
+  "runtimeDecoded": 148
+}

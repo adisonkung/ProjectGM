@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-26",
+  "source": "/workspace/generated_images/exec-91e3c4eb-0ca3-44f1-af95-3252037f2b58.png",
+  "path": "/ui/status/hero-guards.webp",
+  "sourceSha256": "d189b0912093cd99bbfa371b894397fd5956f8233106d3544e07430011f40d8b",
+  "sha256": "00baa3dc74d224ed4259a90797aeb68f4e53c3d29e5fda5d029cde63a70c45bd",
+  "width": 1024,
+  "height": 1024,
+  "alpha": true,
+  "prompt": "Create a production Eldervane status-effect sprite atlas in the same premium Japanese/Korean fantasy icon art style as the reference. SQUARE canvas, EXACT THREE equal columns x THREE equal rows, invisible equal square cells. One complete centered symbol per listed cell, at most70% of cell dimensions with15% transparent gutter. Transparent background everywhere outside each symbol. NO text, letters, numbers, grid, labels, cards, outer frames, scenery or watermark. Bold crisp hand-painted sculpted metal silhouettes, polished silver with restrained antique bronze trims and saturated semantic magic colors, legible at22px. Distinct shape for every state, not recolored copies; restrained contained glow; no touching adjacent cells, no clipped tips. Reading order: ",
+  "icons": [
+    {
+      "id": "taunt_guard",
+      "label": "ตั้งรับ",
+      "design": "bright azure silver shield deflecting a single small red incoming arrow; stable protective silver silhouette",
+      "col": 0,
+      "row": 0
+    },
+    {
+      "id": "open_wound",
+      "label": "แผลเปิด",
+      "design": "two jagged dark silver armor plates split apart revealing a bold crimson glowing wound-shaped rift; stylized damage vulnerability symbol, no gore",
+      "col": 1,
+      "row": 0
+    },
+    {
+      "id": "brace_counter",
+      "label": "ตั้งรับสวนกลับ",
+      "design": "compact cobalt shield in front of a slender silver blade with a clear amber returning curved arrow; distinct counterattack silhouette",
+      "col": 2,
+      "row": 0
+    },
+    {
+      "id": "gate_ward",
+      "label": "ประตูเหล็ก",
+      "design": "luminous icy blue arched protective gateway above three small connected ivory shield nodes; ally protection motif, not a heavy stone castle",
+      "col": 0,
+      "row": 1
+    },
+    {
+      "id": "gate_stance",
+      "label": "ยืนหยัด",
+      "design": "two sturdy steel boots planted on dark stone with amber anchor-like ground rune and two short bronze braces; steadfast unmovable stance, no vines",
+      "col": 1,
+      "row": 1
+    }
+  ]
+}

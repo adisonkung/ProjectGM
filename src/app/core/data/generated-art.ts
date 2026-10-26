@@ -975,5 +975,68 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "group": "environment",
     "url": "/ui/forge/celestial-forge.webp",
     "status": "active"
+  },
+  {
+    "id": "status-atlas/afflictions",
+    "label": "afflictions · status atlas",
+    "group": "status-atlas",
+    "url": "/ui/status/afflictions.webp",
+    "status": "active"
+  },
+  {
+    "id": "status-atlas/control",
+    "label": "control · status atlas",
+    "group": "status-atlas",
+    "url": "/ui/status/control.webp",
+    "status": "active"
+  },
+  {
+    "id": "status-atlas/wards",
+    "label": "wards · status atlas",
+    "group": "status-atlas",
+    "url": "/ui/status/wards.webp",
+    "status": "active"
+  },
+  {
+    "id": "status-atlas/fury",
+    "label": "fury · status atlas",
+    "group": "status-atlas",
+    "url": "/ui/status/fury.webp",
+    "status": "active"
+  },
+  {
+    "id": "ui-symbol-atlas/utility",
+    "label": "utility · UI symbols atlas",
+    "group": "ui-symbol-atlas",
+    "url": "/ui/symbols/utility.webp",
+    "status": "active"
+  },
+  {
+    "id": "ui-symbol-atlas/emblems",
+    "label": "emblems · UI symbols atlas",
+    "group": "ui-symbol-atlas",
+    "url": "/ui/symbols/emblems.webp",
+    "status": "active"
+  },
+  {
+    "id": "affix-atlas/wards",
+    "label": "wards · equipment affix atlas",
+    "group": "affix-atlas",
+    "url": "/ui/affixes/wards.webp",
+    "status": "active"
+  },
+  {
+    "id": "affix-atlas/offense",
+    "label": "offense · equipment affix atlas",
+    "group": "affix-atlas",
+    "url": "/ui/affixes/offense.webp",
+    "status": "active"
+  },
+  {
+    "id": "status-atlas/hero-guards",
+    "label": "Hero guard states ·5icons",
+    "group": "status-atlas",
+    "url": "/ui/status/hero-guards.webp",
+    "status": "active"
   }
 ];

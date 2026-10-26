@@ -1,8 +1,10 @@
+import { equipmentAffixLabel } from '../../core/data/affix-art';
+import { AffixIconComponent } from '../../shared/affix-icon.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ITEMS } from '../../core/data/economy';
-import { AFFIXES, CRAFT_RECIPES, EQUIPMENT_DEFS, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
+import { CRAFT_RECIPES, EQUIPMENT_DEFS, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
 import { EquipmentInstance, EquipmentSlot, EquipStat, Rarity, StatLine } from '../../core/models/equipment';
 import { dismantleRewards, itemLines, itemName, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
 import { EquipmentService } from '../../core/services/equipment.service';
@@ -23,7 +25,7 @@ const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shie
 /** Blacksmith: targeted crafting, enhancement (+1, bag or equipped), salvage (dismantle bag items into materials) */
 @Component({
   selector: 'app-forge',
-  imports: [CitadelFrameComponent, IconComponent, EquipmentArtComponent, RouterLink],
+  imports: [AffixIconComponent, CitadelFrameComponent, IconComponent, EquipmentArtComponent, RouterLink],
   templateUrl: './forge.component.html',
   styleUrl: './forge.component.scss',
 })
@@ -141,7 +143,7 @@ export class ForgeComponent {
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
   readonly lines = (i: EquipmentInstance) => itemLines(i).slice(0, 1 + i.secondaries.length).map(l => this.fmt(l));
   readonly fmt = (l: StatLine) => `${STAT_LABEL[l.stat]} ${l.value >= 0 ? '+' : ''}${FLAT_STATS.includes(l.stat) ? l.value : (l.value * 100).toFixed(1) + ' %'}`;
-  readonly affixName = (id?: string) => (id ? AFFIXES[id].name + ' — ' + AFFIXES[id].description : '');
+  readonly affixName = (item: EquipmentInstance) => equipmentAffixLabel(item.affix, item.rarity);
   readonly dismantleText = (i: EquipmentInstance) => dismantleRewards(i).map(r => `${ITEMS[r.itemId].name} ×${r.count}`).join(', ');
   private say(err: string | null, ok: string) { this.message.set({ text: err ? ERR[err] ?? err : ok, ok: !err }); }
   onTabKey(event: KeyboardEvent): void {

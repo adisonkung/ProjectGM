@@ -179,7 +179,8 @@ export class SpriteLabComponent implements OnDestroy {
     const b = this.blinked();
     return [
       { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left, ...(this.reviewVitals()[HERO_ID] ?? {}),
-        blink: !!b, blinkFade: !b?.ownFade, ...(this.reviewPositions()[HERO_ID] ?? {}) },
+        blink: !!b, blinkFade: !b?.ownFade, ...(this.reviewPositions()[HERO_ID] ?? {}),
+        statuses: (this.reviewStatuses()[HERO_ID] ?? []).filter(s => STATUS_ICONS[s.id]).map(s => ({ ...s, icon: STATUS_ICONS[s.id] })), },
       ...this.comparisonHeroes.filter(other => other.id !== h.id).map((other, i) => ({
         ...base, id: 100 + i, side: 'ally' as const, name: other.name, cls: other.cls,
         r: 1, c: hc - (i + 1) * 2 * (left ? -1 : 1), sprite: other.sprite, star: other.star, heroId: other.id, flip: left,

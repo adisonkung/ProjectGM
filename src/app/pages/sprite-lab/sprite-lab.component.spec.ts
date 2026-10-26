@@ -208,3 +208,30 @@ describe('Sprite lab committed phantom Ultimate review', () => {
     expect(lab.anims()[1]!.anim).toBe('idle');
   }));
 });
+
+
+describe('Sprite lab hero guard status badges', () => {
+  let fixture: ComponentFixture<SpriteLabComponent>;
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [SpriteLabComponent], providers: [
+      { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({ hero: 'garrick', render: 'dom', combat: '1' }) } } },
+    ] });
+    fixture = TestBed.createComponent(SpriteLabComponent);
+  });
+  afterEach(() => fixture.destroy());
+
+  it('includes self-applied S1 and Ultimate guards in the visible caster snapshot', fakeAsync(() => {
+    const lab = fixture.componentInstance;
+    lab.play('skill');
+    tick(animTiming('hero-garrick.png', 'skill').hit * 1000 + 100);
+    const first = lab.units().find(u => u.id === 1)!.statuses!.map(s => s.id);
+    expect(first).toContain('taunt_guard');
+    expect(first).toContain('brace_counter');
+    lab.play('ult');
+    tick(animTiming('hero-garrick.png', 'ult').hit * 1000 + 100);
+    const ultimate = lab.units().find(u => u.id === 1)!.statuses!.map(s => s.id);
+    expect(ultimate).toContain('gate_ward');
+    expect(ultimate).toContain('gate_stance');
+    lab.play('idle');
+  }));
+});
