@@ -30,7 +30,7 @@ export const MAIN_NAV: NavItem[] = [
   { path: '/gacha', label: 'อัญเชิญ', icon: 'summon', match: ['/gacha'] },
 ];
 
-/** The lobby and collection pages expose existing F0 routes; other screens retain compact navigation. */
+/** Existing game destinations share the reviewed lobby navigation. */
 export const LOBBY_NAV: NavItem[] = [
   { path: '/home', label: 'หน้าหลัก', caption: 'HOME', icon: 'home', match: ['/home'] },
   { path: '/heroes', label: 'ฮีโร่', caption: 'HEROES', icon: 'heroes', match: ['/heroes'] },
@@ -70,8 +70,8 @@ export class AppComponent {
 
   /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
   readonly collection = computed(() => /^\/(heroes|team|armory|forge|account)(\/|[?#]|$)/.test(this.url()) || /^\/(tower|dungeons)(\/|[?#]|$)/.test(this.url()));
-  readonly fantasy = computed(() => this.immersive() || this.collection());
-  readonly homeChrome = computed(() => this.active() === '/home');
+  readonly fantasy = computed(() => this.immersive() || this.collection() || this.fight() || this.url().startsWith('/sprite-lab'));
+  readonly homeChrome = computed(() => !this.bare());
 
   readonly gemsFull = computed(() => this.save.state().gems.toLocaleString('en-US'));
   readonly goldFull = computed(() => this.save.state().gold.toLocaleString('en-US'));

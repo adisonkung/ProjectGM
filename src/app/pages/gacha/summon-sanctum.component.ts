@@ -8,17 +8,18 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, input, O
     <div class="art" aria-hidden="true"></div>
     <div class="shade" aria-hidden="true"></div>
     <canvas #light aria-hidden="true"></canvas>
-    <div class="cards" aria-hidden="true">
+    @if (showFloatingCards()) { <div class="cards" aria-hidden="true">
       @for (card of cards; track $index) {
         <div class="card-place" [style.left.%]="card.x" [style.top.%]="card.y" [style.--tilt]="card.tilt + 'deg'" [style.--delay]="card.delay + 's'" [style.--duration]="card.duration + 's'" [style.--size]="card.size">
           <img src="/ui/summon-card.jpg" alt="" draggable="false" />
         </div>
       }
-    </div>
+    </div> }
   `,
   styleUrl: './summon-sanctum.component.scss',
 })
 export class SummonSanctumComponent implements AfterViewInit, OnDestroy {
+  readonly showFloatingCards = input(true);
   readonly paused = input(false);
   readonly light = viewChild.required<ElementRef<HTMLCanvasElement>>('light');
   readonly cards = [

@@ -1,11 +1,10 @@
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CLASS_NAME } from '../../core/data/classes';
 import { ITEMS } from '../../core/data/economy';
-import { AFFIXES, CRAFT_RECIPES, EQUIPMENT_DEFS, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL, WEAPON_GROUP_OF } from '../../core/data/equipment';
-import { HeroClass } from '../../core/models/hero';
+import { AFFIXES, CRAFT_RECIPES, EQUIPMENT_DEFS, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
 import { EquipmentInstance, EquipmentSlot, EquipStat, Rarity, StatLine } from '../../core/models/equipment';
-import { dismantleRewards, mainBaseValue, itemLines, itemName, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
+import { dismantleRewards, itemLines, itemName, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
 import { EquipmentService } from '../../core/services/equipment.service';
 import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
@@ -24,7 +23,7 @@ const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shie
 /** Blacksmith: targeted crafting, enhancement (+1, bag or equipped), salvage (dismantle bag items into materials) */
 @Component({
   selector: 'app-forge',
-  imports: [IconComponent, EquipmentArtComponent, RouterLink],
+  imports: [CitadelFrameComponent, IconComponent, EquipmentArtComponent, RouterLink],
   templateUrl: './forge.component.html',
   styleUrl: './forge.component.scss',
 })
@@ -34,9 +33,9 @@ export class ForgeComponent {
   readonly eq = inject(EquipmentService);
 
   readonly tabs: { id: ForgeTab; label: string; icon: string }[] = [
-    { id: 'craft', label: 'คราฟต์', icon: 'flame' },
-    { id: 'enhance', label: 'ตีบวก', icon: 'bolt' },
-    { id: 'salvage', label: 'ย่อย', icon: 'crystal' },
+    { id: 'craft', label: 'คราฟต์', icon: 'craft' },
+    { id: 'enhance', label: 'ตีบวก', icon: 'enhance' },
+    { id: 'salvage', label: 'ย่อย', icon: 'salvage' },
   ];
   readonly tab = signal<ForgeTab>(this.initialTab());
   private initialTab(): ForgeTab {
@@ -54,35 +53,21 @@ export class ForgeComponent {
   readonly recipes = Object.values(CRAFT_RECIPES);
   readonly rarityName = RARITY_NAME;
   readonly craftRarity = signal<Rarity>('RARE');
-  readonly craftBase = signal<string>('guard_armor');
-  readonly craftMain = signal<EquipStat>('hpPct');
   readonly slotFilter = signal<EquipmentSlot>('ARMOR');
   readonly slots = SLOTS;
   readonly bases = computed(() => Object.values(EQUIPMENT_DEFS).filter(d => d.slot === this.slotFilter()));
-  readonly mains = computed(() => EQUIPMENT_DEFS[this.craftBase()]?.mainStats ?? []);
+  readonly previewBase = computed(() => this.bases()[0].id);
   readonly recipe = computed(() => CRAFT_RECIPES[this.craftRarity()]!);
   readonly canCraft = computed(() => {
     const r = this.recipe();
     return (this.save.state().inventory[r.fragmentId] ?? 0) >= r.fragments && this.gold() >= r.gold;
   });
   readonly fragsHave = computed(() => this.save.state().inventory[this.recipe().fragmentId] ?? 0);
-  readonly mainPreview = computed(() => this.fmt({ stat: this.craftMain(), value: mainBaseValue(EQUIPMENT_DEFS[this.craftBase()], this.craftMain(), this.craftRarity()) }));
-  readonly baseName = computed(() => EQUIPMENT_DEFS[this.craftBase()]?.name ?? '');
   readonly crafted = signal<EquipmentInstance | null>(null);
-  /** which classes wield a weapon base (armor / accessories: everyone) */
-  wielders(defId: string): string {
-    const g = EQUIPMENT_DEFS[defId].weaponGroup;
-    if (!g) return 'ทุกสาย';
-    return (Object.keys(WEAPON_GROUP_OF) as HeroClass[]).filter(c => WEAPON_GROUP_OF[c] === g).map(c => CLASS_NAME[c]).join(' · ');
-  }
-  pickSlot(s: EquipmentSlot) {
-    this.slotFilter.set(s);
-    this.pickBase(this.bases()[0].id);
-  }
-  pickBase(id: string) { this.craftBase.set(id); this.craftMain.set(EQUIPMENT_DEFS[id].mainStats[0]); }
+  pickSlot(s: EquipmentSlot) { this.slotFilter.set(s); this.crafted.set(null); }
   craft() {
     const before = new Set(this.eq.bag().map(i => i.instanceId));
-    const err = this.eq.craft(this.craftRarity(), this.craftBase(), this.craftMain());
+    const err = this.eq.craftRandom(this.craftRarity(), this.slotFilter());
     this.crafted.set(err ? null : this.eq.bag().find(i => !before.has(i.instanceId)) ?? null);
     this.say(err, 'คราฟต์สำเร็จ!');
   }
@@ -100,12 +85,44 @@ export class ForgeComponent {
   ];
   readonly enhanceSlot = signal<EquipmentSlot | 'ALL'>('ALL');
   readonly enhanceList = computed(() => this.allItems().filter(x => this.enhanceSlot() === 'ALL' || slotOf(x.item) === this.enhanceSlot()));
+  readonly selectedEnhanceId = signal<number | null>(null);
+  readonly selectedEnhance = computed(() => this.enhanceList().find(x => x.item.instanceId === this.selectedEnhanceId()) ?? this.enhanceList()[0] ?? null);
+
+  upgradePreview(i: EquipmentInstance): string[] { return this.lines({ ...i, upgradeLevel: Math.min(i.upgradeLevel + 1, this.cap(i)) }); }
   upgrade(i: EquipmentInstance) { this.say(this.eq.upgrade(i.instanceId), `ตีบวก ${itemName(i)} สำเร็จ`); }
 
   // ---------------------------------------------------------------- salvage
   readonly salvageList = computed(() => this.eq.bag());
-  dismantle(i: EquipmentInstance) { this.say(this.eq.dismantle(i.instanceId), `ย่อย ${itemName(i)} → ${this.dismantleText(i)}`); }
-  toggleLock(i: EquipmentInstance) { this.eq.lock(i.instanceId, !i.locked); }
+  readonly selectedSalvageIds = signal<Set<number>>(new Set());
+  readonly salvageEligible = computed(() => this.salvageList().filter(i => !i.locked));
+  readonly selectedSalvage = computed(() => this.salvageEligible().filter(i => this.selectedSalvageIds().has(i.instanceId)));
+  readonly allSalvageSelected = computed(() => this.salvageEligible().length > 0 && this.selectedSalvage().length === this.salvageEligible().length);
+  readonly salvageRewards = computed(() => this.rewardSummary(this.selectedSalvage()));
+  readonly pendingDismantleIds = signal<number[]>([]);
+  readonly pendingItems = computed(() => this.allItems().filter(x => this.pendingDismantleIds().includes(x.item.instanceId)).map(x => x.item));
+  readonly pendingRewards = computed(() => this.rewardSummary(this.pendingItems()));
+  toggleSalvage(i: EquipmentInstance, checked: boolean) {
+    if (i.locked) return;
+    this.selectedSalvageIds.update(ids => { const next = new Set(ids); checked ? next.add(i.instanceId) : next.delete(i.instanceId); return next; });
+  }
+  selectAllSalvage(checked: boolean) { this.selectedSalvageIds.set(new Set(checked ? this.salvageEligible().map(i => i.instanceId) : [])); }
+  toggleLock(i: EquipmentInstance) {
+    this.eq.lock(i.instanceId, !i.locked);
+    this.selectedSalvageIds.update(ids => { const next = new Set(ids); next.delete(i.instanceId); return next; });
+  }
+  prepareDismantle() { this.pendingDismantleIds.set(this.selectedSalvage().map(i => i.instanceId)); }
+  confirmDismantle() {
+    const count = this.pendingDismantleIds().length;
+    const error = this.eq.dismantleMany(this.pendingDismantleIds());
+    this.say(error, `ย่อยอุปกรณ์ ${count} ชิ้นสำเร็จ`);
+    if (!error) this.selectedSalvageIds.set(new Set());
+    this.pendingDismantleIds.set([]);
+  }
+  private rewardSummary(items: EquipmentInstance[]) {
+    const sums = new Map<string, number>();
+    for (const item of items) for (const r of dismantleRewards(item)) sums.set(r.itemId, (sums.get(r.itemId) ?? 0) + r.count);
+    return [...sums].map(([itemId, count]) => ({ itemId, count }));
+  }
 
   // ---------------------------------------------------------------- display
   readonly name = itemName;

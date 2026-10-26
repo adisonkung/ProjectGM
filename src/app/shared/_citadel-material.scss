@@ -1,0 +1,12 @@
+// Applied last inside each component: replaces the former CSS surface completely.
+// Interaction and layout stay with the owning component; SVG owns the material.
+@mixin surfaces {
+  :host .citadel-surface,
+  :host .citadel-surface[aria-pressed],
+  :host .citadel-surface.on,
+  :host .citadel-surface.active,
+  :host .citadel-surface.primary,
+  :host .row .citadel-surface {
+    border: 0; border-radius: 0; background: transparent; box-shadow: none; clip-path: none;
+  }
+}

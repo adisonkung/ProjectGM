@@ -21,6 +21,9 @@ import { IconComponent } from '../../shared/icon.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
 import { heroArt } from '../../core/data/hero-art';
+import { A11yModule } from '@angular/cdk/a11y';
+import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
+import { IslandDetailArtComponent } from './island-detail-art.component';
 
 /** state a building showed before an event (pending events are revealed on screen one at a time) */
 function priorState(ev: IslandEvent): IslandBuildingState {
@@ -46,7 +49,7 @@ const EVENT_TITLE: Record<IslandEvent['type'], string> = {
  */
 @Component({
   selector: 'app-island',
-  imports: [IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent, RouterLink],
+  imports: [A11yModule, TowerOrnamentComponent, IslandDetailArtComponent, IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent, RouterLink],
   templateUrl: './island.component.html',
   styleUrl: './island.component.scss',
 })
@@ -83,6 +86,9 @@ export class IslandComponent implements OnInit, OnDestroy {
     this.isl.setMap(m);
   }
   readonly themeSheet = signal(false);
+  readonly sheetsOpen = computed(() => !!this.selectedBuilding() || this.selectedHero() !== null || this.themeSheet());
+  @HostListener('document:keydown.escape')
+  onSheetEscape(): void { if (this.sheetsOpen()) this.closeSheets(); }
   openThemes(): void {
     this.selectedBuilding.set(null);
     this.selectedHero.set(null);
@@ -110,7 +116,7 @@ export class IslandComponent implements OnInit, OnDestroy {
       if (!h || !t) return [];
       return [{ uid: h.uid, id: t.id, name: t.name, shortName: t.name.split(' ')[0], cls: t.cls, className: CLASS_NAME[t.cls], level: this.roster.progress(h).level,
         star: this.roster.star(h), power: this.roster.power(h), portrait: heroArt(t.id)?.portrait,
-        icon: ({ tank: 'shield', fighter: 'sword', assassin: 'armory', archer: 'heroes', mage: 'crystal', healer: 'potion' })[t.cls] }];
+        icon: ({ tank: 'class-tank', fighter: 'class-fighter', assassin: 'class-assassin', archer: 'class-archer', mage: 'class-mage', healer: 'class-healer' })[t.cls] }];
     });
   });
   readonly partyPower = computed(() => this.party().reduce((sum, h) => sum + h.power, 0).toLocaleString('en-US'));
@@ -182,7 +188,8 @@ export class IslandComponent implements OnInit, OnDestroy {
     const h = this.save.state().heroes.find(x => x.uid === uid);
     if (!h) return null;
     const t = HERO_BY_ID[h.templateId];
-    return { h, t, cls: CLASS_NAME[t.cls], power: this.roster.power(h), isMain: this.mainUid() === h.uid };
+    return { h, t, cls: CLASS_NAME[t.cls], power: this.roster.power(h), isMain: this.mainUid() === h.uid,
+      level: this.roster.progress(h).level, star: this.roster.star(h), art: heroArt(t.id), skills: this.roster.skills(h) };
   });
 
   // ---------------------------------------------------------------- HUD

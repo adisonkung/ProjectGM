@@ -1,3 +1,15 @@
+@use './app/shared/adventure-fonts';
+@use './app/shared/citadel-pages';
+@use './app/shared/hero-detail-panels';
+@use './app/shared/battle-reference';
+@use './app/shared/battle-match';
+@use './app/shared/battle-expand';
+@use './app/shared/victory-inset';
+@use './app/shared/account-reference';
+@use './app/shared/labs-reference';
+@use './app/shared/island-details-reference';
+@use './app/shared/list-empty-reference';
+@use './app/shared/summon-information-reference';
 @use './app/shared/fantasy-ui' as fantasy;
 /* Eldervane — refined East Asian fantasy. Worlds carry light; controls carry contrast. */
 :root {

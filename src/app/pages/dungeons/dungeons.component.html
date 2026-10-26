@@ -1,97 +1,42 @@
 @let t = type();
-<app-adventure-scene [kind]="t.id" />
-<section class="dungeons adventure">
-  <header class="head">
-    <div class="heading"><span class="heading-crest" aria-hidden="true"><app-icon name="scroll" [size]="27" /></span><div><span class="eyebrow">REALMS OF ADVENTURE</span><h1 class="gm-title">ดันเจี้ยน</h1><p class="gm-sub">เลือกเส้นทางท้าทาย เพื่อเสริมพลังให้ทีมของคุณ</p></div></div>
-    <div class="head-links"><a class="gm-btn" routerLink="/team"><app-icon name="team" [size]="16" /> จัดทัพ</a><a class="gm-btn" routerLink="/tower"><app-icon name="tower" [size]="16" /> หอคอย <app-icon name="arrow" [size]="14" /></a></div>
-  </header>
-
-  <nav class="types" aria-label="ประเภทดันเจี้ยน">
-    @for (x of types; track x.id) {
-      <a class="type {{ x.tone }}" [routerLink]="['/dungeons', x.id]" [class.active]="x.id === t.id" [attr.aria-current]="x.id === t.id ? 'page' : null"
-         [class.locked]="cleared() < unlockOf(x)">
-        <span class="ti"><app-icon [name]="x.icon" [size]="20" /></span>
-        <span class="tn"><b>{{ x.name }}</b><small>{{ x.mode }}</small></span>
-        @if (cleared() < unlockOf(x)) { <app-icon name="lock" [size]="13" /> } @else { <em class="left">{{ leftOf(x) }}</em> }
-      </a>
-    }
-  </nav>
-
+<div class="dungeon-scene" aria-hidden="true"></div>
+<section class="dungeons" aria-labelledby="dungeon-title">
+  <h1 id="dungeon-title" class="sr-only">ดันเจี้ยน</h1>
+  <nav class="types" aria-label="ประเภทดันเจี้ยน">@for (x of types; track x.id) {
+    <a class="type" [routerLink]="['/dungeons',x.id]" [class.active]="x.id === t.id" [attr.aria-current]="x.id === t.id ? 'page' : null"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="x.id === t.id" />
+      <app-icon [name]="x.icon" [size]="24" /><span><b>{{ x.label }}</b><small>{{ x.mode }}</small></span>@if (cleared() < unlockOf(x)) { <app-icon class="type-state" name="lock" [size]="15" /> } @else { <em class="type-state" [attr.aria-label]="'โบนัสเหลือ ' + leftOf(x) + ' ครั้ง'">{{ leftOf(x) }}</em> }
+    </a>
+  }</nav>
   <div class="dungeon-layout {{ t.tone }}">
-  <article class="hero">
-    <div class="realm-emblem" aria-hidden="true"><span class="big">
-      <svg class="sigil" viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="90" /><circle cx="100" cy="100" r="82" stroke-dasharray="1 7" /><circle cx="100" cy="100" r="68" /><path d="m100 4 14 22-14 16-14-16z m0 154 14 16-14 22-14-22z M4 100l22-14 16 14-16 14z m154 0 16-14 22 14-22 14z M45 45l110 110M45 155 155 45" /><path d="m100 39 61 61-61 61-61-61z" /></svg>
-      <app-icon [name]="t.icon" [size]="43" />
-    </span><span class="realm-caption">{{ t.name }}</span></div>
-    <div class="txt">
-      <small class="eyebrow">{{ t.mode }}</small>
-      <h2>{{ t.name }}</h2>
-      <p>{{ t.blurb }}</p>
-      <details class="rules"><summary>กติกาการท้าทาย</summary><ul>@for (r of t.rules; track r) { <li>{{ r }}</li> }</ul></details>
-    </div>
-    <div class="meta">
-      <small>โบนัสรางวัลวันนี้ ×1.5</small>
-      <span class="pips">@for (on of bonus().pips; track $index) { <i [class.on]="on"></i> }</span>
-      <b>{{ bonus().left }}/{{ bonus().max }}</b>
-      <small class="rw">ได้: {{ t.reward }}</small>
-    </div>
-  </article>
-
-  <section class="tier-panel frame" aria-label="เลือกระดับดันเจี้ยน">
-  <header class="frame-head"><div><span class="eyebrow">CHOOSE YOUR CHALLENGE</span><h2>เลือกระดับความท้าทาย</h2></div><small>{{ tiers().length }} ระดับ</small></header>
-  @if (t.id === 'ascension') {
-    <section class="target guardians">
-      <span><b>ผู้พิทักษ์ประจำวัน</b><small>สลับตัวตามวันในสัปดาห์</small></span>
-      <div class="row">
-        @for (g of guardians; track g.id) {
-          <span class="gm-chip" [class.today]="g.today">{{ g.days }} · {{ g.name }}@if (g.today) { <em>วันนี้</em> }</span>
-        }
-      </div>
+    <article class="hero" [attr.aria-label]="t.label">
+      <div class="realm-emblem" aria-hidden="true"><div class="realm-halo"></div><div class="realm-art {{ t.id }}"></div><span class="realm-caption">{{ t.name }}</span></div>
+      <div class="txt"><app-tower-ornament [grooved]="true" [ornate]="true" /><div class="realm-title"><app-icon [name]="t.icon" [size]="31" /><div><small class="eyebrow">{{ t.mode }}</small><h2>{{ t.label }}</h2></div></div><p class="realm-reward">{{ t.reward }}</p><details class="rules"><summary>วิธีเล่นและกติกา</summary><p>{{ t.blurb }}</p><ul>@for (r of t.rules; track r) { <li>{{ r }}</li> }</ul></details></div>
+      <div class="meta"><app-tower-ornament [grooved]="true" /><div class="bonus-heading"><app-icon name="star" [size]="22" /><span><b>โบนัสประจำวัน ×{{ bonusMultiplier() }}</b><small>เหลือ {{ bonus().left }} จาก {{ bonus().max }} ครั้ง</small></span><strong>{{ bonus().left }}<small>/ {{ bonus().max }}</small></strong></div><span class="pips" aria-hidden="true">@for (on of bonus().pips; track $index) { <i [class.on]="on"></i> }</span><small class="bonus-note">โบนัสหมดแล้วยังเข้าเล่นได้</small></div>
+      <nav class="hero-links" aria-label="ทางลัดเตรียมทีม"><a routerLink="/team"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="armory" [size]="24" /> จัดทัพ <span aria-hidden="true">&gt;</span></a><a routerLink="/tower"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="tower" [size]="22" /> หอคอย <span aria-hidden="true">&gt;</span></a></nav>
+    </article>
+    <section class="tier-panel" aria-label="เลือกระดับดันเจี้ยน"><app-tower-ornament [grooved]="true" [ornate]="true" />
+      <header class="frame-head"><div><span class="eyebrow">CHOOSE YOUR CHALLENGE</span><h2>เลือกระดับความท้าทาย</h2></div><small>{{ tiers().length }} ระดับ</small></header>
+      @if (t.id === 'ascension') { <section class="target guardians"><div class="target-heading"><app-icon name="crown" [size]="20" /><span><b>ผู้พิทักษ์ประจำวัน</b><small>สลับตามวันในสัปดาห์</small></span></div><div class="row">@for (g of guardians; track g.id) { <span class="guardian" [class.today]="g.today"><small>{{ g.days }}</small><b>{{ g.name }}</b>@if (g.today) { <em>วันนี้</em> }</span> }</div></section> }
+      @if (t.id === 'hunt') { <section class="target hunt-target"><div class="target-heading"><app-icon name="armory" [size]="20" /><span><b>เป้าหมาย Hunt</b><small>เพิ่มโอกาสช่องที่เลือก</small></span></div><div class="row">@for (x of targets; track x) { <button type="button" [attr.aria-pressed]="eq.huntTarget() === x" (click)="eq.setHuntTarget(x)"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="eq.huntTarget() === x" />{{ targetLabel[x] }}</button> }</div></section> }
+      <div class="reward-caption">ระดับที่แนะนำ <span>รางวัลหลัก · กดดูทั้งหมดได้</span></div>
+      <ul class="tiers">@for (d of tiers(); track d.id) {
+        <li class="tier" [class.locked]="!open(d)" [attr.data-dungeon]="d.id"><app-tower-ornament [grooved]="true" /><div class="tier-map" [style.background-image]="'url(' + sceneOf(d) + ')'" aria-hidden="true"></div>
+          <span class="rn"><small>TIER</small><b>{{ roman(d) }}</b></span>
+          <div class="body"><div class="tier-heading"><h3>{{ d.name }}</h3><small>Lv {{ d.recommendedLevel[0] }}–{{ d.recommendedLevel[1] }}</small></div>
+            <details class="reward-details"><summary>เงื่อนไขและรางวัล <span aria-hidden="true">⌄</span></summary><p class="goal">{{ d.stage.special?.goal }}</p>            <div class="rewards">@if (d.baseRewards.heroExp) { <span><app-icon name="heroes" [size]="18" /><span><small>EXP ฮีโร่</small><b>{{ d.baseRewards.heroExp }}</b></span></span> }@for (it of d.baseRewards.items ?? []; track it.itemId) { <span><app-icon [name]="itemIcon(it.itemId)" [size]="18" /><span><small>{{ itemName(it.itemId) }}</small><b>×{{ it.count }} @if (it.count < 1) { <em>สะสมเศษ</em> }</b></span></span> }@if (d.baseRewards.gold) { <span><app-icon name="coin" [size]="18" /><span><small>ทอง</small><b>{{ d.baseRewards.gold }}</b></span></span> }@if (d.equipmentDrops) { <span><app-icon name="armory" [size]="18" /><span><small>โอกาสดรอปอุปกรณ์</small><b>{{ pct(d.equipmentDrops.itemChance) }}%</b></span></span> }</div>
+            @for (drop of d.baseRewards.bonusDrops ?? []; track $index) { <p class="extra-drop">สุ่มเพิ่ม {{ pct(drop.chance) }}%: @for (it of drop.items; track it.itemId) { <span>{{ itemName(it.itemId) }} ×{{ it.count }}</span> }</p> }
+            @if (!firstClearDone(d.id) && (d.firstClearBonus || d.firstClearItem)) { <div class="first-clear"><span>ผ่านครั้งแรก</span>@if (d.firstClearItem) { <b>อุปกรณ์ {{ d.firstClearItem }}</b> }@for (it of d.firstClearBonus?.items ?? []; track it.itemId) { <b>{{ itemName(it.itemId) }} ×{{ it.count }}</b> }</div> }
+</details>
+          </div>
+          <div class="reward-preview" aria-label="รางวัลพื้นฐาน">
+            @if (d.baseRewards.heroExp) { <span class="reward-tile exp" [attr.title]="'EXP ฮีโร่ ' + d.baseRewards.heroExp" role="img" [attr.aria-label]="'EXP ฮีโร่ ' + d.baseRewards.heroExp"><app-icon name="heroes" [size]="27" /><b>{{ d.baseRewards.heroExp }}</b></span> }
+            @for (it of (d.baseRewards.items ?? []).slice(0,d.equipmentDrops ? 2 : 3); track it.itemId) { <span class="reward-tile" [attr.title]="itemName(it.itemId) + ' ×' + it.count" role="img" [attr.aria-label]="itemName(it.itemId) + ' ×' + it.count"><app-dungeon-reward-icon [itemId]="it.itemId" /><b>×{{ it.count }}</b></span> }
+            @if (d.equipmentDrops) { <span class="reward-tile" role="img" [attr.aria-label]="'โอกาสอุปกรณ์ ' + pct(d.equipmentDrops.itemChance) + '%'" [attr.title]="'โอกาสอุปกรณ์ ' + pct(d.equipmentDrops.itemChance) + '%'"><app-icon name="armory" [size]="27" /><b>{{ pct(d.equipmentDrops.itemChance) }}%</b></span> } @else if (d.baseRewards.gold) { <span class="reward-tile" role="img" [attr.aria-label]="'ทอง ' + d.baseRewards.gold" [attr.title]="'ทอง ' + d.baseRewards.gold"><app-icon name="coin" [size]="27" /><b>{{ d.baseRewards.gold }}</b></span> }
+          </div>
+          <div class="side">@if (farm()[d.id]; as rec) { <span class="stars" [attr.aria-label]="rec.bestRating + ' ดาว'">{{ '★'.repeat(rec.bestRating) }}<i>{{ '★'.repeat(3 - rec.bestRating) }}</i></span><small>ผ่าน {{ rec.clears }} ครั้ง</small> }@if (open(d)) { <a class="enter" [routerLink]="['/battle']" [queryParams]="{farm:d.id}" [attr.aria-label]="'เริ่ม ' + d.name"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><span>เริ่ม</span><span aria-hidden="true">&gt;</span></a> } @else { <span class="lock"><app-icon name="lock" [size]="18" /><span>ผ่านหอคอย<small>ชั้น {{ d.unlockFloor }}</small></span></span> }</div>
+        </li>
+      }</ul>
+      <p class="repeat-note"><app-icon name="scroll" [size]="16" /> หลังโบนัสประจำวัน: รับรางวัลพื้นฐาน {{ repeatPct() }}% · ยังเล่นซ้ำได้</p>
     </section>
-  }
-
-  @if (t.id === 'hunt') {
-    <section class="target">
-      <span><b>เป้าหมาย Hunt</b><small>ช่องที่ดรอปบ่อยขึ้น</small></span>
-      <div class="row">
-        @for (x of targets; track x) {
-          <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="eq.huntTarget() === x" (click)="eq.setHuntTarget(x)">{{ targetLabel[x] }}</button>
-        }
-      </div>
-    </section>
-  }
-
-  <ul class="tiers">
-    @for (d of tiers(); track d.id) {
-      <li class="tier {{ t.tone }}" [class.locked]="!open(d)">
-        <span class="rn"><small>TIER</small><b>{{ roman(d) }}</b></span>
-        <div class="body">
-          <b>{{ d.name }} <small>Lv{{ d.recommendedLevel[0] }}–{{ d.recommendedLevel[1] }}</small></b>
-          <span class="goal">{{ d.stage.special?.goal }}</span>
-          <span class="rw">
-            @if (d.baseRewards.heroExp) { <em>EXP {{ d.baseRewards.heroExp }}</em> }
-            @for (it of d.baseRewards.items ?? []; track it.itemId) { <em>{{ itemName(it.itemId) }} ×{{ it.count }}</em> }
-            @if (d.baseRewards.gold) { <em>ทอง {{ d.baseRewards.gold }}</em> }
-            @if (d.baseRewards.bonusDrops?.length) { <em>20% +1</em> }
-            @if (d.equipmentDrops) { <em>อุปกรณ์ {{ pct(d.equipmentDrops.itemChance) }}%</em> }
-            @if (d.firstClearBonus && !firstClearDone(d.id)) { <em class="first">ครั้งแรก: {{ d.firstClearItem ? 'อุปกรณ์ ' + d.firstClearItem : '+1 หิน' }}</em> }
-          </span>
-        </div>
-        <div class="side">
-          @if (farm()[d.id]; as rec) {
-            <span class="stars" [attr.aria-label]="rec.bestRating + ' ดาว'">{{ '★'.repeat(rec.bestRating) }}<i>{{ '★'.repeat(3 - rec.bestRating) }}</i></span>
-            <small>ผ่าน {{ rec.clears }} ครั้ง</small>
-          }
-          @if (open(d)) {
-            <a class="gm-btn primary" [routerLink]="['/battle']" [queryParams]="{ farm: d.id }"><app-icon name="sword" [size]="14" /> เข้า</a>
-          } @else {
-            <span class="lock"><app-icon name="lock" [size]="13" /> ผ่านชั้น {{ d.unlockFloor }}</span>
-          }
-        </div>
-      </li>
-    }
-  </ul>
-  <p class="repeat-note">โบนัสหมดแล้วยังเล่นได้ · รางวัลหลังโบนัส: Training 55% · อื่น ๆ 60%</p>
-  </section>
   </div>
 </section>

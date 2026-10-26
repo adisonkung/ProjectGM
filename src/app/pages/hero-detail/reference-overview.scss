@@ -1,0 +1,65 @@
+@mixin review {
+:host { display: block; position: relative; isolation: isolate; }
+:host::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(#171a1c06,#171a1c18),url('/ui/eldervane/sanctum.webp') center / cover; }
+.detail { max-width: 1320px; gap: 0; padding: 0 0 24px; margin-top: -18px; }
+.crumbs { position: relative; z-index: 2; padding-inline: 8px; margin-bottom: 10px; }
+.gm-btn { position: relative; isolation: isolate; clip-path: none; border: 0; border-radius: 0; background: transparent; box-shadow: none; min-height: 44px; color: #f8e4b6; &:hover:not(:disabled) { background: transparent; filter: brightness(1.15); } &:disabled { opacity: .6; } }
+.gm-panel { isolation: isolate; border: 0; border-radius: 0; background: transparent; box-shadow: none; padding: 25px 30px; &::before, &::after { display: none; } }
+.tabs { position: relative; z-index: 2; gap: 0; margin: 0 24px -2px; max-width: 850px; button { position: relative; isolation: isolate; border: 0; border-radius: 0; background: transparent; box-shadow: none; min-height: 56px; padding: 10px 20px; color: #e8d7af; margin-right: -10px; &.on { background: transparent; border: 0; box-shadow: none; color: #fff1d3; } &:hover { background: transparent; filter: brightness(1.15); } } }
+.reference-overview {
+ .show { position: relative; isolation: isolate; min-height: 420px; height: clamp(420px,40vw,580px); margin: 0 0 14px; border: 0; border-radius: 0; background: transparent; box-shadow: 0 9px 24px #121a2333; }
+ .key-art { position: absolute; inset: 9px; border-radius: 0; overflow: hidden; mask-image: none; clip-path: polygon(17px 0,calc(100% - 17px) 0,100% 17px,100% calc(100% - 17px),calc(100% - 17px) 100%,17px 100%,0 calc(100% - 17px),0 17px); &::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg,#060d1880,transparent 42%),linear-gradient(90deg,#080f1833,transparent 50%); } }
+ .key { height: 100%; width: 100%; aspect-ratio: auto; object-fit: cover; object-position: 50% 20%; background: #101923; }
+ .fallback-art { width: 100%; height: 100%; min-height: 0; background: radial-gradient(ellipse at 65% 35%,#516477,#0e1722 75%); }
+ .plate { position: absolute; z-index: 1; isolation: isolate; }
+ .eyebrow, .identity-note, .skill-shortcuts { display: none; }
+ .name-line { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin: 0 0 5px; }
+ h1 { font: 500 clamp(25px,2.1vw,32px)/1.35 var(--body); color: #fff2d2; }
+ .hero-stars { font-size: 27px; letter-spacing: 2px; color: #ffda7b; }
+ .hero-class { color: #f0e3ca; font-size: 14px; }
+ .chips { gap: 5px; margin: 10px 0 5px; .gm-chip { padding: 1px 5px; font-size: 11px; background: #d7b16a0a; border-color: #ccb47b33; color: #e2d4b8; } .gm-btn.small { font-size: 11px; min-height: 36px; padding: 5px 15px; } }
+ .hero-status { border-top: 1px solid #d6b57555; grid-template-columns: minmax(0,1fr) auto; padding-top: 10px; gap: 12px; }
+ .lvnum { gap: 4px; small { font-size: 12px; } b { font-size: 20px; } }
+ .level .exp { font-size: 10px; }
+ .power { grid-template-columns: auto auto; align-items: center; gap: 0 7px; padding: 0; app-citadel-icon { grid-row: 1/3; color: #f8e0a1; } span { font-size: 11px; } b { font-size: 22px; } }
+ .content-grid { grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; }
+ .content-grid.single { grid-template-columns: minmax(0,1fr); > .gm-panel { grid-column: 1; grid-row: auto; } }
+ .stars-panel { grid-column: 1; grid-row: 1/3; }
+ .stats { grid-column: 2; grid-row: 1; }
+ .gear { grid-column: 2; grid-row: 2; }
+ .grow { grid-column: 1/-1; grid-row: 3; margin-top: 6px; }
+ .gm-h2 { color: #fff0ce; font-size: 19px; border-bottom: 1px solid #c6a25d66; padding-bottom: 9px; &::after { display: none; } small { font-size: 11px; color: #bfb7a5; } }
+ .star-row { justify-content: center; gap: 14px; font-size: 40px; padding: 10px 0; .st.on { color: #ffda75; text-shadow: 0 1px 3px #82551c,0 0 10px #e4b85433; } }
+ .mem { display: grid; grid-template-columns: 62px minmax(0,1fr); gap: 14px; padding: 6px 0 12px; background: transparent; border: 0; border-radius: 0; .need { min-width: 0; font-size: 14px; small { font-size: 11px; } em { font-size: 12px; } } .gm-btn { grid-column: 1/-1; margin: 4px 0 0; width: 100%; min-height: 62px; font-size: 22px; } }
+ .memory-art { width: 62px; height: 76px; padding: 3px; background: #101519; border: 1px solid #e0bb70; img { object-position: 50% 25%; } }
+ .steps { border-top: 1px solid #c6a25d44; padding-top: 12px; li { padding: 3px 0; } }
+ table { font-size: 15px; th,td { padding-block: 7px; } .tot { font-family: var(--body); color: #fdf0d1; } }
+ .gear-list { gap: 10px; }
+ .gear-slot { padding: 10px 5px; gap: 3px; border-color: #c3a96d44; border-radius: 0; background: linear-gradient(135deg,#30373c55,#0b1014); .gi { width: 35px; height: 32px; } small { font-size: 12px; } b { font-size: 11px; } }
+ .growth-link { padding-block: 7px; }
+}
+@media (max-width: 900px) { .reference-overview { .show { min-height: 400px; } .gm-panel { padding: 23px; } .gm-h2 { font-size: 17px; } .star-row { font-size: 32px; gap: 8px; } } }
+@media (max-width: 720px) {
+ .detail { margin-top: -20px; }
+ .crumbs { padding-inline: 0; .gm-btn { font-size: 12px; padding-inline: 16px; } .step { gap: 2px; .gm-btn { padding-inline: 12px; } } }
+ .tabs { margin-inline: 0; max-width: 100%; button { min-height: 60px; flex-direction: column; padding: 6px 4px; gap: 3px; margin-right: 0; font-size: 11px; app-citadel-icon { width: 21px; height: 21px; scale: .9; } } }
+ .reference-overview {
+  .show { height: 510px; min-height: 0; margin: 0 0 10px; padding: 0; }
+  .key-art { inset: 9px; height: auto; mask-image: none; &::after { background: linear-gradient(0deg,#07111cf0,transparent 60%); } }
+  .key { object-fit: cover; object-position: 68% 22%; }
+  .fallback-art { position: absolute; inset: 9px; width: auto; height: auto; }
+
+  .name-line { grid-template-columns: minmax(0,1fr) auto; align-items: center; h1 { font-size: 26px; } }
+  .hero-stars { font-size: 23px; letter-spacing: 1px; }
+  .chips { margin: 7px 0 4px; }
+  .hero-status { padding-top: 7px; }
+  .content-grid { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .stars-panel, .stats, .gear, .grow { grid-column: 1; grid-row: auto; }
+  .gm-panel { padding: 22px; }
+  .gm-h2 { font-size: 17px; }
+  .star-row { font-size: 33px; gap: 10px; }
+  .steps { font-size: 12px; small { font-size: 11px; } }
+ }
+}
+@media (prefers-reduced-motion: reduce) { .gm-btn:hover { transform: none; } }
+}

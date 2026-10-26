@@ -1,3 +1,9 @@
+import { CitadelIconComponent } from '../../shared/citadel-icon.component';
+import { HeroClass } from '../../core/models/hero';
+import { SummonCampaign, SummonCampaignComponent } from './summon-campaign.component';
+import { SummonVfxComponent } from './summon-vfx.component';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
+import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HERO_BY_ID, HEROES } from '../../core/data/heroes';
@@ -14,7 +20,7 @@ import { SummonSanctumComponent } from './summon-sanctum.component';
 /** Summon gate: base rarity 1★–3★ · pity · duplicates → Hero Memory (develop any hero to 6★ on its detail page) */
 @Component({
   selector: 'app-gacha',
-  imports: [HeroPortraitComponent, IconComponent, RouterLink, SummonSceneComponent, SummonSanctumComponent],
+  imports: [CitadelIconComponent, SummonCampaignComponent, SummonVfxComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonSceneComponent, SummonSanctumComponent],
   templateUrl: './gacha.component.html',
   styleUrl: './gacha.component.scss',
 })
@@ -25,7 +31,7 @@ export class GachaComponent {
   readonly G = GACHA;
   get freeSummons(): boolean { return this.gacha.freeSummons; }
   canAfford(n: 1 | 10): boolean { return this.freeSummons || this.gems() >= (n === 10 ? GACHA.multi : GACHA.single); }
-  readonly info = signal<'rates' | 'pool' | 'memory' | null>(null);
+  readonly info = signal<'banner' | 'rates' | 'pool' | 'memory' | null>(null);
   readonly showResults = signal(false);
   readonly pending = signal<1 | 10 | null>(null);
   readonly confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>('confirmDialog');
@@ -33,13 +39,16 @@ export class GachaComponent {
   readonly lastCount = signal<1 | 10>(1);
   readonly pity = computed(() => this.save.state().pity ?? 0);
   readonly pool = HEROES.map(h => ({ ...h, portrait: heroArt(h.id)?.portrait, className: CLASS_NAME[h.cls] }));
+  readonly classIcon = (cls: HeroClass) => ({ tank: 'class-tank', fighter: 'class-fighter', assassin: 'class-assassin', archer: 'class-archer', mage: 'class-mage', healer: 'class-healer' })[cls];
   readonly preview = this.pool.slice(0, 5);
   readonly showcase = heroArt(HEROES[0]?.id)?.banner;
+  readonly campaign: SummonCampaign = { id: 'standard', kind: 'standard', label: 'อัญเชิญปกติ', title: 'เสียงเรียกแห่งดวงดาว', subtitle: 'เหล่าวีรชนแห่งเอลเดอร์เวย์น', art: this.showcase };
   readonly infoDialog = viewChild.required<ElementRef<HTMLDialogElement>>('infoDialog');
   readonly resultsDialog = viewChild.required<ElementRef<HTMLDialogElement>>('resultsDialog');
-  openInfo(kind: 'rates' | 'pool' | 'memory'): void {
+  openInfo(kind: 'banner' | 'rates' | 'pool' | 'memory'): void {
     this.info.set(kind);
-    this.infoDialog().nativeElement.showModal();
+    if (!this.infoDialog().nativeElement.open) this.infoDialog().nativeElement.showModal();
+    this.infoDialog().nativeElement.querySelector<HTMLElement>('.modal-body')?.scrollTo(0, 0);
   }
   closeInfo(): void { this.infoDialog().nativeElement.close(); }
   openResults(): void {

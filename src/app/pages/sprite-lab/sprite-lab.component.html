@@ -1,0 +1,42 @@
+<section class="lab reference-sprite-lab">
+      <a class="lab-back citadel-surface" routerLink="/heroes"><app-citadel-frame shape="hex" [cut]="15" /><span aria-hidden="true">←</span>กลับ</a>
+      <header class="sprite-heading citadel-surface"><app-citadel-frame shape="chapter" [cut]="26" /><app-citadel-icon name="sword" [size]="42" /><div><h1>ห้องทดสอบท่า</h1><p>ไม่มีผลกับเซฟ</p></div><span class="lab-badge">{{ access.isGm() ? 'GM · เครื่องมือทดสอบ' : 'ทดลองสกิล' }}</span><label class="hero-picker">เลือกฮีโร่ @if (heroPortrait(); as portrait) { <img [src]="portrait" alt="" /> }<select aria-label="เลือกฮีโร่" [value]="heroId()" (change)="heroId.set($any($event.target).value); reset()">@for (h of spriteHeroes; track h.id) { <option [value]="h.id" [selected]="h.id === heroId()">{{ h.name }} ({{ h.id }})</option> }</select></label></header>
+
+      @if (comparisonHeroes.length) {
+        <p class="comparison">เทียบสัดส่วน: {{ comparisonNames }} · ตัวละครยืนบนเลนเดียวกัน</p>
+      }
+      @if (activeEngineReview() && access.isGm()) {
+        <p class="comparison">ทดสอบหนึ่งครั้งด้วยระบบต่อสู้ · เป้าแรก{{ initialStatus ? ' มี ' + initialStatus + ' ก่อนร่าย' : ' ยังไม่มีสถานะก่อนร่าย' }} · จังหวะสำหรับรีวิว</p>
+      }
+      <div class="sprite-stage-shell"><app-tower-ornament [grooved]="true" [ornate]="true" /><div class="stage" [class.anchors]="showAnchors() && access.isGm()">
+        <app-board #board (finishedFx)="onFxFinished($event)" [background]="previewBackground" [units]="units()" [fx]="fx()" [projectiles]="projectiles()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
+        @if (showAnchors() && access.isGm()) {
+          <i class="mark root" [style.left]="mark().root.x" [style.top]="mark().root.y" title="root (feet)"></i>
+          @for (t of mark().anchors; track t.name) { <i class="mark tip" [style.left]="t.x" [style.top]="t.y" [title]="t.name"><b>{{ t.name }}</b></i> }
+        }
+      </div>
+
+      </div>
+      <div class="controls action-tabs" [class.player-actions]="!access.isGm()" role="group" aria-label="เลือกท่าทดสอบ">
+        @for (a of actions(); track a.id) {
+          <button type="button" (click)="play(a.id)" [class.on]="last() === a.id" [attr.aria-pressed]="last() === a.id" [attr.title]="a.label" [attr.aria-label]="a.label" class="citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="14" [crimson]="last() === a.id" [lacquer]="last() === a.id" />{{ actionLabels[a.id] }}</button>
+        }
+      </div>
+      <div class="controls playback-controls citadel-surface"><app-citadel-frame [cut]="14" />
+        <label><input type="checkbox" [checked]="loop()" (change)="loop.set($any($event.target).checked); loop() && play(last())" /> วนซ้ำ</label>
+        <label><input type="checkbox" [checked]="faceLeft()" (change)="faceLeft.set($any($event.target).checked)" /> หันซ้าย</label>
+        @if (access.isGm()) { <label><input type="checkbox" [checked]="showAnchors()" (change)="showAnchors.set($any($event.target).checked)" /> จุด root / anchor</label> }
+        <label>ความเร็ว
+          <select aria-label="ความเร็วคลิป" [value]="speed()" (change)="speed.set(+$any($event.target).value)">
+            <option value="0.25">×0.25</option><option value="0.5">×0.5</option><option value="1">×1</option>
+          </select>
+        </label>
+        @if (access.isGm()) { <label>ตัววาด
+          <select aria-label="ตัววาดท่า" [value]="renderer()" (change)="setRenderer($any($event.target).value)">
+            <option value="dom">DOM</option><option value="pixi">Pixi (WebGL)</option>
+          </select>
+        </label> }
+      </div>
+
+      @if (access.isGm()) { <section class="animation-info citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" /><div><h2>ข้อมูลแอนิเมชัน</h2>@if (animationInfo(); as info) { <dl><div><dt>คลิปที่เลือก</dt><dd>{{ actionLabels[last()] }}</dd></div><div><dt>เฟรมที่เล่น</dt><dd>{{ info.frames }}</dd></div><div><dt>FPS ของคลิป (×1)</dt><dd>{{ info.fps }}</dd></div><div><dt>ความยาวคลิป (×1)</dt><dd>{{ info.seconds }} วินาที</dd></div><div><dt>ขนาดช่องสไปรต์</dt><dd>{{ info.size }}</dd></div></dl> }</div><div class="event-log"><h2>บันทึกเหตุการณ์</h2><ol class="log" aria-live="polite">@for (l of log(); track $index) { <li><b>{{ l.t }}</b> {{ l.text }}</li> } @empty { <li class="empty-log">เลือกท่าเพื่อดูจังหวะและเอฟเฟกต์จริง</li> }</ol></div></section> }
+    </section>

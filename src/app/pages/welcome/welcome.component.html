@@ -1,36 +1,26 @@
-<section class="welcome">
-  <div class="welcome-masthead">
-    <img class="welcome-logo" src="/ui/branding/eldervane-logo-champagne.webp" alt="" width="1738" height="863" fetchpriority="high" />
-  </div>
-
-  <div class="card gm-panel glow">
-    <p class="kicker">ยินดีต้อนรับสู่ เอลเดอร์เวย์น</p>
-    <h1 class="sr-only">Eldervane</h1>
-
+<section class="welcome reference-welcome">
+  <div class="welcome-masthead"><img class="welcome-logo" src="/ui/branding/eldervane-wordmark-champagne.webp" alt="Eldervane" width="2023" height="456" fetchpriority="high" /></div>
+  <div class="card gm-panel citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" />
+    <h1 class="welcome-title">ยินดีต้อนรับสู่ เอลเดอร์เวย์น</h1>
     @if (mode() === 'name') {
-      <p class="lead">เกาะลอยฟ้าแห่งนี้เป็นของคุณแล้ว — ตั้งชื่อให้มันหน่อย</p>
+      <p class="lead">ตั้งชื่อเกาะของคุณ</p>
+      <div class="account-divider" aria-hidden="true"><i></i></div>
       <form (submit)="$event.preventDefault(); start()">
-        <label for="isle-name" class="lbl">ชื่อเกาะ</label>
-        <div class="field" [class.bad]="touched() && error()">
-          <input id="isle-name" type="text" autocomplete="off" enterkeyhint="done" [attr.maxlength]="max * 3"
-                 placeholder="เช่น เกาะดาราลอยฟ้า" [value]="name()" (input)="input($any($event.target).value)" />
-          <button type="button" class="dice" (click)="suggest()" aria-label="สุ่มชื่อ" title="สุ่มชื่อ"><app-icon name="summon" [size]="18" /></button>
+        <div class="name-input-row">
+          <label for="isle-name" class="lbl"><app-citadel-icon name="tower" [size]="30" />ชื่อเกาะ</label>
+          <div class="field" [class.bad]="touched() && error()"><input id="isle-name" type="text" autocomplete="off" enterkeyhint="done" [attr.aria-describedby]="touched() && error() ? 'isle-meta isle-error' : 'isle-meta'" [attr.aria-invalid]="touched() && error() ? 'true' : null" [attr.maxlength]="max * 3" placeholder="เช่น เกาะดาราลอยฟ้า" [value]="name()" (input)="input($any($event.target).value)" /></div>
+          <button type="button" class="dice citadel-surface citadel-control" (click)="suggest()" aria-label="สุ่มชื่อ" title="สุ่มชื่อ"><app-citadel-frame shape="panel" [cut]="12" /><svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><path d="m16 2 12 7v14l-12 7L4 23V9Z" fill="currentColor"/><g fill="#11171c"><circle cx="11" cy="11" r="2"/><circle cx="21" cy="11" r="2"/><circle cx="16" cy="16" r="2"/><circle cx="11" cy="21" r="2"/><circle cx="21" cy="21" r="2"/></g></svg></button>
         </div>
-        <div class="meta">
-          <span class="err" role="alert">{{ touched() ? error() ?? '' : '' }}</span>
-          <span class="count" [class.over]="length() > max">{{ length() }}/{{ max }}</span>
-        </div>
-        @if (clean() && !error()) {
-          <p class="preview"><app-icon name="home" [size]="14" /> เกาะ <b>{{ clean() }}</b></p>
-        }
-        <button type="submit" class="gm-btn primary go" [disabled]="!!error()">เริ่มผจญภัย <app-icon name="arrow" [size]="15" /></button>
+        <div class="meta" id="isle-meta"><span class="count" [class.over]="length() > max">{{ length() }}/{{ max }}</span></div>
+        @if (touched() && error()) { <p class="account-alert" id="isle-error" role="alert"><span aria-hidden="true">!</span>{{ error() }}</p> }
+        <button type="submit" class="gm-btn primary go citadel-surface citadel-control" [disabled]="!!error()"><app-citadel-frame shape="hex" [cut]="24" [crimson]="true" [lacquer]="true" /><app-citadel-icon name="tower" [size]="36" />เริ่มผจญภัย <app-citadel-icon name="arrow" [size]="24" /></button>
         <p class="hint">เปลี่ยนชื่อทีหลังได้ที่หน้า “บัญชี”</p>
       </form>
-      <button type="button" class="switch" (click)="mode.set('import')"><app-icon name="load" [size]="14" /> เคยเล่นที่เครื่องอื่น? ย้ายเซฟมาที่นี่</button>
+      <button type="button" class="switch" (click)="mode.set('import')"><app-icon name="restart" [size]="20" /> ย้ายเซฟจากเครื่องอื่น <app-citadel-icon name="arrow" [size]="16" /></button>
     } @else {
-      <p class="lead">วางรหัสย้ายเซฟ หรือเลือกไฟล์เซฟที่ส่งออกจากเครื่องเดิม</p>
+      <p class="lead">ย้ายเซฟจากเครื่องอื่น</p><div class="account-divider" aria-hidden="true"><i></i></div>
       <app-save-import (imported)="imported()" />
-      <button type="button" class="switch" (click)="mode.set('name')"><app-icon name="back" [size]="14" /> เริ่มเกาะใหม่แทน</button>
+      <button type="button" class="switch" (click)="mode.set('name')"><app-icon name="back" [size]="18" /> เริ่มเกาะใหม่แทน</button>
     }
   </div>
 </section>

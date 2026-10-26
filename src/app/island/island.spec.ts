@@ -474,7 +474,7 @@ describe('Home Island — page', () => {
     expect(el.querySelector('img[src*="tower_base_sealed"]')).not.toBeNull();
     f.componentInstance.tapBuilding('equipment_workshop');
     f.detectChanges();
-    expect(el.querySelector('div.sheet[role="dialog"]')!.textContent).toContain('ผ่านหอคอยชั้น 6');
+    expect(el.querySelector('.building-dialog[role="dialog"]')!.textContent).toContain('ผ่านหอคอย ชั้น 6');
     f.destroy();
   });
 
@@ -483,7 +483,7 @@ describe('Home Island — page', () => {
     const before = JSON.stringify({ ...isl.island(), themeId: null });
     el.querySelector<HTMLButtonElement>('.hud.tr .theme-btn')!.click();
     f.detectChanges();
-    const cards = el.querySelectorAll<HTMLButtonElement>('.themes-sheet .theme-card');
+    const cards = el.querySelectorAll<HTMLButtonElement>('.themes-dialog .classic-theme');
     expect(cards.length).toBe(Object.keys(ISLAND_THEMES).length);
     [...cards].find(c => c.textContent!.includes('Cursed Hollow'))!.click();
     f.detectChanges();
@@ -499,7 +499,7 @@ describe('Home Island — page', () => {
     const nav = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
     f.componentInstance.tapBuilding('tower');
     f.detectChanges();
-    const btn = el.querySelector<HTMLButtonElement>('.sheet .acts button')!;
+    const btn = el.querySelector<HTMLButtonElement>('.building-dialog .detail-actions button')!;
     btn.click();
     expect(nav).toHaveBeenCalledWith(['/tower'], { queryParams: undefined });
     f.destroy();
@@ -532,7 +532,7 @@ describe('Home Island — page', () => {
     const teamBefore = JSON.stringify(save.state().team);
     f.componentInstance.tapHero(bench.uid);
     f.detectChanges();
-    const btns = [...el.querySelectorAll<HTMLButtonElement>('.sheet.hero .acts button')];
+    const btns = [...el.querySelectorAll<HTMLButtonElement>('.hero-dialog .detail-actions button')];
     btns.find(b => b.textContent!.includes('ฮีโร่หลัก'))!.click();
     f.detectChanges();
     expect(isl.mainHeroUid()).toBe(bench.uid);

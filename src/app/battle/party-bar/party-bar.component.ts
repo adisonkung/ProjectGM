@@ -1,3 +1,4 @@
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { Component, input, output } from '@angular/core';
 import { heroArt, HeroArt } from '../../core/data/hero-art';
 import { UnitView } from '../board/board.component';
@@ -9,13 +10,14 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
  */
 @Component({
   selector: 'app-party-bar',
-  imports: [UnitSpriteComponent],
+  imports: [UnitSpriteComponent, CitadelFrameComponent],
   template: `
     <div class="bar" [class.compact]="compact()" role="group" aria-label="ทีมของเรา แตะรูปเมื่อเกจเต็มเพื่อใช้ท่าไม้ตาย">
       @for (u of units(); track u.id; let i = $index) {
         @let ready = u.alive && u.manaPct >= 100;
         @let art = artOf(u.heroId);
         <div class="card" [class.ready]="ready" [class.cut]="ready && alert() && !!u.interrupter" [class.queued]="!!u.queued" [class.dead]="!u.alive">
+          @if (referenceChrome()) { <app-citadel-frame shape="panel" [cut]="10" /> }
           <button type="button" class="frame" [style.--rc]="'var(--r' + (u.star ?? 1) + ')'" [disabled]="!ready" (click)="ult.emit(u.id)"
                   [attr.aria-label]="u.name + (ready ? ' ท่าไม้ตายพร้อม กดเพื่อใช้' : ' เกจ ' + pct(u.manaPct) + '%')">
             @if (art) {
@@ -51,7 +53,7 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
             @for (m of modeSlots; track m.slot) {
               @let mode = modeOf(u, m.slot);
               <button type="button" class="mode" [class]="'mode ' + mode" (click)="modeChange.emit({ id: u.id, slot: m.slot })"
-                      [attr.title]="m.label + ': ' + modeName(mode) + ' — แตะเพื่อเปลี่ยน (AUTO → เก็บไว้ → กดเอง)'">{{ m.short }}{{ modeTag(mode) }}</button>
+                      [attr.title]="m.label + ': ' + modeName(mode) + ' — แตะเพื่อเปลี่ยน (AUTO → เก็บไว้ → กดเอง)'">{{ referenceChrome() && m.slot === 'ult' ? 'ULT' : m.short }}{{ modeTag(mode) }}</button>
             }
           </span>
           <span class="name">{{ u.name }}</span>
@@ -117,10 +119,10 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
       border-radius: 999px; background: #000b; font: 700 11px var(--disp); color: var(--cyan); letter-spacing: 0.08em;
     }
     // เกจเต็ม: เส้นนีออนวิ่งรอบกรอบ (conic-gradient หมุน แล้วเจาะกลางด้วย ::after)
-    .ready .frame { box-shadow: 0 0 12px #5ec8e0aa, 0 0 22px #b07cf066; animation: pulse 1.2s ease-in-out infinite alternate; }
+    .ready .frame { box-shadow: 0 0 12px #5ec8e0aa, 0 0 22px #e4bf6b44; animation: pulse 1.2s ease-in-out infinite alternate; }
     .ready .frame::before {
       content: ''; position: absolute; inset: -40%; z-index: 0;
-      background: conic-gradient(from 0deg, transparent 0 55%, #5ec8e0, #fff, #b07cf0, transparent 85%);
+      background: conic-gradient(from 0deg, transparent 0 55%, #5ec8e0, #fff, #f4d694, transparent 85%);
       animation: spin 1.4s linear infinite;
     }
     .ready .frame::after {
@@ -187,12 +189,18 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
       .compact .cd { font-size: 9px; }
     }
     @media (prefers-reduced-motion: reduce) { .ready .frame::before, .ready .frame { animation: none; } }
+
+    .bar .frame, .bar .pic, .bar .sk, .bar .mode { border-radius: 2px; }
+    .bar .frame { border: 1px solid #d7b477; background: #11181e; }
+    .bar .sk { box-shadow: inset 0 0 0 1px #c9a46580; }
+    .bar .name { color: #f4e4c5; }
   `,
 })
 export class PartyBarComponent {
   readonly units = input<UnitView[]>([]);
   /** battle-screen dock layout (horizontal cards) */
   readonly compact = input(false);
+  readonly referenceChrome = input(false);
   readonly ult = output<number>();
   /** tap a ready skill icon = use it now (manual command, also for RESERVE / MANUAL skills) */
   readonly skill = output<{ id: number; slot: 'skill' | 'skill2' }>();

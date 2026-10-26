@@ -1,0 +1,25 @@
+// Same antique-gold surface approved on the Dungeons reference revision.
+@mixin palette {
+  --ornament-face:linear-gradient(120deg,#17202be8,#080e16f2);
+  --ornament-inset:linear-gradient(130deg,#17233355,#070d1844);
+  --ornament-outer-width:2.1px;--ornament-inner-width:1px;
+  --ornament-gold-light:#d9b577;--ornament-gold-low:#735022;
+  --ornament-gold-mid:#b99048;--ornament-gold-shadow:#5d401d;--ornament-gold-end:#c89c50;
+  --ornament-inner-color:#b38b47;--ornament-glint:#e1be83;--ornament-engraving:#b78e4e;
+  --ornament-edge-filter:drop-shadow(0 1px 1px #000b);
+  --ornament-crimson-filter:drop-shadow(0 2px 4px #13060188);
+  --ornament-challenge-filter:drop-shadow(0 2px 4px #12060088);
+}
+
+// Summon-specific dark alloy. Do not alter the approved Tower/Dungeons defaults.
+@mixin cinematic-palette {
+  @include palette;
+  --ornament-gold-light:#cba867;--ornament-gold-low:#442b12;
+  --ornament-gold-mid:#b68a43;--ornament-gold-shadow:#30200f;--ornament-gold-end:#a77734;
+  --ornament-inner-color:#a78046;--ornament-glint:#f0d9a8;--ornament-engraving:#8e6835;
+  --citadel-gold-stop-0:#d0b178;--citadel-gold-stop-1:#503314;--citadel-gold-stop-2:#b99151;--citadel-gold-stop-3:#a57835;--citadel-gold-stop-4:#39270f;--citadel-gold-stop-5:#c4a065;--citadel-gold-stop-6:#80602b;
+  --ornament-outer-width:2.7px;--ornament-inner-width:.8px;
+  --ornament-face:linear-gradient(125deg,#101b28f5,#050b13f5);
+  --ornament-inset:linear-gradient(140deg,#17223466,#03080f66);
+  --ornament-edge-filter:drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #d3b57455);
+}

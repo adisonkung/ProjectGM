@@ -1,0 +1,38 @@
+[
+  {
+    "star": 1,
+    "asset": "public/ui/eldervane/summon-card-common.webp",
+    "sha256": "f5f9e808661e47bc5bd9d914d4f420d4fac8885ac4905f68c6d5bfb2376933fb",
+    "sourceImage": "exec-808b2c81-2969-46b4-89cf-a1400f6b6e86.png",
+    "sourceSha256": "e845aeb35faa82ed664fa9fbd048101c2b2459a9d2f7102a939fab2c2796a9bd",
+    "generatedWith": "image_gen",
+    "generatedDate": "2026-10-25 Asia/Bangkok",
+    "reviewStatus": "pending",
+    "alphaBackground": true,
+    "optimization": "640px wide WebP quality94 alphaQuality100; no programmatic background removal or recoloring"
+  },
+  {
+    "star": 2,
+    "asset": "public/ui/eldervane/summon-card-uncommon.webp",
+    "sha256": "344f355ca9e77d092cfedec8af25284bb9e16153f5a62e9ded2d5f736d9df977",
+    "sourceImage": "exec-83527116-de23-4379-af9a-a87d00ec310e.png",
+    "sourceSha256": "aaee7fef05d7227d3be49f0699a6f8f4a5c0b6f1597a53118b83bb3e59105a3e",
+    "generatedWith": "image_gen",
+    "generatedDate": "2026-10-25 Asia/Bangkok",
+    "reviewStatus": "pending",
+    "alphaBackground": true,
+    "optimization": "640px wide WebP quality94 alphaQuality100; no programmatic background removal or recoloring"
+  },
+  {
+    "star": 3,
+    "asset": "public/ui/eldervane/summon-card-celestial.webp",
+    "sha256": "0764783de50b6205457a383eddc55fad48eb7c202943a5779cd4bf07a4bde7aa",
+    "sourceImage": "exec-444c3fb8-2d99-4eb1-9cdd-8d8d6ca5eba7.png",
+    "sourceSha256": "f2a2ebc7ab21654349cb963f11bd226f226d6ecb01494b3ced4490a91d7f539f",
+    "generatedWith": "image_gen",
+    "generatedDate": "2026-10-25 Asia/Bangkok",
+    "reviewStatus": "pending",
+    "alphaBackground": true,
+    "optimization": "640px wide WebP quality94 alphaQuality100; no programmatic background removal or recoloring"
+  }
+]

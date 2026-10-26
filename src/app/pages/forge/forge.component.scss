@@ -1,3 +1,4 @@
+@use '../../shared/citadel-material' as material;
 @use '../../shared/fantasy-ui' as fantasy;
 @use '../../shared/equipment-ui' as equipment;
 @include equipment.scene('/ui/eldervane/sanctum.webp');
@@ -48,3 +49,79 @@
 .tabs button { @include fantasy.angled; min-height: 58px; font-family: var(--body); padding-inline: 16px; border: 1px solid transparent; }
 .tabs .on { background: linear-gradient(115deg,#702338,#9c2a42); border-color: #d4b67a99; box-shadow: none; app-icon { color: #f0d8aa; filter: none; } }
 .base, .rar, .main-stat, .result, .items li { border-radius: 3px; }
+
+@include material.surfaces;
+
+// Sheets05/06 review: clear recipe steps, card selection and readable real costs.
+.forge { max-width: 1360px; margin-inline: auto; }
+.head { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: center; gap: 24px; }
+.head .gm-sub { max-width: 48ch; }
+.mats { position: relative; isolation: isolate; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); padding: 22px; gap: 8px; margin: 0;
+  .gm-chip { white-space: normal; min-width: 0; padding: 7px 10px; font-size: 12px; border-radius: 0; }
+}
+.materials-title { grid-column: 1/-1; color: #f2d8a6; font-weight: 500; font-size: 14px; }
+.tabs { border: 0; background: transparent; padding: 0; gap: 4px; overflow: visible; }
+.tabs button { min-height: 62px; }
+.rarities { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.rar.citadel-control { min-height: 92px; padding: 18px; }
+.rar b { font-size: 15px; font-family: var(--body); }
+.rar small { font-size: 13px; }
+.steps { gap: 18px; }
+.base.citadel-control { padding: 18px; }
+.base b { font-family: var(--body); font-size: 14px; }
+.cost span small { font-size: 12px; }
+.main-stat { font-family: var(--body); }
+.msg, .msg.bad { position: relative; isolation: isolate; border: 0; border-radius: 0; background: transparent; padding: 16px 22px; }
+.enhance-layout .items { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-top: 20px; }
+.enhance-layout .items li { padding: 0; border: 0; background: transparent; min-width: 0; box-shadow: none; }
+.enhance-layout .items .none { grid-column: 1/-1; padding: 35px 20px; }
+.enhance-pick { position: relative; isolation: isolate; display: grid; align-content: start; justify-items: center; width: 100%; height: 100%; padding: 18px 14px; gap: 12px; border: 0; background: transparent; text-align: center;
+  .gi { width: min(100px,100%); }
+  b { font-size: 14px; font-weight: 500; line-height: 1.6; }
+  small { font-size: 12px; line-height: 1.7; }
+}
+.salvage-panel .salvage-item { position: relative; isolation: isolate; background: transparent; border: 0; box-shadow: none; padding: 18px 22px; border-radius: 0; }
+.salvage-item .gi { width: 76px; }
+.salvage-item .info .nm { font: 500 16px/1.6 var(--body); }
+.salvage-item .info small { font-size: 13px; line-height: 1.8; }
+.salvage-item .act { gap: 10px; }
+.salvage-item .act .gm-btn { min-height: 44px; padding-inline: 20px; }
+@media(max-width:1150px) { .enhance-layout .items { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:900px) { .head { grid-template-columns: minmax(0,1fr); gap: 18px; } }
+@media(max-width:720px) {
+  .mats { padding: 18px; gap: 6px; }
+  .mats .gm-chip { padding: 7px 9px; }
+  .tabs button { min-height: 56px; padding-inline: 10px; }
+  .rar.citadel-control { padding: 16px; }
+  .enhance-pick { padding: 16px 12px; gap: 10px; }
+  .enhance-pick .gi { width: min(88px,100%); }
+  .salvage-panel .salvage-item { padding: 18px; gap: 12px; }
+  .salvage-item .gi { width: 60px; }
+  .salvage-item .act { width: 100%; justify-content: end; }
+}
+.steps .slot-types .gm-btn[aria-pressed], .steps .row .gm-btn[aria-pressed], .steps .base[aria-pressed] {
+  background: transparent; border: 0; box-shadow: none;
+}
+
+.random-craft-note { display:flex; gap:14px; align-items:start; padding:20px; border-block:1px solid #d2ad6655; background:#d2ad6609; color:#eed9b2; p {font-size:14px;line-height:1.9;} }
+.salvage-layout {display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:start;}
+.selection-head {display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding-bottom:18px;color:#f1d7a7;label{display:flex;gap:10px;align-items:center;cursor:pointer;}span{font-size:13px;}}
+.salvage-check {display:flex;align-items:center;gap:14px;flex:1;min-width:0;cursor:pointer;}
+.salvage-check input,.selection-head input {width:22px;height:22px;flex:none;accent-color:#b91a31;cursor:pointer;}
+.salvage-check:has(input:disabled) {opacity:.6;cursor:default;}
+.salvage-layout .salvage-item > button {flex:none;padding-inline:16px;}
+.salvage-summary {display:grid;gap:18px;h2{margin:0;color:#f1d7a7;font:500 26px var(--body);}h3{font-size:16px;color:#eed4a1;margin:0;}p{margin:0;} >p:first-of-type{display:flex;justify-content:space-between;gap:12px;padding-block:14px;border-block:1px solid #d2ad6655;} }
+.salvage-rewards {display:grid;gap:12px;p{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #c9a56633;margin:0;font-size:14px;}b{color:#f1d7a7;white-space:nowrap;}}
+.salvage-warning {color:#f1b2a1;font-size:13px;line-height:1.8;}
+.confirm-item-list {max-height:160px;overflow:auto;text-align:left;font-size:14px;padding-left:22px;}
+@media(max-width:950px){.salvage-layout{grid-template-columns:minmax(0,1fr);}}
+@media(max-width:720px){.salvage-check{gap:10px;}.salvage-layout .salvage-item{flex-wrap:nowrap;padding:18px 14px;}.salvage-item .gi{width:48px;}.salvage-item .info .nm{font-size:14px;}.salvage-item .info small{font-size:12px;}}
+
+/* Generated showcase layers: sword identity is shared with the inventory. */
+.forge-showcase { grid-column: 1; grid-row: 1 / 5; position: relative; width: 100%; aspect-ratio: 1.18; overflow: hidden; border: 1px solid #ad843d; border-radius: 10px; background: url('/ui/generated/equipment/palace-forge.webp') center / cover; }
+.forge-showcase .preview-gear { position: absolute; width: 85%; max-width: none; height: auto; aspect-ratio: 1; left: 7.5%; top: -8%; margin: 0; padding: 0; background: none; border: 0; filter: none; }
+.forge-showcase .preview-gear::before, .forge-showcase .preview-gear::after { display: none; }
+.crafted-art { width: 110px; margin: 10px auto; }
+
+@media(max-width:1150px) { .forge-showcase { grid-column: 1 / -1; grid-row: auto; max-width: 550px; justify-self: center; } }
+@media(min-width:951px) { .forge-showcase { min-height: 320px; } }

@@ -1,5 +1,11 @@
+import { RouterLink } from '@angular/router';
+import { GameAccessService } from '../../core/services/game-access.service';
+import { A11yModule } from '@angular/cdk/a11y';
+import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
+import { CitadelIconComponent } from '../../shared/citadel-icon.component';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { ISLAND_NAME_MAX } from '../../core/rules/account';
+import { ISLAND_NAME_MAX, nameLength, normalizeIslandName } from '../../core/rules/account';
 import { AccountService } from '../../core/services/account.service';
 import { IconComponent } from '../../shared/icon.component';
 import { SaveImportComponent } from '../../shared/save-import.component';
@@ -7,17 +13,19 @@ import { SaveImportComponent } from '../../shared/save-import.component';
 /** island name + move the save to another device (transfer code / file) — step 1 before cloud login */
 @Component({
   selector: 'app-account',
-  imports: [IconComponent, SaveImportComponent],
+  imports: [RouterLink, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, IconComponent, SaveImportComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss',
 })
 export class AccountComponent {
   readonly account = inject(AccountService);
+  readonly access = inject(GameAccessService);
   readonly max = ISLAND_NAME_MAX;
 
   readonly editing = signal(false);
   readonly draft = signal('');
+  readonly draftLength = computed(() => nameLength(normalizeIslandName(this.draft())));
   readonly draftError = computed(() => this.account.nameError(this.draft()));
 
   readonly code = signal('');

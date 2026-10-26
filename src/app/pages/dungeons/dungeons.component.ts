@@ -9,14 +9,17 @@ import { FarmDungeonDefinition } from '../../core/models/economy';
 import { EquipmentService } from '../../core/services/equipment.service';
 import { ProgressionService } from '../../core/services/progression.service';
 import { SaveService } from '../../core/services/save.service';
-import { AdventureSceneComponent } from '../../shared/adventure-scene.component';
+import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
+import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { IconComponent } from '../../shared/icon.component';
+import { DungeonRewardIconComponent } from './dungeon-reward-icon.component';
 
 /** one farm dungeon family = one menu (its own page, own mode) */
 export interface DungeonType {
   id: string;
   pool: string;
   name: string;
+  label: string;
   mode: string;
   icon: string;
   tone: string;
@@ -27,25 +30,25 @@ export interface DungeonType {
 
 export const DUNGEON_TYPES: DungeonType[] = [
   {
-    id: 'training', pool: 'TRAINING', name: 'Training Ground', mode: 'ต้านคลื่น', icon: 'shield', tone: 'survival',
+    id: 'training', pool: 'TRAINING', name: 'Training Ground', label: 'สนามฝึก', mode: 'ต้านคลื่น', icon: 'training', tone: 'survival',
     blurb: 'ศัตรูเดินเข้ามาไม่หยุด — ยืนให้รอดจนหมดเวลา ยิ่งล้มศัตรูได้มากยิ่งได้ดาวมาก',
     rules: ['ชนะเมื่อรอดครบเวลา', 'ดาวตามจำนวนที่ฆ่า (3★ ต้องไม่มีใครล้ม)', 'ฮีโร่ในช่องฝึกได้ EXP ส่วนแบ่ง'],
     reward: 'EXP ฮีโร่ + ยา EXP',
   },
   {
-    id: 'ascension', pool: 'ASCENSION', name: 'Ascension Trial', mode: 'ตีบอสเดี่ยว', icon: 'crown', tone: 'boss_duel',
+    id: 'ascension', pool: 'ASCENSION', name: 'Ascension Trial', label: 'บททดสอบเลื่อนขั้น', mode: 'ตีบอสเดี่ยว', icon: 'ascension', tone: 'boss_duel',
     blurb: 'ดวลผู้พิทักษ์ศาลเทพตัวเดียว (สลับตัวตามวัน) ล้มให้ได้ก่อนมันคลั่ง — เกินเวลาแล้วบอสแรงขึ้นมาก',
     rules: ['บอสตัวเดียว เลือดหนา', 'ถึงเวลาที่กำหนดบอสจะคลั่ง', '3★ = ไม่มีใครล้ม + ทันเวลา'],
     reward: 'หิน Breakthrough',
   },
   {
-    id: 'hunt', pool: 'HUNT', name: 'Equipment Hunt', mode: 'ล่าสมบัติ', icon: 'coin', tone: 'treasure',
+    id: 'hunt', pool: 'HUNT', name: 'Equipment Hunt', label: 'ล่าอุปกรณ์', mode: 'ล่าสมบัติ', icon: 'hunt', tone: 'treasure',
     blurb: 'โคโบลด์ขนทองจะวิ่งหนีเมื่อถูกตีหรืออยู่นานเกิน (ใกล้ตายจะปาระเบิดควันวาร์ปหนี) — จับให้ได้ก่อนมันหลุดขอบสนาม',
     rules: ['ตัวที่จับได้เท่านั้นที่ดรอปอุปกรณ์', 'ตัวที่หนีไม่นับ แต่ไม่ทำให้แพ้', 'ดาวตามจำนวนที่จับได้'],
     reward: 'อุปกรณ์ + Ore + เศษอุปกรณ์',
   },
   {
-    id: 'trial', pool: 'SKILL', name: 'Skill Trial', mode: 'ภารกิจทดสอบ', icon: 'scroll', tone: 'challenge',
+    id: 'trial', pool: 'SKILL', name: 'Skill Trial', label: 'บททดสอบสกิล', mode: 'ภารกิจทดสอบ', icon: 'skillhall', tone: 'challenge',
     blurb: 'ด่านมีกฎเฉพาะ เช่น ห้ามปล่อยให้ศัตรูร่ายสำเร็จ หรือต้องล้มหมอผีให้ทัน — พลาดกฎ = ล้มเหลว',
     rules: ['อ่านเป้าหมายของแต่ละด่านก่อนลง', 'ใช้ท่าตัดร่าย / Break / โฟกัส', 'ดาวตามจำนวนครั้งที่พลาด'],
     reward: 'Skill Tome',
@@ -55,7 +58,7 @@ export const DUNGEON_TYPES: DungeonType[] = [
 /** Farm dungeons menu: one tab per dungeon type, each with its tiers (I–V) */
 @Component({
   selector: 'app-dungeons',
-  imports: [RouterLink, IconComponent, AdventureSceneComponent],
+  imports: [RouterLink, IconComponent, TowerOrnamentComponent, DungeonRewardIconComponent],
   templateUrl: './dungeons.component.html',
   styleUrl: './dungeons.component.scss',
 })
@@ -85,6 +88,10 @@ export class DungeonsComponent {
 
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
   readonly pct = (x: number) => Math.round(x * 100);
+  readonly sceneOf = (d: FarmDungeonDefinition) => '/' + (BACKGROUNDS[d.stage.background ?? 'forest-1'] ?? BACKGROUNDS['forest-1']).file;
+  readonly itemIcon = (id: string) => id.startsWith('bt_') ? 'crystal' : id;
+  readonly repeatPct = computed(() => this.pct(this.tiers()[0].repeatRewardMultiplier));
+  readonly bonusMultiplier = computed(() => this.tiers()[0].dailyBonusMultiplier);
   readonly roman = (d: FarmDungeonDefinition) => d.name.split(' ').pop() ?? '';
   readonly open = (d: FarmDungeonDefinition) => this.cleared() >= d.unlockFloor;
 

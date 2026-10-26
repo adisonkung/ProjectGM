@@ -1,3 +1,4 @@
+import { GENERATED_ICONS } from '../core/data/generated-art';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 /** stroke paths (24×24 viewBox) for the game's UI glyphs — drawn in currentColor */
@@ -40,12 +41,13 @@ export const ICON_PATHS: Record<string, string> = {
 @Component({
   selector: 'app-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<svg viewBox="0 0 24 24" [attr.width]="size() ?? '1em'" [attr.height]="size() ?? '1em'" fill="none" stroke="currentColor"
-    [attr.stroke-width]="stroke()" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path [attr.d]="d()" /></svg>`,
-  styles: [':host { display: inline-flex; line-height: 0; flex: none; }'],
+  template: `@if (art(); as src) { <img [src]="src" [style.width]="size() === null ? '1em' : size() + 'px'" [style.height]="size() === null ? '1em' : size() + 'px'" alt="" aria-hidden="true" decoding="async" /> } @else { <svg viewBox="0 0 24 24" [attr.width]="size() ?? '1em'" [attr.height]="size() ?? '1em'" fill="none" stroke="currentColor"
+    [attr.stroke-width]="stroke()" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path [attr.d]="d()" /></svg> }`,
+  styles: ['img { object-fit: contain; transform: scale(1.3); pointer-events: none; } :host { display: inline-flex; line-height: 0; flex: none; }'],
 })
 export class IconComponent {
   readonly name = input.required<string>();
+  readonly art = computed(() => GENERATED_ICONS[this.name()]);
   readonly size = input<number | null>(null);
   readonly stroke = input(1.7);
   readonly d = computed(() => ICON_PATHS[this.name()] ?? ICON_PATHS["star"]);

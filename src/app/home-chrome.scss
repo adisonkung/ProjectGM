@@ -1,4 +1,4 @@
-// Only the reviewed Home pass uses this chrome; other routes await their own comparison.
+// Shared chrome uses the reviewed Home geometry on every named game route.
 .reference-home {
   .bar { height: 72px; min-height: 72px; gap: 0; padding: 0 14px 0 26px; grid-template-columns: minmax(150px,16%) minmax(0,1fr) auto; background: linear-gradient(115deg,#171c20,#0f1418 65%,#1b2024); border-bottom: 2px solid #d5b470; box-shadow: 0 2px 0 #111,0 3px 0 #80602e,0 5px 15px #0005; }
   .brand { width: 100%; max-width: 220px; padding-right: 10px; height: 62px; }

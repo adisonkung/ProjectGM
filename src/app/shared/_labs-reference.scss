@@ -1,0 +1,86 @@
+// Sheet15. Lab-only presentation; shared engine cells, actions and authored clips stay unchanged.
+html body .app {
+ app-battle:has(.reference-lab),app-sprite-lab {
+  display:block;position:relative;isolation:isolate;
+  &::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:url('/ui/eldervane/sanctum.webp') center 38%/cover;}
+ }
+ app-battle .reference-lab,app-sprite-lab .reference-sprite-lab {
+  container-type:inline-size;max-width:1180px;padding:0;margin:auto;gap:0;min-width:0;
+  --lab-cell:min(72px,calc((100cqw - 24px)/16));
+  --ornament-gold-light:#f2d49a;--ornament-gold-low:#80511e;--ornament-gold-mid:#d8ae61;--ornament-gold-shadow:#70471a;--ornament-gold-end:#e7c17b;--ornament-inner-color:#d4ad65;
+  --ornament-face:linear-gradient(120deg,#1b2229f2,#080e15f0);--ornament-inset:radial-gradient(ellipse at 0 0,#c6a56912,transparent 75%);
+  --citadel-gold-stop-0:#f9e8ab;--citadel-gold-stop-1:#7d511f;--citadel-gold-stop-2:#f4d38e;--citadel-gold-stop-3:#bf9342;--citadel-gold-stop-4:#68431b;--citadel-gold-stop-5:#edce87;--citadel-gold-stop-6:#ad7f38;
+  .citadel-surface{position:relative;isolation:isolate;}
+  .lab-heading,.sprite-heading{display:flex;align-items:center;gap:18px;padding:19px 34px;min-height:100px;position:relative;isolation:isolate;flex-wrap:wrap;color:#f6dfac;
+    h1{font:600 31px/1.45 'Eldervane Trirong',var(--body);margin:0;color:#f6e8c9;}
+    p{font-size:12px;line-height:1.6;color:#d9cbb2;margin:3px 0 0;}
+  }
+  .lab-badge{padding:6px 15px;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%);background:linear-gradient(135deg,#b69651,#fae3a0 50%,#866027);position:relative;isolation:isolate;font-size:12px;color:#f9e4b6;white-space:nowrap;&::before{content:'';position:absolute;inset:1px;z-index:-1;background:#0b131b;clip-path:inherit;}}
+  button,select{font-family:var(--body);}
+  button:focus-visible,select:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #ffdfa1;outline-offset:3px;}
+  .citadel-control{border:0;border-radius:0;background:none;box-shadow:none;clip-path:none;color:#f8e7c2;cursor:pointer;}
+ }
+ app-battle .reference-lab {
+  &:not(.fighting){width:100%;}
+  .lab-heading .power{margin-left:auto;gap:11px;font-size:14px;b{font-size:23px;color:#f4db9d;}}
+  .floors{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:13px 20px;color:#eee1c5;>span{font:500 18px 'Eldervane Trirong',var(--body);margin-right:8px;}button{min-width:49px;min-height:42px;padding:8px 15px;font-size:17px;}}
+  >.status{display:flex;flex-wrap:wrap;gap:12px;margin:0;padding:8px 18px;background:#101921ef;border-inline:1px solid #b39350;color:#dfcfaa;font-size:11px;.chip{padding:0;border:0;background:none;font-size:11px;}.stage-name{font-size:11px;}}
+  app-placement .battle-layout{--cell:var(--lab-cell);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:9px;
+    >.battle-board-shell{grid-column:1/-1;position:relative;isolation:isolate;padding:6px;overflow:hidden;width:max-content;max-width:100%;justify-self:center;>app-tower-ornament{z-index:10;.face,.inner-face{display:none;}}}
+    .board{margin-top:calc(var(--cell)*-1);border:0;border-radius:0;box-shadow:none;clip-path:polygon(13px 0,calc(100% - 13px) 0,100% 13px,100% calc(100% - 13px),calc(100% - 13px) 100%,13px 100%,0 calc(100% - 13px),0 13px);}
+    .zone-headings{position:absolute;display:grid;z-index:8;pointer-events:none;top:calc(var(--cell) + 6px);left:8px;right:8px;font:500 15px 'Eldervane Trirong',var(--body);grid-template-columns:6fr 4fr 6fr;span{background:#0b151ddc;border:0;padding:8px 10px;color:#f8e3ad;app-icon{display:none;}}span:nth-child(2){visibility:hidden;}span:last-child{color:#f2d8a5;}}
+    .lines{display:none;}.cell::before{background:none!important;border:0!important;box-shadow:none!important;}.cell.ally:hover::before{background:#e0c07033!important;}
+    .battle-squad{grid-column:1;grid-row:2/span 2;display:grid;grid-template-rows:45px 1fr;gap:5px;position:relative;isolation:isolate;padding:8px;min-width:0;}
+    .battle-team-cards{display:flex;gap:6px;min-height:110px;}
+    .battle-hero{position:relative;isolation:isolate;flex:1 1 0;min-width:0;display:grid;grid-template-rows:1fr 16px 18px;border:0;background:none;color:#f1d7a8;padding:5px;>img{position:absolute;inset:5px;width:calc(100% - 10px);height:calc(100% - 10px);object-fit:cover;z-index:-1;} &::after{content:'';position:absolute;inset:5px;z-index:-1;background:linear-gradient(transparent 45%,#07111bf2 85%);}}
+    .battle-hero-level{grid-row:2;display:flex;justify-content:space-between;gap:3px;padding-inline:3px;font-size:10px;}.battle-hero-stars{grid-row:3;color:#efc46b;line-height:1.2;font-size:16px;text-align:center;}
+    .battle-actions{grid-column:2;grid-row:2;display:grid;grid-template-columns:1fr 1.2fr 1.2fr;gap:5px;align-content:start;button{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 15px;min-height:51px;border:0;background:none;color:#f4dfb8;font:500 15px/1.5 'Eldervane Trirong',var(--body);}.lab-start{font-size:18px;}app-icon,app-citadel-icon{flex:none;}}
+    .battle-reserves{grid-column:2;grid-row:3;min-width:0;padding:9px 12px;position:relative;isolation:isolate;display:grid;grid-template-rows:20px 1fr;header{display:flex;align-items:center;justify-content:space-between;h2{font:500 14px 'Eldervane Trirong',var(--body);margin:0;color:#ead8ad;}button{border:0;background:none;color:#d6be89;min-width:28px;min-height:25px;}}.bench{display:flex;flex-wrap:nowrap;overflow:auto;gap:6px;padding:6px 0 0;border:0;background:none;min-height:90px;}.bench .card{flex:0 0 72px;width:72px;position:relative;isolation:isolate;min-height:82px;padding:3px;border:1px solid #b59550;background:#0b131c;}.portrait{width:100%;height:100%;min-height:76px;}.info{position:absolute;bottom:3px;left:3px;right:3px;background:#05101bc9;b{font-size:9px;}small{display:none;}}.empty{font-size:11px;}}
+    >.hint{grid-column:1/-1;grid-row:4;font-size:11px;min-height:17px;line-height:1.6;margin:0;padding:0 7px;color:#f0ddb8;background:#09141ac4;}
+  }
+  app-team-presets .presets.reference-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;min-width:0;.preset{padding:0;min-height:45px;border:0;background:none;box-shadow:none;}.load{min-height:45px;padding:8px 31px 8px 14px;gap:0;}.name{font:500 16px 'Eldervane Trirong',var(--body);color:#f6e4bc;}.faces{display:none;}.preset-options{position:absolute;right:3px;top:0;z-index:20;summary{display:grid;place-items:center;width:27px;min-height:45px;cursor:pointer;list-style:none;color:#d3b779;}summary::-webkit-details-marker{display:none;}}.preset-options-panel{position:absolute;top:45px;left:0;width:210px;padding:11px;z-index:30;isolation:isolate;button{display:flex;align-items:center;gap:8px;padding:10px;border:0;background:none;color:#f1dcb2;min-height:42px;font-size:13px;}}}
+  .battle-squad:has(.preset-options[open]){z-index:40;}
+  .lab-simulation{position:relative;isolation:isolate;margin-top:9px;padding:16px 20px;color:#f2dfb9;h2{font:500 17px 'Eldervane Trirong',var(--body);margin:0 0 7px;}.simulation-scroll{overflow-x:auto;}table{border-collapse:collapse;width:100%;font-size:14px;text-align:center;}th,td{border:1px solid #a48d5a55;padding:8px 13px;}th{font-weight:500;color:#e7dbc0;background:#37424b55;}td{color:#f9ebca;background:#111a22cc;}}
+ }
+ app-sprite-lab .reference-sprite-lab {
+  .lab-back{position:relative;isolation:isolate;display:flex;align-items:center;gap:10px;width:135px;min-height:43px;padding:6px 23px;color:#f4dfb4;text-decoration:none;font-size:17px;z-index:3;}
+  .sprite-heading{margin-top:-4px;padding-top:14px;padding-bottom:14px;min-height:90px;h1{flex:none;}}
+  .hero-picker{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:14px;min-width:0;img{width:45px;height:45px;object-fit:cover;border:1px solid #c8a665;}select{width:200px;max-width:100%;min-height:44px;border:1px solid #b89653;border-radius:0;background:#101922;color:#f4e1bb;font-size:17px;padding:8px 13px;}}
+  .sprite-stage-shell{position:relative;isolation:isolate;overflow:hidden;padding:6px;width:max-content;max-width:100%;justify-self:center;>app-tower-ornament{z-index:10;.face,.inner-face{display:none;}}}
+  .stage{--cell:var(--lab-cell);width:calc(16 * var(--cell));margin:calc(var(--cell)*-.75) auto 0;max-width:100%;app-board{--cell:var(--lab-cell);.board{border:0;border-radius:0;}}}
+  .action-tabs{position:relative;margin-top:-3px;gap:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));padding:6px 14px;background:#0a131aee;button{font:500 17px/1.5 'Eldervane Trirong',var(--body);min-height:49px;padding:8px 12px;}.on{outline:none;}}
+  .playback-controls{position:relative;isolation:isolate;padding:15px 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:15px;color:#f0dfbe;label{display:flex;align-items:center;gap:9px;font-size:14px;min-width:0;}input{accent-color:#b51217;width:20px;height:20px;}select{padding:7px 12px;min-width:100px;min-height:38px;background:#111b24;border:1px solid #b79c62;border-radius:0;color:#f1dfba;font-size:14px;}}
+  .animation-info{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,1.5fr);gap:22px;padding:20px 25px;margin-top:5px;min-height:190px;h2{font:500 17px/1.5 'Eldervane Trirong',var(--body);color:#f2dfb6;margin:0 0 9px;}dl{margin:0;background:#121c25aa;border:1px solid #9b865b55;font-size:13px;>div{display:grid;grid-template-columns:1.4fr 1fr;border-bottom:1px solid #9d885b33;padding:5px 9px;gap:10px;}dt{color:#ddccb0;}dd{color:#f9e9c8;margin:0;}}.log{max-height:175px;min-height:90px;padding:10px 12px 10px 26px;background:#07121bbf;border:1px solid #9b865b44;color:#d9cbb0;line-height:1.8;}.empty-log{color:#bdbaa9;font-family:var(--body);list-style:none;}}
+  .comparison{margin:0;padding:8px 15px;text-align:left;background:#0c1a23ed;border-inline:1px solid #b59350;color:#d8c8a7;font-size:12px;}
+ }
+}
+@media(max-width:850px){html body .app {
+ app-battle .reference-lab,app-sprite-lab .reference-sprite-lab{.lab-heading,.sprite-heading{padding:16px 24px;gap:12px;h1{font-size:25px;}}.lab-badge{font-size:10px;padding:5px 12px;}}
+ app-sprite-lab .reference-sprite-lab{.hero-picker{width:100%;margin:0;select{flex:1;width:auto;}}.animation-info{grid-template-columns:minmax(0,1fr);gap:15px;}.action-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;}}
+ app-battle .reference-lab{.floors{gap:5px;padding:12px;>span{flex-basis:100%;font-size:15px;}button{min-width:38px;min-height:36px;padding:5px 10px;font-size:14px;}}app-placement .battle-layout{grid-template-columns:minmax(0,1fr);.battle-squad{grid-column:1;grid-row:2;}.battle-actions{grid-column:1;grid-row:3;}.battle-reserves{grid-column:1;grid-row:4;}>.hint{grid-row:5;}.zone-headings{font-size:10px;span{padding:4px 7px;}}}.lab-heading .power{font-size:11px;b{font-size:17px;}}}
+}}
+@media(max-width:480px){html body .app {
+ app-battle .reference-lab,app-sprite-lab .reference-sprite-lab{.lab-heading,.sprite-heading{gap:8px;padding:16px 20px;h1{font-size:21px;}p{font-size:10px;}app-citadel-icon{width:25px;}}.lab-badge{display:none;}}
+ app-battle .reference-lab{.lab-heading .power{margin:0 0 0 auto;}.battle-team-cards{min-height:100px;}app-team-presets .presets.reference-tabs{.name{font-size:13px;}.load{padding-left:9px;}}.battle-layout .battle-actions{button{font-size:11px;padding:7px 11px;gap:4px;}.lab-start{font-size:14px;}}.lab-simulation{padding:13px;table{font-size:11px;th,td{padding:7px;}}}}
+ app-sprite-lab .reference-sprite-lab{.sprite-heading{.hero-picker{gap:9px;font-size:12px;select{font-size:14px;min-width:0;}}}.playback-controls{padding:14px;gap:12px;label{font-size:12px;}select{min-width:82px;}}.action-tabs{padding:6px;button{font-size:13px;min-height:43px;}}.animation-info{padding:18px;}}
+}}
+html body .app app-sprite-lab .reference-sprite-lab .action-tabs.player-actions{grid-template-columns:repeat(3,minmax(0,1fr));}
+html body .app app-battle .reference-lab {
+ .floors button[aria-pressed]{border:0;box-shadow:none;background:none;color:#f6e2b4;}
+ .lab-field-frame{position:absolute;inset:0 0 var(--foot,82px);z-index:10;.face,.inner-face{display:none;}}
+ .result-card.lab-card,.menu{position:relative;isolation:isolate;border:0;border-radius:0;background:none;padding:30px;gap:14px;color:#f5e2b5;h2{font:600 30px/1.5 'Eldervane Trirong',var(--body);color:#f3d394;small{display:block;font-size:15px;}}.facts{font-size:13px;line-height:1.8;}.actions{width:100%;gap:10px;button{position:relative;isolation:isolate;min-height:50px;padding:10px 22px;border:0;background:none;border-radius:0;color:#f6e2b9;}}}
+ .lab-result-caption{font-size:13px;color:#d4c19c;margin:0;}
+}
+html body .app app-battle .reference-lab {
+ app-team-presets.compact{position:relative;z-index:30;}
+ app-team-presets.compact .presets.reference-tabs .preset.citadel-surface{min-height:45px;height:45px;padding:0;display:block;}
+ app-team-presets.compact .presets.reference-tabs .preset:has(.preset-options[open]){z-index:40;}
+ .battle-team-cards{position:relative;z-index:0;}
+ app-placement .battle-layout .zone-headings span{width:max-content;max-width:100%;}
+}
+html body .app app-battle .reference-lab,html body .app app-sprite-lab .reference-sprite-lab{grid-template-columns:minmax(0,1fr);}
+html body .app app-battle .reference-lab .lab-simulation{min-width:0;max-width:100%;.simulation-scroll{min-width:0;max-width:100%;}table{min-width:460px;}}
+@media(max-width:480px){html body .app {
+ app-battle .reference-lab app-placement .battle-layout .battle-actions{grid-template-columns:repeat(2,minmax(0,1fr));.lab-start{grid-column:1/-1;grid-row:1;min-height:51px;font-size:18px;}.battle-auto{grid-column:1;grid-row:2;}.lab-simulate{grid-column:2;grid-row:2;}button{min-width:0;font-size:12px;padding:9px 14px;}}
+ app-sprite-lab .reference-sprite-lab .sprite-heading{min-width:0;max-width:100%;>div{min-width:0;flex:1;}h1{white-space:normal;}.hero-picker{flex-basis:100%;min-width:0;max-width:100%;select{width:0;min-width:0;flex:1;}}}
+}}

@@ -1,0 +1,78 @@
+{
+  "status": "PASS",
+  "registryItems": 21,
+  "heroes": 12,
+  "heroWholeStonePrompts": 36,
+  "heroFragmentArtProposals": 36,
+  "zipFiles": 100,
+  "canonicalPortraitRefs": [
+    {
+      "heroId": "bailong",
+      "status": 200,
+      "sha256": "c7d5a5b32ee80fda96c03362fffd37882572a8900ce954aab4859fbacc734a16"
+    },
+    {
+      "heroId": "yuezheng",
+      "status": 200,
+      "sha256": "9df1e432eebe1b6ec909c763a0fb57c78264eee6f228071141a41ab1e8f5a680"
+    },
+    {
+      "heroId": "moye",
+      "status": 200,
+      "sha256": "15615ebbddc0288cf00d55ba539028eafadde2f38024566a0047164c7d0ce22d"
+    },
+    {
+      "heroId": "tangxun",
+      "status": 200,
+      "sha256": "7ba5e4d8b5e59f04c99a479d779faaa09e6445c50204861a0e1a3347476c56ea"
+    },
+    {
+      "heroId": "linxue",
+      "status": 200,
+      "sha256": "9f641958b103e8fba509a1af0cefb6c1b2366177518eee3454453911fa3bf706"
+    },
+    {
+      "heroId": "garrick",
+      "status": 200,
+      "sha256": "19266b313e0abac61e0eda3093548eed16de835ae6a3bb36cd370f19e566fe67"
+    },
+    {
+      "heroId": "kael",
+      "status": 200,
+      "sha256": "ef9bd8ffc4ef35334bdfa44e634e43d954b5c3a571c764548d04eda4e0d4ea17"
+    },
+    {
+      "heroId": "mirelle",
+      "status": 200,
+      "sha256": "8183a6a96fc81f25927189969ce487707cdee5370e523c1fe5843882593a88b9"
+    },
+    {
+      "heroId": "sylvara",
+      "status": 200,
+      "sha256": "c96cb1248fbae91e93fd68a5b4ae0783e0d87c7f2febcf93ea4d4d713384efef"
+    },
+    {
+      "heroId": "elira",
+      "status": 200,
+      "sha256": "452e70e7279f708371ea0f409049b20b26234d710ea77376709a283b73f42122"
+    },
+    {
+      "heroId": "vaelric",
+      "status": 200,
+      "sha256": "59098fb1b3ffd0527fb10815f2f79c1c7932bd026b96480832e8f9a562e2af12"
+    },
+    {
+      "heroId": "draeven",
+      "status": 200,
+      "sha256": "6cea786c6a7a9beec4b204f6a358ff73fed9d4de6c7229f857844ddddc338d34"
+    }
+  ],
+  "confirmedConversion": {
+    "trigger": "hero_has_completed_all_breakthroughs",
+    "ratio": "1:1",
+    "runtimeImplemented": false
+  },
+  "artGenerated": false,
+  "runtimeChanged": false,
+  "deployment": false
+}

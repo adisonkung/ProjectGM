@@ -1,70 +1,64 @@
-<section class="heroes">
-  <header class="head">
-    <div>
-      <span class="eyebrow">HERO COLLECTION</span>
-      <h1 class="gm-title">ฮีโร่</h1>
-      <p class="gm-sub">เลือกวีรชน ดูค่าพลัง และเตรียมพร้อมสำหรับการเดินทาง</p>
-    </div>
-    <div class="collection-summary" aria-label="ภาพรวมฮีโร่">
-      <span><b>{{ cards().length }}</b><small>วีรชนทั้งหมด</small></span>
-      <span><b>{{ teamCount() }}<i>/5</i></b><small>อยู่ในกองทัพ</small></span>
-      <span><b>{{ readyCount() }}</b><small>พร้อมพัฒนา</small></span>
-    </div>
-  </header>
-
-  <div class="bar gm-panel">
-    <label class="search">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg>
-      <input type="search" aria-label="ค้นหาฮีโร่" placeholder="ค้นหาชื่อวีรชน…" [value]="query()" (input)="query.set($any($event.target).value)" />
-    </label>
+<section class="heroes" aria-labelledby="collection-title">
+  <aside class="collection-sidebar">
+    <app-citadel-frame [cut]="26" />
+    <header class="head">
+      <app-citadel-icon name="heroes" [size]="38" />
+      <div><h1 id="collection-title">ฮีโร่</h1><p>รวบรวมฮีโร่ <b>{{ cards().length }}</b></p></div>
+    </header>
     <div class="filters" role="group" aria-label="กรองตามสาย">
       @for (c of classes; track c) {
-        <button type="button" class="gm-btn small ghost" [attr.aria-pressed]="cls() === c" (click)="cls.set(c)">
-          <app-icon [name]="classIcon(c)" [size]="20" /> {{ className(c) }} <small>{{ count(c) }}</small>
+        <button type="button" [attr.aria-pressed]="cls() === c" (click)="cls.set(c)">
+          @if (cls() === c) { <app-citadel-frame shape="hex" [cut]="13" [crimson]="true" [lacquer]="true" /> }
+          <app-citadel-icon [name]="classIcon(c)" [size]="25" /><span>{{ className(c) }}</span><small>{{ count(c) }}</small>
         </button>
       }
     </div>
-    <label class="sort">
-      <span>เรียงตาม</span>
-      <select [value]="sort()" (change)="sort.set($any($event.target).value)">
-        @for (s of sorts; track s.id) { <option [value]="s.id">{{ s.label }}</option> }
-      </select>
-    </label>
-    <div class="view-switch" role="group" aria-label="รูปแบบรายการ">
-      <button type="button" (click)="layout.set('grid')" [attr.aria-pressed]="layout() === 'grid'" aria-label="แสดงแบบการ์ด">▦</button>
-      <button type="button" (click)="layout.set('list')" [attr.aria-pressed]="layout() === 'list'" aria-label="แสดงแบบรายการ">☷</button>
-    </div>
-  </div>
+    <div class="collection-summary"><span>อยู่ในทีม <b>{{ teamCount() }}/5</b></span><span>พร้อมพัฒนา <b>{{ readyCount() }}</b></span></div>
+  </aside>
 
-  <div class="collection-caption"><span aria-live="polite">แสดง {{ shown().length }} จาก {{ cards().length }} วีรชน</span><small>เลือกการ์ดเพื่อดูรายละเอียด <span aria-hidden="true">↗</span></small></div>
-  <ul class="grid" [class.list]="layout() === 'list'">
-    @for (h of shown(); track h.uid) {
-      <li>
-        <a class="card r{{ h.star }}" [routerLink]="['/heroes', h.uid]" [attr.aria-label]="h.name + ' เลเวล ' + h.level">
-          <span class="art">
-            @if (h.portrait) { <img class="hero-art" [src]="h.portrait" [alt]="h.name" loading="lazy" draggable="false" /> }
-            @else { <app-hero-portrait [heroId]="h.id" [star]="h.star" [size]="112" /> }
-            <span class="class-seal" [attr.title]="classLabel(h.cls)"><app-icon [name]="classIcon(h.cls)" [size]="22" /></span>
-            <span class="lv">Lv<b>{{ h.level }}</b></span>
-            @if (h.isMain) { <span class="flag main" title="ฮีโร่หลักบนเกาะ"><app-icon name="crown" [size]="13" /></span> }
-            @if (h.inTeam) { <span class="flag team" title="อยู่ในทีม"><app-icon name="team" [size]="13" /></span> }
-            @else if (h.training) { <span class="flag train" title="อยู่ในช่องฝึก"><app-icon name="book" [size]="13" /></span> }
-          </span>
-          <span class="name">{{ h.name }}</span>
-          <span class="meta"><span class="gm-stars">{{ stars(h.star) }}</span> <span class="gm-class">{{ classLabel(h.cls) }}</span></span>
-          <span class="gm-bar gold xp"><i [style.width.%]="h.expPct"></i></span>
-          <span class="pw"><app-icon name="flame" [size]="13" />{{ h.power }}</span>
-          @if (h.btReady || h.skillReady || h.canLevel) {
-            <span class="ready">
-              @if (h.btReady) { <em class="gm-chip ember">Breakthrough</em> }
-              @if (h.skillReady) { <em class="gm-chip arcane">อัปสกิลได้</em> }
-              @if (h.canLevel) { <em class="gm-chip ok">ใช้ยา EXP ได้</em> }
+  <div class="collection-body">
+    <div class="toolbar">
+      <label class="search">
+        <app-citadel-frame [cut]="11" />
+        <app-citadel-icon name="search" [size]="24" />
+        <input type="search" aria-label="ค้นหาฮีโร่" placeholder="ค้นหาฮีโร่…" [value]="query()" (input)="query.set($any($event.target).value)" />
+        @if (query()) { <button type="button" class="clear-search" aria-label="ล้างคำค้นหา" (click)="query.set('')">×</button> }
+      </label>
+      <label class="sort"><app-citadel-frame [cut]="11" /><span class="sr-only">เรียงตาม</span>
+        <select aria-label="เรียงตาม" [value]="sort()" (change)="sort.set($any($event.target).value)">
+          @for (s of sorts; track s.id) { <option [value]="s.id">{{ s.label }}</option> }
+        </select>
+      </label>
+      <div class="view-switch" role="group" aria-label="รูปแบบรายการ">
+        <button type="button" (click)="layout.set('grid')" [attr.aria-pressed]="layout() === 'grid'" aria-label="แสดงแบบการ์ด"><app-citadel-frame shape="hex" [cut]="9" [crimson]="layout() === 'grid'" /><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z" /></svg></button>
+        <button type="button" (click)="layout.set('list')" [attr.aria-pressed]="layout() === 'list'" aria-label="แสดงแบบรายการ"><app-citadel-frame shape="hex" [cut]="9" [crimson]="layout() === 'list'" /><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h4v4H3zm7 0h11v4H10zM3 10h4v4H3zm7 0h11v4H10zM3 16h4v4H3zm7 0h11v4H10z" /></svg></button>
+      </div>
+    </div>
+    <div class="collection-caption"><span aria-live="polite">แสดง {{ shown().length }} จาก {{ cards().length }} ฮีโร่</span><small>เลือกฮีโร่เพื่อดูรายละเอียด</small></div>
+    <ul class="grid" [class.list]="layout() === 'list'">
+      @for (h of shown(); track h.uid) {
+        <li>
+          <a class="card r{{ h.star }}" [class.main-hero]="h.isMain" [routerLink]="['/heroes', h.uid]" [attr.aria-label]="h.name + ' เลเวล ' + h.level + ' พลัง ' + h.power" [attr.title]="h.name + ' · พลัง ' + h.power">
+            <app-citadel-frame [cut]="12" />
+            <span class="art">
+              @if (h.portrait) { <img class="hero-art" [src]="h.portrait" [alt]="h.name" loading="lazy" draggable="false" /> }
+              @else { <app-hero-portrait [heroId]="h.id" [star]="h.star" [size]="112" /> }
+              @if (h.isMain) { <span class="flag main" title="ฮีโร่หลักบนเกาะ"><app-icon name="crown" [size]="15" /></span> }
+              @if (h.inTeam) { <span class="flag team" title="อยู่ในทีม"><app-citadel-icon name="armory" [size]="15" /></span> }
+              @else if (h.training) { <span class="flag train" title="อยู่ในช่องฝึก"><app-icon name="book" [size]="15" /></span> }
             </span>
-          }
-        </a>
-      </li>
-    } @empty {
-      <li class="none"><app-icon name="heroes" [size]="32" /><b>ไม่พบวีรชนที่ค้นหา</b><span>ลองชื่ออื่น หรือเลือกดูวีรชนทั้งหมด</span><button class="gm-btn" type="button" (click)="query.set(''); cls.set('all')">ดูวีรชนทั้งหมด</button></li>
-    }
-  </ul>
+            <span class="identity"><app-citadel-icon class="class-seal" [name]="classIcon(h.cls)" [size]="26" [attr.title]="classLabel(h.cls)" /><span class="name">{{ h.name }}</span><span class="list-class">{{ classLabel(h.cls) }}</span><span class="gm-stars">{{ stars(h.star) }}</span></span>
+            <span class="lv">Lv. {{ h.level }}</span>
+            <span class="pw"><app-citadel-icon name="armory" [size]="18" />{{ h.power }}</span>
+            <span class="list-chevron" aria-hidden="true">›</span>
+            @if (h.btReady || h.skillReady || h.canLevel) {
+              <span class="ready" [attr.title]="h.btReady ? 'พร้อมเลื่อนขั้น' : h.skillReady ? 'อัปสกิลได้' : 'ใช้ยา EXP ได้'"><span aria-hidden="true">↑</span><span class="sr-only">{{ h.btReady ? 'พร้อมเลื่อนขั้น' : h.skillReady ? 'อัปสกิลได้' : 'ใช้ยา EXP ได้' }}</span></span>
+            }
+          </a>
+        </li>
+      } @empty {
+        <li class="none reference-empty" role="status"><app-state-emblem icon="search" /><h2>ไม่พบฮีโร่ที่ค้นหา</h2><p>@if (query().trim()) { ไม่พบฮีโร่ที่ตรงกับ “{{ query().trim() }}”<br>กรุณาลองใช้คำอื่น หรือตรวจสอบการสะกดคำ } @else { ยังไม่มีฮีโร่ในสาย{{ className(cls()) }}<br>เลือกดูฮีโร่ทั้งหมดเพื่อเปลี่ยนสาย }</p><button type="button" (click)="query.set(''); cls.set('all')"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-citadel-icon name="heroes" [size]="28" />ดูฮีโร่ทั้งหมด <span aria-hidden="true">›</span></button></li>
+      }
+    </ul>
+  </div>
 </section>

@@ -1,3 +1,4 @@
+@use '../../shared/citadel-material' as material;
 :host { display: block; --cell: min(56px, calc((100vw - 32px) / 16)); }
 .wrap { display: grid; gap: 10px; }
 
@@ -183,3 +184,78 @@
 }
 @media (max-width:1050px) { .own-team { grid-template-columns: minmax(0,1fr); .formation-roster { display: none; } .formation-overview, .formation-labels, .board, .hint { grid-column: 1; } } }
 @media (max-width:720px) { .own-team { gap: 10px; .bar button { min-height: 44px; } .hint { font-size: 12px; } .board { padding-inline: 0; } .cell::before { left: 4%; right: 4%; height: 48%; } } }
+
+@include material.surfaces;
+
+// Formation review: compact legal 3×6 grid, square slots and roomy preset tools.
+.own-team {
+  grid-template-columns: minmax(0,1fr) 270px; gap: 12px 18px;
+  .formation-overview { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 18px; }
+  .board { height: 390px; padding: 18px 12px; gap: 8px; border-radius: 0; }
+  .cell::before { inset: 0; height: auto; border-radius: 0; background: #1b27354d; }
+  .cell:has(.unit)::before { background: linear-gradient(145deg,#d7bd7730,#17232c55); }
+  .unit app-unit-sprite { width: min(88px,80%); height: 96px; bottom: 23px; }
+  .place-mark { bottom: 28px; }
+  .formation-roster { padding: 20px; gap: 8px;
+    > button { min-height: 55px; gap: 10px; img { width: 44px; height: 49px; } }
+    .roster-power { padding-block: 7px; }
+  }
+  .bench, .card, .portrait, .tag { border-radius: 0; }
+}
+@media(max-width:1050px) {
+  .own-team { grid-template-columns: minmax(0,1fr);
+    .formation-overview { grid-template-columns: minmax(0,1fr); gap: 10px; }
+    .team-totals { justify-self: end; width: max-content; }
+    .board { height: 370px; }
+  }
+}
+@media(max-width:720px) {
+  .own-team {
+    .board { height: 330px; padding: 12px 6px; gap: 6px 4px; }
+    .cell::before { inset: 0; height: auto; border-radius: 0; }
+    .unit app-unit-sprite { width: min(65px,105%); height: 78px; bottom: 22px; }
+    .tag { bottom: 5px; }
+    .place-mark { bottom: 25px; }
+    .team-totals { width: 100%; }
+  }
+}
+
+.own-team .formation-roster {
+  h2 { line-height: 1.3; }
+  .roster-power b { line-height: 1.2; }
+  > button > span { grid-template-columns: minmax(0,1fr) auto; gap: 1px 8px; line-height: 1.3;
+    b { grid-column: 1/-1; }
+    small { grid-column: 1; white-space: nowrap; }
+    em { grid-column: 2; }
+  }
+  > p { line-height: 1.3; padding-top: 10px; }
+}
+
+.own-team { grid-template-rows: auto 30px 390px auto auto auto auto; align-items: start; }
+.own-team .formation-roster { align-self: stretch; }
+@media(max-width:1050px) { .own-team { grid-template-rows: auto 30px 370px auto auto auto auto; } }
+@media(max-width:720px) { .own-team { grid-template-rows: auto 30px 330px auto auto auto auto; } }
+.own-team .bar {
+  button.auto-action, button.clear-action, .class-filters button[aria-pressed] {
+    background: transparent; border: 0; box-shadow: none; isolation: isolate;
+  }
+}
+
+// Cut-gold containers replace the remaining rectangular slate backplates.
+.own-team {
+  .bar, .bench, .card, .card.selected { position: relative; isolation: isolate; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+  .bar { padding: 16px 20px; }
+  .bench { padding: 18px; gap: 12px; }
+  .card { padding: 14px; gap: 12px; min-height: 90px; width: 240px; }
+}
+@media(max-width:720px) {
+  .own-team {
+    .bar { padding: 14px 16px; }
+    .bench { padding: 14px; gap: 8px; }
+    .card { width: calc(50% - 4px); padding: 12px; gap: 8px; }
+  }
+}
+
+.own-team .hint { position: relative; isolation: isolate; background: transparent; border: 0; padding: 14px 20px; }
+
+.zone-headings { display: none; }

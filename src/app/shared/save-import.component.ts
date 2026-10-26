@@ -1,3 +1,6 @@
+import { A11yModule } from '@angular/cdk/a11y';
+import { TowerOrnamentComponent } from '../pages/tower/tower-ornament.component';
+import { CitadelFrameComponent } from './citadel-frame.component';
 import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
 import { DecodeResult, saveSummary } from '../core/rules/account';
 import { AccountService } from '../core/services/account.service';
@@ -6,34 +9,9 @@ import { IconComponent } from './icon.component';
 /** paste a transfer code or pick a save file → preview → confirm → this device's save is replaced */
 @Component({
   selector: 'app-save-import',
-  imports: [IconComponent],
+  imports: [A11yModule, TowerOrnamentComponent, CitadelFrameComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <label class="lbl" for="imp-code">รหัสย้ายเซฟ</label>
-    <textarea id="imp-code" class="code" rows="3" spellcheck="false" autocomplete="off" placeholder="วางรหัสที่ขึ้นต้นด้วย ST1…"
-              [value]="text()" (input)="text.set($any($event.target).value); result.set(null)"></textarea>
-    <div class="row">
-      <button type="button" class="gm-btn small" (click)="check()" [disabled]="busy() || !text().trim()"><app-icon name="load" [size]="13" /> ตรวจรหัส</button>
-      <span class="or">หรือ</span>
-      <label class="gm-btn small ghost file"><app-icon name="scroll" [size]="13" /> เลือกไฟล์เซฟ (.json)
-        <input type="file" accept=".json,application/json" (change)="pickFile($event)" />
-      </label>
-    </div>
-
-    @if (result(); as r) {
-      @if (r.ok) {
-        <div class="preview" role="status">
-          <b>{{ summary(r).name }}</b>
-          <span>ฮีโร่ {{ summary(r).heroes }} · หอคอยชั้น {{ summary(r).cleared }} · เพชร {{ summary(r).gems }}</span>
-          <small>ส่งออกเมื่อ {{ when(r) }}</small>
-          <p class="warn"><app-icon name="lock" [size]="13" /> เซฟในเครื่องนี้จะถูกแทนที่ (เก็บสำรองไว้ย้อนกลับได้ 1 ครั้ง)</p>
-          <button type="button" class="gm-btn primary" (click)="confirm(r)">ใช้เซฟนี้</button>
-        </div>
-      } @else {
-        <p class="err" role="alert">{{ r.error }}</p>
-      }
-    }
-  `,
+  templateUrl: './save-import.component.html',
   styles: [`
     :host { display: grid; gap: 8px; }
     .lbl { font-size: 12.5px; color: var(--muted); }
@@ -60,6 +38,9 @@ export class SaveImportComponent {
   readonly text = signal('');
   readonly busy = signal(false);
   readonly result = signal<DecodeResult | null>(null);
+  readonly pending = signal<DecodeResult | null>(null);
+
+  review(r: DecodeResult): void { if (r.ok) this.pending.set(r); }
 
   async check(): Promise<void> {
     this.busy.set(true);
@@ -90,6 +71,7 @@ export class SaveImportComponent {
   }
 
   confirm(r: DecodeResult): void {
+    this.pending.set(null);
     if (this.account.apply(r)) {
       this.result.set(null);
       this.text.set('');

@@ -40,3 +40,7 @@ App/spec TypeScript checks pass; full Karma807/807 and production build pass. Na
 ## Champagne/ivory revision — review only (2026-10-24 Bangkok)
 
 User approved applying the previewed champagne/ivory recolors. New transparent delivery files `eldervane-logo-champagne.webp` (1738×863) and `eldervane-wordmark-champagne.webp` (2023×456) are cropped/encoded from generated PNGs `exec-43968c18-83e7-49a9-9211-128d5797ed93.png` and `exec-b5ad1ec3-0763-4650-8e35-fc6fabb1cf72.png`. Original masters and original WebPs remain available. Shared navigation and summon heading use the compact version; welcome uses the full floating-tower logo. Home fits the complete wordmark with contain, removing the earlier full-logo crop. The latest explicit no-deploy instruction supersedes the historical deployment authorization above for this review.
+
+## Welcome reference pass — 2026-10-25
+
+The user advanced from Battle to Welcome/Account reference12. Welcome now displays the already approved compact champagne wordmark above the naming panel, matching the composition of sheet12 over the existing citadel panorama. Full floating-tower masters/delivery assets remain available and were not edited. Header and other branding placements are unchanged. This supersedes the historical welcome-placement notes above; no deployment. See ACCOUNT_REFERENCE_REVIEW.md.

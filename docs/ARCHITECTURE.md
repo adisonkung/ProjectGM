@@ -174,7 +174,7 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 
 ### UI / pages
 
-- **Eldervane logo (2026-10-23):** transparent full/compact PNG masters and WebP delivery assets under `public/ui/branding/`. Welcome uses the full floating-tower lockup over the citadel environment; shared navigation and summon heading use the optimized compact wordmark. The generic crest/SVG and old summon wordmark are replaced, with semantic title/Home labeling preserved. The reviewed champagne/ivory delivery variants now serve these placements; original assets remain available. Header balances show exact comma-separated numbers below100k, then truncated decimal k/m/b with exact balances in accessible labels/tooltips. Formatting never changes saved currency. See `BRANDING.md`.
+- **Eldervane logo (2026-10-23):** transparent full/compact PNG masters and WebP delivery assets under `public/ui/branding/`. Welcome now uses the reviewed compact champagne wordmark over the citadel environment to match sheet12; shared navigation and summon heading also use the compact wordmark. Full floating-tower assets remain available. The generic crest/SVG and old summon wordmark are replaced, with semantic title/Home labeling preserved. The reviewed champagne/ivory delivery variants now serve these placements; original assets remain available. Header balances show exact comma-separated numbers below100k, then truncated decimal k/m/b with exact balances in accessible labels/tooltips. Formatting never changes saved currency. See `BRANDING.md`.
 
 - **Refined Citadel presentation (2026-10-23):** replaces Jade Court after user-reviewed drafts. Charcoal panels, fine champagne-gold edges, crimson selected/actions and pale-blue magic accompany luminous Japanese/Korean fantasy environment assets. `styles.scss` and `shared/_fantasy-ui.scss` define typography, angled controls, surfaces and reduced-motion-safe UI transitions. Shared header is slim/full-width; phone navigation remains labeled. Real hero art/data are preserved. See `ELDERVANE_CITADEL_UI.md`; older feature notes below describe functional behavior and asset history.
 
@@ -204,6 +204,10 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 - Rule presets: `stage/rules.ts`.
 - Economy tables: `core/data/economy.ts`, `progression.ts`, `equipment.ts`, `skill-ranks.ts`, `stars.ts`.
 
+- **Empty/recovery presentation:** `StateEmblemComponent` provides decorative vector seals for hero search/not-found and Armory bag/filter-empty states. Scoped `_list-empty-reference.scss` keeps the approved five-column grid and 2×2 equipment presentation; state/action data remains in existing services.
+
+- **Summon information:** `_summon-information-reference.scss` scopes sheet17 chrome to the pool/rates/Memory dialog only. Memory uses an optimized hero-memory-bailong.webp illustration generated with the canonical Bai Long portrait/banner as identity references; original hero assets remain unchanged. Data comes from current registries/rules. `openInfo` resets the shared body scroll when changing information. Campaign/confirmation/results/cinematic services retain existing behavior.
+
 ### Localization
 
 - **None.** Thai strings are inline in data (`HeroTemplate.name`, skill `name`) and templates. There are no localization keys.
@@ -213,6 +217,7 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 - **Sprites:** `core/data/sprite-files.ts` (`spriteUrl`, `stripGrid`) maps through the generated `sprite-atlas.ts` to `public/sprites/opt/*.webp|png`.
 - **Pixi:** `Assets.load` plus `preloadFx` when a unit appears.
 - **Island:** `PreloadService` decodes island art at app start.
+- **Home detail windows:** `IslandDetailArtComponent` crops existing City layers or resolves the current classic `buildingDraw` as a still SVG; actual state/actions come from `IslandComponent`. `_island-details-reference.scss` isolates reference16 windows, CDK focus traps and internally scrolling mobile content. Hero Skills shortcut uses the existing HeroDetail tab through `tab=skills`; no save schema or island rules changed.
 
 ### Scene / state management
 
@@ -282,3 +287,88 @@ SheetDef.fieldFx.loopAfterStart optionally defers Loop until the start clip fini
 Elira Ultimate selects LOWEST_HP_ALLY with unlimited range,self included. The recipient is selected when casting starts; the field snapshots that recipient's current cell at activation and stays fixed. A dead recipient during anticipation cancels targeted ally-field creation; it does not redirect. Source death still cancels an active field; recipient movement/death afterwards does not move/remove it.
 
 RECT_6X3_CENTERED uses the exact activation cell as geometry and visual centre. It does not use the legacy RECT_6X3 midpoint/clamping. Half-open column bounds[c−3,c+3) and lane bounds[r−1.5,r+1.5) retain18 cells at interior integer centres; edges clip instead of shifting the centre. FieldSystem aura checks and healNeed AI checks share resolveArea. The existing home-zone/clamped pattern remains available and unchanged. Formation/Loop/Dissolve now align their common root to the recipient's feet at dy27.25%cell. Sprite lab formation=field puts the40%-HP recipient away from the full-health caster with inside/outside witnesses.
+
+The `/heroes` collection review reuses CitadelFrame/Icon with original sanctum/portrait assets, a class sidebar (compact mobile grid), search/sort toolbar and two-column mobile cards. The shared reference header now applies to Home and the exact `/heroes` route; hero-detail keeps its current header pending review. Formatting/filters/routes use real data and do not mutate saves. See HERO_COLLECTION_REFERENCE_REVIEW.md.
+
+Hero detail overview reuses CitadelFrame/Icon and the reviewed shared header on `/heroes/:uid`. Original banner/identity remain stable across tabs; basic overview stats can expand to the full six-row breakdown, with star development, actual equipment slots and growth actions retained. See HERO_DETAIL_REFERENCE_REVIEW.md for review scope.
+
+Hero detail banner follow-up uses one full-width Citadel frame with the original artwork inside and a lower-left glass identity overlay; it replaces the earlier soft-mask/standalone plate composition. Source assets, callbacks and save data are unchanged.
+
+The selected hero poster banner uses poster-banner.scss after the shared overview mixin: typography over a fading image shadow replaces the rejected glass identity box. It preserves all live identity/level/power actions and adds modest font/contrast increases.
+
+Hero detail stats tab uses stats-reference.scss for a responsive breakdown table with an adjacent live progression sidebar. Both use existing statRows/starView/progress services; source art, formulas and save serialization remain unchanged.
+
+
+### Citadel material across routed UI (24 Oct 2026 review batch)
+
+The reviewed Home chrome is shared by all named game routes. Explicit `CitadelFrameComponent` children own the metal/lacquer face of controls and panels. `shared/_citadel-material.scss` clears superseded component surface backgrounds; global `shared/_citadel-pages.scss` supplies scoped layout/material refinements without increasing hero-detail's component stylesheet budget. Forge enhancement selection is presentation state with filter fallback and previews through the existing equipment rules. Armory sale and forge dismantle present native confirmation dialogs before invoking the unchanged equipment services. Sprite Lab gives its board host the same container-derived cell size as its stage. See ALL_PAGES_REFERENCE_REVIEW.md for pending user review; this architectural description does not authorize deployment.
+
+Formation review correction adds an opt-in rectangular Citadel contour for square panels. Standalone formation uses compact fixed presentation rows for its unchanged3×6 grid, and compact presets reserve44px save/edit targets in a horizontal tool row. See FORMATION_REFERENCE_REVIEW.md; no game coordinates or save models change.
+
+Armory reference review uses optional original hero banner/portrait fallback in its equipment column, with unchanged service-backed inventory and comparison. Its responsive grids and shallow square-cut artwork controls are presentation-only; see ARMORY_REFERENCE_REVIEW.md for pending approval.
+
+Forge reference review presents enhancement items as single-button cards using the existing selectedEnhanceId/filter fallback and rule-derived preview. Craft and salvage continue through existing services; material/status/row framing is presentation-only. See FORGE_REFERENCE_REVIEW.md for pending approval.
+
+User-requested Forge behavior update: EquipmentService.craftRandom delegates to a pure rarity/slot roll over existing definitions/legal mains and then existing craft costs/rolls; explicit-base craft remains a lower-level helper. EquipmentService.dismantleMany applies one immutable all-or-error batch result with deduplicated ids. Forge keeps selection/confirmation ids in signals, excludes locked items and derives totals through dismantleRewards. See FORGE_REFERENCE_REVIEW.md; no deployment or Relic implementation.
+
+### Tower presentation review (24 Oct2026)
+
+TowerComponent derives preview mode/time from STAGES and first-clear item labels from ITEMS/TOWER_REWARDS. Ascending floor buttons retain locked preview, next-floor entry and completed-floor replay. Static citadel artwork is decorative, not a floor-specific battle background. No progression/reward/save logic changes.
+
+### Premium Tower presentation
+
+Tower preview/row thumbnails resolve STAGES.background through BACKGROUNDS registry (same art as battle). The scene background assettower-palace.webp is decoration only. TowerOrnamentComponent is a local noninteractive CSS/SVG contour/corner/lacquer renderer; buttons/links retain semantics/focus. Tower owns its responsive CSS rather than old shared page overrides. No stage/save/economy changes.
+
+### Tower lighting follow-up
+
+TowerOrnamentComponent now draws continuous gradient SVG outline strokes sized by a cleaned-up ResizeObserver; CSS supplies translucent faces/corner engraving/lacquer. The outline no longer fills the entire panel with an opaque metallic layer. Tower page uses the existing palace art with warm lighting and blurred transparent list panel; actual-map preview remains unchanged. No game or save logic changes.
+
+### Tower CTA typography
+
+The challenge-only ornament variant scopes lacquer/end engraving; gold sword SVG/centered label/right chevron remain native anchor children. Tower CTA uses local Trirong700 Thai/Latin WOFF2 subsets under isolated Eldervane Trirong @font-face, with OFL/provenance inpublic/fonts/trirong; this avoids failed remote font requests without changing other pages' font families. No gameplay changes.
+
+### Dungeons reference review
+
+DungeonsComponent resolves map accents fromstage.background/BACKGROUNDS and item glyphs fromITEMS.kind. Mode labels are presentation only; ids/pools and original services remain authoritative. The view iterates bonusDrops chances/items and firstClearBonus items/firstClearItem, hides claimed first-clear rewards and derives bonus/repeat multipliers from dungeon definitions. Four decorative emblems are a transparent2×2CSS sprite with no gameplay identity. The pure TowerOrnamentComponent decoration is reused without importing TowerComponent/page state. Local Trirong @font-face declarations now live in shared/_adventure-fonts.scss imported by globalstyles; lazy Tower and Dungeons share those unchanged localfont files.
+
+### Dungeons compact reward presentation
+
+DungeonRewardIconComponent is stateless SVG art derived from existing ITEMS kinds/ids. Compact tier previews show selected main rewards with actual quantities and accessible labels. Native details retain the full objective and all reward lists/chances/first-clear data. No gameplay data or persistent state is added. Optional CSS variables on TowerOrnamentComponent let Dungeons specify cool panel fills/gold outline widths; other consumers use existing fallbacks.
+
+### Ornament metal palette and mock material art
+
+TowerOrnamentComponent accepts inherited optional gradient-stop, inner-line, engraving/filter variables; defaults preserve Tower appearance. Dungeons supplies antique-gold overrides and enables the optional grooved input. The duplicate dark outline is rendered only when requested, without affecting layout. Material art status is documented indocs/art/material-icons with real ITEMS ids; no planned asset paths are wired into gameplay.
+
+### Summon presentation (2026-10-24 review)
+
+`GachaComponent` uses the existing Bai Long banner and `SummonSanctumComponent` background with a campaign banner opening information on click and separate pity/actions. The gate owns vertical scrolling while the shared app shell locks document scrolling. Information dialogs scroll `.modal-body`; native results and cinematic dialogs own their viewport scrolling. `SummonSanctumComponent.showFloatingCards` defaults to true and is disabled on the main gate and the summon cinematic (which owns its own physical flight). `_antique-ornament.scss` supplies scoped presentation variables for TowerOrnament on Summon and its reveal scene; small portrait frames remain CitadelFrame. This is presentation only: gacha transaction/reveal state logic and save schema are unchanged.
+
+### Campaign banners and procedural summon VFX (review revision)
+
+`SummonCampaignComponent` is presentation-only metadata and a details output; Gacha currently configures exactly one standard campaign. Kind themes prepare future banner art but do not introduce pool selection, rates or new gameplay rarity. The banner details state reuses the native information dialog and can switch to pool/rates/Memory without reopening an already-modal dialog.
+
+`SummonVfxComponent` is a noninteractive Canvas layer for ambient/charge/burst/cards/spotlight. It reads only presentation inputs, uses no RNG or save APIs, paints outside Angular at ≤30fps and DPR≤1.5, uses Resize/Intersection observers, respects visibility/reduced-motion/paused state, and cleans all lifecycle resources. The 3★ intro is 2.6s charge +2.6s burst; reduced motion still skips directly to cards. Optional CitadelFrame gradient CSS variables preserve original fallback colors everywhere outside Summon. New effects use existing hero/banner/card assets; no hero or material art was regenerated.
+
+### Summon flight/card art revision (25 October 2026)
+
+`SummonFlightComponent` renders one physical-style card per committed result during charge/burst, replacing legacy image spokes and the Sanctum floating-card overlay. Native WAAPI receives64-segment cubic3D trajectories: quintic gather settling, accelerating release, depth-dependent scale and banking, plus tangent-oriented wakes. Gather end/release start poses match exactly; all Animation handles cancel on replacement/destruction, and reduced motion never starts them. Lighting is separate masked foil, static card shadow, moving ribbons and floor light. No runtime physics engine, frame loop, RNG or save access is introduced.
+
+`summon-card-art.ts` maps existing1/2/3★ to newly generated alpha WebP backs, shared by flight and sealed cards. Steel/silver and bronze ordinary assets remain ready for existing tiers without adding hero templates. The live roster/fallback remains all3★. See `docs/art/summon-cards/manifest.json` for generation/optimization provenance. Hero artwork and material icon backlog are untouched; no deployment.
+
+### Flexible card surface (25 October 2026 review)
+
+`SummonCardSurfaceComponent` supplies ten connected textured bands within each flight card. Native periodic hinge/twist waves travel toward the tip; a separate rig sways continuously. UV bands/glints use the existing rarity texture, so no card art is regenerated. Surface animations belong to this child and persist through parent gather/release; the parent still owns trajectory/wake animations. Each child owns21 Animation handles, one common document-timeline start, reduced-motion listener and cancellation on replacement/destroy. Prefixed global component CSS avoids per-card Shadow DOM stylesheet copies and preserves nested3D transforms by omitting a parent filter. No gameplay/timeline/save changes.
+
+Hero detail follow-up adds a fifth `growth` tab while keeping the approved overview poster and existing actions. Non-overview stats/skills/gear/growth use the scoped global `_hero-detail-panels.scss` and TowerOrnament chrome; original services, six stats, three equipment slots, skill costs and save serialization are unchanged. See HERO_PANELS_REFERENCE_REVIEW.md for actual browser states and visual-review status.
+
+Battle visual review scopes `_battle-reference.scss` to real tower/farm `.reference-battle` runs. Existing map art backs field chrome and result headers; preparation has decorative zone headings and compact saved presets below the field. CDK focus capture/trapping covers pause and real result dialogs. Item glyphs derive from registered item kinds; reward counts/EXP still come from the existing RunReward view. No engine, field coordinates or transaction changes. See BATTLE_REFERENCE_REVIEW.md.
+
+Battle reference matching adds opt-in Placement.battleLayout with projected preset/start controls and a shared ng-template reserve/field view; Formation/lab retain their original layout. TeamPresets.tabs defaults false and offers native options for the battle tab variant. The real-run party dock uses a separate framed foot tray; results expose two main actions and expandable hero EXP/additional actions with a display-only EXP aggregate. BattleEmblem uses a transparent three-cell UI atlas; no outcome/transaction/engine change. UI work now follows mandatory UI_REFERENCE_RULES.md/PROJECT_RULES §21 and paired reference/actual evidence.
+
+Battle viewport presentation keeps sheet11B proportions: battleViewport derives square cell size and a cell-relative party dock, with at most0.65 extra upper-crop rows. Board.sceneryExtraRows defaults0 and shifts its common .cam (DOM/Pixi/FX/hit targets). Field reveals previously cropped pixels without scaling either image layer; Battle caps extension to the map zoom crop, so zoom1 maps receive none. Placement uses the same bounded preview. Core BOARD_ROWS/SCENERY_ROWS, engine coordinates, renderer clock and saves are unchanged. PartyBar.referenceChrome defaultsfalse; real battle opts into individual metal frames and responsive portrait/skill proportions. The result masthead groups emblem/title/subtitle, and a thin shared reward ribbon contains the first-clear badge, still controlled by the existing TOWER_FIRST kind. See BATTLE_PROPORTIONS_REVIEW.md; the previous3-row expansion was rejected.
+
+Victory result now uses a unified transparent tower/laurel/Thai-title artwork (victory-title.webp, provenance alongside), with accessible h2 title and live floor/run subtitle. Defeat/pause retain atlas emblems. _victory-inset.scss scopes a central radial shadow, a reward ribbon inside the outer frame with positive padding, and taller reward tiles to real win dialogs only. See BATTLE_VICTORY_INSET_REVIEW.md.
+
+Welcome/account reference UI uses _account-reference.scss, existing champagne wordmark/citadel panorama, and shared frame/ornament chrome. Account rename opens a trapped modal, preserving AccountService.setName/name rules. SaveImportComponent uses an external template, existing decode preview, and UI-only pending confirmation; only the final button invokes the same AccountService.apply. Cancel/Escape leave the save untouched; backup/restore and transfer format remain in the original services. See ACCOUNT_REFERENCE_REVIEW.md.
+
+Lab UI uses _labs-reference.scss under reference-lab/reference-sprite-lab. Real battle retains reference-battle styling. Lab opts into Placement.battleLayout; only unused upper scenery is cropped (1row for placement,0.75row for sprite preview), leaving square combat cells/model/hit areas/anchors intact. simStats is display-only output of the existing seeded simulation loop. SpriteLab external template adds selected-clip metadata from animOf/clipClock (idle renderer default), existing log and controls. GameAccessService reads temporary DEV_FLAGS.allPlayersAreGm=true per user; GM gets8 actions/debug controls, false policy getsS1/S2/ULT and an entry guard in play(). No identity/role field, login or codec change. See LABS_REFERENCE_REVIEW.md.

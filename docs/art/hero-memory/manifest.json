@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-25",
+  "purpose": "Hero Memory information-panel illustration",
+  "heroId": "bailong",
+  "source": "/workspace/generated_images/exec-04665251-f0b6-481c-9d40-e853676503da.png",
+  "sourceSha256": "481ad3e8f0590ab78d196110dc8fa12c6bc2de7ad59f94568c8d27db3d3c5c35",
+  "references": [
+    {
+      "path": "public/portraits/bailong.webp",
+      "sha256": "c7d5a5b32ee80fda96c03362fffd37882572a8900ce954aab4859fbacc734a16"
+    },
+    {
+      "path": "public/banners/bailong.webp",
+      "sha256": "2aa3d49cb5585c7076afd4fc28f3bb78638f098f2c405a7a58520724305ef9e3"
+    }
+  ],
+  "compositionReference": "/workspace/generated_images/exec-8192c22a-0283-4202-bf0c-e470f1a5ac99.png",
+  "asset": "public/ui/eldervane/hero-memory-bailong.webp",
+  "assetSha256": "5acf43650375780a6ba2452dbc1e00d67dd01f8634a2cfbb57338fa131e04244",
+  "encoding": "960px WebP quality94; no manual portrait compositing or content edits after imagegen",
+  "deployment": false
+}

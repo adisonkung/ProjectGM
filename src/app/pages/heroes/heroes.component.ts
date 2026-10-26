@@ -1,3 +1,4 @@
+import { StateEmblemComponent } from '../../shared/state-emblem.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CLASS_NAME } from '../../core/data/classes';
@@ -8,13 +9,15 @@ import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
 import { heroArt } from '../../core/data/hero-art';
 import { heroStar } from '../../core/rules/stars';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
+import { CitadelIconComponent } from '../../shared/citadel-icon.component';
 
 export type HeroSort = 'power' | 'level' | 'star' | 'name';
 
 /** Hero roster: portrait cards, class filter, sort, "ready" badges (breakthrough / skill rank-up / potions) */
 @Component({
   selector: 'app-heroes',
-  imports: [RouterLink, HeroPortraitComponent, IconComponent],
+  imports: [StateEmblemComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './heroes.component.html',
   styleUrl: './heroes.component.scss',
 })
@@ -27,7 +30,7 @@ export class HeroesComponent {
     { id: 'power', label: 'พลัง' }, { id: 'level', label: 'เลเวล' }, { id: 'star', label: 'ดาว' }, { id: 'name', label: 'ชื่อ' },
   ];
   readonly layout = signal<'grid' | 'list'>('grid');
-  readonly classIcon = (c: HeroClass | 'all') => ({ all: 'heroes', tank: 'shield', fighter: 'sword', assassin: 'armory', archer: 'arrow', mage: 'star', healer: 'summon' })[c];
+  readonly classIcon = (c: HeroClass | 'all') => ({ all: 'heroes', tank: 'class-tank', fighter: 'class-fighter', assassin: 'class-assassin', archer: 'class-archer', mage: 'class-mage', healer: 'class-healer' })[c];
   readonly cls = signal<HeroClass | 'all'>('all');
   readonly query = signal('');
   readonly sort = signal<HeroSort>('power');

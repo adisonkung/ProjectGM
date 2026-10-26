@@ -1,46 +1,25 @@
 <section class="gate" [class.summoning]="playing()" aria-label="วิหารอัญเชิญ">
-  <app-summon-sanctum [paused]="playing()" />
+  <app-summon-sanctum [paused]="playing()" [showFloatingCards]="false" />
   @if (showcase) { <div class="summon-showcase" aria-hidden="true"><img [src]="showcase" alt="" decoding="async" /></div> }
+  <app-summon-vfx mode="ambient" [paused]="playing()" />
   <div class="summon-ui">
-    <aside class="banner-menu" aria-label="เมนูอัญเชิญ">
-      <a class="back-link" routerLink="/home"><app-icon name="back" [size]="15" /> กลับเกาะ</a>
-      <div class="banner-choice framed" aria-current="true">
-        @if (showcase) { <img [src]="showcase" alt="" /> }
-        <div><b>อัญเชิญปกติ</b><small>STANDARD</small><span><app-icon name="summon" [size]="13" /> เปิดอัญเชิญเสมอ</span></div>
-      </div>
-      <button type="button" class="side-choice" aria-label="รายชื่อฮีโร่" (click)="openInfo('pool')"><app-icon name="heroes" [size]="27" /><span>รายชื่อฮีโร่<small>HERO COLLECTION</small></span></button>
-      <button type="button" class="side-choice" aria-label="ความทรงจำฮีโร่" (click)="openInfo('memory')"><app-icon name="book" [size]="27" /><span>ความทรงจำฮีโร่<small>HERO MEMORY</small></span></button>
-      <a class="side-choice" aria-label="พัฒนาฮีโร่" routerLink="/heroes"><app-icon name="star" [size]="27" /><span>พัฒนาฮีโร่<small>ASCENSION</small></span></a>
+    <aside class="hero-pool campaign-column" aria-label="แบนเนอร์ตู้อัญเชิญ">
+      <header class="campaign-heading"><span class="eyebrow">SUMMON · CELESTIAL SANCTUM</span><h1>ประตูอัญเชิญ</h1><p>เรียกวีรชนร่วมเดินทาง สู่ยอดหอคอย</p></header>
+      <app-summon-campaign [campaign]="campaign" (details)="openInfo('banner')" />
+      <nav class="pool-tools" aria-label="ข้อมูลการอัญเชิญ"><button type="button" aria-label="รายละเอียดอัตรา" (click)="openInfo('rates')"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="scroll" [size]="20" /><span>อัตราอัญเชิญ</span></button><button type="button" aria-label="รายชื่อฮีโร่" (click)="openInfo('pool')"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="heroes" [size]="20" /><span>รายชื่อฮีโร่</span></button><button type="button" aria-label="ความทรงจำฮีโร่" (click)="openInfo('memory')"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="book" [size]="20" /><span>ความทรงจำ</span></button></nav>
+      @if (results().length && !playing()) { <button type="button" class="last-results" (click)="openResults()"><app-icon name="restart" [size]="16" />ดูผลครั้งล่าสุด</button> }
     </aside>
-    <nav class="quick-tools" aria-label="ข้อมูลการอัญเชิญ">
-      <button type="button" (click)="openInfo('rates')"><app-icon name="scroll" [size]="23" /><span>รายละเอียดอัตรา</span></button>
-      @if (results().length && !playing()) { <button type="button" (click)="openResults()"><app-icon name="restart" [size]="23" /><span>ผลครั้งล่าสุด</span></button> }
-    </nav>
-    <section class="hero-pool" aria-label="ตัวอย่างฮีโร่ในตู้">
-      <span class="eyebrow">THE CELESTIAL SANCTUM</span>
-      <h1>ประตูอัญเชิญ</h1>
-      <p>เรียกวีรชนร่วมเดินทาง สู่ยอดหอคอย</p>
-      <div class="hero-lineup">
-        @for (h of preview; track h.id) {
-          <button type="button" class="pool-card" (click)="openInfo('pool')" [attr.aria-label]="'ดูรายชื่อในตู้ ' + h.name">
-            @if (h.portrait) { <img [src]="h.portrait" alt="" /> } @else { <app-hero-portrait [heroId]="h.id" [size]="64" /> }
-            <span><small>{{ stars(h.star) }}</small><b>{{ h.name }}</b></span>
-          </button>
-        }
-      </div>
-      <button type="button" class="pool-caption" (click)="openInfo('pool')">ฮีโร่ในตู้ {{ pool.length }} ตัว <span>ดูรายชื่อทั้งหมด <app-icon name="arrow" [size]="13" /></span></button>
-    </section>
     <section class="summon-footer" aria-label="อัญเชิญฮีโร่">
-      <div class="pity-panel framed">
-        <header><b>การันตีระดับ <span>3★</span></b><button type="button" aria-label="ดูเงื่อนไขการันตีและอัตรา" (click)="openInfo('rates')">?</button></header>
+      <div class="pity-panel framed citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" [crimson]="false" />
+        <header><app-icon name="star" [size]="24" /><b>การันตีระดับ <span>3★</span></b><button type="button" aria-label="ดูเงื่อนไขการันตีและอัตรา" (click)="openInfo('rates')" class="citadel-surface citadel-control"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" />?</button></header>
         <div class="pity-progress"><div class="pity-rail" role="progressbar" aria-label="ความคืบหน้าการันตี" aria-valuemin="0" [attr.aria-valuemax]="G.pity" [attr.aria-valuenow]="pity()"><i [style.width.%]="pity() / G.pity * 100"></i></div><b>{{ pity() }} <small>/ {{ G.pity }}</small></b></div>
         <p>ภายในอีก {{ pityLeft() }} ครั้ง · ×10 ได้ระดับ 2★+ อย่างน้อย 1 ครั้ง</p>
-        <div class="rate-strip"><small>อัตราระดับการสุ่ม</small>@for (r of rates.slice().reverse(); track r.star) { <span>{{ r.star }}★ <b>{{ r.pct }}%</b></span> }</div>
+
       </div>
       @if (error(); as e) { <p class="err" role="alert">{{ e }}</p> }
       <div class="acts">
-        <button type="button" class="summon-button single" (click)="summon(1)" [disabled]="playing() || !canAfford(1)"><span class="price"><app-icon name="gem" [size]="15" /> {{ G.single }}</span><b>อัญเชิญ 1 ครั้ง</b><small>{{ freeSummons ? 'FREE TEST · ไม่หักเพชร' : 'SUMMON ×1' }}</small></button>
-        <button type="button" class="summon-button multi" (click)="summon(10)" [disabled]="playing() || !canAfford(10)"><span class="price"><app-icon name="gem" [size]="15" /> {{ G.multi }}</span><b>อัญเชิญ 10 ครั้ง</b><small>{{ freeSummons ? 'FREE TEST · ไม่หักเพชร' : 'SUMMON ×10' }}</small></button>
+        <button type="button" class="summon-button single citadel-surface citadel-control" (click)="summon(1)" [disabled]="playing() || !canAfford(1)"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" /><b>อัญเชิญ 1 ครั้ง</b><span class="price"><app-icon name="gem" [size]="22" /> {{ G.single }}</span><small>{{ freeSummons ? 'ทดสอบฟรี · ไม่หักเพชร' : 'SUMMON ×1' }}</small></button>
+        <button type="button" class="summon-button multi citadel-surface citadel-control" (click)="summon(10)" [disabled]="playing() || !canAfford(10)"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><b>อัญเชิญ 10 ครั้ง</b><span class="price"><app-icon name="gem" [size]="22" /> {{ G.multi }}</span><small>{{ freeSummons ? 'ทดสอบฟรี · ไม่หักเพชร' : 'SUMMON ×10' }}</small></button>
       </div>
       @if (freeSummons) { <span class="funds-note" role="status">อัญเชิญฟรีชั่วคราวสำหรับทดสอบ · แสดงราคาเดิม แต่ไม่หักเพชร</span> }
       @if (!freeSummons && gems() < G.single) { <span class="funds-note">เพชรไม่พอสำหรับอัญเชิญ · ต้องใช้ {{ G.single }} เพชร</span> }
@@ -49,46 +28,54 @@
 </section>
 @if (playing() && results().length) { <app-summon-scene [results]="results()" (done)="finishSummon()" /> }
 
-<dialog #infoDialog class="summon-dialog" aria-labelledby="summon-info-title" (close)="info.set(null)" (click)="$event.target === infoDialog && closeInfo()">
-  <header class="dialog-heading"><h2 id="summon-info-title">{{ info() === 'pool' ? 'รายชื่อฮีโร่ในตู้' : info() === 'memory' ? 'ความทรงจำฮีโร่' : 'อัตราและเงื่อนไขอัญเชิญ' }}</h2><button type="button" class="close" aria-label="ปิดข้อมูล" (click)="closeInfo()" autofocus>×</button></header>
-  @if (info() === 'pool') {
-    <p class="dialog-intro">ตู้อัญเชิญปกติ · {{ pool.length }} ฮีโร่ในรายชื่อปัจจุบัน</p>
-    <div class="pool-grid">@for (h of pool; track h.id) { <article>@if (h.portrait) { <img [src]="h.portrait" alt="" loading="lazy" /> } @else { <app-hero-portrait [heroId]="h.id" [size]="72" /> }<b>{{ h.name }}</b><small>{{ stars(h.star) }} · {{ h.className }}</small></article> }</div>
-  } @else if (info() === 'memory') {
-    <p>ฮีโร่ที่อัญเชิญซ้ำจะเปลี่ยนเป็น Hero Memory สำหรับพัฒนาดาวของฮีโร่ตัวนั้น</p>
-    <ul class="memory-rules">@for (r of dupMemory; track r.star) { <li>{{ stars(r.star) }} <span>Hero Memory <b>+{{ r.m }}</b></span></li> }</ul>
-    <p>ทุกตัวพัฒนาได้ถึง {{ MAX_STAR }}★ · 3★ → 6★ ใช้ Memory {{ toSix }} หน่วย</p>
-    <p>เมื่อพัฒนาถึง 6★ ตัวซ้ำจะเปลี่ยนเป็น Universal Memory ซึ่งใช้แทน Memory ของฮีโร่ตัวใดก็ได้</p>
-    <a class="gm-btn primary" routerLink="/heroes" (click)="closeInfo()">ไปพัฒนาฮีโร่ <app-icon name="arrow" [size]="15" /></a>
+<dialog #infoDialog class="summon-dialog citadel-surface" [class.reference-summon-info]="info() !== 'banner'" aria-labelledby="summon-info-title" (close)="info.set(null)" (click)="$event.target === infoDialog && closeInfo()"><app-tower-ornament [grooved]="true" [ornate]="true" [crimson]="false" />
+  <header class="dialog-heading">@if (info() !== 'banner') { <app-citadel-icon class="information-emblem" [name]="info() === 'memory' ? 'compass' : 'tower'" [size]="57" /> }<div class="information-title"><h2 id="summon-info-title">{{ info() === 'banner' ? 'รายละเอียดตู้อัญเชิญ' : info() === 'pool' ? 'รายชื่อฮีโร่ในตู้' : info() === 'memory' ? 'ความทรงจำฮีโร่' : 'อัตราและเงื่อนไขอัญเชิญ' }}</h2>@if (info() !== 'banner') { <p>{{ info() === 'pool' ? 'ฮีโร่ทั้งหมดที่สามารถอัญเชิญได้' : info() === 'memory' ? 'รายละเอียดการได้รับและการใช้งานความทรงจำฮีโร่' : info() === 'rates' ? 'รายละเอียดอัตราการได้รับ และเงื่อนไขการอัญเชิญ' : 'ตู้อัญเชิญปกติ' }}</p> }</div>@if (info() === 'pool') { <span class="information-count">{{ pool.length }} / {{ pool.length }}</span> }<button type="button" class="close citadel-surface citadel-control" aria-label="ปิดข้อมูล" (click)="closeInfo()" autofocus><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" /><app-icon name="close" [size]="24" /></button></header>
+  <div class="modal-body">
+  @if (info() === 'banner') {
+    <div class="banner-details-art">@if (showcase) { <img [src]="showcase" alt="ภาพประกอบไป๋หลง" /> }<div><span class="eyebrow">STANDARD SUMMON</span><h3>{{ campaign.title }}</h3><p>{{ campaign.subtitle }}</p></div></div>
+    <p class="dialog-intro">อัญเชิญปกติ · ฮีโร่ในตู้ {{ pool.length }} ตัว · ไม่มี Rate Up หรือการันตีฮีโร่เฉพาะตัว</p>
+    <div class="hero-lineup">@for (h of preview; track h.id) { <button type="button" class="pool-card" (click)="openInfo('pool')" [attr.aria-label]="'ดูรายชื่อในตู้ ' + h.name"><app-citadel-frame [cut]="8" />@if (h.portrait) { <img [src]="h.portrait" alt="" /> }<span><small>{{ stars(h.star) }}</small><b>{{ h.name }}</b></span></button> }</div>
+    <p class="pool-notice">ภาพไป๋หลงเป็นภาพประกอบตู้ปกติ ไม่ได้เพิ่มโอกาสได้รับฮีโร่ตัวนี้ @if (freeSummons) { เปิดทดสอบฟรีชั่วคราว ไม่หักเพชร }</p>
+    <nav class="pool-tools" aria-label="รายละเอียดตู้"><button type="button" (click)="openInfo('rates')"><app-tower-ornament [grooved]="true" [arrow]="true" />อัตราและราคา</button><button type="button" (click)="openInfo('pool')"><app-tower-ornament [grooved]="true" [arrow]="true" />ฮีโร่ทั้งหมด</button><button type="button" (click)="openInfo('memory')"><app-tower-ornament [grooved]="true" [arrow]="true" />Hero Memory</button></nav>
+  } @else if (info() === 'pool') {
+    <p class="dialog-intro pool-intro">ตู้อัญเชิญปกติ · ไม่มี Rate Up หรือการันตีฮีโร่เฉพาะตัว</p>
+    <div class="pool-grid">@for (h of pool; track h.id) { <article [attr.aria-label]="h.name + ' ' + stars(h.star) + ' ' + h.className"><app-citadel-frame shape="panel" [cut]="10" /><div class="pool-portrait">@if (h.portrait) { <img [src]="h.portrait" alt="" loading="lazy" /> } @else { <app-hero-portrait [heroId]="h.id" [size]="72" /> }<span class="pool-card-rating"><app-citadel-icon [name]="classIcon(h.cls)" [size]="23" /><span>{{ stars(h.star) }}</span></span></div><b>{{ h.name }}</b><small>{{ h.className }}</small></article> }</div>
+  } @else if (info() === 'memory') {<div class="memory-layout"><div class="memory-key-art" aria-hidden="true"><app-tower-ornament [grooved]="true" /><img class="memory-illustration" src="/ui/eldervane/hero-memory-bailong.webp" alt="" /></div><div class="memory-copy">
+    <div class="memory-step"><app-tower-ornament [grooved]="true" /><app-citadel-icon name="people" [size]="39" /><div><h3>ฮีโร่ที่ได้รับซ้ำ</h3><p>จะถูกเปลี่ยนเป็นความทรงจำของฮีโร่ตัวนั้น</p><ul class="memory-rules">@for (r of dupMemory; track r.star) { <li>{{ stars(r.star) }} <span>Memory <b>+{{ r.m }}</b></span></li> }</ul></div></div>
+    <div class="memory-step"><app-tower-ornament [grooved]="true" /><app-citadel-icon name="summon" [size]="39" /><div><h3>ใช้ความทรงจำฮีโร่</h3><p>เพื่อพัฒนาฮีโร่ได้สูงสุดถึง {{ MAX_STAR }}★</p><small>3★ → 6★ ใช้ Memory {{ toSix }} หน่วย</small></div></div>
+    <div class="memory-step"><app-tower-ornament [grooved]="true" /><app-citadel-icon name="heroes" [size]="39" /><div><h3>หลังจากพัฒนาถึง {{ MAX_STAR }}★</h3><p>ตัวซ้ำจะได้รับ Universal Memory แทน<br>ใช้แทน Memory ของฮีโร่ตัวใดก็ได้</p></div></div>
+    <a class="gm-btn primary citadel-surface citadel-control" routerLink="/heroes" (click)="closeInfo()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" />ไปพัฒนาฮีโร่ <app-icon name="arrow" [size]="23" /></a>
+</div></div>
   } @else {
-    <p>อัญเชิญ 1 ครั้ง {{ G.single }} เพชร · 10 ครั้ง {{ G.multi }} เพชร</p>
-    @if (freeSummons) { <p class="pool-notice">เปิดอัญเชิญฟรีชั่วคราวสำหรับทดสอบ ราคาด้านบนเป็นราคาเดิม และจะไม่หักเพชร</p> }
-    <table><caption>อัตราระดับการสุ่ม</caption><thead><tr><th>ระดับ</th><th>อัตรา</th><th>ฮีโร่ในระดับ</th></tr></thead><tbody>@for (r of rates; track r.star) { <tr><th>{{ stars(r.star) }}</th><td>{{ r.pct }}%</td><td>{{ r.count }} ตัว</td></tr> }</tbody></table>
+
+    @if (freeSummons) { <p class="pool-notice">เปิดอัญเชิญฟรีชั่วคราวสำหรับทดสอบ ราคาที่แสดงเป็นราคาเดิม และจะไม่หักเพชร</p> }
+    <div class="rates-layout"><table><caption>อัตราระดับการสุ่ม</caption><thead><tr><th>ระดับ</th><th>อัตรา</th><th>ฮีโร่ในระดับ</th></tr></thead><tbody>@for (r of rates; track r.star) { <tr><th>{{ stars(r.star) }}</th><td>{{ r.pct }}%</td><td>{{ r.count }} ตัว</td></tr> }</tbody></table><dl class="rates-prices"><div><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><dt>อัญเชิญ 1 ครั้ง</dt><dd><app-icon name="gem" [size]="23" />{{ G.single }}</dd></div><div><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><dt>อัญเชิญ 10 ครั้ง</dt><dd><app-icon name="gem" [size]="23" />{{ G.multi }}</dd></div><small>{{ freeSummons ? 'ทดสอบฟรีชั่วคราว · ไม่หักเพชร' : 'ค่าใช้จ่ายเป็นเพชรต่อครั้ง' }}</small></dl></div>
     <p>การันตีสุ่มระดับ 3★ ภายใน {{ G.pity }} ครั้ง และอัญเชิญ ×10 ได้ระดับ 2★ ขึ้นไปอย่างน้อย 1 ครั้ง เกจเริ่มใหม่เมื่อสุ่มได้ระดับ 3★</p>
     <p class="pool-notice">รายชื่อปัจจุบันมีเฉพาะฮีโร่ 3★ หากระดับที่สุ่มได้ไม่มีฮีโร่ ระบบจะเลือกจากรายชื่อรวม ดาวของฮีโร่ที่ได้รับจึงเป็น 3★ ทั้งหมด ส่วนเกจการันตีนับจากระดับที่สุ่มได้</p>
     <p>ตัวซ้ำเปลี่ยนเป็น Hero Memory · ไม่มี Rate Up หรือการันตีฮีโร่เฉพาะตัวในตู้นี้</p>
   }
+  </div>
 </dialog>
 <dialog #resultsDialog class="summon-dialog results-dialog" aria-labelledby="summon-results-title" (close)="showResults.set(false)" (click)="$event.target === resultsDialog && resultsDialog.close()">
-  <header class="dialog-heading"><div><span class="eyebrow">THE CELESTIAL SANCTUM</span><h2 id="summon-results-title">ผลการอัญเชิญ</h2><p>วีรชนที่ตอบรับเสียงเรียกของคุณ</p></div><button type="button" class="close" aria-label="ปิดผลอัญเชิญ" (click)="resultsDialog.close()" autofocus>×</button></header>
+  <header class="dialog-heading"><div><span class="eyebrow">THE CELESTIAL SANCTUM</span><h2 id="summon-results-title">ผลการอัญเชิญ</h2><p>วีรชนที่ตอบรับเสียงเรียกของคุณ</p></div><button type="button" class="close citadel-surface citadel-control" aria-label="ปิดผลอัญเชิญ" (click)="resultsDialog.close()" autofocus><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" /><app-icon name="close" [size]="24" /></button></header>
   @if (showResults()) {
-    <ul class="results" aria-label="ผลการอัญเชิญ">@for (r of results(); track $index) {
-      <li class="res r{{ r.star }}" [class.new]="r.isNew">
+    <ul class="results" [class.single]="results().length === 1" aria-label="ผลการอัญเชิญ">@for (r of results(); track $index) {
+      <li class="res r{{ r.star }}" [class.new]="r.isNew"><app-citadel-frame shape="panel" [cut]="10" />
         @if (portrait(r.templateId); as image) { <img class="result-portrait" [src]="image" alt="" /> } @else { <app-hero-portrait [heroId]="r.templateId" [size]="88" /> }<b>{{ r.name }}</b><span class="gm-stars">{{ stars(r.star) }}</span>
         @if (r.isNew) { <em class="tag">ใหม่!</em> } @else if (r.memory) { <small>ตัวซ้ำ → Hero Memory +{{ r.memory }}</small> } @else { <small>6★ แล้ว → Universal +{{ r.universal }}</small> }
         @if (r.uid) { <a class="more" [routerLink]="['/heroes', r.uid]" (click)="resultsDialog.close()">ดูฮีโร่ <app-icon name="arrow" [size]="13" /></a> }
       </li>
     }</ul>
     <p class="dialog-intro">เพิ่มฮีโร่และ Memory เข้าเซฟเรียบร้อยแล้ว</p>
-    <footer class="result-actions"><button type="button" class="gm-btn" (click)="resultsDialog.close()">ยืนยัน</button><button type="button" class="gm-btn primary" (click)="summon(lastCount())" [disabled]="!canAfford(lastCount())">อัญเชิญอีก {{ lastCount() }} ครั้ง · {{ lastCount() === 10 ? G.multi : G.single }} เพชร</button></footer>
+    <footer class="result-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="resultsDialog.close()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" />ยืนยัน</button><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="summon(lastCount())" [disabled]="!canAfford(lastCount())"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" />อัญเชิญอีก {{ lastCount() }} ครั้ง · {{ freeSummons ? 'ทดสอบฟรี' : (lastCount() === 10 ? G.multi : G.single) + ' เพชร' }}</button></footer>
   }
 </dialog>
 
-<dialog #confirmDialog class="summon-dialog confirm-dialog" aria-labelledby="confirm-title" (cancel)="$event.preventDefault(); cancelSummon()" (click)="$event.target === confirmDialog && cancelSummon()">
-  <header class="dialog-heading"><h2 id="confirm-title">ยืนยันการอัญเชิญ</h2><button type="button" class="close" aria-label="ยกเลิกอัญเชิญ" (click)="cancelSummon()">×</button></header>
+<dialog #confirmDialog class="summon-dialog confirm-dialog citadel-surface" aria-labelledby="confirm-title" (cancel)="$event.preventDefault(); cancelSummon()" (click)="$event.target === confirmDialog && cancelSummon()"><app-tower-ornament [grooved]="true" [ornate]="true" [crimson]="false" />
+  <header class="dialog-heading"><h2 id="confirm-title">ยืนยันการอัญเชิญ</h2><button type="button" class="close citadel-surface citadel-control" aria-label="ยกเลิกอัญเชิญ" (click)="cancelSummon()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" /><app-icon name="close" [size]="24" /></button></header>
   <p class="confirm-copy">@if (freeSummons) { ต้องการอัญเชิญฟรี <strong>{{ pending() }} ครั้ง</strong><br />สำหรับทดสอบ โดยไม่หักเพชร ใช่หรือไม่? } @else { ต้องการใช้ <strong>{{ pendingCost() }} เพชร</strong> เพื่ออัญเชิญ <strong>{{ pending() }} ครั้ง</strong><br />ในตู้อัญเชิญปกติ ใช่หรือไม่? }</p>
-  <div class="confirm-banner">@if (showcase) { <img [src]="showcase" alt="" /> }<div><small>STANDARD SUMMON</small><b>เสียงเรียกแห่งดวงดาว</b><span>เหล่าวีรชนแห่ง Dawnmere</span></div></div>
+  <div class="confirm-banner">@if (showcase) { <img [src]="showcase" alt="" /> }<div><small>STANDARD SUMMON</small><b>เสียงเรียกแห่งดวงดาว</b><span>เหล่าวีรชนแห่งเอลเดอร์เวย์น</span></div></div>
   <div class="confirm-wallet"><span>{{ freeSummons ? 'ราคาเดิม' : 'ใช้จ่าย' }} <strong><app-icon name="gem" [size]="18" /> {{ pendingCost() }}</strong></span><span>มีอยู่ <strong><app-icon name="gem" [size]="18" /> {{ gems() }}</strong></span></div>
   <p class="confirm-note">{{ freeSummons ? 'โหมดทดสอบ: ไม่หักเพชร แต่ยังได้รับฮีโร่และ Memory ตามปกติ' : 'เมื่อยืนยันจะใช้เพชรทันที และเพิ่มผลอัญเชิญเข้าเซฟ' }}<br />การข้ามฉากจะไม่เปลี่ยนผลที่ได้รับ</p>
-  <footer class="confirm-actions"><button type="button" class="gm-btn" (click)="cancelSummon()" autofocus>ยกเลิก</button><button type="button" class="gm-btn primary" (click)="confirmSummon()" [disabled]="!pending() || !canAfford(pending() ?? 1)">อัญเชิญ {{ pending() }} ครั้ง · {{ pendingCost() }} เพชร</button></footer>
+  <footer class="confirm-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="cancelSummon()" autofocus><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" />ยกเลิก</button><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="confirmSummon()" [disabled]="!pending() || !canAfford(pending() ?? 1)"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" />{{ freeSummons ? 'ยืนยันอัญเชิญฟรี' : 'ยืนยันอัญเชิญ' }} {{ pending() }} ครั้ง</button></footer>
 </dialog>

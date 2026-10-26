@@ -1,6 +1,6 @@
-<div class="board" [style.--spd]="speed()" [style.--tick]="tickMs() + 'ms'" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 16 คอลัมน์ ฝั่งเราซ้าย โซนกลาง 4 คอลัมน์ ศัตรูขวา">
+<div class="board" [class.expanded-scenery]="sceneryExtraRows() > 0" [style.--scenery-extra-rows]="sceneryExtraRows()" [style.--spd]="speed()" [style.--tick]="tickMs() + 'ms'" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 16 คอลัมน์ ฝั่งเราซ้าย โซนกลาง 4 คอลัมน์ ศัตรูขวา">
   <div class="cam">
-  <app-field [scroll]="scroll()" [duration]="tickMs()" [bg]="background()" [live]="!!alpha()" />
+  <app-field [sceneryExtraRows]="sceneryExtraRows()" [scroll]="scroll()" [duration]="tickMs()" [bg]="background()" [live]="!!alpha()" />
 
   @if (world(); as w) {
     <div class="dbg-world" aria-hidden="true">

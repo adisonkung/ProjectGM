@@ -1,3 +1,4 @@
+import { GameAccessService } from './core/services/game-access.service';
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, Routes } from '@angular/router';
 import { AccountService } from './core/services/account.service';
@@ -27,6 +28,7 @@ const GAME_ROUTES: Routes = [
   { path: 'battle', loadComponent: () => import('./pages/battle/battle.component').then(m => m.BattleComponent), title: 'สนามรบ · Eldervane' },
   { path: 'lab', loadComponent: () => import('./pages/battle/battle.component').then(m => m.BattleComponent), title: 'ห้องทดลองต่อสู้ · Eldervane', data: { lab: true } },
   { path: 'sprite-lab', loadComponent: () => import('./pages/sprite-lab/sprite-lab.component').then(m => m.SpriteLabComponent), title: 'ห้องทดสอบท่า · Eldervane' },
+  { path: 'art-catalog', loadComponent: () => import('./pages/art-catalog/art-catalog.component').then(m => m.ArtCatalogComponent), title: 'คลังอาร์ต · Eldervane', canActivate: [() => inject(GameAccessService).isGm() ? true : inject(Router).createUrlTree(['/home'])] },
   { path: '**', redirectTo: 'home' },
 ];
 

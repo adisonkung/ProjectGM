@@ -1,3 +1,4 @@
+@use '../../shared/citadel-material' as material;
 :host { display: block; }
 .account { display: grid; gap: 14px; }
 .head .gm-title { margin: 0; }
@@ -29,3 +30,5 @@
 .soon { padding: 14px; background: #202a39ed; }
 @media (max-width:850px) { .grid { grid-template-columns: minmax(0,1fr); } }
 @media (max-width:400px) { .card { padding: 16px; } .row .gm-btn { white-space: normal; text-align: center; } }
+
+@include material.surfaces;

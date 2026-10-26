@@ -1,3 +1,9 @@
+import { battleViewport } from './battle-viewport';
+import { BattleEmblemComponent } from './battle-emblem.component';
+import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
+import { A11yModule } from '@angular/cdk/a11y';
+import { CitadelIconComponent } from '../../shared/citadel-icon.component';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { sequenceFx } from '../../battle/render/sequence-fx';
 import { itemName as itemNameOf } from '../../core/rules/equipment';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
@@ -48,12 +54,12 @@ import { strokeMultipliers } from '../../core/rules/slash-trace';
 const TICK = 0.05;
 
 /**
- * ห้องทดลองต่อสู้: เลือกชั้น จัดตำแหน่งบนกระดาน แล้วดูทีมปัจจุบันสู้กับศัตรูบนกระดาน 8x7
+ * ห้องทดลองต่อสู้: เลือกชั้น จัดตำแหน่งบนกระดาน แล้วดูทีมปัจจุบันสู้กับศัตรูบนกระดาน 5×16 (สองแถวบนเป็นฉาก)
  * ผลการต่อสู้ไม่มีผลกับเซฟ (แต่การจัดตำแหน่งบันทึกลงทีม) ใช้ทดสอบเอนจินและปรับสมดุล
  */
 @Component({
   selector: 'app-battle',
-  imports: [BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
+  imports: [BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -85,6 +91,7 @@ export class BattleComponent implements OnDestroy {
     return this.engine?.units.find(u => u.heroUid === uid)?.name ?? `#${uid}`;
   }
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
+  readonly itemIcon = (id: string) => id.startsWith('bt_') ? 'crystal' : id;
   /** result popup: one tile per hero (team order, left → right) with the EXP bar before / after this run */
   readonly expStrip = computed(() => {
     const rw = this.reward();
@@ -106,10 +113,20 @@ export class BattleComponent implements OnDestroy {
       };
     });
   });
+  readonly totalHeroExp = computed(() => this.expStrip().reduce((n,x) => n + x.gained,0));
   readonly gearName = itemNameOf;
 
   readonly stages = STAGES;
   readonly floor = signal(1);
+  readonly viewport = signal({ width: typeof window === 'undefined' ? 1280 : window.innerWidth, height: typeof window === 'undefined' ? 900 : window.innerHeight });
+  readonly fieldLayout = computed(() => battleViewport(this.viewport().width,this.viewport().height));
+  readonly sceneryExtraRows = computed(() => {
+    if (this.mode() === 'lab') return 0;
+    const requested = this.placing() ? (this.viewport().width >= 900 ? .65 : 0) : this.fieldLayout().extraRows;
+    // Reveal only pixels already cropped above the map; never expose an empty image band.
+    return Math.min(requested, Math.max(0, ((this.background()?.zoom ?? 1) - 1) * 5));
+  });
+  @HostListener('window:resize') onViewportResize(): void { this.viewport.set({ width: window.innerWidth, height: window.innerHeight }); }
   readonly speed = signal(1);
   readonly running = signal(false);
   /** settings popup open → the fight is paused (engine not stepped, board animations frozen) */
@@ -139,6 +156,7 @@ export class BattleComponent implements OnDestroy {
   readonly projectiles = signal<ProjectileView[]>([]);
   readonly anims = signal<Record<number, AnimState>>({});
   readonly simReport = signal<string | null>(null);
+  readonly simStats = signal<{ floor: number; runs: number; wins: number; seconds: number } | null>(null);
   /** เวฟปัจจุบัน (เริ่ม 0) / ทั้งหมด · ช่วงของการต่อสู้ (BattlePhase) */
   readonly wave = signal(0);
   readonly totalWaves = signal(1);
@@ -401,6 +419,7 @@ export class BattleComponent implements OnDestroy {
     this.result.set(null);
     this.reward.set(null);
     this.simReport.set(null);
+    this.simStats.set(null);
     this.floats.set([]);
     this.fx.set([]);
     this.zones.set([]);
@@ -440,6 +459,7 @@ export class BattleComponent implements OnDestroy {
     if (this.result()) this.prepare();
     if (!this.engine.alive(PLAYER_TEAM).length) return;
     this.running.set(true);
+    if (this.mode() !== 'lab' && typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
     this.lockLandscape();
     if (this.portraitPhone()) {
       this.paused.set(true);
@@ -571,6 +591,7 @@ export class BattleComponent implements OnDestroy {
       if (e.run() === 'win') wins++;
       t += e.time;
     }
+    this.simStats.set({ floor: this.floor(), runs, wins, seconds: t / runs });
     this.simReport.set(`จำลอง ${runs} รอบ: ชนะ ${Math.round((wins / runs) * 100)}% · เฉลี่ย ${(t / runs).toFixed(1)} วินาที`);
   }
 

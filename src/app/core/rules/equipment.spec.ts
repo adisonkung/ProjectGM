@@ -15,7 +15,7 @@ import { UnitSpec } from '../models/unit';
 import { migrate } from '../services/save.service';
 import { BattleEngine } from '../../battle/engine/battle-engine';
 import {
-  canEquip, compareGear, craft, dismantle, effectivePower, equip, gearTotals, heroGearTotals, itemLines, mainValue, profileGear,
+  canEquip, compareGear, craft, craftRandom, dismantle, dismantleMany, effectivePower, equip, gearTotals, heroGearTotals, itemLines, mainValue, profileGear,
   releaseHeroGear, rollItem, sell, setLocked, totalUpgradeOre, unequipSlot, upgrade, upgradeCost,
 } from './equipment';
 import { combatModifiers } from './progression';
@@ -188,6 +188,51 @@ describe('Equipment — bag actions', () => {
     expect(craft(s, 'RARE', 'longbow', 'atkPct', () => 0.5)).toEqual({ error: 'NEED_FRAGMENTS' });
     expect(craft(withBag([], { inventory: { equip_frag_rare: 99 } }), 'RARE', 'longbow', 'hpPct', () => 0.5)).toEqual({ error: 'BAD_MAIN' });
     expect(Object.keys(CRAFT_RECIPES)).toEqual(['UNCOMMON', 'RARE', 'ELITE', 'EPIC']);
+  });
+
+  it('random crafting rolls legal bases/mains in the selected slot and charges once', () => {
+    const recipe = CRAFT_RECIPES.RARE!;
+    const s = withBag([], { inventory: { equip_frag_rare: recipe.fragments + 5 } });
+    const first = craftRandom(s, 'RARE', 'WEAPON', () => 0);
+    const last = craftRandom(s, 'RARE', 'WEAPON', () => .999);
+    const a = ok(first), b = ok(last);
+    expect(first.item!.definitionId).not.toBe(last.item!.definitionId);
+    for (const item of [first.item!, last.item!]) {
+      const base = EQUIPMENT_DEFS[item.definitionId];
+      expect(base.slot).toBe('WEAPON');
+      expect(base.mainStats).toContain(item.main.stat);
+      expect(item.rarity).toBe('RARE');
+    }
+    expect(a.gold).toBe(s.gold - recipe.gold);
+    expect(a.inventory['equip_frag_rare']).toBe(5);
+    expect(b.nextItemId).toBe(s.nextItemId + 1);
+    const armorA = craftRandom(s, 'RARE', 'ARMOR', () => 0);
+    const armorB = craftRandom(s, 'RARE', 'ARMOR', () => .999);
+    expect(armorA.item!.main.stat).not.toBe(armorB.item!.main.stat);
+    const rng = jasmine.createSpy('rng');
+    expect(craftRandom({ ...s, gold: 0 }, 'RARE', 'ARMOR', rng)).toEqual({ error: 'NEED_GOLD' });
+    expect(craftRandom({ ...s, inventory: {} }, 'RARE', 'ARMOR', rng)).toEqual({ error: 'NEED_FRAGMENTS' });
+    expect(rng).not.toHaveBeenCalled();
+    expect(s.equipment.length).toBe(0);
+  });
+
+  it('bulk dismantle sums yields once per unique item and rejects the whole invalid selection', () => {
+    const a = item('heavy_blade', 'RARE', 'atkPct');
+    const b = item('guard_armor', 'ELITE', 'hpPct');
+    const s = withBag([a,b], { inventory: {} });
+    const next = ok(dismantleMany(s, [a.instanceId,b.instanceId,a.instanceId]));
+    expect(next.equipment.length).toBe(0);
+    expect(next.inventory).toEqual({ enhancement_ore: 20, equip_frag_rare: 3, equip_frag_elite: 3 });
+    expect(next.gold).toBe(s.gold);
+    const locked = { ...s, equipment: [a,{...b,locked:true}] };
+    expect(dismantleMany(locked, [a.instanceId,b.instanceId])).toEqual({error:'LOCKED'});
+    expect(locked.equipment.length).toBe(2);
+    expect(locked.inventory).toEqual({});
+    expect(dismantleMany(s, [a.instanceId,999999])).toEqual({error:'NOT_FOUND'});
+    expect(dismantleMany(s, [])).toEqual({error:'NOT_FOUND'});
+    const worn = ok(equip(s, uidOf(s, 'aurel'), b.instanceId));
+    expect(dismantleMany(worn,[a.instanceId,b.instanceId])).toEqual({error:'EQUIPPED'});
+    expect(s.equipment.length).toBe(2);
   });
 
   it('a hero leaving the roster never destroys gear — it returns to the bag', () => {

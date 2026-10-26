@@ -10,9 +10,9 @@ let frameId = 0;
     <svg [attr.viewBox]="'0 0 ' + width() + ' ' + height()" preserveAspectRatio="none" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient [id]="id + '-metal'" x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0" stop-color="#fff3bb"/><stop offset=".12" stop-color="#9b6426"/>
-          <stop offset=".25" stop-color="#ffe8a5"/><stop offset=".43" stop-color="#d1a44e"/>
-          <stop offset=".63" stop-color="#755124"/><stop offset=".8" stop-color="#ffe8a2"/><stop offset="1" stop-color="#ba863b"/>
+          <stop offset="0" stop-color="#fff3bb" style="stop-color:var(--citadel-gold-stop-0,#fff3bb)"/><stop offset=".12" stop-color="#9b6426" style="stop-color:var(--citadel-gold-stop-1,#9b6426)"/>
+          <stop offset=".25" stop-color="#ffe8a5" style="stop-color:var(--citadel-gold-stop-2,#ffe8a5)"/><stop offset=".43" stop-color="#d1a44e" style="stop-color:var(--citadel-gold-stop-3,#d1a44e)"/>
+          <stop offset=".63" stop-color="#755124" style="stop-color:var(--citadel-gold-stop-4,#755124)"/><stop offset=".8" stop-color="#ffe8a2" style="stop-color:var(--citadel-gold-stop-5,#ffe8a2)"/><stop offset="1" stop-color="#ba863b" style="stop-color:var(--citadel-gold-stop-6,#ba863b)"/>
         </linearGradient>
         <linearGradient [id]="id + '-face'" x1="0" y1="0" x2=".8" y2="1">
           <stop offset="0" [attr.stop-color]="crimson() ? '#550009' : '#1f2428'"/>
@@ -67,7 +67,7 @@ let frameId = 0;
 })
 export class CitadelFrameComponent implements AfterViewInit, OnDestroy {
   readonly id = 'citadel-frame-' + frameId++;
-  readonly shape = input<'panel' | 'chapter' | 'hex' | 'tab'>('panel');
+  readonly shape = input<'panel' | 'chapter' | 'hex' | 'tab' | 'rect'>('panel');
   readonly crimson = input(false);
   readonly lacquer = input(false);
   readonly cut = input(22);
@@ -80,6 +80,7 @@ export class CitadelFrameComponent implements AfterViewInit, OnDestroy {
   url(part: string): string { return `url(#${this.id}-${part})`; }
   contour(inset: number): string {
     const w = this.width(), h = this.height(), c = Math.min(this.cut(), h / 2 - 2, w / 4);
+    if (this.shape() === 'rect') return `M${inset} ${inset}H${w - inset}V${h - inset}H${inset}Z`;
     if (this.shape() === 'tab') return `M${c + inset} ${inset}H${w - inset}L${w - c - inset} ${h - inset}H${inset}Z`;
     if (this.shape() === 'hex') return `M${c + inset / 2} ${inset}H${w - c - inset / 2}L${w - inset} ${h / 2} ${w - c - inset / 2} ${h - inset}H${c + inset / 2}L${inset} ${h / 2}Z`;
     const k = Math.max(2, c - inset * .3);

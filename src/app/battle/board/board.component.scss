@@ -253,3 +253,10 @@ app-projectile.px { visibility: hidden; }
 .unit.px.reviving { filter: none; }
 .unit.px.taunt::before, .unit.px.aura5::before, .unit.px.aura6::before, .unit.px.elite::after { display: none; }
 @media (prefers-reduced-motion: reduce) { .unit.aura5::before, .unit.aura6::before, .unit.aura6::after { animation: none; } }
+
+// A display-only offset shared by DOM units, Pixi, projectiles, FX and hit targets.
+.board.expanded-scenery {
+  --scenery-extra: calc(var(--cell) * var(--scenery-extra-rows));
+  height: calc(var(--rows) * var(--cell) + var(--foot, 0px) + var(--scenery-extra));
+  >.cam { top: var(--scenery-extra); >app-field { top: calc(-1 * var(--scenery-extra)); } }
+}
