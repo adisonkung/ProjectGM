@@ -26,12 +26,18 @@ from draeven_s2_vfx import pieces, runs, to_img  # noqa: E402
 N = 8
 CELL = 80
 BODY_RING = 108             # body aura ring (biggest frame f7) in atlas px — around his feet, he stays visible
-# review (user 2026-10-26): the body aura starts with the ultimate and builds f1–f8 once, then breathes
-# f8 7 6 5 6 7 8 … until the Final Impact (1.10 s): 50 ms frames, 22 frames = 1.10 s
+# review (user 2026-10-26): the body aura starts with the ultimate and builds f1–f8 once (8 × 50 ms), then breathes
+# f8 7 6 5 6 7 8 … until the Final Impact (1.10 s). Review 2: the breathing is slower and smooth — each loop key holds
+# 100 ms with a cross-faded in-between (entries (a, b, t) = blend of frames a → b), 22 × 50 ms = 1.10 s in total
 BODY_MS, BODY_END_MS = 50, 1100
-BODY_SEQ = list(range(8))
+BODY_SEQ = [(k, k, 0) for k in range(8)]
+_loop = [7, 6, 5, 4, 5, 6]
+_i = 0
 while len(BODY_SEQ) < BODY_END_MS // BODY_MS:
-    BODY_SEQ.append([6, 5, 4, 5, 6, 7][(len(BODY_SEQ) - 8) % 6])
+    a, b = _loop[_i % 6], _loop[(_i + 1) % 6]
+    BODY_SEQ += [(a, b, 0.5), (b, b, 0)]
+    _i += 1
+BODY_SEQ = BODY_SEQ[:BODY_END_MS // BODY_MS]
 DOMINION_RING = 104         # loop ring, like the S1 taunt loop
 IMPACT_W = 2.6 * CELL       # final impact F1 spread — over the 2 × 3 cells in front
 # final impact: F1 max at once, F1–F3 over 0.2 s, decay F4–F6 to 0.45 s, residual F7–F8 to 0.7 s (50 ms frames)
@@ -52,11 +58,19 @@ def ground_strip(frames, target, peak, seq=None, ground=(0, 1, N - 2, N - 1)):
     up = max(py - b[1] for _, _, py, b in placed)
     down = max(b[3] - py for _, _, py, b in placed)
     cw, ch, top = 2 * half, int(np.ceil(up + down)) + 4, int(np.ceil(up)) + 2
-    order = seq or list(range(len(frames)))
+    order = [e if isinstance(e, tuple) else (e, e, 0) for e in (seq or range(len(frames)))]
+    cells = []
+    for img, px, py, _ in placed:
+        cell = Image.new('RGBA', (cw, ch))
+        cell.alpha_composite(img, (int(round(half - px)), int(round(top - py))))
+        cells.append(np.asarray(cell).astype(float))
     strip = Image.new('RGBA', (cw * len(order), ch))
-    for k, f in enumerate(order):
-        img, px, py, _ = placed[f]
-        strip.alpha_composite(img, (int(round(k * cw + half - px)), int(round(top - py))))
+    for k, (a, b, t) in enumerate(order):
+        pa, pb = cells[a], cells[b]
+        alpha = pa[..., 3] * (1 - t) + pb[..., 3] * t
+        prem = (pa[..., :3] * pa[..., 3:] * (1 - t) + pb[..., :3] * pb[..., 3:] * t) / 255
+        rgb = prem / np.maximum(alpha[..., None] / 255, 1e-3)
+        strip.paste(Image.fromarray(np.dstack([np.clip(rgb, 0, 255), alpha]).astype(np.uint8), 'RGBA'), (k * cw, 0))
     return strip, {'frames': len(order), 'w': cw, 'h': ch, 'pivot': [0.5, round(top / ch, 4)], 'scale': round(scale, 4)}
 
 

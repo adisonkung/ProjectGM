@@ -1294,7 +1294,7 @@ export const FX: Record<string, FxDef> = {
   },
   // Draeven Ult Blood Dominion (user 2026-10-26, tools/sprites/draeven_ult_vfx.py, magenta-keyed, baked at 2 × atlas px)
   // Body Charge Aura (review: from the moment the ultimate starts): cast FX, f1–f8 build once (0.40 s) then breathes
-  // 8 7 6 5 6 7 8 … (baked) until the Final Impact — 22 × 50 ms = 1.10 s = DAMAGE, then gone (60 ms fade) · crimson-black
+  // 8 7 6 5 6 7 8 … slower and smooth (100 ms per key with a cross-faded in-between, baked) until the Final Impact — 22 × 50 ms = 1.10 s = DAMAGE, then gone (60 ms fade) · crimson-black
   // aura around him, ring ~1.35 cells on the ground pivot · behind him so he stays clearly visible
   'dr-ult-body': {
     file: 'fx-draeven-ult-body.png', frames: 22, w: 228, h: 275, frameMs: 50, fadeOutMs: 60, at: 'self',
