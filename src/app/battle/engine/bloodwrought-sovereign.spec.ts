@@ -42,16 +42,23 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect((ch.delayMs! + ch.frames * ch.frameMs + ch.fadeOutMs!) / 1000).toBeLessThanOrEqual(at('skill2', 'DAMAGE')[0]);
     expect(at('ult', 'DAMAGE').length).toBe(1);
     expect(at('ult', 'CHARGE_START')[0]).toBeLessThan(at('ult', 'DAMAGE')[0]);
-    expect(Math.max(...SHEETS['hero-draeven.png'].anims.ult!.steps!)).toBe(1500);
-    // the charge aura spans the hold exactly: it starts at CHARGE_START and its strip ends at STRIKE_START
-    const aura = FX['dr-ult-charge'];
-    expect(aura.event).toBe('CHARGE_START');
+    // Ult Blood Dominion: charge 0.60 s, strike 0.95 s, final damage 1.10 s, clip ends 1.80 s; both auras build to the
+    // strike, the final impact starts on the damage at full size, the Dominion loop follows the buff
+    const ms = (k: string) => Math.round(at('ult', k)[0] * 1000);
+    expect([ms('CHARGE_START'), ms('STRIKE_START'), ms('DAMAGE')]).toEqual([600, 950, 1100]);
+    expect(SHEETS['hero-draeven.png'].anims.ult!.steps!.reduce((x, y) => x + y, 0)).toBe(1800);
+    const body = FX['dr-ult-body'], sword = FX['dr-ult-sword'];
+    expect(body.event).toBe('CHARGE_START');
+    expect(body.frames * body.frameMs).toBeCloseTo(350, 3);
+    expect((sword.delayMs ?? 0) + sword.frames * sword.frameMs).toBeCloseTo(350, 3);
+    expect(SHEETS['hero-draeven.png'].fx!.ult).toContain('dr-ult-impact');
+    expect(SHEETS['hero-draeven.png'].statusFx!['sovereign_dominion'].loop).toBe('dr-ult-dominion');
     // S1: the taunt loop runs from the cast start — one cycle as a cast FX ends exactly at the taunt (status applied)
     const lead = FX['dr-s1-loop-lead'];
     expect(lead.on).toBe('cast');
     expect(lead.frames * lead.frameMs / 1000).toBeCloseTo(at('skill', 'SKILL_ACTIVATE')[0], 3);
     expect(FX['dr-s1-loop'].frameMs).toBe(lead.frameMs);
-    expect(at('ult', 'STRIKE_START')[0] - at('ult', 'CHARGE_START')[0]).toBeCloseTo((aura.frames * aura.frameMs) / 1000, 3);
+    expect(at('ult', 'STRIKE_START')[0] - at('ult', 'CHARGE_START')[0]).toBeCloseTo((body.frames * body.frameMs) / 1000, 3);
   });
 
   it('kit keeps the Tank class ids + cooldowns, and stays PUNISH: no shield, no interrupt, no stun / knockback / Break', () => {
@@ -177,7 +184,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(b.dr.hp).toBe(3012);
   });
 
-  it('Ult: one strike on the front cell, Blood Brand on the hit, −20 % damage taken, Blood Debt re-armed with a taunt', () => {
+  it('Ult Blood Dominion: one strike on the 2 × 3 ahead, Blood Brand, −20 % damage taken, Blood Debt re-armed with a taunt', () => {
     const b = battle();
     const [f] = b.foes();
     b.place(f, { r: b.dr.pos.r, c: b.dr.pos.c + 1 });
@@ -189,5 +196,27 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(hasStatus(b.dr, 'sovereign_dominion')).toBeTrue();
     expect(hasStatus(b.dr, 'blood_debt')).toBeTrue();
     expect(modifier(b.dr, 'damageTakenMultiplier')).toBeCloseTo(0.8, 5);
+    expect(kitOf('draeven', 'tank').ult.effects[0]).toEqual(jasmine.objectContaining({ area: 'FRONT_RECT_2X3' }));
+  });
+
+  it('Blood Dominion boosts Blood Reprisal: ×1.3 eruption damage, ×1.2 self-heal (and cap)', () => {
+    const run = (dominion: boolean) => {
+      const b = battle();
+      const [f] = b.foes();
+      b.place(f, { r: b.dr.pos.r, c: b.dr.pos.c + 1 });
+      b.e.skills.applyEffects(b.dr, kitOf('draeven', 'tank').skill, 'skill', f, f.pos);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (dominion) (b.e as any).applyStatus(b.dr, 'sovereign_dominion', b.dr);
+      b.dr.hp = 1000;
+      f.hp = f.maxHp = 100000;
+      for (let i = 0; i < 5; i++) b.dmg(b.dr, 1, f);
+      b.dr.hp = 1000;
+      b.wait(0.16);
+      const r = b.e.drainEvents().find(x => x.type === 'retaliate') as Extract<BattleEvent, { type: 'retaliate' }>;
+      return { dealt: 100000 - f.hp, healed: r.healed };
+    };
+    const plain = run(false), boosted = run(true);
+    expect(boosted.dealt / plain.dealt).toBeCloseTo(1.3, 1);
+    expect(boosted.healed / plain.healed).toBeCloseTo(1.2, 1);
   });
 });

@@ -134,8 +134,9 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
   },
   /** Draeven Sovereign's Dominion (self, Ultimate): −20 % damage taken for 6 s */
   sovereign_dominion: {
-    id: 'sovereign_dominion', name: 'อำนาจจอมราชัน', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
-    modifiers: { damageTakenMultiplier: 0.8 },
+    // Blood Dominion (user 2026-10-26): damage taken ↓, Blood Reprisal damage ↑, its self-heal ↑ a little (provisional)
+    id: 'sovereign_dominion', name: 'อำนาจโลหิต', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0.8, retaliationDamageMultiplier: 1.3, retaliationHealMultiplier: 1.2 },
   },
   healing_reduction: {
     id: 'healing_reduction', name: 'ฮีลลดลง', duration: 6, stackPolicy: 'REFRESH_DURATION',

@@ -40,6 +40,10 @@ export interface StatusModifiers {
   healingReceivedMultiplier?: number;
   /** share of the damage this unit takes that is sent back to the attacker as TRUE damage (Mirror Stance) */
   reflectDamage?: number;
+  /** multiplies this unit's retaliation eruption damage (Blood Dominion → Blood Reprisal) */
+  retaliationDamageMultiplier?: number;
+  /** multiplies this unit's retaliation self-heal and its cap (Blood Dominion → Blood Reprisal) */
+  retaliationHealMultiplier?: number;
 }
 
 /** Control flags: stun = no actions / no movement · root = no movement (attacks / casts allowed) · taunted = must target the source */

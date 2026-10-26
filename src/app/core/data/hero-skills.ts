@@ -496,8 +496,9 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
   // (Crimson Spike Eruption) 140 % ATK to foes within 1 cell + 3 % max HP per stack, cap 15 %
   // S2 Sovereign's Reprisal = a crimson slash on the column one cell in front (user 2026-10-26: up / front / down,
   // the front cell main, above / below splash) + Blood Brand (ATK −15 %, his hits on branded foes heal him 12 % of the damage)
-  // Ult = one heavy committed downward strike (front cell + above / below), Blood Brand on the hit, then Sovereign's
-  // Dominion (−20 % damage taken 6 s) and Blood Debt re-armed with a fresh taunt
+  // Ult Blood Dominion (user 2026-10-26) = momentum wind-up (no hit), charge, ONE heavy downward strike on the 2 × 3
+  // ahead (front cell main, the rest splash), Blood Brand on the hit, then Blood Dominion (sovereign_dominion: −20 %
+  // damage taken, Blood Reprisal ×1.3 damage / ×1.2 self-heal, 6 s) and Blood Debt re-armed with a fresh taunt
   draeven: {
     id: 'draeven', cls: 'tank', identity: 'Tank / Fighter · Blood Retaliation · Self Sustain · ATK Suppression',
     kit: {
@@ -519,9 +520,9 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
         ai: { tier: 'NORMAL', minTargets: 1 },
       },
       ult: {
-        ...tank.ult, name: 'ประหารแห่งจอมราชันโลหิต', label: 'Bloodwrought Execution', range: 1, target: 'CURRENT',
+        ...tank.ult, name: 'อาณาจักรโลหิต', label: 'Blood Dominion', range: 1, target: 'CURRENT',
         effects: [
-          { type: 'DAMAGE', area: 'FRONT_T3', primary: 2.8, secondary: 1.2 },
+          { type: 'DAMAGE', area: 'FRONT_RECT_2X3', primary: 2.8, secondary: 1.2 },
           { type: 'APPLY_STATUS', status: 'blood_brand', to: 'HIT' },
           { type: 'APPLY_STATUS', status: 'sovereign_dominion', to: 'SELF' },
           { type: 'APPLY_STATUS', status: 'taunted', to: 'AREA', area: 'RADIUS_2', center: 'SELF', team: 'ENEMY' },

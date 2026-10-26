@@ -2217,9 +2217,12 @@ export class BattleEngine {
     this.events.push({ type: 'retaliateStart', src: u.id, status: def.id, stacks });
     this.later(rt.delay ?? 0, u, () => {
       const foes = this.units.filter(t => this.isValidTarget(u, t) && distance(t.pos, u.pos) <= rt.radius);
-      for (const t of foes) this.hit(u, t, rt.damage, { damageType: rt.damageType ?? 'PHYSICAL', sourceId: def.id });
+      // status modifiers on the holder (Blood Dominion) scale the eruption and its capped self-heal
+      const dmg = rt.damage * modifier(u, 'retaliationDamageMultiplier');
+      const healMul = modifier(u, 'retaliationHealMultiplier');
+      for (const t of foes) this.hit(u, t, dmg, { damageType: rt.damageType ?? 'PHYSICAL', sourceId: def.id });
       const before = u.hp;
-      this.heal(u, u.maxHp * Math.min(rt.healCap, rt.healPerStack * stacks), u);
+      this.heal(u, u.maxHp * Math.min(rt.healCap * healMul, rt.healPerStack * stacks * healMul), u);
       this.events.push({ type: 'retaliate', src: u.id, status: def.id, stacks, targets: foes.map(t => t.id), healed: u.hp - before });
     });
   }

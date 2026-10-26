@@ -1,103 +1,119 @@
-"""Draeven Ult — charge aura around the blade (user 2026-10-22). Never modifies the source PNG.
+"""Draeven Ultimate — Blood Dominion VFX (user 2026-10-26). Never modifies the source PNGs.
 
-python3 tools/sprites/draeven_ult_vfx.py [source] [out dir]
-Source: assets/heroes/Draeven/vfx/draeven_ult_charge_aura.png — 8 frames in one row on a magenta key (2172 × 724).
+python3 tools/sprites/draeven_ult_vfx.py [source dir] [out dir]
+Sources (assets/heroes/Draeven/vfx/, 8 frames in one row on a magenta key, 2172 × 724 each):
+  Draeven_ULT_ChargeAura_VFX.png         → fx-draeven-ult-body.png      crimson-black aura around him (charge)
+  Draeven_ULT_SwordCharge_VFX.png        → fx-draeven-ult-sword.png     aura coil along the blade only (no sword drawn)
+  Draeven_ULT_FinalImpactBurst_VFX.png   → fx-draeven-ult-impact.png    ground detonation, F1 = max size, then decay
+  Draeven_ULT_BloodDominion_Loop_VFX.png → fx-draeven-ult-dominion.png  Blood Dominion status loop
+(The earlier draeven_ult_charge_aura.png stays tracked but is replaced by these — user 2026-10-26.)
 
-User: during the Ult charge hold the aura wraps the sword; play the 8 frames once, then keep cycling the last frames until
-the downward slash starts, then the aura is gone. The hold is a fixed 1.5 s in the clip (sprites.ts, step 15), so the
-strip is baked to exactly that length: intro f1–f8, then f6 → f7 → f8 → f7 … (60 ms per frame, 25 frames = 1.50 s).
-
-Each frame keeps its place inside its slot of the source row (the artist grows the spiral from one end). The spiral's long
-axis (measured on f8) is turned onto the blade of the hold pose (atlas row 7 col 15: blade tip (127, 60) → hilt (167, 67),
-~41 px) and scaled so the spiral is BLADE_COVER × the blade length. Baked at 2 × atlas px (FxDef scale 1/3 = 1 atlas px).
+Frames are cut by connected pieces (nothing clipped at a slot edge). Body aura / dominion loop / impact: every frame on its
+ground-ring centre = the ground pivot. Sword aura: the coil's long axis (PCA of the biggest frame) is turned onto the
+blade of the charge-hold pose (atlas row 7 step 15: tip (127, 60) → hilt (167, 67)) and scaled to BLADE_COVER × the
+blade length; every frame (its own coil centroid) is centred on the blade centre. Baked at RES × atlas px (FxDef scale 1/3 = 1 atlas px).
 """
 import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
-from scipy import ndimage
 
-SRC = 'assets/heroes/Draeven/vfx/draeven_ult_charge_aura.png'
-N, SLOT = 8, 2172 / 8
-EDGES = [0, 266, 526, 792, 1061, 1328, 1607, 1879, 2172]  # mid-gaps between the drawn frames
+sys.path.insert(0, str(Path(__file__).parent))
+from draeven_s1_vfx import RES, ring, unmix  # noqa: E402
+from draeven_s2_vfx import pieces, runs, to_img  # noqa: E402
+
+N = 8
+CELL = 80
+BODY_RING = 108             # body aura ring (biggest frame f7) in atlas px — around his feet, he stays visible
+DOMINION_RING = 104         # loop ring, like the S1 taunt loop
+IMPACT_W = 2.6 * CELL       # final impact F1 spread — over the 2 × 3 cells in front
+# final impact: F1 max at once, F1–F3 over 0.2 s, decay F4–F6 to 0.45 s, residual F7–F8 to 0.7 s (50 ms frames)
+IMPACT_SEQ = [0, 0, 1, 2, 3, 3, 4, 4, 5, 6, 6, 6, 7, 7]
 BLADE = ((127, 60), (167, 67))  # tip → hilt in the atlas cell (hold pose)
-BLADE_COVER = 1.45
-RES = 2  # bake at 2 × atlas px
-FRAME_MS = 60
-HOLD_MS = 1500
-LOOP = [5, 6, 7, 6]
+BLADE_COVER = 1.55
 
 
-def unmix(rgb: np.ndarray) -> np.ndarray:
-    rgb = rgb.astype(float)
-    bg = np.median(rgb[:6].reshape(-1, 3), 0)
-    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
-    al = np.clip(1 - (np.minimum(r, b) - g) / (min(bg[0], bg[2]) - bg[1]), 0, 1)
-    al = np.where(al < 0.08, 0, al)
-    col = np.clip((rgb - (1 - al[..., None]) * bg) / np.maximum(al[..., None], 1e-3), 0, 255)
-    return np.dstack([col, al * 255]).astype(np.uint8)
+def ground_strip(frames, target, peak, seq=None, ground=(0, 1, N - 2, N - 1)):
+    rings = [ring(f[..., 3]) for f in frames]
+    scale = target * RES / rings[peak][2]
+    ry = float(np.median([rings[k][1] for k in ground]))
+    placed = []
+    for f, (cx, _, _) in zip(frames, rings):
+        img = to_img(f, scale)
+        placed.append((img, cx * scale, ry * scale, img.getbbox()))
+    half = int(np.ceil(max(max(px - b[0], b[2] - px) for _, px, _, b in placed))) + 2
+    up = max(py - b[1] for _, _, py, b in placed)
+    down = max(b[3] - py for _, _, py, b in placed)
+    cw, ch, top = 2 * half, int(np.ceil(up + down)) + 4, int(np.ceil(up)) + 2
+    order = seq or list(range(len(frames)))
+    strip = Image.new('RGBA', (cw * len(order), ch))
+    for k, f in enumerate(order):
+        img, px, py, _ = placed[f]
+        strip.alpha_composite(img, (int(round(k * cw + half - px)), int(round(top - py))))
+    return strip, {'frames': len(order), 'w': cw, 'h': ch, 'pivot': [0.5, round(top / ch, 4)], 'scale': round(scale, 4)}
 
 
-def main():
-    src = Path(sys.argv[1] if len(sys.argv) > 1 else SRC)
-    out = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
-    im = unmix(np.array(Image.open(src).convert('RGB')))
-    h = im.shape[0]
-    slots = []
-    for k in range(N):
-        a, b = EDGES[k], EDGES[k + 1]
-        s = np.zeros((h, 420, 4), np.uint8)
-        x0 = int(round(k * SLOT)) - 60  # slot origin on the artist's spacing (keeps each frame's drawn position)
-        part = im[:, a:b].copy()
-        part[..., 3] = np.where(ndimage.binary_opening(part[..., 3] > 20, iterations=1) | (part[..., 3] > 60), part[..., 3], 0)
-        s[:, a - x0:b - x0] = part
-        slots.append(s)
-    # long axis of the full spiral (f8) by PCA of its alpha
-    al = slots[-1][..., 3].astype(float)
-    ys, xs = np.nonzero(al > 60)
+def load(path: Path):
+    im = unmix(np.array(Image.open(path).convert('RGB')))
+    im[-30:] = 0
+    return pieces(im, [(a + b) / 2 for a, b in runs(im)])
+
+
+def sword(frames):
+    big = frames[-2]  # f7, the fullest coil
+    ys, xs = np.nonzero(big[..., 3] > 60)
     cx, cy = xs.mean(), ys.mean()
-    cov = np.cov(np.vstack([xs - cx, ys - cy]))
-    ev, evec = np.linalg.eigh(cov)
+    ev, evec = np.linalg.eigh(np.cov(np.vstack([xs - cx, ys - cy])))
     ax = evec[:, np.argmax(ev)]
     proj = (xs - cx) * ax[0] + (ys - cy) * ax[1]
     length = np.percentile(proj, 99) - np.percentile(proj, 1)
-    src_ang = np.degrees(np.arctan2(ax[1], ax[0]))  # image coords (y down)
     (tx, ty), (hx, hy) = BLADE
-    blade_ang = np.degrees(np.arctan2(hy - ty, hx - tx))
     blade_len = np.hypot(hx - tx, hy - ty)
     scale = BLADE_COVER * blade_len * RES / length
-    # rotate every slot about the f8 centre by the same angle, then scale
-    rot = src_ang - blade_ang
-    frames = []
-    for s in slots:
-        img = Image.fromarray(s)
-        pad = Image.new('RGBA', (900, 900))
-        pad.paste(img, (int(450 - cx), int(450 - cy)))
-        r = pad.rotate(rot, resample=Image.BICUBIC, center=(450, 450))
-        n = int(round(900 * scale))
-        frames.append(r.resize((n, n), Image.LANCZOS))
-    box = None
+    rot = np.degrees(np.arctan2(ax[1], ax[0])) - np.degrees(np.arctan2(hy - ty, hx - tx))
+    out = []
     for f in frames:
+        # each frame is drawn in its own slot: centre it on its own coil (alpha-weighted centroid)
+        a = f[..., 3].astype(float)
+        fy, fx = np.nonzero(a > 60)
+        fcx, fcy = (fx.mean(), fy.mean()) if len(fx) else (cx, cy)
+        img = Image.fromarray(np.clip(f, 0, 255).astype(np.uint8), 'RGBA')
+        pad = Image.new('RGBA', (1400, 1400))
+        pad.paste(img, (int(700 - fcx), int(700 - fcy)))
+        r = pad.rotate(rot, resample=Image.BICUBIC, center=(700, 700))
+        n = int(round(1400 * scale))
+        out.append(r.resize((n, n), Image.LANCZOS))
+    c = out[0].size[0] / 2
+    box = None
+    for f in out:
         bb = f.getbbox()
         if bb:
             box = bb if box is None else (min(box[0], bb[0]), min(box[1], bb[1]), max(box[2], bb[2]), max(box[3], bb[3]))
-    c = frames[0].size[0] / 2  # the f8 centre (= blade centre) stays the frame centre
-    half_w = int(np.ceil(max(c - box[0], box[2] - c))) + 2
-    half_h = int(np.ceil(max(c - box[1], box[3] - c))) + 2
-    cells = [f.crop((int(c - half_w), int(c - half_h), int(c + half_w), int(c + half_h))) for f in frames]
-    seq = list(range(N))
-    total = HOLD_MS // FRAME_MS
-    while len(seq) < total:
-        seq.append(LOOP[(len(seq) - N) % len(LOOP)])
+    hw = int(np.ceil(max(c - box[0], box[2] - c))) + 2
+    hh = int(np.ceil(max(c - box[1], box[3] - c))) + 2
+    cells = [f.crop((int(c - hw), int(c - hh), int(c + hw), int(c + hh))) for f in out]
     W, H = cells[0].size
-    strip = Image.new('RGBA', (W * len(seq), H))
-    for i, k in enumerate(seq):
-        strip.paste(cells[k], (i * W, 0))
+    strip = Image.new('RGBA', (W * N, H))
+    for i, cell in enumerate(cells):
+        strip.paste(cell, (i * W, 0))
+    centre = ((tx + hx) / 2, (ty + hy) / 2)
+    return strip, {'frames': N, 'w': W, 'h': H, 'pivot': [0.5, 0.5], 'rotate': round(float(rot), 1),
+                   'scale': round(float(scale), 4), 'bladeCentre': centre}
+
+
+def main():
+    src = Path(sys.argv[1] if len(sys.argv) > 1 else 'assets/heroes/Draeven/vfx')
+    out = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
     out.mkdir(parents=True, exist_ok=True)
-    strip.save(out / 'fx-draeven-ult-charge.png', optimize=True)
-    print({'frames': len(seq), 'w': W, 'h': H, 'frameMs': FRAME_MS, 'rotate': round(rot, 1), 'scale': round(scale, 4),
-           'bladeCentre': ((tx + hx) / 2, (ty + hy) / 2), 'seq': seq})
+    s, m = ground_strip(load(src / 'Draeven_ULT_ChargeAura_VFX.png'), BODY_RING, 6, ground=(0, 1, 2))
+    s.save(out / 'fx-draeven-ult-body.png', optimize=True); print('body', m)
+    s, m = sword(load(src / 'Draeven_ULT_SwordCharge_VFX.png'))
+    s.save(out / 'fx-draeven-ult-sword.png', optimize=True); print('sword', m)
+    s, m = ground_strip(load(src / 'Draeven_ULT_FinalImpactBurst_VFX.png'), IMPACT_W, 0, IMPACT_SEQ, ground=(5, 6, 7))
+    s.save(out / 'fx-draeven-ult-impact.png', optimize=True); print('impact', m)
+    s, m = ground_strip(load(src / 'Draeven_ULT_BloodDominion_Loop_VFX.png'), DOMINION_RING, 3)
+    s.save(out / 'fx-draeven-ult-dominion.png', optimize=True); print('dominion', m)
 
 
 if __name__ == '__main__':
