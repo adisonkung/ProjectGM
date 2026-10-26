@@ -115,6 +115,8 @@ export interface SheetDef {
   healFx?: string;
   /** One-shot visual when a status applied by this caster succeeds (buff event, after immunity/conditions). */
   appliedStatusFx?: Record<string, string>;
+  /** One-shot burst on the holder when this caster's retaliation status erupts (`retaliateStart`), keyed by status id. */
+  retaliateFx?: Record<string, string>;
   /** Persistent status visuals, owned by real status presence rather than fixed VFX duration. */
   statusFx?: Record<string, { start?: string; loop: string }>;
   /** Presentation of this caster's fixed fields. Engine lifecycle events, not animation end, own their lifetime. */
@@ -256,7 +258,10 @@ export const SHEETS: Record<string, SheetDef> = {
   'hero-draeven.png': {
     // cell 290 wide (root 145, 155): the S2 burst / impact disc reach 140 px ahead of the feet
     cols: 28, rows: 8, cellW: 290, cellH: 170,
-    fx: { ult: 'dr-ult-charge' },
+    fx: { skill: 'dr-s1-loop-lead', skill2: ['dr-s2-charge', 'dr-s2-wave'], ult: ['dr-ult-body', 'dr-ult-sword', 'dr-ult-impact'] },
+    // S1 Blood Debt (user 2026-10-26): the loop follows the real status; the eruption starts on the threshold hit
+    statusFx: { blood_debt: { loop: 'dr-s1-loop' }, sovereign_dominion: { loop: 'dr-ult-dominion' } },
+    retaliateFx: { blood_debt: 'dr-s1-eruption' },
     anims: {
       idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
       // provisional: the stagger at the start of the death sheet (no hurt clip supplied)
@@ -268,18 +273,20 @@ export const SHEETS: Record<string, SheetDef> = {
       die: { row: 4, frames: 14, ms: 80 },
       // S1 Blood Debt: open-hand beckon taunt (28 frames × 57 ms = 1.6 s); the taunt lands at the full beckon F12
       skill: { row: 5, frames: 28, ms: 57, events: { CAST_START: 0, SKILL_ACTIVATE: 12, DAMAGE: 12, RECOVERY_START: 21 } },
-      // S2 Sovereign's Reprisal (user sheet 2026-10-22, VFX + Timeline Sync pending): raise → sword drawn back F8 →
-      // forward release F9 (STRIKE / VFX) → the wave lands F11 → crouched follow-through → back to stance. 1.43 s
+      // S2 Sovereign's Reprisal (user sheet 2026-10-22, baked slash / burst kept — user 2026-10-26 review: use the
+      // original S2 clip, hold the charge at F12): raise → sword drawn back = source frame 12 (row step 5) HELD 450 ms
+      // under the charge swirl → forward release F9 (STRIKE) → the baked burst + Crimson Wave F1 + DAMAGE at step 11
+      // (0.98 s) → crouched follow-through → back to stance. 1.83 s
       skill2: { row: 6, frames: 27, ms: 50, seq: Array.from({ length: 27 }, (_, i) => i),
-        steps: [50, 50, 50, 50, 50, 50, 50, 60, 90, 40, 40, 50, 60, 60, 50, 50, 50, 50, 55, 55, 55, 55, 55, 55, 55, 55, 60],
-        events: { CAST_START: 0, STRIKE_START: 9, VFX_SPAWN: 9, DAMAGE: 11, IMPACT: 11, RECOVERY_START: 16 },
+        steps: [50, 50, 50, 50, 50, 450, 50, 60, 90, 40, 40, 50, 60, 60, 50, 50, 50, 50, 55, 55, 55, 55, 55, 55, 55, 55, 60],
+        events: { CAST_START: 0, CHARGE_START: 5, STRIKE_START: 9, VFX_SPAWN: 11, DAMAGE: 11, IMPACT: 11, RECOVERY_START: 16 },
         impact: { hitStopMs: 50, shakePx: 4, shakeMs: 140 } },
-      // Ult Bloodwrought Execution (user sheet 2026-10-22, Timeline Sync pending): raise → crouch + spin for momentum
-      // (no hit) → sword lowered behind the head to the horizontal wind-up F15 = HOLD / CHARGE 1.5 s (user: hold longer;
-      // the charge aura wraps the blade, ending as the slash starts) → ONE downward slam, contact F18 → recovery. 2.97 s
+      // Ult Blood Dominion (user 2026-10-26): Ready → momentum swing (wind-up, NO hit) → sword raised to the horizontal
+      // wind-up F15 = CHARGE 0.60 s, held 0.35 s (body + sword aura build) → STRIKE 0.95 s → heavy downward slam, ground
+      // contact F18 = FINAL DAMAGE 1.10 s (Final Impact F1 at max size) → recovery to 1.80 s → Blood Dominion buff
       ult: { row: 7, frames: 28, ms: 50, seq: Array.from({ length: 28 }, (_, i) => i),
-        steps: [70, 70, 70, 45, 45, 45, 45, 45, 45, 45, 45, 45, 60, 60, 60, 1500, 40, 40, 90, 50, 50, 50, 50, 60, 60, 60, 60, 60],
-        events: { CAST_START: 0, CHARGE_START: 15, CHARGE_PEAK: 15.9, STRIKE_START: 16, DAMAGE: 18, IMPACT: 18, RECOVERY_START: 20 },
+        steps: [53, 53, 53, 34, 34, 34, 34, 34, 34, 34, 34, 34, 45, 45, 45, 350, 75, 75, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70],
+        events: { CAST_START: 0, CHARGE_START: 15, CHARGE_PEAK: 15.99, STRIKE_START: 16, DAMAGE: 18, IMPACT: 18, RECOVERY_START: 20 },
         impact: { hitStopMs: 90, shakePx: 8, shakeMs: 240, flashMs: 120 } },
     },
   },
@@ -1248,12 +1255,70 @@ export const FX: Record<string, FxDef> = {
   // through the held F6 — user 2026-10, drawn into the sword on the cut) · the ground wave from VFX_SPAWN (30 FPS strip, ~1.9 × his height, its travel along
   // the front line baked in at the kit's 7 cells/s — leading edge reaches cell k at (k − 0.5) / 7 s, when that cell's
   // damage resolves) · a burst (~1.6 × body) on every unit each collision hit (one impact event per cell)
-  // Draeven Ult charge aura (user 2026-10-22): wraps the blade of the 1.5 s hold — f1–f8 once, then f6–f8 cycle until
-  // STRIKE_START, where the strip ends (tools/sprites/draeven_ult_vfx.py bakes it to the hold length). Centre = blade centre
-  // of the hold pose (atlas 147, 63.5 → feet 145, 155): dx 2 px, dy −91.5 px from the feet (feet = dy 27.25 %)
-  'dr-ult-charge': {
-    file: 'fx-draeven-ult-charge.png', frames: 25, w: 156, h: 90, frameMs: 60, at: 'self', orient: 'flip',
-    event: 'CHARGE_START', pivot: [0.5, 0.5], dx: 2.5, dy: 27.25 - 91.5 * 1.25, scale: 1 / 3,
+  // Draeven S1 Blood Debt (user 2026-10-26, tools/sprites/draeven_s1_vfx.py, magenta-keyed, frames cut by connected
+  // pieces so nothing is clipped; baked at 2 × atlas px, scale 1/3 = 1 atlas px, 80 atlas px = 1 cell). No Taunt
+  // Activation (user: too fast — start straight on the loop).
+  // Taunt Loop from the moment the skill starts (review 2): one cycle as a cast FX (8 × 85.5 ms = 0.684 s = CAST_START
+  // → the taunt at F12), then the status-owned loop (statusFx) takes over at frame 0 — seamless, and it lives exactly
+  // as long as Blood Debt · ring ~1.3 cells on his ground pivot (feet dy 27.25 %) · behind him
+  'dr-s1-loop-lead': {
+    file: 'fx-draeven-s1-loop.png', frames: 8, w: 230, h: 219, frameMs: 85.5, at: 'self', on: 'cast', attach: true,
+    layer: 'under', pivot: [0.5, 0.8356], dy: 27.25, scale: 1 / 3,
+  },
+  'dr-s1-loop': {
+    file: 'fx-draeven-s1-loop.png', frames: 8, w: 230, h: 219, frameMs: 85.5, at: 'self',
+    layer: 'under', pivot: [0.5, 0.8356], dy: 27.25, scale: 1 / 3,
+  },
+  // Crimson Spike Eruption (Blood Reprisal): from the threshold hit (`retaliateStart`) · source speed 40 ms per key
+  // with the biggest spikes (f5) held 160 ms — 11 frames: f1–f4 0–0.16 s, f5 0.16–0.32 s = the eruption's damage +
+  // heal at its start (retaliation.delay 0.16), f6–f8 to 0.44 s + 150 ms fade (review 2: punchier, a little smaller)
+  // · burst core on his body centre (atlas 141, 118 → dx −4 px, dy −37 px from the feet) · ~2.25 cells · in front
+  'dr-s1-eruption': {
+    file: 'fx-draeven-s1-eruption.png', frames: 11, w: 372, h: 362, frameMs: 40, fadeOutMs: 150, at: 'self',
+    orient: 'flip', pivot: [0.5, 0.7597], dx: -4 * 1.25, dy: 27.25 - 37 * 1.25, scale: 1 / 3,
+  },
+  // Draeven S2 Sovereign's Reprisal (user 2026-10-26, tools/sprites/draeven_s2_vfx.py, magenta-keyed; no impact VFX)
+  // Charge: from 0.05 s of the cast, 8 × 81.25 ms build to the end of the F12 hold (0.70 s, peak f7 ~0.6 s), fades 220 ms as the
+  // sword swings · ring ~1.4 cells on his ground pivot, the crimson swirl over him
+  'dr-s2-charge': {
+    file: 'fx-draeven-s2-charge.png', frames: 8, w: 260, h: 231, frameMs: 81.25, delayMs: 50, fadeOutMs: 220,
+    at: 'self', on: 'cast', attach: true, orient: 'flip', pivot: [0.5, 0.8745], dy: 27.25, scale: 1 / 3,
+  },
+  // Main Crimson Wave: VFX_SPAWN = the release / DAMAGE (0.98 s): F1 already at max size, then it shrinks away IN PLACE
+  // (no travel) · review 2: ONE cell ahead — centred on the middle of the front cell, F1 two cells tall (half of the
+  // lanes above and below = the damage column up / front / down) · review 3: 2.4 cells tall, the biggest slash F1
+  // held 3 frames · 10 × 37.5 ms (F1 0–0.11 s, decay to 0.375 s) + 200 ms fade · pivot = his feet
+  'dr-s2-wave': {
+    file: 'fx-draeven-s2-wave.png', frames: 10, w: 362, h: 395, frameMs: 37.5, fadeOutMs: 200, at: 'self',
+    event: 'VFX_SPAWN', attach: false, orient: 'flip', pivot: [0.058, 0.6101], dy: 27.25, scale: 1 / 3,
+  },
+  // Draeven Ult Blood Dominion (user 2026-10-26, tools/sprites/draeven_ult_vfx.py, magenta-keyed, baked at 2 × atlas px)
+  // Body Charge Aura (review: from the moment the ultimate starts): cast FX, f1–f8 build once (0.40 s) then breathes
+  // 8 7 6 5 6 7 8 … slower and smooth (100 ms per key with a cross-faded in-between, baked) until the Final Impact — 22 × 50 ms = 1.10 s = DAMAGE, then gone (60 ms fade) · crimson-black
+  // aura around him, ring ~1.35 cells on the ground pivot · behind him so he stays clearly visible
+  'dr-ult-body': {
+    file: 'fx-draeven-ult-body.png', frames: 22, w: 228, h: 275, frameMs: 50, fadeOutMs: 60, at: 'self',
+    on: 'cast', attach: true, layer: 'under', pivot: [0.5, 0.8873], dy: 27.25, scale: 1 / 3,
+  },
+  // Sword Charge: 0.65 s (CHARGE_START + 50 ms), 8 × 37.5 ms build to the strike + 150 ms fade into the swing · aura coil
+  // only (no sword drawn), its long axis turned onto the blade of the hold pose and centred on it (atlas 147, 63.5 →
+  // feet 145, 155: dx 2 px, dy −91.5 px) · over the real sword
+  'dr-ult-sword': {
+    file: 'fx-draeven-ult-sword.png', frames: 8, w: 156, h: 88, frameMs: 37.5, delayMs: 50, fadeOutMs: 150, at: 'self',
+    event: 'CHARGE_START', attach: true, orient: 'flip', pivot: [0.5, 0.5], dx: 2.5, dy: 27.25 - 91.5 * 1.25, scale: 1 / 3,
+  },
+  // Final Impact Burst: DAMAGE / IMPACT 1.10 s (sword hits the ground) — F1 at max size at once (no build-up), F1–F3 to
+  // 1.30 s, decay F4–F6 to 1.55 s, residual F7–F8 to 1.80 s (14 × 50 ms baked) + 100 ms fade · ground detonation
+  // centred on the 2 × 3 area ahead (1.5 cells forward, on the ground), F1 spread ~2.6 cells · in front
+  'dr-ult-impact': {
+    file: 'fx-draeven-ult-impact.png', frames: 14, w: 446, h: 535, frameMs: 50, fadeOutMs: 100, at: 'self',
+    attach: false, orient: 'flip', pivot: [0.5, 0.871], dx: 150, dy: 27.25, scale: 1 / 3,
+  },
+  // Blood Dominion loop: owned by the sovereign_dominion status (statusFx), shows 0.6 s after it lands (1.70 s, after the
+  // impact) and loops 8 × 100 ms while the buff lasts · ring ~1.3 cells on his ground pivot · behind him
+  'dr-ult-dominion': {
+    file: 'fx-draeven-ult-dominion.png', frames: 8, w: 222, h: 283, frameMs: 100, delayMs: 600, at: 'self',
+    layer: 'under', pivot: [0.5, 0.788], dy: 27.25, scale: 1 / 3,
   },
   'kl-ult-charge': {
     particles: ['ember-rise'],
@@ -1654,6 +1719,12 @@ export function impactFeelOf(sprite: string | undefined, anim: 'attack' | SkillK
 }
 
 /** does this FX follow the unit it was placed on (`FxDef.attach`, default = a lingering aura on a unit)? */
+/** the burst a retaliation status of this caster plays when it erupts (`SheetDef.retaliateFx`) */
+export function retaliateFx(sprite: string | undefined, status: string): string | undefined {
+  const name = sprite ? SHEETS[sprite]?.retaliateFx?.[status] : undefined;
+  return name && FX[name] ? name : undefined;
+}
+
 export function fxAttached(name: string): boolean {
   const d = FX[name];
   if (!d || d.at === 'allies') return false;

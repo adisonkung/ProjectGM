@@ -20,8 +20,9 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
-  // Draeven Phase A (2026-10-22): temporary portrait cropped from the approved master reference; no icons / banner yet.
-  draeven: { portrait: 'portraits/draeven.webp' },
+  // Draeven UI art (user 2026-10-26, assets/heroes/Draeven/art → tools/sprites/draeven_art.py): portrait, the three
+  // skill icons (Blood Debt sigil / crimson slash / Blood Dominion sword impact) and banner.
+  draeven: { ...art('draeven'), banner: 'banners/draeven.webp' },
   // Supplied v_icon.zip (2026-10-21): dedicated portrait, all skill icons and banner.
   vaelric: { ...art('vaelric'), banner: 'banners/vaelric.webp' },
   // Supplied Elira_icn.zip (2026-10-19): dedicated portrait, all skill icons and banner.

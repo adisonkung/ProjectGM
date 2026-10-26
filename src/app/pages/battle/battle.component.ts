@@ -32,7 +32,7 @@ import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
-import { animOf, appliedStatusFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
+import { animOf, appliedStatusFx, retaliateFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
@@ -1200,8 +1200,16 @@ export class BattleComponent implements OnDestroy {
           if (text) floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: 'buff' });
           break;
         }
+        case 'retaliateStart': {
+          // Blood Reprisal: the burst (Crimson Spike Eruption) starts on the threshold hit; damage lands at its peak
+          const name = retaliateFx(unitOf(e.src).sprite, e.status);
+          const p = posOf(e.src);
+          if (name) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name, angle: 0, offset: fxOffset(name),
+            under: FX[name].layer === 'under', follow: fxAttached(name) ? e.src : undefined });
+          break;
+        }
         case 'retaliate': {
-          // Blood Reprisal (Crimson Spike Eruption — VFX pending): label the eruption on the holder
+          // Blood Reprisal peak: label the eruption on the holder
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'โลหิตตอบแทน', kind: 'dmg' });
           break;

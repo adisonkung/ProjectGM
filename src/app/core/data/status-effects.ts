@@ -125,7 +125,7 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
    *  Eruption): 140 % ATK to foes within 1 cell, heal 3 % max HP per stack (cap 15 %). Provisional numbers */
   blood_debt: {
     id: 'blood_debt', name: 'หนี้เลือด', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
-    modifiers: {}, retaliation: { hits: 5, radius: 1, damage: 1.4, healPerStack: 0.03, healCap: 0.15 },
+    modifiers: {}, retaliation: { hits: 5, radius: 1, damage: 1.4, healPerStack: 0.03, healCap: 0.15, delay: 0.16 },
   },
   /** Draeven Blood Brand (foes): ATK −15 %; Draeven's own hits on a branded foe heal him for 12 % of the damage */
   blood_brand: {
@@ -134,8 +134,9 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
   },
   /** Draeven Sovereign's Dominion (self, Ultimate): −20 % damage taken for 6 s */
   sovereign_dominion: {
-    id: 'sovereign_dominion', name: 'อำนาจจอมราชัน', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
-    modifiers: { damageTakenMultiplier: 0.8 },
+    // Blood Dominion (user 2026-10-26): damage taken ↓, Blood Reprisal damage ↑, its self-heal ↑ a little (provisional)
+    id: 'sovereign_dominion', name: 'อำนาจโลหิต', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0.8, retaliationDamageMultiplier: 1.3, retaliationHealMultiplier: 1.2 },
   },
   healing_reduction: {
     id: 'healing_reduction', name: 'ฮีลลดลง', duration: 6, stackPolicy: 'REFRESH_DURATION',

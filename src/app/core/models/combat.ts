@@ -40,6 +40,10 @@ export interface StatusModifiers {
   healingReceivedMultiplier?: number;
   /** share of the damage this unit takes that is sent back to the attacker as TRUE damage (Mirror Stance) */
   reflectDamage?: number;
+  /** multiplies this unit's retaliation eruption damage (Blood Dominion → Blood Reprisal) */
+  retaliationDamageMultiplier?: number;
+  /** multiplies this unit's retaliation self-heal and its cap (Blood Dominion → Blood Reprisal) */
+  retaliationHealMultiplier?: number;
 }
 
 /** Control flags: stun = no actions / no movement · root = no movement (attacks / casts allowed) · taunted = must target the source */
@@ -93,7 +97,9 @@ export interface StatusEffectDefinition {
    * carrier erupts once — `damage` × own ATK to every valid foe within `radius` cells (8-direction) — heals
    * `healPerStack` × max HP per stack, capped at `healCap` × max HP — and the status ends
    */
-  retaliation?: { hits: number; radius: number; damage: number; damageType?: 'PHYSICAL' | 'MAGIC'; healPerStack: number; healCap: number };
+  retaliation?: { hits: number; radius: number; damage: number; damageType?: 'PHYSICAL' | 'MAGIC'; healPerStack: number; healCap: number;
+    /** seconds from the threshold hit (status ends, `retaliateStart`) to the eruption's damage + heal (VFX peak); 0 = same tick */
+    delay?: number };
   /** DRAIN (Draeven Blood Brand): damage the status source deals to the carrier heals the source by this share */
   drainToSource?: number;
   /** stance statuses (Mirror Stance) end at once when the unit is stunned or knocked back */
