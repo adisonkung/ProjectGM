@@ -6,6 +6,8 @@ Default source: assets/heroes/Mordrienne (user-supplied sheets, 2026-10-26).
 Sources (square-cell grids, reading order):
   base/mordrienne_idle.png       7 × 7 cells of 512 px, RGBA (49 frames, one breathing loop; F48 = F0)
   base/mordrienne_idle_alt.png   second idle variant (kept, unused)
+  base/mordrienne_idle_v2.png    8 × 5 cells of 512 px, RGBA (36 frames, wand held forward) — the idle row since 2026-10-27
+  base/mordrienne_hurt.png       8 × 7 cells of 512 px, RGBA (56 frames: stand → hit F15 → recoil → recover → stand)
   base/mordrienne_run.png        8 × 5 cells of 512 px, RGBA (33 frames, a 16-frame run cycle twice)
   base/mordrienne_death.png      7 × 7 cells of 512 px, RGBA (49 frames: stand → kneel → collapse → lie still)
   skill/mordrienne_s1_ashen_mark.jpg        8 × 5 cells of 1000 px, WHITE background JPEG (40 frames)
@@ -19,8 +21,8 @@ skill / run sheets are drawn in a wider stance so SIFT has few inliers — scale
 against idle at the same ground line) and its frame-0 feet placed on the idle feet. The idle body (hair top → feet)
 is then scaled to BODY_PX with the feet on the cell root — the game's 260 × 170 hero cell.
 
-Provisional (user 2026-10-26, no dedicated sheets yet): basic attack = the point → release part of the S1 sheet,
-hurt = the first stagger of the death sheet.
+Provisional (user 2026-10-26, no dedicated sheet yet): basic attack = the point → release part of the S1 sheet.
+idle (wand forward) and hurt come from their own sheets (user 2026-10-27).
 """
 import hashlib
 import json
@@ -42,6 +44,9 @@ K = BODY_PX / IDLE_BODY
 # sheet: (file, grid columns, scale into idle space)
 SHEETS = {
     'idle': ('base/mordrienne_idle.png', 7, 1.0),
+    # user 2026-10-27: new idle (wand held forward) + dedicated hurt — drawn smaller (body 286 px in 512 cells) → 489 / 286
+    'idle2': ('base/mordrienne_idle_v2.png', 8, 1.71),
+    'hurt': ('base/mordrienne_hurt.png', 8, 1.71),
     'run': ('base/mordrienne_run.png', 8, 1.56),
     'death': ('base/mordrienne_death.png', 7, 1.696),
     's1': ('skill/mordrienne_s1_ashen_mark.jpg', 8, 1.5),
@@ -50,9 +55,10 @@ SHEETS = {
 }
 # atlas rows (frame indices into each sheet's non-empty cells, reading order)
 ROWS = [
-    ('idle', 'idle', list(range(0, 48, 4))),                                   # 12 · breathing loop
+    ('idle', 'idle2', list(range(0, 36, 2))),                                  # 18 · new idle (2026-10-27), loop
     ('walk', 'run', list(range(0, 16, 2))),                                    # 8 · one run cycle
-    ('hurt', 'death', [9, 11, 11]),                                            # 3 · provisional: stagger of death
+    # 8 · new hurt sheet (2026-10-27): hit F15 → recoil F17–F25 → recover F33–F39 (standing)
+    ('hurt', 'hurt', [15, 17, 19, 25, 33, 35, 37, 39]),
     ('attack', 's1', [8, 11, 12, 13, 14, 16, 23, 25, 27, 30]),                 # 10 · provisional: S1 point → release
     ('die', 'death', [9, 11, 12, 13, 14, 16, 20, 24, 25, 26, 27, 28, 30, 32]),  # 14
     # 17 · S1 Ashen Mark (Timeline Sync 2026-10-26): ready → aim / wand raised F11–F12 → thrust F13 = wand-release frame

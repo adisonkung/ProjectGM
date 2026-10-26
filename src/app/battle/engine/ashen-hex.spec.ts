@@ -13,12 +13,12 @@ import { hasFlag, hasStatus, modifier } from './buffs';
 
 /** Mordrienne Vale (Mage — Control / Debuff, Phase A): Hex Mark · Cinderbind Hex · House of Ashes */
 describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
-  it('31 × 8 atlas 260 × 170: idle 12 · walk 8 · hurt 3 · attack 10 · die 14 · S1 17 · S2 30 · Ult 31 + hex bolt', () => {
+  it('31 × 8 atlas 260 × 170: idle 18 · walk 8 · hurt 8 · attack 10 · die 14 · S1 17 · S2 30 · Ult 31 + hex bolt', () => {
     const sh = SHEETS['hero-mordrienne.png'];
     expect([sh.cols, sh.rows, sh.cellW, sh.cellH, !!sh.pixelated]).toEqual([31, 8, 260, 170, false]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die', 'skill', 'skill2', 'ult'] as const).map(k => [a[k]!.row, a[k]!.frames]))
-      .toEqual([[0, 12], [1, 8], [2, 3], [3, 10], [4, 14], [5, 17], [6, 30], [7, 31]]);
+      .toEqual([[0, 18], [1, 8], [2, 8], [3, 10], [4, 14], [5, 17], [6, 30], [7, 31]]);
     for (const k of ['attack', 'skill', 'skill2', 'ult'] as const) expect(a[k]!.steps!.length).toBe(a[k]!.frames);
     expect(HERO_BY_ID['mordrienne']).toEqual(jasmine.objectContaining({ cls: 'mage', star: 3, sprite: 'hero-mordrienne.png' }));
     expect(HERO_ART['mordrienne']).toEqual({ portrait: 'portraits/mordrienne.webp' });

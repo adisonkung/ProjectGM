@@ -283,9 +283,10 @@ export const SHEETS: Record<string, SheetDef> = {
     // Hex Mark: appears on the hit and lives exactly as long as the status
     statusFx: { hex_mark: { start: 'mo-s1-mark-in', loop: 'mo-s1-mark' } },
     anims: {
-      idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
-      // provisional: the first stagger of the death sheet
-      hurt: { row: 2, frames: 3, ms: 90, seq: [0, 1, 2, 1, 0], steps: [60, 80, 140, 80, 80] },
+      // idle (user 2026-10-27): the new wand-forward sheet, 18 frames (every 2nd of 36) — one loop 2.16 s
+      idle: { row: 0, frames: 18, ms: 120 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
+      // hurt (user 2026-10-27, own sheet): hit → recoil → recover to standing · 0.45 s
+      hurt: { row: 2, frames: 8, ms: 60, seq: Array.from({ length: 8 }, (_, i) => i), steps: [50, 60, 70, 60, 50, 50, 50, 60] },
       // provisional: S1 point → raise → thrust → spark F14 (bolt released) → recover · 0.74 s
       attack: { row: 3, frames: 10, ms: 70, seq: Array.from({ length: 10 }, (_, i) => i),
         steps: [70, 80, 70, 60, 70, 90, 80, 70, 70, 80], events: { DAMAGE: 4, RECOVERY_START: 6 } },
