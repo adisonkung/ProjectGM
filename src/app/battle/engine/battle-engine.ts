@@ -28,7 +28,7 @@ import { BattlePhase, CombatActivity, LifeState, ReviveHeroCommand, ReviveResult
 import { CRIT_CHANCE, DamageResolver, effectiveAttack } from './damage-resolver';
 import { BOARD_COLS, distance, Grid, LANES, Line, lineOf, SIDE_DEPTH, STACK_CAP, toBoard } from './grid';
 import { CombatContext, isBigMonster, MonsterCombatState, MonsterController } from './monster-controller';
-import { greedyStep, nextStep } from './pathfinding';
+import { greedyStep, laneStep, nextStep } from './pathfinding';
 import { createRng } from './rng';
 import { foeSideOf, isPlayerUnit } from './stage/party';
 
@@ -965,7 +965,9 @@ export class BattleEngine {
     // ROOT: cannot move (may still attack / cast when a target is in range)
     if (u.moveCd <= 0 && !hasFlag(u, 'root')) {
       const blocked = this.bodyBlocked(u);
+      // advance straight down the placed lane first; turn toward the target only when close (not while chasing an interrupt)
       const step =
+        (chase ? null : laneStep(this.grid, u.pos, goal.pos, blocked)) ??
         nextStep(this.grid, u.pos, c => distance(c, goal.pos) <= (chase ? this.skills.interruptReach(u) : u.range), blocked) ??
         greedyStep(this.grid, u.pos, goal.pos, blocked);
       // assassin without an active dive: never the first to make contact — no step past the allied frontline
@@ -2315,7 +2317,7 @@ export class BattleEngine {
       alliesOf: u => self.units.filter(a => a.alive && a.side === u.side && (a.wave < 0 || a.wave === self.flow.waveIndex)),
       isValidTarget: (u, t) => self.isValidTarget(u, t),
       stepToward: (u, target, goal) => {
-        const step = nextStep(self.grid, u.pos, goal) ?? greedyStep(self.grid, u.pos, target);
+        const step = laneStep(self.grid, u.pos, target) ?? nextStep(self.grid, u.pos, goal) ?? greedyStep(self.grid, u.pos, target);
         if (!step) return false;
         self.grid.move(u.id, u.pos, step);
         u.pos = step;

@@ -2,7 +2,16 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Home visual reference review (Codex, 2026-10-24 Bangkok)
+## Latest task — lane-first combat advance (Claude, 2026-10-26)
+
+Branch `fix/combat-lane-advance` from origin/master 4088691 (separate from the unmerged Draeven branch). User: at battle start units converged into one row and collided; they should run down their placed lane, then close in.
+
+- Generic `laneStep()` in `battle/engine/pathfinding.ts`: while the target is more than `LANE_ADVANCE_GAP` (2) columns away, step straight forward in the current lane if the cell can be entered and is not body-blocked; otherwise the existing BFS / greedy step runs. Used by melee hero movement (not while chasing an interrupt) and monster `stepToward` (also flee). Ranged heroes still use `rangedMove`.
+- Test `battle/engine/lane-advance.spec.ts`. app/spec typecheck + Karma 826/826 pass.
+- hero-sim 10 runs (starter team) master → branch: F4 100/90 → 90/100 %, F5 20/20 → 90/90 %, F6 100/90 → 60/100 %, F9 TACTICAL 0 → 20 %, F10 TACTICAL 0 → 10 % (AUTO/TACTICAL). No tuning done (balance waits for the roster).
+- Not merged; awaiting user review.
+
+## Previous task — Home visual reference review (Codex, 2026-10-24 Bangkok)
 
 User asked for a close match to reference colors/gloss/corners/icons and actual screenshots before review, explicitly **no deployment**. Local task branch `wip/codex-home-reference-match` starts from fetched origin/master e94d853 and carries the18-board reference archive first. No local master exists and no new other-agent source commits were observed.
 
