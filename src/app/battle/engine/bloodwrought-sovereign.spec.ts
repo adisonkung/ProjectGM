@@ -36,6 +36,11 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     // the charge aura spans the hold exactly: it starts at CHARGE_START and its strip ends at STRIKE_START
     const aura = FX['dr-ult-charge'];
     expect(aura.event).toBe('CHARGE_START');
+    // S1: the taunt loop runs from the cast start — one cycle as a cast FX ends exactly at the taunt (status applied)
+    const lead = FX['dr-s1-loop-lead'];
+    expect(lead.on).toBe('cast');
+    expect(lead.frames * lead.frameMs / 1000).toBeCloseTo(at('skill', 'SKILL_ACTIVATE')[0], 3);
+    expect(FX['dr-s1-loop'].frameMs).toBe(lead.frameMs);
     expect(at('ult', 'STRIKE_START')[0] - at('ult', 'CHARGE_START')[0]).toBeCloseTo((aura.frames * aura.frameMs) / 1000, 3);
   });
 
@@ -98,12 +103,12 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(f.hp).toBe(fhp);
     b.dmg(b.dr, 50, f);
     ev = b.e.drainEvents();
-    // the 5th hit: the status ends and the Crimson Spike Eruption starts; damage + heal land at its peak (0.4 s)
+    // the 5th hit: the status ends and the Crimson Spike Eruption starts; damage + heal land at its peak (0.16 s)
     expect(ev.some(x => x.type === 'retaliateStart')).toBeTrue();
     expect(ev.some(x => x.type === 'retaliate')).toBeFalse();
     expect(hasStatus(b.dr, 'blood_debt')).toBeFalse();
     expect(f.hp).toBe(fhp);
-    b.wait(0.4);
+    b.wait(0.16);
     ev = b.e.drainEvents();
     const r = ev.find(x => x.type === 'retaliate') as Extract<BattleEvent, { type: 'retaliate' }>;
     expect(r).toBeDefined();
@@ -127,7 +132,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(b.e.drainEvents().some(x => x.type === 'retaliateStack')).toBeFalse();
     const farHp = far.hp;
     for (let i = 0; i < 5; i++) b.dmg(b.dr, 30, near);
-    b.wait(0.4);
+    b.wait(0.16);
     const r = b.e.drainEvents().find(x => x.type === 'retaliate') as Extract<BattleEvent, { type: 'retaliate' }>;
     expect(r.targets).toEqual([near.id]);
     expect(far.hp).toBe(farHp);
@@ -141,7 +146,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     const fhp = f.hp;
     for (let i = 0; i < 5; i++) b.dmg(b.dr, 10, f);
     b.dmg(b.dr, b.dr.hp, f);
-    b.wait(0.4);
+    b.wait(0.16);
     expect(b.e.drainEvents().some(x => x.type === 'retaliate')).toBeFalse();
     expect(f.hp).toBe(fhp);
   });

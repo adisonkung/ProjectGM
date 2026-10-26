@@ -23,19 +23,12 @@ N, RES = 8, 2
 SHEETS = {
     # name: (source, out, ring width of the peak frame in atlas px, peak frame)
     'loop': ('Draeven_S1_TauntLoop_VFX.png', 'fx-draeven-s1-loop.png', 104, 4, None),
-    # the spikes fan out sideways around him — the peak spread ~2.5 cells (same scale as the first review, now uncut) (Blood Reprisal reaches 1 cell around him)
-    'eruption': ('Draeven_S1_CrimsonSpikeEruption_VFX.png', 'fx-draeven-s1-eruption.png', 202, 4, 'ERUPTION_SEQ'),
+    # the spikes fan out sideways around him — the peak spread ~2.25 cells (review 2: a little smaller) (Blood Reprisal reaches 1 cell around him)
+    'eruption': ('Draeven_S1_CrimsonSpikeEruption_VFX.png', 'fx-draeven-s1-eruption.png', 180, 4, 'ERUPTION_SEQ'),
 }
-# user 2026-10-26: a slower, smooth eruption — cross-faded in-betweens: 2 between each build-up key (f1 → f5 peak),
-# 3 between each decay key (f5 → f8). 25 frames; the peak f5 is frame 12.
-def _seq():
-    out = []
-    for a in range(4):
-        out += [(a, a + 1, t) for t in (0, 1 / 3, 2 / 3)]
-    for a in range(4, 7):
-        out += [(a, a + 1, t) for t in (0, .25, .5, .75)]
-    return out + [(7, 7, 0)]
-ERUPTION_SEQ = _seq()
+# user 2026-10-26 review 2: the source speed (8 keys) with a short hold on the biggest spikes (f5 × 4) — punchier than
+# the cross-faded version. 11 frames; the peak f5 starts at frame 4.
+ERUPTION_SEQ = [(k, k, 0) for k in (0, 1, 2, 3, 4, 4, 4, 4, 5, 6, 7)]
 
 
 def unmix(rgb: np.ndarray) -> np.ndarray:

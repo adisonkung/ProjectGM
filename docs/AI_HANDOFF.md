@@ -8,8 +8,8 @@ Branch `wip/claude-draeven-s1-vfx` from `origin/master` 4088691 (clean). User su
 
 - `tools/sprites/draeven_s1_vfx.py` → `fx-draeven-s1-{activation,loop,eruption}.png` (unmix magenta, each frame aligned on its ground-ring centre = Draeven's ground pivot, 2 × atlas px, scale 1/3).
 - Review 1 (user): no Taunt Activation (too fast) — the loop starts with the status; the activation source stays tracked but unused.
-- Loop: `statusFx.blood_debt` (lives exactly as long as the status), 8 × 90 ms, behind him.
-- Eruption: new generic `SheetDef.retaliateFx` + engine event `retaliateStart` (status ends, burst starts) and `retaliation.delay` (blood_debt 0.4 s): damage + heal land at the burst peak; a holder who falls in between never erupts. Review 1: frames cut by connected pieces (no clipped spikes), 8 keys + cross-faded in-betweens = 25 × 32 ms (peak frame 12 at 0.384 s) + 200 ms fade, burst core on his body centre (dx −4 / dy −37 atlas px), in front, ~2.5 cells.
+- Loop (review 2: from the skill start): `dr-s1-loop-lead` cast FX = one 8 × 85.5 ms cycle = CAST_START → taunt F12 (0.684 s), then `statusFx.blood_debt` (lives exactly as long as the status) continues at frame 0; behind him.
+- Eruption: new generic `SheetDef.retaliateFx` + engine event `retaliateStart` (status ends, burst starts) and `retaliation.delay` (blood_debt 0.16 s): damage + heal land when the peak starts; a holder who falls in between never erupts. Frames cut by connected pieces (no clipped spikes); review 2: source speed 40 ms with the peak f5 held 160 ms (11 frames, 0.44 s + 150 ms fade), ~2.25 cells, burst core on his body centre (dx −4 / dy −37 atlas px), in front.
 - Validation: typechecks, Karma 825/825, `sprites:optimize`. Preview `draeven-s1-vfx-preview.mp4` / `-keys.png` (offline composite at game scale). Sprite lab single-cast review does not show the eruption (needs 5 foe hits). Last confirmed canonical-local sync metadata unchanged.
 
 ## Home visual reference review (Codex, 2026-10-24 Bangkok)

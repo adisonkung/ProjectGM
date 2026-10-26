@@ -258,7 +258,7 @@ export const SHEETS: Record<string, SheetDef> = {
   'hero-draeven.png': {
     // cell 290 wide (root 145, 155): the S2 burst / impact disc reach 140 px ahead of the feet
     cols: 28, rows: 8, cellW: 290, cellH: 170,
-    fx: { ult: 'dr-ult-charge' },
+    fx: { skill: 'dr-s1-loop-lead', ult: 'dr-ult-charge' },
     // S1 Blood Debt (user 2026-10-26): the loop follows the real status; the eruption starts on the threshold hit
     statusFx: { blood_debt: { loop: 'dr-s1-loop' } },
     retaliateFx: { blood_debt: 'dr-s1-eruption' },
@@ -1259,19 +1259,24 @@ export const FX: Record<string, FxDef> = {
   // Draeven S1 Blood Debt (user 2026-10-26, tools/sprites/draeven_s1_vfx.py, magenta-keyed, frames cut by connected
   // pieces so nothing is clipped; baked at 2 × atlas px, scale 1/3 = 1 atlas px, 80 atlas px = 1 cell). No Taunt
   // Activation (user: too fast — start straight on the loop).
-  // Taunt Loop (Blood Debt state): owned by the status (statusFx) from the taunt (F12) · 8 × 90 ms cycle · ring
-  // ~1.3 cells on his ground pivot (feet dy 27.25 %) · behind him
-  'dr-s1-loop': {
-    file: 'fx-draeven-s1-loop.png', frames: 8, w: 230, h: 219, frameMs: 90, at: 'self',
+  // Taunt Loop from the moment the skill starts (review 2): one cycle as a cast FX (8 × 85.5 ms = 0.684 s = CAST_START
+  // → the taunt at F12), then the status-owned loop (statusFx) takes over at frame 0 — seamless, and it lives exactly
+  // as long as Blood Debt · ring ~1.3 cells on his ground pivot (feet dy 27.25 %) · behind him
+  'dr-s1-loop-lead': {
+    file: 'fx-draeven-s1-loop.png', frames: 8, w: 230, h: 219, frameMs: 85.5, at: 'self', on: 'cast', attach: true,
     layer: 'under', pivot: [0.5, 0.8356], dy: 27.25, scale: 1 / 3,
   },
-  // Crimson Spike Eruption (Blood Reprisal): from the threshold hit (`retaliateStart`) · 25 frames × 32 ms (8 keys with
-  // cross-faded in-betweens: a slower, smooth burst) — peak f5 = frame 12 at 0.384–0.416 s = the eruption's damage +
-  // heal (retaliation.delay 0.4) · decay to 0.8 s + 200 ms fade · burst core on his body centre (atlas 141, 118 →
-  // dx −4 px, dy −37 px from the feet) · spikes fan out sideways ~2.5 cells · in front of him
+  'dr-s1-loop': {
+    file: 'fx-draeven-s1-loop.png', frames: 8, w: 230, h: 219, frameMs: 85.5, at: 'self',
+    layer: 'under', pivot: [0.5, 0.8356], dy: 27.25, scale: 1 / 3,
+  },
+  // Crimson Spike Eruption (Blood Reprisal): from the threshold hit (`retaliateStart`) · source speed 40 ms per key
+  // with the biggest spikes (f5) held 160 ms — 11 frames: f1–f4 0–0.16 s, f5 0.16–0.32 s = the eruption's damage +
+  // heal at its start (retaliation.delay 0.16), f6–f8 to 0.44 s + 150 ms fade (review 2: punchier, a little smaller)
+  // · burst core on his body centre (atlas 141, 118 → dx −4 px, dy −37 px from the feet) · ~2.25 cells · in front
   'dr-s1-eruption': {
-    file: 'fx-draeven-s1-eruption.png', frames: 25, w: 414, h: 405, frameMs: 32, fadeOutMs: 200, at: 'self',
-    orient: 'flip', pivot: [0.5, 0.7654], dx: -4 * 1.25, dy: 27.25 - 37 * 1.25, scale: 1 / 3,
+    file: 'fx-draeven-s1-eruption.png', frames: 11, w: 372, h: 362, frameMs: 40, fadeOutMs: 150, at: 'self',
+    orient: 'flip', pivot: [0.5, 0.7597], dx: -4 * 1.25, dy: 27.25 - 37 * 1.25, scale: 1 / 3,
   },
   'dr-ult-charge': {
     file: 'fx-draeven-ult-charge.png', frames: 25, w: 156, h: 90, frameMs: 60, at: 'self', orient: 'flip',
