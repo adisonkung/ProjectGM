@@ -2,11 +2,12 @@
 
 python3 tools/sprites/draeven_s1_vfx.py [source dir] [out dir]
 Sources (assets/heroes/Draeven/vfx/, 8 frames in one row on a magenta key, 2172 × 724 each):
-  Draeven_S1_TauntActivation_VFX.png    → fx-draeven-s1-activation.png  (one shot when the taunt lands)
   Draeven_S1_TauntLoop_VFX.png          → fx-draeven-s1-loop.png        (Blood Debt status loop)
   Draeven_S1_CrimsonSpikeEruption_VFX.png → fx-draeven-s1-eruption.png  (Blood Reprisal burst)
+  (Draeven_S1_TauntActivation_VFX.png is kept as a source but not used — user 2026-10-26: too fast, start on the loop.)
 
-All three spawn on Draeven's ground pivot (centre of the feet). Each frame is aligned so the centre of its ground ring
+Frames are cut by connected pieces (each piece goes to the nearest drawn frame), so spikes and debris that reach into a
+neighbour's slot are never clipped. Each frame is aligned so the centre of its ground ring
 (the widest row of the lower part of the frame) lands on the strip pivot; the size is set from the ring of the peak
 frame (TARGET = ring width in atlas px; 80 atlas px = one board cell). Baked at RES × atlas px — FxDef scale 1/3 with
 FX_SCALE 1.5 draws 1 baked px = 1/RES atlas px.
@@ -21,11 +22,20 @@ from scipy import ndimage
 N, RES = 8, 2
 SHEETS = {
     # name: (source, out, ring width of the peak frame in atlas px, peak frame)
-    'activation': ('Draeven_S1_TauntActivation_VFX.png', 'fx-draeven-s1-activation.png', 118, 4),
-    'loop': ('Draeven_S1_TauntLoop_VFX.png', 'fx-draeven-s1-loop.png', 104, 4),
-    # the spikes fan out sideways around him — the peak spread ~2.7 cells (Blood Reprisal reaches 1 cell around him)
-    'eruption': ('Draeven_S1_CrimsonSpikeEruption_VFX.png', 'fx-draeven-s1-eruption.png', 170, 4),
+    'loop': ('Draeven_S1_TauntLoop_VFX.png', 'fx-draeven-s1-loop.png', 104, 4, None),
+    # the spikes fan out sideways around him — the peak spread ~2.5 cells (same scale as the first review, now uncut) (Blood Reprisal reaches 1 cell around him)
+    'eruption': ('Draeven_S1_CrimsonSpikeEruption_VFX.png', 'fx-draeven-s1-eruption.png', 202, 4, 'ERUPTION_SEQ'),
 }
+# user 2026-10-26: a slower, smooth eruption — cross-faded in-betweens: 2 between each build-up key (f1 → f5 peak),
+# 3 between each decay key (f5 → f8). 25 frames; the peak f5 is frame 12.
+def _seq():
+    out = []
+    for a in range(4):
+        out += [(a, a + 1, t) for t in (0, 1 / 3, 2 / 3)]
+    for a in range(4, 7):
+        out += [(a, a + 1, t) for t in (0, .25, .5, .75)]
+    return out + [(7, 7, 0)]
+ERUPTION_SEQ = _seq()
 
 
 def unmix(rgb: np.ndarray) -> np.ndarray:
@@ -63,14 +73,32 @@ def ring(a: np.ndarray):
     return (x0 + x1) / 2, y, w
 
 
-def build(src: Path, out: Path, target: float, peak: int):
+def build(src: Path, out: Path, target: float, peak: int, seq=None):
     im = unmix(np.array(Image.open(src).convert('RGB')))
     im[-30:] = 0  # noisy bottom edge of the key
     h, W = im.shape[:2]
-    slot = W / N
+    # drawn frames = the 8 widest column runs; every connected piece goes to the frame whose centre is nearest
+    cols = im[..., 3].max(0) > 25
+    runs, x = [], 0
+    while x < W:
+        if cols[x]:
+            e = x
+            while e < W and cols[e]:
+                e += 1
+            runs.append((x, e))
+            x = e
+        x += 1
+    runs = sorted(sorted(runs, key=lambda r: r[1] - r[0])[-N:])
+    centres = np.array([(a + b) / 2 for a, b in runs])
+    al = im[..., 3]
+    lab, n = ndimage.label(ndimage.binary_dilation(al > 25, iterations=2))
+    owner = np.zeros(n + 1, int)
+    for i, sl in enumerate(ndimage.find_objects(lab), 1):
+        xs = np.nonzero(lab[sl] == i)[1] + sl[1].start
+        owner[i] = int(np.argmin(np.abs(centres - xs.mean())))
     frames, rings = [], []
     for k in range(N):
-        part = im[:, int(round(k * slot)):int(round((k + 1) * slot))].copy()
+        part = np.where(((lab > 0) & (owner[lab] == k))[..., None], im, 0)
         part[..., 3] = clean(part[..., 3])
         frames.append(part)
         rings.append(ring(part[..., 3]))
@@ -94,11 +122,23 @@ def build(src: Path, out: Path, target: float, peak: int):
     half = int(np.ceil(max(left, right))) + 2
     cw, ch = 2 * half, int(np.ceil(up + down)) + 4
     top = int(np.ceil(up)) + 2
-    strip = Image.new('RGBA', (cw * N, ch))
-    for k, (img, px, py) in enumerate(placed):
-        strip.alpha_composite(img, (int(round(k * cw + half - px)), int(round(top - py))))
+    cells = []
+    for img, px, py in placed:
+        c = Image.new('RGBA', (cw, ch))
+        c.alpha_composite(img, (int(round(half - px)), int(round(top - py))))
+        cells.append(np.asarray(c).astype(float))
+    order = [(k, k, 0) for k in range(N)] if seq is None else seq
+    strip = Image.new('RGBA', (cw * len(order), ch))
+    for i, (a, b, t) in enumerate(order):
+        # premultiplied cross-fade between two keys
+        pa, pb = cells[a], cells[b]
+        prem = lambda c: c[..., :3] * c[..., 3:] / 255
+        alpha = pa[..., 3] * (1 - t) + pb[..., 3] * t
+        rgb = (prem(pa) * (1 - t) + prem(pb) * t) / np.maximum(alpha[..., None] / 255, 1e-3)
+        f = np.dstack([np.clip(rgb, 0, 255), alpha]).astype(np.uint8)
+        strip.paste(Image.fromarray(f, 'RGBA'), (i * cw, 0))
     strip.save(out, optimize=True)
-    return {'frames': N, 'w': cw, 'h': ch, 'pivot': [0.5, round(top / ch, 4)], 'scale': round(scale, 4),
+    return {'frames': len(order), 'w': cw, 'h': ch, 'pivot': [0.5, round(top / ch, 4)], 'scale': round(scale, 4),
             'ringPeak': rings[peak][2]}
 
 
@@ -106,8 +146,8 @@ def main():
     src = Path(sys.argv[1] if len(sys.argv) > 1 else 'assets/heroes/Draeven/vfx')
     out = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
     out.mkdir(parents=True, exist_ok=True)
-    for name, (s, o, target, peak) in SHEETS.items():
-        print(name, build(src / s, out / o, target, peak))
+    for name, (s, o, target, peak, seq) in SHEETS.items():
+        print(name, build(src / s, out / o, target, peak, globals()[seq] if seq else None))
 
 
 if __name__ == '__main__':

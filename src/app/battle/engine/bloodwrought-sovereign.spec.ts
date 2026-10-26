@@ -98,12 +98,12 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(f.hp).toBe(fhp);
     b.dmg(b.dr, 50, f);
     ev = b.e.drainEvents();
-    // the 5th hit: the status ends and the Crimson Spike Eruption starts; damage + heal land at its peak (0.16 s)
+    // the 5th hit: the status ends and the Crimson Spike Eruption starts; damage + heal land at its peak (0.4 s)
     expect(ev.some(x => x.type === 'retaliateStart')).toBeTrue();
     expect(ev.some(x => x.type === 'retaliate')).toBeFalse();
     expect(hasStatus(b.dr, 'blood_debt')).toBeFalse();
     expect(f.hp).toBe(fhp);
-    b.wait(0.16);
+    b.wait(0.4);
     ev = b.e.drainEvents();
     const r = ev.find(x => x.type === 'retaliate') as Extract<BattleEvent, { type: 'retaliate' }>;
     expect(r).toBeDefined();
@@ -127,7 +127,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(b.e.drainEvents().some(x => x.type === 'retaliateStack')).toBeFalse();
     const farHp = far.hp;
     for (let i = 0; i < 5; i++) b.dmg(b.dr, 30, near);
-    b.wait(0.16);
+    b.wait(0.4);
     const r = b.e.drainEvents().find(x => x.type === 'retaliate') as Extract<BattleEvent, { type: 'retaliate' }>;
     expect(r.targets).toEqual([near.id]);
     expect(far.hp).toBe(farHp);
@@ -141,7 +141,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     const fhp = f.hp;
     for (let i = 0; i < 5; i++) b.dmg(b.dr, 10, f);
     b.dmg(b.dr, b.dr.hp, f);
-    b.wait(0.16);
+    b.wait(0.4);
     expect(b.e.drainEvents().some(x => x.type === 'retaliate')).toBeFalse();
     expect(f.hp).toBe(fhp);
   });

@@ -125,7 +125,7 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
    *  Eruption): 140 % ATK to foes within 1 cell, heal 3 % max HP per stack (cap 15 %). Provisional numbers */
   blood_debt: {
     id: 'blood_debt', name: 'หนี้เลือด', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
-    modifiers: {}, retaliation: { hits: 5, radius: 1, damage: 1.4, healPerStack: 0.03, healCap: 0.15, delay: 0.16 },
+    modifiers: {}, retaliation: { hits: 5, radius: 1, damage: 1.4, healPerStack: 0.03, healCap: 0.15, delay: 0.4 },
   },
   /** Draeven Blood Brand (foes): ATK −15 %; Draeven's own hits on a branded foe heal him for 12 % of the damage */
   blood_brand: {
