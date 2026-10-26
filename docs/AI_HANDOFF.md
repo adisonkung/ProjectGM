@@ -2,7 +2,17 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Home visual reference review (Codex, 2026-10-24 Bangkok)
+## Latest task — Draeven S1 Blood Debt VFX (Claude, 2026-10-26)
+
+Branch `wip/claude-draeven-s1-vfx` from `origin/master` 4088691 (clean). User supplied three magenta-key VFX sheets (tracked unchanged: `assets/heroes/Draeven/vfx/Draeven_S1_{TauntActivation,TauntLoop,CrimsonSpikeEruption}_VFX.png`) plus a timeline; preview requested before any merge.
+
+- `tools/sprites/draeven_s1_vfx.py` → `fx-draeven-s1-{activation,loop,eruption}.png` (unmix magenta, each frame aligned on its ground-ring centre = Draeven's ground pivot, 2 × atlas px, scale 1/3).
+- Activation: skill FX on new S1 clip event VFX_SPAWN 8.42 (0.48 s), 8 × 50 ms, peak f5 on the taunt (F12, 0.684 s), behind him. The character clip (1.6 s, user-approved) is unchanged, so the user's 0.05–0.45 s character window is mapped onto the existing taunt frame — flagged for review.
+- Loop: `statusFx.blood_debt` (lives exactly as long as the status), delayMs 250, 8 × 90 ms, behind him.
+- Eruption: new generic `SheetDef.retaliateFx` + engine event `retaliateStart` (status ends, burst starts) and `retaliation.delay` (blood_debt 0.16 s): damage + heal land at the burst peak; a holder who falls in between never erupts. 8 × 40 ms + 130 ms fade, in front, ~2.1 cells.
+- Validation: typechecks, Karma 825/825, `sprites:optimize`. Preview `draeven-s1-vfx-preview.mp4` / `-keys.png` (offline composite at game scale). Sprite lab single-cast review does not show the eruption (needs 5 foe hits). Last confirmed canonical-local sync metadata unchanged.
+
+## Home visual reference review (Codex, 2026-10-24 Bangkok)
 
 User asked for a close match to reference colors/gloss/corners/icons and actual screenshots before review, explicitly **no deployment**. Local task branch `wip/codex-home-reference-match` starts from fetched origin/master e94d853 and carries the18-board reference archive first. No local master exists and no new other-agent source commits were observed.
 

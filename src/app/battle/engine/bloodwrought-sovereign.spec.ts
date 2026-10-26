@@ -76,7 +76,10 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const grid = (e as any).grid;
     const place = (u: { id: number; pos: { r: number; c: number } }, cell: { r: number; c: number }) => { grid.move(u.id, u.pos, cell); u.pos = cell; };
-    return { e, dr, foes, dmg, place };
+    // advance only the engine's delayed actions (the Blood Reprisal peak), without a combat tick
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wait = (sec: number) => { (e as any).time += sec; (e as any).runPending(); };
+    return { e, dr, foes, dmg, place, wait };
   }
 
   it('Blood Debt: taunts, then every foe hit adds a stack; the 5th erupts once (damage around him + capped heal) and ends', () => {
@@ -94,6 +97,13 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(ev.some(x => x.type === 'retaliate')).toBeFalse();
     expect(f.hp).toBe(fhp);
     b.dmg(b.dr, 50, f);
+    ev = b.e.drainEvents();
+    // the 5th hit: the status ends and the Crimson Spike Eruption starts; damage + heal land at its peak (0.16 s)
+    expect(ev.some(x => x.type === 'retaliateStart')).toBeTrue();
+    expect(ev.some(x => x.type === 'retaliate')).toBeFalse();
+    expect(hasStatus(b.dr, 'blood_debt')).toBeFalse();
+    expect(f.hp).toBe(fhp);
+    b.wait(0.16);
     ev = b.e.drainEvents();
     const r = ev.find(x => x.type === 'retaliate') as Extract<BattleEvent, { type: 'retaliate' }>;
     expect(r).toBeDefined();
@@ -117,9 +127,23 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(b.e.drainEvents().some(x => x.type === 'retaliateStack')).toBeFalse();
     const farHp = far.hp;
     for (let i = 0; i < 5; i++) b.dmg(b.dr, 30, near);
+    b.wait(0.16);
     const r = b.e.drainEvents().find(x => x.type === 'retaliate') as Extract<BattleEvent, { type: 'retaliate' }>;
     expect(r.targets).toEqual([near.id]);
     expect(far.hp).toBe(farHp);
+  });
+
+  it('Blood Reprisal: a holder who falls before the eruption peak never erupts', () => {
+    const b = battle();
+    const [f] = b.foes();
+    b.place(f, { r: b.dr.pos.r, c: b.dr.pos.c + 1 });
+    b.e.skills.applyEffects(b.dr, kitOf('draeven', 'tank').skill, 'skill', f, f.pos);
+    const fhp = f.hp;
+    for (let i = 0; i < 5; i++) b.dmg(b.dr, 10, f);
+    b.dmg(b.dr, b.dr.hp, f);
+    b.wait(0.16);
+    expect(b.e.drainEvents().some(x => x.type === 'retaliate')).toBeFalse();
+    expect(f.hp).toBe(fhp);
   });
 
   it('Sovereign\'s Reprisal: frontal wave + Blood Brand (ATK −15 %); his hits on a branded foe heal him', () => {

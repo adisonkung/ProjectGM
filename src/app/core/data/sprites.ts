@@ -115,6 +115,8 @@ export interface SheetDef {
   healFx?: string;
   /** One-shot visual when a status applied by this caster succeeds (buff event, after immunity/conditions). */
   appliedStatusFx?: Record<string, string>;
+  /** One-shot burst on the holder when this caster's retaliation status erupts (`retaliateStart`), keyed by status id. */
+  retaliateFx?: Record<string, string>;
   /** Persistent status visuals, owned by real status presence rather than fixed VFX duration. */
   statusFx?: Record<string, { start?: string; loop: string }>;
   /** Presentation of this caster's fixed fields. Engine lifecycle events, not animation end, own their lifetime. */
@@ -256,7 +258,10 @@ export const SHEETS: Record<string, SheetDef> = {
   'hero-draeven.png': {
     // cell 290 wide (root 145, 155): the S2 burst / impact disc reach 140 px ahead of the feet
     cols: 28, rows: 8, cellW: 290, cellH: 170,
-    fx: { ult: 'dr-ult-charge' },
+    fx: { skill: 'dr-s1-activation', ult: 'dr-ult-charge' },
+    // S1 Blood Debt (user 2026-10-26): the loop follows the real status; the eruption starts on the threshold hit
+    statusFx: { blood_debt: { loop: 'dr-s1-loop' } },
+    retaliateFx: { blood_debt: 'dr-s1-eruption' },
     anims: {
       idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
       // provisional: the stagger at the start of the death sheet (no hurt clip supplied)
@@ -267,7 +272,8 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { DAMAGE: 9, IMPACT: 9, RECOVERY_START: 12 } },
       die: { row: 4, frames: 14, ms: 80 },
       // S1 Blood Debt: open-hand beckon taunt (28 frames × 57 ms = 1.6 s); the taunt lands at the full beckon F12
-      skill: { row: 5, frames: 28, ms: 57, events: { CAST_START: 0, SKILL_ACTIVATE: 12, DAMAGE: 12, RECOVERY_START: 21 } },
+      // VFX_SPAWN 8.42 (0.48 s): Taunt Activation starts so its peak (f5) meets the taunt at F12 (0.684 s)
+      skill: { row: 5, frames: 28, ms: 57, events: { CAST_START: 0, VFX_SPAWN: 8.42, SKILL_ACTIVATE: 12, DAMAGE: 12, RECOVERY_START: 21 } },
       // S2 Sovereign's Reprisal (user sheet 2026-10-22, VFX + Timeline Sync pending): raise → sword drawn back F8 →
       // forward release F9 (STRIKE / VFX) → the wave lands F11 → crouched follow-through → back to stance. 1.43 s
       skill2: { row: 6, frames: 27, ms: 50, seq: Array.from({ length: 27 }, (_, i) => i),
@@ -1251,6 +1257,26 @@ export const FX: Record<string, FxDef> = {
   // Draeven Ult charge aura (user 2026-10-22): wraps the blade of the 1.5 s hold — f1–f8 once, then f6–f8 cycle until
   // STRIKE_START, where the strip ends (tools/sprites/draeven_ult_vfx.py bakes it to the hold length). Centre = blade centre
   // of the hold pose (atlas 147, 63.5 → feet 145, 155): dx 2 px, dy −91.5 px from the feet (feet = dy 27.25 %)
+  // Draeven S1 Blood Debt (user 2026-10-26, tools/sprites/draeven_s1_vfx.py, magenta-keyed, every frame on the ground
+  // ring centre = his ground pivot, feet dy 27.25 %; baked at 2 × atlas px, scale 1/3 = 1 atlas px, 80 atlas px = 1 cell)
+  // Taunt Activation: 8 × 50 ms = 0.4 s from VFX_SPAWN, peak f5 on the taunt (F12) · ring ~1.5 cells · behind him
+  'dr-s1-activation': {
+    file: 'fx-draeven-s1-activation.png', frames: 8, w: 248, h: 239, frameMs: 50, at: 'self', orient: 'flip',
+    event: 'VFX_SPAWN', layer: 'under', pivot: [0.5, 0.8703], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  // Taunt Loop (Blood Debt state): owned by the status (statusFx), appears 0.25 s after the taunt = 0.05 s after the
+  // activation fades · 8 × 90 ms cycle · ring ~1.3 cells around the feet · behind him
+  'dr-s1-loop': {
+    file: 'fx-draeven-s1-loop.png', frames: 8, w: 230, h: 219, frameMs: 90, at: 'self',
+    delayMs: 250, layer: 'under', pivot: [0.5, 0.8356], dy: 27.25, scale: 1 / 3,
+  },
+  // Crimson Spike Eruption (Blood Reprisal): from the threshold hit (`retaliateStart`), 8 × 40 ms — peak f5 at
+  // 0.16–0.20 s = the eruption's damage + heal (retaliation.delay 0.16) — then fades by 0.45 s · spikes fan out
+  // sideways ~2.1 cells (the burst reaches 1 cell around him) · in front of him
+  'dr-s1-eruption': {
+    file: 'fx-draeven-s1-eruption.png', frames: 8, w: 348, h: 405, frameMs: 40, fadeOutMs: 130, at: 'self',
+    pivot: [0.5, 0.7235], dy: 27.25, scale: 1 / 3,
+  },
   'dr-ult-charge': {
     file: 'fx-draeven-ult-charge.png', frames: 25, w: 156, h: 90, frameMs: 60, at: 'self', orient: 'flip',
     event: 'CHARGE_START', pivot: [0.5, 0.5], dx: 2.5, dy: 27.25 - 91.5 * 1.25, scale: 1 / 3,
@@ -1654,6 +1680,12 @@ export function impactFeelOf(sprite: string | undefined, anim: 'attack' | SkillK
 }
 
 /** does this FX follow the unit it was placed on (`FxDef.attach`, default = a lingering aura on a unit)? */
+/** the burst a retaliation status of this caster plays when it erupts (`SheetDef.retaliateFx`) */
+export function retaliateFx(sprite: string | undefined, status: string): string | undefined {
+  const name = sprite ? SHEETS[sprite]?.retaliateFx?.[status] : undefined;
+  return name && FX[name] ? name : undefined;
+}
+
 export function fxAttached(name: string): boolean {
   const d = FX[name];
   if (!d || d.at === 'allies') return false;

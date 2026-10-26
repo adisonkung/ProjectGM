@@ -69,6 +69,7 @@ export type BattleEvent =
   /** RETALIATION stack gained (`stacks` / `hits`) on `src` from `dst`'s hit */
   | { type: 'retaliateStack'; src: number; dst: number; stacks: number; hits: number; status: string }
   /** RETALIATION erupted around `src`: `targets` hit, `healed` HP restored */
+  | { type: 'retaliateStart'; src: number; status: string; stacks: number }
   | { type: 'retaliate'; src: number; status: string; stacks: number; targets: number[]; healed: number }
   /** ฟื้นคืนชีพ */
   | { type: 'revive'; src: number; dst: number; amount: number }
@@ -2203,16 +2204,24 @@ export class BattleEngine {
     }
   }
 
-  /** RETALIATION eruption: damage foes around the holder, capped self-heal, the status ends */
+  /**
+   * RETALIATION eruption: the status ends on the threshold hit (`retaliateStart`, the burst VFX starts); after
+   * `retaliation.delay` (its peak) foes around the holder take damage and the holder heals (capped). A holder who falls
+   * in between never erupts.
+   */
   private retaliate(u: BattleUnit, b: ActiveBuff): void {
     const rt = b.def.retaliation!;
     const stacks = b.debt ?? 0;
-    this.removeStatus(u, b.def.id);
-    const foes = this.units.filter(t => this.isValidTarget(u, t) && distance(t.pos, u.pos) <= rt.radius);
-    for (const t of foes) this.hit(u, t, rt.damage, { damageType: rt.damageType ?? 'PHYSICAL', sourceId: b.def.id });
-    const before = u.hp;
-    this.heal(u, u.maxHp * Math.min(rt.healCap, rt.healPerStack * stacks), u);
-    this.events.push({ type: 'retaliate', src: u.id, status: b.def.id, stacks, targets: foes.map(t => t.id), healed: u.hp - before });
+    const def = b.def;
+    this.removeStatus(u, def.id);
+    this.events.push({ type: 'retaliateStart', src: u.id, status: def.id, stacks });
+    this.later(rt.delay ?? 0, u, () => {
+      const foes = this.units.filter(t => this.isValidTarget(u, t) && distance(t.pos, u.pos) <= rt.radius);
+      for (const t of foes) this.hit(u, t, rt.damage, { damageType: rt.damageType ?? 'PHYSICAL', sourceId: def.id });
+      const before = u.hp;
+      this.heal(u, u.maxHp * Math.min(rt.healCap, rt.healPerStack * stacks), u);
+      this.events.push({ type: 'retaliate', src: u.id, status: def.id, stacks, targets: foes.map(t => t.id), healed: u.hp - before });
+    });
   }
 
   private heal(dst: BattleUnit, amount: number, src?: BattleUnit): void {

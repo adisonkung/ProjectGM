@@ -93,7 +93,9 @@ export interface StatusEffectDefinition {
    * carrier erupts once — `damage` × own ATK to every valid foe within `radius` cells (8-direction) — heals
    * `healPerStack` × max HP per stack, capped at `healCap` × max HP — and the status ends
    */
-  retaliation?: { hits: number; radius: number; damage: number; damageType?: 'PHYSICAL' | 'MAGIC'; healPerStack: number; healCap: number };
+  retaliation?: { hits: number; radius: number; damage: number; damageType?: 'PHYSICAL' | 'MAGIC'; healPerStack: number; healCap: number;
+    /** seconds from the threshold hit (status ends, `retaliateStart`) to the eruption's damage + heal (VFX peak); 0 = same tick */
+    delay?: number };
   /** DRAIN (Draeven Blood Brand): damage the status source deals to the carrier heals the source by this share */
   drainToSource?: number;
   /** stance statuses (Mirror Stance) end at once when the unit is stunned or knocked back */
