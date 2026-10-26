@@ -736,7 +736,7 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "label": "guard_armor",
     "group": "equipment-base",
     "url": "/ui/generated/equipment/bases/guard_armor.webp",
-    "status": "active"
+    "status": "superseded"
   },
   {
     "id": "equipment/bases/heavy_blade",
@@ -757,7 +757,7 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "label": "trinket",
     "group": "equipment-base",
     "url": "/ui/generated/equipment/bases/trinket.webp",
-    "status": "active"
+    "status": "superseded"
   },
   {
     "id": "equipment/bases/twin_daggers",
@@ -806,35 +806,35 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "label": "common",
     "group": "sword-aura",
     "url": "/ui/generated/equipment/swords/aura/common.webp",
-    "status": "active"
+    "status": "superseded"
   },
   {
     "id": "equipment/swords/aura/elite",
     "label": "elite",
     "group": "sword-aura",
     "url": "/ui/generated/equipment/swords/aura/elite.webp",
-    "status": "active"
+    "status": "superseded"
   },
   {
     "id": "equipment/swords/aura/epic",
     "label": "epic",
     "group": "sword-aura",
     "url": "/ui/generated/equipment/swords/aura/epic.webp",
-    "status": "active"
+    "status": "superseded"
   },
   {
     "id": "equipment/swords/aura/rare",
     "label": "rare",
     "group": "sword-aura",
     "url": "/ui/generated/equipment/swords/aura/rare.webp",
-    "status": "active"
+    "status": "superseded"
   },
   {
     "id": "equipment/swords/aura/uncommon",
     "label": "uncommon",
     "group": "sword-aura",
     "url": "/ui/generated/equipment/swords/aura/uncommon.webp",
-    "status": "active"
+    "status": "superseded"
   },
   {
     "id": "equipment/palace-forge",
@@ -863,5 +863,117 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "group": "concept-board",
     "url": "/ui/generated/concepts/forge-screen-draft.webp",
     "status": "concept_only"
+  },
+  {
+    "id": "equipment-tiered/armor/common",
+    "label": "เกราะ common",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/armor/common.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/armor/uncommon",
+    "label": "เกราะ uncommon",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/armor/uncommon.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/armor/rare",
+    "label": "เกราะ rare",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/armor/rare.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/armor/elite",
+    "label": "เกราะ elite",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/armor/elite.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/armor/epic",
+    "label": "เกราะ epic",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/armor/epic.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/necklace/common",
+    "label": "สร้อย common",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/necklace/common.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/necklace/uncommon",
+    "label": "สร้อย uncommon",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/necklace/uncommon.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/necklace/rare",
+    "label": "สร้อย rare",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/necklace/rare.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/necklace/elite",
+    "label": "สร้อย elite",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/necklace/elite.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/necklace/epic",
+    "label": "สร้อย epic",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/necklace/epic.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/ring/common",
+    "label": "แหวน common",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/ring/common.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/ring/uncommon",
+    "label": "แหวน uncommon",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/ring/uncommon.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/ring/rare",
+    "label": "แหวน rare",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/ring/rare.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/ring/elite",
+    "label": "แหวน elite",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/ring/elite.webp",
+    "status": "active"
+  },
+  {
+    "id": "equipment-tiered/ring/epic",
+    "label": "แหวน epic",
+    "group": "equipment-tiered",
+    "url": "/ui/equipment/tiered/ring/epic.webp",
+    "status": "active"
+  },
+  {
+    "id": "environment/celestial-forge",
+    "label": "ฉากแท่นหลอมกลาง",
+    "group": "environment",
+    "url": "/ui/forge/celestial-forge.webp",
+    "status": "active"
   }
 ];

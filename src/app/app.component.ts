@@ -69,6 +69,7 @@ export class AppComponent {
   readonly immersive = computed(() => /^\/(home|gacha)([?#]|$)/.test(this.url()));
 
   /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
+  readonly forgePage = computed(() => /^\/forge([?#]|$)/.test(this.url()));
   readonly collection = computed(() => /^\/(heroes|team|armory|forge|account)(\/|[?#]|$)/.test(this.url()) || /^\/(tower|dungeons)(\/|[?#]|$)/.test(this.url()));
   readonly fantasy = computed(() => this.immersive() || this.collection() || this.fight() || this.url().startsWith('/sprite-lab'));
   readonly homeChrome = computed(() => !this.bare());

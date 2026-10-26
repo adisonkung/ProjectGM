@@ -1,10 +1,50 @@
-# Eldervane — Forge stage and tier equipment
+# Eldervane — โรงตีเหล็กและอุปกรณ์แยก Tier
 
-26 Oct 2026 · User-selected three-column forge reference. Work branch `wip/codex-forge-tier-showcase`, based on production4088691.
+26 ต.ค. 2026 · สาขา `wip/codex-forge-tier-showcase` จาก production `4088691` · **รอตรวจภาพ ยังไม่ merge/Deploy**
 
-- New15individual foreground assets: armor, necklace, ring × Common/Uncommon/Rare/Elite/Epic. Distinct silhouettes/materials; transparent backgrounds. PNG masters remain outside runtime in `/workspace/eldervane-equipment-tier-production/`; runtime512/1024WebP files in `public/ui/equipment/tiered/`.
-- Existing approved5sword masters are reused. Large1024WebP variants generated from the same originals. No weapon family or save identifiers change.
-- Empty generated sky-palace/anvil background in `public/ui/forge/`; center equipment and live VFX are rendered separately.
-- References: [Forge](forge-reference.png), [equipment art direction](equipment-reference.png). Source hashes and paths in [manifest](manifest.json).
+## สิ่งที่ทำ
 
-Implementation and native desktop/mobile visual review are in progress. No merge or deployment in this task. Final validation/evidence and remaining differences will be recorded here before completion.
+- เกราะ5, สร้อย5, แหวน5: **15ภาพใหม่** ต่างรูปทรง วัสดุและรายละเอียดตาม Common/Uncommon/Rare/Elite/Epic; รวมกับดาบ5ภาพที่เลือกไว้เป็น **20แบบ** ไม่ใช่เพียงเปลี่ยนสี
+- ไฟล์512WebPสำหรับกระเป๋า/ช่องสวมใส่ และ1024WebPสำหรับเหนือแท่น/รายละเอียด มาจากmasterเดียวกัน ภาพโปร่งใสมีพื้นที่ขอบ ไม่ตัดชิ้นงาน
+- ออร่าขยับจริงเป็นSVG/CSSหลายชั้น: ดาบมีวงโคจร/เส้นพลังเกลียว; เกราะมีวงป้องกันหกเหลี่ยม; สร้อยมีริบบอนแสง; แหวนมีวงรูนซ้อน ชั้นสูงเพิ่มวง/ประกาย/รัศมี
+- เพิ่มประกายชั้นหน้าและแสงสะท้อนที่maskตามรูปร่างชิ้นงาน ตัวอุปกรณ์ลอยช้า ๆ แยกจากวงพลังที่หมุนสวนกัน
+- เคลื่อนไหวเฉพาะเหนือแท่นและเมื่อดูรายละเอียด กระเป๋า/ช่องสวมใส่เป็นออร่านิ่ง และรองรับreduced-motion; ออร่าชิ้นงานกับแสงผิวหยุดเมื่อซ่อนtab
+- หน้าคราฟต์จัด **เมนูซ้าย · แท่นกลางโล่ง · สูตรและปุ่มสร้างขวา** ตาม [ภาพอ้างอิงที่ผู้ใช้เลือก](forge-reference.png) ใช้ฉากเปล่าที่genแยกจากชิ้นงาน/เอฟเฟค
+- ปรับ responsive: แท็บเล็ตเมนูกับแท่นอยู่คู่กัน สูตรอยู่ด้านล่าง; มือถือแสดงแท่นก่อน แล้วเมนูและสูตรเลื่อนดูได้
+- ปุ่มกดภาพเหนือแท่นเปิดหน้าดูภาพใหญ่; รายละเอียดอุปกรณ์ในArmory/หน้าตีบวกมีออร่าเคลื่อนไหวด้วย
+- คลังอาร์ตGM `/art-catalog` แสดงคอลเลกชัน20แบบและ15ไฟล์ใหม่ พร้อมคงตัวอย่างเก่าไว้ตามสถานะ
+
+## ข้อมูลและเซฟ
+
+คงราคา จำนวนวัสดุ การสุ่มค่าพลัง ตีบวก ย่อย ล็อก และข้อจำกัดสวมใส่จากระบบจริง ไม่มีการปรับสมดุล/เปลี่ยนID/แก้save schema
+
+สร้อยกับแหวนใช้ฐาน `trinket` และช่อง `ACCESSORY` เดิม รูปลักษณ์ของของที่ครอบครองอิงinstance IDแบบคงที่ จึงเป็นภาพเดิมทั้งในกระเป๋า ดูรายละเอียด และสวมใส่ ปุ่ม“ดูตัวอย่างสร้อย/แหวน”เปลี่ยนเฉพาะตัวอย่าง ไม่เลือกผลของการคราฟต์ ยังไม่เพิ่มช่องแหวนแยกหรือระบบRelic ภาพบุคลิก/portrait/spriteฮีโร่ไม่ได้เปลี่ยนตามชุด
+
+Commonมีอาร์ตสำหรับของที่มีอยู่/ดรอปและคลังGM แต่ไม่ได้เพิ่มสูตรCommonใหม่ สูตรคราฟต์ยังเริ่มที่Uncommonตามเกมจริง
+
+## อาร์ตและอ้างอิง
+
+- [ภาพ Forge อ้างอิง](forge-reference.png) · [ทิศทางอุปกรณ์](equipment-reference.png)
+- [Manifest / ที่มา / hash / alpha](manifest.json)
+- Runtime: `public/ui/equipment/tiered/`, `public/ui/forge/`
+- PNGmaster1024: `/workspace/eldervane-equipment-tier-production/` (แยกจากruntimeเพื่อไม่ให้เกมโหลดไฟล์ใหญ่)
+- ออร่า: `EquipmentAuraComponent`; ใช้สีและความซับซ้อนตามTier ไม่ฝังลงภาพforeground
+
+## หลักฐานตรวจ
+
+- [ภาพเกมจริงเทียบกับ Forge อ้างอิง](review/forge-comparison.webp) · [ภาพเกมจริงเต็ม](review/forge-sword-rare.webp) · [อ้างอิงเต็ม](forge-reference.png)
+- [อุปกรณ์ครบ20แบบจากคลังเกมจริง](review/equipment-20-tiers.webp) · [เทียบทิศทางอุปกรณ์](review/equipment-comparison.webp)
+- [คลิปออร่าจากเกมจริง](review/aura-showcase.mp4): ดาบ Rare → เกราะ Epic → สร้อย Elite → แหวน Epic → เปิดดูภาพใหญ่ (1440×900, เปิด motion)
+- [ดูแหวนใหญ่](review/inspect-ring-desktop.webp) · [กระเป๋าและรายละเอียด](review/armory-ring-desktop.webp) · [สวมใส่](review/armory-ring-equipped.webp)
+- [มือถือ390px](review/forge-390-top.webp) · [เมนูมือถือ](review/forge-390-controls.webp) · [สูตรมือถือ](review/forge-390-recipe.webp) · [แท็บเล็ต768px](review/forge-768-top.webp)
+- [ผลตรวจ browser](review/validation.json): 33สถานะหน้าจอ + คอลเลกชัน20แบบ, ไม่มีconsole error/ไฟล์ภาพหาย/แนวนอนล้น ใน1672/1280/1024/768/390/320px
+- Typecheck app/spec ผ่าน, production build ผ่าน, unit tests **827/827 ผ่าน**; Forge stylesheetมีbudget warningเดิม8KB แต่ยังต่ำกว่าerror limit24KB
+
+ภาพนิ่งจากbrowserใช้reduced-motionเพื่อเก็บตำแหน่งซ้ำได้ คลิปเปิดmotionตามปกติ ไม่มีการแต่งเฟรมเกม ทดสอบด้วยlocal save fixtureที่มีวัสดุ500ชิ้น/ระดับ ทอง100,000 และอุปกรณ์ตัวอย่าง โดยไม่ได้เปลี่ยนเซฟผู้เล่นจริง ตรวจcraft Epicเกราะใช้110เศษ/4,000ทองและเพิ่ม1ชิ้น ถูกต้อง ภาพเกมกับrefแยกไฟล์ชัดเจน ยังรอตรวจความสวยงามจากผู้ใช้ ไม่อ้างว่าตรงทุกพิกเซล
+
+## งานที่ยังเหลือ
+
+- งานวัสดุที่ตรวจพบก่อนหน้านี้ยังแยกค้างอยู่: ตัวแสดงรางวัลดันเจี้ยน `DungeonRewardIconComponent` ยังใช้SVGจำลอง รวมถึงบางป้ายEXP/รายการวัสดุที่ยังไม่ได้ใช้ภาพใหม่ งานนี้ไม่ได้แก้หน้าดันเจี้ยน
+- ระบบแยกช่องสร้อย/แหวน/Relic, รวมweapon familiesเป็นดาบในระดับกติกา และหินผูกฮีโร่/แปลง1:1 ยังต้องทำแยก
+- ภาพฮีโร่สวมเกราะ/อาวุธจริงตามของที่ใส่ ยังไม่ได้ผลิตหรือเปลี่ยนsprite
+- ตรวจความสวยงามจากผู้ใช้ก่อน merge/Deploy; เมนูส่วนบนคงเวอร์ชันที่อนุมัติแล้ว และข้อมูลทรัพยากร/ภาพอุปกรณ์ใช้ของจริง จึงต่างจากรายละเอียดจำลองบางจุดในref

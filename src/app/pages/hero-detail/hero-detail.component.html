@@ -128,7 +128,7 @@
         @for (g of gear(); track g.slot) {
           <a class="gear-slot" [class]="'gear-slot t' + g.tier + (g.item ? '' : ' empty')" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }" [attr.aria-label]="g.label + (g.item ? ' ' + gearName(g.item) : ' ว่าง — จัดการอุปกรณ์')">
             @if (tab() === 'gear') { <app-tower-ornament [grooved]="true" /> }
-            <span class="gi">@if (g.item; as equipped) { <app-equipment-art [definitionId]="equipped.definitionId" [rarity]="equipped.rarity" [level]="equipped.upgradeLevel" /> } @else { <app-citadel-icon [name]="g.slot === 'WEAPON' ? 'sword' : g.slot === 'ARMOR' ? 'shield' : 'summon'" [size]="34" /> }</span>
+            <span class="gi">@if (g.item; as equipped) { <app-equipment-art [definitionId]="equipped.definitionId" [rarity]="equipped.rarity" [level]="equipped.upgradeLevel" [instanceId]="equipped.instanceId" /> } @else { <app-citadel-icon [name]="g.slot === 'WEAPON' ? 'sword' : g.slot === 'ARMOR' ? 'shield' : 'summon'" [size]="34" /> }</span>
             <div>
               <small>{{ g.label }}</small>
               @if (g.item; as it) {

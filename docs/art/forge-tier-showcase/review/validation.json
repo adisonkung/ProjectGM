@@ -1,0 +1,288 @@
+{
+  "errors": [],
+  "missing": [],
+  "screenshots": [
+    {
+      "name": "forge-sword-rare",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "forge-armor-uncommon",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "forge-armor-rare",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "forge-armor-elite",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "forge-armor-epic",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "forge-necklace-rare",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "forge-ring-elite",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "forge-ring-epic",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "inspect-ring-desktop",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "crafted-armor-epic",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "forge-1280-top",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "inspect-1280",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      }
+    },
+    {
+      "name": "forge-1024-top",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      }
+    },
+    {
+      "name": "inspect-1024",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      }
+    },
+    {
+      "name": "forge-768-top",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "name": "forge-768-controls",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "name": "forge-768-recipe",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "name": "inspect-768",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      }
+    },
+    {
+      "name": "forge-390-top",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "forge-390-controls",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "forge-390-recipe",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "inspect-390",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "forge-320-top",
+      "viewport": {
+        "width": 320,
+        "height": 740
+      }
+    },
+    {
+      "name": "forge-320-controls",
+      "viewport": {
+        "width": 320,
+        "height": 740
+      }
+    },
+    {
+      "name": "forge-320-recipe",
+      "viewport": {
+        "width": 320,
+        "height": 740
+      }
+    },
+    {
+      "name": "inspect-320",
+      "viewport": {
+        "width": 320,
+        "height": 740
+      }
+    },
+    {
+      "name": "enhance-desktop",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "enhance-mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "salvage-desktop",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "salvage-mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "armory-ring-desktop",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "armory-ring-equipped",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    },
+    {
+      "name": "hero-equipped-ring",
+      "viewport": {
+        "width": 1672,
+        "height": 941
+      }
+    }
+  ],
+  "checks": [
+    "20distinct item foregrounds decode;3new families each5tiers plus existing swords",
+    "Forge matches left/center/right geometry, shared assets for owned items across views",
+    "Preview does not spend or create items; actual Epic craft consumes110fragments+4000gold",
+    "Desktop1672x941 and1280/1024/tablet768/mobile390/320 no horizontal overflow",
+    "Inspect dialog closes and resizes; enhancement/bulk salvage still render",
+    "Actual ring identity preserved in bag/inspection/equip/hero details",
+    "Inventory static, reduced-motion disables movement, normal orbit and metal glint change over time"
+  ],
+  "geometry": {
+    "stage": {
+      "x": 556.171875,
+      "y": 204,
+      "width": 559.640625,
+      "height": 698.03125,
+      "top": 204,
+      "right": 1115.8125,
+      "bottom": 902.03125,
+      "left": 556.171875
+    },
+    "left": {
+      "x": 20,
+      "y": 204,
+      "width": 518.171875,
+      "height": 698.03125,
+      "top": 204,
+      "right": 538.171875,
+      "bottom": 902.03125,
+      "left": 20
+    },
+    "right": {
+      "x": 1133.8125,
+      "y": 204,
+      "width": 518.1875,
+      "height": 698.03125,
+      "top": 204,
+      "right": 1652,
+      "bottom": 902.03125,
+      "left": 1133.8125
+    },
+    "item": {
+      "x": 556.171875,
+      "y": 200.14125061035156,
+      "width": 559.640625,
+      "height": 559.640625,
+      "top": 200.14125061035156,
+      "right": 1115.8125,
+      "bottom": 759.7818756103516,
+      "left": 556.171875
+    }
+  }
+}

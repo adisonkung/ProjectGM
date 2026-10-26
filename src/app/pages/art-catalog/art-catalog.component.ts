@@ -11,9 +11,9 @@ import { EquipmentArtComponent } from '../../shared/equipment-art.component';
   template: `
     <section><header><a routerLink="/account">‹ กลับบัญชี</a><h1>คลังอาร์ต Eldervane</h1><p>ภาพทั้งหมด {{ all.length }} ไฟล์ · ใช้งานแล้ว / แบบร่าง / ตัวอย่างที่พักไว้</p></header>
       <nav aria-label="หมวดอาร์ต">@for (g of groups; track g) { <button type="button" [class.on]="group() === g" [attr.aria-pressed]="group() === g" (click)="group.set(g)">{{ g === 'all' ? 'ทั้งหมด' : g }}</button> }</nav>
-      @if (group() === 'all' || group() === 'sword-foreground') {
-        <h2>ดาบ 5 Tier · ภาพเดียวกับเตาหลอม / กระเป๋า / ช่องสวมใส่</h2><div class="tiers">@for (t of tiers; track t) { <article><app-equipment-art definitionId="heavy_blade" [rarity]="t" /><b>{{ t }}</b></article> }</div>
-      }
+      @if (group() === 'all' || group() === 'equipment-tiered' || group() === 'sword-foreground') {<div class="tier-collection">
+        @for (f of families; track f.id) { <h2>{{ f.label }} · 5 Tier</h2><div class="tiers">@for (t of tiers; track t) { <article><app-equipment-art [definitionId]="f.base" [appearance]="f.id" [rarity]="t" /><b>{{ t }}</b></article> }</div> }
+      </div>}
       <h2>ไฟล์แยกรายภาพ</h2><div class="assets">@for (a of visible(); track a.id) {
         <article [class.board]="a.group === 'concept-board'"><a [href]="a.url" target="_blank" rel="noopener"><img [src]="a.url" [alt]="a.label" loading="lazy" /></a><h3>{{ a.label }}</h3><small>{{ a.group }}</small><span class="status" [class.active]="a.status === 'active'">{{ statusLabel[a.status] }}</span></article>
       }</div>
@@ -28,6 +28,7 @@ export class ArtCatalogComponent {
   readonly groups = ['all', ...new Set(GENERATED_ART.map(a => a.group))];
   readonly group = signal('all');
   readonly visible = computed(() => this.all.filter(a => this.group() === 'all' || a.group === this.group()));
+  readonly families = [{ id: 'sword', label: 'ดาบ', base: 'heavy_blade' }, { id: 'armor', label: 'เกราะ', base: 'guard_armor' }, { id: 'necklace', label: 'สร้อย', base: 'trinket' }, { id: 'ring', label: 'แหวน', base: 'trinket' }] as const;
   readonly tiers = ['COMMON', 'UNCOMMON', 'RARE', 'ELITE', 'EPIC'] as const;
   readonly statusLabel: Record<string, string> = { active: 'เชื่อมใช้งานแล้ว', example_paused: 'ตัวอย่างไป๋หลง · พักรอเปลี่ยน Portrait', concept_only: 'แบบร่าง · ยังไม่ใช่ไอเทมใช้งาน', superseded: 'แบบเก่า · ถูกแทนด้วยดาบแล้ว' };
 }
