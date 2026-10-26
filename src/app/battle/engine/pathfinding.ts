@@ -50,3 +50,23 @@ export function greedyStep(grid: Grid, start: Cell, target: Cell, blocked?: (c: 
   }
   return best;
 }
+
+/** ระยะคอลัมน์ที่เริ่มเบี่ยงเลนเข้าหาเป้า — ไกลกว่านี้เดินตรงในเลนของตัวเอง */
+export const LANE_ADVANCE_GAP = 2;
+
+/**
+ * เดินหน้าตรงในเลนเดิม (ผู้ใช้ 2026-10-26: เริ่มต่อสู้แล้วทุกตัวเบียดไปรวมเลนเดียว)
+ * ถ้าเป้ายังห่างเกิน `gap` คอลัมน์ ก้าวไปช่องถัดไปในแถวเดียวกันทางเป้า ถ้าช่องนั้นเข้าได้ ไม่งั้น null (ให้ BFS / greedy ทำต่อ)
+ */
+export function laneStep(
+  grid: Grid,
+  start: Cell,
+  target: Cell,
+  blocked?: (c: Cell) => boolean,
+  gap = LANE_ADVANCE_GAP,
+): Cell | null {
+  const dc = target.c - start.c;
+  if (Math.abs(dc) <= gap) return null;
+  const n = { r: start.r, c: start.c + Math.sign(dc) };
+  return grid.canEnter(n) && !blocked?.(n) ? n : null;
+}
