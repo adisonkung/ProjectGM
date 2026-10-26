@@ -975,5 +975,33 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "group": "environment",
     "url": "/ui/forge/celestial-forge.webp",
     "status": "active"
+  },
+  {
+    "id": "status-atlas/afflictions",
+    "label": "afflictions · status atlas",
+    "group": "status-atlas",
+    "url": "/ui/status/afflictions.webp",
+    "status": "active"
+  },
+  {
+    "id": "status-atlas/control",
+    "label": "control · status atlas",
+    "group": "status-atlas",
+    "url": "/ui/status/control.webp",
+    "status": "active"
+  },
+  {
+    "id": "status-atlas/wards",
+    "label": "wards · status atlas",
+    "group": "status-atlas",
+    "url": "/ui/status/wards.webp",
+    "status": "active"
+  },
+  {
+    "id": "status-atlas/fury",
+    "label": "fury · status atlas",
+    "group": "status-atlas",
+    "url": "/ui/status/fury.webp",
+    "status": "active"
   }
 ];

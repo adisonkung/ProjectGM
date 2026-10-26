@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-26",
+  "screens": [
+    "status-catalog-desktop",
+    "status-catalog-mobile",
+    "engine-status-desktop",
+    "engine-status-landscape",
+    "engine-chill-desktop"
+  ],
+  "errors": [],
+  "missing": [],
+  "catalogIcons": 31,
+  "uniqueCells": 31,
+  "requestedPixiRenderer": "pixi",
+  "checks": [
+    "31 actual rendered status cells,72/28/22px previews",
+    "Four atlases decode; no missing status requests or page errors",
+    "Actual engine preview seeds poison/chill and uses generated badges with Thai names and live remaining time",
+    "Desktop/mobile catalog and desktop/landscape engine screenshots; no horizontal overflow",
+    "Gameplay effect IDs, modifiers and durations unchanged"
+  ]
+}
