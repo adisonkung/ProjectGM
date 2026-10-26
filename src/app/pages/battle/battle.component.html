@@ -96,7 +96,7 @@
             <span class="fc-hp" [attr.title]="'HP ' + f.hpPct.toFixed(0) + '%'"><i [style.width.%]="f.hpPct"></i></span>
             <small>{{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · {{ focusCount().on }}/{{ focusCount().total }} }@if (f.isFocus && debug() && !focusSafe()) { · OUT OF SAFE RANGE }</small>
             @if (f.isFocus) {
-              <button type="button" (click)="cancelFocus()" aria-label="ยกเลิกโฟกัส" title="ยกเลิกโฟกัส" class="citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />✕</button>
+              <button type="button" (click)="cancelFocus()" aria-label="ยกเลิกโฟกัส" title="ยกเลิกโฟกัส" class="citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" /><app-icon name="close" [size]="20" /></button>
             } @else {
               <button type="button" class="go citadel-surface citadel-control" (click)="setFocus(f.id)"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />🎯 FOCUS</button>
             }

@@ -1,0 +1,657 @@
+{
+  "date": "2026-10-26",
+  "catalogCount": 119,
+  "statuses": {
+    "active": 97,
+    "example_paused": 6,
+    "concept_only": 4,
+    "superseded": 12
+  },
+  "runtimeFileCountIncludingLargeAndSuperseded": 139,
+  "missingFiles": [],
+  "materialCount": 15,
+  "activeEntries": [
+    {
+      "id": "ui/adventure",
+      "url": "/ui/generated/ui/adventure.webp",
+      "group": "ui"
+    },
+    {
+      "id": "ui/equipment",
+      "url": "/ui/generated/ui/equipment.webp",
+      "group": "ui"
+    },
+    {
+      "id": "ui/heroes",
+      "url": "/ui/generated/ui/heroes.webp",
+      "group": "ui"
+    },
+    {
+      "id": "ui/home",
+      "url": "/ui/generated/ui/home.webp",
+      "group": "ui"
+    },
+    {
+      "id": "ui/summon",
+      "url": "/ui/generated/ui/summon.webp",
+      "group": "ui"
+    },
+    {
+      "id": "ui/team",
+      "url": "/ui/generated/ui/team.webp",
+      "group": "ui"
+    },
+    {
+      "id": "utility/back",
+      "url": "/ui/generated/utility/back.webp",
+      "group": "utility"
+    },
+    {
+      "id": "utility/edit",
+      "url": "/ui/generated/utility/edit.webp",
+      "group": "utility"
+    },
+    {
+      "id": "utility/lock",
+      "url": "/ui/generated/utility/lock.webp",
+      "group": "utility"
+    },
+    {
+      "id": "utility/next",
+      "url": "/ui/generated/utility/next.webp",
+      "group": "utility"
+    },
+    {
+      "id": "utility/save",
+      "url": "/ui/generated/utility/save.webp",
+      "group": "utility"
+    },
+    {
+      "id": "utility/settings",
+      "url": "/ui/generated/utility/settings.webp",
+      "group": "utility"
+    },
+    {
+      "id": "class/archer",
+      "url": "/ui/generated/class/archer.webp",
+      "group": "class"
+    },
+    {
+      "id": "class/assassin",
+      "url": "/ui/generated/class/assassin.webp",
+      "group": "class"
+    },
+    {
+      "id": "class/fighter",
+      "url": "/ui/generated/class/fighter.webp",
+      "group": "class"
+    },
+    {
+      "id": "class/healer",
+      "url": "/ui/generated/class/healer.webp",
+      "group": "class"
+    },
+    {
+      "id": "class/mage",
+      "url": "/ui/generated/class/mage.webp",
+      "group": "class"
+    },
+    {
+      "id": "class/tank",
+      "url": "/ui/generated/class/tank.webp",
+      "group": "class"
+    },
+    {
+      "id": "feature/ascension",
+      "url": "/ui/generated/feature/ascension.webp",
+      "group": "feature"
+    },
+    {
+      "id": "feature/bag",
+      "url": "/ui/generated/feature/bag.webp",
+      "group": "feature"
+    },
+    {
+      "id": "feature/forge",
+      "url": "/ui/generated/feature/forge.webp",
+      "group": "feature"
+    },
+    {
+      "id": "feature/skillhall",
+      "url": "/ui/generated/feature/skillhall.webp",
+      "group": "feature"
+    },
+    {
+      "id": "feature/tower",
+      "url": "/ui/generated/feature/tower.webp",
+      "group": "feature"
+    },
+    {
+      "id": "feature/training",
+      "url": "/ui/generated/feature/training.webp",
+      "group": "feature"
+    },
+    {
+      "id": "battle/close",
+      "url": "/ui/generated/battle/close.webp",
+      "group": "battle"
+    },
+    {
+      "id": "battle/exit",
+      "url": "/ui/generated/battle/exit.webp",
+      "group": "battle"
+    },
+    {
+      "id": "battle/fast",
+      "url": "/ui/generated/battle/fast.webp",
+      "group": "battle"
+    },
+    {
+      "id": "battle/pause",
+      "url": "/ui/generated/battle/pause.webp",
+      "group": "battle"
+    },
+    {
+      "id": "battle/play",
+      "url": "/ui/generated/battle/play.webp",
+      "group": "battle"
+    },
+    {
+      "id": "battle/restart",
+      "url": "/ui/generated/battle/restart.webp",
+      "group": "battle"
+    },
+    {
+      "id": "craft/craft",
+      "url": "/ui/generated/craft/craft.webp",
+      "group": "craft"
+    },
+    {
+      "id": "craft/enhance",
+      "url": "/ui/generated/craft/enhance.webp",
+      "group": "craft"
+    },
+    {
+      "id": "craft/filter",
+      "url": "/ui/generated/craft/filter.webp",
+      "group": "craft"
+    },
+    {
+      "id": "craft/hunt",
+      "url": "/ui/generated/craft/hunt.webp",
+      "group": "craft"
+    },
+    {
+      "id": "craft/salvage",
+      "url": "/ui/generated/craft/salvage.webp",
+      "group": "craft"
+    },
+    {
+      "id": "craft/search",
+      "url": "/ui/generated/craft/search.webp",
+      "group": "craft"
+    },
+    {
+      "id": "stats/atk",
+      "url": "/ui/generated/stats/atk.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/attack_speed",
+      "url": "/ui/generated/stats/attack_speed.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/bleed_reduction",
+      "url": "/ui/generated/stats/bleed_reduction.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/break_power",
+      "url": "/ui/generated/stats/break_power.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/cooldown_reduction",
+      "url": "/ui/generated/stats/cooldown_reduction.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/crit_chance",
+      "url": "/ui/generated/stats/crit_chance.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/crit_damage",
+      "url": "/ui/generated/stats/crit_damage.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/damage_reduction",
+      "url": "/ui/generated/stats/damage_reduction.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/def",
+      "url": "/ui/generated/stats/def.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/dive_reduction",
+      "url": "/ui/generated/stats/dive_reduction.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/execution",
+      "url": "/ui/generated/stats/execution.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/healing_power",
+      "url": "/ui/generated/stats/healing_power.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/healing_received",
+      "url": "/ui/generated/stats/healing_received.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/hp",
+      "url": "/ui/generated/stats/hp.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/max_mana",
+      "url": "/ui/generated/stats/max_mana.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/mist_hunter",
+      "url": "/ui/generated/stats/mist_hunter.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/move_speed",
+      "url": "/ui/generated/stats/move_speed.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/poison_reduction",
+      "url": "/ui/generated/stats/poison_reduction.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/range",
+      "url": "/ui/generated/stats/range.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/root_reduction",
+      "url": "/ui/generated/stats/root_reduction.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/shield_power",
+      "url": "/ui/generated/stats/shield_power.webp",
+      "group": "stats"
+    },
+    {
+      "id": "stats/skill_damage",
+      "url": "/ui/generated/stats/skill_damage.webp",
+      "group": "stats"
+    },
+    {
+      "id": "items/materials/equip_frag_basic",
+      "url": "/ui/generated/items/materials/equip_frag_basic.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/exp_potion_s",
+      "url": "/ui/generated/items/materials/exp_potion_s.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/universal_memory",
+      "url": "/ui/generated/items/materials/universal_memory.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/exp_potion_l",
+      "url": "/ui/generated/items/materials/exp_potion_l.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/exp_potion_m",
+      "url": "/ui/generated/items/materials/exp_potion_m.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/skill_tome_1",
+      "url": "/ui/generated/items/materials/skill_tome_1.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/skill_tome_2",
+      "url": "/ui/generated/items/materials/skill_tome_2.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/skill_tome_3",
+      "url": "/ui/generated/items/materials/skill_tome_3.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/enhancement_ore",
+      "url": "/ui/generated/items/materials/enhancement_ore.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/equip_frag_elite",
+      "url": "/ui/generated/items/materials/equip_frag_elite.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/equip_frag_epic",
+      "url": "/ui/generated/items/materials/equip_frag_epic.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/equip_frag_rare",
+      "url": "/ui/generated/items/materials/equip_frag_rare.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/skill_tome_frag_1",
+      "url": "/ui/generated/items/materials/skill_tome_frag_1.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/skill_tome_frag_2",
+      "url": "/ui/generated/items/materials/skill_tome_frag_2.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/materials/skill_tome_frag_3",
+      "url": "/ui/generated/items/materials/skill_tome_frag_3.webp",
+      "group": "materials"
+    },
+    {
+      "id": "items/rewards/gem_reward",
+      "url": "/ui/generated/items/rewards/gem_reward.webp",
+      "group": "rewards"
+    },
+    {
+      "id": "items/rewards/gold_reward",
+      "url": "/ui/generated/items/rewards/gold_reward.webp",
+      "group": "rewards"
+    },
+    {
+      "id": "items/rewards/hero_exp_reward",
+      "url": "/ui/generated/items/rewards/hero_exp_reward.webp",
+      "group": "rewards"
+    },
+    {
+      "id": "equipment/swords/foreground/common",
+      "url": "/ui/generated/equipment/swords/foreground/common.webp",
+      "group": "sword-foreground"
+    },
+    {
+      "id": "equipment/swords/foreground/elite",
+      "url": "/ui/generated/equipment/swords/foreground/elite.webp",
+      "group": "sword-foreground"
+    },
+    {
+      "id": "equipment/swords/foreground/epic",
+      "url": "/ui/generated/equipment/swords/foreground/epic.webp",
+      "group": "sword-foreground"
+    },
+    {
+      "id": "equipment/swords/foreground/rare",
+      "url": "/ui/generated/equipment/swords/foreground/rare.webp",
+      "group": "sword-foreground"
+    },
+    {
+      "id": "equipment/swords/foreground/uncommon",
+      "url": "/ui/generated/equipment/swords/foreground/uncommon.webp",
+      "group": "sword-foreground"
+    },
+    {
+      "id": "equipment-tiered/armor/common",
+      "url": "/ui/equipment/tiered/armor/common.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/armor/uncommon",
+      "url": "/ui/equipment/tiered/armor/uncommon.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/armor/rare",
+      "url": "/ui/equipment/tiered/armor/rare.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/armor/elite",
+      "url": "/ui/equipment/tiered/armor/elite.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/armor/epic",
+      "url": "/ui/equipment/tiered/armor/epic.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/necklace/common",
+      "url": "/ui/equipment/tiered/necklace/common.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/necklace/uncommon",
+      "url": "/ui/equipment/tiered/necklace/uncommon.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/necklace/rare",
+      "url": "/ui/equipment/tiered/necklace/rare.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/necklace/elite",
+      "url": "/ui/equipment/tiered/necklace/elite.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/necklace/epic",
+      "url": "/ui/equipment/tiered/necklace/epic.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/ring/common",
+      "url": "/ui/equipment/tiered/ring/common.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/ring/uncommon",
+      "url": "/ui/equipment/tiered/ring/uncommon.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/ring/rare",
+      "url": "/ui/equipment/tiered/ring/rare.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/ring/elite",
+      "url": "/ui/equipment/tiered/ring/elite.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "equipment-tiered/ring/epic",
+      "url": "/ui/equipment/tiered/ring/epic.webp",
+      "group": "equipment-tiered"
+    },
+    {
+      "id": "environment/celestial-forge",
+      "url": "/ui/forge/celestial-forge.webp",
+      "group": "environment"
+    }
+  ],
+  "retainedNonRuntimeEntries": [
+    {
+      "id": "items/hero-examples/bailong/bt_fragment_1__bailong",
+      "label": "bt_fragment_1__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_fragment_1__bailong.webp",
+      "status": "example_paused"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_fragment_2__bailong",
+      "label": "bt_fragment_2__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_fragment_2__bailong.webp",
+      "status": "example_paused"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_fragment_3__bailong",
+      "label": "bt_fragment_3__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_fragment_3__bailong.webp",
+      "status": "example_paused"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_stone_1__bailong",
+      "label": "bt_stone_1__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_stone_1__bailong.webp",
+      "status": "example_paused"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_stone_2__bailong",
+      "label": "bt_stone_2__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_stone_2__bailong.webp",
+      "status": "example_paused"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_stone_3__bailong",
+      "label": "bt_stone_3__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_stone_3__bailong.webp",
+      "status": "example_paused"
+    },
+    {
+      "id": "items/concepts/universal-breakthrough-concept",
+      "label": "universal-breakthrough-concept",
+      "group": "concepts",
+      "url": "/ui/generated/items/concepts/universal-breakthrough-concept.webp",
+      "status": "concept_only"
+    },
+    {
+      "id": "equipment/bases/focus_staff",
+      "label": "focus_staff",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/focus_staff.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/bases/guard_armor",
+      "label": "guard_armor",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/guard_armor.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/bases/heavy_blade",
+      "label": "heavy_blade",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/heavy_blade.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/bases/longbow",
+      "label": "longbow",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/longbow.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/bases/trinket",
+      "label": "trinket",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/trinket.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/bases/twin_daggers",
+      "label": "twin_daggers",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/twin_daggers.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/swords/aura/common",
+      "label": "common",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/common.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/swords/aura/elite",
+      "label": "elite",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/elite.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/swords/aura/epic",
+      "label": "epic",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/epic.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/swords/aura/rare",
+      "label": "rare",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/rare.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/swords/aura/uncommon",
+      "label": "uncommon",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/uncommon.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "equipment/palace-forge",
+      "label": "palace-forge",
+      "group": "environment",
+      "url": "/ui/generated/equipment/palace-forge.webp",
+      "status": "superseded"
+    },
+    {
+      "id": "concepts/equipment-tier-board",
+      "label": "equipment-tier-board",
+      "group": "concept-board",
+      "url": "/ui/generated/concepts/equipment-tier-board.webp",
+      "status": "concept_only"
+    },
+    {
+      "id": "concepts/forge-inventory-equipped",
+      "label": "forge-inventory-equipped",
+      "group": "concept-board",
+      "url": "/ui/generated/concepts/forge-inventory-equipped.webp",
+      "status": "concept_only"
+    },
+    {
+      "id": "concepts/forge-screen-draft",
+      "label": "forge-screen-draft",
+      "group": "concept-board",
+      "url": "/ui/generated/concepts/forge-screen-draft.webp",
+      "status": "concept_only"
+    }
+  ],
+  "scope": "Current generated UI/material/equipment batches. Existing portraits, sprites, logo, summon cards and scene assets are retained; rejected variants are not imported. Native proof for changed views is in validation.json; earlier unchanged views are in ../review/."
+}

@@ -1,12 +1,13 @@
+import { GENERATED_ICONS } from '../../core/data/generated-art';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { ITEMS } from '../../core/data/economy';
 
-/** Temporary/mock art for real item ids. Batch art backlog: docs/art/material-icons/README.md. */
+/** Uses generated art by real item ID; keeps neutral fallback for unproduced hero stones. */
 @Component({
   selector: 'app-dungeon-reward-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'aria-hidden': 'true' },
-  template: `<svg viewBox="0 0 64 64" fill="none">
+  template: `@if (art(); as src) { <img [src]="src" alt="" decoding="async" /> } @else { <svg viewBox="0 0 64 64" fill="none">
     @switch (kind()) {
       @case ('EXP_POTION') {
         <path d="M26 8H40L38 23C54 33 52 51 39 57L22 53C11 42 18 31 27 22Z" fill="#142832" stroke="#edd79e" stroke-width="1.8"/>
@@ -32,11 +33,12 @@ import { ITEMS } from '../../core/data/economy';
         <path d="M31 6 27 29 49 20Z" fill="#fff7d0" opacity=".4"/><path d="M13 39 27 29 27 58Z" fill="#162d5c" opacity=".45"/>
       }
     }
-  </svg>`,
-  styles: [`:host{display:block;width:42px;height:42px;filter:drop-shadow(0 0 5px #f2bd4b33);}svg{display:block;width:100%;height:100%;}`],
+  </svg> }`,
+  styles: [`:host{display:block;width:42px;height:42px;filter:drop-shadow(0 0 5px #f2bd4b33);}svg,img{display:block;width:100%;height:100%;object-fit:contain;}`],
 })
 export class DungeonRewardIconComponent {
   readonly itemId = input.required<string>();
+  readonly art = computed(() => GENERATED_ICONS[this.itemId()]);
   readonly kind = computed(() => ITEMS[this.itemId()]?.kind);
   readonly color = computed(() => {
     const id = this.itemId();

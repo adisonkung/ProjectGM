@@ -62,8 +62,14 @@ export class ForgeComponent {
     const r = this.recipe();
     return (this.save.state().inventory[r.fragmentId] ?? 0) >= r.fragments && this.gold() >= r.gold;
   });
+  readonly fragmentTier = computed(() => this.recipe().fragmentId === 'equip_frag_basic' ? 'Basic' : RARITY_NAME[this.craftRarity()]);
   readonly fragsHave = computed(() => this.save.state().inventory[this.recipe().fragmentId] ?? 0);
   readonly crafted = signal<EquipmentInstance | null>(null);
+  readonly accessoryPreview = signal<'necklace' | 'ring'>('necklace');
+  readonly displayBase = computed(() => this.crafted()?.definitionId ?? this.previewBase());
+  readonly displayRarity = computed(() => this.crafted()?.rarity ?? this.craftRarity());
+  pickRarity(r: Rarity) { this.craftRarity.set(r); this.crafted.set(null); }
+  pickAdornment(v: 'necklace' | 'ring') { this.accessoryPreview.set(v); this.crafted.set(null); }
   pickSlot(s: EquipmentSlot) { this.slotFilter.set(s); this.crafted.set(null); }
   craft() {
     const before = new Set(this.eq.bag().map(i => i.instanceId));

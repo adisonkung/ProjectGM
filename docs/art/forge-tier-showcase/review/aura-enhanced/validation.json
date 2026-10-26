@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-26",
+  "errors": [],
+  "missing": [],
+  "checks": [
+    "Actual screenshots at1672x941 and390x844",
+    "Rare20particles, Epic38; new sigil rotates in browser",
+    "Reduced-motion disables new radiance and particles",
+    "Compact inventory retains earlier static aura; no extra layers",
+    "No horizontal overflow or missing equipment/forge images"
+  ],
+  "screenshots": [
+    "forge-rare-desktop",
+    "forge-epic-desktop",
+    "inspect-epic-desktop",
+    "forge-epic-mobile"
+  ]
+}

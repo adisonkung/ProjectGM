@@ -1,7 +1,7 @@
 {
   "version": 1,
   "date": "2026-10-25",
-  "status": "prompts_only_no_art_generated",
+  "status": "prompt_archive_non_hero_15_generated_integrated_hero_examples_paused",
   "game": "Eldervane / เอลเดอร์เวย์น",
   "scope": "21 existing ITEMS/backlog ids only; visual proposals are not balance or item-definition changes",
   "master": {
@@ -553,5 +553,6 @@
     },
     "conversionMode": null,
     "universalTierPolicy": null
-  }
+  },
+  "runtimeStatusDocument": "docs/art/generated/README.md"
 }

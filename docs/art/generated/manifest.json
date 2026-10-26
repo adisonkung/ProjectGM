@@ -763,7 +763,7 @@
       "label": "guard_armor",
       "group": "equipment-base",
       "url": "/ui/generated/equipment/bases/guard_armor.webp",
-      "status": "active",
+      "status": "superseded",
       "source": "/workspace/eldervane-equipment-type-icons/guard_armor.webp",
       "sha256": "88654e7212dd87ce06f475664db44559337eb019f23616dd047810b5365c941f"
     },
@@ -790,7 +790,7 @@
       "label": "trinket",
       "group": "equipment-base",
       "url": "/ui/generated/equipment/bases/trinket.webp",
-      "status": "active",
+      "status": "superseded",
       "source": "/workspace/eldervane-equipment-type-icons/trinket.webp",
       "sha256": "72ad58667ab1e80b511ed6085c8b1663971dff11c9a9759d9fc925f9cb11ef51"
     },
@@ -853,7 +853,7 @@
       "label": "common",
       "group": "sword-aura",
       "url": "/ui/generated/equipment/swords/aura/common.webp",
-      "status": "active",
+      "status": "superseded",
       "source": "/workspace/eldervane-sword-tier-assets/aura/common.webp",
       "sha256": "d3e993a9fe7e7871b9525bb3179c971256dc6a4838d58aae70b3a40c879733e3"
     },
@@ -862,7 +862,7 @@
       "label": "elite",
       "group": "sword-aura",
       "url": "/ui/generated/equipment/swords/aura/elite.webp",
-      "status": "active",
+      "status": "superseded",
       "source": "/workspace/eldervane-sword-tier-assets/aura/elite.webp",
       "sha256": "f08bf7f05d2ed602bb828d5710b12515ae9666cba2926960ba48515c62b37dcd"
     },
@@ -871,7 +871,7 @@
       "label": "epic",
       "group": "sword-aura",
       "url": "/ui/generated/equipment/swords/aura/epic.webp",
-      "status": "active",
+      "status": "superseded",
       "source": "/workspace/eldervane-sword-tier-assets/aura/epic.webp",
       "sha256": "aa511d86182d789c0b666646b17dc3f2ae4e5bbcf885c507f30b2f6a68f41189"
     },
@@ -880,7 +880,7 @@
       "label": "rare",
       "group": "sword-aura",
       "url": "/ui/generated/equipment/swords/aura/rare.webp",
-      "status": "active",
+      "status": "superseded",
       "source": "/workspace/eldervane-sword-tier-assets/aura/rare.webp",
       "sha256": "5cd3cf82f82b9ca1f5e99f01722b693fa28511e2e3e9688ce479be32c34ddcf2"
     },
@@ -889,7 +889,7 @@
       "label": "uncommon",
       "group": "sword-aura",
       "url": "/ui/generated/equipment/swords/aura/uncommon.webp",
-      "status": "active",
+      "status": "superseded",
       "source": "/workspace/eldervane-sword-tier-assets/aura/uncommon.webp",
       "sha256": "e96cbb15c61a0a460181cefd3daef766896c52974cdf962817b0d9fd72e2f64d"
     },
@@ -898,7 +898,7 @@
       "label": "palace-forge",
       "group": "environment",
       "url": "/ui/generated/equipment/palace-forge.webp",
-      "status": "active",
+      "status": "superseded",
       "source": "/workspace/eldervane-sword-tier-assets/environment/palace-forge.webp",
       "sha256": "c6dbaf7a1a994d833c109030786836602450c347fc8f6ee83e3d2c971cf3c18c"
     },
@@ -929,5 +929,7 @@
       "source": "/workspace/generated_images/exec-ef56d703-a202-4ef0-aeca-e87243df3558.png",
       "sha256": "e93f091cc34e253dc73774636551886a3c88bf0b30f8e0ffcba4da19d1679f5d"
     }
-  ]
+  ],
+  "statusUpdated": "2026-10-26",
+  "currentStatusDocument": "docs/art/generated/README.md"
 }

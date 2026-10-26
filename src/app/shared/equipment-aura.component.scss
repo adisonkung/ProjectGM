@@ -1,0 +1,36 @@
+:host { position:absolute; inset:0; display:block; pointer-events:none; color:var(--aura-color); overflow:visible; isolation:isolate; }
+.bloom { position:absolute; inset:12%; border-radius:50%; background:radial-gradient(ellipse,color-mix(in srgb,var(--aura-color) 24%,transparent),transparent 69%); opacity:var(--aura-strength); }
+.orbit-plane { position:absolute; inset:1%; transform-style:preserve-3d; }
+.plane-one { transform:rotate(-24deg) scaleY(.37); }
+.plane-two { transform:rotate(28deg) scaleY(.56); inset:7%; }
+svg { width:100%; height:100%; overflow:visible; stroke:currentColor; stroke-width:.7; opacity:calc(var(--aura-strength) + .1); }
+.orbit { transform-origin:100px 100px; }.clockwise{animation:orbit-turn 9s linear infinite;}.counter{animation:orbit-turn 15s linear infinite reverse;}
+.inner { opacity:.4; stroke-width:.45; }.comet { stroke:#fff4c3; stroke-width:2.4; stroke-linecap:round; stroke-dasharray:36 170; filter:drop-shadow(0 0 3px currentColor); }.head{fill:#fff9d6;stroke:#fff;filter:drop-shadow(0 0 4px currentColor);}
+.ward,.ribbons,.rune-wheel { position:absolute; inset:7%; width:86%; height:86%; }.ward{opacity:calc(var(--aura-strength) * .7);animation:ward-breathe 4.7s ease-in-out infinite;}.ward-runes{stroke-width:1.8;stroke-linecap:round;}.ribbons{opacity:calc(var(--aura-strength) + .15);stroke-width:1.2;}.ribbons .comet{stroke-dasharray:32 280;animation:ribbon-flow 6s linear infinite;}.rune-wheel{inset:1%;width:98%;height:98%;opacity:calc(var(--aura-strength) * .55);}
+.crown-rays{position:absolute;inset:-2%;opacity:.2;background:repeating-conic-gradient(from 0deg,transparent 0deg 17deg,#ffe3a433 18deg,#ffe3a400 20deg 36deg);mask-image:radial-gradient(ellipse,transparent 35%,#000 46%,transparent 68%);animation:orbit-turn 48s linear infinite;}
+.sparks{position:absolute;inset:0;}.sparks i{position:absolute;width:3px;height:3px;background:#fff5ce;border-radius:50%;box-shadow:0 0 5px 1px var(--aura-color),0 0 12px var(--aura-color);animation:spark-rise var(--duration) ease-in-out var(--delay) infinite;opacity:0;}.sparks .star{width:10px;height:10px;border-radius:0;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);}
+:host([data-family='armor']){.plane-one{transform:rotate(0deg) scaleY(.7);inset:3%;}.plane-two{transform:rotate(70deg) scaleY(.45);inset:12%;}}
+:host([data-family='necklace']){.plane-one{transform:rotate(-24deg) scaleY(.7);inset:12%;}.plane-two{transform:rotate(46deg) scaleY(.42);inset:9%;}}
+:host([data-family='ring']){.plane-one{transform:rotate(28deg) scaleY(.75);}.plane-two{transform:rotate(-35deg) scaleY(.75);inset:14%;}}
+:host(:not(.moving)){*{animation-play-state:paused!important;}.sparks{display:none;}}
+@keyframes orbit-turn{to{transform:rotate(360deg);}}
+@keyframes ribbon-flow{to{stroke-dashoffset:-312;}}
+@keyframes ward-breathe{50%{opacity:calc(var(--aura-strength) * .95);transform:scale(1.025);}}
+@keyframes spark-rise{0%,100%{opacity:0;transform:translate(0,20px) scale(.35);}35%{opacity:.95;}70%{opacity:.65;}95%{transform:translate(var(--drift),-28px) scale(.8);}}
+@media(prefers-reduced-motion:reduce){:host *{animation:none!important;}.sparks{display:none;}}
+
+svg{opacity:calc(var(--aura-strength) + .3);stroke-width:1.05;filter:drop-shadow(0 0 2px currentColor);}
+.plane-two svg{color:#ffe1a3;opacity:calc(var(--aura-strength) + .1);}
+.energy-helix{position:absolute;inset:0;stroke-width:1.3;opacity:calc(var(--aura-strength) + .25);}.energy-helix .comet{stroke-width:2.7;stroke-dasharray:42 270;animation:ribbon-flow 5s linear infinite;}
+
+// Extra showcase layers stay out of the compact inventory artwork.
+.radiance{position:absolute;inset:5%;border-radius:50%;background:radial-gradient(ellipse at 50% 68%,#fff4cc44,transparent 34%),radial-gradient(ellipse,color-mix(in srgb,var(--aura-color) 30%,transparent),transparent 66%);opacity:var(--aura-strength);animation:radiance-breathe 4.8s ease-in-out infinite;}
+.summoning-plane{position:absolute;inset:0;transform:translateY(31%) scaleY(.25);color:var(--aura-color);filter:drop-shadow(0 0 5px currentColor);}
+.summoning-plane svg{stroke-width:1.3;opacity:calc(var(--aura-strength) + .3);}
+.sigil-ticks{stroke-width:4;stroke-dasharray:1 8;}.sigil-diamonds{fill:color-mix(in srgb,var(--aura-color) 22%,transparent);stroke:#fff0bd;}
+.ascendant-halo{position:absolute;inset:0;stroke-width:.8;opacity:calc(var(--aura-strength) * .8);filter:drop-shadow(0 0 4px currentColor);}.halo-arc{stroke-width:1.6;stroke-dasharray:44 9 2 9;}
+:host(.moving){.comet{filter:drop-shadow(0 0 4px currentColor) drop-shadow(0 0 7px var(--aura-color));}.sparks i{box-shadow:0 0 5px 1px #fff2c6,0 0 12px 2px var(--aura-color),0 0 20px var(--aura-color);}.sparks .star{width:12px;height:12px;}.plane-one svg{stroke-width:1.4;}.bloom{opacity:calc(var(--aura-strength) + .12);}}
+:host([data-tier='4']),:host([data-tier='5']){.summoning-plane{filter:drop-shadow(0 0 4px #fff0c0) drop-shadow(0 0 9px var(--aura-color));}}
+:host([data-tier='5']) .radiance{background:radial-gradient(ellipse at 50% 68%,#fff4cc66,transparent 38%),conic-gradient(from 0deg,transparent,#ffd87718,transparent,#fff2ca22,transparent);mask-image:radial-gradient(ellipse,#000 30%,transparent 69%);}
+@keyframes radiance-breathe{50%{transform:scale(1.055);opacity:calc(var(--aura-strength) * .7);}}
+@media(prefers-reduced-motion:reduce){.radiance{animation:none;}}

@@ -146,3 +146,5 @@
   .gear-slot small { font-size: 12px; }
   .empty-art, .slot-art, .relic-art { width: min(96px,100%); }
 }
+
+.inspect-art { width: min(240px,90%); margin: 6px auto 14px; aspect-ratio:1; background:radial-gradient(ellipse,#34465555,transparent 70%); }

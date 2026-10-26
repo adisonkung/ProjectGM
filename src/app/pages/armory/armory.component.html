@@ -25,7 +25,7 @@
             <div class="gear-slot citadel-surface" [class.empty]="!it"><app-citadel-frame shape="panel" [cut]="22" [crimson]="false" [lacquer]="false" />
               <h3><app-icon [name]="slotIcon[slot]" [size]="18" /> {{ slotLabel[slot] }}</h3>
               @if (it) {
-                <button type="button" class="slot-art citadel-surface citadel-control" (click)="chooseSlot(slot, it)" [attr.aria-label]="'ดู ' + name(it)"><app-citadel-frame shape="panel" [cut]="8" [crimson]="false" [lacquer]="false" /><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /></button>
+                <button type="button" class="slot-art citadel-surface citadel-control" (click)="chooseSlot(slot, it)" [attr.aria-label]="'ดู ' + name(it)"><app-citadel-frame shape="panel" [cut]="8" [crimson]="false" [lacquer]="false" /><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /></button>
                 <b class="nm">{{ name(it) }}</b><small>{{ fmt(lines(it)[0]) }}</small>
                 <div class="slot-actions"><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="unequip(slot)"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />ถอด</button><a class="gm-btn small ghost citadel-surface citadel-control" routerLink="/forge" [queryParams]="{ tab: 'enhance' }"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />ตีบวก</a></div>
               } @else {
@@ -49,13 +49,13 @@
       <div class="inventory">
         <ul class="bag">
           @for (it of bag(); track it.instanceId) {
-            <li><button type="button" class="item-tile citadel-surface citadel-control" (click)="selectedId.set(it.instanceId)" [attr.aria-pressed]="selected()?.instanceId === it.instanceId" [attr.aria-label]="name(it)"><app-citadel-frame shape="panel" [cut]="8" [crimson]="selected()?.instanceId === it.instanceId" [lacquer]="selected()?.instanceId === it.instanceId" /><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /><span>{{ rarityName[it.rarity] }}</span>@if (it.locked) { <app-icon class="locked" name="lock" [size]="13" /> }</button></li>
+            <li><button type="button" class="item-tile citadel-surface citadel-control" (click)="selectedId.set(it.instanceId)" [attr.aria-pressed]="selected()?.instanceId === it.instanceId" [attr.aria-label]="name(it)"><app-citadel-frame shape="panel" [cut]="8" [crimson]="selected()?.instanceId === it.instanceId" [lacquer]="selected()?.instanceId === it.instanceId" /><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /><span>{{ rarityName[it.rarity] }}</span>@if (it.locked) { <app-icon class="locked" name="lock" [size]="13" /> }</button></li>
           } @empty { <li class="bag-empty reference-empty" role="status"><app-state-emblem icon="armor" /><h2>{{ eq.bag().length === 0 ? 'ยังไม่มีอุปกรณ์ในกระเป๋า' : 'ไม่พบอุปกรณ์ประเภทนี้' }}</h2><p>{{ eq.bag().length === 0 ? 'ล่าอุปกรณ์ในด่านต่าง ๆ หรือใช้วัสดุที่มีเพื่อสร้างอุปกรณ์' : 'ลองเลือกประเภทอื่น หรือดูอุปกรณ์ทั้งหมดในกระเป๋า' }}</p><div class="empty-actions">@if (eq.bag().length > 0) { <button type="button" class="gm-btn" (click)="chooseFilter('ALL')"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" />ดูอุปกรณ์ทั้งหมด</button> } @else { <a class="gm-btn" routerLink="/dungeons/hunt"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-icon name="sword" [size]="25" />ล่าอุปกรณ์ <span aria-hidden="true">›</span></a> }<a class="gm-btn" routerLink="/forge"><app-citadel-frame shape="hex" [cut]="18" /><app-icon name="flame" [size]="25" />โรงตีเหล็ก <span aria-hidden="true">›</span></a></div></li> }
         </ul>
         @if (selected(); as it) {
           <aside class="item-detail citadel-surface" aria-label="รายละเอียดอุปกรณ์"><app-citadel-frame shape="panel" [cut]="22" [crimson]="false" [lacquer]="false" />
-            <div class="detail-title"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /><div><span class="eyebrow">{{ rarityName[it.rarity] }}</span><h3>{{ name(it) }}</h3><small>สูงสุด +{{ cap(it) }} @if (it.locked) { · ล็อกอยู่ }</small></div></div>
-            <div class="item-lines">@for (l of lines(it); track $index) { <p><app-icon [name]="'equip-stat-' + l.stat" [size]="15" /> {{ fmt(l) }}</p> }</div>
+            <div class="detail-title"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /><div><span class="eyebrow">{{ rarityName[it.rarity] }}</span><h3>{{ name(it) }}</h3><small>สูงสุด +{{ cap(it) }} @if (it.locked) { · ล็อกอยู่ }</small></div></div>
+            <div class="inspect-art"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" context="inspect" /></div><div class="item-lines">@for (l of lines(it); track $index) { <p><app-icon [name]="'equip-stat-' + l.stat" [size]="15" /> {{ fmt(l) }}</p> }</div>
             @if (it.affix) { <p class="affix">{{ affixName(it.affix) }}</p> }
             @if (!selectedWorn()) {
               @if (usable(it)) { <div class="comparison"><small>เปลี่ยนแปลงเมื่อสวมใส่</small>@for (d of compare(it); track $index) { <span [class.up]="d.includes('+')">{{ d }}</span> } @empty { <span>ค่าพลังเท่าเดิม</span> }</div> }
@@ -68,12 +68,13 @@
       </div>
     </section>
   </div>
+  <app-material-inventory />
 </section>
 
 <dialog #saleDialog class="equipment-confirm citadel-surface" aria-labelledby="sale-title" (close)="pendingSale.set(null)"><app-citadel-frame [cut]="24" />
   @if (pendingSale(); as it) {
     <span class="eyebrow">SELL EQUIPMENT</span><h2 id="sale-title">ยืนยันการขายอุปกรณ์</h2>
-    <div class="confirmation-art"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" /></div>
+    <div class="confirmation-art"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /></div>
     <h3>{{ name(it) }}</h3><p>ขายอุปกรณ์ชิ้นนี้ในราคา <strong>{{ price(it) }} ทอง</strong></p><p class="note">อุปกรณ์ชิ้นนี้จะถูกนำออกจากกระเป๋า</p>
     <div class="confirm-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="saleDialog.close()" autofocus><app-citadel-frame shape="hex" [cut]="14" />ยกเลิก</button><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="sell(it); saleDialog.close()" [disabled]="it.locked"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" />ยืนยันการขาย</button></div>
   }

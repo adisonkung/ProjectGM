@@ -61,3 +61,8 @@ main { margin: 0; outline: none; }
 @media (max-width: 390px) { .bar { padding-inline: 10px; gap: 5px; } .brand { width: min(136px,100%); } .purse { gap: 6px; } .treasury { gap: 6px; } .coin-row b { font-size: 11px; } .menu a { font-size: 10px; } }
 @media (orientation: landscape) and (max-height: 500px) { .app.fight { padding: 0; max-width: none; .bar { display: none; } } }
 @media (prefers-reduced-motion: reduce) { .menu a:hover .glyph { transform: none; } }
+
+.app.collection.reference-home.forge-view { max-width: none; padding: 86px 20px 14px; }
+@media(max-width:720px) { .app.collection.reference-home.forge-view { padding: 77px 12px 96px; } }
+
+@media(min-width:1201px) { .app.collection.reference-home.forge-view { padding: 92px 20px 48px; } }
