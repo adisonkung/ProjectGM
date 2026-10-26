@@ -1,0 +1,22 @@
+{
+  "errors": [],
+  "missing": [],
+  "screens": [
+    "affixes-desktop",
+    "affixes-mobile",
+    "bag-poison-desktop",
+    "bag-poison-detail",
+    "bag-poison-mobile",
+    "forge-affix-desktop",
+    "forge-affix-mobile",
+    "crafted-affix"
+  ],
+  "checks": [
+    "13actual affix IDs covered,13unique atlas cells at72/28/24px",
+    "All13owned fixture affixes render in bag with rarity-scaled descriptions",
+    "Epic Poison Ward25%, Execution30% HP condition retained",
+    "Viewing catalog/bag/enhance does not mutate save",
+    "Actual Epic craft creates affix item, consumes110fragments+4000gold and shows generated badge",
+    "Desktop1440x1000/mobile390x844 no overflow, missing UI requests or console errors"
+  ]
+}

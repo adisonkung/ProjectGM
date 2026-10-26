@@ -1,3 +1,6 @@
+import { AFFIXES } from '../../core/data/equipment';
+import { AFFIX_ART } from '../../core/data/affix-art';
+import { AffixIconComponent } from '../../shared/affix-icon.component';
 import { UI_SYMBOL_ART } from '../../core/data/ui-symbol-art';
 import { UiSymbolComponent } from '../../shared/ui-symbol.component';
 import { STATUS_ART } from '../../core/data/status-art';
@@ -10,7 +13,7 @@ import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 /** GM art review; examples and superseded concepts are explicitly separated from active runtime art. */
 @Component({
   selector: 'app-art-catalog',
-  imports: [UiSymbolComponent, StatusIconComponent, RouterLink, EquipmentArtComponent],
+  imports: [AffixIconComponent, UiSymbolComponent, StatusIconComponent, RouterLink, EquipmentArtComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section><header><a routerLink="/account">‹ กลับบัญชี</a><h1>คลังอาร์ต Eldervane</h1><p>ภาพทั้งหมด {{ all.length }} ไฟล์ · ใช้งานแล้ว / แบบร่าง / ตัวอย่างที่พักไว้</p></header>
@@ -20,6 +23,7 @@ import { EquipmentArtComponent } from '../../shared/equipment-art.component';
       </div>}
       @if (group() === 'all' || group() === 'status-icons') { <div class="status-collection"><h2>สถานะต่อสู้ · {{ statuses.length }} แบบ</h2><div class="status-grid">@for (s of statuses; track s.id) { <article><app-status-icon [statusId]="s.id" [size]="72" /><h3>{{ s.label }}</h3><small>{{ s.id }}</small><div class="combat-sizes"><app-status-icon [statusId]="s.id" [size]="22" /><app-status-icon [statusId]="s.id" [size]="28" /></div></article> }</div></div> }
       @if (group() === 'all' || group() === 'ui-symbols') { <div class="symbol-collection"><h2>สัญลักษณ์และเครื่องมือ · {{ symbols.length }} แบบ</h2><div class="status-grid">@for (s of symbols; track s.id) { <article><app-ui-symbol [name]="s.id" [size]="72" /><h3>{{ s.label }}</h3><small>{{ s.id }}</small><div class="combat-sizes"><app-ui-symbol [name]="s.id" [size]="18" /><app-ui-symbol [name]="s.id" [size]="28" /></div></article> }</div></div> }
+      @if (group() === 'all' || group() === 'affix-icons') { <div class="affix-collection"><h2>คุณสมบัติพิเศษอุปกรณ์ · {{ affixes.length }} แบบ</h2><div class="status-grid">@for (a of affixes; track a.id) { <article><app-affix-icon [affixId]="a.id" [size]="72" /><h3>{{ a.name }}</h3><small>{{ a.description }}</small><div class="combat-sizes"><app-affix-icon [affixId]="a.id" [size]="24" /><app-affix-icon [affixId]="a.id" [size]="28" /></div></article> }</div></div> }
       <h2>ไฟล์แยกรายภาพ</h2><div class="assets">@for (a of visible(); track a.id) {
         <article [class.board]="a.group === 'concept-board'"><a [href]="a.url" target="_blank" rel="noopener"><img [src]="a.url" [alt]="a.label" loading="lazy" /></a><h3>{{ a.label }}</h3><small>{{ a.group }}</small><span class="status" [class.active]="a.status === 'active'">{{ statusLabel[a.status] }}</span></article>
       }</div>
@@ -31,9 +35,10 @@ import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 })
 export class ArtCatalogComponent {
   readonly all = GENERATED_ART;
+  readonly affixes = Object.keys(AFFIX_ART).map(id => AFFIXES[id]);
   readonly symbols = Object.entries(UI_SYMBOL_ART).map(([id, art]) => ({ id, ...art }));
   readonly statuses = Object.entries(STATUS_ART).map(([id, art]) => ({ id, ...art }));
-  readonly groups = ['all', 'ui-symbols', 'status-icons', ...new Set(GENERATED_ART.map(a => a.group))];
+  readonly groups = ['all', 'affix-icons', 'ui-symbols', 'status-icons', ...new Set(GENERATED_ART.map(a => a.group))];
   readonly group = signal('all');
   readonly visible = computed(() => this.all.filter(a => this.group() === 'all' || a.group === this.group()));
   readonly families = [{ id: 'sword', label: 'ดาบ', base: 'heavy_blade' }, { id: 'armor', label: 'เกราะ', base: 'guard_armor' }, { id: 'necklace', label: 'สร้อย', base: 'trinket' }, { id: 'ring', label: 'แหวน', base: 'trinket' }] as const;

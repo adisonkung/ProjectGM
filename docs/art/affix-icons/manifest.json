@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-26",
+  "count": 13,
+  "prompt": "Create a premium Eldervane fantasy equipment AFFIX ICON SPRITE ATLAS. Perfect SQUARE canvas, EXACT THREE equal columns and THREE equal rows, invisible equal square cells. One complete icon centered in each listed cell, at most70% of cell width and height,15% transparent padding, clean transparent background. Empty unused cells MUST stay empty transparent. NO text, letters, numbers, grid, UI frames, cards, scenery or watermarks. Japanese/Korean luxury fantasy, bold distinct sculpted silhouettes, crisp dimensional hand-painted polished silver with restrained antique bronze trims, saturated semantic magic color. Clear at24pixels, no tiny text or clutter. Each affix has a different silhouette rather than recoloring the same shield. Complete symbols within cells, no cropped tips, no overlap. Exact positions in reading order: ",
+  "atlases": [
+    {
+      "id": "wards",
+      "path": "/ui/affixes/wards.webp",
+      "source": "/workspace/generated_images/exec-b2c60dee-6e57-496a-ae72-758b947f5a4a.png",
+      "sourceSha256": "054b9beb43c36cc18c6599cbeb56b7b2effa5faafb9ecb6f4c75d2663218ced5",
+      "sha256": "812a81458e4e64d80793fca8d93a327a502b2699326560e28ca8ebf8c9f767e7",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "icons": [
+        {
+          "id": "bleed_guard",
+          "label": "Bleed Guard",
+          "design": "silver shield intercepting a deep red blood drop, a small red drop outside and protected ivory center",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "poison_ward",
+          "label": "Poison Ward",
+          "design": "emerald shield bearing a tiny antidote vial with pale silver protective rim",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "id": "rootbreaker",
+          "label": "Rootbreaker",
+          "design": "silver armored boot snapping two vivid green thorn vines, visible broken vine ends",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "id": "guardian",
+          "label": "Guardian",
+          "design": "azure translucent layered barrier shield with ivory guardian wings and small blue gem",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "id": "medic",
+          "label": "Medic",
+          "design": "jade green heart receiving two inward silver arrows, warmth and incoming healing",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "id": "backline_guard",
+          "label": "Backline Guard",
+          "design": "teal cloak silhouette protected from a curved incoming dagger by a silver back-facing shield",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "id": "bulwark",
+          "label": "Bulwark",
+          "design": "massive steel fortress gate shield with bronze rivets and four stone blocks, sturdy charcoal and amber",
+          "col": 0,
+          "row": 2
+        }
+      ]
+    },
+    {
+      "id": "offense",
+      "path": "/ui/affixes/offense.webp",
+      "source": "/workspace/generated_images/exec-1c18666c-734f-413d-ad81-170de06e6393.png",
+      "sourceSha256": "b00ed8261611d678f047cc55261696e4d67781aa4b18a26d678dff773597bf22",
+      "sha256": "60ebbe0bc32cf86f7c56b80053e8c33b22f7610f6747a53aa9f53b9896cc0645",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "icons": [
+        {
+          "id": "mist_hunter",
+          "label": "Mist Hunter",
+          "design": "precise violet silver hawk eye peering through two separated indigo mist wisps",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "breaker",
+          "label": "Breaker",
+          "design": "silver warhammer striking an amber cracked rune plate with bold cyan impact burst",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "id": "execution",
+          "label": "Execution",
+          "design": "slim crimson silver blade descending over a small dim red heart, clean non-gory finishing-strike symbol",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "id": "focus",
+          "label": "Focus",
+          "design": "sleek cyan silver hourglass encircled by one blue clockwise arrow, cooldown efficiency",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "id": "keen_eye",
+          "label": "Keen Eye",
+          "design": "luminous amber hawk eye inside a fine silver crosshair with a narrow arrowhead",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "id": "mender",
+          "label": "Mender",
+          "design": "open ivory healing hand projecting a bright emerald healing cross outward, outgoing healing",
+          "col": 2,
+          "row": 1
+        }
+      ]
+    }
+  ]
+}

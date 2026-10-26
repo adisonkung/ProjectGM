@@ -1,3 +1,5 @@
+import { equipmentAffixLabel } from '../../core/data/affix-art';
+import { AffixIconComponent } from '../../shared/affix-icon.component';
 import { MaterialInventoryComponent } from '../../shared/material-inventory.component';
 import { StateEmblemComponent } from '../../shared/state-emblem.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
@@ -8,7 +10,7 @@ import { heroArt } from '../../core/data/hero-art';
 import { CLASS_NAME } from '../../core/data/classes';
 import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 import { IconComponent } from '../../shared/icon.component';
-import { AFFIXES, SELL_GOLD, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
+import { SELL_GOLD, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
 import { EquipmentInstance, EquipmentSlot, StatLine } from '../../core/models/equipment';
 import { canEquip, heroGearTotals, itemLines, itemName, slotOf, upgradeCap } from '../../core/rules/equipment';
 import { EquipmentService } from '../../core/services/equipment.service';
@@ -23,7 +25,7 @@ const ERR: Record<string, string> = {
 /** Equipment: hero gear (3 slots), bag with comparison, equip / unequip / lock / sell — crafting, enhancement and salvage live in the forge */
 @Component({
   selector: 'app-armory',
-  imports: [MaterialInventoryComponent, StateEmblemComponent, CitadelFrameComponent, HeroPortraitComponent, IconComponent, EquipmentArtComponent, RouterLink],
+  imports: [AffixIconComponent, MaterialInventoryComponent, StateEmblemComponent, CitadelFrameComponent, HeroPortraitComponent, IconComponent, EquipmentArtComponent, RouterLink],
   templateUrl: './armory.component.html',
   styleUrl: './armory.component.scss',
 })
@@ -70,7 +72,7 @@ export class ArmoryComponent {
   readonly name = itemName;
   readonly price = (i: EquipmentInstance) => SELL_GOLD[i.rarity];
   readonly cap = upgradeCap;
-  readonly affixName = (id?: string) => (id ? AFFIXES[id].name + ' — ' + AFFIXES[id].description : '');
+  readonly affixName = (item: EquipmentInstance) => equipmentAffixLabel(item.affix, item.rarity);
   readonly lines = (i: EquipmentInstance) => itemLines(i).slice(0, 1 + i.secondaries.length);
   readonly fmt = (l: StatLine) => `${STAT_LABEL[l.stat]} ${l.value >= 0 ? '+' : ''}${FLAT_STATS.includes(l.stat) ? l.value : (l.value * 100).toFixed(1) + ' %'}`;
   readonly usable = (i: EquipmentInstance) => { const c = this.cls(); return !!c && canEquip(c, i); };

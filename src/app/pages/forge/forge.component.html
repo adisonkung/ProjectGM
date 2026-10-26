@@ -43,7 +43,7 @@
           <div class="cost"><div class="cost-row citadel-surface" [class.miss]="fragsHave() < recipe().fragments"><app-citadel-frame [cut]="13" /><app-icon [name]="recipe().fragmentId" [size]="44" /><span>เศษอุปกรณ์ <em>{{ fragmentTier() }}</em><small>มี {{ fragsHave().toLocaleString() }} ชิ้น</small></span><b>{{ recipe().fragments }} <small>ชิ้น</small></b></div><div class="cost-row citadel-surface" [class.miss]="gold() < recipe().gold"><app-citadel-frame [cut]="13" /><app-icon name="coin" [size]="42" /><span>ทอง<small>มี {{ gold().toLocaleString() }}</small></span><b>{{ recipe().gold.toLocaleString() }}</b></div></div>
           <button type="button" class="gm-btn primary big craft-action citadel-surface" [disabled]="!canCraft()" (click)="craft()"><app-citadel-frame shape="hex" [cut]="23" [crimson]="true" [lacquer]="true" /><app-icon name="craft" [size]="34" /><span>หลอมสร้าง</span><app-icon name="arrow" [size]="22" /></button>
           <small class="result-note">ผลลัพธ์จะแสดงหลังสร้าง</small>
-          @if (crafted(); as c) { <div class="result"><small>ได้รับ</small><b>{{ name(c) }}</b><span>{{ lines(c).join(' · ') }}</span><a class="gm-btn small" routerLink="/armory">ดูในกระเป๋า<app-icon name="arrow" [size]="16" /></a></div> }
+          @if (crafted(); as c) { <div class="result"><small>ได้รับ</small><b>{{ name(c) }}</b><span>{{ lines(c).join(' · ') }}</span>@if (c.affix) { <p class="affix"><app-affix-icon [affixId]="c.affix" [rarity]="c.rarity" /><span>{{ affixName(c) }}</span></p> }<a class="gm-btn small" routerLink="/armory">ดูในกระเป๋า<app-icon name="arrow" [size]="16" /></a></div> }
         </section>
       </div>
     }
@@ -74,7 +74,7 @@
           <div class="enhancement-art"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" context="inspect" /></div>
           <h3>{{ name(it) }}</h3><span class="gm-chip gold">{{ rarityName[it.rarity] }} · สูงสุด +{{ cap(it) }}</span>
           @if (x.wearer) { <p class="note">สวมอยู่: {{ x.wearer }}</p> }
-          <div class="upgrade-comparison"><div><small>ปัจจุบัน +{{ it.upgradeLevel }}</small>@for (l of lines(it); track $index) { <b>{{ l }}</b> }</div><app-icon name="arrow" [size]="24" /><div><small>{{ cost(it) ? 'หลังตีบวก +' + (it.upgradeLevel + 1) : 'ระดับสูงสุด' }}</small>@for (l of upgradePreview(it); track $index) { <b>{{ l }}</b> }</div></div>
+          @if (it.affix) { <p class="affix"><app-affix-icon [affixId]="it.affix" [rarity]="it.rarity" /><span>{{ affixName(it) }}</span></p> }<div class="upgrade-comparison"><div><small>ปัจจุบัน +{{ it.upgradeLevel }}</small>@for (l of lines(it); track $index) { <b>{{ l }}</b> }</div><app-icon name="arrow" [size]="24" /><div><small>{{ cost(it) ? 'หลังตีบวก +' + (it.upgradeLevel + 1) : 'ระดับสูงสุด' }}</small>@for (l of upgradePreview(it); track $index) { <b>{{ l }}</b> }</div></div>
           @if (cost(it); as c) {
             <div class="enhancement-cost"><span [class.miss]="ore() < c.ore"><app-icon name="enhancement_ore" [size]="26" />Enhancement Ore <b>{{ ore() }} / {{ c.ore }}</b></span><span [class.miss]="gold() < c.gold"><app-icon name="coin" [size]="26" />ทอง <b>{{ gold() }} / {{ c.gold }}</b></span></div>
             <button type="button" class="gm-btn primary big citadel-surface citadel-control" (click)="upgrade(it)" [disabled]="ore() < c.ore || gold() < c.gold"><app-citadel-frame shape="hex" [cut]="16" [crimson]="true" [lacquer]="true" /><app-icon name="enhance" [size]="24" />ตีบวก +{{ it.upgradeLevel + 1 }}</button>

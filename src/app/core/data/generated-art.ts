@@ -1017,5 +1017,19 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "group": "ui-symbol-atlas",
     "url": "/ui/symbols/emblems.webp",
     "status": "active"
+  },
+  {
+    "id": "affix-atlas/wards",
+    "label": "wards · equipment affix atlas",
+    "group": "affix-atlas",
+    "url": "/ui/affixes/wards.webp",
+    "status": "active"
+  },
+  {
+    "id": "affix-atlas/offense",
+    "label": "offense · equipment affix atlas",
+    "group": "affix-atlas",
+    "url": "/ui/affixes/offense.webp",
+    "status": "active"
   }
 ];

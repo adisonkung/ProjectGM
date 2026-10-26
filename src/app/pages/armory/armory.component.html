@@ -56,7 +56,7 @@
           <aside class="item-detail citadel-surface" aria-label="รายละเอียดอุปกรณ์"><app-citadel-frame shape="panel" [cut]="22" [crimson]="false" [lacquer]="false" />
             <div class="detail-title"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /><div><span class="eyebrow">{{ rarityName[it.rarity] }}</span><h3>{{ name(it) }}</h3><small>สูงสุด +{{ cap(it) }} @if (it.locked) { · ล็อกอยู่ }</small></div></div>
             <div class="inspect-art"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" context="inspect" /></div><div class="item-lines">@for (l of lines(it); track $index) { <p><app-icon [name]="'equip-stat-' + l.stat" [size]="15" /> {{ fmt(l) }}</p> }</div>
-            @if (it.affix) { <p class="affix">{{ affixName(it.affix) }}</p> }
+            @if (it.affix) { <p class="affix"><app-affix-icon [affixId]="it.affix" [rarity]="it.rarity" /><span>{{ affixName(it) }}</span></p> }
             @if (!selectedWorn()) {
               @if (usable(it)) { <div class="comparison"><small>เปลี่ยนแปลงเมื่อสวมใส่</small>@for (d of compare(it); track $index) { <span [class.up]="d.includes('+')">{{ d }}</span> } @empty { <span>ค่าพลังเท่าเดิม</span> }</div> }
               @else { <p class="incompatible">ฮีโร่สายนี้ใช้อาวุธนี้ไม่ได้</p> }
