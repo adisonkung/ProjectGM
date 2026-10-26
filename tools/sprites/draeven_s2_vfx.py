@@ -26,7 +26,8 @@ N = 8
 CHARGE_RING = 112      # ring width of the peak frame (f7) in atlas px — ~1.4 cells around his feet
 CHARGE_PEAK = 6
 CELL = 80              # atlas px per board cell
-WAVE_H = 2 * CELL      # F1 height: half of the lane above + the front cell + half of the lane below
+WAVE_H = 2.4 * CELL    # F1 height (review 3: a bit bigger than half of the lanes above / below)
+WAVE_SEQ = [0, 0, 0, 1, 2, 3, 4, 5, 6, 7]  # review 3: the biggest slash F1 held 3 frames, then the decay
 WAVE_CX = CELL         # centre of the front cell, ahead of his feet
 WAVE_CY = 0.2725 * CELL  # the cell centre above the feet (feet sit at dy 27.25 % of a cell)
 # drawn frame centres along the wave sheet (the small late frames break into pieces, so they are given, not searched)
@@ -112,11 +113,12 @@ def wave(src: Path, out: Path):
     top = int(np.floor(min(y + i.getbbox()[1] for i, _, y in placed))) - 2
     bottom = int(np.ceil(max(0, max(y + i.getbbox()[3] for i, _, y in placed)))) + 2
     cw, ch = right - left, bottom - top
-    strip = Image.new('RGBA', (cw * N, ch))
-    for k, (img, x, y) in enumerate(placed):
+    strip = Image.new('RGBA', (cw * len(WAVE_SEQ), ch))
+    for k, f in enumerate(WAVE_SEQ):
+        img, x, y = placed[f]
         strip.alpha_composite(img, (int(round(k * cw + x - left)), int(round(y - top))))
     strip.save(out, optimize=True)
-    return {'frames': N, 'w': cw, 'h': ch, 'pivot': [round(-left / cw, 4), round(-top / ch, 4)], 'scale': round(scale, 4)}
+    return {'frames': len(WAVE_SEQ), 'w': cw, 'h': ch, 'pivot': [round(-left / cw, 4), round(-top / ch, 4)], 'scale': round(scale, 4)}
 
 
 def main():

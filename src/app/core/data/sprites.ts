@@ -1289,10 +1289,11 @@ export const FX: Record<string, FxDef> = {
   },
   // Main Crimson Wave: VFX_SPAWN = the release / DAMAGE (0.98 s): F1 already at max size, then it shrinks away IN PLACE
   // (no travel) · review 2: ONE cell ahead — centred on the middle of the front cell, F1 two cells tall (half of the
-  // lanes above and below = the damage column up / front / down) · 8 × 37.5 ms decay + 200 ms fade · pivot = his feet
+  // lanes above and below = the damage column up / front / down) · review 3: 2.4 cells tall, the biggest slash F1
+  // held 3 frames · 10 × 37.5 ms (F1 0–0.11 s, decay to 0.375 s) + 200 ms fade · pivot = his feet
   'dr-s2-wave': {
-    file: 'fx-draeven-s2-wave.png', frames: 8, w: 313, h: 331, frameMs: 37.5, fadeOutMs: 200, at: 'self',
-    event: 'VFX_SPAWN', attach: false, orient: 'flip', pivot: [0.0064, 0.6314], dy: 27.25, scale: 1 / 3,
+    file: 'fx-draeven-s2-wave.png', frames: 10, w: 362, h: 395, frameMs: 37.5, fadeOutMs: 200, at: 'self',
+    event: 'VFX_SPAWN', attach: false, orient: 'flip', pivot: [0.058, 0.6101], dy: 27.25, scale: 1 / 3,
   },
   'dr-ult-charge': {
     file: 'fx-draeven-ult-charge.png', frames: 25, w: 156, h: 90, frameMs: 60, at: 'self', orient: 'flip',
