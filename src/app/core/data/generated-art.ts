@@ -1003,5 +1003,19 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "group": "status-atlas",
     "url": "/ui/status/fury.webp",
     "status": "active"
+  },
+  {
+    "id": "ui-symbol-atlas/utility",
+    "label": "utility · UI symbols atlas",
+    "group": "ui-symbol-atlas",
+    "url": "/ui/symbols/utility.webp",
+    "status": "active"
+  },
+  {
+    "id": "ui-symbol-atlas/emblems",
+    "label": "emblems · UI symbols atlas",
+    "group": "ui-symbol-atlas",
+    "url": "/ui/symbols/emblems.webp",
+    "status": "active"
   }
 ];

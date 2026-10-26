@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-26",
+  "count": 18,
+  "prompt": "Create a production Eldervane fantasy game UI ICON SPRITE ATLAS. Perfectly SQUARE canvas. EXACT grid THREE equal columns and THREE equal rows, nine invisible equal square cells. One centered isolated icon per cell, at most70% of cell width and height,15% transparent gutter on all sides. Whole transparent background, no card, frame, label, text, letters, numbers, watermark, grid or scenery. Premium Japanese/Korean fantasy inventory/UI art: crisp bold sculpted silhouettes, polished dimensional metal, subtle engraved details, high contrast, controlled rich semantic colors, readable at22px, no tiny clutter. Metal trims restrained and elegant; do not make every symbol gold. All effects stay inside each cell, no crossing gutters. Exact reading order and positions: ",
+  "atlases": [
+    {
+      "id": "utility",
+      "path": "/ui/symbols/utility.webp",
+      "source": "/workspace/generated_images/exec-fcaad74d-f0d7-43b0-a700-00126d6dcac8.png",
+      "sourceSha256": "dc30e6b10d52926ddeff4d0ce51c9cd187e8e3a14e4138b58031288f5f7cc4f5",
+      "sha256": "41d469433d23481f097dd7f8dc2490c4be377e51a0000f458ac8afd7b6472dfb",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "icons": [
+        {
+          "id": "load",
+          "label": "นำเข้า / โหลด",
+          "design": "cyan blue downward arrow entering a silver open tray, bold unmistakable download or import symbol",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "export",
+          "label": "ส่งออก",
+          "design": "bright azure upward arrow emerging from a silver open tray, distinct export symbol",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "id": "lab",
+          "label": "ห้องทดลอง",
+          "design": "slender silver alchemical flask containing luminous turquoise liquid, one small magical spark",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "id": "fullscreen",
+          "label": "เต็มจอ",
+          "design": "four clean ivory silver right-angle corner brackets pointing outward around empty center, crisp expansion symbol",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "id": "palette",
+          "label": "เปลี่ยนธีม",
+          "design": "elegant ivory artist palette with clearly separate ruby emerald sapphire amber gem paint spots, colorful",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "id": "people",
+          "label": "กลุ่มคน",
+          "design": "three distinct ivory and champagne humanoid bust silhouettes with central person larger",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "id": "check",
+          "label": "ยืนยัน / สำเร็จ",
+          "design": "bold emerald gemstone check mark in silver bevel, clean successful confirmation silhouette",
+          "col": 0,
+          "row": 2
+        },
+        {
+          "id": "scroll",
+          "label": "ม้วนคัมภีร์",
+          "design": "ivory parchment scroll partly unfurled with dark blue ribbon and restrained bronze tips",
+          "col": 1,
+          "row": 2
+        },
+        {
+          "id": "book",
+          "label": "หนังสือ",
+          "design": "compact closed teal spellbook with slim antique bronze corners and one luminous emerald star clasp",
+          "col": 2,
+          "row": 2
+        }
+      ]
+    },
+    {
+      "id": "emblems",
+      "path": "/ui/symbols/emblems.webp",
+      "source": "/workspace/generated_images/exec-3b04e0c1-4d41-404d-ada7-c60d26949115.png",
+      "sourceSha256": "e1b563b8195ba4ff00408f7a63e2e05f439327742700a1ccab6b251567162813",
+      "sha256": "d58d403e19150f1edbab19b32de2928a597132a56ead60d76f648c30d3b7fce6",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "icons": [
+        {
+          "id": "sword",
+          "label": "ดาบ",
+          "design": "single very slim straight silver longsword angled diagonally tip upper-right, long narrow blade occupying most height, small elegant antique gold crossguard and dark red grip, NOT chunky or wide",
+          "col": 0,
+          "row": 0
+        },
+        {
+          "id": "bow",
+          "label": "ธนู",
+          "design": "slender elegant jade green recurved longbow with taut silver bowstring and single narrow ivory arrow, graceful thin silhouette",
+          "col": 1,
+          "row": 0
+        },
+        {
+          "id": "healer",
+          "label": "รักษา",
+          "design": "bold bright emerald healing cross of polished jade with silver beveled edge and white center gleam",
+          "col": 2,
+          "row": 0
+        },
+        {
+          "id": "star",
+          "label": "ดาว",
+          "design": "simple five-point champagne gold metallic star with sharp clear silhouette, no extra decorations",
+          "col": 0,
+          "row": 1
+        },
+        {
+          "id": "crystal",
+          "label": "คริสตัล",
+          "design": "one slender upright amethyst violet faceted crystal diamond with icy silver edge, clean elongated silhouette",
+          "col": 1,
+          "row": 1
+        },
+        {
+          "id": "potion",
+          "label": "ยา",
+          "design": "small round red ruby healing potion in a clear glass flask with short neck and cork, restrained bronze collar",
+          "col": 2,
+          "row": 1
+        },
+        {
+          "id": "skull",
+          "label": "กะโหลก",
+          "design": "ivory bone skull with dark hollow eye sockets, restrained silver crown rim and smoky charcoal outline, no purple glow",
+          "col": 0,
+          "row": 2
+        },
+        {
+          "id": "crown",
+          "label": "มงกุฎ",
+          "design": "three-point royal antique gold crown with deep crimson central ruby and dark burgundy lining",
+          "col": 1,
+          "row": 2
+        },
+        {
+          "id": "bolt",
+          "label": "พลังสายฟ้า",
+          "design": "bold sharp zigzag amber lightning bolt with white-hot center and thin bronze silver bevel",
+          "col": 2,
+          "row": 2
+        }
+      ]
+    }
+  ]
+}
