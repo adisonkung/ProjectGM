@@ -5,6 +5,7 @@ Sources (assets/heroes/Mordrienne/vfx/, one row on a magenta key, pixel art):
   Mordrienne_S2_GroundHexSpawn_VFX.png     9 frames → fx-mordrienne-s2-spawn.png  (small ring f1 → full hex f7 → settle)
   Mordrienne_S2_GroundHexLoop_VFX.png      8 frames → fx-mordrienne-s2-loop.png   (charging hex, one breathing cycle)
   Mordrienne_S2_HexActivationBurst_VFX.png 8 frames → fx-mordrienne-s2-burst.png  (eruption f1–f3 peak → decay f8)
+  Mordrienne_S1_CastCharge_VFX.png         reused  → fx-mordrienne-s2-tip.png    (green flash on the wand tip, each strike)
 
 No resampling: every frame is copied at the artist's pixel size (drawn pixelated at runtime). One ground pivot per
 sheet = the centre of the hex ring on the ground plane (spawn / loop: the star centre on the horizontal star line;
@@ -20,9 +21,11 @@ from PIL import Image
 from scipy import ndimage
 
 sys.path.insert(0, str(Path(__file__).parent))
-from mordrienne_s1_vfx import unmix  # noqa: E402
+from mordrienne_s1_vfx import unmix, cut as cut_s1, cells_around, strip, width_of  # noqa: E402
 
 FX_SCALE = 1.5
+RES = 2
+TIP_PX = 36  # wand-tip strike flash at its peak (atlas px) — the S1 CastCharge sigil, the same Deep Emerald
 RING_ATLAS = 150  # hex-ring diameter on the board (atlas px, 80 px = 1 cell)
 
 # per sheet: frame x centres (source px, read off the sheets), the ground line y (ring centre), the ring diameter
@@ -100,6 +103,17 @@ def bake(frames, out: Path):
     return {'frames': len(cells), 'w': W, 'h': H, 'pivot': [round((W // 2) / W, 6), round(up / H, 6)]}
 
 
+def build_tip(src: Path, out: Path):
+    """green flash on the wand tip at each strike: the S1 CastCharge sigil (same emerald palette) — f3 → f5 peak held
+    → collapse f6–f8 fading. Pivot = the sigil core, baked at RES × atlas px"""
+    frames = cut_s1(src / 'Mordrienne_S1_CastCharge_VFX.png')
+    cells, W, H = cells_around(frames, TIP_PX * RES / width_of(frames[4][0]))
+    seq = [(2, 2, 0, 1.0), (3, 3, 0, 1.0), (4, 4, 0, 1.0), (4, 4, 0, 1.0), (5, 5, 0, 0.95), (6, 6, 0, 0.8),
+           (7, 7, 0, 0.6)]
+    strip(cells, seq).save(out, optimize=True)
+    return {'frames': len(seq), 'w': W, 'h': H, 'scale': round(1 / (FX_SCALE * RES), 5)}
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     src = Path(args[0] if args else 'assets/heroes/Mordrienne/vfx')
@@ -111,6 +125,7 @@ def main():
         # baked px → atlas px = RING_ATLAS / ring; FxDef width % = w · PX_TO_CELL · scale · FX_SCALE
         r['scale'] = round(RING_ATLAS / ring / FX_SCALE, 6)
         res[key] = r
+    res['tip'] = build_tip(src, out / 'fx-mordrienne-s2-tip.png')
     print(json.dumps(res, indent=1))
 
 

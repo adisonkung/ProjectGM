@@ -276,7 +276,7 @@ export const SHEETS: Record<string, SheetDef> = {
     cols: 31, rows: 8, cellW: 260, cellH: 170,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     projectile: { attack: 'mo-hex-bolt', skill: 'mo-s1-bolt' },
-    fx: { skill: 'mo-s1-charge', skill2: ['mo-s2-spawn', 'mo-s2-loop', 'mo-s2-burst'] },
+    fx: { skill: 'mo-s1-charge', skill2: ['mo-s2-spawn', 'mo-s2-loop', 'mo-s2-burst', 'mo-s2-tip1', 'mo-s2-tip2'] },
     // Hex Mark: appears on the hit and lives exactly as long as the status
     statusFx: { hex_mark: { start: 'mo-s1-mark-in', loop: 'mo-s1-mark' } },
     anims: {
@@ -1516,6 +1516,16 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-mordrienne-s2-burst.png', frames: 8, w: 384, h: 457, frameMs: 50, fadeOutMs: 150, at: 'target',
     groundArea: 'SQUARE_2', event: 'VFX_SPAWN', eventIndex: 1, pivot: [0.5, 0.85558], dy: 27.25, scale: 0.4,
     layer: 'under', attach: false, pixelated: true,
+  },
+  // S2 wand-tip strike flash (user 2026-10-27: green light on the wand tip, the skill's emerald): the S1 CastCharge
+  // sigil f3 → f5 peak → collapse, 36 px, on each strike (VFX_SPAWN #0 / #1) at the strike pose's tip (atlas 181, 101)
+  'mo-s2-tip1': {
+    file: 'fx-mordrienne-s2-tip.png', frames: 7, w: 80, h: 104, frameMs: 35, fadeOutMs: 80, at: 'self',
+    event: 'VFX_SPAWN', eventIndex: 0, dx: 63.75, dy: -40.25, scale: 1 / 3, blend: 'add', attach: true, pixelated: true,
+  },
+  'mo-s2-tip2': {
+    file: 'fx-mordrienne-s2-tip.png', frames: 7, w: 80, h: 104, frameMs: 35, fadeOutMs: 80, at: 'self',
+    event: 'VFX_SPAWN', eventIndex: 1, dx: 63.75, dy: -40.25, scale: 1 / 3, blend: 'add', attach: true, pixelated: true,
   },
   // Mordrienne provisional hex bolt (procedural, tools/sprites/mordrienne.py): 4 flight frames + impact ring
   'mo-hex-bolt': { file: 'fx-mordrienne-hex-bolt.png', frames: 5, w: 48, h: 48, frameMs: 60, at: 'target', angle0: 0, scale: 0.6 },

@@ -109,6 +109,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-mordrienne-s2-burst.png': { url: 'opt/fx-mordrienne-s2-burst.webp' },
   'fx-mordrienne-s2-loop.png': { url: 'opt/fx-mordrienne-s2-loop.webp' },
   'fx-mordrienne-s2-spawn.png': { url: 'opt/fx-mordrienne-s2-spawn.webp' },
+  'fx-mordrienne-s2-tip.png': { url: 'opt/fx-mordrienne-s2-tip.webp' },
   'fx-moye-s1-impact1.png': { url: 'opt/fx-moye-s1-impact1.webp' },
   'fx-moye-s1-impact2.png': { url: 'opt/fx-moye-s1-impact2.webp' },
   'fx-moye-s1-main.png': { url: 'opt/fx-moye-s1-main.webp' },

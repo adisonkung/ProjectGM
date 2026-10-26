@@ -48,6 +48,8 @@ def frames_of(name):
 
 
 FR = {k: frames_of(k) for k in FX}
+_tip = Image.open(SP + 'fx-mordrienne-s2-tip.png').convert('RGBA')
+TIP = [_tip.crop((i * 80, 0, i * 80 + 80, _tip.height)).resize((40, _tip.height // 2), Image.NEAREST) for i in range(7)]
 
 
 def clip_frame(t):
@@ -103,6 +105,16 @@ def render(t):
     hero = ATLAS.crop((k * 260, 6 * 170, k * 260 + 260, 7 * 170)) if k is not None else ATLAS.crop((0, 0, 260, 170))
     put(c, hero, HERO_X - 130, GROUND - 155)
     draw_fx('over')
+    # wand-tip strike flash (self, attached): centre on the strike pose's tip (atlas 181, 101)
+    for k0, start in ((0, SPAWN), (1, STRIKE2)):
+        dt = (t - start) * 1000
+        n = len(TIP)
+        if 0 <= dt < n * 35 + 80:
+            i = min(n - 1, int(dt // 35))
+            a = 1.0 if dt < n * 35 else 1 - ((dt - n * 35) / 80) ** 2
+            f = TIP[i]
+            put(c, f, HERO_X - 130 + 181 - f.width / 2, GROUND - 155 + 101 - f.height / 2, a)
+            log.append(('tip', i + 1, round(a, 2)))
     return c, k, log
 
 
@@ -123,8 +135,9 @@ def main():
                     'spearTip': [HEX_X, GROUND], 'center': [HERO_X, GROUND - 40]})
         chars.append(cf)
         for track, fr, op in log:
+            lay = FX[track][6] if track in FX else 'over'
             vfx.append({'T': i, 'track': track, 'frame': fr, 'opacity': op,
-                        'layer': 'back' if FX[track][6] == 'under' else 'front', 'split': FX[track][6]})
+                        'layer': 'back' if lay == 'under' else 'front', 'split': lay})
     vid.stdin.close()
     vid.wait()
     runs, a = [], 0
@@ -174,10 +187,12 @@ def main():
                     'จุดเดียวกัน', f'T{T(SPIN):03d} → T{T(STRIKE2) - 1:03d} หนึ่งรอบหายใจ · หยุดทันทีที่ตีครั้งที่ 2'],
                    ['burst', 'L4 HexActivationBurst', [40, 230, 140], 'fx-mordrienne-s2-burst (8 × 50 ms + fade 150)', 'over',
                     'จุดเดียวกัน', f'T{T(STRIKE2):03d} ปะทุ → peak f3 T{T(HIT):03d} = ดาเมจ → สลาย f8 → หมด T{T(burst_end):03d}'],
-                   ['events', 'L5 Gameplay Events', [200, 200, 200], 'engine', '-', '-',
+                   ['tip', 'L5 Wand-tip Flash', [120, 255, 170], 'fx-mordrienne-s2-tip (7 × 35 ms + fade 80)', 'over',
+                    'ปลายคทาท่าตี', f'แสงเขียวที่ปลายคทาตอนตีทั้ง 2 ครั้ง T{T(SPAWN):03d} / T{T(STRIKE2):03d}'],
+                   ['events', 'L6 Gameplay Events', [200, 200, 200], 'engine', '-', '-',
                     'DAMAGE ครั้งเดียวที่ burst peak · ไม่มี impact VFX ซ้ำ']],
-        'trackNames': {'spawn': 'Hex Spawn', 'loop': 'Hex Loop', 'burst': 'Activation Burst', 'events': 'อีเวนต์'},
-        'layers': [[1, 'Hex Spawn / Loop (ใต้ตัวละคร)'], [2, 'ตัวละคร (L1)'], [3, 'Activation Burst (L4)'], [4, 'อีเวนต์ (L5)']],
+        'trackNames': {'spawn': 'Hex Spawn', 'loop': 'Hex Loop', 'burst': 'Activation Burst', 'tip': 'Wand Flash', 'events': 'อีเวนต์'},
+        'layers': [[1, 'Hex Spawn / Loop (ใต้ตัวละคร)'], [2, 'ตัวละคร (L1)'], [3, 'Activation Burst (L4)'], [4, 'Wand-tip Flash (L5)'], [5, 'อีเวนต์ (L6)']],
         'shake': {},
         'thumbs': [0, T(at(5)), T(SPAWN) + 3, T(SPAWN) + 13, T(SPIN) + 12, T(at(20)), T(STRIKE2), T(HIT), T(HIT) + 9,
                    T(REC) + 12, T(END)],
@@ -191,6 +206,7 @@ def main():
                   'ควงไม้ = วงชาร์จอยู่ที่เดิม ไม่มีดาเมจหลัก · ตีครั้งที่ 2 = หยุดลูปทันที + ระเบิดวงที่จุดเดียวกัน',
                   'ดาเมจเวทครั้งเดียวที่ peak ของ burst: AoE + Slow + ATK Down + Cast Speed Down · Root เฉพาะตัวที่ติด Hex Mark อยู่ก่อน',
                   'ทั้ง 3 ชั้นใช้ศูนย์กลาง/เส้นผ่านศูนย์กลางวงเดียวกัน (~150 px = 1.9 ช่อง) · burst เล่นจนสลายครบ ไม่มี impact VFX ที่สอง',
+                  'แสงเขียวที่ปลายคทาตอนตีทั้ง 2 ครั้ง = ซิกิลเขียวมรกตของ S1 CastCharge (สีเดียวกับสกิล) ติดตัว Mordrienne',
                   'pixel art: ใช้พิกเซลของศิลปินตรง ๆ ไม่ย่อ/ขยายตอนอบ · วาด pixelated (nearest) ไม่มี blur/AA']}
     json.dump({'fps': FPS, 'frames': N, 'canvas': [W, H], 'upscale': UP, 'ground': GROUND,
                'characterTiming': [{'from': a, 'to': b, 'char': f'C{c:02d}', 'drawnFrame': c} for a, b, c in runs],

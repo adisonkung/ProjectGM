@@ -73,7 +73,11 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     expect(at('DAMAGE')).toEqual([1370]);
     expect(at('RECOVERY_START')).toEqual([1460]);
     expect(sh.anims.skill2!.steps!.reduce((a, b) => a + b, 0)).toBe(1890);
-    expect(sh.fx!.skill2).toEqual(['mo-s2-spawn', 'mo-s2-loop', 'mo-s2-burst']);
+    expect(sh.fx!.skill2).toEqual(['mo-s2-spawn', 'mo-s2-loop', 'mo-s2-burst', 'mo-s2-tip1', 'mo-s2-tip2']);
+    // green flash on the wand tip at each strike, riding on her
+    const t1 = FX['mo-s2-tip1'], t2 = FX['mo-s2-tip2'];
+    expect([t1.at, t1.event, t1.eventIndex, t2.eventIndex, t1.attach, t1.pixelated]).toEqual(['self', 'VFX_SPAWN', 0, 1, true, true]);
+    expect([t2.dx, t2.dy]).toEqual([t1.dx, t1.dy]);
     const sp = FX['mo-s2-spawn'], lp = FX['mo-s2-loop'], bu = FX['mo-s2-burst'];
     // all three on the ground plane at the same 2 × 2 area centre, never attached to her or the target
     for (const d of [sp, lp, bu]) {

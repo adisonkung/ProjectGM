@@ -2303,12 +2303,28 @@
    "split": "under"
   },
   {
+   "T": 24,
+   "track": "tip",
+   "frame": 1,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 25,
    "track": "spawn",
    "frame": 1,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 25,
+   "track": "tip",
+   "frame": 1,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 26,
@@ -2319,12 +2335,28 @@
    "split": "under"
   },
   {
+   "T": 26,
+   "track": "tip",
+   "frame": 1,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 27,
    "track": "spawn",
    "frame": 2,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 27,
+   "track": "tip",
+   "frame": 2,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 28,
@@ -2335,12 +2367,28 @@
    "split": "under"
   },
   {
+   "T": 28,
+   "track": "tip",
+   "frame": 2,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 29,
    "track": "spawn",
    "frame": 3,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 29,
+   "track": "tip",
+   "frame": 3,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 30,
@@ -2351,12 +2399,28 @@
    "split": "under"
   },
   {
+   "T": 30,
+   "track": "tip",
+   "frame": 3,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 31,
    "track": "spawn",
    "frame": 5,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 31,
+   "track": "tip",
+   "frame": 4,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 32,
@@ -2367,12 +2431,28 @@
    "split": "under"
   },
   {
+   "T": 32,
+   "track": "tip",
+   "frame": 4,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 33,
    "track": "spawn",
    "frame": 6,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 33,
+   "track": "tip",
+   "frame": 5,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 34,
@@ -2383,12 +2463,28 @@
    "split": "under"
   },
   {
+   "T": 34,
+   "track": "tip",
+   "frame": 5,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 35,
    "track": "spawn",
    "frame": 7,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 35,
+   "track": "tip",
+   "frame": 6,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 36,
@@ -2399,12 +2495,28 @@
    "split": "under"
   },
   {
+   "T": 36,
+   "track": "tip",
+   "frame": 6,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 37,
    "track": "spawn",
    "frame": 8,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 37,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 38,
@@ -2415,6 +2527,14 @@
    "split": "under"
   },
   {
+   "T": 38,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 39,
    "track": "spawn",
    "frame": 9,
@@ -2431,12 +2551,28 @@
    "split": "under"
   },
   {
+   "T": 39,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 1.0,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 40,
    "track": "loop",
    "frame": 1,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 40,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 0.93,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 41,
@@ -2447,6 +2583,14 @@
    "split": "under"
   },
   {
+   "T": 41,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 0.77,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 42,
    "track": "loop",
    "frame": 1,
@@ -2455,12 +2599,28 @@
    "split": "under"
   },
   {
+   "T": 42,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 0.53,
+   "layer": "front",
+   "split": "over"
+  },
+  {
    "T": 43,
    "track": "loop",
    "frame": 1,
    "opacity": 1.0,
    "layer": "back",
    "split": "under"
+  },
+  {
+   "T": 43,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 0.2,
+   "layer": "front",
+   "split": "over"
   },
   {
    "T": 44,
@@ -2731,12 +2891,28 @@
    "track": "burst",
    "frame": 1,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 77,
+   "track": "tip",
+   "frame": 1,
+   "opacity": 1.0,
    "layer": "front",
    "split": "over"
   },
   {
    "T": 78,
    "track": "burst",
+   "frame": 1,
+   "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 78,
+   "track": "tip",
    "frame": 1,
    "opacity": 1.0,
    "layer": "front",
@@ -2747,12 +2923,28 @@
    "track": "burst",
    "frame": 1,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 79,
+   "track": "tip",
+   "frame": 2,
+   "opacity": 1.0,
    "layer": "front",
    "split": "over"
   },
   {
    "T": 80,
    "track": "burst",
+   "frame": 2,
+   "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 80,
+   "track": "tip",
    "frame": 2,
    "opacity": 1.0,
    "layer": "front",
@@ -2763,6 +2955,14 @@
    "track": "burst",
    "frame": 2,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 81,
+   "track": "tip",
+   "frame": 3,
+   "opacity": 1.0,
    "layer": "front",
    "split": "over"
   },
@@ -2770,6 +2970,14 @@
    "T": 82,
    "track": "burst",
    "frame": 2,
+   "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 82,
+   "track": "tip",
+   "frame": 3,
    "opacity": 1.0,
    "layer": "front",
    "split": "over"
@@ -2779,6 +2987,14 @@
    "track": "burst",
    "frame": 3,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 83,
+   "track": "tip",
+   "frame": 4,
+   "opacity": 1.0,
    "layer": "front",
    "split": "over"
   },
@@ -2786,6 +3002,14 @@
    "T": 84,
    "track": "burst",
    "frame": 3,
+   "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 84,
+   "track": "tip",
+   "frame": 4,
    "opacity": 1.0,
    "layer": "front",
    "split": "over"
@@ -2795,6 +3019,14 @@
    "track": "burst",
    "frame": 3,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 85,
+   "track": "tip",
+   "frame": 5,
+   "opacity": 1.0,
    "layer": "front",
    "split": "over"
   },
@@ -2802,6 +3034,14 @@
    "T": 86,
    "track": "burst",
    "frame": 4,
+   "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 86,
+   "track": "tip",
+   "frame": 5,
    "opacity": 1.0,
    "layer": "front",
    "split": "over"
@@ -2811,6 +3051,14 @@
    "track": "burst",
    "frame": 4,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 87,
+   "track": "tip",
+   "frame": 6,
+   "opacity": 1.0,
    "layer": "front",
    "split": "over"
   },
@@ -2818,6 +3066,14 @@
    "T": 88,
    "track": "burst",
    "frame": 4,
+   "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 88,
+   "track": "tip",
+   "frame": 6,
    "opacity": 1.0,
    "layer": "front",
    "split": "over"
@@ -2827,6 +3083,14 @@
    "track": "burst",
    "frame": 5,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 89,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 1.0,
    "layer": "front",
    "split": "over"
   },
@@ -2834,6 +3098,14 @@
    "T": 90,
    "track": "burst",
    "frame": 5,
+   "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 90,
+   "track": "tip",
+   "frame": 7,
    "opacity": 1.0,
    "layer": "front",
    "split": "over"
@@ -2843,6 +3115,14 @@
    "track": "burst",
    "frame": 5,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 91,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 1.0,
    "layer": "front",
    "split": "over"
   },
@@ -2851,6 +3131,14 @@
    "track": "burst",
    "frame": 6,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 92,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 0.95,
    "layer": "front",
    "split": "over"
   },
@@ -2859,6 +3147,14 @@
    "track": "burst",
    "frame": 6,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 93,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 0.81,
    "layer": "front",
    "split": "over"
   },
@@ -2867,6 +3163,14 @@
    "track": "burst",
    "frame": 6,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 94,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 0.58,
    "layer": "front",
    "split": "over"
   },
@@ -2875,6 +3179,14 @@
    "track": "burst",
    "frame": 7,
    "opacity": 1.0,
+   "layer": "back",
+   "split": "under"
+  },
+  {
+   "T": 95,
+   "track": "tip",
+   "frame": 7,
+   "opacity": 0.27,
    "layer": "front",
    "split": "over"
   },
@@ -2883,112 +3195,112 @@
    "track": "burst",
    "frame": 7,
    "opacity": 1.0,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 97,
    "track": "burst",
    "frame": 7,
    "opacity": 1.0,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 98,
    "track": "burst",
    "frame": 8,
    "opacity": 1.0,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 99,
    "track": "burst",
    "frame": 8,
    "opacity": 1.0,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 100,
    "track": "burst",
    "frame": 8,
    "opacity": 1.0,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 101,
    "track": "burst",
    "frame": 8,
    "opacity": 0.99,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 102,
    "track": "burst",
    "frame": 8,
    "opacity": 0.96,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 103,
    "track": "burst",
    "frame": 8,
    "opacity": 0.9,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 104,
    "track": "burst",
    "frame": 8,
    "opacity": 0.82,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 105,
    "track": "burst",
    "frame": 8,
    "opacity": 0.72,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 106,
    "track": "burst",
    "frame": 8,
    "opacity": 0.58,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 107,
    "track": "burst",
    "frame": 8,
    "opacity": 0.43,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 108,
    "track": "burst",
    "frame": 8,
    "opacity": 0.25,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   },
   {
    "T": 109,
    "track": "burst",
    "frame": 8,
    "opacity": 0.04,
-   "layer": "front",
-   "split": "over"
+   "layer": "back",
+   "split": "under"
   }
  ],
  "sheet": {
@@ -3368,8 +3680,21 @@
     "T076 ปะทุ → peak f3 T082 = ดาเมจ → สลาย f8 → หมด T109"
    ],
    [
+    "tip",
+    "L5 Wand-tip Flash",
+    [
+     120,
+     255,
+     170
+    ],
+    "fx-mordrienne-s2-tip (7 × 35 ms + fade 80)",
+    "over",
+    "ปลายคทาท่าตี",
+    "แสงเขียวที่ปลายคทาตอนตีทั้ง 2 ครั้ง T024 / T076"
+   ],
+   [
     "events",
-    "L5 Gameplay Events",
+    "L6 Gameplay Events",
     [
      200,
      200,
@@ -3385,6 +3710,7 @@
    "spawn": "Hex Spawn",
    "loop": "Hex Loop",
    "burst": "Activation Burst",
+   "tip": "Wand Flash",
    "events": "อีเวนต์"
   },
   "layers": [
@@ -3402,7 +3728,11 @@
    ],
    [
     4,
-    "อีเวนต์ (L5)"
+    "Wand-tip Flash (L5)"
+   ],
+   [
+    5,
+    "อีเวนต์ (L6)"
    ]
   ],
   "shake": {},
@@ -3446,6 +3776,7 @@
    "ควงไม้ = วงชาร์จอยู่ที่เดิม ไม่มีดาเมจหลัก · ตีครั้งที่ 2 = หยุดลูปทันที + ระเบิดวงที่จุดเดียวกัน",
    "ดาเมจเวทครั้งเดียวที่ peak ของ burst: AoE + Slow + ATK Down + Cast Speed Down · Root เฉพาะตัวที่ติด Hex Mark อยู่ก่อน",
    "ทั้ง 3 ชั้นใช้ศูนย์กลาง/เส้นผ่านศูนย์กลางวงเดียวกัน (~150 px = 1.9 ช่อง) · burst เล่นจนสลายครบ ไม่มี impact VFX ที่สอง",
+   "แสงเขียวที่ปลายคทาตอนตีทั้ง 2 ครั้ง = ซิกิลเขียวมรกตของ S1 CastCharge (สีเดียวกับสกิล) ติดตัว Mordrienne",
    "pixel art: ใช้พิกเซลของศิลปินตรง ๆ ไม่ย่อ/ขยายตอนอบ · วาด pixelated (nearest) ไม่มี blur/AA"
   ]
  }
