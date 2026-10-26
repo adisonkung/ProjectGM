@@ -35,7 +35,7 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     expect(at('skill2', 'VFX_SPAWN')[0]).toBeLessThan(at('skill2', 'CHARGE_START')[0]);
     expect(at('skill2', 'CHARGE_START')[0]).toBeLessThan(at('skill2', 'DAMAGE')[0]);
     expect(at('ult', 'DAMAGE').length).toBe(1);
-    expect(at('ult', 'STRIKE_START')[0] - at('ult', 'CHARGE_PEAK')[0]).toBe(500);
+    expect(at('ult', 'CHARGE_PEAK')[0] - at('ult', 'CHARGE_START')[0]).toBe(630);
     expect(at('ult', 'DAMAGE')[0]).toBeGreaterThan(at('ult', 'STRIKE_START')[0]);
   });
 
@@ -168,6 +168,52 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     expect(hasFlag(c, 'root')).toBeFalse();
   });
 
+  it('Ult Timeline Sync: circle while drawing, charge on the raise, burst on the ground frame, its peak = the field opening', () => {
+    const sh = SHEETS['hero-mordrienne.png'];
+    const at = (ev: string) => animEvents('hero-mordrienne.png', 'ult').filter(e => e.event === ev).map(e => Math.round(e.t * 1000));
+    expect(at('CAST_START')).toEqual([50]);
+    expect(at('CHARGE_START')).toEqual([1030]);
+    expect(at('CHARGE_PEAK')).toEqual([1660]);
+    expect(at('STRIKE_START')).toEqual([1840]);
+    expect(at('VFX_SPAWN')).toEqual([2020]);
+    expect(at('DAMAGE')).toEqual([2270]);
+    expect(sh.anims.ult!.steps!.reduce((a, b) => a + b, 0)).toBe(2430);
+    expect(sh.fx!.ult).toEqual(['mo-ult-circle', 'mo-ult-charge', 'mo-ult-burst']);
+    expect(sh.fieldFx).toEqual({ loop: 'mo-ult-field', end: 'mo-ult-field-end' });
+    const ci = FX['mo-ult-circle'], ch = FX['mo-ult-charge'], bu = FX['mo-ult-burst'], fl = FX['mo-ult-field'], en = FX['mo-ult-field-end'];
+    // the circle is drawn until the raise, the charge holds its peak until the wand-down frame then collapses
+    expect([ci.event, Math.round(50 + ci.frames * ci.frameMs)]).toEqual(['CAST_START', 1030]);
+    expect([ch.event, 1030 + (ch.frames - 3) * ch.frameMs]).toEqual(['CHARGE_START', 1840]);
+    // burst peak f6 = DAMAGE; the loop starts on the burst's last frame and its cycles end with the 6 s field
+    expect(2020 + 5 * bu.frameMs).toBe(2270);
+    expect(fl.delayMs).toBe(bu.frames * bu.frameMs - 5 * bu.frameMs);
+    expect((6000 - fl.delayMs!) / (fl.frames * fl.frameMs)).toBeCloseTo(6, 2);
+    for (const d of [bu, fl, en]) {
+      expect([d.w, d.h, d.pivot, d.scale, d.dy, d.layer, d.attach, d.pixelated])
+        .toEqual([bu.w, bu.h, bu.pivot, bu.scale, 27.25, 'under', false, true]);
+    }
+  });
+
+  it('FIELD pulseOnStart (generic): pulse 0 at the opening, then every interval, same count over the duration', () => {
+    const b = battle([{ enemy: 'forest_slime', r: 0, c: 1 }]);
+    const [a] = b.foes();
+    b.place(a, { r: 1, c: 11 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (b.e as any).applyStatus(a, 'root', a, 30);
+    b.e.drainEvents();
+    const before = a.hp;
+    b.e.skills.applyEffects(b.mo, b.kit.ult, 'ult', a, a.pos);
+    expect(a.hp).toBeLessThan(before);
+    expect(hasStatus(a, 'ash_curse')).toBeTrue();
+    const pulses: number[] = [];
+    const take = () => { for (const ev of b.e.drainEvents()) if (ev.type === 'FIELD_PULSED') pulses.push(ev.index); };
+    take();
+    for (let i = 0; i < 140; i++) { b.e.step(0.05); take(); }
+    const hits = pulses.length;
+    expect(pulses).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(hits).toBe(6);
+  });
+
   it('House of Ashes: opening burst only on Hex-Marked foes, then a 6 s curse field (pulse damage + DEF / ATK / cast down)', () => {
     const b = battle([{ enemy: 'forest_slime', r: 0, c: 1 }, { enemy: 'forest_slime', r: 1, c: 1 }]);
     const [a, c] = b.foes();
@@ -176,8 +222,10 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     b.e.skills.applyEffects(b.mo, b.kit.skill, 'skill', a, a.pos);
     const hpA = a.hp, hpC = c.hp;
     b.e.skills.applyEffects(b.mo, b.kit.ult, 'ult', a, a.pos);
-    expect(a.hp).toBeLessThan(hpA);
-    expect(c.hp).toBe(hpC);
+    // the opening pulse hits both; the Hex Mark burst only the marked one (a takes much more)
+    expect(hpA - a.hp).toBeGreaterThan(2 * (hpC - c.hp));
+    expect(c.hp).toBeLessThan(hpC);
+    const opened = c.hp;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fields = (b.e as any).fields;
     expect(fields).toBeDefined();
@@ -185,7 +233,7 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const f of [a, c]) (b.e as any).applyStatus(f, 'root', f, 30);
     for (let i = 0; i < 25; i++) b.e.step(0.05);
-    expect(c.hp).toBeLessThan(hpC);
+    expect(c.hp).toBeLessThan(opened);
     for (const f of [a, c]) {
       expect(hasStatus(f, 'ash_curse')).toBeTrue();
       expect(modifier(f, 'defenseMultiplier')).toBeCloseTo(0.85, 5);

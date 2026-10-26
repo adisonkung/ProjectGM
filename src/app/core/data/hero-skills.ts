@@ -615,8 +615,10 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
         ],
         ai: { tier: 'HIGH_VALUE', minTargets: 1, countArea: 'SQUARE_2' },
       },
-      // Ult House of Ashes: draw the circle → raise to the sky → charge hold → slam → a curse field (3 × 3, 6 s):
-      // opening burst on Hex-Marked foes only, then 1 s pulses of magic + Ash Curse (DEF −15 %, ATK −15 %, cast −20 %)
+      // Ult House of Ashes: draw the circle → raise to the sky → charge hold → slam → a curse field (3 × 3, 6 s).
+      // Timeline Sync (user 2026-10-27): at the activation peak the field opens with its first pulse (initial magic
+      // damage + Ash Curse: DEF −15 %, ATK −15 %, cast −20 %) + the Hex Mark bonus burst on already-marked foes,
+      // then a pulse every 1 s (pulses 0…5 — the same 6 pulses as before, the first one moved to the opening)
       ult: {
         ...mage.ult, name: 'เรือนแห่งเถ้าธุลี', label: 'House of Ashes', target: 'CLUSTER', fallback: ['CURRENT'],
         delivery: 'INSTANT',
@@ -624,7 +626,7 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
           { type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 1.2, secondary: 1.2, damageType: 'MAGIC',
             requireStatus: 'hex_mark' },
           { type: 'FIELD', field: {
-            area: 'ADJACENT_8', duration: 6, interval: 1,
+            area: 'ADJACENT_8', duration: 6, interval: 1, pulseOnStart: true,
             effects: [
               { type: 'DAMAGE', area: 'ADJACENT_8', primary: 0.25, secondary: 0.25, damageType: 'MAGIC',
                 bonusVsStatus: { status: 'hex_mark', mul: 1.2 } },

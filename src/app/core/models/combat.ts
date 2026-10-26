@@ -191,6 +191,9 @@ export interface FieldDefinition {
   aura?: { team: 'ALLY' | 'ENEMY'; modifiers: StatusModifiers };
   /** combat seconds; first pulse after interval, final pulse may land at duration */
   duration: number;
+  /** pulse once the moment the field opens (then every interval, the last one before `duration`): same pulse count,
+   *  the opening pulse = the activation hit (Mordrienne House of Ashes) */
+  pulseOnStart?: boolean;
   interval: number;
   /** pulse damage/statuses only; geometry is the field area, no nested fields */
   effects: Extract<SkillEffect, { type: 'DAMAGE' | 'APPLY_STATUS' }>[];

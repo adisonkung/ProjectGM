@@ -52,6 +52,11 @@ export class FieldSystem {
     };
     this.fields.push(f);
     this.changed(f, 'start');
+    // opening pulse: the field hits as it opens (pulse 0 now, then every interval) — same pulse count over its life
+    if (definition.pulseOnStart && sourceAlive()) {
+      f.pulse();
+      this.pulsed(f, 0);
+    }
   }
 
   /** Call only during COMBAT. First pulse is delayed; large steps and final boundary are deterministic. */
@@ -60,10 +65,12 @@ export class FieldSystem {
       if (!f.sourceAlive()) { this.remove(f, 'SOURCE_DIED'); continue; }
       f.elapsed = Math.min(f.definition.duration, f.elapsed + dt);
       f.remaining = Math.max(0, f.definition.duration - f.elapsed);
-      while (f.nextPulse <= f.elapsed + 1e-9 && f.nextPulse <= f.definition.duration + 1e-9) {
+      const opening = !!f.definition.pulseOnStart;
+      while (f.nextPulse <= f.elapsed + 1e-9 &&
+        (opening ? f.nextPulse < f.definition.duration - 1e-9 : f.nextPulse <= f.definition.duration + 1e-9)) {
         if (!f.sourceAlive() || !this.fields.includes(f)) break;
         f.pulse();
-        this.pulsed(f, Math.round(f.nextPulse / f.definition.interval) - 1);
+        this.pulsed(f, Math.round(f.nextPulse / f.definition.interval) - (opening ? 0 : 1));
         f.nextPulse += f.definition.interval;
       }
       if (!f.sourceAlive()) this.remove(f, 'SOURCE_DIED');
