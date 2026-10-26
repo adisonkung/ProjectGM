@@ -45,7 +45,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-draeven-s1-eruption.png': { url: 'opt/fx-draeven-s1-eruption.webp' },
   'fx-draeven-s1-loop.png': { url: 'opt/fx-draeven-s1-loop.webp' },
   'fx-draeven-s2-charge.png': { url: 'opt/fx-draeven-s2-charge.webp' },
-  'fx-draeven-s2-wave.png': { url: 'opt/fx-draeven-s2-wave.webp', cols: 6, rows: 2 },
+  'fx-draeven-s2-wave.png': { url: 'opt/fx-draeven-s2-wave.webp' },
   'fx-draeven-ult-charge.png': { url: 'opt/fx-draeven-ult-charge.png' },
   'fx-dummy-bolt.png': { url: 'opt/fx-dummy-bolt.png' },
   'fx-elira-basic-light.png': { url: 'opt/fx-elira-basic-light.webp' },

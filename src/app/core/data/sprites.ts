@@ -273,13 +273,13 @@ export const SHEETS: Record<string, SheetDef> = {
       die: { row: 4, frames: 14, ms: 80 },
       // S1 Blood Debt: open-hand beckon taunt (28 frames × 57 ms = 1.6 s); the taunt lands at the full beckon F12
       skill: { row: 5, frames: 28, ms: 57, events: { CAST_START: 0, SKILL_ACTIVATE: 12, DAMAGE: 12, RECOVERY_START: 21 } },
-      // S2 Sovereign's Reprisal (user 2026-10-26: Charge → Character Attack → Large Crimson Sweep 1 × 3): the attack row —
-      // its first frame held 160 ms (idle → attack transition, under the charge swirl from 0.05 s), then the basic swing
-      // with the release on its slash F9 at 0.50 s = VFX_SPAWN (Crimson Wave F1 at max size) + DAMAGE; follow-through,
-      // recovery to 0.96 s. (The supplied release sheet with the baked wave stays in row 6, unused.)
-      skill2: { row: 3, frames: 21, ms: 40, seq: [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 16, 17, 18, 19, 20],
-        steps: [160, 45, 40, 40, 40, 40, 40, 35, 30, 30, 35, 60, 55, 45, 45, 40, 40, 40, 40, 60],
-        events: { CAST_START: 0, STRIKE_START: 8, VFX_SPAWN: 10, DAMAGE: 10, IMPACT: 10, RECOVERY_START: 13 },
+      // S2 Sovereign's Reprisal (user sheet 2026-10-22, baked slash / burst kept — user 2026-10-26 review: use the
+      // original S2 clip, hold the charge at F12): raise → sword drawn back = source frame 12 (row step 5) HELD 450 ms
+      // under the charge swirl → forward release F9 (STRIKE) → the baked burst + Crimson Wave F1 + DAMAGE at step 11
+      // (0.98 s) → crouched follow-through → back to stance. 1.83 s
+      skill2: { row: 6, frames: 27, ms: 50, seq: Array.from({ length: 27 }, (_, i) => i),
+        steps: [50, 50, 50, 50, 50, 450, 50, 60, 90, 40, 40, 50, 60, 60, 50, 50, 50, 50, 55, 55, 55, 55, 55, 55, 55, 55, 60],
+        events: { CAST_START: 0, CHARGE_START: 5, STRIKE_START: 9, VFX_SPAWN: 11, DAMAGE: 11, IMPACT: 11, RECOVERY_START: 16 },
         impact: { hitStopMs: 50, shakePx: 4, shakeMs: 140 } },
       // Ult Bloodwrought Execution (user sheet 2026-10-22, Timeline Sync pending): raise → crouch + spin for momentum
       // (no hit) → sword lowered behind the head to the horizontal wind-up F15 = HOLD / CHARGE 1.5 s (user: hold longer;
@@ -1281,18 +1281,18 @@ export const FX: Record<string, FxDef> = {
     orient: 'flip', pivot: [0.5, 0.7597], dx: -4 * 1.25, dy: 27.25 - 37 * 1.25, scale: 1 / 3,
   },
   // Draeven S2 Sovereign's Reprisal (user 2026-10-26, tools/sprites/draeven_s2_vfx.py, magenta-keyed; no impact VFX)
-  // Charge: from 0.05 s of the cast, 8 × 43.75 ms build (peak f7 at ~0.31–0.35 s), fades 0.40–0.50 s · ring ~1.4
-  // cells on his ground pivot, the crimson swirl over him (covers the idle → attack transition)
+  // Charge: from 0.05 s of the cast, 8 × 81.25 ms build to the end of the F12 hold (0.70 s, peak f7 ~0.6 s), fades 220 ms as the
+  // sword swings · ring ~1.4 cells on his ground pivot, the crimson swirl over him
   'dr-s2-charge': {
-    file: 'fx-draeven-s2-charge.png', frames: 8, w: 260, h: 231, frameMs: 43.75, delayMs: 50, fadeOutMs: 100,
+    file: 'fx-draeven-s2-charge.png', frames: 8, w: 260, h: 231, frameMs: 81.25, delayMs: 50, fadeOutMs: 220,
     at: 'self', on: 'cast', attach: true, orient: 'flip', pivot: [0.5, 0.8745], dy: 27.25, scale: 1 / 3,
   },
-  // Main Crimson Wave: VFX_SPAWN = the release / DAMAGE (0.50 s): F1 already at max size (~1.6 cells tall), then it
-  // shrinks away while its front edge sweeps down the 1 × 3 lane (1.6 → 3.6 cells ahead, baked) · 8 × 37.5 ms decay to
-  // 0.80 s + 200 ms fade · centred on his body height · strip pivot = his feet
+  // Main Crimson Wave: VFX_SPAWN = the release / DAMAGE (0.98 s): F1 already at max size (~1.9 cells tall) across the
+  // 1 × 3 front, then it shrinks away IN PLACE (review: no travel) — front edge fixed 2.9 cells ahead · 8 × 37.5 ms
+  // decay + 200 ms fade · centred on his body height · strip pivot = his feet
   'dr-s2-wave': {
-    file: 'fx-draeven-s2-wave.png', frames: 8, w: 624, h: 270, frameMs: 37.5, fadeOutMs: 200, at: 'self',
-    event: 'VFX_SPAWN', attach: false, orient: 'flip', pivot: [0.0321, 0.7963], dy: 27.25, scale: 1 / 3,
+    file: 'fx-draeven-s2-wave.png', frames: 8, w: 508, h: 311, frameMs: 37.5, fadeOutMs: 200, at: 'self',
+    event: 'VFX_SPAWN', attach: false, orient: 'flip', pivot: [0.0394, 0.7556], dy: 27.25, scale: 1 / 3,
   },
   'dr-ult-charge': {
     file: 'fx-draeven-ult-charge.png', frames: 25, w: 156, h: 90, frameMs: 60, at: 'self', orient: 'flip',

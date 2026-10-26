@@ -7,9 +7,9 @@ Sources (assets/heroes/Draeven/vfx/, 8 frames in one row on a magenta key):
 No separate impact VFX (user: cancelled).
 
 Charge: every frame on its ground-ring centre = his ground pivot (same method as draeven_s1_vfx.py).
-Wave: F1 is the biggest (the sword has already swung — no build-up), then it shrinks away. Each frame keeps the crescent's
-front (convex, right) edge on a travel path down the lane: from WAVE_FROM to WAVE_TO atlas px ahead of his feet (ease-out),
-so the sweep runs across the three cells in front of him while it decays. The crescent is centred on his body height
+Wave: F1 is the biggest (the sword has already swung — no build-up), then it shrinks away IN PLACE (user 2026-10-26
+review: no travel — a sweep across his front that stays put and fades). Every frame keeps the crescent's front (convex,
+right) edge at WAVE_FRONT atlas px ahead of his feet, so F1 spans the 1 × 3 cells in front of him. The crescent is centred on his body height
 (WAVE_Y atlas px above the feet). Baked at RES × atlas px — FxDef scale 1/3 (× FX_SCALE 1.5) = 1/RES atlas px.
 """
 import sys
@@ -25,8 +25,8 @@ from draeven_s1_vfx import RES, clean, ring, unmix  # noqa: E402
 N = 8
 CHARGE_RING = 112      # ring width of the peak frame (f7) in atlas px — ~1.4 cells around his feet
 CHARGE_PEAK = 6
-WAVE_H = 130           # F1 crescent height in atlas px (~1.6 cells: "Large Crimson Sweep")
-WAVE_FROM, WAVE_TO = 128, 290  # front edge ahead of the feet, F1 → F8 (cell 1 starts at 40, cell 3 ends at 280)
+WAVE_H = 150           # F1 crescent height in atlas px (~1.9 cells: "Large Crimson Sweep" over the 1 × 3 front)
+WAVE_FRONT = 232      # front edge ahead of the feet (cell 1 starts at 40, cell 3 ends at 280)
 WAVE_Y = 40            # crescent centre above the feet (his body centre)
 # drawn frame centres along the wave sheet (the small late frames break into pieces, so they are given, not searched)
 WAVE_CENTRES = [272, 700, 1045, 1358, 1640, 1905, 2165, 2412]
@@ -101,7 +101,7 @@ def wave(src: Path, out: Path):
     scale = WAVE_H * RES / (b0[3] - b0[1])
     cy = (b0[1] + b0[3]) / 2  # one vertical centre for the strip (the artist's row)
     # canvas around his feet (baked px): from just behind him to past the 3rd cell
-    left, right = -10 * RES, (WAVE_TO + 12) * RES
+    left, right = -10 * RES, (WAVE_FRONT + 12) * RES
     imgs = [to_img(f, scale) for f in frames]
     up = max(cy * scale - i.getbbox()[1] for i in imgs) + WAVE_Y * RES
     down = max(i.getbbox()[3] - cy * scale for i in imgs) - WAVE_Y * RES
@@ -109,8 +109,7 @@ def wave(src: Path, out: Path):
     cw, ch = right - left, bottom - top
     strip = Image.new('RGBA', (cw * N, ch))
     for k, (img, (x0, y0, x1, y1)) in enumerate(zip(imgs, boxes)):
-        t = k / (N - 1)
-        front = (WAVE_FROM + (WAVE_TO - WAVE_FROM) * (1 - (1 - t) ** 2)) * RES  # ease-out
+        front = WAVE_FRONT * RES
         x = front - x1 * scale - left
         y = -WAVE_Y * RES - cy * scale - top
         strip.alpha_composite(img, (int(round(k * cw + x)), int(round(y))))
