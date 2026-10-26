@@ -11,6 +11,11 @@ export type EquipmentArtFamily = 'sword' | 'armor' | 'necklace' | 'ring';
   host: { 'aria-hidden': 'true', '[class.moving]': 'moving()', '[attr.data-family]': 'family()', '[attr.data-tier]': 'rank()', '[style.--aura-color]': 'color()', '[style.--aura-strength]': 'strength()' },
   template: `
     <div class="bloom"></div>
+    @if (animated() && rank() > 1) {
+      <div class="radiance"></div>
+      <div class="summoning-plane"><svg viewBox="0 0 200 200" fill="none"><g class="orbit clockwise"><circle cx="100" cy="100" r="76"/><circle class="inner" cx="100" cy="100" r="67"/><circle class="sigil-ticks" cx="100" cy="100" r="72"/><path class="sigil-diamonds" d="M100 17 105 25 100 33 95 25Z M183 100 175 105 167 100 175 95Z M100 183 95 175 100 167 105 175Z M17 100 25 95 33 100 25 105Z"/><path class="comet" d="M100 24A76 76 0 0 1 176 100"/></g></svg></div>
+      @if (rank() > 2) { <svg class="ascendant-halo" viewBox="0 0 200 200" fill="none"><g class="orbit counter"><path class="halo-arc" d="M34 70A72 72 0 0 1 166 70 M166 130A72 72 0 0 1 34 130"/><path d="M100 21 104 31 100 41 96 31Z M179 100 169 104 159 100 169 96Z M100 179 96 169 100 159 104 169Z M21 100 31 96 41 100 31 104Z"/><circle class="head" cx="48" cy="48" r="1.6"/><circle class="head" cx="152" cy="152" r="1.6"/></g></svg> }
+    }
     @if (rank() > 1) {
       <div class="orbit-plane plane-one"><svg viewBox="0 0 200 200" fill="none"><g class="orbit clockwise"><circle cx="100" cy="100" r="78"/><circle class="inner" cx="100" cy="100" r="71"/><path class="comet" d="M100 22A78 78 0 0 1 178 100"/><circle class="head" cx="178" cy="100" r="2.2"/></g></svg></div>
       <div class="orbit-plane plane-two"><svg viewBox="0 0 200 200" fill="none"><g class="orbit counter"><circle cx="100" cy="100" r="74" stroke-dasharray="35 8 3 8"/><path class="comet" d="M26 100A74 74 0 0 0 100 174"/></g></svg></div>
@@ -40,6 +45,6 @@ export class EquipmentAuraComponent {
   readonly rank = computed(() => ({ COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5 })[this.rarity()]);
   readonly color = computed(() => ({ COMMON: '#c2d0df', UNCOMMON: '#63edac', RARE: '#70cfff', ELITE: '#d393ff', EPIC: '#ffc860' })[this.rarity()]);
   readonly strength = computed(() => [.1, .23, .43, .6, .82][this.rank() - 1]);
-  readonly particles = computed(() => Array.from({ length: [3, 8, 14, 20, 28][this.rank() - 1] }, (_, i) => ({ x: 12 + (i * 37 + 11) % 77, y: 17 + (i * 23 + 3) % 73, delay: -i * .47, duration: 2.7 + i % 5 * .43, drift: (i % 2 ? 1 : -1) * (8 + i % 13) })));
+  readonly particles = computed(() => Array.from({ length: [3, 10, 20, 28, 38][this.rank() - 1] }, (_, i) => ({ x: 12 + (i * 37 + 11) % 77, y: 17 + (i * 23 + 3) % 73, delay: -i * .47, duration: 2.7 + i % 5 * .43, drift: (i % 2 ? 1 : -1) * (8 + i % 13) })));
   @HostListener('document:visibilitychange') visibilityChanged(): void { this.hidden.set(this.document.hidden); }
 }

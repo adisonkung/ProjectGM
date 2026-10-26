@@ -48,3 +48,15 @@ Commonมีอาร์ตสำหรับของที่มีอยู�
 - ระบบแยกช่องสร้อย/แหวน/Relic, รวมweapon familiesเป็นดาบในระดับกติกา และหินผูกฮีโร่/แปลง1:1 ยังต้องทำแยก
 - ภาพฮีโร่สวมเกราะ/อาวุธจริงตามของที่ใส่ ยังไม่ได้ผลิตหรือเปลี่ยนsprite
 - ตรวจความสวยงามจากผู้ใช้ก่อน merge/Deploy; เมนูส่วนบนคงเวอร์ชันที่อนุมัติแล้ว และข้อมูลทรัพยากร/ภาพอุปกรณ์ใช้ของจริง จึงต่างจากรายละเอียดจำลองบางจุดในref
+
+## รอบปรับออร่าเพิ่ม — 26 ต.ค. 2026
+
+เพิ่มเฉพาะบนแท่น/เปิดรายละเอียด: วงเวทใต้ชิ้นงานหมุนพร้อมขีดรูนและอัญมณีสี่ทิศ, วงแสงชั้นนอกตั้งแต่ Rare, แสงเรืองหายใจ และประกายเพิ่มเป็น Common3 / Uncommon10 / Rare20 / Elite28 / Epic38 จุด ระดับ Epic เพิ่มรัศมีทอง ขนาดชิ้นงานและเลย์เอาต์คงเดิม; กระเป๋ายังคงออร่านิ่งชุดเดิม ไม่เพิ่มเลเยอร์เหล่านี้ให้รายการย่อย
+
+- [คลิปออร่ารอบใหม่ — เกมจริง](review/aura-enhanced/aura-showcase.mp4)
+- [ก่อน/หลัง — ภาพเกมจริง](review/aura-enhanced/before-after.webp)
+- [เกมจริงเทียบอ้างอิง](review/aura-enhanced/reference-comparison.webp)
+- [Rare บนแท่น](review/aura-enhanced/forge-rare-desktop.webp) · [Epic บนแท่น](review/aura-enhanced/forge-epic-desktop.webp) · [Epic เปิดดูใหญ่](review/aura-enhanced/inspect-epic-desktop.webp) · [มือถือ](review/aura-enhanced/forge-epic-mobile.webp)
+- [ผลตรวจ browser](review/aura-enhanced/validation.json): วงเวทหมุนจริง, Rare/Epicจำนวนประกายถูกต้อง, reduced-motionหยุดเอฟเฟค, กระเป๋าไม่มีเลเยอร์ใหม่, ไม่มีภาพหาย/console error/แนวนอนล้น
+
+ภาพนิ่งรอบนี้เปิดmotionตามปกติเพื่อเห็นเอฟเฟคพร้อมประกาย ไม่แต่งภาพเกม ภาพก่อนหน้าใช้reduced-motion จึงต่างกันทั้งตำแหน่งวงแสงและจังหวะประกาย ทดสอบapp/spec typecheck, build และ827unit testsผ่าน ยังคงมีstylesheet budget warningsตามที่ระบุไว้ และยังรอตรวจภาพก่อน merge/Deploy
