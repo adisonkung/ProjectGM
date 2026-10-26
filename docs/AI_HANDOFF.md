@@ -9,7 +9,8 @@ Branch `wip/claude-hero-mordrienne` from origin/master 43b1099. User supplied id
 - Sources tracked unchanged in `assets/heroes/Mordrienne/` → `tools/sprites/mordrienne.py` → `hero-mordrienne.png` (31 × 8, 260 × 170), `portraits/mordrienne.webp`, `fx-mordrienne-hex-bolt.png` (procedural provisional bolt). `npm run sprites:optimize` run.
 - Kit + statuses (`hex_mark`, `cinder_hex`, `ash_curse`) + generic engine additions: `DAMAGE.bonusVsStatus`, `DAMAGE.requireStatus`, `StatusModifiers.castSpeedMultiplier`.
 - Validation: app/spec typecheck, Karma 842/842. hero-sim 10 runs with her in the starter team runs clean (no balance pass).
-- Pending: dedicated VFX (hex circle, curse field, snake / skull / broken runes), real attack / hurt sheets, UI art (icons, banner, portrait), Timeline Sync. Not merged; awaiting review.
+- S1 Ashen Mark Timeline Sync (same branch): user VFX `assets/heroes/Mordrienne/vfx/Mordrienne_S1_*_VFX.png` → `tools/sprites/mordrienne_s1_vfx.py` (charge baked along the wand tip, Hex Bolt projectile with the new generic `FxDef.muzzle` / `projectileOrigin()`, Hex Mark as `statusFx`); S1 clip retimed: CAST_START 0.05 s, release 0.30 s, recovery 0.71 s, end 1.11 s. Sync sheet + preview script `tools/sprites/mordrienne_s1_sync.py` → `docs/timelines/mordrienne/`. Assumption: first supplied sigil sheet = CastCharge, second = HexMark. Karma 843/843.
+- Pending: dedicated S2 / Ult VFX (hex circle, curse field, snake / skull / broken runes), real attack / hurt sheets, UI art (icons, banner, portrait), Timeline Sync. Not merged; awaiting review.
 
 ## Previous task — lane-first combat advance (Claude, 2026-10-26)
 

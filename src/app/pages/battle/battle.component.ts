@@ -32,7 +32,7 @@ import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
-import { animOf, appliedStatusFx, retaliateFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, SHEETS, SkillKind } from '../../core/data/sprites';
+import { animOf, appliedStatusFx, retaliateFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, projectileOrigin, SHEETS, SkillKind } from '../../core/data/sprites';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
@@ -1077,7 +1077,8 @@ export class BattleComponent implements OnDestroy {
           const to = { x: q.c, y: q.r + SCENERY_ROWS };
           // ตกจากฟ้า: เริ่มเหนือเป้า 3 ช่อง เยื้องมาทางฝั่งผู้ยิง
           const dir = isPlayerUnit(src) ? -1 : 1;
-          const from = e.sky ? { x: to.x + dir * 1.2, y: to.y - 3.2 } : { x: p.c, y: p.r + SCENERY_ROWS };
+          const from = e.sky ? { x: to.x + dir * 1.2, y: to.y - 3.2 }
+            : projectileOrigin(name, { x: p.c, y: p.r + SCENERY_ROWS }, to.x, -dir);
           // piercing blade: keeps flying past the target at the same speed (visual only — damage already timed)
           let end = to, flight = e.flight * 1000;
           const over = FX[name].overshoot;

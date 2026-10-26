@@ -217,6 +217,19 @@ export interface FxDef {
    * ที่ทะลุไปหาตัวหลัง · เฟรมสุดท้าย (จาง) แสดงที่ปลายทาง
    */
   overshoot?: number;
+  /**
+   * projectiles: where the shot leaves the shooter, as [dx, dy] in % of a cell from the default origin (cell centre,
+   * 42 % height) — dx mirrored with the shooter's facing (e.g. a wand tip; Mordrienne S1 Hex Bolt)
+   */
+  muzzle?: [number, number];
+}
+
+/** a projectile's start point (board cells): the shooter's cell, moved by the FX `muzzle` mirrored with the facing */
+export function projectileOrigin(name: string, from: { x: number; y: number }, toX: number, fallbackFace = 1): { x: number; y: number } {
+  const mz = FX[name]?.muzzle;
+  if (!mz) return from;
+  const face = Math.sign(toX - from.x) || fallbackFace;
+  return { x: from.x + (face * mz[0]) / 100, y: from.y + mz[1] / 100 };
 }
 
 /** เวลาต่อเฟรมปกติ และของท่ายืน (ช้ากว่า ไม่เร่งตามความเร็วการต่อสู้) */
@@ -262,7 +275,10 @@ export const SHEETS: Record<string, SheetDef> = {
   'hero-mordrienne.png': {
     cols: 31, rows: 8, cellW: 260, cellH: 170,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
-    projectile: { attack: 'mo-hex-bolt', skill: 'mo-hex-bolt' },
+    projectile: { attack: 'mo-hex-bolt', skill: 'mo-s1-bolt' },
+    fx: { skill: 'mo-s1-charge' },
+    // Hex Mark: appears on the hit and lives exactly as long as the status
+    statusFx: { hex_mark: { start: 'mo-s1-mark-in', loop: 'mo-s1-mark' } },
     anims: {
       idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
       // provisional: the first stagger of the death sheet
@@ -271,10 +287,12 @@ export const SHEETS: Record<string, SheetDef> = {
       attack: { row: 3, frames: 10, ms: 70, seq: Array.from({ length: 10 }, (_, i) => i),
         steps: [70, 80, 70, 60, 70, 90, 80, 70, 70, 80], events: { DAMAGE: 4, RECOVERY_START: 6 } },
       die: { row: 4, frames: 14, ms: 80 },
-      // S1 Ashen Mark: ready → wand raised → thrust F13 → spark at the tip F14 = the bolt leaves (DAMAGE) → hold → recover · 1.22 s
-      skill: { row: 5, frames: 19, ms: 60, seq: Array.from({ length: 19 }, (_, i) => i),
-        steps: [90, 80, 80, 70, 60, 60, 50, 70, 70, 60, 55, 55, 55, 55, 55, 55, 55, 60, 80],
-        events: { CAST_START: 0, STRIKE_START: 6, DAMAGE: 7, RECOVERY_START: 12 } },
+      // S1 Ashen Mark — Timeline Sync (user 2026-10-26): idle 0.00 → aim + CastCharge at the wand tip 0.05 (CAST_START)
+      // → wand-release frame (source F13) 0.30 s = DAMAGE → the Hex Bolt leaves the tip (muzzle) → flight → hit =
+      // magic damage + Hex Mark status + HexMark VFX → recovery 0.71 s → idle 1.11 s
+      skill: { row: 5, frames: 17, ms: 60, seq: Array.from({ length: 17 }, (_, i) => i),
+        steps: [50, 45, 45, 45, 55, 60, 120, 80, 70, 70, 70, 60, 60, 60, 60, 70, 90],
+        events: { CAST_START: 1, ANTICIPATION_PEAK: 5, STRIKE_START: 6, DAMAGE: 6, RECOVERY_START: 11 } },
       // S2 Cinderbind Hex: raise → STRIKE 1 (hex placed, VFX_SPAWN) → twirl at the chest = charge → raise → STRIKE 2
       // = activation (DAMAGE) → hold → recover · 1.90 s
       skill2: { row: 6, frames: 30, ms: 60, seq: Array.from({ length: 30 }, (_, i) => i),
@@ -1454,6 +1472,28 @@ export const FX: Record<string, FxDef> = {
     hitIndex: 2, perHit: 1, exceptPrimary: true, pivot: [0.4968, 0.8935], dy: 27.25, scale: 1 / 1.5,
   },
   'linxue-lotus': { file: 'fx-linxue-lotus.png', frames: 1, w: 22, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.3, noRotate: true, pixelated: true },
+  // Mordrienne S1 Ashen Mark (tools/sprites/mordrienne_s1_vfx.py, baked at 2 × atlas px, pixelated). CastCharge: baked
+  // along the clip's wand tip on a canvas anchored at her feet — grows f1 → f5 from 0.05 s to the release (0.30 s),
+  // collapses in 75 ms
+  'mo-s1-charge': {
+    file: 'fx-mordrienne-s1-charge.png', frames: 13, w: 186, h: 226, frameMs: 25, delayMs: 50, at: 'self', on: 'cast',
+    pivot: [0.0269, 0.9956], dy: 27.25, scale: 1 / 3, pixelated: true,
+  },
+  // Hex Bolt: f1 spawn orb at the wand tip (muzzle = release tip, atlas (203, 96)) → f6 full bolt, tip leading;
+  // last frame = ash-rune dispersal at the target
+  'mo-s1-bolt': {
+    file: 'fx-mordrienne-s1-bolt.png', frames: 7, w: 248, h: 82, frameMs: 60, at: 'target', angle0: 0,
+    scale: 1 / 2.6, pixelated: true, muzzle: [91.25, -38.5],
+  },
+  // Hex Mark on the target's upper body: appear (f1 → f5 burst → settle) then a breathing loop while the status lasts
+  'mo-s1-mark-in': {
+    file: 'fx-mordrienne-s1-mark-in.png', frames: 9, w: 88, h: 118, frameMs: 40, at: 'target',
+    dy: -10.25, scale: 1 / 3, pixelated: true, attach: true,
+  },
+  'mo-s1-mark': {
+    file: 'fx-mordrienne-s1-mark.png', frames: 4, w: 88, h: 118, frameMs: 100, delayMs: 360, at: 'target',
+    dy: -10.25, scale: 1 / 3, pixelated: true, attach: true,
+  },
   // Mordrienne provisional hex bolt (procedural, tools/sprites/mordrienne.py): 4 flight frames + impact ring
   'mo-hex-bolt': { file: 'fx-mordrienne-hex-bolt.png', frames: 5, w: 48, h: 48, frameMs: 60, at: 'target', angle0: 0, scale: 0.6 },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },

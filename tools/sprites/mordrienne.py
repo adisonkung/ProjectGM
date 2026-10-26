@@ -55,8 +55,10 @@ ROWS = [
     ('hurt', 'death', [9, 11, 11]),                                            # 3 · provisional: stagger of death
     ('attack', 's1', [8, 11, 12, 13, 14, 16, 23, 25, 27, 30]),                 # 10 · provisional: S1 point → release
     ('die', 'death', [9, 11, 12, 13, 14, 16, 20, 24, 25, 26, 27, 28, 30, 32]),  # 14
-    # 19 · S1 Ashen Mark: ready → wand raised F11–F12 → thrust F13 → spark at the tip F14 (release) → hold → recover
-    ('skill', 's1', [0, 4, 8, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 23, 24, 25, 26, 28, 32]),
+    # 17 · S1 Ashen Mark (Timeline Sync 2026-10-26): ready → aim / wand raised F11–F12 → thrust F13 = wand-release frame
+    #      (the Hex Bolt leaves the tip) → hold → recover. The baked gold spark frames F14–F16 are skipped — the
+    #      dedicated Deep Emerald VFX (CastCharge / HexBolt / HexMark) replace them
+    ('skill', 's1', [0, 4, 8, 10, 11, 12, 13, 17, 18, 20, 22, 23, 24, 25, 26, 28, 32]),
     # 30 · S2 Cinderbind Hex: raise → STRIKE 1 F13 (thrust: place the hex) → hold → twirl at the chest F21–F27 (charge)
     #      → raise F28–F30 → STRIKE 2 F32 (activate) → hold → recover
     ('skill2', 's2', [0, 2, 4, 6, 8, 10, 11, 12, 13, 15, 17, 19, 20, 21, 22, 24, 26, 27, 28, 29, 30, 31, 32, 34, 36,

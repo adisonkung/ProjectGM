@@ -2,7 +2,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { CLASS_KITS, kitOf } from '../../core/data/hero-skills';
 import { HERO_ART } from '../../core/data/hero-art';
-import { animEvents, FX, SHEETS } from '../../core/data/sprites';
+import { animEvents, FX, projectileOrigin, SHEETS } from '../../core/data/sprites';
 import { OwnedHero } from '../../core/models/hero';
 import { EnemyPlacement, StageDef } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
@@ -13,16 +13,16 @@ import { hasFlag, hasStatus, modifier } from './buffs';
 
 /** Mordrienne Vale (Mage — Control / Debuff, Phase A): Hex Mark · Cinderbind Hex · House of Ashes */
 describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
-  it('31 × 8 atlas 260 × 170: idle 12 · walk 8 · hurt 3 · attack 10 · die 14 · S1 19 · S2 30 · Ult 31 + hex bolt', () => {
+  it('31 × 8 atlas 260 × 170: idle 12 · walk 8 · hurt 3 · attack 10 · die 14 · S1 17 · S2 30 · Ult 31 + hex bolt', () => {
     const sh = SHEETS['hero-mordrienne.png'];
     expect([sh.cols, sh.rows, sh.cellW, sh.cellH, !!sh.pixelated]).toEqual([31, 8, 260, 170, false]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die', 'skill', 'skill2', 'ult'] as const).map(k => [a[k]!.row, a[k]!.frames]))
-      .toEqual([[0, 12], [1, 8], [2, 3], [3, 10], [4, 14], [5, 19], [6, 30], [7, 31]]);
+      .toEqual([[0, 12], [1, 8], [2, 3], [3, 10], [4, 14], [5, 17], [6, 30], [7, 31]]);
     for (const k of ['attack', 'skill', 'skill2', 'ult'] as const) expect(a[k]!.steps!.length).toBe(a[k]!.frames);
     expect(HERO_BY_ID['mordrienne']).toEqual(jasmine.objectContaining({ cls: 'mage', star: 3, sprite: 'hero-mordrienne.png' }));
     expect(HERO_ART['mordrienne']).toEqual({ portrait: 'portraits/mordrienne.webp' });
-    expect(sh.projectile).toEqual({ attack: 'mo-hex-bolt', skill: 'mo-hex-bolt' });
+    expect(sh.projectile).toEqual({ attack: 'mo-hex-bolt', skill: 'mo-s1-bolt' });
     expect(FX['mo-hex-bolt'].file).toBe('fx-mordrienne-hex-bolt.png');
   });
 
@@ -30,13 +30,38 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     const at = (k: 'attack' | 'skill' | 'skill2' | 'ult', ev: string) =>
       animEvents('hero-mordrienne.png', k).filter(e => e.event === ev).map(e => Math.round(e.t * 1000));
     expect(at('attack', 'DAMAGE')).toEqual([280]);
-    expect(at('skill', 'DAMAGE')).toEqual([490]);
+    expect(at('skill', 'DAMAGE')).toEqual([300]);
     expect(at('skill2', 'DAMAGE').length).toBe(1);
     expect(at('skill2', 'VFX_SPAWN')[0]).toBeLessThan(at('skill2', 'CHARGE_START')[0]);
     expect(at('skill2', 'CHARGE_START')[0]).toBeLessThan(at('skill2', 'DAMAGE')[0]);
     expect(at('ult', 'DAMAGE').length).toBe(1);
     expect(at('ult', 'STRIKE_START')[0] - at('ult', 'CHARGE_PEAK')[0]).toBe(500);
     expect(at('ult', 'DAMAGE')[0]).toBeGreaterThan(at('ult', 'STRIKE_START')[0]);
+  });
+
+  it('S1 Timeline Sync: charge at the wand tip from 0.05 s to the release 0.30 s, bolt from the muzzle, Hex Mark owned by the status', () => {
+    const sh = SHEETS['hero-mordrienne.png'];
+    const at = (ev: string) => animEvents('hero-mordrienne.png', 'skill').filter(e => e.event === ev).map(e => Math.round(e.t * 1000));
+    expect(at('CAST_START')).toEqual([50]);
+    expect(at('DAMAGE')).toEqual([300]);
+    expect(at('RECOVERY_START')).toEqual([710]);
+    expect(sh.anims.skill!.steps!.reduce((a, b) => a + b, 0)).toBe(1110);
+    const ch = FX['mo-s1-charge'];
+    expect(sh.fx!.skill).toBe('mo-s1-charge');
+    expect([ch.on, ch.delayMs, ch.pixelated]).toEqual(['cast', 50, true]);
+    // grows until the release, then collapses in 3 frames — never replays after the launch
+    expect(ch.delayMs! + (ch.frames - 3) * ch.frameMs).toBe(300);
+    const bolt = FX['mo-s1-bolt'];
+    expect(bolt.muzzle).toEqual([91.25, -38.5]);
+    expect([bolt.angle0, bolt.noRotate, bolt.pixelated]).toEqual([0, undefined, true]);
+    expect(sh.statusFx!['hex_mark']).toEqual({ start: 'mo-s1-mark-in', loop: 'mo-s1-mark' });
+    const mi = FX['mo-s1-mark-in'], ml = FX['mo-s1-mark'];
+    expect(ml.delayMs).toBe(mi.frames * mi.frameMs);
+    expect([mi.attach, ml.attach]).toEqual([true, true]);
+    // the muzzle mirrors with the facing
+    expect(projectileOrigin('mo-s1-bolt', { x: 3, y: 4 }, 8)).toEqual({ x: 3 + 0.9125, y: 4 - 0.385 });
+    expect(projectileOrigin('mo-s1-bolt', { x: 8, y: 4 }, 3)).toEqual({ x: 8 - 0.9125, y: 4 - 0.385 });
+    expect(projectileOrigin('mo-hex-bolt', { x: 3, y: 4 }, 8)).toEqual({ x: 3, y: 4 });
   });
 
   it('kit keeps the Mage class ids + cooldowns; control, not burst: no shield / heal / interrupt / Break', () => {

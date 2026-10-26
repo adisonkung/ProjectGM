@@ -17,7 +17,7 @@ import { MONSTERS } from '../../core/data/monsters';
 import { HEROES } from '../../core/data/heroes';
 import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxAttached, fxFor, fxOffset, FxTrigger, FRAME_MS, IDLE_FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
 import { kitOf } from '../../core/data/hero-skills';
-import { appliedStatusFx } from '../../core/data/sprites';
+import { appliedStatusFx, projectileOrigin } from '../../core/data/sprites';
 import { STATUS_ICONS } from '../../core/data/visuals';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
@@ -315,7 +315,8 @@ export class SpriteLabComponent implements OnDestroy {
     const flight = 0.1 + 0.06 * Math.max(Math.abs(target.c - me.c), Math.abs(target.r - me.r));
     if (name && FX[name]) {
       const p: ProjectileView = { id: ++this.id, name,
-        from: { x: me.c, y: me.r + SCENERY_ROWS }, to: { x: target.c, y: target.r + SCENERY_ROWS }, flight: flight * 1000 };
+        from: projectileOrigin(name, { x: me.c, y: me.r + SCENERY_ROWS }, target.c), to: { x: target.c, y: target.r + SCENERY_ROWS },
+        flight: flight * 1000 };
       this.projectiles.update(l => [...l, p]);
       this.at(projectileLife(p.flight) / 1000, () => this.projectiles.update(l => l.filter(x => x.id !== p.id)));
     }
@@ -409,7 +410,7 @@ export class SpriteLabComponent implements OnDestroy {
           if (name && FX[name]) {
             const p: ProjectileView = { id: ++this.id, name, flight: e.flight * 1000,
               from: e.sky ? { x: to.c + (from.c < to.c ? -1.2 : 1.2), y: to.r + SCENERY_ROWS - 3.2 }
-                : { x: from.c, y: from.r + SCENERY_ROWS }, to: { x: to.c, y: to.r + SCENERY_ROWS } };
+                : projectileOrigin(name, { x: from.c, y: from.r + SCENERY_ROWS }, to.c), to: { x: to.c, y: to.r + SCENERY_ROWS } };
             this.projectiles.update(l => [...l, p]);
             this.at(projectileLife(p.flight) / 1000, () => this.projectiles.update(l => l.filter(x => x.id !== p.id)));
           }
