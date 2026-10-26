@@ -20,7 +20,8 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect((['idle', 'walk', 'hurt', 'attack', 'die', 'skill', 'skill2', 'ult'] as const).map(k => [a[k]!.row, a[k]!.frames]))
       .toEqual([[0, 12], [1, 8], [2, 3], [3, 21], [4, 14], [5, 28], [6, 27], [7, 28]]);
     expect(HERO_BY_ID['draeven']).toEqual(jasmine.objectContaining({ cls: 'tank', star: 3, sprite: 'hero-draeven.png' }));
-    expect(HERO_ART['draeven']).toEqual({ portrait: 'portraits/draeven.webp' });
+    expect(HERO_ART['draeven']).toEqual({ portrait: 'portraits/draeven.webp', s1: 'skills/draeven-s1.webp', s2: 'skills/draeven-s2.webp',
+      ult: 'skills/draeven-ult.webp', banner: 'banners/draeven.webp' });
   });
 
   it('timings: attack 0.8 s (damage 0.34 s) · S1 1.6 s · S2 one hit · ult holds the charge 1.5 s, then ONE final hit', () => {

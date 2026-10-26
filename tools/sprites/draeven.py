@@ -176,7 +176,11 @@ def main():
         meta[anim] = {'row': row, 'frames': len(picks), 'source': sheet, 'sourceFrames': picks}
     out.mkdir(parents=True, exist_ok=True)
     Image.fromarray(atlas).save(out / 'hero-draeven.png', optimize=True)
-    portrait(src / 'reference/draeven_master_reference.png', portraits / 'draeven.webp')
+    if (src / 'art/portrait.png').is_file():  # the user's painted UI art (2026-10-26) wins over the reference crop
+        import draeven_art
+        draeven_art.bake_ui(src / 'art', portraits.parent)
+    else:
+        portrait(src / 'reference/draeven_master_reference.png', portraits / 'draeven.webp')
     body = atlas[:CELL_H, :CELL_W, 3] > 96
     ys = np.nonzero(body.any(1))[0]
     print(json.dumps({'cols': COLS, 'rows': len(ROWS), 'idleBody': int(ys.max() - ys.min() + 1), 'rows_meta': meta,
