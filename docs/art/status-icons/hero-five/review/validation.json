@@ -1,0 +1,21 @@
+{
+  "errors": [],
+  "missing": [],
+  "screens": [
+    "all36-desktop",
+    "new-five-desktop",
+    "all36-mobile",
+    "garrick-s1-desktop",
+    "garrick-s1-landscape",
+    "garrick-ult-desktop",
+    "tangxun-s2-desktop"
+  ],
+  "checks": [
+    "Five requested existing IDs now have artwork and are in display allowlist;36total statuses",
+    "Garrick actual engine S1 produces taunt_guard/brace_counter on caster; Ultimate produces gate_ward/gate_stance",
+    "TangXun actual engine S2 applies open_wound after third projectile hit",
+    "Real remaining duration ticks; no fallback glyphs for known states",
+    "Catalog desktop1440/mobile390 and engine desktop/landscape844; no horizontal overflow",
+    "Preview does not change save; no engine effects, durations or stats changed"
+  ]
+}

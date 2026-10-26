@@ -57,7 +57,10 @@ export const mockVisualOf = (id: string | undefined): MockVisual | undefined => 
 };
 
 /** status → small icon over the head (mock mode and real art alike) */
+// Display allowlist. Board renders generated art by ID; these strings are legacy metadata.
 export const STATUS_ICONS: Record<string, string> = {
+  taunt_guard: 'ตั้งรับ', open_wound: 'แผลเปิด', brace_counter: 'ตั้งรับสวนกลับ',
+  gate_ward: 'ประตูเหล็ก', gate_stance: 'ยืนหยัด',
   curse_mark: '☠',
   blood_debt: '🩸',
   blood_brand: '⛧',

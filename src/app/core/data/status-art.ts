@@ -186,5 +186,35 @@ export const STATUS_ART: Readonly<Record<string, StatusArt>> = {
     "sheet": "/ui/status/fury.webp",
     "col": 0,
     "row": 2
+  },
+  "taunt_guard": {
+    "label": "ตั้งรับ",
+    "sheet": "/ui/status/hero-guards.webp",
+    "col": 0,
+    "row": 0
+  },
+  "open_wound": {
+    "label": "แผลเปิด",
+    "sheet": "/ui/status/hero-guards.webp",
+    "col": 1,
+    "row": 0
+  },
+  "brace_counter": {
+    "label": "ตั้งรับสวนกลับ",
+    "sheet": "/ui/status/hero-guards.webp",
+    "col": 2,
+    "row": 0
+  },
+  "gate_ward": {
+    "label": "ประตูเหล็ก",
+    "sheet": "/ui/status/hero-guards.webp",
+    "col": 0,
+    "row": 1
+  },
+  "gate_stance": {
+    "label": "ยืนหยัด",
+    "sheet": "/ui/status/hero-guards.webp",
+    "col": 1,
+    "row": 1
   }
 };

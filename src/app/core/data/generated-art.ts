@@ -1031,5 +1031,12 @@ export const GENERATED_ART: readonly GeneratedArtEntry[] = [
     "group": "affix-atlas",
     "url": "/ui/affixes/offense.webp",
     "status": "active"
+  },
+  {
+    "id": "status-atlas/hero-guards",
+    "label": "Hero guard states ·5icons",
+    "group": "status-atlas",
+    "url": "/ui/status/hero-guards.webp",
+    "status": "active"
   }
 ];
