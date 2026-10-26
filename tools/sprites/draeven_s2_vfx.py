@@ -3,14 +3,14 @@
 python3 tools/sprites/draeven_s2_vfx.py [source dir] [out dir]
 Sources (assets/heroes/Draeven/vfx/, 8 frames in one row on a magenta key):
   Draeven_S2_Charge_VFX.png      (2172 × 724) → fx-draeven-s2-charge.png  ground ring + crimson swirl around him
-  Draeven_S2_CrimsonWave_VFX.png (2508 × 627) → fx-draeven-s2-wave.png    the 1 × 3 sweep in front of him
+  Draeven_S2_CrimsonWave_VFX.png (2508 × 627) → fx-draeven-s2-wave.png    the slash on the column in front of him
 No separate impact VFX (user: cancelled).
 
 Charge: every frame on its ground-ring centre = his ground pivot (same method as draeven_s1_vfx.py).
 Wave: F1 is the biggest (the sword has already swung — no build-up), then it shrinks away IN PLACE (user 2026-10-26
-review: no travel — a sweep across his front that stays put and fades). Every frame keeps the crescent's front (convex,
-right) edge at WAVE_FRONT atlas px ahead of his feet, so F1 spans the 1 × 3 cells in front of him. The crescent is centred on his body height
-(WAVE_Y atlas px above the feet). Baked at RES × atlas px — FxDef scale 1/3 (× FX_SCALE 1.5) = 1/RES atlas px.
+review: no travel — it stays put and fades). Review 2: the slash sits ONE cell ahead — centred on the middle of the
+front cell (his lane), F1 two cells tall so it reaches half-way into the lanes above and below (the damage column:
+up / front / down). Every frame keeps its box centre on that point (WAVE_CX ahead of the feet, WAVE_CY above them). Baked at RES × atlas px — FxDef scale 1/3 (× FX_SCALE 1.5) = 1/RES atlas px.
 """
 import sys
 from pathlib import Path
@@ -25,9 +25,10 @@ from draeven_s1_vfx import RES, clean, ring, unmix  # noqa: E402
 N = 8
 CHARGE_RING = 112      # ring width of the peak frame (f7) in atlas px — ~1.4 cells around his feet
 CHARGE_PEAK = 6
-WAVE_H = 150           # F1 crescent height in atlas px (~1.9 cells: "Large Crimson Sweep" over the 1 × 3 front)
-WAVE_FRONT = 232      # front edge ahead of the feet (cell 1 starts at 40, cell 3 ends at 280)
-WAVE_Y = 40            # crescent centre above the feet (his body centre)
+CELL = 80              # atlas px per board cell
+WAVE_H = 2 * CELL      # F1 height: half of the lane above + the front cell + half of the lane below
+WAVE_CX = CELL         # centre of the front cell, ahead of his feet
+WAVE_CY = 0.2725 * CELL  # the cell centre above the feet (feet sit at dy 27.25 % of a cell)
 # drawn frame centres along the wave sheet (the small late frames break into pieces, so they are given, not searched)
 WAVE_CENTRES = [272, 700, 1045, 1358, 1640, 1905, 2165, 2412]
 
@@ -99,20 +100,21 @@ def wave(src: Path, out: Path):
         boxes.append((xs.min(), ys.min(), xs.max(), ys.max()))
     b0 = boxes[0]
     scale = WAVE_H * RES / (b0[3] - b0[1])
-    cy = (b0[1] + b0[3]) / 2  # one vertical centre for the strip (the artist's row)
-    # canvas around his feet (baked px): from just behind him to past the 3rd cell
-    left, right = -10 * RES, (WAVE_FRONT + 12) * RES
     imgs = [to_img(f, scale) for f in frames]
-    up = max(cy * scale - i.getbbox()[1] for i in imgs) + WAVE_Y * RES
-    down = max(i.getbbox()[3] - cy * scale for i in imgs) - WAVE_Y * RES
-    top, bottom = -int(np.ceil(up)) - 2, int(np.ceil(max(down, 0))) + 2
+    cx, cy = WAVE_CX * RES, -WAVE_CY * RES  # frame centre relative to his feet (baked px, y down)
+    # each frame's box centre sits on (cx, cy); the canvas is the union around the feet
+    placed = []
+    for img in imgs:
+        bx0, by0, bx1, by1 = img.getbbox()
+        placed.append((img, cx - (bx0 + bx1) / 2, cy - (by0 + by1) / 2))
+    left = int(np.floor(min(0, min(x + i.getbbox()[0] for i, x, _ in placed)))) - 2
+    right = int(np.ceil(max(x + i.getbbox()[2] for i, x, _ in placed))) + 2
+    top = int(np.floor(min(y + i.getbbox()[1] for i, _, y in placed))) - 2
+    bottom = int(np.ceil(max(0, max(y + i.getbbox()[3] for i, _, y in placed)))) + 2
     cw, ch = right - left, bottom - top
     strip = Image.new('RGBA', (cw * N, ch))
-    for k, (img, (x0, y0, x1, y1)) in enumerate(zip(imgs, boxes)):
-        front = WAVE_FRONT * RES
-        x = front - x1 * scale - left
-        y = -WAVE_Y * RES - cy * scale - top
-        strip.alpha_composite(img, (int(round(k * cw + x)), int(round(y))))
+    for k, (img, x, y) in enumerate(placed):
+        strip.alpha_composite(img, (int(round(k * cw + x - left)), int(round(y - top))))
     strip.save(out, optimize=True)
     return {'frames': N, 'w': cw, 'h': ch, 'pivot': [round(-left / cw, 4), round(-top / ch, 4)], 'scale': round(scale, 4)}
 

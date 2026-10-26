@@ -63,8 +63,6 @@ export const GROUND_SHAPES: Partial<Record<AreaPattern, [number, number, boolean
   FRONT_T3: [[1, 0, true], [1, -1, false], [1, 1, false]],
   // Two columns strictly forward, ±1 lane; the directly adjacent front cell remains the main cell.
   FRONT_RECT_2X3: [[1, 0, true], [1, -1, false], [1, 1, false], [2, 0, false], [2, -1, false], [2, 1, false]],
-  // the 3 cells straight ahead, the first main (Draeven Sovereign's Reprisal: a 1 × 3 crimson sweep)
-  FRONT_LINE_3: [[1, 0, true], [2, 0, false], [3, 0, false]],
   // the 4 cells straight ahead, all main (Kael Ashen Rupture: one sword wave down the lane)
   FRONT_LINE_4: [[1, 0, true], [2, 0, true], [3, 0, true], [4, 0, true]],
 };
@@ -152,7 +150,6 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
     case 'FRONT_CROSS':
     case 'FRONT_T3':
     case 'FRONT_RECT_2X3':
-    case 'FRONT_LINE_3':
     case 'FRONT_LINE_4':
       // ground-targeted: every unit in the shape's cells (any number stacked), main cells first
       hit = candidates.filter(u => groundCell(pattern, caster, primary, candidates, u) !== null);

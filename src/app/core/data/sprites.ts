@@ -1287,12 +1287,12 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-draeven-s2-charge.png', frames: 8, w: 260, h: 231, frameMs: 81.25, delayMs: 50, fadeOutMs: 220,
     at: 'self', on: 'cast', attach: true, orient: 'flip', pivot: [0.5, 0.8745], dy: 27.25, scale: 1 / 3,
   },
-  // Main Crimson Wave: VFX_SPAWN = the release / DAMAGE (0.98 s): F1 already at max size (~1.9 cells tall) across the
-  // 1 × 3 front, then it shrinks away IN PLACE (review: no travel) — front edge fixed 2.9 cells ahead · 8 × 37.5 ms
-  // decay + 200 ms fade · centred on his body height · strip pivot = his feet
+  // Main Crimson Wave: VFX_SPAWN = the release / DAMAGE (0.98 s): F1 already at max size, then it shrinks away IN PLACE
+  // (no travel) · review 2: ONE cell ahead — centred on the middle of the front cell, F1 two cells tall (half of the
+  // lanes above and below = the damage column up / front / down) · 8 × 37.5 ms decay + 200 ms fade · pivot = his feet
   'dr-s2-wave': {
-    file: 'fx-draeven-s2-wave.png', frames: 8, w: 508, h: 311, frameMs: 37.5, fadeOutMs: 200, at: 'self',
-    event: 'VFX_SPAWN', attach: false, orient: 'flip', pivot: [0.0394, 0.7556], dy: 27.25, scale: 1 / 3,
+    file: 'fx-draeven-s2-wave.png', frames: 8, w: 313, h: 331, frameMs: 37.5, fadeOutMs: 200, at: 'self',
+    event: 'VFX_SPAWN', attach: false, orient: 'flip', pivot: [0.0064, 0.6314], dy: 27.25, scale: 1 / 3,
   },
   'dr-ult-charge': {
     file: 'fx-draeven-ult-charge.png', frames: 25, w: 156, h: 90, frameMs: 60, at: 'self', orient: 'flip',

@@ -161,7 +161,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(f.hp).toBe(fhp);
   });
 
-  it('Sovereign\'s Reprisal: 1 × 3 sweep down the lane (not the lanes beside) + Blood Brand (ATK −15 %); his hits on a branded foe heal him', () => {
+  it('Sovereign\'s Reprisal: the column one cell ahead (up / front / down) + Blood Brand (ATK −15 %); his hits on a branded foe heal him', () => {
     const b = battle();
     const [f] = b.foes();
     b.place(f, { r: b.dr.pos.r, c: b.dr.pos.c + 1 });
@@ -169,7 +169,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     const hp = f.hp;
     b.e.skills.applyEffects(b.dr, kitOf('draeven', 'tank').skill2, 'skill2', f, f.pos);
     expect(f.hp).toBeLessThan(hp);
-    expect(kitOf('draeven', 'tank').skill2.effects[0]).toEqual(jasmine.objectContaining({ area: 'FRONT_LINE_3' }));
+    expect(kitOf('draeven', 'tank').skill2.effects[0]).toEqual(jasmine.objectContaining({ area: 'FRONT_T3' }));
     expect(hasStatus(f, 'blood_brand')).toBeTrue();
     expect(modifier(f, 'attackMultiplier')).toBeCloseTo(atk * 0.85, 5);
     b.dr.hp = 3000;

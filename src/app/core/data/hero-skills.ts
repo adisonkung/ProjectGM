@@ -494,8 +494,8 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
   // Provisional numbers, no balance run:
   // S1 Blood Debt = taunt foes within 2 + Blood Debt on himself (he keeps fighting): 5 foe hits → Blood Reprisal
   // (Crimson Spike Eruption) 140 % ATK to foes within 1 cell + 3 % max HP per stack, cap 15 %
-  // S2 Sovereign's Reprisal = a 1 × 3 crimson sweep down his lane (front cell main, the next two splash — user
-  // 2026-10-26) + Blood Brand (ATK −15 %, his hits on branded foes heal him 12 % of the damage)
+  // S2 Sovereign's Reprisal = a crimson slash on the column one cell in front (user 2026-10-26: up / front / down,
+  // the front cell main, above / below splash) + Blood Brand (ATK −15 %, his hits on branded foes heal him 12 % of the damage)
   // Ult = one heavy committed downward strike (front cell + above / below), Blood Brand on the hit, then Sovereign's
   // Dominion (−20 % damage taken 6 s) and Blood Debt re-armed with a fresh taunt
   draeven: {
@@ -513,7 +513,7 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
         ...tank.skill2, name: 'การตอบแทนแห่งราชัน', label: "Sovereign's Reprisal", range: 1, target: 'CURRENT',
         fallback: undefined, movement: undefined,
         effects: [
-          { type: 'DAMAGE', area: 'FRONT_LINE_3', primary: 1.6, secondary: 1.0 },
+          { type: 'DAMAGE', area: 'FRONT_T3', primary: 1.6, secondary: 1.0 },
           { type: 'APPLY_STATUS', status: 'blood_brand', to: 'HIT' },
         ],
         ai: { tier: 'NORMAL', minTargets: 1 },

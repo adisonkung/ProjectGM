@@ -122,14 +122,13 @@ export interface StatusEffectDefinition {
  * FRONT_CROSS   ground: main in front, splash above / below it and one cell further
  * FRONT_T3      ground: main in front, splash on the cells above / below it
  * FRONT_RECT_2X3 ground: two columns strictly forward, lane −1 / 0 / +1; front cell main
- * FRONT_LINE_3  ground: the 3 cells straight ahead, the first main (crimson sweep down the lane)
  * FRONT_LINE_4  ground: the 4 cells straight ahead, all main (sword wave down the lane)
  * FRONT_ARC     short cone in front of the caster: 1–2 columns ahead, ±1 lane
  * RADIUS_2/3    within 2 / 3 cells of the centre
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'RECT_6X3_CENTERED' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_RECT_2X3' | 'FRONT_LINE_3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'RECT_6X3_CENTERED' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_RECT_2X3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';
