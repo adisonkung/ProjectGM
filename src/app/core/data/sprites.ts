@@ -270,13 +270,13 @@ export const SHEETS: Record<string, SheetDef> = {
   // (idle 80 px), soft alpha (painted art, not pixelated). Skill VFX not supplied yet — all skill timings provisional.
   // Mordrienne Vale Phase A (user 2026-10-26, tools/sprites/mordrienne.py from assets/heroes/Mordrienne): painted art
   // (not pixelated) · idle 78 px · attack / hurt provisional (S1 point → release / death stagger) · S1 / S2 / Ult
-  // character clips from the user's sheets (the Ult keeps its baked green wand trail + ground splash) · no separate VFX
-  // yet (hex circle, curse field, snake / skull) · timings provisional (no Timeline Sync)
+  // character clips from the user's sheets (the Ult keeps its baked green wand trail + ground splash) · S1 + S2
+  // Timeline Sync done (user 2026-10-26) · Ult VFX (curse field, snake / skull) + sync still to come
   'hero-mordrienne.png': {
     cols: 31, rows: 8, cellW: 260, cellH: 170,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
     projectile: { attack: 'mo-hex-bolt', skill: 'mo-s1-bolt' },
-    fx: { skill: 'mo-s1-charge' },
+    fx: { skill: 'mo-s1-charge', skill2: ['mo-s2-spawn', 'mo-s2-loop', 'mo-s2-burst'] },
     // Hex Mark: appears on the hit and lives exactly as long as the status
     statusFx: { hex_mark: { start: 'mo-s1-mark-in', loop: 'mo-s1-mark' } },
     anims: {
@@ -293,12 +293,16 @@ export const SHEETS: Record<string, SheetDef> = {
       skill: { row: 5, frames: 17, ms: 60, seq: Array.from({ length: 17 }, (_, i) => i),
         steps: [50, 45, 45, 45, 55, 60, 120, 80, 70, 70, 70, 60, 60, 60, 60, 70, 90],
         events: { CAST_START: 1, ANTICIPATION_PEAK: 5, STRIKE_START: 6, DAMAGE: 6, RECOVERY_START: 11 } },
-      // S2 Cinderbind Hex: raise → STRIKE 1 (hex placed, VFX_SPAWN) → twirl at the chest = charge → raise → STRIKE 2
-      // = activation (DAMAGE) → hold → recover · 1.90 s
+      // S2 Cinderbind Hex — Timeline Sync (user 2026-10-26): idle 0.00 → 0.05 animation begins → STRIKE 1 (source
+      // F13) 0.40 s = GroundHexSpawn under the target area (VFX_SPAWN #0) → wand spin 0.65 s = GroundHexLoop charging
+      // on the same ground point (CHARGE_START, no damage) → STRIKE 2 (source F32) 1.27 s = the loop ends and the
+      // HexActivationBurst erupts on the same centre (VFX_SPAWN #1) → burst peak 1.37 s = MAIN HIT (DAMAGE: magic AoE +
+      // Slow + ATK / Cast Speed down, Root if already Hex Marked) → burst decays (no second impact VFX) → recovery
+      // 1.46 s → idle 1.89 s
       skill2: { row: 6, frames: 30, ms: 60, seq: Array.from({ length: 30 }, (_, i) => i),
-        steps: [60, 60, 60, 60, 60, 60, 60, 60, 90, 60, 60, 60, 70, 70, 70, 70, 70, 70, 55, 55, 55, 55, 90,
-          60, 60, 60, 60, 60, 60, 60],
-        events: { CAST_START: 0, STRIKE_START: [7, 21], VFX_SPAWN: 8, CHARGE_START: 12, DAMAGE: 22, IMPACT: 22,
+        steps: [50, ...Array(7).fill(50), 100, 50, 50, 50, ...Array(6).fill(70), 50, 50, 50, 50, 100, 90,
+          70, 70, 70, 70, 70, 80],
+        events: { CAST_START: 1, STRIKE_START: [7, 21], VFX_SPAWN: [8, 22], CHARGE_START: 12, DAMAGE: 23, IMPACT: 23,
           RECOVERY_START: 24 },
         impact: { hitStopMs: 40, shakePx: 3, shakeMs: 120 } },
       // Ult House of Ashes: draw the circle with the wand (baked green trail) → raise to the sky → CHARGE HOLD 0.5 s →
@@ -1493,6 +1497,25 @@ export const FX: Record<string, FxDef> = {
   'mo-s1-mark': {
     file: 'fx-mordrienne-s1-mark.png', frames: 4, w: 88, h: 118, frameMs: 100, delayMs: 360, at: 'target',
     dy: -10.25, scale: 1 / 3, pixelated: true, attach: true,
+  },
+  // Mordrienne S2 Cinderbind Hex (tools/sprites/mordrienne_s2_vfx.py, the artist's pixels unresampled, pixelated): all
+  // three on the SAME ground point = the centre of the 2 × 2 hex area (groundArea SQUARE_2, at the feet line), pivot =
+  // the hex-ring centre, ring ≈ 150 atlas px (1.9 cells) in every sheet. Spawn on STRIKE 1 (9 × 27.8 ms = ends at the
+  // spin) → Loop from the spin (one cycle 8 × 77.5 ms = ends exactly at STRIKE 2, no damage) → Burst on STRIKE 2
+  // (peak f3 = DAMAGE, full decay + fade; the ground hex is gone with it) — all on the ground layer, under the units
+  'mo-s2-spawn': {
+    file: 'fx-mordrienne-s2-spawn.png', frames: 9, w: 274, h: 336, frameMs: 27.78, at: 'target', groundArea: 'SQUARE_2',
+    event: 'VFX_SPAWN', eventIndex: 0, pivot: [0.5, 0.723214], dy: 27.25, scale: 0.5, layer: 'under', attach: false,
+    pixelated: true,
+  },
+  'mo-s2-loop': {
+    file: 'fx-mordrienne-s2-loop.png', frames: 8, w: 286, h: 291, frameMs: 77.5, at: 'target', groundArea: 'SQUARE_2',
+    event: 'CHARGE_START', pivot: [0.5, 0.67354], dy: 27.25, scale: 0.5, layer: 'under', attach: false, pixelated: true,
+  },
+  'mo-s2-burst': {
+    file: 'fx-mordrienne-s2-burst.png', frames: 8, w: 384, h: 457, frameMs: 50, fadeOutMs: 150, at: 'target',
+    groundArea: 'SQUARE_2', event: 'VFX_SPAWN', eventIndex: 1, pivot: [0.5, 0.85558], dy: 27.25, scale: 0.4,
+    layer: 'under', attach: false, pixelated: true,
   },
   // Mordrienne provisional hex bolt (procedural, tools/sprites/mordrienne.py): 4 flight frames + impact ring
   'mo-hex-bolt': { file: 'fx-mordrienne-hex-bolt.png', frames: 5, w: 48, h: 48, frameMs: 60, at: 'target', angle0: 0, scale: 0.6 },

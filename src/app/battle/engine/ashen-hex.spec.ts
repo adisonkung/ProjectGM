@@ -64,6 +64,33 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     expect(projectileOrigin('mo-hex-bolt', { x: 3, y: 4 }, 8)).toEqual({ x: 3, y: 4 });
   });
 
+  it('S2 Timeline Sync: strike 1 places the ground hex, the spin loops it in place, strike 2 swaps it for the burst whose peak is the hit', () => {
+    const sh = SHEETS['hero-mordrienne.png'];
+    const at = (ev: string) => animEvents('hero-mordrienne.png', 'skill2').filter(e => e.event === ev).map(e => Math.round(e.t * 1000));
+    expect(at('CAST_START')).toEqual([50]);
+    expect(at('VFX_SPAWN')).toEqual([400, 1270]);
+    expect(at('CHARGE_START')).toEqual([650]);
+    expect(at('DAMAGE')).toEqual([1370]);
+    expect(at('RECOVERY_START')).toEqual([1460]);
+    expect(sh.anims.skill2!.steps!.reduce((a, b) => a + b, 0)).toBe(1890);
+    expect(sh.fx!.skill2).toEqual(['mo-s2-spawn', 'mo-s2-loop', 'mo-s2-burst']);
+    const sp = FX['mo-s2-spawn'], lp = FX['mo-s2-loop'], bu = FX['mo-s2-burst'];
+    // all three on the ground plane at the same 2 × 2 area centre, never attached to her or the target
+    for (const d of [sp, lp, bu]) {
+      expect([d.at, d.groundArea, d.dy, d.layer, d.attach, d.pixelated]).toEqual(['target', 'SQUARE_2', 27.25, 'under', false, true]);
+      expect(d.pivot![0]).toBe(0.5);
+      expect(d.repeat).toBeUndefined();
+    }
+    // same ring diameter on the board: ring source px × scale is equal (spawn / loop ring 200 px, burst 250 px)
+    expect(200 * sp.scale!).toBeCloseTo(250 * bu.scale!, 6);
+    expect(sp.scale).toBe(lp.scale!);
+    expect([sp.event, sp.eventIndex, lp.event, bu.event, bu.eventIndex]).toEqual(['VFX_SPAWN', 0, 'CHARGE_START', 'VFX_SPAWN', 1]);
+    // spawn ends as the loop starts; the loop's single cycle ends exactly at strike 2; the burst peaks (f3) on the hit
+    expect(Math.round(400 + sp.frames * sp.frameMs)).toBe(650);
+    expect(650 + lp.frames * lp.frameMs).toBe(1270);
+    expect(1270 + 2 * bu.frameMs).toBe(1370);
+  });
+
   it('kit keeps the Mage class ids + cooldowns; control, not burst: no shield / heal / interrupt / Break', () => {
     const k = kitOf('mordrienne', 'mage');
     const c = CLASS_KITS.mage;

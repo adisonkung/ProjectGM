@@ -190,6 +190,9 @@ export class BattleComponent implements OnDestroy {
   private castFx = new Map<number, number>();
   /** Target cell at cast start, for ground visuals when an aimed unit dies before activation. */
   private castAim = new Map<number, { id: number; at: { r: number; c: number } }>();
+  /** ground footprint of the current cast per caster: every ground FX layer of one cast (spawn → loop → burst) lands
+   *  on the cell the first one used, even if the target steps away meanwhile (cleared on the next cast) */
+  private groundLock = new Map<number, { r: number; c: number }>();
   private fieldVisuals = new FieldFxPlayback({
     spawn: (name, world, loop) => {
       const id = ++this.floatId;
@@ -446,6 +449,7 @@ export class BattleComponent implements OnDestroy {
     this.focusId.set(null);
     this.facing.clear();
     this.castAim.clear();
+    this.groundLock.clear();
     this.fieldVisuals.clear();
     this.statusVisuals.clear();
     this.motionVisuals.clear();
@@ -943,8 +947,9 @@ export class BattleComponent implements OnDestroy {
         }
         for (const id of at) {
           const q = id === src ? p : posOf(id);
-          const areaCell = groundFxCell(def, unitOf(src).pos, aim?.at ?? unitOf(id).pos,
+          const areaCell = (def.groundArea && this.groundLock.get(src)) || groundFxCell(def, unitOf(src).pos, aim?.at ?? unitOf(id).pos,
             unitOf(src).actionFacing?.left ?? this.facing.get(src));
+          if (def.groundArea && !this.groundLock.has(src)) this.groundLock.set(src, areaCell);
           const cell = def.groundArea
             ? { r: areaCell.r, c: areaCell.c + this.engine.formation.originPosition - this.engine.cameraX }
             : q;
@@ -1006,6 +1011,7 @@ export class BattleComponent implements OnDestroy {
           if (anims[e.src]?.anim !== 'die') set(e.src, 'walk');
           break;
         case 'cast': {
+          this.groundLock.delete(e.src);
           if (e.dst != null) this.castAim.set(e.src, { id: e.dst, at: { ...unitOf(e.dst).pos } });
           else this.castAim.delete(e.src);
           set(e.src, e.kind);
