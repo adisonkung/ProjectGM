@@ -2,7 +2,16 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — lane-first combat advance (Claude, 2026-10-26)
+## Latest task — Mordrienne Vale Phase A (Claude, 2026-10-26)
+
+Branch `wip/claude-hero-mordrienne` from origin/master 43b1099. User supplied idle (×2 variants) / run / death / S1 / S2 / Ult sheets + master reference and the kit concept (Mage — Control / Debuff); answered: sheet mapping as proposed, provisional attack + hurt, Phase A + all three skill clips, full name Mordrienne Vale.
+
+- Sources tracked unchanged in `assets/heroes/Mordrienne/` → `tools/sprites/mordrienne.py` → `hero-mordrienne.png` (31 × 8, 260 × 170), `portraits/mordrienne.webp`, `fx-mordrienne-hex-bolt.png` (procedural provisional bolt). `npm run sprites:optimize` run.
+- Kit + statuses (`hex_mark`, `cinder_hex`, `ash_curse`) + generic engine additions: `DAMAGE.bonusVsStatus`, `DAMAGE.requireStatus`, `StatusModifiers.castSpeedMultiplier`.
+- Validation: app/spec typecheck, Karma 842/842. hero-sim 10 runs with her in the starter team runs clean (no balance pass).
+- Pending: dedicated VFX (hex circle, curse field, snake / skull / broken runes), real attack / hurt sheets, UI art (icons, banner, portrait), Timeline Sync. Not merged; awaiting review.
+
+## Previous task — lane-first combat advance (Claude, 2026-10-26)
 
 Branch `fix/combat-lane-advance` from origin/master 4088691 (separate from the unmerged Draeven branch). User: at battle start units converged into one row and collided; they should run down their placed lane, then close in.
 

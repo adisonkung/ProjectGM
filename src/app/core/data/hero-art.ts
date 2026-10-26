@@ -20,6 +20,9 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
+  // Mordrienne Phase A (2026-10-26): temporary portrait cropped from the master reference — no UI art supplied yet
+  // (skill icons fall back to the text badge)
+  mordrienne: { portrait: 'portraits/mordrienne.webp' },
   // Draeven UI art (user 2026-10-26, assets/heroes/Draeven/art → tools/sprites/draeven_art.py): portrait, the three
   // skill icons (Blood Debt sigil / crimson slash / Blood Dominion sword impact) and banner.
   draeven: { ...art('draeven'), banner: 'banners/draeven.webp' },

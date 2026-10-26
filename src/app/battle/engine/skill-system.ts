@@ -629,7 +629,9 @@ export class SkillSystem {
   /** run a skill's effects in order (primary may have died: areas centre on its last cell) */
   applyEffects(u: BattleUnit, s: SkillDefinition, slot: SkillSlot, primary: BattleUnit, at: Cell, areaOrigin?: Cell): BattleUnit[] {
     const caster = areaOrigin ? { ...u, pos: areaOrigin } : u;
-    const conditional = s.effects.some(e => e.type === 'APPLY_STATUS' && e.when);
+    const conditional = s.effects.some(e => (e.type === 'APPLY_STATUS' && e.when)
+      || (e.type === 'DAMAGE' && (e.bonusVsStatus || e.requireStatus)));
+    const had = (t: BattleUnit, status: string) => before.get(t.id)?.has(status) ?? false;
     const before = new Map(conditional ? [u, primary, ...this.h.foes(u), ...this.h.allies(u)].map(t => [t.id, new Set(t.buffs.map(b => b.def.id))]) : []);
     const ghost = { ...primary, pos: at } as BattleUnit;
     const focusOf = (p: BattleUnit) => (p.alive || p === u ? p : ghost);
@@ -708,7 +710,9 @@ export class SkillSystem {
             const main = GROUND_SHAPES[e.area] ? g === true : f === primary;
             let mul = main ? e.primary : (e.secondary ?? (e.area === 'SINGLE' ? 0 : e.primary));
             if (mul <= 0) continue;
+            if (e.requireStatus && !had(f, e.requireStatus)) continue;
             mul *= rankPower(u, slot);
+            if (e.bonusVsStatus && had(f, e.bonusVsStatus.status)) mul *= e.bonusVsStatus.mul;
             if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
             if (e.bonusVsGuard && this.h.guarded(f)) mul *= e.bonusVsGuard;
             const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);
@@ -743,7 +747,7 @@ export class SkillSystem {
           }
           const opts = e.potency != null || e.modifiers ? { potency: e.potency, modifiers: e.modifiers } : undefined;
           for (const t of targets) {
-            if (e.when && (before.get(t.id)?.has(e.when.status) ?? false) !== e.when.present) continue;
+            if (e.when && had(t, e.when.status) !== e.when.present) continue;
             this.h.applyStatus(t, e.status, u, e.duration, opts);
           }
           break;

@@ -255,6 +255,43 @@ export const runPace = (frames: number, ms: number, cycles = 1): number =>
 export const SHEETS: Record<string, SheetDef> = {
   // Draeven Morcant Phase A (user 2026-10-22, tools/sprites/draeven.py): Autosprite sheets mapped to one body scale
   // (idle 80 px), soft alpha (painted art, not pixelated). Skill VFX not supplied yet — all skill timings provisional.
+  // Mordrienne Vale Phase A (user 2026-10-26, tools/sprites/mordrienne.py from assets/heroes/Mordrienne): painted art
+  // (not pixelated) · idle 78 px · attack / hurt provisional (S1 point → release / death stagger) · S1 / S2 / Ult
+  // character clips from the user's sheets (the Ult keeps its baked green wand trail + ground splash) · no separate VFX
+  // yet (hex circle, curse field, snake / skull) · timings provisional (no Timeline Sync)
+  'hero-mordrienne.png': {
+    cols: 31, rows: 8, cellW: 260, cellH: 170,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    projectile: { attack: 'mo-hex-bolt', skill: 'mo-hex-bolt' },
+    anims: {
+      idle: { row: 0, frames: 12, ms: 160 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
+      // provisional: the first stagger of the death sheet
+      hurt: { row: 2, frames: 3, ms: 90, seq: [0, 1, 2, 1, 0], steps: [60, 80, 140, 80, 80] },
+      // provisional: S1 point → raise → thrust → spark F14 (bolt released) → recover · 0.74 s
+      attack: { row: 3, frames: 10, ms: 70, seq: Array.from({ length: 10 }, (_, i) => i),
+        steps: [70, 80, 70, 60, 70, 90, 80, 70, 70, 80], events: { DAMAGE: 4, RECOVERY_START: 6 } },
+      die: { row: 4, frames: 14, ms: 80 },
+      // S1 Ashen Mark: ready → wand raised → thrust F13 → spark at the tip F14 = the bolt leaves (DAMAGE) → hold → recover · 1.22 s
+      skill: { row: 5, frames: 19, ms: 60, seq: Array.from({ length: 19 }, (_, i) => i),
+        steps: [90, 80, 80, 70, 60, 60, 50, 70, 70, 60, 55, 55, 55, 55, 55, 55, 55, 60, 80],
+        events: { CAST_START: 0, STRIKE_START: 6, DAMAGE: 7, RECOVERY_START: 12 } },
+      // S2 Cinderbind Hex: raise → STRIKE 1 (hex placed, VFX_SPAWN) → twirl at the chest = charge → raise → STRIKE 2
+      // = activation (DAMAGE) → hold → recover · 1.90 s
+      skill2: { row: 6, frames: 30, ms: 60, seq: Array.from({ length: 30 }, (_, i) => i),
+        steps: [60, 60, 60, 60, 60, 60, 60, 60, 90, 60, 60, 60, 70, 70, 70, 70, 70, 70, 55, 55, 55, 55, 90,
+          60, 60, 60, 60, 60, 60, 60],
+        events: { CAST_START: 0, STRIKE_START: [7, 21], VFX_SPAWN: 8, CHARGE_START: 12, DAMAGE: 22, IMPACT: 22,
+          RECOVERY_START: 24 },
+        impact: { hitStopMs: 40, shakePx: 3, shakeMs: 120 } },
+      // Ult House of Ashes: draw the circle with the wand (baked green trail) → raise to the sky → CHARGE HOLD 0.5 s →
+      // swing over → slam down → ground splash = field opens (DAMAGE) → recover · 2.50 s
+      ult: { row: 7, frames: 31, ms: 70, seq: Array.from({ length: 31 }, (_, i) => i),
+        steps: [...Array(15).fill(70), 60, 60, 60, 500, 60, 60, 60, 45, 45, 45, 45, 90, 80, 80, 80, 80],
+        events: { CAST_START: 0, CHARGE_START: 15, CHARGE_PEAK: 18, STRIKE_START: 19, DAMAGE: 26, IMPACT: 26,
+          RECOVERY_START: 27 },
+        impact: { hitStopMs: 80, shakePx: 6, shakeMs: 200, flashMs: 100 } },
+    },
+  },
   'hero-draeven.png': {
     // cell 290 wide (root 145, 155): the S2 burst / impact disc reach 140 px ahead of the feet
     cols: 28, rows: 8, cellW: 290, cellH: 170,
@@ -1417,6 +1454,8 @@ export const FX: Record<string, FxDef> = {
     hitIndex: 2, perHit: 1, exceptPrimary: true, pivot: [0.4968, 0.8935], dy: 27.25, scale: 1 / 1.5,
   },
   'linxue-lotus': { file: 'fx-linxue-lotus.png', frames: 1, w: 22, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.3, noRotate: true, pixelated: true },
+  // Mordrienne provisional hex bolt (procedural, tools/sprites/mordrienne.py): 4 flight frames + impact ring
+  'mo-hex-bolt': { file: 'fx-mordrienne-hex-bolt.png', frames: 5, w: 48, h: 48, frameMs: 60, at: 'target', angle0: 0, scale: 0.6 },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
   // Alpha Howl (tools/sprites/fx_alpha_howl.py จากแผ่น 8 เฟรมของผู้ใช้): frame 5 = FX PEAK = SKILL_ACTIVATE,
   // started early by the engine's 'fx' event · wave origin sits at the wolf's raised mouth and travels forward

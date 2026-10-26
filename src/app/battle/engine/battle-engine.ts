@@ -1361,7 +1361,7 @@ export class BattleEngine {
   private updateCast(u: BattleUnit, dt: number): void {
     const c = u.casting;
     if (!c) return;
-    c.left -= dt;
+    c.left -= dt * modifier(u, 'castSpeedMultiplier');
     const pct = 1 - Math.max(0, c.left) / c.def.castTime;
     while (c.nextProgress < 1 - 1e-9 && pct >= c.nextProgress - 1e-9) {
       this.events.push({ type: 'castProgress', src: u.id, skill: c.def.id, pct: c.nextProgress });

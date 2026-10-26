@@ -29,6 +29,8 @@ export interface StatusModifiers {
   attackSpeedMultiplier?: number;
   /** multiplies voluntary movement speed (Slow), without changing base stats */
   moveSpeedMultiplier?: number;
+  /** multiplies cast progress speed of channelled casts (Mordrienne hexes ×0.8 = casts take 25 % longer) */
+  castSpeedMultiplier?: number;
   /** multiplies incoming damage (e.g. Taunt guard ×0.60) */
   damageTakenMultiplier?: number;
   /** chance (0–1) to evade an incoming attack */
@@ -214,6 +216,10 @@ export type SkillEffectCore =
       breakPower?: number;
       /** ×mul against a guarded target: it carries a shield or a damage-reducing status (damage taken < ×1) */
       bonusVsGuard?: number;
+      /** ×mul against a unit carrying `status` before this cast's effects (e.g. Mordrienne's Hex Mark amplifies her spells) */
+      bonusVsStatus?: { status: string; mul: number };
+      /** only units carrying this status before this cast's effects are hit (e.g. House of Ashes burst on hexed foes) */
+      requireStatus?: string;
       /**
        * line pierce (LINE_2 / LINE_3): the n-th unit behind the primary is hit this many seconds after it (one entry per
        * unit, the last repeats) — the same blade reaching it — with its own `impact` event (index n) for FX / feel
