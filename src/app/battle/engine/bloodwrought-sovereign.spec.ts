@@ -48,8 +48,9 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect([ms('CHARGE_START'), ms('STRIKE_START'), ms('DAMAGE')]).toEqual([600, 950, 1100]);
     expect(SHEETS['hero-draeven.png'].anims.ult!.steps!.reduce((x, y) => x + y, 0)).toBe(1800);
     const body = FX['dr-ult-body'], sword = FX['dr-ult-sword'];
-    expect(body.event).toBe('CHARGE_START');
-    expect(body.frames * body.frameMs).toBeCloseTo(350, 3);
+    // the body aura runs from the cast to the Final Impact exactly
+    expect(body.on).toBe('cast');
+    expect(body.frames * body.frameMs).toBeCloseTo(1100, 3);
     expect((sword.delayMs ?? 0) + sword.frames * sword.frameMs).toBeCloseTo(350, 3);
     expect(SHEETS['hero-draeven.png'].fx!.ult).toContain('dr-ult-impact');
     expect(SHEETS['hero-draeven.png'].statusFx!['sovereign_dominion'].loop).toBe('dr-ult-dominion');
@@ -58,7 +59,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(lead.on).toBe('cast');
     expect(lead.frames * lead.frameMs / 1000).toBeCloseTo(at('skill', 'SKILL_ACTIVATE')[0], 3);
     expect(FX['dr-s1-loop'].frameMs).toBe(lead.frameMs);
-    expect(at('ult', 'STRIKE_START')[0] - at('ult', 'CHARGE_START')[0]).toBeCloseTo((body.frames * body.frameMs) / 1000, 3);
+    expect(at('ult', 'STRIKE_START')[0] - at('ult', 'CHARGE_START')[0]).toBeCloseTo(0.35, 3);
   });
 
   it('kit keeps the Tank class ids + cooldowns, and stays PUNISH: no shield, no interrupt, no stun / knockback / Break', () => {

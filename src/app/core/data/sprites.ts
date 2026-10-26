@@ -1293,11 +1293,12 @@ export const FX: Record<string, FxDef> = {
     event: 'VFX_SPAWN', attach: false, orient: 'flip', pivot: [0.058, 0.6101], dy: 27.25, scale: 1 / 3,
   },
   // Draeven Ult Blood Dominion (user 2026-10-26, tools/sprites/draeven_ult_vfx.py, magenta-keyed, baked at 2 × atlas px)
-  // Body Charge Aura: CHARGE_START 0.60 s, 8 × 43.75 ms build to the strike (0.95 s) + 150 ms fade · crimson-black aura
-  // around him, ring ~1.35 cells on the ground pivot · behind him so he stays clearly visible
+  // Body Charge Aura (review: from the moment the ultimate starts): cast FX, f1–f8 build once (0.40 s) then breathes
+  // 8 7 6 5 6 7 8 … (baked) until the Final Impact — 22 × 50 ms = 1.10 s = DAMAGE, then gone (60 ms fade) · crimson-black
+  // aura around him, ring ~1.35 cells on the ground pivot · behind him so he stays clearly visible
   'dr-ult-body': {
-    file: 'fx-draeven-ult-body.png', frames: 8, w: 228, h: 275, frameMs: 43.75, fadeOutMs: 150, at: 'self',
-    event: 'CHARGE_START', attach: true, layer: 'under', pivot: [0.5, 0.8873], dy: 27.25, scale: 1 / 3,
+    file: 'fx-draeven-ult-body.png', frames: 22, w: 228, h: 275, frameMs: 50, fadeOutMs: 60, at: 'self',
+    on: 'cast', attach: true, layer: 'under', pivot: [0.5, 0.8873], dy: 27.25, scale: 1 / 3,
   },
   // Sword Charge: 0.65 s (CHARGE_START + 50 ms), 8 × 37.5 ms build to the strike + 150 ms fade into the swing · aura coil
   // only (no sword drawn), its long axis turned onto the blade of the hold pose and centred on it (atlas 147, 63.5 →

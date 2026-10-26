@@ -26,6 +26,12 @@ from draeven_s2_vfx import pieces, runs, to_img  # noqa: E402
 N = 8
 CELL = 80
 BODY_RING = 108             # body aura ring (biggest frame f7) in atlas px — around his feet, he stays visible
+# review (user 2026-10-26): the body aura starts with the ultimate and builds f1–f8 once, then breathes
+# f8 7 6 5 6 7 8 … until the Final Impact (1.10 s): 50 ms frames, 22 frames = 1.10 s
+BODY_MS, BODY_END_MS = 50, 1100
+BODY_SEQ = list(range(8))
+while len(BODY_SEQ) < BODY_END_MS // BODY_MS:
+    BODY_SEQ.append([6, 5, 4, 5, 6, 7][(len(BODY_SEQ) - 8) % 6])
 DOMINION_RING = 104         # loop ring, like the S1 taunt loop
 IMPACT_W = 2.6 * CELL       # final impact F1 spread — over the 2 × 3 cells in front
 # final impact: F1 max at once, F1–F3 over 0.2 s, decay F4–F6 to 0.45 s, residual F7–F8 to 0.7 s (50 ms frames)
@@ -106,7 +112,7 @@ def main():
     src = Path(sys.argv[1] if len(sys.argv) > 1 else 'assets/heroes/Draeven/vfx')
     out = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
     out.mkdir(parents=True, exist_ok=True)
-    s, m = ground_strip(load(src / 'Draeven_ULT_ChargeAura_VFX.png'), BODY_RING, 6, ground=(0, 1, 2))
+    s, m = ground_strip(load(src / 'Draeven_ULT_ChargeAura_VFX.png'), BODY_RING, 6, BODY_SEQ, ground=(0, 1, 2))
     s.save(out / 'fx-draeven-ult-body.png', optimize=True); print('body', m)
     s, m = sword(load(src / 'Draeven_ULT_SwordCharge_VFX.png'))
     s.save(out / 'fx-draeven-ult-sword.png', optimize=True); print('sword', m)
