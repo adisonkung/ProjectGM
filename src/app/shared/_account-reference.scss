@@ -1,0 +1,78 @@
+// Sheets12/13/18: welcoming floating citadel, engraved dark panels and lacquer actions.
+html body .app {
+ app-account,app-welcome {
+  --ornament-gold-light:#f6dca0;--ornament-gold-low:#714719;--ornament-gold-mid:#d3aa58;--ornament-gold-shadow:#75501e;--ornament-gold-end:#e8c77b;--ornament-inner-color:#d0a653;
+  --ornament-face:linear-gradient(125deg,#182026f5,#0c1217f5 60%,#11191ff2);--ornament-inset:radial-gradient(ellipse at 0 0,#bfa36810,transparent 70%);
+  --citadel-gold-stop-0:#ffedb0;--citadel-gold-stop-1:#7f531f;--citadel-gold-stop-2:#f3d294;--citadel-gold-stop-3:#c09546;--citadel-gold-stop-4:#69451e;--citadel-gold-stop-5:#efcf86;--citadel-gold-stop-6:#ab7f36;
+  display:block;isolation:isolate;
+  &::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:url('/ui/eldervane/citadel.webp') center 42%/cover;}
+  .citadel-surface{position:relative;isolation:isolate;}
+  .account-divider{position:relative;height:17px;margin:3px auto 10px;width:75%;background:linear-gradient(90deg,transparent,#ad8038 20%,#f3d795 50%,#ad8038 80%,transparent) center/100% 1px no-repeat;i{position:absolute;left:50%;top:4px;width:9px;height:9px;border:1px solid #ebc981;background:#11181d;transform:translateX(-50%) rotate(45deg);}}
+  .gm-btn{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:10px 24px;font:600 18px/1.5 'Eldervane Trirong',var(--body);color:#fae8be;white-space:normal;}
+  .gm-btn:disabled{filter:saturate(.65);opacity:.6;}
+  .account-alert{display:flex;align-items:center;gap:12px;padding:13px 16px;margin:0;color:#ff8c80;border:1px solid #a42f29;background:linear-gradient(110deg,#71181d77,#390a0d99);box-shadow:inset 0 0 0 3px #16080955;font-size:14px;>span{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;background:#ed7369;color:#3f0d0a;font:bold 21px/1 Georgia,serif;}b{font-size:16px;}p{margin:5px 0 0;line-height:1.65;}}
+  input,textarea{border-radius:0!important;}
+  input:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid #ffdfa0;outline-offset:3px;}
+  .account-overlay{position:fixed;inset:0;z-index:1600;display:grid;place-items:center;padding:24px;overflow-y:auto;background:#03080bbd;backdrop-filter:blur(5px);}
+  .rename-dialog,.save-confirm-dialog{width:min(520px,100%);max-height:calc(100dvh - 48px);overflow-y:auto;padding:28px;display:grid;gap:18px;color:#f4ead4;background:none;border:0;box-shadow:0 10px 60px #0009;>app-tower-ornament{z-index:-1;} }
+  .dialog-close{position:absolute;right:16px;top:11px;z-index:2;border:0;background:none;color:#e6d6a2;font:32px/1 Georgia,serif;cursor:pointer;width:36px;height:36px;}
+  .dialog-heading{display:flex;align-items:center;gap:18px;padding:4px 32px 16px 0;border-bottom:1px solid #b5914b8c;color:#f7dfaa;h2{font:600 28px/1.6 'Eldervane Trirong',var(--body);margin:0;}}
+  .dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;.gm-btn{min-height:60px;font-size:21px;}}
+  .save-summary{display:flex;gap:16px;align-items:center;min-width:0;>img{width:96px;height:96px;object-fit:cover;border:1px solid #b59150;box-shadow:0 0 0 3px #080d11;}dl{flex:1;min-width:0;margin:0;display:grid;gap:9px;font-size:14px;div{display:grid;grid-template-columns:auto 1fr;gap:15px;}dt{color:#e2d1a7;}dd{margin:0;overflow-wrap:anywhere;color:#fcf1d5;}}}
+  app-save-import{gap:10px;min-width:0;
+    .lbl{color:#f3e3bd;font-size:15px;}.code{min-height:130px;padding:13px;border:1px solid #b6a27e88;background:linear-gradient(135deg,#182027,#080e14);font-size:13px;line-height:1.7;color:#f7e8cb;}
+    .import-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;.or{display:none;}.gm-btn{font-size:16px;min-height:47px;padding:8px 18px;}.file:focus-within{outline:2px solid #f3d195;outline-offset:3px;}}
+    .save-preview{display:grid;gap:13px;padding:14px;border:1px solid #9b86585c;background:linear-gradient(120deg,#171e25,#0c1219);border-radius:0;h3{font:600 16px/1.5 'Eldervane Trirong',var(--body);margin:0;color:#f8e9c8;}.save-summary{gap:14px;>img{width:88px;height:88px;}dl{font-size:12px;gap:6px;div{gap:10px;}}}.gm-btn{justify-self:stretch;font-size:17px;}}
+    .empty-preview{min-height:122px;color:#bfb7a3;font-size:13px;p{margin:0;line-height:1.8;}}
+  }
+ }
+ app-welcome {
+  .reference-welcome{min-height:calc(100dvh - 64px);padding:140px 0 0;align-content:center;}
+  .welcome-masthead{width:min(500px,78vw);max-width:500px;margin:0 0 4px;padding:0;background:none;border:0;box-shadow:none;}
+  .welcome-logo{width:100%;height:auto;filter:drop-shadow(0 3px 5px #0007);}
+  .card.citadel-surface{width:min(680px,100%);padding:30px 36px 22px;background:none;box-shadow:0 10px 25px #0006;}
+  .welcome-title{margin:0;font:600 36px/1.6 'Eldervane Trirong',var(--body);color:#f7e0a5;letter-spacing:0;}
+  .lead{margin:8px 0 2px;font:500 22px/1.7 'Eldervane Trirong',var(--body);color:#f5e5bd;}
+  .name-input-row{display:grid;grid-template-columns:auto minmax(0,1fr) 52px;gap:13px;align-items:center;.lbl{display:flex;align-items:center;gap:10px;font:500 20px/1.6 'Eldervane Trirong',var(--body);color:#f3e1ad;}}
+  .field{background:linear-gradient(130deg,#1c2228,#080e13);border:1px solid #b39150;min-height:52px;padding:0 14px;border-radius:0;input{font-size:19px;padding:10px 0;color:#f7e8c2;}}
+  .dice{width:52px;height:52px;background:none;box-shadow:none;border:0;color:#f7dfac;}
+  .meta{min-height:23px;font-size:12px;align-items:center;.err{max-width:80%;color:#fa8f7b;}.count{margin-left:auto;font-size:14px;}}
+  .account-alert{justify-self:center;padding:9px 14px;font-size:13px;>span{width:18px;height:18px;font-size:14px;}}
+  .go{width:80%;justify-self:center;min-height:72px;font-size:29px;gap:25px;padding-inline:28px;margin-top:4px;}
+  .hint{font-size:11px;margin:0;color:#c8b995;}
+  .switch{position:relative;display:inline-flex;align-items:center;gap:10px;margin-top:13px;padding:4px 8px;background:none;border:0;box-shadow:none;color:#f2d9a5;font:500 18px/1.5 'Eldervane Trirong',var(--body);text-decoration:none;cursor:pointer;}
+ }
+ app-account {
+  .reference-account{max-width:1180px;margin:auto;gap:12px;}
+  .head{position:relative;isolation:isolate;display:flex;align-items:center;gap:20px;min-height:100px;width:fit-content;max-width:100%;padding:15px 65px 15px 27px;border:0;background:none;color:#f8deb0;.gm-title{font:600 32px/1.55 'Eldervane Trirong',var(--body);}.gm-sub{margin:0;font-size:14px;color:#e8dbc4;}}
+  .profile-card{min-height:100px;display:flex;align-items:center;gap:20px;padding:13px 22px;color:#f4dfae;.island-thumb{width:120px;height:68px;object-fit:cover;border:1px solid #c19c54;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);}.profile-label{display:flex;gap:10px;align-items:center;white-space:nowrap;border-right:1px solid #b9934d;padding-right:20px;font:500 20px/1.5 'Eldervane Trirong',var(--body);}.isle-name{flex:1;font:500 26px/1.6 'Eldervane Trirong',var(--body);}.gm-btn{min-height:48px;}}
+  .grid{gap:15px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;}
+  .card.citadel-surface{min-width:0;min-height:460px;padding:25px;gap:15px;align-content:start;background:none;}
+  .section-heading{display:flex;align-items:flex-start;gap:18px;color:#f5dfb2;.gm-h2{font:600 27px/1.55 'Eldervane Trirong',var(--body);margin:0;}p{margin:2px 0 0;font-size:14px;line-height:1.7;color:#e0d6bf;}}
+  .steps{list-style:none;counter-reset:transfer;padding:0;margin:0;gap:9px;font-size:14px;line-height:1.6;color:#f2e7cf;li{counter-increment:transfer;display:flex;align-items:center;gap:12px;&::before{content:counter(transfer);display:grid;place-items:center;flex:0 0 25px;height:25px;border:1px solid #d6b264;border-radius:50%;font:500 17px/1 Georgia,serif;color:#f4d88f;}}}
+  .export-actions{display:grid;gap:10px;.gm-btn{width:100%;}}
+  .export-code{position:relative;display:grid;gap:5px;padding:12px;background:#0b1118b3;border:1px solid #98866655;label{font-size:15px;color:#f5e3b6;}.code{min-height:128px;margin:0;padding:10px 12px 42px;background:linear-gradient(125deg,#1d242c,#090f15);border:1px solid #a79c8577;color:#e1d9c5;font-size:12px;line-height:1.7;}.copy-code{position:absolute;right:17px;bottom:17px;min-height:35px;padding:6px 15px;font-size:13px;}}
+  .soon{font-size:11px;background:#0b1118b3;padding:8px 15px;}
+  .notice{display:flex;align-items:center;gap:10px;margin:0;padding:10px 16px;border-radius:0;border:1px solid #8bb776;background:#0b2c1fe8;color:#c9f1c4;font-size:14px;}
+  .rename{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;label{color:#f2dfb6;font-size:16px;}input{width:100%;box-sizing:border-box;min-height:50px;padding:10px 14px;background:linear-gradient(120deg,#1a232c,#0b1218);border:1px solid #a88b56;color:#f9ebd2;font-size:19px;}.rename-meta{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#dfcfad;}.err{font-size:13px;color:#ff9388;min-height:21px;}}
+ }
+}
+@media(max-width:850px){html body .app app-account {.grid{grid-template-columns:minmax(0,1fr);}.card.citadel-surface{min-height:0;}.profile-card{gap:12px;.island-thumb{width:90px;}.profile-label{font-size:16px;padding-right:12px;}.isle-name{font-size:20px;}}}}
+@media(max-width:600px){html body .app {
+ app-welcome,app-account{
+  .account-overlay{padding:14px;}.rename-dialog,.save-confirm-dialog{padding:23px 20px;max-height:calc(100dvh - 28px);gap:13px;}.dialog-heading{gap:10px;h2{font-size:22px;}}.dialog-actions{gap:5px;.gm-btn{font-size:17px;min-height:52px;padding-inline:14px;}}
+  .save-summary{gap:11px;>img{width:75px;height:85px;}dl{font-size:12px;gap:7px;div{gap:10px;}}}
+  .account-alert{padding:10px;font-size:12px;gap:8px;b{font-size:14px;}p{font-size:12px;}}
+  app-save-import{.import-actions{gap:6px;.gm-btn{font-size:12px;padding:8px 12px;gap:6px;}}.save-preview{padding:12px;.save-summary>img{width:65px;height:80px;} .save-summary dl{font-size:11px;}}}
+ }
+ app-welcome{.reference-welcome{min-height:calc(100dvh - 40px);padding-block:12px;}.welcome-masthead{width:85%;}.card.citadel-surface{padding:23px 20px 20px;}.welcome-title{font-size:24px;line-height:1.65;}.lead{font-size:17px;}.name-input-row{grid-template-columns:minmax(0,1fr) 45px;gap:8px;.lbl{grid-column:1/-1;font-size:17px;gap:8px;}}.dice{width:45px;height:49px;}.field{min-height:49px;input{font-size:16px;}}.go{width:100%;min-height:62px;font-size:23px;gap:14px;}.switch{font-size:15px;}}
+ app-account{.head{min-height:85px;gap:13px;padding:14px 38px 14px 20px;.gm-title{font-size:24px;}.gm-sub{font-size:12px;}}.profile-card{display:grid;grid-template-columns:68px minmax(0,1fr);gap:8px 12px;padding:17px;.island-thumb{grid-row:1 / span 2;width:68px;height:60px;}.profile-label{border:0;padding:0;font-size:13px;app-citadel-icon{display:none;}}.isle-name{font-size:19px;}.gm-btn{grid-column:1/-1;min-height:43px;font-size:15px;}}.card.citadel-surface{padding:22px 20px;gap:13px;}.section-heading{gap:12px;.gm-h2{font-size:23px;}p{font-size:12px;}}.steps{font-size:12px;gap:8px;}.gm-btn{font-size:15px;}.export-code .code{font-size:11px;}}
+}}
+@media(prefers-reduced-motion:reduce){html body .app app-welcome *,html body .app app-account *{scroll-behavior:auto;}}
+
+html body .app app-account .dialog-close,html body .app app-welcome .dialog-close{position:absolute;inset:11px 16px auto auto;z-index:3;}
+html body .app app-account .dialog-actions .gm-btn>svg,html body .app app-welcome .dialog-actions .gm-btn>svg{flex:none;}
+html body .app app-account app-save-import .preview.save-preview .gm-btn,html body .app app-welcome app-save-import .preview.save-preview .gm-btn{justify-self:stretch;}
+html body .app app-account .dialog-close,html body .app app-welcome .dialog-close{display:grid;place-items:center;right:19px;top:15px;width:32px;height:32px;padding:0;border:1px solid #a28b5744;background:#0a101ac9;color:#f5dfa6;}
+html body .app app-account .save-confirm-dialog .save-summary,html body .app app-welcome .save-confirm-dialog .save-summary{position:relative;isolation:isolate;padding:14px;>img{width:112px;height:112px;}dl{font-size:16px;gap:10px;}}
+@media(max-width:600px){html body .app app-account .save-confirm-dialog .save-summary,html body .app app-welcome .save-confirm-dialog .save-summary{padding:12px;gap:10px;>img{width:75px;height:85px;}dl{font-size:12px;gap:7px;}}}

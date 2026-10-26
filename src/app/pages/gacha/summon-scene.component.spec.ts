@@ -26,9 +26,9 @@ describe('Summon cinematic', () => {
     expect(rare.componentInstance.grand()).toBeTrue();
     tick(550);
     expect(rare.componentInstance.phase()).toBe('charge');
-    tick(1100);
+    tick(2050);
     expect(rare.componentInstance.phase()).toBe('burst');
-    tick(1500);
+    tick(2600);
     expect(rare.componentInstance.phase()).toBe('cards');
     rare.destroy();
   }));
@@ -37,7 +37,7 @@ describe('Summon cinematic', () => {
     const done = jasmine.createSpy('done'); c.done.subscribe(done);
     c.reveal(0); // Cannot reveal during the intro.
     expect(c.opened().size).toBe(0);
-    tick(3150);
+    tick(5200);
     c.revealNext();
     expect(c.current()?.star).toBe(3);
     expect(c.remaining()).toBe(1);

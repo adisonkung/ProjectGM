@@ -1,3 +1,4 @@
+import { GENERATED_ICONS } from '../core/data/generated-art';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 const GLYPHS: Record<string, string> = {
@@ -26,14 +27,15 @@ const GLYPHS: Record<string, string> = {
 @Component({
   selector: 'app-citadel-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<svg [attr.viewBox]="name() === 'tower' ? '0 0 44 64' : '0 0 32 32'" [attr.width]="size()" [attr.height]="size()" aria-hidden="true" focusable="false"><path [attr.d]="path()" fill="currentColor" fill-rule="evenodd" />
+  template: `@if (art(); as src) { <img [src]="src" [style.width]="size() + 'px'" [style.height]="size() + 'px'" alt="" aria-hidden="true" decoding="async" /> } @else { <svg [attr.viewBox]="name() === 'tower' ? '0 0 44 64' : '0 0 32 32'" [attr.width]="size()" [attr.height]="size()" aria-hidden="true" focusable="false"><path [attr.d]="path()" fill="currentColor" fill-rule="evenodd" />
     @if (name() === 'gem') { <path d="M11 6 21 9 17 23 7 22Z" fill="#31b9ff"/><path d="M11 6 17 10 7 22Z" fill="#a3f3ff"/><path d="M17 10 21 9 25 15 17 23Z" fill="#147ae5"/> }
     @if (name() === 'coin') { <circle cx="16" cy="16" r="11" fill="#df9416"/><path d="M17 6 10 17H15L13 26 23 13H17Z" fill="#fff0ae"/> }
-  </svg>`,
-  styles: [':host { display: inline-flex; flex: none; line-height: 0; } svg { overflow: visible; filter: drop-shadow(0 1px 1px #0009); }'],
+  </svg> }`,
+  styles: ['img { object-fit: contain; transform: scale(1.3); pointer-events: none; } :host { display: inline-flex; flex: none; line-height: 0; } svg { overflow: visible; filter: drop-shadow(0 1px 1px #0009); }'],
 })
 export class CitadelIconComponent {
   readonly name = input.required<string>();
+  readonly art = computed(() => GENERATED_ICONS[this.name()]);
   readonly size = input(28);
   readonly path = computed(() => GLYPHS[this.name()] ?? GLYPHS['summon']);
 }

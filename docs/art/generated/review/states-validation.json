@@ -1,0 +1,10 @@
+{
+  "errors": [],
+  "checks": [
+    "Mobile sword showcase uses the same Epic foreground file",
+    "Summon pool and generated close action desktop/mobile",
+    "6BaiLong samples retain paused label in GM gallery",
+    "Real tower1 win reward includes EXP artwork; pause/resume buttons use semantic art"
+  ],
+  "screenshots": 7
+}

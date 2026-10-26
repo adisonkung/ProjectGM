@@ -1,0 +1,80 @@
+@use './antique-ornament' as metal;
+
+html body .app.reference-home:has(.island-detail-overlay) > .bar{pointer-events:none;}
+
+// Sheet16: the approved Home remains behind these independently framed windows.
+html body .app app-island {
+ .event{--ornament-face:linear-gradient(130deg,#1a242af7,#0a1118fc);--ornament-gold-low:#76501f;--ornament-gold-mid:#d2ad62;gap:7px;padding:22px 25px;small{color:#efcd86;font:500 16px/1.5 'Eldervane Trirong',var(--body);letter-spacing:0;}b{font:500 21px/1.6 'Eldervane Trirong',var(--body);color:#fff0c9;background:none;}.event-emblem{color:#efce87;filter:drop-shadow(0 0 10px #e8bf642f);}.more{font-size:12px;}.ev-acts{margin-top:6px;} .gm-btn{min-height:43px;font-size:15px;}}
+ .island-detail-overlay {
+  @include metal.palette;
+  --ornament-gold-light:#f3d58e;--ornament-gold-low:#7e561e;--ornament-gold-mid:#d9af58;--ornament-gold-shadow:#5f421c;--ornament-gold-end:#dcb660;
+  --ornament-inner-color:#cfaa58;--ornament-outer-width:2.5px;--ornament-inner-width:1px;
+  --ornament-face:linear-gradient(120deg,#182024f7,#0b1014fc 65%,#13191bf7);--ornament-inset:linear-gradient(140deg,#d5bd7f07,transparent);
+  position:absolute;inset:0;z-index:12;display:grid;place-items:center;padding:calc(var(--ui-top,70px) + 20px) 22px calc(var(--ui-bottom,0px) + 20px);overflow:auto;background:#060b0f45;backdrop-filter:blur(3px);
+  h2,h3,p{margin:0;}button:focus-visible{outline:2px solid #fff0b5;outline-offset:4px;}button{cursor:pointer;font-family:inherit;}button:disabled{cursor:default;}
+ }
+ .island-dialog{position:relative;isolation:isolate;width:min(840px,100%);max-height:100%;min-height:490px;color:#f4ebd9;filter:drop-shadow(0 12px 30px #0007);animation:island-detail-open .22s ease-out;}
+ .island-dialog>.detail-close{background:#0c1219b8;border-radius:0;}
+ .detail-btn>app-tower-ornament .engraving{width:39px;height:39px;opacity:.38;}
+ .detail-btn>app-tower-ornament .seal{opacity:.22;}
+ .island-theme-card>app-tower-ornament .engraving{width:35px;height:35px;opacity:.35;}
+ .detail-close{position:absolute;right:14px;top:10px;z-index:5;display:grid;place-items:center;width:40px;height:40px;border:0;background:none;color:#f6e7b6;font:36px/1 Georgia,serif;padding:0;text-shadow:0 1px 5px #000;}
+ .building-dialog{padding:13px;overflow:hidden;}
+ .island-dialog-content{overflow-y:auto;max-height:calc(100dvh - var(--ui-top,70px) - var(--ui-bottom,0px) - 80px);}
+ .building-content{display:grid;grid-template-columns:40% minmax(0,1fr);grid-template-rows:1fr auto;min-height:464px;column-gap:0;}
+ .detail-art{position:relative;grid-column:1;grid-row:1/3;min-height:410px;overflow:hidden;clip-path:polygon(22px 0,100% 0,100% 100%,22px 100%,0 calc(100% - 22px),0 22px);app-island-detail-art{height:100%;position:absolute;inset:0;}&::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 66%,#11171b);pointer-events:none;}.art-caption{position:absolute;bottom:24px;left:20px;right:0;z-index:1;padding:7px 15px;background:linear-gradient(90deg,#0e151bdd,transparent);color:#ffedb7;font-size:13px;letter-spacing:.03em;}}
+ .locked-art{app-island-detail-art{filter:saturate(.8) brightness(.82);}}
+ .building-lock{position:absolute;inset:0;display:grid;place-items:center;color:#f5e1ae;filter:drop-shadow(0 2px 3px #000b);}
+ .detail-copy{grid-column:2;min-width:0;display:flex;flex-direction:column;padding:15px 24px 14px 13px;gap:17px;}
+ .detail-heading{display:flex;align-items:center;gap:13px;padding:0 32px 14px 0;border-bottom:1px solid #b6954a;min-height:58px;>app-icon{color:#f4dfac;flex:none;}h2{font:500 34px/1.5 'Eldervane Trirong',var(--body);color:#fff5dc;}.level-badge{flex:none;position:relative;margin-left:4px;padding:4px 14px;border-block:1px solid #c3a45b;color:#f6e5b7;font:600 16px Georgia,serif;}}
+ .detail-description{font:400 18px/1.95 var(--body);color:#e4dfd2;}
+ .detail-requirement{position:relative;isolation:isolate;padding:15px 20px;h3{font:500 19px/1.5 'Eldervane Trirong',var(--body);color:#f7dca1;padding-bottom:7px;border-bottom:1px solid #95773f;} >div{display:flex;gap:17px;align-items:center;padding-top:11px;}>div>app-citadel-icon{color:#e9cd8d;}p{display:grid;gap:4px;}b{font-weight:500;font-size:18px;color:#fff4d8;}small{font-size:12px;line-height:1.6;color:#c7c2b7;}}
+ .detail-next{margin-top:auto;padding-top:11px;border-top:1px solid #b18d44;h3{display:flex;align-items:center;gap:11px;font:500 18px/1.6 'Eldervane Trirong',var(--body);color:#f3db9d;} >div{display:flex;align-items:center;gap:15px;margin-top:10px;}p{display:grid;gap:5px;}b{font-weight:500;font-size:17px;}small{font-size:13px;color:#c9c3b4;}.next-emblem{position:relative;isolation:isolate;display:grid;place-items:center;width:80px;height:74px;color:#f5dca3;flex:none;}}
+ .future-note{display:flex;gap:10px;align-items:center;font-size:13px;color:#d1c7b3;padding-top:10px;border-top:1px solid #95773f;}
+ .detail-actions{grid-column:1/-1;grid-row:2;z-index:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;padding:12px 16px 14px 36px;align-self:end;margin-top:8px;}.three-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding-inline:14px;}
+ .detail-btn{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;gap:13px;min-height:72px;min-width:0;padding:12px 26px;border:0;background:none;box-shadow:none;color:#fff3d8;font:500 24px/1.5 'Eldervane Trirong',var(--body);text-align:center;transition:filter .18s,transform .18s;>span:not(.detail-chevron){min-width:0;}small{display:block;font:400 11px/1.5 var(--body);color:#d5c8b0;}>app-icon{flex:none;color:#ffedc0;}.detail-chevron{margin-left:auto;font:36px/1 Georgia,serif;color:#fff0ca;}&:hover:not(:disabled){filter:brightness(1.17);transform:translateY(-1px);}&:active:not(:disabled){transform:translateY(1px);}&:disabled{filter:saturate(.25);color:#aaa69d;}}
+ .three-actions .detail-btn{font-size:20px;gap:8px;padding-inline:24px;}
+ .locked-status{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;gap:16px;min-height:52px;color:#bcb8b0;filter:saturate(.15);font-size:17px;grid-column:1/-1;}
+ .building-dialog:has(.locked-status){.detail-art{grid-row:1/3;}.detail-actions{grid-column:2;padding:0 24px 22px 13px;margin:0;}}
+ .hero-dialog{width:min(840px,100%);min-height:420px;padding:13px;overflow:hidden;}
+ .hero-content{display:grid;grid-template-columns:53% minmax(0,1fr);grid-template-rows:minmax(290px,1fr) auto;min-height:390px;}
+ .hero-keyart{position:relative;grid-column:1;grid-row:1/3;overflow:hidden;clip-path:polygon(22px 0,100% 0,100% 100%,22px 100%,0 calc(100% - 22px),0 22px);>img{width:100%;height:100%;object-fit:cover;object-position:60% center;position:absolute;inset:0;}&::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 50%,#10171b),linear-gradient(0deg,#0c1217,transparent 28%);}}
+ .hero-copy{grid-column:2;grid-row:1;z-index:1;padding:25px 24px 8px 5px;h2{padding-right:20px;font:500 34px/1.6 'Eldervane Trirong',var(--body);color:#fff4da;}.hero-rating{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:4px 0 11px;b{font:500 20px Georgia,serif;}}}
+ .detail-stars{font-size:28px;letter-spacing:3px;color:#ffc75b;text-shadow:0 2px 1px #7c410b,0 0 9px #edb25a33;}
+ .hero-class-power{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:12px 0;border-block:1px solid #b3914b;span{display:flex;align-items:center;gap:7px;font-size:17px;}app-icon,app-citadel-icon{color:#e8d49f;}b{font-weight:500;}}
+ .hero-skill-list{display:grid;gap:7px;padding-top:16px;font-size:15px;>span{display:flex;gap:10px;align-items:center;}small{min-width:32px;text-align:center;border:1px solid #9b865354;font:500 11px/1.7 Georgia,serif;color:#d7bd7f;}}
+ .main-hero-status{display:flex;align-items:center;gap:8px;margin-top:12px;color:#e4c785;font-size:12px;}
+ .hero-actions{grid-template-columns:.95fr .82fr .72fr 1.25fr;padding:7px 7px 10px;gap:5px;.detail-btn{min-height:65px;padding-inline:22px;gap:9px;font-size:19px;white-space:nowrap;}.main-hero-btn{font-size:18px;}.main-hero-btn:disabled{color:#f4d9a4;filter:saturate(.8);}}
+ .themes-dialog{width:min(900px,100%);min-height:0;padding:22px;max-height:100%;overflow:hidden;display:flex;flex-direction:column;}
+ .theme-heading{flex:none;display:flex;align-items:center;gap:20px;padding:2px 35px 15px 10px;color:#f6dca4;h2{font:500 32px/1.5 'Eldervane Trirong',var(--body);color:#fff4db;}p{font-size:13px;line-height:1.7;color:#e2dbca;}}
+ .theme-scroll-hint{font-size:11px;color:#d5c198;padding:0 4px 9px;}
+ .island-theme-cards{min-height:0;overflow:auto;padding:3px 3px 10px;display:grid;grid-template-columns:calc(50% - 6px) repeat(6,calc(25% - 9px));grid-template-rows:minmax(240px,auto);gap:12px;scroll-snap-type:x proximity;scrollbar-color:#b28c46 #10171b;scrollbar-width:thin;}
+ .island-theme-card{scroll-snap-align:start;position:relative;isolation:isolate;display:flex;flex-direction:column;min-width:0;border:0;background:none;padding:9px;color:#f2e6cd;text-align:center;transition:filter .18s;>.theme-preview{width:100%;height:140px;object-fit:cover;display:block;clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%,0 12px);}.theme-label{position:relative;isolation:isolate;margin-top:auto;display:grid;gap:2px;padding:7px 5px 1px;font-size:14px;b{font-weight:500;}small{color:#c0b7a1;font-size:10px;}}&:hover{filter:brightness(1.12);}&.on .theme-choice{border-color:#ffdda0;background:radial-gradient(circle at 30% 20%,#df4026,#970604 80%);box-shadow:0 0 9px #e84b26;}&.on .theme-label small{color:#f5b77f;}}
+ .theme-choice{position:absolute;top:14px;left:14px;z-index:2;width:27px;height:27px;border:1px solid #e0bd76;border-radius:50%;background:#0d171ca6;color:#fff0cf;font:700 20px/26px var(--body);}
+ .city-theme{grid-column:auto;grid-row:1;>.theme-preview{height:200px;}.theme-label{grid-template-columns:1fr auto;align-items:center;gap:10px;padding-inline:15px;font-size:19px;small{font-size:13px;}}}
+ .classic-theme .theme-preview{position:relative;overflow:hidden;background-size:cover;background-position:center;image-rendering:pixelated;>img{height:130px;width:auto;position:absolute;bottom:0;left:50%;transform:translateX(-50%);}}
+ .theme-description{font-size:10px;color:#c5bda9;line-height:1.5;padding:4px 8px 1px;}
+ @media(max-width:720px){
+  .island-detail-overlay{padding:calc(var(--ui-top,60px) + 12px) 10px calc(var(--ui-bottom,66px) + 10px);align-items:center;}
+  .island-dialog{max-height:100%;min-height:0;}
+  .island-dialog-content{max-height:calc(100dvh - var(--ui-top,60px) - var(--ui-bottom,66px) - 46px);min-height:0;}
+  .building-dialog{padding:10px;}.building-content{min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:190px auto auto;}
+  .detail-art{grid-column:1;grid-row:1;min-height:0;clip-path:polygon(15px 0,calc(100% - 15px) 0,100% 15px,100% 100%,0 100%,0 15px);&::after{background:linear-gradient(0deg,#10171b,transparent 55%);}.art-caption{bottom:4px;left:5px;font-size:11px;}}
+  .detail-close{right:12px;top:10px;background:#0a101b99;}
+  .detail-copy{grid-column:1;grid-row:2;padding:3px 12px 5px;gap:12px;}.detail-heading{min-height:45px;padding:0 0 9px;gap:10px;h2{font-size:24px;}>app-icon{width:30px;transform:scale(.8);}.level-badge{font-size:14px;padding-inline:9px;}}
+  .detail-description{font-size:13px;line-height:1.85;}.detail-next{padding-top:8px;h3{font-size:14px;}b{font-size:14px;}small{font-size:12px;}.next-emblem{width:62px;height:58px;}}
+  .detail-requirement{padding:11px 15px;h3{font-size:14px;}b{font-size:15px;}small{font-size:11px;}>div{gap:12px;}}
+  .detail-actions{grid-column:1;grid-row:3;padding:12px 7px 9px;margin:0;gap:7px;}.detail-btn{min-height:57px;font-size:17px;gap:7px;padding:10px 18px;>app-icon{width:21px;transform:scale(.8);}.detail-chevron{font-size:27px;}}
+  .three-actions{grid-template-columns:minmax(0,1fr);.detail-btn{font-size:18px;min-height:50px;}}
+  .building-dialog:has(.locked-status){.detail-art{grid-row:1;}.detail-actions{grid-column:1;grid-row:3;padding:10px;}}.locked-status{font-size:14px;min-height:45px;}
+  .hero-dialog{padding:10px;}.hero-content{grid-template-columns:minmax(0,1fr);grid-template-rows:230px auto auto;}
+  .hero-keyart{grid-row:1;grid-column:1;clip-path:polygon(15px 0,calc(100% - 15px) 0,100% 15px,100% 100%,0 100%,0 15px);>img{object-position:65% 40%;}&::after{background:linear-gradient(0deg,#10171b,transparent 45%);}}
+  .hero-copy{grid-column:1;grid-row:2;padding:0 13px 5px;margin-top:-15px;h2{font-size:27px;padding-right:0;}.hero-rating{margin-block:1px 7px;b{font-size:17px;}}}.detail-stars{font-size:23px;}.hero-class-power{padding-block:9px;span{font-size:14px;}}.hero-skill-list{font-size:12px;padding-top:12px;gap:5px;}
+  .hero-actions{grid-template-columns:1fr 1fr;grid-row:3;padding:10px 5px 7px;gap:5px;.detail-btn,.main-hero-btn{min-height:49px;font-size:15px;padding-inline:17px;}}
+  .themes-dialog{padding:20px 14px 16px;}.theme-heading{gap:12px;padding:0 32px 13px 4px;>app-citadel-icon{width:36px;transform:scale(.8);}h2{font-size:25px;}p{font-size:11px;}}
+  .island-theme-cards{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none;gap:9px;grid-auto-rows:auto;scroll-snap-type:none;}.island-theme-card{padding:8px;>.theme-preview{height:115px;}.theme-label{font-size:12px;}}.city-theme{grid-column:span 2;grid-row:auto;}.city-theme>.theme-preview{height:158px;}.city-theme .theme-label{font-size:17px;}.classic-theme .theme-preview>img{height:110px;}.theme-description{font-size:9px;padding:4px;}
+ }
+ @media(max-width:370px){.detail-actions:not(.hero-actions):not(.three-actions){grid-template-columns:minmax(0,1fr);}.detail-copy{padding-inline:8px;}.detail-heading h2{font-size:22px;}.detail-art{min-height:0;}.hero-rating .detail-stars{font-size:20px;}}
+ @media(prefers-reduced-motion:reduce){.island-dialog{animation:none;}.detail-btn,.island-theme-card{transition:none;}.detail-btn:hover:not(:disabled),.detail-btn:active:not(:disabled){transform:none;}}
+}
+@keyframes island-detail-open{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}

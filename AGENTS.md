@@ -96,3 +96,7 @@ Work produced by any agent is first-class. Never rewrite it for style or prefere
 4. Run `npm run sprites:optimize` if `public/sprites/*.png` changed.
 5. Update `CLAUDE.md` (the feature notes; Codex too) and `docs/AI_HANDOFF.md`. The handoff note records only the **last confirmed** sync base (a commit/tree verified identical on both sides) — never the hash of the commit that contains the note. Current state is always `git rev-parse HEAD` / `HEAD^{tree}` (PROJECT_RULES §5).
 6. Commit with `git add <paths>`, a subject in the form `type(scope): summary`, and your agent trailer (`Co-Authored-By: Codex …` / `Claude …`). Then stop.
+
+## UI visual matching — user-added rule (2026-10-25)
+
+Every UI change must follow [docs/UI_REFERENCE_RULES.md](docs/UI_REFERENCE_RULES.md) and PROJECT_RULES §21: match the selected reference precisely, inspect real screenshots, and send both the actual game image and its reference for direct comparison. Do not claim visual completion based on passing tests. This addition is explicitly authorized by the user.

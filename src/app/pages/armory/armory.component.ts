@@ -1,3 +1,5 @@
+import { StateEmblemComponent } from '../../shared/state-emblem.component';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
@@ -5,7 +7,7 @@ import { heroArt } from '../../core/data/hero-art';
 import { CLASS_NAME } from '../../core/data/classes';
 import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 import { IconComponent } from '../../shared/icon.component';
-import { AFFIXES, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
+import { AFFIXES, SELL_GOLD, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
 import { EquipmentInstance, EquipmentSlot, StatLine } from '../../core/models/equipment';
 import { canEquip, heroGearTotals, itemLines, itemName, slotOf, upgradeCap } from '../../core/rules/equipment';
 import { EquipmentService } from '../../core/services/equipment.service';
@@ -20,7 +22,7 @@ const ERR: Record<string, string> = {
 /** Equipment: hero gear (3 slots), bag with comparison, equip / unequip / lock / sell — crafting, enhancement and salvage live in the forge */
 @Component({
   selector: 'app-armory',
-  imports: [HeroPortraitComponent, IconComponent, EquipmentArtComponent, RouterLink],
+  imports: [StateEmblemComponent, CitadelFrameComponent, HeroPortraitComponent, IconComponent, EquipmentArtComponent, RouterLink],
   templateUrl: './armory.component.html',
   styleUrl: './armory.component.scss',
 })
@@ -42,6 +44,7 @@ export class ArmoryComponent {
   readonly selectedId = signal<number | null>(null);
   readonly sort = signal<'recent' | 'rarity' | 'upgrade'>('recent');
   readonly className = CLASS_NAME;
+  readonly heroBanner = computed(() => heroArt(this.hero()?.templateId ?? '')?.banner);
   readonly heroPortrait = computed(() => heroArt(this.hero()?.templateId ?? '')?.portrait);
   readonly hero = computed(() => this.save.state().heroes.find(h => h.uid === this.heroUid()) ?? null);
   readonly cls = computed(() => { const h = this.hero(); return h ? this.roster.template(h).cls : null; });
@@ -64,6 +67,7 @@ export class ArmoryComponent {
   readonly gold = computed(() => this.save.state().gold);
 
   readonly name = itemName;
+  readonly price = (i: EquipmentInstance) => SELL_GOLD[i.rarity];
   readonly cap = upgradeCap;
   readonly affixName = (id?: string) => (id ? AFFIXES[id].name + ' — ' + AFFIXES[id].description : '');
   readonly lines = (i: EquipmentInstance) => itemLines(i).slice(0, 1 + i.secondaries.length);
@@ -81,5 +85,6 @@ export class ArmoryComponent {
   equip(i: EquipmentInstance) { this.say(this.eq.equip(this.heroUid(), i.instanceId), `สวม ${itemName(i)}`); }
   unequip(slot: EquipmentSlot) { this.eq.unequip(this.heroUid(), slot); }
   toggleLock(i: EquipmentInstance) { this.eq.lock(i.instanceId, !i.locked); }
+  readonly pendingSale = signal<EquipmentInstance | null>(null);
   sell(i: EquipmentInstance) { this.say(this.eq.sell(i.instanceId), `ขาย ${itemName(i)}`); }
 }

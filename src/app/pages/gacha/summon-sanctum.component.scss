@@ -1,6 +1,6 @@
 :host { position: fixed; inset: 0; display: block; overflow: hidden; pointer-events: none; }
 .art { position: absolute; inset: 0; background: url('/ui/eldervane/sanctum.webp') center / cover no-repeat; }
-.shade { position: absolute; inset: 0; background: linear-gradient(90deg,#0f121866,transparent 27%,transparent 78%,#0f121844),linear-gradient(0deg,#0f1218a6,transparent 32%,transparent 83%,#0f121855); }
+.shade { position: absolute; inset: 0; background: var(--sanctum-veil,linear-gradient(90deg,#0f121866,transparent 27%,transparent 78%,#0f121844),linear-gradient(0deg,#0f1218a6,transparent 32%,transparent 83%,#0f121855)); }
 canvas, .cards { position: absolute; inset: 0; width: 100%; height: 100%; }
 canvas { mix-blend-mode: screen; }
 .card-place { position: absolute; width: calc(clamp(48px,5.6vw,90px) * var(--size)); transform: translate(-50%,-50%) rotate(var(--tilt)); filter: drop-shadow(0 3px 5px #0f121888) drop-shadow(0 0 2px #ffe6acb3) drop-shadow(0 0 7px #eebe6655);

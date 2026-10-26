@@ -1,0 +1,3 @@
+# Battle seals — UI decorative atlas
+
+Generated 2026-10-25 with image_gen using docs/design/eldervane-ui/13-dialogs.png as the supplied visual reference, following the user's request to match that reference. Three equal 724×724 transparent cells in a 2172×724 atlas: victory tower/laurel, defeat fractured shield, pause compass. No hero/item/skill definitions or gameplay meaning added. Original generation retained at /workspace/generated_images/exec-60c13334-2289-4655-bc80-05d975a18be4.png; runtime WebP uses lossless conversion with original alpha. Atlas is shown by CSS cropping; no manual recoloring/background removal or screenshot retouching.

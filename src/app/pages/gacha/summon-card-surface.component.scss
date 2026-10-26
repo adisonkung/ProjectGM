@@ -1,0 +1,7 @@
+app-summon-card-surface{position:absolute;inset:0;display:block;transform-style:preserve-3d;pointer-events:none;}
+app-summon-card-surface .card-flex-surface{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:50% 28%;}
+app-summon-card-surface .card-flex-bone{position:absolute;top:100%;left:0;width:100%;height:100%;transform-origin:50% 0;transform-style:preserve-3d;will-change:transform;}
+app-summon-card-surface .card-flex-root{top:0;height:calc(100% / var(--bands));}
+app-summon-card-surface .card-flex-face{position:absolute;top:0;left:0;width:100%;height:calc(100% + .45px);background-image:var(--card-texture);background-size:100% calc(var(--bands) * 100%);background-position:50% var(--slice-y);background-repeat:no-repeat;backface-visibility:visible;}
+app-summon-card-surface .card-flex-glint{position:absolute;inset:0;background:linear-gradient(110deg,#a2d9ff55,#fff0c6aa 54%,#132a4866);mix-blend-mode:screen;mask-image:var(--card-texture);mask-size:100% calc(var(--bands) * 100%);mask-position:50% var(--slice-y);mask-repeat:no-repeat;pointer-events:none;}
+@media(prefers-reduced-motion:reduce){app-summon-card-surface .card-flex-surface,app-summon-card-surface .card-flex-bone{will-change:auto;}}

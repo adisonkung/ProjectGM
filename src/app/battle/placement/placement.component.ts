@@ -1,3 +1,6 @@
+import { TowerOrnamentComponent } from '../../pages/tower/tower-ornament.component';
+import { NgTemplateOutlet } from '@angular/common';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { Component, computed, inject, input, OnDestroy, signal } from '@angular/core';
@@ -55,7 +58,7 @@ interface HeroView {
  */
 @Component({
   selector: 'app-placement',
-  imports: [CdkDropListGroup, CdkDropList, CdkDrag, UnitSpriteComponent, FieldComponent, IconComponent],
+  imports: [TowerOrnamentComponent, NgTemplateOutlet, CitadelFrameComponent, CdkDropListGroup, CdkDropList, CdkDrag, UnitSpriteComponent, FieldComponent, IconComponent],
   templateUrl: './placement.component.html',
   styleUrl: './placement.component.scss',
 })
@@ -65,6 +68,9 @@ export class PlacementComponent implements OnDestroy {
 
   /** Standalone editor crops to legal ally cells; battle preparation keeps both sides. */
   readonly allyOnly = input(false);
+  /** Reference battle footer; standalone formation and lab keep their own layouts. */
+  readonly battleLayout = input(false);
+  readonly sceneryExtraRows = input(0);
   readonly pendingCell = signal<AllyCell | null>(null);
   /** ด่านที่ใช้แสดงตำแหน่งศัตรู */
   readonly stage = input<StageDef | null>(null);
@@ -112,7 +118,7 @@ export class PlacementComponent implements OnDestroy {
   readonly benchClass = signal<HeroClass | 'all'>('all');
   readonly benchClasses: (HeroClass | 'all')[] = ['all', 'tank', 'fighter', 'assassin', 'archer', 'mage', 'healer'];
   readonly benchClassName = (cls: HeroClass | 'all') => cls === 'all' ? 'ทั้งหมด' : CLASS_NAME[cls];
-  readonly classIcon = (cls: HeroClass | 'all') => ({ all: 'heroes', tank: 'shield', fighter: 'sword', assassin: 'armory', archer: 'arrow', mage: 'star', healer: 'summon' })[cls];
+  readonly classIcon = (cls: HeroClass | 'all') => ({ all: 'heroes', tank: 'class-tank', fighter: 'class-fighter', assassin: 'class-assassin', archer: 'class-archer', mage: 'class-mage', healer: 'class-healer' })[cls];
   readonly benchClassCount = (cls: HeroClass | 'all') => cls === 'all' ? this.bench().length : this.bench().filter(h => h.cls === cls).length;
   readonly filteredBench = computed(() => this.bench().filter(h => !this.allyOnly() || this.benchClass() === 'all' || h.cls === this.benchClass()));
   setBenchClass(cls: HeroClass | 'all'): void {

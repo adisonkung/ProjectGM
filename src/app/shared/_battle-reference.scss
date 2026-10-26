@@ -1,0 +1,113 @@
+@use './antique-ornament' as metal;
+// Real tower/dungeon runs only. Keep the board's five rows and sixteen columns.
+html body .app app-battle .lab.reference-battle {
+  @include metal.cinematic-palette;
+  max-width: 1252px;
+  &:not(.fighting) { --prepare-width: min(1252px,calc(100vw - 48px)); width: var(--prepare-width); max-width: none; margin-inline: calc((100% - var(--prepare-width)) / 2); }
+  .run-head .back { flex: none; width: 44px; min-width: 44px; height: 44px; padding: 0; display: grid; place-items: center; }
+  .controls>button.primary { background: transparent; border: 0; box-shadow: none; clip-path: none; &::before,&::after { display: none; } }
+  .zone-headings { position: absolute; z-index: 8; top: 8px; left: 8px; right: 8px; display: grid; grid-template-columns: 6fr 4fr 6fr; pointer-events: none; text-align: center; font: 700 17px/1.7 'Eldervane Trirong',var(--body); span { padding: 5px; border-block: 1px solid #c7ad6b99; background: linear-gradient(100deg,#143b5fcc,#19456999); color: #ddf5ff; } span:nth-child(2) { color: #f0dbaf; background: #101b27c9; } span:last-child { color: #ffe1d3; background: linear-gradient(100deg,#76251eaa,#491a1fcc); } }
+  app-placement .cell.ally { box-shadow: inset 0 0 0 1px #b8d9eb66; }
+  app-placement .cell.enemy-half { box-shadow: inset 0 0 0 1px #e4b27c55; }
+  app-placement .lines .neutral { background-image: linear-gradient(#e4d4a955 1px,transparent 1px),linear-gradient(90deg,#e4d4a955 1px,transparent 1px); background-size: var(--cell) var(--cell); }
+  app-placement .lines .lbl,app-placement .lines .neutral>b { display: none; }
+  .screen { --foot: 96px; }
+  app-party-bar .compact .card { grid-template-columns: 56px 84px; }
+  app-party-bar .compact .frame { width: 56px; height: 56px; }
+  .special { width: 50px; height: 50px; }
+  .menu.citadel-surface,.result-card.citadel-surface { >h2,>.facts,>.loot,>.exp-strip,>.actions,>.stars,>.fail,>button,>small { position: relative; z-index: 1; } }
+
+  gap: 14px;
+  .run-head { padding: 18px 24px; gap: 16px; h1 { font: 700 26px/1.6 'Eldervane Trirong',var(--body); } .power { font-size: 14px; b { color: #efd29b; font-size: 22px; } } }
+  .status { justify-content: flex-start; gap: 12px; .chip { border-radius: 0; border-color: #a77d3e77; background: #101c2aeb; color: #e8d6b2; padding: 7px 16px; } }
+  .controls { justify-content: flex-end; padding-bottom: 12px; >button.primary { position: relative; isolation: isolate; display: flex; align-items: center; justify-content: space-between; gap: 25px; min-width: 330px; min-height: 76px; padding: 15px 28px; font: 700 27px/1.5 'Eldervane Trirong',var(--body); } }
+  app-placement {
+    --cell: min(77px, calc((100vw - 56px) / 16));
+    .board { border: 4px double #c49a51; border-radius: 0; clip-path: polygon(15px 0,calc(100% - 15px) 0,100% 15px,100% calc(100% - 15px),calc(100% - 15px) 100%,15px 100%,0 calc(100% - 15px),0 15px); box-shadow: 0 8px 28px #0007; }
+    .cell.ally { border-color: #b8d9eb77; background: #185a7814; &.odd { background: #184a761f; } }
+    .cell.enemy-half { background: #7427190d; }
+    .lines .neutral { background: #ddc4770d; border-inline-color: #e9cd9677; b { color: #ead5ac; } }
+    .bar { padding: 12px 16px; background: #0b1625eb; border-block: 1px solid #ad884b88; color: #d3c7b0; }
+    .bar b { color: #f7deb0; }
+    .formation-actions { gap: 10px; button { min-height: 44px; border-radius: 0; border: 1px solid #ba9657; background: linear-gradient(160deg,#25303c,#080f18); color: #eddbb6; padding: 10px 20px; } }
+    .bench { border-radius: 0; border: 1px solid #9c794266; background: #0b1625e8; padding: 16px; gap: 12px; }
+    .bench .card { border-radius: 0; border: 1px solid #ae8b4c; background: linear-gradient(120deg,#233044,#0a121d); min-height: 68px; padding: 8px; width: 180px; }
+    .portrait { border-radius: 0; width: 50px; height: 54px; }
+    .hint { color: #efdfc0; padding: 6px 10px; background: #102033b8; }
+  }
+  .screen { isolation: isolate; }
+  .battle-field-frame { inset: -6px; z-index: 260; pointer-events: none; >.face,>.inner-face { display: none; } }
+  app-board .board { border-radius: 0; border-color: #a38347; clip-path: polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px); }
+  .wave-panel.citadel-surface { padding: 9px 28px; .wv { font: 700 23px/1.2 'Eldervane Trirong',var(--body); em { color: #ffe2a7; background: none; font-size: 25px; } } small { color: #d3c5aa; } }
+  .clock.citadel-surface { font-size: 26px; min-width: 66px; justify-content: center; }
+  .hud-right .hud-btn { color: #f5deb0; min-height: 42px; min-width: 45px; }
+  app-party-bar .compact .card { isolation: isolate; border-radius: 0; background: linear-gradient(125deg,#182333f5,#070e17f5); box-shadow: inset 0 0 0 1px #b8904f, inset 0 0 0 3px #050b11; padding: 5px; }
+  app-party-bar .compact .frame, app-party-bar .compact .pic, app-party-bar .compact .sk { border-radius: 2px; }
+  app-party-bar .compact .sk { box-shadow: inset 0 0 0 1px #c5a36a99; }
+  app-party-bar .compact .name { color: #f3dfb8; }
+  app-party-bar .mana.full i { background: linear-gradient(90deg,#4da4cf,#f7df9c); }
+  .overlay { position: fixed; inset: 0; padding: 24px; border-radius: 0; z-index: 1500; background: radial-gradient(ellipse at 50% 40%,#13223488,#020810e8); backdrop-filter: blur(6px); overflow-y: auto; }
+  .menu.citadel-surface, .result-card.citadel-surface {
+    position: relative; isolation: isolate; border: 0; border-radius: 0; background: none; box-shadow: 0 25px 70px #0007; width: min(620px,100%); max-height: calc(100dvh - 48px); overflow-y: auto; padding: 34px 36px; gap: 16px;
+    >app-citadel-frame { display: none; }
+    &::before { content: ''; position: absolute; z-index: 0; inset: 8px 8px auto; height: 240px; background: linear-gradient(180deg,#0a142322,#0a1423),var(--battle-scene) center / cover; opacity: .5; clip-path: polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%,0 14px); pointer-events: none; }
+    h2 { display: grid; gap: 6px; margin: 0; font: 700 38px/1.5 'Eldervane Trirong',var(--body); color: #f6d89d; letter-spacing: .02em; text-shadow: 0 2px 18px #d4a04c44; small { font: 500 15px/1.8 var(--body); color: #e4d5b9; } }
+    .gm-btn { min-height: 60px; font: 700 23px/1.7 'Eldervane Trirong',var(--body); }
+    >small { font-size: 12px; line-height: 1.9; color: #cfbea1; }
+  }
+  .battle-crest { position: relative; display: grid; place-items: center; justify-self: center; width: 108px; height: 108px; color: #f1ce87; border-block: 1px solid #ae814644; background: radial-gradient(ellipse,#e9bd4b24,transparent 70%); filter: drop-shadow(0 3px 10px #dda63744);  }
+  .result-card:not(.win) { .battle-crest { color: #da7766; filter: drop-shadow(0 3px 14px #bf3f3833); } h2 { color: #f0b4a3; } }
+  .result-card.citadel-surface .facts { color: #d2c4ac; font-size: 13px; line-height: 1.8; }
+  .result-card.citadel-surface .loot { gap: 10px; width: 100%; padding-block: 16px; border-block: 1px solid #ad864977; b { color: #e6c48b; font: 700 17px 'Eldervane Trirong',var(--body); margin-bottom: 8px; } .loot-item { display: grid; justify-items: center; gap: 7px; min-width: 104px; max-width: 160px; padding: 15px 12px; border: 1px solid #ac8444; background: linear-gradient(145deg,#31405066,#07101be6); color: #e9d7b2; border-radius: 0; >span { border: 0; background: none; padding: 0; font-size: 11px; line-height: 1.6; } strong { font: 600 20px var(--title); color: #ffe1a1; } } .drop { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; padding: 12px; } }
+  .result-card.citadel-surface .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; button { background: transparent; border: 0; border-radius: 0; box-shadow: none; clip-path: none; color: #f5e4bf; &::before,&::after { display: none; } display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 57px; padding: 12px 18px; font: 700 19px/1.7 'Eldervane Trirong',var(--body); white-space: normal; } }
+  .exp-strip { padding-block: 10px; gap: 14px; .pf app-hero-portrait { outline: 1px solid #a8874c; } }
+  .rotate-hint { background: radial-gradient(ellipse at 50% 35%,#25425bbb,#06101af5),var(--battle-scene) center / cover; b { font-family: 'Eldervane Trirong',var(--body); } .ph { font-size: 0; width: 43px; height: 72px; border: 2px solid #e5c587; border-radius: 7px; box-shadow: inset 0 0 0 5px #152538,0 0 35px #cfaa5122; } }
+}
+@media(max-width:720px) {
+  html body .app app-battle .lab.reference-battle {
+    .zone-headings { font-size: 10px; top: 4px; left: 4px; right: 4px; span { padding: 1px; } }
+    .run-head { padding: 15px; gap: 10px; h1 { font-size: 20px; } .power b { font-size: 17px; } }
+    .controls>button.primary { width: 100%; min-width: 0; min-height: 65px; font-size: 24px; }
+    app-placement { --cell: calc((100vw - 40px) / 16); .bench { padding: 10px; } .bench .card { width: calc(50% - 6px); min-width: 0; gap: 6px; .info b { font-size: 12px; } } .bar { gap: 10px; padding: 12px; } .formation-actions { width: 100%; justify-content: flex-end; button { flex: 1; padding-inline: 8px; } } }
+    .overlay { padding: 14px; }
+    .menu.citadel-surface,.result-card.citadel-surface { max-height: calc(100dvh - 28px); padding: 26px 23px; h2 { font-size: 32px; } }
+    .result-card.citadel-surface .actions { grid-template-columns: 1fr; }
+  }
+}
+@media(orientation:landscape) and (max-height:500px) {
+  html body .app app-battle .lab.reference-battle {
+    .screen { --foot: 62px; }
+    app-party-bar .compact .card { grid-template-columns: 38px 60px; }
+    app-party-bar .compact .frame { width: 38px; height: 38px; }
+    .special { width: 40px; height: 40px; }
+    .battle-field-frame { inset: -2px; }
+    .wave-panel.citadel-surface { padding: 4px 18px; small { display: none; } .wv { font-size: 14px; em { font-size: 17px; } } }
+    .clock.citadel-surface { font-size: 17px; padding: 3px 9px; min-width: 40px; }
+    .hud-right .hud-btn { min-height: 30px; min-width: 34px; padding: 5px 10px; }
+    app-party-bar .compact .card { padding: 3px; }
+    .overlay { padding: 12px; }
+    .menu.citadel-surface,.result-card.citadel-surface { max-height: calc(100dvh - 24px); padding: 22px 28px; gap: 10px; }
+    .menu.citadel-surface { width: min(570px,100%); .battle-crest { display: none; } .gm-btn { min-height: 42px; font-size: 18px; } h2 { font-size: 25px; } }
+    .result-card.citadel-surface { width: min(740px,100%); grid-template-columns: minmax(0,.85fr) minmax(0,1.3fr); align-items: center;
+      >h2 { grid-column: 1; grid-row: 1; } >.facts { grid-column: 1; grid-row: 2; } >.fail,>.stars { grid-column: 1; grid-row: 3; }
+      >.loot { grid-column: 2; grid-row: 1 / span 2; padding-block: 8px; gap: 6px; b { font-size: 14px; margin-bottom: 2px; } .loot-item { min-width: 80px; padding: 8px; gap: 4px; } }
+      >.exp-strip { grid-column: 2; grid-row: 3; padding-block: 4px; gap: 8px; li { width: 52px; } }
+      >.actions { grid-column: 1/-1; grid-row: 4; grid-template-columns: repeat(4,minmax(0,1fr)); button { font-size: 13px; padding: 9px 7px; gap: 5px; } }
+      .battle-crest { display: none; } h2 { font-size: 28px; } .actions button { min-height: 44px; } }
+  }
+}
+@media(prefers-reduced-motion:reduce) { html body .app app-battle .lab.reference-battle { .overlay,.result-card,.menu,.rotate-hint .ph { animation: none; } } }
+html body .app app-battle .lab.reference-battle .result-card.citadel-surface .actions button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+@media(orientation:landscape) and (max-height:500px) {
+  html body .app app-battle .lab.reference-battle .result-card.citadel-surface:not(.win) {
+    grid-template-columns: minmax(0,1fr);
+    >h2,>.facts,>.fail,>.stars,>.actions { grid-column: 1; grid-row: auto; }
+    >.actions { grid-template-columns: repeat(3,minmax(0,1fr)); button:last-child { grid-column: auto; } }
+  }
+}
+@media(orientation:landscape) and (max-height:500px) {
+  html body .app app-battle .lab.reference-battle .result-card.citadel-surface .actions {
+    &:has(>button:nth-child(3):last-child) { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    button:last-child:nth-child(odd) { grid-column: auto; }
+  }
+}

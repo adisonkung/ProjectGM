@@ -1,5 +1,7 @@
 <dialog #stage class="scene" [class.grand]="grand()" [attr.data-phase]="phase()" aria-labelledby="scene-title" (cancel)="$event.preventDefault(); finish()">
-  <app-summon-sanctum />
+  <app-summon-sanctum [showFloatingCards]="false" />
+  <app-summon-vfx [mode]="phase()" />
+  <div class="cinematic-bars" aria-hidden="true"></div>
   <div class="vignette" aria-hidden="true"></div>
   <div class="light-stage" aria-hidden="true">
     <div class="pillar-haze"></div><div class="pillar"></div><div class="altar-flare"></div>
@@ -8,12 +10,10 @@
     </svg>
     <div class="motes">@for (m of motes; track $index) { <i [style.left.%]="m.x" [style.--delay]="m.delay + 's'" [style.--duration]="m.duration + 's'"></i> }</div>
   </div>
-  @if (phase() === 'burst') {
-    <div class="flying-cards" aria-hidden="true">@for (c of flights(); track $index) {
-      <img [src]="cardBack(c.star)" [class.three-star]="c.star >= 3" alt="" [style.--x]="c.x + 'vw'" [style.--y]="c.y + 'vh'" [style.--tilt]="c.tilt + 'deg'" [style.animation-delay.s]="c.delay" />
-    }</div>
+  @if (phase() === 'charge' || phase() === 'burst') {
+    <app-summon-flight [stars]="flightStars()" [grand]="grand()" [release]="phase() === 'burst'" />
   }
-  <header class="scene-heading"><span class="wordmark"><img src="/ui/branding/eldervane-wordmark-champagne.webp" alt="Eldervane" width="2023" height="456" decoding="async" /></span><button type="button" class="skip" (click)="finish()" autofocus>ข้าม <span>»</span></button></header>
+  <header class="scene-heading"><span class="wordmark"><img src="/ui/branding/eldervane-wordmark-champagne.webp" alt="Eldervane" width="2023" height="456" decoding="async" /></span><button type="button" class="skip citadel-surface citadel-control" (click)="finish()" autofocus><app-tower-ornament [grooved]="true" [arrow]="true" />ข้าม <span>»</span></button></header>
   @if (phase() === 'charge' || phase() === 'burst') {
     <div class="intro-copy" role="status"><span>THE HEARTH OF DESTINY</span><h1 id="scene-title">{{ grand() ? 'แสงแห่งวีรชนกำลังตื่นขึ้น' : 'เสียงเรียกจากดวงดาว' }}</h1><p>การเดินทางครั้งใหม่กำลังเริ่มต้น</p></div>
   }
@@ -27,16 +27,16 @@
           </button>
         }
       </div>
-      <footer class="scene-actions"><button type="button" (click)="revealNext()">✧ เปิดทีละใบ</button><button type="button" class="primary" (click)="finish()">✦ เปิดทั้งหมด</button></footer>
+      <footer class="scene-actions"><button type="button" (click)="revealNext()" class="citadel-surface citadel-control"><app-tower-ornament [grooved]="true" [arrow]="true" />✧ เปิดทีละใบ</button><button type="button" class="primary citadel-surface citadel-control" (click)="finish()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" />✦ เปิดทั้งหมด</button></footer>
     </section>
   }
   @if (phase() === 'spotlight') {
     @if (current(); as r) {
       <section class="spotlight" [class.rare]="r.star >= 3" aria-labelledby="scene-title">
         <div class="hero-art">@if (banner()) { <img [src]="banner()" alt="" /> } @else { <app-hero-portrait [heroId]="r.templateId" [size]="220" /> }</div>
-        <div class="hero-caption"><span class="rarity">{{ r.star }}★ HERO</span><h1 id="scene-title">{{ r.name }}</h1><p>{{ r.cls }}</p><div class="stars">{{ '★'.repeat(r.star) }}</div>
+        <div class="hero-caption"><span class="reveal-ornament" aria-hidden="true">✧ ───── ◆ ───── ✧</span><span class="rarity">{{ r.star }}★ HERO</span><h1 id="scene-title">{{ r.name }}</h1><p>{{ r.cls }}</p><div class="stars">{{ '★'.repeat(r.star) }}</div>
           @if (r.isNew) { <strong class="new-tag">NEW · ฮีโร่ใหม่</strong> } @else if (r.memory) { <p>ตัวซ้ำ → Hero Memory +{{ r.memory }}</p> } @else { <p>6★ แล้ว → Universal Memory +{{ r.universal }}</p> }
-          <button type="button" class="primary continue" (click)="continue()">{{ remaining() ? 'เปิดไพ่ที่เหลือ' : 'ดูผลการอัญเชิญ' }} »</button>
+          <button type="button" class="primary continue citadel-surface citadel-control" (click)="continue()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" />{{ remaining() ? 'เปิดไพ่ที่เหลือ' : 'ดูผลการอัญเชิญ' }} »</button>
         </div>
       </section>
     }

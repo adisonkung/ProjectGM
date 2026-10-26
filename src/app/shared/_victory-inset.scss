@@ -1,0 +1,38 @@
+// User correction: local title shadow and a reward ribbon fully INSIDE its frame.
+html body .app app-battle .lab.reference-battle .result-card.citadel-surface.win {
+  .result-hero {width:100%;}
+  .result-hero h2 {
+    &::before {inset:auto;left:50%;top:-2px;bottom:-3px;width:300px;max-width:85%;transform:translateX(-50%);background:radial-gradient(ellipse,#030609e0 0%,#030609b3 40%,#03060944 66%,transparent 82%);filter:blur(5px);}
+    small {width:100%;border:0;background:none;position:relative;padding:3px 0;
+      &::before,&::after {content:'';position:absolute;left:50%;width:75%;height:1px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,#d6aa51 20%,#f1cf7a 50%,#d6aa51 80%,transparent);}
+      &::before{top:0;}&::after{bottom:0;}
+    }
+  }
+  .loot {width:83%;min-height:180px;padding:16px 14px 14px;gap:10px;margin-top:8px;align-content:start;
+    .reward-heading{flex:0 0 100%;width:100%;min-width:0;height:38px;min-height:38px;margin:0;padding:0;}
+    .reward-heading>b{font-size:15px;padding-inline:75px;}
+    .first-clear-badge{width:94px;height:38px;font-size:15px;}
+    .loot-item{min-height:104px;min-width:104px;position:relative;align-content:center;gap:6px;}
+  }
+}
+@media(orientation:landscape) and (max-height:500px){html body .app app-battle .lab.reference-battle .result-card.citadel-surface.win {
+ .result-hero h2::before{width:190px;max-width:95%;}
+ .loot{width:100%;min-height:150px;padding:13px 12px 12px;gap:7px;.reward-heading{height:32px;min-height:32px;margin:0;}.reward-heading>b{font-size:11px;padding-inline:8px 70px;}.first-clear-badge{width:70px;height:32px;font-size:12px;}.loot-item{min-height:84px;min-width:90px;padding:5px;}}
+}}
+@media(max-width:480px){html body .app app-battle .lab.reference-battle .result-card.citadel-surface.win {
+ .loot{width:100%;padding-inline:12px;.reward-heading>b{font-size:11px;padding-inline:8px 74px;}.first-clear-badge{width:74px;font-size:12px;}}
+}}
+html body .app app-battle .lab.reference-battle .result-card.citadel-surface.win {
+ .result-hero {isolation:isolate;
+   &::after{content:'';position:absolute;left:50%;bottom:0;width:310px;max-width:85%;height:105px;transform:translateX(-50%);z-index:-1;pointer-events:none;background:radial-gradient(ellipse,#020609dc 0%,#020609a6 45%,#02060944 68%,transparent 85%);filter:blur(6px);}
+ }
+ .victory-mark {display:block;width:300px;max-width:95%;height:auto;aspect-ratio:3/2;object-fit:contain;position:relative;z-index:1;}
+ .result-hero h2 {margin:-3px 0 0;font-size:0;line-height:1;background:none;
+   &::before{display:none;}
+   .art-title{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+ }
+}
+@media(orientation:landscape) and (max-height:500px){html body .app app-battle .lab.reference-battle .result-card.citadel-surface.win {
+ .victory-mark{width:165px;}.result-hero::after{width:180px;height:70px;}.result-hero h2{margin-top:-4px;}
+}}
+@media(max-width:480px){html body .app app-battle .lab.reference-battle .result-card.citadel-surface.win {.victory-mark{width:240px;}}}

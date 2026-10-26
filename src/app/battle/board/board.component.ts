@@ -210,6 +210,8 @@ export class BoardComponent {
    * (phase 3) and so are the projectiles (phase 4); bars / cast bars / numbers stay DOM either way.
    */
   readonly renderer = input<'dom' | 'pixi'>('dom');
+  /** Extra decorative sky, in visual cell heights. Does not change rows or unit coordinates. */
+  readonly sceneryExtraRows = input(0);
   /** battle: the game clock is frozen (paused / hit-stop) — the Pixi units hold their frame */
   readonly frozen = input<(() => boolean) | undefined>(undefined);
   /** debug: lines from each monster to its target (board cell coordinates incl. scenery rows) */

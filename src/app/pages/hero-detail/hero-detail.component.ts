@@ -1,3 +1,6 @@
+import { StateEmblemComponent } from '../../shared/state-emblem.component';
+import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
+import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -21,21 +24,23 @@ import { SaveService } from '../../core/services/save.service';
 import { IslandService } from '../../core/services/island.service';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
+import { CitadelIconComponent } from '../../shared/citadel-icon.component';
 
 const UPGRADE_ERROR: Record<SkillUpgradeError, string> = {
   MAX_RANK: 'ระดับสูงสุดแล้ว', RANK_CAP: 'ติดเพดานระดับ — ต้อง Breakthrough', NEED_LEVEL: 'เลเวลไม่ถึง',
   NEED_BREAKTHROUGH: 'ต้อง Breakthrough ก่อน', NEED_MATERIALS: 'Skill Tome ไม่พอ', NEED_GOLD: 'ทองไม่พอ', NO_HERO: '',
 };
-type DetailTab = 'overview' | 'stats' | 'skills' | 'gear';
+type DetailTab = 'overview' | 'stats' | 'skills' | 'gear' | 'growth';
 
 const RARITY_TIER: Record<Rarity, number> = { COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5 };
 const SLOT_LABEL: Record<EquipmentSlot, string> = { WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
 const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
 
-/** Hero detail: full key art, live identity/skill shortcuts, then overview · stats · skills · equipment. */
+/** Hero detail: full key art, live identity/skill shortcuts, then overview · stats · skills · equipment · growth. */
 @Component({
   selector: 'app-hero-detail',
-  imports: [RouterLink, HeroPortraitComponent, IconComponent],
+  imports: [StateEmblemComponent, TowerOrnamentComponent, EquipmentArtComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './hero-detail.component.html',
   styleUrl: './hero-detail.component.scss',
 })
@@ -91,12 +96,12 @@ export class HeroDetailComponent {
     const base = heroStats(t, { ...h, gear: undefined });
     const row = (label: string, icon: string, b: number, f: number, digits = 0) => ({ label, icon, base: b.toFixed(digits), total: f.toFixed(digits), bonus: f - b > 1e-6 ? '+' + (f - b).toFixed(digits) : '' });
     return [
-      row('พลังชีวิต', 'shield', base.hp, fin.hp),
-      row('พลังโจมตี', 'sword', base.atk, fin.atk),
-      row('พลังป้องกัน', 'shield', base.def, fin.def),
-      row('ความเร็วโจมตี', 'bolt', base.atkSpeed, fin.atkSpeed, 2),
-      row('ความเร็วเดิน', 'arrow', base.moveSpeed, fin.moveSpeed, 2),
-      row('ระยะโจมตี', 'star', base.range, fin.range),
+      row('พลังชีวิต', 'base-stat-hp', base.hp, fin.hp),
+      row('พลังโจมตี', 'base-stat-atk', base.atk, fin.atk),
+      row('พลังป้องกัน', 'base-stat-def', base.def, fin.def),
+      row('ความเร็วโจมตี', 'base-stat-atkSpeed', base.atkSpeed, fin.atkSpeed, 2),
+      row('ความเร็วเดิน', 'base-stat-moveSpeed', base.moveSpeed, fin.moveSpeed, 2),
+      row('ระยะโจมตี', 'base-stat-range', base.range, fin.range),
     ];
   });
 
@@ -106,20 +111,21 @@ export class HeroDetailComponent {
     if (!h) return [];
     const tot = heroGearTotals(h);
     const core: EquipStat[] = ['atkPct', 'atkFlat', 'hpPct', 'defPct', 'attackSpeed', 'moveSpeed'];
-    return (Object.keys(tot) as EquipStat[]).filter(s => tot[s] && !core.includes(s)).map(s => this.fmt(s, tot[s]));
+    return (Object.keys(tot) as EquipStat[]).filter(s => tot[s] && !core.includes(s)).map(s => ({ stat: s, text: this.fmt(s, tot[s]) }));
   });
 
   /** wide key art behind the header (heroes that have one) */
   readonly banner = computed(() => heroArt(this.t()?.id)?.banner);
   readonly portrait = computed(() => heroArt(this.t()?.id)?.portrait);
   readonly attack = computed(() => { const t = this.t(); return t ? kitOf(t.id, t.cls).attack : null; });
-  readonly tab = signal<DetailTab>('overview');
+  readonly tab = signal<DetailTab>(inject(ActivatedRoute).snapshot?.queryParamMap?.get('tab') === 'skills' ? 'skills' : 'overview');
   readonly statBreakdown = signal(false);
   readonly tabs: { id: DetailTab; label: string; icon: string }[] = [
-    { id: 'overview', label: 'ข้อมูล', icon: 'heroes' },
+    { id: 'overview', label: 'ภาพรวม', icon: 'heroes' },
     { id: 'stats', label: 'ค่าสถานะ', icon: 'sword' },
     { id: 'skills', label: 'สกิล', icon: 'bolt' },
     { id: 'gear', label: 'อุปกรณ์', icon: 'armory' },
+    { id: 'growth', label: 'พัฒนา', icon: 'star' },
   ];
 
   onTabKey(event: KeyboardEvent): void {

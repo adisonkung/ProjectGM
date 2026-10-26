@@ -1,56 +1,28 @@
-<section class="account">
-  <header class="head">
-    <h1 class="gm-title">บัญชี & ย้ายเซฟ</h1>
-    <p class="gm-sub">เซฟเก็บอยู่ในเบราว์เซอร์เครื่องนี้ — ใช้รหัสหรือไฟล์ด้านล่างเพื่อเล่นต่อที่เครื่องอื่น</p>
-  </header>
-
-  @if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
-
-  <div class="gm-panel card">
-    <h2 class="gm-h2"><app-icon name="home" [size]="16" /> ชื่อเกาะ</h2>
-    @if (!editing()) {
-      <div class="name-row">
-        <b class="isle-name">{{ account.islandName() }}</b>
-        <button type="button" class="gm-btn small ghost" (click)="edit()"><app-icon name="edit" [size]="13" /> เปลี่ยนชื่อ</button>
-      </div>
-    } @else {
-      <form class="rename" (submit)="$event.preventDefault(); saveName()">
-        <input type="text" aria-label="ชื่อเกาะใหม่" autocomplete="off" [value]="draft()" (input)="draft.set($any($event.target).value)" />
-        <button type="submit" class="gm-btn small primary" [disabled]="!!draftError()">บันทึก</button>
-        <button type="button" class="gm-btn small ghost" (click)="editing.set(false)">ยกเลิก</button>
-        <span class="err">{{ draftError() ?? '' }}</span>
-      </form>
-    }
-  </div>
-
+@if (access.isGm()) { <a class="gm-btn small" routerLink="/art-catalog">คลังอาร์ตเกม · GM</a> }
+<section class="account reference-account">
+  <header class="head citadel-surface"><app-citadel-frame shape="chapter" [cut]="26" /><app-citadel-icon name="people" [size]="44" /><div><h1 class="gm-title">บัญชีและย้ายเซฟ</h1><p class="gm-sub">เซฟเก็บอยู่ในเบราว์เซอร์เครื่องนี้</p></div></header>
+  @if (notice()) { <p class="notice" role="status"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 9 17 20 5"/></svg>{{ notice() }}</p> }
+  <div class="profile-card citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" /><img class="island-thumb" src="/ui/eldervane/citadel.webp" alt="" /><span class="profile-label"><app-citadel-icon name="tower" [size]="31" />ชื่อเกาะ</span><b class="isle-name">{{ account.islandName() }}</b><button type="button" class="gm-btn ghost citadel-surface citadel-control" (click)="edit()"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="edit" [size]="20" />เปลี่ยนชื่อ</button></div>
   <div class="grid">
-    <div class="gm-panel card">
-      <h2 class="gm-h2"><app-icon name="save" [size]="16" /> ส่งออก (เครื่องนี้ → เครื่องใหม่)</h2>
-      <ol class="steps">
-        <li>สร้างรหัส แล้วคัดลอกไปวางที่เครื่องใหม่ (ส่งผ่านแชตหรือโน้ตได้)</li>
-        <li>หรือดาวน์โหลดไฟล์เซฟ .json เก็บไว้เป็นสำรองด้วยก็ได้</li>
-      </ol>
-      <div class="row">
-        <button type="button" class="gm-btn primary" (click)="makeCode()"><app-icon name="bolt" [size]="14" /> {{ code() ? 'สร้างรหัสใหม่' : 'สร้างรหัสย้ายเซฟ' }}</button>
-        <button type="button" class="gm-btn ghost" (click)="download()"><app-icon name="load" [size]="14" /> ดาวน์โหลดไฟล์เซฟ</button>
-      </div>
-      @if (code()) {
-        <textarea class="code" readonly rows="4" aria-label="รหัสย้ายเซฟ" (focus)="$any($event.target).select()" [value]="code()"></textarea>
-        <div class="row">
-          <button type="button" class="gm-btn small" (click)="copy()">{{ copied() ? 'คัดลอกแล้ว ✓' : 'คัดลอกรหัส' }}</button>
-          <small class="muted">{{ code().length.toLocaleString() }} ตัวอักษร · รหัสคือเซฟทั้งเกม ใครมีรหัสก็เล่นเซฟนี้ได้</small>
-        </div>
-      }
-    </div>
-
-    <div class="gm-panel card">
-      <h2 class="gm-h2"><app-icon name="load" [size]="16" /> นำเข้า (เครื่องเดิม → เครื่องนี้)</h2>
+    <section class="gm-panel card export-card citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" />
+      <header class="section-heading"><svg viewBox="0 0 32 32" width="34" height="34" aria-hidden="true"><path d="M14 23V10H8L16 2 24 10H18V23ZM4 18H8V26H24V18H28V30H4Z" fill="currentColor"/></svg><div><h2 class="gm-h2">ส่งออกเซฟ</h2><p>สร้างรหัสย้ายเซฟ หรือดาวน์โหลดไฟล์เซฟ<br />เพื่อนำไปใช้กับเครื่องอื่น</p></div></header>
+      <ol class="steps"><li>กดสร้างรหัสย้ายเซฟเพื่อสร้างรหัส</li><li>คัดลอกรหัส หรือดาวน์โหลดไฟล์</li><li>นำรหัสหรือไฟล์ไปใช้กับเครื่องอื่น</li></ol>
+      <div class="export-actions"><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="makeCode()"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-icon name="save" [size]="22" />{{ code() ? 'สร้างรหัสใหม่' : 'สร้างรหัสย้ายเซฟ' }}</button><button type="button" class="gm-btn ghost citadel-surface citadel-control" (click)="download()"><app-citadel-frame shape="hex" [cut]="18" /><app-icon name="load" [size]="22" />ดาวน์โหลดไฟล์เซฟ</button></div>
+      <div class="export-code"><label for="export-code">รหัสย้ายเซฟ</label><textarea id="export-code" class="code" readonly rows="4" aria-label="รหัสย้ายเซฟ" [placeholder]="'กดสร้างรหัสย้ายเซฟเพื่อแสดงรหัสที่นี่'" (focus)="$any($event.target).select()" [value]="code()"></textarea>@if (code()) { <button type="button" class="gm-btn small copy-code citadel-surface citadel-control" (click)="copy()"><app-citadel-frame shape="hex" [cut]="12" /><app-icon name="scroll" [size]="16" />{{ copied() ? 'คัดลอกแล้ว ✓' : 'คัดลอกรหัส' }}</button> }</div>
+      @if (code()) { <small class="muted">{{ code().length.toLocaleString() }} ตัวอักษร · รหัสคือเซฟทั้งเกม ใครมีรหัสก็เล่นเซฟนี้ได้</small> }
+    </section>
+    <section class="gm-panel card import-card citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" />
+      <header class="section-heading"><app-icon name="load" [size]="34" /><div><h2 class="gm-h2">นำเข้าเซฟ</h2><p>ใส่รหัสย้ายเซฟ หรือเลือกไฟล์เซฟจากเครื่องอื่น<br />เพื่อกู้คืนข้อมูล</p></div></header>
       <app-save-import (imported)="imported()" />
-      @if (backup()) {
-        <p class="undo"><button type="button" class="gm-btn small ghost" (click)="undo()"><app-icon name="restart" [size]="13" /> ย้อนกลับเป็นเซฟก่อนนำเข้า</button></p>
-      }
-    </div>
+      @if (backup()) { <p class="undo"><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="undo()"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="restart" [size]="18" />ย้อนกลับเป็นเซฟก่อนนำเข้า</button></p> }
+    </section>
   </div>
-
-  <p class="soon muted"><app-icon name="lock" [size]="13" /> ระบบล็อกอินและเซฟบนคลาวด์ (ซิงก์อัตโนมัติ) จะตามมาในขั้นถัดไป</p>
+  <p class="soon muted"><app-icon name="lock" [size]="14" />ระบบล็อกอินและเซฟบนคลาวด์จะตามมาในขั้นถัดไป</p>
+  @if (editing()) {
+    <div class="account-overlay" (click)="editing.set(false)" (keydown.escape)="editing.set(false)"><section class="rename-dialog citadel-surface" role="dialog" aria-modal="true" aria-labelledby="rename-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" (click)="$event.stopPropagation()"><app-tower-ornament [grooved]="true" [ornate]="true" />
+      <button type="button" class="dialog-close" (click)="editing.set(false)" aria-label="ปิดเปลี่ยนชื่อเกาะ"><app-icon name="close" [size]="22" /></button>
+      <header class="dialog-heading"><app-citadel-icon name="tower" [size]="42" /><h2 id="rename-title">เปลี่ยนชื่อเกาะ</h2></header>
+      <form class="rename" (submit)="$event.preventDefault(); saveName()"><label for="rename-name">ชื่อเกาะ</label><input id="rename-name" type="text" autocomplete="off" cdkFocusInitial aria-describedby="rename-error rename-count" [attr.aria-invalid]="draftError() ? 'true' : null" [value]="draft()" (input)="draft.set($any($event.target).value)" /><div class="rename-meta"><span id="rename-error" class="err" role="alert">{{ draftError() ?? '' }}</span><span id="rename-count">{{ draftLength() }}/{{ max }}</span></div><div class="dialog-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="editing.set(false)"><app-citadel-frame shape="hex" [cut]="18" /><app-icon name="close" [size]="22" />ยกเลิก</button><button type="submit" class="gm-btn primary citadel-surface citadel-control" [disabled]="!!draftError()"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 9 17 20 5"/></svg>บันทึก</button></div></form>
+    </section></div>
+  }
 </section>

@@ -358,3 +358,7 @@ Order: bake → normalize (when configured) → `sprites:optimize`.
 ## 20. Known technical debt
 
 See `docs/ARCHITECTURE.md` → *Known architectural issues*.
+
+## 21. UI must match the selected reference (user instruction, 2026-10-25)
+
+For every UI task, follow [UI_REFERENCE_RULES.md](UI_REFERENCE_RULES.md). Open the exact selected reference before editing, match its composition/proportions/materials/buttons/icons precisely, verify real desktop/mobile screenshots, and deliver the reference and actual implementation images together for comparison. Tests alone do not establish visual fidelity. Report remaining differences honestly; preserve real gameplay/data and do not deploy without explicit authorization. This addition is explicitly requested by the user; it does not relax any other rule.

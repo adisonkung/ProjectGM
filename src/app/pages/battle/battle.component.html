@@ -1,26 +1,14 @@
-<section class="lab" [class.run]="mode() !== 'lab'" [class.fighting]="!placing()">
+<section class="lab" [style.--battle-cell]="fieldLayout().cell + 'px'" [style.--battle-foot]="fieldLayout().foot + 'px'" [style.--scenery-extra-rows]="sceneryExtraRows()" [class.reference-battle]="mode() !== 'lab'" [class.reference-lab]="mode() === 'lab'" [style.--battle-scene]="background() ? 'url(/' + background()!.file + ')' : null" [class.run]="mode() !== 'lab'" [class.fighting]="!placing()">
   @if (mode() === 'lab') {
-    <header class="head">
-      <div>
-        <h1 class="gm-title">ห้องทดลองต่อสู้</h1>
-        <p class="gm-sub">สนามทดสอบ: เลือกชั้น จัดตำแหน่ง แล้วดูทีมสู้ · ผลแพ้ชนะไม่มีผลกับเซฟ</p>
-      </div>
-      <div class="power"><app-icon name="flame" [size]="15" /> พลังทีม <b>{{ teamPower() }}</b></div>
-    </header>
-    <div class="floors" role="group" aria-label="เลือกชั้น">
-      @for (s of stages; track s.floor) {
-        <button type="button" [attr.aria-pressed]="floor() === s.floor" [class.surv]="s.mode === 'survive'"
-                [disabled]="running()" (click)="selectFloor(s.floor)">{{ s.floor }}</button>
-      }
+    <header class="head lab-heading citadel-surface"><app-citadel-frame shape="chapter" [cut]="26" /><app-citadel-icon name="armory" [size]="46" /><div><h1 class="gm-title">ห้องทดลองต่อสู้</h1><p class="gm-sub">ผลการต่อสู้ไม่กระทบเซฟ · จัดทีมใช้ตำแหน่งเดียวกับเกมจริง</p></div><span class="lab-badge">เครื่องมือทดสอบ</span><div class="power"><app-citadel-icon name="armory" [size]="26" />พลังทีม <b>{{ teamPower() }}</b></div></header>
+    <div class="floors citadel-surface" role="group" aria-label="เลือกชั้น"><app-citadel-frame [cut]="16" /><span>เลือกชั้นทดสอบ</span>
+      @for (s of stages; track s.floor) { <button type="button" [attr.aria-label]="'ชั้นทดสอบ ' + s.floor" [attr.aria-pressed]="floor() === s.floor" [class.surv]="s.mode === 'survive'" [disabled]="running()" (click)="selectFloor(s.floor)" class="citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="14" [crimson]="floor() === s.floor" [lacquer]="floor() === s.floor" />{{ s.floor }}</button> }
     </div>
   } @else if (placing()) {
-    <header class="run-head gm-panel">
-      <a class="gm-btn small ghost back" [routerLink]="backLink()" [attr.aria-label]="mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย'"><app-icon name="back" [size]="14" /></a>
-      <div class="run-title">
-        <small class="gm-class">{{ mode() === 'farm' ? 'ดันเจี้ยน' : 'หอคอย · ชั้น ' + floor() }}</small>
-        <h1>{{ farmId() ? runTitle() : stage().name ?? 'ชั้น ' + floor() }}</h1>
-      </div>
-      <div class="power"><app-icon name="flame" [size]="15" /> <b>{{ teamPower() }}</b></div>
+    <header class="run-head gm-panel citadel-surface"><app-citadel-frame shape="chapter" [cut]="22" />
+      <a class="reference-back" [routerLink]="backLink()"><app-citadel-icon name="tower" [size]="45" /><h1>{{ mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย' }}</h1></a>
+      <div class="run-title" [attr.title]="runTitle()"><b>{{ mode() === 'farm' ? runTitle() : 'ชั้นที่ ' + floor() }}</b><small>{{ stage().mode === 'eliminate' ? totalWaves() + ' เวฟ' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ</small></div>
+      <div class="power"><app-citadel-icon name="armory" [size]="24" /><span>พลังทีม</span><b>{{ teamPower() }}</b></div>
     </header>
   }
   @if (placing()) {
@@ -33,22 +21,29 @@
       </span>
       @if (mode() === 'lab' && stage().name) { <span class="stage-name">{{ stage().name }}</span> }
     </div>
-    <app-team-presets />
-    <app-placement [stage]="stage()" />
-    <div class="controls">
-      <button type="button" class="primary" (click)="start()" [disabled]="running()">เริ่มต่อสู้</button>
-      @if (mode() === 'lab') { <button type="button" (click)="simulate()" [disabled]="running()">จำลอง 100 รอบ</button> }
-    </div>
+    @if (mode() === 'lab') {
+      <app-placement [stage]="stage()" [battleLayout]="true">
+        <app-team-presets battle-presets [compact]="true" [tabs]="true" />
+        <button battle-start type="button" class="lab-start citadel-surface citadel-control" (click)="start()" [disabled]="running()"><app-citadel-frame shape="hex" [cut]="20" [crimson]="true" [lacquer]="true" /><app-citadel-icon name="armory" [size]="28" />เริ่มต่อสู้<app-citadel-icon name="arrow" [size]="18" /></button>
+        <button battle-start type="button" class="lab-simulate citadel-surface citadel-control" (click)="simulate()" [disabled]="running()"><app-citadel-frame shape="hex" [cut]="18" /><app-icon name="fast" [size]="22" />จำลอง 100 รอบ</button>
+      </app-placement>
+    } @else {
+      <app-placement [stage]="stage()" [battleLayout]="true" [sceneryExtraRows]="sceneryExtraRows()">
+        <app-team-presets battle-presets [compact]="true" [tabs]="true" />
+        <button battle-start type="button" class="battle-start citadel-surface citadel-control" (click)="start()" [disabled]="running()"><app-citadel-frame shape="hex" [cut]="22" [crimson]="true" [lacquer]="true" /><app-citadel-icon name="armory" [size]="36" />เริ่มต่อสู้<app-citadel-icon name="arrow" [size]="24" /></button>
+      </app-placement>
+    }
   } @else {
     <div class="arena" [class.paused]="paused()">
       <div class="screen" [class.boss]="!!bossBar()">
-        <app-board (finishedFx)="onFxFinished($event)" [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
+        @if (mode() !== 'lab') { <app-tower-ornament class="battle-field-frame" [grooved]="true" [ornate]="true" /> } @else { <app-tower-ornament class="lab-field-frame" [grooved]="true" [ornate]="true" /> }
+        <app-board [sceneryExtraRows]="sceneryExtraRows()" (finishedFx)="onFxFinished($event)" [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
                    [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
 
         <!-- top HUD (scenery rows only — never over the lanes' units) -->
         <div class="hud-top">
           <div class="wave-group">
-            <div class="wave-panel" [class.surv]="stage().mode === 'survive'" role="status" aria-live="polite">
+            <div class="wave-panel citadel-surface" [class.surv]="stage().mode === 'survive'" role="status" aria-live="polite"><app-citadel-frame shape="hex" [cut]="10" />
               <small>{{ farmId() ? runTitle() : 'ชั้น ' + floor() + (stage().name ? ' · ' + stage().name : '') }}</small>
               @if (stage().mode === 'survive') {
                 <b class="wv">เอาตัวรอด</b>
@@ -59,7 +54,7 @@
                 }
               }
             </div>
-            <div class="clock" [class.low]="timeLeft() <= 10" aria-label="เวลาที่เหลือ">{{ timeLeft() }}<small>วิ</small></div>
+            <div class="clock citadel-surface" [class.low]="timeLeft() <= 10" aria-label="เวลาที่เหลือ"><app-citadel-frame shape="hex" [cut]="8" />{{ timeLeft() }}<small>วิ</small></div>
           </div>
           @if (bossBar(); as bb) {
             <div class="boss-bar" [class.final]="bb.final" [class.enraged]="bb.enraged" role="status" aria-label="พลังชีวิตบอส">
@@ -72,24 +67,25 @@
           @if (debug()) { <span class="chip dbg">DEBUG · {{ phase() }}</span> }
         </div>
         <div class="hud-right">
-          <button type="button" class="hud-btn spd" (click)="cycleSpeed()" [attr.aria-label]="'ความเร็ว x' + speed() + ' แตะเพื่อเปลี่ยน'" title="ความเร็ว (x1 → x2 → x4)">
+          <button type="button" class="hud-btn spd citadel-surface citadel-control" (click)="cycleSpeed()" [attr.aria-label]="'ความเร็ว x' + speed() + ' แตะเพื่อเปลี่ยน'" title="ความเร็ว (x1 → x2 → x4)"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />
             <app-icon name="fast" [size]="14" /> x{{ speed() }}
           </button>
-          <button type="button" class="hud-btn" (click)="openMenu()" [disabled]="!running()" aria-label="ตั้งค่า / หยุดชั่วคราว" title="ตั้งค่า"><app-icon name="gear" [size]="18" /></button>
+          <button type="button" class="hud-btn citadel-surface citadel-control" (click)="openMenu()" [disabled]="!running()" aria-label="ตั้งค่า / หยุดชั่วคราว" title="ตั้งค่า"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" /><app-icon name="gear" [size]="18" /></button>
         </div>
 
         @if (specialFlash()) { <div class="special-flash" aria-hidden="true"><i></i><i></i><i></i><i></i></div> }
         @if (tracing()) { <app-slash-trace [def]="specialDef" [seed]="traceSeed()" (done)="specialDone($event)" /> }
 
         <!-- free strip under the lanes (inside the field): party, then AUTO and the special skill — one row -->
-        <app-party-bar class="party-in" [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
-          <button type="button" class="auto" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม">AUTO</button>
+        <app-party-bar class="party-in" [referenceChrome]="mode() !== 'lab'" [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
+          @if (mode() !== 'lab') { <app-tower-ornament class="battle-party-frame" [grooved]="true" [ornate]="true" /> }
+          <button type="button" class="auto citadel-surface citadel-control" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม"><app-citadel-frame shape="hex" [cut]="14" [crimson]="autoUlt()" [lacquer]="autoUlt()" />AUTO</button>
           <!-- player special skill (not a hero skill): charges during combat, opens the Blade Trace mini-game -->
           <button type="button" class="special" [class.ready]="specialReady()" [disabled]="!specialReady()" (click)="useSpecial()"
                   [style.--charge]="specialCharge()" [attr.aria-label]="specialDef.name + (specialReady() ? ' พร้อมใช้' : ' ชาร์จ ' + (specialCharge() * 100).toFixed(0) + '%')"
                   [title]="specialDef.description">
             <span class="sp-ring"></span>
-            <span class="sp-icon">⚔</span>
+            <span class="sp-icon"><app-citadel-icon name="armory" [size]="22" /></span>
             <small>{{ specialReady() ? specialDef.name : (specialCharge() * 100).toFixed(0) + '%' }}</small>
           </button>
         </app-party-bar>
@@ -100,9 +96,9 @@
             <span class="fc-hp" [attr.title]="'HP ' + f.hpPct.toFixed(0) + '%'"><i [style.width.%]="f.hpPct"></i></span>
             <small>{{ f.hpPct.toFixed(0) }}%@if (f.isFocus) { · {{ focusCount().on }}/{{ focusCount().total }} }@if (f.isFocus && debug() && !focusSafe()) { · OUT OF SAFE RANGE }</small>
             @if (f.isFocus) {
-              <button type="button" (click)="cancelFocus()" aria-label="ยกเลิกโฟกัส" title="ยกเลิกโฟกัส">✕</button>
+              <button type="button" (click)="cancelFocus()" aria-label="ยกเลิกโฟกัส" title="ยกเลิกโฟกัส" class="citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />✕</button>
             } @else {
-              <button type="button" class="go" (click)="setFocus(f.id)">🎯 FOCUS</button>
+              <button type="button" class="go citadel-surface citadel-control" (click)="setFocus(f.id)"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />🎯 FOCUS</button>
             }
           </div>
         }
@@ -127,12 +123,15 @@
       <!-- settings popup (fight paused) -->
       @if (menuOpen()) {
         <div class="overlay" (click)="resume()">
-          <div class="menu gm-panel" role="dialog" aria-modal="true" aria-label="หยุดชั่วคราว" (click)="$event.stopPropagation()">
-            <h2>หยุดชั่วคราว</h2>
-            <button type="button" class="gm-btn primary" (click)="resume()"><app-icon name="play" [size]="15" /> เล่นต่อ</button>
-            <button type="button" class="gm-btn" (click)="restart()"><app-icon name="restart" [size]="15" /> เริ่มใหม่</button>
-            <button type="button" class="gm-btn ghost" (click)="exitStage()"><app-icon name="exit" [size]="15" /> ออกจากด่าน</button>
-            <button type="button" class="gm-btn small" (click)="toggleRenderer()">ตัววาดตัวละคร: {{ renderer() === 'pixi' ? 'Pixi (WebGL)' : 'DOM (เดิม)' }} — กดเพื่อสลับ</button>
+          <div class="menu gm-panel citadel-surface" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" role="dialog" aria-modal="true" aria-label="หยุดชั่วคราว" (click)="$event.stopPropagation()"><app-citadel-frame shape="panel" [cut]="22" [crimson]="false" [lacquer]="false" />
+            @if (mode() !== 'lab') { <app-tower-ornament [grooved]="true" [ornate]="true" /><button type="button" class="result-close" (click)="resume()" aria-label="ปิดหน้าพักรบ"><app-citadel-frame shape="hex" [cut]="10" /><app-icon name="close" [size]="22" /></button><app-battle-emblem kind="pause" /> }
+            <h2><app-icon name="pause" [size]="26" /> หยุดชั่วคราว</h2>
+            <button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="resume()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" /><app-icon name="play" [size]="15" /> เล่นต่อ</button>
+            <button type="button" class="gm-btn citadel-surface citadel-control" (click)="restart()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" /><app-icon name="restart" [size]="15" /> เริ่มใหม่</button>
+            <button type="button" class="gm-btn ghost citadel-surface citadel-control" (click)="exitStage()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" /><app-icon name="exit" [size]="15" /> ออกจากด่าน</button>
+            @if (mode() === 'lab') {
+            <button type="button" class="gm-btn small citadel-surface citadel-control" (click)="toggleRenderer()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />ตัววาดตัวละคร: {{ renderer() === 'pixi' ? 'Pixi (WebGL)' : 'DOM (เดิม)' }} — กดเพื่อสลับ</button>
+            }
             <small>ออกจากด่าน = กลับไปจัดทีม/ตำแหน่งใหม่ (ไม่ได้รางวัล)</small>
           </div>
         </div>
@@ -141,12 +140,13 @@
       <!-- lab: quick result -->
       @if (mode() === 'lab' && result(); as r) {
         <div class="overlay">
-          <div class="result-card lab-card" [class.win]="r === 'win'" role="dialog" aria-label="ผลการต่อสู้">
+          <div class="result-card lab-card citadel-surface" [class.win]="r === 'win'" role="dialog" aria-label="ผลการต่อสู้"><app-citadel-frame shape="panel" [cut]="22" [crimson]="false" [lacquer]="false" />
+            <p class="lab-result-caption">ผลการทดลอง · ไม่มีรางวัล</p>
             <h2>{{ r === 'win' ? 'ชนะ' : r === 'lose' ? 'แพ้' : 'หมดเวลา' }} <small>{{ time().toFixed(1) }} วินาที</small></h2>
             @if (summary(); as sm) { <p class="facts">{{ sm }}</p> }
             <div class="actions">
-              <button type="button" class="primary" (click)="start()">สู้อีกครั้ง</button>
-              <button type="button" (click)="prepare()">จัดตำแหน่งใหม่</button>
+              <button type="button" class="primary citadel-surface citadel-control" (click)="start()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" />สู้อีกครั้ง</button>
+              <button type="button" (click)="prepare()" class="citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />จัดตำแหน่งใหม่</button>
             </div>
           </div>
         </div>
@@ -155,31 +155,24 @@
       <!-- tower / farm result: centred on the battle screen -->
       @if (mode() !== 'lab' && result() && outcome(); as o) {
         <div class="overlay">
-          <div class="result-card" [class.win]="o.win" role="dialog" aria-label="ผลการต่อสู้">
-            <h2>{{ o.win ? 'สำเร็จ!' : o.result === 'timeout' ? 'หมดเวลา' : 'ล้มเหลว' }} <small>{{ runTitle() }}</small></h2>
+          <div class="result-card citadel-surface" [class.win]="o.win" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" role="dialog" aria-modal="true" aria-label="ผลการต่อสู้"><app-tower-ornament [grooved]="true" [ornate]="true" />
+            <button type="button" class="result-close" (click)="backToTower()" [attr.aria-label]="mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย'"><app-citadel-frame shape="hex" [cut]="10" /><app-icon name="close" [size]="22" /></button><div class="result-hero" [class.victory]="o.win">@if (o.win) { <img class="victory-mark" src="/ui/eldervane/victory-title.webp" alt="" aria-hidden="true" draggable="false" /> } @else { <app-battle-emblem kind="defeat" /> }
+              <h2><span class="result-title" [class.art-title]="o.win">{{ o.win ? 'ชัยชนะ' : o.result === 'timeout' ? 'หมดเวลา' : 'พ่ายแพ้' }}</span>@if (o.win) { <small>{{ mode() === 'tower' ? 'ชั้นที่ ' + floor() + ' สำเร็จ' : runTitle() }}</small> }</h2>
+            </div>
             @if (o.failReason) { <p class="fail">ภารกิจล้มเหลว: {{ o.failReason }}</p> }
             @if (reward()?.rating; as st) { <p class="stars" [attr.aria-label]="st + ' ดาว'">{{ '★'.repeat(st) }}<span>{{ '★'.repeat(3 - st) }}</span></p> }
-            <p class="facts">
-              เวลาสู้ {{ o.time.toFixed(1) }} วิ · ฮีโร่ล้ม {{ o.deaths }}
-              @if (o.mode; as m) {
-                @switch (m.kind) {
-                  @case ('SURVIVAL') { · ฆ่า {{ m.kills }} ตัว }
-                  @case ('TREASURE') { · จับก็อบลินขนสมบัติ {{ m.carriersKilled }}/{{ m.carriersTotal }} (หนี {{ m.escaped }}) }
-                  @case ('CHALLENGE') { @if (m.maxStrikes) { · ร่ายสำเร็จ {{ m.strikes }}/{{ m.maxStrikes }} } }
-                  @case ('BOSS_DUEL') { · {{ m.enraged ? 'บอสคลั่งแล้ว' : 'ล้มก่อนบอสคลั่ง' }} }
-                }
-              }
-            </p>
+
             @if (reward(); as rw) {
               @if (rw.breakdown; as b) {
-                <div class="loot">
-                  <b>{{ b.kind === 'DAILY_BONUS' ? 'โบนัสรายวัน ×' + b.multiplier : b.kind === 'REPEAT' ? 'รางวัลรอบซ้ำ ×' + b.multiplier : b.kind === 'TOWER_FIRST' ? 'เคลียร์ครั้งแรก!' : 'เคลียร์ซ้ำ' }}</b>
-                  @for (it of b.final.items; track $index) { <span>{{ itemName(it.itemId) }} ×{{ it.count }}</span> }
-                  @if (b.final.gold) { <span>ทอง +{{ b.final.gold }}</span> }
-                  @for (eq of b.equipment ?? []; track eq.instanceId) { <span class="drop {{ eq.rarity.toLowerCase() }}">ได้อุปกรณ์: {{ gearName(eq) }}</span> }
+                <div class="loot"><app-citadel-frame [cut]="14" />
+                  <header class="reward-heading"><svg class="reward-ribbon-chrome" viewBox="0 0 500 40" preserveAspectRatio="none" aria-hidden="true"><path d="M15 1H485L499 20 485 39H15L1 20Z" fill="#080f14" stroke="#b38a42" stroke-width="1.5"/><path d="M17 4H483L495 20 483 36H17L5 20Z" fill="none" stroke="#eed18a" stroke-width=".7"/><path d="M20 7 8 20 20 33M480 7 492 20 480 33" fill="none" stroke="#8d682e" stroke-width=".6"/></svg><b>{{ b.kind === 'DAILY_BONUS' ? 'โบนัสรายวัน ×' + b.multiplier : b.kind === 'REPEAT' ? 'รางวัลรอบซ้ำ ×' + b.multiplier : b.kind === 'TOWER_FIRST' ? 'รางวัลที่ได้รับ (ครั้งแรก)' : 'เคลียร์ซ้ำ' }}</b>@if (b.kind === 'TOWER_FIRST') { <span class="first-clear-badge"><svg class="first-clear-chrome" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="first-clear-red" x2="0" y2="1"><stop stop-color="#b91810"/><stop offset=".45" stop-color="#8b0507"/><stop offset="1" stop-color="#490305"/></linearGradient></defs><path d="M14 1H86L99 20 86 39H14L1 20Z" fill="url(#first-clear-red)" stroke="#efce7d" stroke-width="1.5"/><path d="M16 4H84L95 20 84 36H16L5 20Z" fill="none" stroke="#ba8c3f" stroke-width=".8"/><path d="M18 6H82M19 34H81" fill="none" stroke="#ffbd86" stroke-width=".6"/></svg>ครั้งแรก</span> }</header>
+                  @for (it of b.final.items; track $index) { <span class="loot-item" [attr.title]="itemName(it.itemId)"><app-icon [name]="itemIcon(it.itemId)" [size]="28" /><span>{{ itemName(it.itemId) }}</span><strong>×{{ it.count }}</strong></span> }
+                  @if (totalHeroExp()) { <span class="loot-item" title="EXP รวมฮีโร่"><app-icon name="exp" [size]="38" /><span>EXP รวมฮีโร่</span><strong>+{{ totalHeroExp() }}</strong></span> }
+                  @if (b.final.gold) { <span class="loot-item"><app-citadel-icon name="coin" [size]="30" /><span>ทอง</span><strong>+{{ b.final.gold }}</strong></span> }
+                  @for (eq of b.equipment ?? []; track eq.instanceId) { <span class="drop {{ eq.rarity.toLowerCase() }}"><app-icon name="armory" [size]="24" />{{ gearName(eq) }}</span> }
                 </div>
                 @if (expStrip().length) {
-                  <ul class="exp-strip" aria-label="EXP ที่ได้รับ">
+                  <details class="hero-experience"><summary>รายละเอียด EXP ฮีโร่ ({{ expStrip().length }})</summary><ul class="exp-strip" aria-label="EXP ที่ได้รับ">
                     @for (x of expStrip(); track x.uid) {
                       <li [class.up]="x.up" [attr.title]="x.name + ' +' + x.gained + ' EXP' + (x.share < 1 ? ' (ช่องฝึก ' + x.share * 100 + '%)' : '')">
                         <span class="pf">
@@ -192,16 +185,34 @@
                         <small>{{ x.max ? 'MAX' : x.exp + '/' + x.need }}</small>
                       </li>
                     }
-                  </ul>
+                  </ul></details>
                 }
-              } @else { <p class="facts">ไม่ได้รับรางวัล · ลองเปลี่ยนตำแหน่ง อัปเลเวล/อุปกรณ์ แล้วลองใหม่ ฮีโร่ที่ล้มไม่มีผลค้าง</p> }
+              } @else { <p class="facts defeat-guidance">ลองจัดทัพให้สมดุลยิ่งขึ้น<br />และอัปเกรดอุปกรณ์ของฮีโร่เพื่อเพิ่มพลังต่อสู้</p> }
             }
-            <div class="actions">
-              @if (o.win && nextFloor(); as n) { <button type="button" class="primary" (click)="goNext()">ชั้นถัดไป ({{ n }}) →</button> }
-              <button type="button" (click)="start()">{{ o.win ? 'เล่นอีกครั้ง' : 'ลองอีกครั้ง' }}</button>
-              <button type="button" (click)="prepare()">จัดตำแหน่งใหม่</button>
-              <button type="button" (click)="backToTower()">{{ mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย' }}</button>
+            <div class="actions reference-result-actions">
+              @if (o.win) {
+                <button type="button" (click)="backToTower()" class="citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="18" /><app-citadel-icon name="tower" [size]="24" />{{ mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย' }}</button>
+                @if (nextFloor(); as n) { <button type="button" class="primary citadel-surface citadel-control" (click)="goNext()"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-citadel-icon name="tower" [size]="24" />ชั้นถัดไป ({{ n }}) <app-citadel-icon name="arrow" [size]="17" /></button> }
+                @else { <button type="button" class="primary citadel-surface citadel-control" (click)="start()"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-icon name="restart" [size]="20" />เล่นอีกครั้ง <app-citadel-icon name="arrow" [size]="17" /></button> }
+              } @else {
+                <button type="button" (click)="prepare()" class="citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="18" /><app-citadel-icon name="team" [size]="24" />จัดทัพ</button>
+                <button type="button" (click)="start()" class="primary citadel-surface citadel-control"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-icon name="restart" [size]="22" />ลองอีกครั้ง <app-citadel-icon name="arrow" [size]="17" /></button>
+              }
             </div>
+            <details class="result-options"><summary aria-label="ตัวเลือกเพิ่มเติม"><app-icon name="gear" [size]="18" /></summary><div><p class="result-stage">{{ runTitle() }}</p>@if (!o.win) { <p class="result-stage">ไม่ได้รับรางวัล · ฮีโร่ที่ล้มไม่มีผลค้าง</p> }            <p class="facts">
+              เวลาสู้ {{ o.time.toFixed(1) }} วิ · ฮีโร่ล้ม {{ o.deaths }}
+              @if (o.mode; as m) {
+                @switch (m.kind) {
+                  @case ('SURVIVAL') { · ฆ่า {{ m.kills }} ตัว }
+                  @case ('TREASURE') { · จับก็อบลินขนสมบัติ {{ m.carriersKilled }}/{{ m.carriersTotal }} (หนี {{ m.escaped }}) }
+                  @case ('CHALLENGE') { @if (m.maxStrikes) { · ร่ายสำเร็จ {{ m.strikes }}/{{ m.maxStrikes }} } }
+                  @case ('BOSS_DUEL') { · {{ m.enraged ? 'บอสคลั่งแล้ว' : 'ล้มก่อนบอสคลั่ง' }} }
+                }
+              }
+            </p>
+              @if (o.win) { <button type="button" (click)="prepare()">จัดตำแหน่งใหม่</button>@if (nextFloor()) { <button type="button" (click)="start()">เล่นอีกครั้ง</button> } }
+              @else { <button type="button" (click)="backToTower()">{{ mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย' }}</button> }
+            </div></details>
           </div>
         </div>
       }
@@ -216,5 +227,5 @@
     }
   }
 
-  @if (simReport()) { <p class="sim">{{ simReport() }}</p> }
+  @if (mode() === 'lab' && simStats(); as stats) { <section class="lab-simulation citadel-surface" role="status"><app-tower-ornament [grooved]="true" [ornate]="true" /><h2>ผลการจำลอง ({{ stats.runs }} รอบ)</h2><div class="simulation-scroll"><table><thead><tr><th>ชั้น</th><th>ชนะ</th><th>แพ้ / หมดเวลา</th><th>อัตราชนะ</th><th>เวลาเฉลี่ย (วินาที)</th></tr></thead><tbody><tr><td>{{ stats.floor }}</td><td>{{ stats.wins }}</td><td>{{ stats.runs - stats.wins }}</td><td>{{ (stats.wins / stats.runs * 100).toFixed(0) }}%</td><td>{{ stats.seconds.toFixed(1) }}</td></tr></tbody></table></div></section> } @else if (simReport()) { <p class="sim">{{ simReport() }}</p> }
 </section>

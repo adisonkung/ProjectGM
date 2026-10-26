@@ -1,3 +1,8 @@
+import { GameAccessService } from '../../core/services/game-access.service';
+import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
+import { CitadelIconComponent } from '../../shared/citadel-icon.component';
+import { heroArt } from '../../core/data/hero-art';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { sequenceFx } from '../../battle/render/sequence-fx';
 import { Component, computed, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -10,7 +15,7 @@ import { SCENERY_ROWS } from '../../battle/engine/grid';
 import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { MONSTERS } from '../../core/data/monsters';
 import { HEROES } from '../../core/data/heroes';
-import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxAttached, fxFor, fxOffset, FxTrigger, FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
+import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxAttached, fxFor, fxOffset, FxTrigger, FRAME_MS, IDLE_FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
 import { kitOf } from '../../core/data/hero-skills';
 import { appliedStatusFx } from '../../core/data/sprites';
 import { STATUS_ICONS } from '../../core/data/visuals';
@@ -35,63 +40,15 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
  */
 @Component({
   selector: 'app-sprite-lab',
-  imports: [BoardComponent, RouterLink],
-  template: `
-    <section class="lab">
-      <header>
-        <a routerLink="/heroes">← กลับ</a>
-        <h1>ห้องทดสอบท่า · {{ heroName() }}</h1>
-        <select [value]="heroId()" (change)="heroId.set($any($event.target).value); reset()">
-          @for (h of spriteHeroes; track h.id) { <option [value]="h.id" [selected]="h.id === heroId()">{{ h.name }} ({{ h.id }})</option> }
-        </select>
-      </header>
-
-      @if (comparisonHeroes.length) {
-        <p class="comparison">เทียบสัดส่วน: {{ comparisonNames }} · ตัวละครยืนบนเลนเดียวกัน</p>
-      }
-      @if (activeEngineReview()) {
-        <p class="comparison">ทดสอบหนึ่งครั้งด้วยระบบต่อสู้ · เป้าแรก{{ initialStatus ? ' มี ' + initialStatus + ' ก่อนร่าย' : ' ยังไม่มีสถานะก่อนร่าย' }} · จังหวะสำหรับรีวิว</p>
-      }
-      <div class="stage" [class.anchors]="showAnchors()">
-        <app-board #board (finishedFx)="onFxFinished($event)" [background]="previewBackground" [units]="units()" [fx]="fx()" [projectiles]="projectiles()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
-        @if (showAnchors()) {
-          <i class="mark root" [style.left]="mark().root.x" [style.top]="mark().root.y" title="root (feet)"></i>
-          @for (t of mark().anchors; track t.name) { <i class="mark tip" [style.left]="t.x" [style.top]="t.y" [title]="t.name"><b>{{ t.name }}</b></i> }
-        }
-      </div>
-
-      <div class="controls">
-        @for (a of actions(); track a.id) {
-          <button type="button" (click)="play(a.id)" [class.on]="last() === a.id">{{ a.label }}</button>
-        }
-      </div>
-      <div class="controls">
-        <label><input type="checkbox" [checked]="loop()" (change)="loop.set($any($event.target).checked); loop() && play(last())" /> วนซ้ำ</label>
-        <label><input type="checkbox" [checked]="faceLeft()" (change)="faceLeft.set($any($event.target).checked)" /> หันซ้าย</label>
-        <label><input type="checkbox" [checked]="showAnchors()" (change)="showAnchors.set($any($event.target).checked)" /> จุด root / anchor</label>
-        <label>ความเร็ว
-          <select [value]="speed()" (change)="speed.set(+$any($event.target).value)">
-            <option value="0.25">×0.25</option><option value="0.5">×0.5</option><option value="1">×1</option>
-          </select>
-        </label>
-        <label>ตัววาด
-          <select [value]="renderer()" (change)="setRenderer($any($event.target).value)">
-            <option value="dom">DOM</option><option value="pixi">Pixi (WebGL)</option>
-          </select>
-        </label>
-      </div>
-
-      <ol class="log" aria-live="polite">
-        @for (l of log(); track $index) { <li><b>{{ l.t }}</b> {{ l.text }}</li> }
-      </ol>
-    </section>
-  `,
+  imports: [TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, RouterLink],
+  templateUrl: './sprite-lab.component.html',
   styles: `
-    .lab { padding: 12px; display: grid; gap: 10px; max-width: 980px; margin: 0 auto; }
+    .lab { container-type: inline-size; padding: 12px; display: grid; gap: 10px; max-width: 980px; margin: 0 auto; }
     header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     h1 { font-size: 18px; margin: 0; flex: 1; }
     .comparison { margin: 0; text-align: center; font-size: 13px; color: #b9cee2; }
-    .stage { position: relative; --cell: min(56px, calc((100vw - 32px) / 16)); width: calc(16 * var(--cell)); margin: 0 auto; }
+    .stage { position: relative; --cell: min(56px, 6.25cqw); width: calc(16 * var(--cell)); max-width: 100%; margin: 0 auto; }
+    .stage app-board { --cell: min(56px, 6.25cqw); }
     .mark { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; z-index: 300; pointer-events: none; }
     .mark.root { background: #ff3b3b; box-shadow: 0 0 0 2px #fff; }
     .mark.tip { background: #3bd1ff; box-shadow: 0 0 0 2px #fff; }
@@ -103,6 +60,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
   `,
 })
 export class SpriteLabComponent implements OnDestroy {
+  readonly access = inject(GameAccessService);
   readonly spriteHeroes = HEROES.filter(h => h.sprite && SHEETS[h.sprite]);
   onFxFinished(ids: number[]): void {
     const done = new Set(ids);
@@ -113,7 +71,7 @@ export class SpriteLabComponent implements OnDestroy {
   /** Optional lab-only comparison uses real roster sheets, never changes saves or combat. */
   readonly comparisonHeroes = HEROES.filter(h => (this.qp.get('compare') ?? '').split(',').includes(h.id) && h.sprite && SHEETS[h.sprite]).slice(0, 2);
   readonly comparisonNames = this.comparisonHeroes.map(h => h.name).join(' / ');
-  readonly previewBackground = BACKGROUNDS[this.qp.get('bg') ?? ''] ?? null;
+  readonly previewBackground = BACKGROUNDS[this.qp.get('bg') ?? ''] ?? BACKGROUNDS['forest-1'];
   private readonly comparisonMonster = MONSTERS[this.qp.get('enemy') ?? ''];
   private readonly targetDistance = Math.min(5, Math.max(1, Number(this.qp.get('distance')) || 1));
   readonly engineReview = this.qp.get('combat') === '1';
@@ -135,6 +93,15 @@ export class SpriteLabComponent implements OnDestroy {
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
   readonly heroName = computed(() => this.hero()?.name ?? '');
+  readonly heroPortrait = computed(() => heroArt(this.hero()?.id)?.portrait);
+  readonly actionLabels: Record<Action, string> = { idle: 'Idle', walk: 'Walk', attack: 'Attack', hurt: 'Hurt', die: 'Die', skill: 'S1', skill2: 'S2', ult: 'ULT' };
+  readonly animationInfo = computed(() => {
+    const sheet = this.sheet();
+    const clip = animOf(this.hero()?.sprite, this.last());
+    if (!sheet || !clip) return null;
+    const clock = clipClock(this.last() === 'idle' ? { ...clip, ms: clip.ms ?? IDLE_FRAME_MS } : clip);
+    return { frames: clock.count, fps: (clock.count / clock.total).toFixed(1), seconds: clock.total.toFixed(2), size: `${sheet.cellW} × ${sheet.cellH}` };
+  });
   readonly sheet = computed(() => SHEETS[this.hero()?.sprite ?? '']);
 
   readonly speed = signal(1);
@@ -231,14 +198,18 @@ export class SpriteLabComponent implements OnDestroy {
   });
 
   readonly actions = computed(() => {
-    const d = this.sheet();
     const h = this.hero();
     const kit = kitOf(h.id, h.cls);
-    const list: { id: Action; label: string }[] = [{ id: 'idle', label: 'Idle' }, { id: 'walk', label: 'Move' }, { id: 'attack', label: 'Normal Attack' }];
-    for (const k of ['skill', 'skill2', 'ult'] as const)
-      if (d?.anims[k] && d.anims[k] !== d.anims.attack) list.push({ id: k, label: kit[k].label ?? k });
-    list.push({ id: 'hurt', label: 'Hurt' }, { id: 'die', label: 'Death' });
-    return list;
+    const skills: { id: Action; label: string }[] = [
+      { id: 'skill', label: kit.skill.label ?? 'S1' },
+      { id: 'skill2', label: kit.skill2.label ?? 'S2' },
+      { id: 'ult', label: kit.ult.label ?? 'Ultimate' },
+    ];
+    return this.access.isGm() ? [
+      { id: 'idle' as Action, label: 'Idle' }, { id: 'walk' as Action, label: 'Walk' },
+      { id: 'attack' as Action, label: 'Attack' }, { id: 'hurt' as Action, label: 'Hurt' },
+      { id: 'die' as Action, label: 'Die' }, ...skills,
+    ] : skills;
   });
 
   /** root (feet) and the sheet's named anchors in board px — the same maths the board / FX layer use */
@@ -265,6 +236,7 @@ export class SpriteLabComponent implements OnDestroy {
   }
 
   play(a: Action): void {
+    if (!this.access.isGm() && a !== 'skill' && a !== 'skill2' && a !== 'ult') return;
     this.clear();
     this.last.set(a);
     this.log.set([]);

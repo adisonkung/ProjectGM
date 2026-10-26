@@ -14,9 +14,9 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
   selector: 'app-field',
   template: `
     @if (img(); as g) {
-      <div class="layers" [style.--shift]="live() ? null : shift()" [style.--dur]="live() ? '0ms' : duration() + 'ms'">
-        <div class="img" [style.height.%]="g.cut * 100" [style.background-image]="g.url" [style.background-size]="g.size"
-             [style.background-position]="'calc(var(--shift) * var(--screen) * -0.4) ' + g.y"></div>
+      <div class="layers" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + sceneryExtraRows() + ')' : null" [style.height]="sceneryExtraRows() ? 'calc(var(--cell) * ' + baseRows + ')' : null" [style.--shift]="live() ? null : shift()" [style.--dur]="live() ? '0ms' : duration() + 'ms'">
+        <div class="img" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + -sceneryExtraRows() + ')' : null" [style.height]="'calc(var(--cell) * ' + (g.cut * baseRows + sceneryExtraRows()) + ')'" [style.background-image]="g.url" [style.background-size]="g.size"
+             [style.background-position]="'calc(var(--shift) * var(--screen) * -0.4) ' + g.yUpper"></div>
         <div class="img" [style.top.%]="g.cut * 100" [style.bottom]="0" [style.background-image]="g.url" [style.background-size]="g.size"
              [style.background-position]="'calc(var(--shift) * var(--screen) * -1) ' + g.yGround"></div>
         <div class="mid faint" [style.top.%]="g.cut * 100"></div>
@@ -115,6 +115,9 @@ export class FieldComponent {
   readonly duration = input(0);
   /** battle: the board writes --shift every display frame (interpolated camera) — no binding, no transition */
   readonly live = input(false);
+  /** Cosmetic sky extension; the ground and logical board keep their original projection. */
+  readonly sceneryExtraRows = input(0);
+  readonly baseRows = BOARD_ROWS + SCENERY_ROWS;
   /** ภาพพื้นหลังของด่าน (ไม่มี = วาดฉากด้วย CSS) */
   readonly bg = input<BackgroundDef | null | undefined>(null);
 
@@ -130,7 +133,7 @@ export class FieldComponent {
     return {
       url: `url(${b.file})`,
       size: `auto ${cells(imgH)}`,
-      y: cells(top),
+      yUpper: cells(top + this.sceneryExtraRows()),
       yGround: cells(top - cut * rows),
       cut,
     };

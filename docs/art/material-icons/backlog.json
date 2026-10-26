@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "status": "backlog_only_not_generated",
+  "scope": "Existing item ids only; drawings are placeholders, game data is real",
+  "recommendedAssetSpec": {
+    "masterSize": "512x512",
+    "background": "transparent",
+    "safePadding": "10%",
+    "previewSizes": [
+      32,
+      48,
+      64
+    ],
+    "palette": "ivory/antique gold, distinct semantic material colors",
+    "batchCount": 21
+  },
+  "items": [
+    {
+      "id": "enhancement_ore",
+      "name": "Enhancement Ore",
+      "kind": "MATERIAL",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/enhancement_ore.webp"
+    },
+    {
+      "id": "equip_frag_basic",
+      "name": "Basic Equipment Fragment",
+      "kind": "EQUIPMENT_FRAGMENT",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/equip_frag_basic.webp"
+    },
+    {
+      "id": "equip_frag_rare",
+      "name": "Rare Equipment Fragment",
+      "kind": "EQUIPMENT_FRAGMENT",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/equip_frag_rare.webp"
+    },
+    {
+      "id": "equip_frag_elite",
+      "name": "Elite Equipment Fragment",
+      "kind": "EQUIPMENT_FRAGMENT",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/equip_frag_elite.webp"
+    },
+    {
+      "id": "equip_frag_epic",
+      "name": "Epic Equipment Fragment",
+      "kind": "EQUIPMENT_FRAGMENT",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/equip_frag_epic.webp"
+    },
+    {
+      "id": "exp_potion_s",
+      "name": "Small Training Potion",
+      "kind": "EXP_POTION",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/exp_potion_s.webp"
+    },
+    {
+      "id": "exp_potion_m",
+      "name": "Medium Training Potion",
+      "kind": "EXP_POTION",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/exp_potion_m.webp"
+    },
+    {
+      "id": "exp_potion_l",
+      "name": "Large Training Potion",
+      "kind": "EXP_POTION",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/exp_potion_l.webp"
+    },
+    {
+      "id": "bt_stone_1",
+      "name": "Breakthrough Stone I",
+      "kind": "BREAKTHROUGH_STONE",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/bt_stone_1.webp"
+    },
+    {
+      "id": "bt_stone_2",
+      "name": "Breakthrough Stone II",
+      "kind": "BREAKTHROUGH_STONE",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/bt_stone_2.webp"
+    },
+    {
+      "id": "bt_stone_3",
+      "name": "Breakthrough Stone III",
+      "kind": "BREAKTHROUGH_STONE",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/bt_stone_3.webp"
+    },
+    {
+      "id": "bt_fragment_1",
+      "name": "Breakthrough Fragment I",
+      "kind": "BREAKTHROUGH_FRAGMENT",
+      "status": "no_dedicated_art",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "No dedicated asset; generic item-kind glyph where shown",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/bt_fragment_1.webp"
+    },
+    {
+      "id": "bt_fragment_2",
+      "name": "Breakthrough Fragment II",
+      "kind": "BREAKTHROUGH_FRAGMENT",
+      "status": "no_dedicated_art",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "No dedicated asset; generic item-kind glyph where shown",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/bt_fragment_2.webp"
+    },
+    {
+      "id": "bt_fragment_3",
+      "name": "Breakthrough Fragment III",
+      "kind": "BREAKTHROUGH_FRAGMENT",
+      "status": "no_dedicated_art",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "No dedicated asset; generic item-kind glyph where shown",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/bt_fragment_3.webp"
+    },
+    {
+      "id": "skill_tome_1",
+      "name": "Skill Tome I",
+      "kind": "SKILL_TOME",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/skill_tome_1.webp"
+    },
+    {
+      "id": "skill_tome_2",
+      "name": "Skill Tome II",
+      "kind": "SKILL_TOME",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/skill_tome_2.webp"
+    },
+    {
+      "id": "skill_tome_3",
+      "name": "Skill Tome III",
+      "kind": "SKILL_TOME",
+      "status": "temporary_svg",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "DungeonRewardIconComponent; flat generic facets also shared by ore/equipment fragments",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/skill_tome_3.webp"
+    },
+    {
+      "id": "skill_tome_frag_1",
+      "name": "Skill Tome Fragment I",
+      "kind": "SKILL_TOME_FRAGMENT",
+      "status": "no_dedicated_art",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "No dedicated asset; generic item-kind glyph where shown",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/skill_tome_frag_1.webp"
+    },
+    {
+      "id": "skill_tome_frag_2",
+      "name": "Skill Tome Fragment II",
+      "kind": "SKILL_TOME_FRAGMENT",
+      "status": "no_dedicated_art",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "No dedicated asset; generic item-kind glyph where shown",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/skill_tome_frag_2.webp"
+    },
+    {
+      "id": "skill_tome_frag_3",
+      "name": "Skill Tome Fragment III",
+      "kind": "SKILL_TOME_FRAGMENT",
+      "status": "no_dedicated_art",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "No dedicated asset; generic item-kind glyph where shown",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/skill_tome_frag_3.webp"
+    },
+    {
+      "id": "universal_memory",
+      "name": "Universal Memory",
+      "kind": "HERO_MEMORY",
+      "status": "generic_memory_glyph",
+      "finalArtApproved": false,
+      "generationStatus": "not_started",
+      "currentRenderer": "IconComponent star in details; temporary memory SVG available",
+      "source": "src/app/core/data/economy.ts#ITEMS",
+      "plannedAsset": "public/items/universal_memory.webp"
+    }
+  ]
+}

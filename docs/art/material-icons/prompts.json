@@ -1,0 +1,557 @@
+{
+  "version": 1,
+  "date": "2026-10-25",
+  "status": "prompts_only_no_art_generated",
+  "game": "Eldervane / เอลเดอร์เวย์น",
+  "scope": "21 existing ITEMS/backlog ids only; visual proposals are not balance or item-definition changes",
+  "master": {
+    "width": 512,
+    "height": 512,
+    "format": "PNG",
+    "alpha": true,
+    "padding": "at least10%",
+    "previewSizes": [
+      32,
+      48,
+      64
+    ]
+  },
+  "sharedStylePrompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.",
+  "sharedNegativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+  "items": [
+    {
+      "id": "exp_potion_s",
+      "name": "Small Training Potion",
+      "thaiLabel": "ยา EXP ขนาดเล็ก",
+      "kind": "EXP_POTION",
+      "gameFacts": "ให้ EXP 50 หน่วย; ไม่ใช่ยาเพิ่ม HP หรือมานา",
+      "visualProposal": {
+        "silhouette": "ขวดเล็กทรงหยดน้ำ คอสั้น ฝาจุกเรียบ",
+        "palette": "เขียวหยก #48B28B / แก้วใส / ทองเก่า #B99048",
+        "subject": "A small squat teardrop-shaped clear glass training-potion vial, short narrow neck, a plain dark cork held by one slim antique-gold collar, and luminous jade-green liquid filling the lower two thirds. Show a strong readable curved meniscus, one broad glass highlight, one tiny golden energy mote suspended inside, and a subtle embossed non-letter diamond on the collar. The bottle is compact and modest; its simple pear silhouette must remain recognizable when viewed at 32 pixels.",
+        "avoid": "อย่าวาดกากบาท/หัวใจ/ขวดหลายใบ/เลข50; สีเขียวไม่ได้หมายถึงยาHP"
+      },
+      "outputPng": "exp_potion_s.png",
+      "plannedRuntimeAsset": "public/items/exp_potion_s.webp",
+      "order": 1,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nA small squat teardrop-shaped clear glass training-potion vial, short narrow neck, a plain dark cork held by one slim antique-gold collar, and luminous jade-green liquid filling the lower two thirds. Show a strong readable curved meniscus, one broad glass highlight, one tiny golden energy mote suspended inside, and a subtle embossed non-letter diamond on the collar. The bottle is compact and modest; its simple pear silhouette must remain recognizable when viewed at 32 pixels.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "exp_potion_m",
+      "name": "Medium Training Potion",
+      "thaiLabel": "ยา EXP ขนาดกลาง",
+      "kind": "EXP_POTION",
+      "gameFacts": "ให้ EXP 150 หน่วย; ใช้เพิ่ม EXP ฮีโร่",
+      "visualProposal": {
+        "silhouette": "ขวดทรงกระติกหกเหลี่ยม ไหล่กว้าง ฝาแปดเหลี่ยม",
+        "palette": "ฟ้าแซฟไฟร์ #449FE0 / แก้วใส / ทองเก่า",
+        "subject": "A medium hexagonal-shouldered clear glass training-potion flask with a flat broad body, short neck, and an octagonal antique-gold cap. Fill it with luminous sapphire-blue liquid. A single tasteful gold brace follows the lower bottle edge; two tiny suspended light motes and a broad liquid meniscus give depth. Preserve the same glass, metal finish and viewpoint as the small jade vial, but use a clearly wider angular canteen silhouette instead of merely enlarging or recoloring the small bottle.",
+        "avoid": "อย่าทำเป็นขวดหยดน้ำเหมือนขนาดเล็ก; ไม่มีสัญลักษณ์มานาหรือเลข150"
+      },
+      "outputPng": "exp_potion_m.png",
+      "plannedRuntimeAsset": "public/items/exp_potion_m.webp",
+      "order": 2,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nA medium hexagonal-shouldered clear glass training-potion flask with a flat broad body, short neck, and an octagonal antique-gold cap. Fill it with luminous sapphire-blue liquid. A single tasteful gold brace follows the lower bottle edge; two tiny suspended light motes and a broad liquid meniscus give depth. Preserve the same glass, metal finish and viewpoint as the small jade vial, but use a clearly wider angular canteen silhouette instead of merely enlarging or recoloring the small bottle.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "exp_potion_l",
+      "name": "Large Training Potion",
+      "thaiLabel": "ยา EXP ขนาดใหญ่",
+      "kind": "EXP_POTION",
+      "gameFacts": "ให้ EXP 500 หน่วย; เป็นขนาดใหญ่สุดในรายการยาปัจจุบัน",
+      "visualProposal": {
+        "silhouette": "ขวดโถทรงกลมแบน มีหูโลหะสั้นสองข้าง จุกสูง",
+        "palette": "อำพันสว่าง #EAB64D / งาช้าง / ทองเก่า",
+        "subject": "A large flattened round glass training-potion decanter, visibly broader than it is tall, with two short elegant metal shoulder handles and a tall faceted antique-gold stopper. Rich amber-gold liquid glows inside the clear vessel. The handles belong to the bottle and are not loose objects. Add a restrained ivory inlay on the neck and a small internal swirl of concentrated golden energy. Its broad round decanter outline must distinguish it from both the pear-shaped small vial and the angular medium flask.",
+        "avoid": "ไม่ใช้ม่วงเป็นสีหลัก; ไม่ทำเป็นHP/มานา/น้ำยาวิเศษชนิดใหม่; ไม่วาดเลข500"
+      },
+      "outputPng": "exp_potion_l.png",
+      "plannedRuntimeAsset": "public/items/exp_potion_l.webp",
+      "order": 3,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nA large flattened round glass training-potion decanter, visibly broader than it is tall, with two short elegant metal shoulder handles and a tall faceted antique-gold stopper. Rich amber-gold liquid glows inside the clear vessel. The handles belong to the bottle and are not loose objects. Add a restrained ivory inlay on the neck and a small internal swirl of concentrated golden energy. Its broad round decanter outline must distinguish it from both the pear-shaped small vial and the angular medium flask.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "bt_stone_1",
+      "name": "Breakthrough Stone I",
+      "thaiLabel": "หินเลื่อนขั้น I",
+      "kind": "BREAKTHROUGH_STONE",
+      "gameFacts": "ใช้เลื่อน Lv5→6; ต้องใช้หินชนิดนี้ 4 ชิ้น ตาม BREAKTHROUGHS ข้อกำหนดใหม่:ต้องเป็นของฮีโร่ที่ระบุ; runtimeยังไม่แยกเจ้าของและยังไม่มีสูตรแปลงเป็นหินรวม",
+      "visualProposal": {
+        "silhouette": "หินหรือเศษหินตามระดับเดิม มีช่องภาพฮีโร่จริงที่อ่านหน้าออก",
+        "palette": "อำพัน #DFA23C / ทองเก่า / หินสีเข้ม",
+        "subject": "One intact upright single-point breakthrough crystal, a warm amber polished monolith with five broad readable facets. A thin antique-gold socket embraces only its base, with a small abstract diamond-shaped incision on the front. The crystal is whole, symmetric and deliberate, conveying a first-stage growth catalyst. Keep the top a simple sharp peak, the main face broad, and the inner light modest. No secondary crystal spikes. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.",
+        "avoid": "ไม่ใช่แร่ดิบหรือกองเศษ; ไม่ใส่เลขI/ดาว/ระดับในภาพ; ต้องแนบportraitฮีโร่ที่ถูกตัว ห้ามใช้ภาพgenericหรือสลับฮีโร่",
+        "originalTierShape": "ผลึกเจียระไนตั้งตรงยอดเดียว ฐานหุ้มทองบาง"
+      },
+      "outputPng": "bt_stone_1__{heroId}.png",
+      "plannedRuntimeAsset": null,
+      "currentImplementationNote": "Current runtime uses generic tier items; hero ownership/conversion is a user-requested change, not implemented in this prompt-writing task.",
+      "userRequirement": "Belongs to one specific hero; use that exact canonical portrait as the identity inset. After this hero has completed every breakthrough, surplus hero-bound stones convert to universal breakthrough stones at1:1, as confirmed by the user. Runtime conversion is not implemented by this art-prompt task.",
+      "referenceRequired": true,
+      "templateOnly": true,
+      "legacyBacklogAssetPath": "public/items/bt_stone_1.webp",
+      "plannedRuntimeAssetTemplate": "public/items/heroes/{heroId}/bt_stone_1.webp",
+      "order": 4,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne intact upright single-point breakthrough crystal, a warm amber polished monolith with five broad readable facets. A thin antique-gold socket embraces only its base, with a small abstract diamond-shaped incision on the front. The crystal is whole, symmetric and deliberate, conveying a first-stage growth catalyst. Keep the top a simple sharp peak, the main face broad, and the inner light modest. No secondary crystal spikes. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "bt_stone_2",
+      "name": "Breakthrough Stone II",
+      "thaiLabel": "หินเลื่อนขั้น II",
+      "kind": "BREAKTHROUGH_STONE",
+      "gameFacts": "ใช้เลื่อน Lv8→9; ต้องใช้หินชนิดนี้ 6 ชิ้น ข้อกำหนดใหม่:ต้องเป็นของฮีโร่ที่ระบุ; runtimeยังไม่แยกเจ้าของและยังไม่มีสูตรแปลงเป็นหินรวม",
+      "visualProposal": {
+        "silhouette": "หินหรือเศษหินตามระดับเดิม มีช่องภาพฮีโร่จริงที่อ่านหน้าออก",
+        "palette": "ฟ้าน้ำแข็ง #69CDEB / เงินหม่น / ทองเก่า",
+        "subject": "One intact twin-ridged breakthrough crystal with a single coherent body: a broad icy-cyan central prism whose top splits into two clear, unequal faceted peaks. A narrow antique-gold ring circles its middle and a muted silver-gold socket secures its base. Use crystalline depth and a restrained inner cyan core, with the two-ridge outline and central ring readable at icon scale. It belongs to the same crafted growth-stone family as the amber single-point crystal, not a geological ore cluster. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.",
+        "avoid": "สองยอดต้องต่อเป็นชิ้นเดียว ไม่ใช่หินสองชิ้น; ไม่ใส่เลขII/ดาว; ต้องแนบportraitฮีโร่ที่ถูกตัว ห้ามใช้ภาพgenericหรือสลับฮีโร่",
+        "originalTierShape": "ผลึกหน้ากว้างสองสันยอด แหวนคาดกลางหนึ่งวง"
+      },
+      "outputPng": "bt_stone_2__{heroId}.png",
+      "plannedRuntimeAsset": null,
+      "currentImplementationNote": "Current runtime uses generic tier items; hero ownership/conversion is a user-requested change, not implemented in this prompt-writing task.",
+      "userRequirement": "Belongs to one specific hero; use that exact canonical portrait as the identity inset. After this hero has completed every breakthrough, surplus hero-bound stones convert to universal breakthrough stones at1:1, as confirmed by the user. Runtime conversion is not implemented by this art-prompt task.",
+      "referenceRequired": true,
+      "templateOnly": true,
+      "legacyBacklogAssetPath": "public/items/bt_stone_2.webp",
+      "plannedRuntimeAssetTemplate": "public/items/heroes/{heroId}/bt_stone_2.webp",
+      "order": 5,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne intact twin-ridged breakthrough crystal with a single coherent body: a broad icy-cyan central prism whose top splits into two clear, unequal faceted peaks. A narrow antique-gold ring circles its middle and a muted silver-gold socket secures its base. Use crystalline depth and a restrained inner cyan core, with the two-ridge outline and central ring readable at icon scale. It belongs to the same crafted growth-stone family as the amber single-point crystal, not a geological ore cluster. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "bt_stone_3",
+      "name": "Breakthrough Stone III",
+      "thaiLabel": "หินเลื่อนขั้น III",
+      "kind": "BREAKTHROUGH_STONE",
+      "gameFacts": "ใช้เลื่อน Lv9→10; ต้องใช้หินชนิดนี้ 8 ชิ้น ข้อกำหนดใหม่:ต้องเป็นของฮีโร่ที่ระบุ; runtimeยังไม่แยกเจ้าของและยังไม่มีสูตรแปลงเป็นหินรวม",
+      "visualProposal": {
+        "silhouette": "หินหรือเศษหินตามระดับเดิม มีช่องภาพฮีโร่จริงที่อ่านหน้าออก",
+        "palette": "ขาวโอปอล #DCEFFA / ทองสว่าง #E9C673 / ฟ้าอ่อน",
+        "subject": "One complete opalescent breakthrough crystal with a low crown-like silhouette: one tall central faceted ridge flanked by two shorter integrated ridges. The three ridges share a single solid crystal base. Slender antique-gold prongs cradle the lower third like a refined growth catalyst, with restrained ivory-blue internal radiance and a warm gold core. Use richer facets and mounting than the lower stones while preserving a large clean silhouette and controlled highlights. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.",
+        "avoid": "ไม่ใช่มงกุฎสวมศีรษะหรือUniversal Memory; ไม่ใช้วงดาว; ไม่มีเลขIII; ต้องแนบportraitฮีโร่ที่ถูกตัว ห้ามใช้ภาพgenericหรือสลับฮีโร่",
+        "originalTierShape": "ผลึกสามสันทรงมงกุฎเตี้ย มีฐานกิ่งทองโอบ"
+      },
+      "outputPng": "bt_stone_3__{heroId}.png",
+      "plannedRuntimeAsset": null,
+      "currentImplementationNote": "Current runtime uses generic tier items; hero ownership/conversion is a user-requested change, not implemented in this prompt-writing task.",
+      "userRequirement": "Belongs to one specific hero; use that exact canonical portrait as the identity inset. After this hero has completed every breakthrough, surplus hero-bound stones convert to universal breakthrough stones at1:1, as confirmed by the user. Runtime conversion is not implemented by this art-prompt task.",
+      "referenceRequired": true,
+      "templateOnly": true,
+      "legacyBacklogAssetPath": "public/items/bt_stone_3.webp",
+      "plannedRuntimeAssetTemplate": "public/items/heroes/{heroId}/bt_stone_3.webp",
+      "order": 6,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne complete opalescent breakthrough crystal with a low crown-like silhouette: one tall central faceted ridge flanked by two shorter integrated ridges. The three ridges share a single solid crystal base. Slender antique-gold prongs cradle the lower third like a refined growth catalyst, with restrained ivory-blue internal radiance and a warm gold core. Use richer facets and mounting than the lower stones while preserving a large clean silhouette and controlled highlights. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "bt_fragment_1",
+      "name": "Breakthrough Fragment I",
+      "thaiLabel": "เศษหินเลื่อนขั้น 1",
+      "kind": "BREAKTHROUGH_FRAGMENT",
+      "gameFacts": "เศษหินชนิดเดียวกัน 10 ชิ้นรวมเป็น bt_stone_1 1 ชิ้น; จำนวนเป็นข้อมูลUI ไม่วาดในภาพ ข้อกำหนดใหม่:ต้องเป็นของฮีโร่ที่ระบุ; runtimeยังไม่แยกเจ้าของและยังไม่มีสูตรแปลงเป็นหินรวม",
+      "visualProposal": {
+        "silhouette": "หินหรือเศษหินตามระดับเดิม มีช่องภาพฮีโร่จริงที่อ่านหน้าออก",
+        "palette": "ใช้สี/วัสดุเดียวกับ bt_stone_1",
+        "subject": "One large broken wedge fragment from the single-point amber monolith breakthrough stone, not a complete stone. Preserve its warm amber crystalline material and the same facet language as its matching whole item. Show one sharp polished outside face and one broad jagged freshly fractured inside surface, with one broken golden base rim. The broken silhouette has a conspicuous diagonal missing top, making it unmistakably a fragment at 32 pixels. The metal remnants belong to the shard. Keep it a single readable fragment rather than a pile of crystals. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.",
+        "avoid": "ห้ามเป็นหินเต็มก้อน/แร่ดิบ/เศษโลหะ; ต้องเข้าคู่กับ bt_stone_1; ไม่วาด10:1; ต้องแนบportraitฮีโร่ที่ถูกตัว ห้ามใช้ภาพgenericหรือสลับฮีโร่",
+        "originalTierShape": "ชิ้นผลึกแตกทรงลิ่ม มีหน้าตัดหักชัด"
+      },
+      "outputPng": "bt_fragment_1__{heroId}.png",
+      "plannedRuntimeAsset": null,
+      "currentImplementationNote": "Current runtime uses generic tier items; hero ownership/conversion is a user-requested change, not implemented in this prompt-writing task.",
+      "userRequirement": "Belongs to one specific hero; use that exact canonical portrait as the identity inset. After this hero has completed every breakthrough, surplus hero-bound stones convert to universal breakthrough stones at1:1, as confirmed by the user. Runtime conversion is not implemented by this art-prompt task.",
+      "referenceRequired": true,
+      "templateOnly": true,
+      "legacyBacklogAssetPath": "public/items/bt_fragment_1.webp",
+      "plannedRuntimeAssetTemplate": "public/items/heroes/{heroId}/bt_fragment_1.webp",
+      "order": 7,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne large broken wedge fragment from the single-point amber monolith breakthrough stone, not a complete stone. Preserve its warm amber crystalline material and the same facet language as its matching whole item. Show one sharp polished outside face and one broad jagged freshly fractured inside surface, with one broken golden base rim. The broken silhouette has a conspicuous diagonal missing top, making it unmistakably a fragment at 32 pixels. The metal remnants belong to the shard. Keep it a single readable fragment rather than a pile of crystals. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "bt_fragment_2",
+      "name": "Breakthrough Fragment II",
+      "thaiLabel": "เศษหินเลื่อนขั้น 2",
+      "kind": "BREAKTHROUGH_FRAGMENT",
+      "gameFacts": "เศษหินชนิดเดียวกัน 10 ชิ้นรวมเป็น bt_stone_2 1 ชิ้น; จำนวนเป็นข้อมูลUI ไม่วาดในภาพ ข้อกำหนดใหม่:ต้องเป็นของฮีโร่ที่ระบุ; runtimeยังไม่แยกเจ้าของและยังไม่มีสูตรแปลงเป็นหินรวม",
+      "visualProposal": {
+        "silhouette": "หินหรือเศษหินตามระดับเดิม มีช่องภาพฮีโร่จริงที่อ่านหน้าออก",
+        "palette": "ใช้สี/วัสดุเดียวกับ bt_stone_2",
+        "subject": "One large broken wedge fragment from the twin-ridged cyan prism breakthrough stone, not a complete stone. Preserve its icy cyan crystalline material and the same facet language as its matching whole item. Show one sharp polished outside face and one broad jagged freshly fractured inside surface, with a recognizable broken section of its slim central gold ring. The broken silhouette has a conspicuous diagonal missing top, making it unmistakably a fragment at 32 pixels. The metal remnants belong to the shard. Keep it a single readable fragment rather than a pile of crystals. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.",
+        "avoid": "ห้ามเป็นหินเต็มก้อน/แร่ดิบ/เศษโลหะ; ต้องเข้าคู่กับ bt_stone_2; ไม่วาด10:1; ต้องแนบportraitฮีโร่ที่ถูกตัว ห้ามใช้ภาพgenericหรือสลับฮีโร่",
+        "originalTierShape": "ชิ้นผลึกแตกทรงลิ่ม มีหน้าตัดหักชัด"
+      },
+      "outputPng": "bt_fragment_2__{heroId}.png",
+      "plannedRuntimeAsset": null,
+      "currentImplementationNote": "Current runtime uses generic tier items; hero ownership/conversion is a user-requested change, not implemented in this prompt-writing task.",
+      "userRequirement": "Belongs to one specific hero; use that exact canonical portrait as the identity inset. After this hero has completed every breakthrough, surplus hero-bound stones convert to universal breakthrough stones at1:1, as confirmed by the user. Runtime conversion is not implemented by this art-prompt task.",
+      "referenceRequired": true,
+      "templateOnly": true,
+      "legacyBacklogAssetPath": "public/items/bt_fragment_2.webp",
+      "plannedRuntimeAssetTemplate": "public/items/heroes/{heroId}/bt_fragment_2.webp",
+      "order": 8,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne large broken wedge fragment from the twin-ridged cyan prism breakthrough stone, not a complete stone. Preserve its icy cyan crystalline material and the same facet language as its matching whole item. Show one sharp polished outside face and one broad jagged freshly fractured inside surface, with a recognizable broken section of its slim central gold ring. The broken silhouette has a conspicuous diagonal missing top, making it unmistakably a fragment at 32 pixels. The metal remnants belong to the shard. Keep it a single readable fragment rather than a pile of crystals. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "bt_fragment_3",
+      "name": "Breakthrough Fragment III",
+      "thaiLabel": "เศษหินเลื่อนขั้น 3",
+      "kind": "BREAKTHROUGH_FRAGMENT",
+      "gameFacts": "เศษหินชนิดเดียวกัน 10 ชิ้นรวมเป็น bt_stone_3 1 ชิ้น; จำนวนเป็นข้อมูลUI ไม่วาดในภาพ ข้อกำหนดใหม่:ต้องเป็นของฮีโร่ที่ระบุ; runtimeยังไม่แยกเจ้าของและยังไม่มีสูตรแปลงเป็นหินรวม",
+      "visualProposal": {
+        "silhouette": "หินหรือเศษหินตามระดับเดิม มีช่องภาพฮีโร่จริงที่อ่านหน้าออก",
+        "palette": "ใช้สี/วัสดุเดียวกับ bt_stone_3",
+        "subject": "One large broken wedge fragment from the three-ridged opalescent crown crystal breakthrough stone, not a complete stone. Preserve its opalescent ivory-blue crystalline material and the same facet language as its matching whole item. Show one sharp polished outside face and one broad jagged freshly fractured inside surface, with two tiny intact gold prong remnants along its lower edge. The broken silhouette has a conspicuous diagonal missing top, making it unmistakably a fragment at 32 pixels. The metal remnants belong to the shard. Keep it a single readable fragment rather than a pile of crystals. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.",
+        "avoid": "ห้ามเป็นหินเต็มก้อน/แร่ดิบ/เศษโลหะ; ต้องเข้าคู่กับ bt_stone_3; ไม่วาด10:1; ต้องแนบportraitฮีโร่ที่ถูกตัว ห้ามใช้ภาพgenericหรือสลับฮีโร่",
+        "originalTierShape": "ชิ้นผลึกแตกทรงลิ่ม มีหน้าตัดหักชัด"
+      },
+      "outputPng": "bt_fragment_3__{heroId}.png",
+      "plannedRuntimeAsset": null,
+      "currentImplementationNote": "Current runtime uses generic tier items; hero ownership/conversion is a user-requested change, not implemented in this prompt-writing task.",
+      "userRequirement": "Belongs to one specific hero; use that exact canonical portrait as the identity inset. After this hero has completed every breakthrough, surplus hero-bound stones convert to universal breakthrough stones at1:1, as confirmed by the user. Runtime conversion is not implemented by this art-prompt task.",
+      "referenceRequired": true,
+      "templateOnly": true,
+      "legacyBacklogAssetPath": "public/items/bt_fragment_3.webp",
+      "plannedRuntimeAssetTemplate": "public/items/heroes/{heroId}/bt_fragment_3.webp",
+      "order": 9,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne large broken wedge fragment from the three-ridged opalescent crown crystal breakthrough stone, not a complete stone. Preserve its opalescent ivory-blue crystalline material and the same facet language as its matching whole item. Show one sharp polished outside face and one broad jagged freshly fractured inside surface, with two tiny intact gold prong remnants along its lower edge. The broken silhouette has a conspicuous diagonal missing top, making it unmistakably a fragment at 32 pixels. The metal remnants belong to the shard. Keep it a single readable fragment rather than a pile of crystals. IMPORTANT USER CORRECTION: This is NOT a generic shared breakthrough stone. It belongs exclusively to [HERO_ID]. Use the attached canonical [HERO_PORTRAIT_REFERENCE] image as a recognizable protected portrait inset inside the crystal. Keep the actual hero face, hairstyle, skin tone, gender and outfit from that reference; do not invent a different person or reuse Bai Long for every hero. The portrait window should occupy roughly 40-50% of the visible front face, leaving the tier-specific crystal silhouette and gold fittings visible. Do not tint the face so strongly that identity is lost. For a fragment, place the broken edges around a still-readable identity inset; do not remove the face or turn it into an unrelated generic shard. No name or number printed on the icon. If the actual hero portrait has not been supplied, request it before generating this asset.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, unrelated character, full-body scene, hands outside the item, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "skill_tome_1",
+      "name": "Skill Tome I",
+      "thaiLabel": "ตำราสกิล I",
+      "kind": "SKILL_TOME",
+      "gameFacts": "ใช้เพิ่ม rank สกิล: Rank1→2 ใช้2เล่ม; Rank2→3 ใช้ I 4เล่มร่วมกับ II 1เล่ม (ยังมีเงื่อนไขเกมอื่น); ไม่ใช่ตำราเฉพาะS1",
+      "visualProposal": {
+        "silhouette": "สมุดบางปิดเล่ม คล้องสายเดียว ตราวงกลมเรียบ",
+        "palette": "หนังเขียวป่า #3F775B / กระดาษงาช้าง / ทองเก่า",
+        "subject": "One closed slim skill tome in a three-quarter view, its forest-green leather cover facing the viewer and a narrow ivory page block visible at the lower right. One simple dark leather strap with an antique-gold clasp crosses the cover. A small embossed circular starburst seal sits centrally, with no writing or readable glyphs. Use modest rounded gold corner protectors and light signs of careful use; the thin book-and-single-strap silhouette denotes the entry skill manual.",
+        "avoid": "ไม่ใส่S1/ตัวหนังสือ/เลขI; ไม่ทำเป็นคัมภีร์หนาสูงสุดหรือหนังสือเปิด"
+      },
+      "outputPng": "skill_tome_1.png",
+      "plannedRuntimeAsset": "public/items/skill_tome_1.webp",
+      "order": 10,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne closed slim skill tome in a three-quarter view, its forest-green leather cover facing the viewer and a narrow ivory page block visible at the lower right. One simple dark leather strap with an antique-gold clasp crosses the cover. A small embossed circular starburst seal sits centrally, with no writing or readable glyphs. Use modest rounded gold corner protectors and light signs of careful use; the thin book-and-single-strap silhouette denotes the entry skill manual.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "skill_tome_2",
+      "name": "Skill Tome II",
+      "thaiLabel": "ตำราสกิล II",
+      "kind": "SKILL_TOME",
+      "gameFacts": "ใช้ร่วมในการเพิ่ม Rank2→3 (1เล่ม) และ Rank3→4 (4เล่ม); เป็นระดับตำรา ไม่ใช่สกิลS2",
+      "visualProposal": {
+        "silhouette": "หนังสือหนาปานกลาง แถบสันคู่ มุมเหลี่ยมและเข็มขัดคู่",
+        "palette": "หนังน้ำเงินคราม #315C93 / งาช้าง / ทองเก่า",
+        "subject": "One closed medium-thickness skill grimoire, deep sapphire-blue leather, two raised spine bands and two narrow aligned metal-and-leather clasps. Show a visible ivory page block and refined antique-gold corner plates. The cover bears a large embossed interlocking diamond seal without letters, with a tiny blue glass inlay at its center. Match the viewing angle, leather grain and light direction of the slim green tome; distinguish this tier by a thicker rectangular silhouette, two clasps, and more deliberate metalwork.",
+        "avoid": "ไม่ใส่S2/เลขII; แยกจากเล่มเขียวด้วยทรงและตัวล็อก ไม่ใช่เปลี่ยนสีอย่างเดียว"
+      },
+      "outputPng": "skill_tome_2.png",
+      "plannedRuntimeAsset": "public/items/skill_tome_2.webp",
+      "order": 11,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne closed medium-thickness skill grimoire, deep sapphire-blue leather, two raised spine bands and two narrow aligned metal-and-leather clasps. Show a visible ivory page block and refined antique-gold corner plates. The cover bears a large embossed interlocking diamond seal without letters, with a tiny blue glass inlay at its center. Match the viewing angle, leather grain and light direction of the slim green tome; distinguish this tier by a thicker rectangular silhouette, two clasps, and more deliberate metalwork.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "skill_tome_3",
+      "name": "Skill Tome III",
+      "thaiLabel": "ตำราสกิล III",
+      "kind": "SKILL_TOME",
+      "gameFacts": "ใช้เพิ่ม Rank4→5 ตามปัจจุบัน 5เล่ม; ไม่ใช่ตำราเฉพาะUltimate",
+      "visualProposal": {
+        "silhouette": "คัมภีร์หนา สันเสริมโลหะ ตัวล็อกกลางทรงโล่",
+        "palette": "หนังแดงไวน์ #922D35 / ขอบหน้างาช้าง / ทองเก่า",
+        "subject": "One closed heavy master skill grimoire, deep wine-red leather with an antique-gold reinforced spine and one bold shield-shaped central clasp. A thick layered ivory page block and three clearly raised spine ribs distinguish it from the lower tomes. Add restrained engraved gold corner armor and a luminous but small ivory cover inlay. The book must still feel like a usable leather-bound manual, not a jewelry box or an altar. Keep its complex fittings subordinate to the broad readable red-book silhouette.",
+        "avoid": "ไม่ใช้ธีมม่วงดำ; ไม่ใส่ULT/เลขIII/ตัวหนังสือ; ไม่แปลงเป็นเครื่องประดับ"
+      },
+      "outputPng": "skill_tome_3.png",
+      "plannedRuntimeAsset": "public/items/skill_tome_3.webp",
+      "order": 12,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne closed heavy master skill grimoire, deep wine-red leather with an antique-gold reinforced spine and one bold shield-shaped central clasp. A thick layered ivory page block and three clearly raised spine ribs distinguish it from the lower tomes. Add restrained engraved gold corner armor and a luminous but small ivory cover inlay. The book must still feel like a usable leather-bound manual, not a jewelry box or an altar. Keep its complex fittings subordinate to the broad readable red-book silhouette.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "skill_tome_frag_1",
+      "name": "Skill Tome Fragment I",
+      "thaiLabel": "เศษตำราสกิล 1",
+      "kind": "SKILL_TOME_FRAGMENT",
+      "gameFacts": "เศษตำราชนิดเดียวกัน 10 ชิ้นรวมเป็น skill_tome_1 1 เล่ม",
+      "visualProposal": {
+        "silhouette": "มุมปกขาดติดหน้ากระดาษฉีกสองชั้น",
+        "palette": "ใช้สีปก/ตราเดียวกับ skill_tome_1",
+        "subject": "One clearly torn corner fragment of the forest-green skill tome, with one torn strap edge and a partial circular starburst embossed cover motif. A broad irregular leather cover scrap remains attached to two visibly torn ivory paper layers. Show fibrous paper edges and a broken binding seam; the main silhouette is an uneven L-shaped page-and-cover scrap, not a whole book, a scroll, a crystal or a metal plate. Keep the family leather color, gilding and surface treatment identical to its matching complete tome. No readable marks on the paper.",
+        "avoid": "ต้องดูเป็นเศษปก+กระดาษ ไม่ใช่หนังสือจิ๋ว; จับคู่ skill_tome_1; ไม่วาด10/ตัวหนังสือ"
+      },
+      "outputPng": "skill_tome_frag_1.png",
+      "plannedRuntimeAsset": "public/items/skill_tome_frag_1.webp",
+      "order": 13,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne clearly torn corner fragment of the forest-green skill tome, with one torn strap edge and a partial circular starburst embossed cover motif. A broad irregular leather cover scrap remains attached to two visibly torn ivory paper layers. Show fibrous paper edges and a broken binding seam; the main silhouette is an uneven L-shaped page-and-cover scrap, not a whole book, a scroll, a crystal or a metal plate. Keep the family leather color, gilding and surface treatment identical to its matching complete tome. No readable marks on the paper.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "skill_tome_frag_2",
+      "name": "Skill Tome Fragment II",
+      "thaiLabel": "เศษตำราสกิล 2",
+      "kind": "SKILL_TOME_FRAGMENT",
+      "gameFacts": "เศษตำราชนิดเดียวกัน 10 ชิ้นรวมเป็น skill_tome_2 1 เล่ม",
+      "visualProposal": {
+        "silhouette": "มุมปกขาดติดหน้ากระดาษฉีกสองชั้น",
+        "palette": "ใช้สีปก/ตราเดียวกับ skill_tome_2",
+        "subject": "One clearly torn corner fragment of the deep sapphire-blue skill tome, with a partial narrow gold clasp and a partial interlocking diamond embossed cover motif. A broad irregular leather cover scrap remains attached to two visibly torn ivory paper layers. Show fibrous paper edges and a broken binding seam; the main silhouette is an uneven L-shaped page-and-cover scrap, not a whole book, a scroll, a crystal or a metal plate. Keep the family leather color, gilding and surface treatment identical to its matching complete tome. No readable marks on the paper.",
+        "avoid": "ต้องดูเป็นเศษปก+กระดาษ ไม่ใช่หนังสือจิ๋ว; จับคู่ skill_tome_2; ไม่วาด10/ตัวหนังสือ"
+      },
+      "outputPng": "skill_tome_frag_2.png",
+      "plannedRuntimeAsset": "public/items/skill_tome_frag_2.webp",
+      "order": 14,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne clearly torn corner fragment of the deep sapphire-blue skill tome, with a partial narrow gold clasp and a partial interlocking diamond embossed cover motif. A broad irregular leather cover scrap remains attached to two visibly torn ivory paper layers. Show fibrous paper edges and a broken binding seam; the main silhouette is an uneven L-shaped page-and-cover scrap, not a whole book, a scroll, a crystal or a metal plate. Keep the family leather color, gilding and surface treatment identical to its matching complete tome. No readable marks on the paper.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "skill_tome_frag_3",
+      "name": "Skill Tome Fragment III",
+      "thaiLabel": "เศษตำราสกิล 3",
+      "kind": "SKILL_TOME_FRAGMENT",
+      "gameFacts": "เศษตำราชนิดเดียวกัน 10 ชิ้นรวมเป็น skill_tome_3 1 เล่ม",
+      "visualProposal": {
+        "silhouette": "มุมปกขาดติดหน้ากระดาษฉีกสองชั้น",
+        "palette": "ใช้สีปก/ตราเดียวกับ skill_tome_3",
+        "subject": "One clearly torn corner fragment of the wine-red skill tome, with a small reinforced gold corner and a partial shield-shaped embossed cover motif. A broad irregular leather cover scrap remains attached to two visibly torn ivory paper layers. Show fibrous paper edges and a broken binding seam; the main silhouette is an uneven L-shaped page-and-cover scrap, not a whole book, a scroll, a crystal or a metal plate. Keep the family leather color, gilding and surface treatment identical to its matching complete tome. No readable marks on the paper.",
+        "avoid": "ต้องดูเป็นเศษปก+กระดาษ ไม่ใช่หนังสือจิ๋ว; จับคู่ skill_tome_3; ไม่วาด10/ตัวหนังสือ"
+      },
+      "outputPng": "skill_tome_frag_3.png",
+      "plannedRuntimeAsset": "public/items/skill_tome_frag_3.webp",
+      "order": 15,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne clearly torn corner fragment of the wine-red skill tome, with a small reinforced gold corner and a partial shield-shaped embossed cover motif. A broad irregular leather cover scrap remains attached to two visibly torn ivory paper layers. Show fibrous paper edges and a broken binding seam; the main silhouette is an uneven L-shaped page-and-cover scrap, not a whole book, a scroll, a crystal or a metal plate. Keep the family leather color, gilding and surface treatment identical to its matching complete tome. No readable marks on the paper.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "equip_frag_basic",
+      "name": "Basic Equipment Fragment",
+      "thaiLabel": "เศษอุปกรณ์ Basic",
+      "kind": "EQUIPMENT_FRAGMENT",
+      "gameFacts": "ใช้สร้างอุปกรณ์ระดับ Uncommon: 25เศษ +300ทอง; อย่าสับสนว่าใช้สร้างCommon",
+      "visualProposal": {
+        "silhouette": "แผ่นเหล็กแตกชิ้นหนา ทรงสี่เหลี่ยมคางหมู มีรูหมุดเดียว",
+        "palette": "เหล็กอุ่น #7D8586 / สัมฤทธิ์หม่น / เขียวหยกเล็กน้อย",
+        "subject": "One rugged broken equipment plate of warm iron, a chunky trapezoidal silhouette with one empty rivet hole, a folded edge and one visibly snapped corner. A modest dark-bronze rim and a tiny muted jade enamel remnant imply reclaimable low-tier equipment material. Show brushed metal and a clear thick fractured cross-section. It is a crafting fragment shared by weapons and armor, so do not make a recognizable complete sword, helmet or chestplate. No crystal body.",
+        "avoid": "ต้องเป็นเศษโลหะ ไม่ใช่อัญมณี; ไม่วาดอุปกรณ์สมบูรณ์/จำนวน25/กรอบrarity"
+      },
+      "outputPng": "equip_frag_basic.png",
+      "plannedRuntimeAsset": "public/items/equip_frag_basic.webp",
+      "order": 16,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne rugged broken equipment plate of warm iron, a chunky trapezoidal silhouette with one empty rivet hole, a folded edge and one visibly snapped corner. A modest dark-bronze rim and a tiny muted jade enamel remnant imply reclaimable low-tier equipment material. Show brushed metal and a clear thick fractured cross-section. It is a crafting fragment shared by weapons and armor, so do not make a recognizable complete sword, helmet or chestplate. No crystal body.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "equip_frag_rare",
+      "name": "Rare Equipment Fragment",
+      "thaiLabel": "เศษอุปกรณ์ Rare",
+      "kind": "EQUIPMENT_FRAGMENT",
+      "gameFacts": "ใช้สร้างอุปกรณ์ Rare: 40เศษ +800ทอง",
+      "visualProposal": {
+        "silhouette": "แผ่นโลหะแตกทรงง่ามสองแฉก ขอบเงิน มีหมุดสองตำแหน่ง",
+        "palette": "เหล็กน้ำเงิน #356FA6 / เงิน #C3D1D8 / ทองเก่าเล็กน้อย",
+        "subject": "One broken high-quality equipment fitting shaped as a two-pronged metal plate. Sapphire-blue enamel covers part of a polished cool-steel body, with muted silver edging and two visible rivet sockets. One prong is cleanly broken, exposing dense forged metal, while a slim antique-gold incised line follows the intact edge. Keep it visibly manufactured metal with an angular plate silhouette, related to the basic iron fragment but more precise and refined. The blue surface is enamel, not a blue gemstone.",
+        "avoid": "ไม่เป็นผลึกฟ้าทั้งก้อน; ไม่ใส่ดาว/คำRare/จำนวน40; ใช้เศษชิ้นเดียว"
+      },
+      "outputPng": "equip_frag_rare.png",
+      "plannedRuntimeAsset": "public/items/equip_frag_rare.webp",
+      "order": 17,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne broken high-quality equipment fitting shaped as a two-pronged metal plate. Sapphire-blue enamel covers part of a polished cool-steel body, with muted silver edging and two visible rivet sockets. One prong is cleanly broken, exposing dense forged metal, while a slim antique-gold incised line follows the intact edge. Keep it visibly manufactured metal with an angular plate silhouette, related to the basic iron fragment but more precise and refined. The blue surface is enamel, not a blue gemstone.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "equip_frag_elite",
+      "name": "Elite Equipment Fragment",
+      "thaiLabel": "เศษอุปกรณ์ Elite",
+      "kind": "EQUIPMENT_FRAGMENT",
+      "gameFacts": "ใช้สร้างอุปกรณ์ Elite: 70เศษ +2000ทอง",
+      "visualProposal": {
+        "silhouette": "แผ่นเสริมเกราะแตกทรงเสี้ยวหนา มีสันซ้อนสามชั้น",
+        "palette": "เหล็กแดงดำ #692D30 / เคลือบแดง #B5483B / สัมฤทธิ์ทอง",
+        "subject": "One elite forged equipment fragment, a thick crescent-shaped broken reinforcement plate with three layered metal ridges and a conspicuous torn attachment lug. Deep crimson enamel sits over dark forged steel, edged with aged warm gold and bronze. One broken edge reveals the layered metal construction. Its curved crescent outline must differ from both the basic trapezoid and rare forked plate. Use controlled ember reflections on the metal, not floating fire or a bright crystal core.",
+        "avoid": "ไม่ใช่พระจันทร์/เครื่องประดับทั้งชิ้น; ไม่เป็นคริสตัลแดง; ไม่ใช้กองไฟบังรูปทรง"
+      },
+      "outputPng": "equip_frag_elite.png",
+      "plannedRuntimeAsset": "public/items/equip_frag_elite.webp",
+      "order": 18,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne elite forged equipment fragment, a thick crescent-shaped broken reinforcement plate with three layered metal ridges and a conspicuous torn attachment lug. Deep crimson enamel sits over dark forged steel, edged with aged warm gold and bronze. One broken edge reveals the layered metal construction. Its curved crescent outline must differ from both the basic trapezoid and rare forked plate. Use controlled ember reflections on the metal, not floating fire or a bright crystal core.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "equip_frag_epic",
+      "name": "Epic Equipment Fragment",
+      "thaiLabel": "เศษอุปกรณ์ Epic",
+      "kind": "EQUIPMENT_FRAGMENT",
+      "gameFacts": "ใช้สร้างอุปกรณ์ Epic: 110เศษ +4000ทอง",
+      "visualProposal": {
+        "silhouette": "แผ่นโลหะสลักแตกทรงพัดสามก้าน ผิวเคลือบงาช้าง",
+        "palette": "ทองเก่า #C5A15A / งาช้าง #F0E4C7 / ฟ้าแซฟไฟร์จุดเล็ก",
+        "subject": "One epic equipment crafting fragment: a broken fan-shaped gilded metal plate with three broad structural ribs, one missing attachment corner and a thick exposed forged cross-section. Ivory enamel panels sit between antique-gold ribs, with one tiny sapphire rivet head as an accent. Use refined engraved edge work and a soft warm highlight, while the broken plate outline stays dominant at small sizes. It is precious manufactured equipment scrap, not a complete royal badge, finished relic, crystal cluster or pile of coins.",
+        "avoid": "ห้ามเป็นRelic/ตราราชวงศ์สมบูรณ์/อัญมณีก้อน; ไม่มีคำEpic/ดาว/จำนวน110"
+      },
+      "outputPng": "equip_frag_epic.png",
+      "plannedRuntimeAsset": "public/items/equip_frag_epic.webp",
+      "order": 19,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne epic equipment crafting fragment: a broken fan-shaped gilded metal plate with three broad structural ribs, one missing attachment corner and a thick exposed forged cross-section. Ivory enamel panels sit between antique-gold ribs, with one tiny sapphire rivet head as an accent. Use refined engraved edge work and a soft warm highlight, while the broken plate outline stays dominant at small sizes. It is precious manufactured equipment scrap, not a complete royal badge, finished relic, crystal cluster or pile of coins.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "enhancement_ore",
+      "name": "Enhancement Ore",
+      "thaiLabel": "แร่เสริมพลังอุปกรณ์",
+      "kind": "MATERIAL",
+      "gameFacts": "ใช้ตีบวกอุปกรณ์; ปริมาณแร่ขึ้นกับrarityและระดับตีบวก และมีค่าทองร่วมด้วย",
+      "visualProposal": {
+        "silhouette": "ก้อนแร่ดิบเหลี่ยมขรุขระ ฐานหินเข้ม เส้นแร่ส้มทอง",
+        "palette": "บะซอลต์เทา #39464D / แร่ส้มทอง #F0A34A / แสงขาวอุ่น",
+        "subject": "One irregular raw enhancement-ore nugget, a dense dark basalt-like rock with several broad angular chipped faces. Molten amber-orange mineral veins run through the stone, ending in two small bright metallic inclusions. Its chunky asymmetrical geological silhouette must read as raw forge material, with rough stone texture and restrained warm inner light. No gold socket, ring, jewelry mount or clean symmetric cut; it must be visually distinct from the crafted breakthrough crystals and from manufactured equipment plate fragments.",
+        "avoid": "ไม่เป็นแท่งโลหะ/คริสตัลเจียระไน/ก้อนลาวาที่มีไฟล้อม; ไม่มีค้อนหรือทั่งพ่วงในasset"
+      },
+      "outputPng": "enhancement_ore.png",
+      "plannedRuntimeAsset": "public/items/enhancement_ore.webp",
+      "order": 20,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne irregular raw enhancement-ore nugget, a dense dark basalt-like rock with several broad angular chipped faces. Molten amber-orange mineral veins run through the stone, ending in two small bright metallic inclusions. Its chunky asymmetrical geological silhouette must read as raw forge material, with rough stone texture and restrained warm inner light. No gold socket, ring, jewelry mount or clean symmetric cut; it must be visually distinct from the crafted breakthrough crystals and from manufactured equipment plate fragments.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    },
+    {
+      "id": "universal_memory",
+      "name": "Universal Memory",
+      "thaiLabel": "ความทรงจำสากล",
+      "kind": "HERO_MEMORY",
+      "gameFacts": "ใช้แทนHero Memoryเพื่อพัฒนาดาวของฮีโร่ใดก็ได้ โดยใช้Memoryของฮีโร่ตัวนั้นก่อน; ไม่ใช่Memoryเฉพาะไป๋หลง",
+      "visualProposal": {
+        "silhouette": "ปริซึมดาวสี่แฉกกลางวงโอบทองเปิดสองปลาย",
+        "palette": "ขาวมุก #E8F3FC / ฟ้าอ่อน #97DAF1 / ทอง #D9B76C",
+        "subject": "One universal-memory talisman: a single opalescent four-point faceted star prism suspended at the center of a thin antique-gold open crescent ring. The two open ring tips are clearly separated, making it unlike a coin or a closed medallion. Pearl-white and faint icy-cyan reflections cross the star, with a restrained gold core and a tiny internal swirl of light. The dominant outline is a radiant four-point star within an open arc, representing memory usable by any hero. Keep it iconic, clean and precious. No human face, character portrait, card, book or character-specific emblem.",
+        "avoid": "ไม่ใช้ใบหน้าไป๋หลง/ฮีโร่ใด; ไม่ใช่เหรียญหรือHero Memoryรายตัว; ไม่มีเลข/ตัวอักษร"
+      },
+      "outputPng": "universal_memory.png",
+      "plannedRuntimeAsset": "public/items/universal_memory.webp",
+      "order": 21,
+      "artStatus": "proposal_not_generated_not_approved",
+      "prompt": "Create exactly one isolated inventory material icon for Eldervane, a premium Japanese/Korean high-fantasy mobile RPG. Polished hand-painted 2.5D game item art with believable dimensional materials, crisp designed edges, broad readable surface planes and restrained antique-gold craftsmanship. Use the stated item silhouette and palette; avoid a purple-and-black default aesthetic. Show the object at a consistent slight three-quarter angle, its front and right-hand thickness visible, with warm neutral key light from the upper left, gentle cool fill, and a clear silhouette against both dark charcoal and pale ivory interfaces. Keep major features readable at 32, 48 and 64 pixels; prioritize shape and material over fine ornament. Center the complete object in one square 512x512 canvas, occupying roughly 75-80% of its width and height, with at least 10% clear padding on every side. True transparent RGBA background, sharp clean alpha edges, fully solid object materials, and only a restrained local alpha glow if specified. Do not add any inventory-tile frame, surrounding square border, background scene, floor, pedestal, cast-shadow rectangle, labels, letters, numerals, stars denoting rarity, quantity badges, logos or watermark. Abstract non-readable geometric ornament is acceptable. Output one item only, not a contact sheet, collage or multiple views.\n\nITEM SUBJECT:\nOne universal-memory talisman: a single opalescent four-point faceted star prism suspended at the center of a thin antique-gold open crescent ring. The two open ring tips are clearly separated, making it unlike a coin or a closed medallion. Pearl-white and faint icy-cyan reflections cross the star, with a restrained gold core and a tiny internal swirl of light. The dominant outline is a radiant four-point star within an open arc, representing memory usable by any hero. Keep it iconic, clean and precious. No human face, character portrait, card, book or character-specific emblem.\n\nNegative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark.",
+      "negativePrompt": "Negative prompt: text, typography, readable runes, Roman numerals, numbers, rarity badges, inventory border, UI tile, opaque background, fake checkerboard transparency, scene, landscape, pedestal, floor shadow, character, hands, cropped object, cut-off glow, multiple unrelated items, flat emoji, simplistic vector placeholder, pixel art, blurry edges, dense micro-detail, excessive bloom, neon purple-black styling, oversaturated rainbow light, watermark."
+    }
+  ],
+  "heroSpecificRequirement": {
+    "baseItemIds": [
+      "bt_fragment_1",
+      "bt_fragment_2",
+      "bt_fragment_3",
+      "bt_stone_1",
+      "bt_stone_2",
+      "bt_stone_3"
+    ],
+    "heroes": [
+      {
+        "id": "bailong",
+        "name": "ไป๋หลง",
+        "portrait": "public/portraits/bailong.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/bailong.webp"
+      },
+      {
+        "id": "yuezheng",
+        "name": "เยว่เจิ้ง",
+        "portrait": "public/portraits/yuezheng.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/yuezheng.webp"
+      },
+      {
+        "id": "moye",
+        "name": "โม่เย่",
+        "portrait": "public/portraits/moye.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/moye.webp"
+      },
+      {
+        "id": "tangxun",
+        "name": "ถังซวิ่น",
+        "portrait": "public/portraits/tangxun.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/tangxun.webp"
+      },
+      {
+        "id": "linxue",
+        "name": "หลินเสวี่ย",
+        "portrait": "public/portraits/linxue.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/linxue.webp"
+      },
+      {
+        "id": "garrick",
+        "name": "การ์ริก",
+        "portrait": "public/portraits/garrick.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/garrick.webp"
+      },
+      {
+        "id": "kael",
+        "name": "เคล",
+        "portrait": "public/portraits/kael.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/kael.webp"
+      },
+      {
+        "id": "mirelle",
+        "name": "มิเรลล์ ฟรอสต์กลาส",
+        "portrait": "public/portraits/mirelle.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/mirelle.webp"
+      },
+      {
+        "id": "sylvara",
+        "name": "ซิลวารา วินด์วิสเปอร์",
+        "portrait": "public/portraits/sylvara.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/sylvara.webp"
+      },
+      {
+        "id": "elira",
+        "name": "เอลิรา ดอว์นเมียร์",
+        "portrait": "public/portraits/elira.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/elira.webp"
+      },
+      {
+        "id": "vaelric",
+        "name": "เวลริค น็อกธาร์",
+        "portrait": "public/portraits/vaelric.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/vaelric.webp"
+      },
+      {
+        "id": "draeven",
+        "name": "เดรเวน มอร์แคนต์",
+        "portrait": "public/portraits/draeven.webp",
+        "portraitUrl": "https://raw.githubusercontent.com/adisonkung/ProjectGM/2b06592cd8a56e1faa432a55fa89e85435dd5eee/public/portraits/draeven.webp"
+      }
+    ],
+    "variantsFile": "hero-breakthrough-prompts.json",
+    "ruleImplementation": "not_implemented",
+    "conversionTrigger": "hero_has_completed_all_breakthroughs",
+    "conversionRatio": {
+      "heroStone": 1,
+      "universalStone": 1
+    },
+    "conversionMode": null,
+    "universalTierPolicy": null
+  }
+}

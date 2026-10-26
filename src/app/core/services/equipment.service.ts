@@ -1,7 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { EquipmentInstance, EquipmentSlot, EquipStat, HuntTarget, Rarity } from '../models/equipment';
 import {
-  compareGear, craft, dismantle, EquipError, equip, sell, setLocked, unequipSlot, upgrade,
+  compareGear, craft, craftRandom, dismantle, dismantleMany, EquipError, equip, sell, setLocked, unequipSlot, upgrade,
 } from '../rules/equipment';
 import { SaveService } from './save.service';
 
@@ -29,6 +29,8 @@ export class EquipmentService {
     const r = craft(this.save.state(), rarity, defId, main, rng);
     return this.apply(r);
   }
+  craftRandom(rarity: Rarity, slot: EquipmentSlot, rng = Math.random) { return this.apply(craftRandom(this.save.state(), rarity, slot, rng)); }
+  dismantleMany(ids: readonly number[]) { return this.apply(dismantleMany(this.save.state(), ids)); }
   setHuntTarget(t: HuntTarget) { this.save.update(s => ({ ...s, huntTarget: t })); }
 
   compare(heroUid: number, item: EquipmentInstance) {

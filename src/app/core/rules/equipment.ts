@@ -136,6 +136,18 @@ export function craft(state: GameState, rarity: Rarity, defId: string, main: Equ
   };
 }
 
+/** Player craft: choose rarity/slot; base and legal main stat are uniformly rolled. */
+export function craftRandom(state: GameState, rarity: Rarity, slot: EquipmentSlot, rng: () => number): Result & { item?: EquipmentInstance } {
+  const recipe = CRAFT_RECIPES[rarity];
+  if (!recipe) return { error: 'NO_RECIPE' };
+  const bases = Object.values(EQUIPMENT_DEFS).filter(d => d.slot === slot);
+  if (!bases.length) return { error: 'NO_RECIPE' };
+  if ((state.inventory[recipe.fragmentId] ?? 0) < recipe.fragments) return { error: 'NEED_FRAGMENTS' };
+  if (state.gold < recipe.gold) return { error: 'NEED_GOLD' };
+  const base = pick(bases, rng);
+  return craft(state, rarity, base.id, pick(base.mainStats, rng), rng);
+}
+
 // ------------------------------------------------------------------ upgrades / dismantle / sell / lock
 
 /** cost of the next upgrade step (+n → +n+1) */
@@ -199,6 +211,19 @@ export function dismantle(state: GameState, id: number): Result {
   if (f.item.locked) return { error: 'LOCKED' };
   if (f.heroUid != null) return { error: 'EQUIPPED' };
   return { state: { ...state, equipment: state.equipment.filter(i => i.instanceId !== id), inventory: addItems(state.inventory, dismantleRewards(f.item)) } };
+}
+
+/** Validate the whole selection before returning one new state; no partial salvage. */
+export function dismantleMany(state: GameState, ids: readonly number[]): Result {
+  const unique = [...new Set(ids)];
+  if (!unique.length) return { error: 'NOT_FOUND' };
+  let next = state;
+  for (const id of unique) {
+    const result = dismantle(next, id);
+    if ('error' in result) return result;
+    next = result.state;
+  }
+  return { state: next };
 }
 
 export function sell(state: GameState, id: number): Result {

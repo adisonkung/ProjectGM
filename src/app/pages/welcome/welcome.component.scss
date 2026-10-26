@@ -1,3 +1,4 @@
+@use '../../shared/citadel-material' as material;
 :host { display: block; }
 .welcome { position: relative; min-height: calc(100dvh - 40px); display: grid; grid-template-columns: minmax(0,1fr); place-items: center; align-content: center; gap: 0; padding-block: 12px; }
 
@@ -44,3 +45,5 @@ app-save-import { text-align: left; }
 .kicker { color: #f0d29a; }
 .field { background: #192332; border-radius: 3px; }
 .dice { border-radius: 2px; color: #f0d29a; background: #2b384a; border-color: #c6ac7566; }
+
+@include material.surfaces;

@@ -1,3 +1,6 @@
+import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
+import { CitadelIconComponent } from '../../shared/citadel-icon.component';
+import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ISLAND_NAME_MAX, nameLength, normalizeIslandName, suggestIslandName } from '../../core/rules/account';
@@ -8,7 +11,7 @@ import { SaveImportComponent } from '../../shared/save-import.component';
 /** first launch: name your island (or bring a save from another device) */
 @Component({
   selector: 'app-welcome',
-  imports: [IconComponent, SaveImportComponent],
+  imports: [TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, IconComponent, SaveImportComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './welcome.component.html',
   styleUrl: './welcome.component.scss',

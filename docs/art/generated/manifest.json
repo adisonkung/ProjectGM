@@ -1,0 +1,933 @@
+{
+  "date": "2026-10-26",
+  "assetCount": 103,
+  "assets": [
+    {
+      "id": "ui/adventure",
+      "label": "adventure",
+      "group": "ui",
+      "url": "/ui/generated/ui/adventure.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-ui-icons/adventure.webp",
+      "sha256": "5c6424b03bd9e95df4dc48ee170ab9761afb605889ddd693629fa9bb27d35b30"
+    },
+    {
+      "id": "ui/equipment",
+      "label": "equipment",
+      "group": "ui",
+      "url": "/ui/generated/ui/equipment.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-ui-icons/equipment.webp",
+      "sha256": "cff63fd2ff617715c7d22a29e408122acd71617bfa4a6e74691f11e76bb1ccad"
+    },
+    {
+      "id": "ui/heroes",
+      "label": "heroes",
+      "group": "ui",
+      "url": "/ui/generated/ui/heroes.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-ui-icons/heroes.webp",
+      "sha256": "fc14d739316401bcfdfed7a07990c8a8b17d60055a8244a3fa014b910de2cc7d"
+    },
+    {
+      "id": "ui/home",
+      "label": "home",
+      "group": "ui",
+      "url": "/ui/generated/ui/home.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-ui-icons/home.webp",
+      "sha256": "6e0b25ee5487e4a2281076a377647f7483237698d43a1ecd27baf1cc93b5cafe"
+    },
+    {
+      "id": "ui/summon",
+      "label": "summon",
+      "group": "ui",
+      "url": "/ui/generated/ui/summon.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-ui-icons/summon.webp",
+      "sha256": "3b5523a2cdc6b71533dbd29ed757fc0f72a8bef52980c3bff127ac83fe312dfa"
+    },
+    {
+      "id": "ui/team",
+      "label": "team",
+      "group": "ui",
+      "url": "/ui/generated/ui/team.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-ui-icons/team.webp",
+      "sha256": "38b933918d248666b1555c1928a6cdeed6d5fc65395052afe9cd9913e5df79ed"
+    },
+    {
+      "id": "utility/back",
+      "label": "back",
+      "group": "utility",
+      "url": "/ui/generated/utility/back.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-utility-icons/back.webp",
+      "sha256": "b99a8be7217aefacd551872d749af9c58e5de2fdd1c3b51ca0937bc6b111dc3f"
+    },
+    {
+      "id": "utility/edit",
+      "label": "edit",
+      "group": "utility",
+      "url": "/ui/generated/utility/edit.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-utility-icons/edit.webp",
+      "sha256": "51431fe9ee61024189a67fd743a5ba7309e927a2664ba1fb9d5c5e70bc3cd6b1"
+    },
+    {
+      "id": "utility/lock",
+      "label": "lock",
+      "group": "utility",
+      "url": "/ui/generated/utility/lock.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-utility-icons/lock.webp",
+      "sha256": "4b9025d40ecf032188b2c84adf584b3c049ef943ba587e71cd48675880552573"
+    },
+    {
+      "id": "utility/next",
+      "label": "next",
+      "group": "utility",
+      "url": "/ui/generated/utility/next.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-utility-icons/next.webp",
+      "sha256": "0a42f9dff46477893a5dc55dc3089a65ecdf3c7d39b1e00c7ef09ee379597776"
+    },
+    {
+      "id": "utility/save",
+      "label": "save",
+      "group": "utility",
+      "url": "/ui/generated/utility/save.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-utility-icons/save.webp",
+      "sha256": "3a5e9c397ee511b04c181d9bb5ea5e8fe51282e2743794e29157bd264f96ec25"
+    },
+    {
+      "id": "utility/settings",
+      "label": "settings",
+      "group": "utility",
+      "url": "/ui/generated/utility/settings.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-utility-icons/settings.webp",
+      "sha256": "68c11262c997cb4d7517bc1491a8335a04a42d5266abc94d31fa61a32a326eb8"
+    },
+    {
+      "id": "class/archer",
+      "label": "archer",
+      "group": "class",
+      "url": "/ui/generated/class/archer.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-class-icons/archer.webp",
+      "sha256": "77fd2639303f09d308d43d0a1932ec7a5e2c96b58f7198612eaeb18975983755"
+    },
+    {
+      "id": "class/assassin",
+      "label": "assassin",
+      "group": "class",
+      "url": "/ui/generated/class/assassin.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-class-icons/assassin.webp",
+      "sha256": "41ee1f956d42610f47a9db3bc68c3499c58167f5fa5e5cffee36f2a0ad4159f0"
+    },
+    {
+      "id": "class/fighter",
+      "label": "fighter",
+      "group": "class",
+      "url": "/ui/generated/class/fighter.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-class-icons/fighter.webp",
+      "sha256": "9a6ed1ccdd25c0a241d54859392276b7819c02c865de889f692fee6fe5917597"
+    },
+    {
+      "id": "class/healer",
+      "label": "healer",
+      "group": "class",
+      "url": "/ui/generated/class/healer.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-class-icons/healer.webp",
+      "sha256": "a465e0bea50365d155c5c6b89aba1c4dfdb408d43b9dfaa84ab9e7e4db11cba4"
+    },
+    {
+      "id": "class/mage",
+      "label": "mage",
+      "group": "class",
+      "url": "/ui/generated/class/mage.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-class-icons/mage.webp",
+      "sha256": "bba5ee0ea0de4077a131be42bc5648644228045f9a60067464d88216788876ef"
+    },
+    {
+      "id": "class/tank",
+      "label": "tank",
+      "group": "class",
+      "url": "/ui/generated/class/tank.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-class-icons/tank.webp",
+      "sha256": "0244a4304859087c6a2350fdeba7e52411a894ffd0e2b09b19e6e850ebfb2009"
+    },
+    {
+      "id": "feature/ascension",
+      "label": "ascension",
+      "group": "feature",
+      "url": "/ui/generated/feature/ascension.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-feature-icons/ascension.webp",
+      "sha256": "72116f832e7e3226bb38d024d90946227db00df0be43c13680a993882efe1742"
+    },
+    {
+      "id": "feature/bag",
+      "label": "bag",
+      "group": "feature",
+      "url": "/ui/generated/feature/bag.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-feature-icons/bag.webp",
+      "sha256": "c17a9ffe797d482990c5dff5fe17633daa9ff41e1ff2dea4d09436f9de1c259a"
+    },
+    {
+      "id": "feature/forge",
+      "label": "forge",
+      "group": "feature",
+      "url": "/ui/generated/feature/forge.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-feature-icons/forge.webp",
+      "sha256": "b62f9fcfe8cfd1ea011d98c33886fa648087e79c29d81f0655e39e7dacc8be21"
+    },
+    {
+      "id": "feature/skillhall",
+      "label": "skillhall",
+      "group": "feature",
+      "url": "/ui/generated/feature/skillhall.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-feature-icons/skillhall.webp",
+      "sha256": "f5d61b5c4e71873d44147b32965916fa2bbe2df8fb690c73f42c89de59b80f3f"
+    },
+    {
+      "id": "feature/tower",
+      "label": "tower",
+      "group": "feature",
+      "url": "/ui/generated/feature/tower.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-feature-icons/tower.webp",
+      "sha256": "65f0a6de10b8a93d634444feb23c6a8e3a9e3a04bdf1276ba01f04e2f096f6ad"
+    },
+    {
+      "id": "feature/training",
+      "label": "training",
+      "group": "feature",
+      "url": "/ui/generated/feature/training.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-feature-icons/training.webp",
+      "sha256": "b8ef5b9bd38631084a0fc638b122e61f60144d57c47b294a9790cfe7cfd9d319"
+    },
+    {
+      "id": "battle/close",
+      "label": "close",
+      "group": "battle",
+      "url": "/ui/generated/battle/close.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-battle-icons/close.webp",
+      "sha256": "22ac9195f2363a5418db53fa149055ea3c9bb5a0eba1c59a08785db73d30c6dc"
+    },
+    {
+      "id": "battle/exit",
+      "label": "exit",
+      "group": "battle",
+      "url": "/ui/generated/battle/exit.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-battle-icons/exit.webp",
+      "sha256": "82b9e2f42cd85d06283c1adfd3009d3e55f10eff6d2ff58e710293d5d82db8a1"
+    },
+    {
+      "id": "battle/fast",
+      "label": "fast",
+      "group": "battle",
+      "url": "/ui/generated/battle/fast.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-battle-icons/fast.webp",
+      "sha256": "f9477a73be738f4dab56e5ea60105616790b1e51ed92dc9ac9b6bc0467081ebe"
+    },
+    {
+      "id": "battle/pause",
+      "label": "pause",
+      "group": "battle",
+      "url": "/ui/generated/battle/pause.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-battle-icons/pause.webp",
+      "sha256": "3cdf3e47b2d266004c7a39935321020feb285360b773ce6df33d99fe6bf63b07"
+    },
+    {
+      "id": "battle/play",
+      "label": "play",
+      "group": "battle",
+      "url": "/ui/generated/battle/play.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-battle-icons/play.webp",
+      "sha256": "85b6f89dcfea72fac237f4c823d46e773730aa96b4a870e509f579baba1f5a3f"
+    },
+    {
+      "id": "battle/restart",
+      "label": "restart",
+      "group": "battle",
+      "url": "/ui/generated/battle/restart.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-battle-icons/restart.webp",
+      "sha256": "57976fde2b472b81d34a6420f759270f0d6b62adae1ff5d26aac63f74ca7c0af"
+    },
+    {
+      "id": "craft/craft",
+      "label": "craft",
+      "group": "craft",
+      "url": "/ui/generated/craft/craft.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-craft-utility-icons/craft.webp",
+      "sha256": "ddb6fa3c315f99d6b224a3841d83480ae4e29a5df386b328a9c9fa8f57797b76"
+    },
+    {
+      "id": "craft/enhance",
+      "label": "enhance",
+      "group": "craft",
+      "url": "/ui/generated/craft/enhance.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-craft-utility-icons/enhance.webp",
+      "sha256": "13ba1d58f3cbc21a811791adf2b895d05d6fbc9d79d84e0e6d5619b9d61ad077"
+    },
+    {
+      "id": "craft/filter",
+      "label": "filter",
+      "group": "craft",
+      "url": "/ui/generated/craft/filter.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-craft-utility-icons/filter.webp",
+      "sha256": "730f2a7252041aded275ec50e338afd39f213451a3ffe4be7a3080f5b319420a"
+    },
+    {
+      "id": "craft/hunt",
+      "label": "hunt",
+      "group": "craft",
+      "url": "/ui/generated/craft/hunt.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-craft-utility-icons/hunt.webp",
+      "sha256": "a8a65548e07079ea9578d85af848001b249aef52cb0b0e343052f9fa404f15f8"
+    },
+    {
+      "id": "craft/salvage",
+      "label": "salvage",
+      "group": "craft",
+      "url": "/ui/generated/craft/salvage.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-craft-utility-icons/salvage.webp",
+      "sha256": "72760c70a6d20baa5d43c50a967e37290893a21ad75fe7357d3587e2335241f9"
+    },
+    {
+      "id": "craft/search",
+      "label": "search",
+      "group": "craft",
+      "url": "/ui/generated/craft/search.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-craft-utility-icons/search.webp",
+      "sha256": "84dd8cb58f98339a676272738ba4e3abdb6004fa4e74f145e999cde38b1ed77b"
+    },
+    {
+      "id": "stats/atk",
+      "label": "atk",
+      "group": "stats",
+      "url": "/ui/generated/stats/atk.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/atk.webp",
+      "sha256": "40d8d968140203578f7c8e62d9bdb6d39b39c63404914b04564758094810b6dd"
+    },
+    {
+      "id": "stats/attack_speed",
+      "label": "attack_speed",
+      "group": "stats",
+      "url": "/ui/generated/stats/attack_speed.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/attack_speed.webp",
+      "sha256": "03801a87a64028b7aa30a9b11f1fc928c1c5ec451fbb9a90f2b5e859a89fc6e8"
+    },
+    {
+      "id": "stats/bleed_reduction",
+      "label": "bleed_reduction",
+      "group": "stats",
+      "url": "/ui/generated/stats/bleed_reduction.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/bleed_reduction.webp",
+      "sha256": "0e008bda42bc0604ba31809c147d29638b2204d40b8eca7508eea32452b21d81"
+    },
+    {
+      "id": "stats/break_power",
+      "label": "break_power",
+      "group": "stats",
+      "url": "/ui/generated/stats/break_power.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/break_power.webp",
+      "sha256": "2bb69137cba0505de7e631741a1175944e638b3de6ebde4fd7a07f556b62e2ab"
+    },
+    {
+      "id": "stats/cooldown_reduction",
+      "label": "cooldown_reduction",
+      "group": "stats",
+      "url": "/ui/generated/stats/cooldown_reduction.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/cooldown_reduction.webp",
+      "sha256": "3765f925db28d78cff784d4f23893ca9875f832b53ebf40434fc108b7afc92c6"
+    },
+    {
+      "id": "stats/crit_chance",
+      "label": "crit_chance",
+      "group": "stats",
+      "url": "/ui/generated/stats/crit_chance.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/crit_chance.webp",
+      "sha256": "7124091bb796eadeeb309fb045bd49b519efeabb4336f65d4ed152251e2c8904"
+    },
+    {
+      "id": "stats/crit_damage",
+      "label": "crit_damage",
+      "group": "stats",
+      "url": "/ui/generated/stats/crit_damage.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/crit_damage.webp",
+      "sha256": "7aaf51ca7a3bbceb330cc916559962d553f644c3e26c2f5e92116a1e8efeabc5"
+    },
+    {
+      "id": "stats/damage_reduction",
+      "label": "damage_reduction",
+      "group": "stats",
+      "url": "/ui/generated/stats/damage_reduction.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/damage_reduction.webp",
+      "sha256": "59fb7581eac6a20af259869beaacf002abf2fa27abe731f51a33b6fc330aeb24"
+    },
+    {
+      "id": "stats/def",
+      "label": "def",
+      "group": "stats",
+      "url": "/ui/generated/stats/def.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/def.webp",
+      "sha256": "b50ba1203d2b53f80b6a67421600b323ecc9d82f9c7057b34658f8fa249d5ac0"
+    },
+    {
+      "id": "stats/dive_reduction",
+      "label": "dive_reduction",
+      "group": "stats",
+      "url": "/ui/generated/stats/dive_reduction.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/dive_reduction.webp",
+      "sha256": "96ca5a1b5dc72ba5b6076b392029ff9341596eac574aef2bdb6f5cf3c6c36151"
+    },
+    {
+      "id": "stats/execution",
+      "label": "execution",
+      "group": "stats",
+      "url": "/ui/generated/stats/execution.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/execution.webp",
+      "sha256": "ce0ef020ca12b7321b890ec641ab462d528e3792c47f263ddcb4d37672a445e8"
+    },
+    {
+      "id": "stats/healing_power",
+      "label": "healing_power",
+      "group": "stats",
+      "url": "/ui/generated/stats/healing_power.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/healing_power.webp",
+      "sha256": "b0907c142eae5175576750a066587c9a3ea6e041234f3ccbcc3cd71033e93ad8"
+    },
+    {
+      "id": "stats/healing_received",
+      "label": "healing_received",
+      "group": "stats",
+      "url": "/ui/generated/stats/healing_received.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/healing_received.webp",
+      "sha256": "dc3f8356bb0e0811c6b078f78d2e880c1b4b66ad12833b11bb4ba59f7ade3c41"
+    },
+    {
+      "id": "stats/hp",
+      "label": "hp",
+      "group": "stats",
+      "url": "/ui/generated/stats/hp.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/hp.webp",
+      "sha256": "620d6d74b18f6ba6fbe1a6b7a12d0ac6d69fa872fb8dab9d3342db0eb39e04a5"
+    },
+    {
+      "id": "stats/max_mana",
+      "label": "max_mana",
+      "group": "stats",
+      "url": "/ui/generated/stats/max_mana.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/max_mana.webp",
+      "sha256": "694b62630f533f9d7f22b479f19b1542adaceb7a7f69c1f0e5590e533386d2bd"
+    },
+    {
+      "id": "stats/mist_hunter",
+      "label": "mist_hunter",
+      "group": "stats",
+      "url": "/ui/generated/stats/mist_hunter.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/mist_hunter.webp",
+      "sha256": "48c3e13dd619b940a276b759a3c28bd56edd6a1ae52aaad2fb33b6032f485031"
+    },
+    {
+      "id": "stats/move_speed",
+      "label": "move_speed",
+      "group": "stats",
+      "url": "/ui/generated/stats/move_speed.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/move_speed.webp",
+      "sha256": "412b3c8dc7d3bdf794d573833c2990d30788ecf3ec8a16192adc469a23703e27"
+    },
+    {
+      "id": "stats/poison_reduction",
+      "label": "poison_reduction",
+      "group": "stats",
+      "url": "/ui/generated/stats/poison_reduction.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/poison_reduction.webp",
+      "sha256": "ff50d76b33a7646aa8e9a1506125319af1a089c2dd8941e5dc34d7a26388455a"
+    },
+    {
+      "id": "stats/range",
+      "label": "range",
+      "group": "stats",
+      "url": "/ui/generated/stats/range.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/range.webp",
+      "sha256": "681ebc392d12173252598052a5f526a543e0db78f12bda42f8879cbd7bc3d7ec"
+    },
+    {
+      "id": "stats/root_reduction",
+      "label": "root_reduction",
+      "group": "stats",
+      "url": "/ui/generated/stats/root_reduction.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/root_reduction.webp",
+      "sha256": "32cc78f68d716b39bf3404a332b8fc657283a22329e26fa51b55069fbefc7c5c"
+    },
+    {
+      "id": "stats/shield_power",
+      "label": "shield_power",
+      "group": "stats",
+      "url": "/ui/generated/stats/shield_power.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/shield_power.webp",
+      "sha256": "bd68779207cb86c18c143262347c7d6d5b8df788ba361413c6829b8913783f7b"
+    },
+    {
+      "id": "stats/skill_damage",
+      "label": "skill_damage",
+      "group": "stats",
+      "url": "/ui/generated/stats/skill_damage.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-all-stat-icons/icons/skill_damage.webp",
+      "sha256": "0445c4f4b4892d2f7d80e95c8fe38ebce00f3818acb6fb573874b9e947594edc"
+    },
+    {
+      "id": "items/materials/equip_frag_basic",
+      "label": "เศษอุปกรณ์ Basic",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/equip_frag_basic.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/equip_frag_basic.webp",
+      "sha256": "b84a3467e4bebbea6fdbdb6ebb4edad8151052565e76c34332bd1e2f4482effc"
+    },
+    {
+      "id": "items/materials/exp_potion_s",
+      "label": "ยา EXP ขนาดเล็ก",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/exp_potion_s.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/exp_potion_s.webp",
+      "sha256": "211a793e395ac8a7ca264094737ed76078291db843d372c8c36070be6bbe9130"
+    },
+    {
+      "id": "items/materials/universal_memory",
+      "label": "ความทรงจำสากล",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/universal_memory.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/universal_memory.webp",
+      "sha256": "cae9db032d0d7e3de965fdf6e95613459a913c1f8a5fcaabbfe6c2ed53f27a20"
+    },
+    {
+      "id": "items/materials/exp_potion_l",
+      "label": "ยา EXP ขนาดใหญ่",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/exp_potion_l.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/exp_potion_l.webp",
+      "sha256": "fc320e46960236482f48868b364971bd125c7eaa9e730f19441e911b2967059f"
+    },
+    {
+      "id": "items/materials/exp_potion_m",
+      "label": "ยา EXP ขนาดกลาง",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/exp_potion_m.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/exp_potion_m.webp",
+      "sha256": "3d3e0b9739d2eac3c3400f0fb35f97cd83870894f3185bd5b4ee6d9fc959118a"
+    },
+    {
+      "id": "items/materials/skill_tome_1",
+      "label": "ตำราสกิล I",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/skill_tome_1.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/skill_tome_1.webp",
+      "sha256": "b138899d2afc37b7402e807f6d8e79c3c8372c6446c81f22ced99bddea2d56e9"
+    },
+    {
+      "id": "items/materials/skill_tome_2",
+      "label": "ตำราสกิล II",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/skill_tome_2.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/skill_tome_2.webp",
+      "sha256": "d7c2f530265647cbff2cfb9a0fd4ac74eff754c20c8c498abb82258739599c57"
+    },
+    {
+      "id": "items/materials/skill_tome_3",
+      "label": "ตำราสกิล III",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/skill_tome_3.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/skill_tome_3.webp",
+      "sha256": "e1feeabe29e51e9800295edecc789fd4d671826678de45d4f90480707ca40dc8"
+    },
+    {
+      "id": "items/materials/enhancement_ore",
+      "label": "แร่เสริมพลังอุปกรณ์",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/enhancement_ore.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/enhancement_ore.webp",
+      "sha256": "c436d4c9512a59ae6868a2fdb5bd5b6c6d75424f03b01450ecba2f497319899f"
+    },
+    {
+      "id": "items/materials/equip_frag_elite",
+      "label": "เศษอุปกรณ์ Elite",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/equip_frag_elite.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/equip_frag_elite.webp",
+      "sha256": "21ed9eb3bc031a854bb9104f66af35380a4ce54e88226a6cf70a07cdce79b415"
+    },
+    {
+      "id": "items/materials/equip_frag_epic",
+      "label": "เศษอุปกรณ์ Epic",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/equip_frag_epic.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/equip_frag_epic.webp",
+      "sha256": "1aeab6f93e2e74cf119aa6c6761348bc56e8a045f4389f2a8c5a152152576eba"
+    },
+    {
+      "id": "items/materials/equip_frag_rare",
+      "label": "เศษอุปกรณ์ Rare",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/equip_frag_rare.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/equip_frag_rare.webp",
+      "sha256": "5d8478caf2614891d8ec42d8477a0b62ac199266001fc8b10450a534a2fd4dde"
+    },
+    {
+      "id": "items/materials/skill_tome_frag_1",
+      "label": "เศษตำราสกิล 1",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/skill_tome_frag_1.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/skill_tome_frag_1.webp",
+      "sha256": "06343fc6a75f3b0c34112ebab4ce36f991353fbb122696bc40aabdd6c70db662"
+    },
+    {
+      "id": "items/materials/skill_tome_frag_2",
+      "label": "เศษตำราสกิล 2",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/skill_tome_frag_2.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/skill_tome_frag_2.webp",
+      "sha256": "5d5347db5417c67dcad4d5f4e5efac7a9c481791904e59eb2de5e85fd4191e60"
+    },
+    {
+      "id": "items/materials/skill_tome_frag_3",
+      "label": "เศษตำราสกิล 3",
+      "group": "materials",
+      "url": "/ui/generated/items/materials/skill_tome_frag_3.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/materials/skill_tome_frag_3.webp",
+      "sha256": "9f97c96c81839bdbe85134df9c9a5c8aed836e42cb127ecd6f528974dda2c251"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_fragment_1__bailong",
+      "label": "bt_fragment_1__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_fragment_1__bailong.webp",
+      "status": "example_paused",
+      "source": "/workspace/eldervane-art-pack/hero-examples/bailong/bt_fragment_1__bailong.webp",
+      "sha256": "9f6bec593b871dc0d4f2f4acc754596a38e47d8011f8279e6e77c687765f4558"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_fragment_2__bailong",
+      "label": "bt_fragment_2__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_fragment_2__bailong.webp",
+      "status": "example_paused",
+      "source": "/workspace/eldervane-art-pack/hero-examples/bailong/bt_fragment_2__bailong.webp",
+      "sha256": "29335532c1e337239f108599a668bec173f447ab42f4927de4bce19cadf1aa24"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_fragment_3__bailong",
+      "label": "bt_fragment_3__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_fragment_3__bailong.webp",
+      "status": "example_paused",
+      "source": "/workspace/eldervane-art-pack/hero-examples/bailong/bt_fragment_3__bailong.webp",
+      "sha256": "8a378efa61fffdf560983a8ed23eaacbf21de946bcf57e3c32cf4c586b4db8af"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_stone_1__bailong",
+      "label": "bt_stone_1__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_stone_1__bailong.webp",
+      "status": "example_paused",
+      "source": "/workspace/eldervane-art-pack/hero-examples/bailong/bt_stone_1__bailong.webp",
+      "sha256": "f66c0b69994dbfc4b7e8de8f67578f5b2f6d7a858f24028ffac04cb2ceef9bdc"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_stone_2__bailong",
+      "label": "bt_stone_2__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_stone_2__bailong.webp",
+      "status": "example_paused",
+      "source": "/workspace/eldervane-art-pack/hero-examples/bailong/bt_stone_2__bailong.webp",
+      "sha256": "f43c082b8fc6baae807f9e2225d06552132ec505a20e599891f558adddf691aa"
+    },
+    {
+      "id": "items/hero-examples/bailong/bt_stone_3__bailong",
+      "label": "bt_stone_3__bailong",
+      "group": "hero-examples/bailong",
+      "url": "/ui/generated/items/hero-examples/bailong/bt_stone_3__bailong.webp",
+      "status": "example_paused",
+      "source": "/workspace/eldervane-art-pack/hero-examples/bailong/bt_stone_3__bailong.webp",
+      "sha256": "9514cf409928f90bec0471005b56cd1f1dfba290ab207402e0405f0ac478c931"
+    },
+    {
+      "id": "items/concepts/universal-breakthrough-concept",
+      "label": "universal-breakthrough-concept",
+      "group": "concepts",
+      "url": "/ui/generated/items/concepts/universal-breakthrough-concept.webp",
+      "status": "concept_only",
+      "source": "/workspace/eldervane-art-pack/concepts/universal-breakthrough-concept.webp",
+      "sha256": "3a0b4696772c02cce47a5f033549d40aefcd8aec796c79d9eeee468442f93a33"
+    },
+    {
+      "id": "items/rewards/gem_reward",
+      "label": "gem_reward",
+      "group": "rewards",
+      "url": "/ui/generated/items/rewards/gem_reward.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/rewards/gem_reward.webp",
+      "sha256": "064bc29926e2aedb9defed5f38903d2710cceec87fdbf13a77175aef98b56002"
+    },
+    {
+      "id": "items/rewards/gold_reward",
+      "label": "gold_reward",
+      "group": "rewards",
+      "url": "/ui/generated/items/rewards/gold_reward.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/rewards/gold_reward.webp",
+      "sha256": "1f7aaf0e5c0ee180def49cf6fede1c7c28b9a172f4f9a0751d1683901b90026c"
+    },
+    {
+      "id": "items/rewards/hero_exp_reward",
+      "label": "hero_exp_reward",
+      "group": "rewards",
+      "url": "/ui/generated/items/rewards/hero_exp_reward.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-art-pack/rewards/hero_exp_reward.webp",
+      "sha256": "6054ce03d68f2679a86ffac0ab8bcdc6d41d2fc120503668e5872684e2a0b5ff"
+    },
+    {
+      "id": "equipment/bases/focus_staff",
+      "label": "focus_staff",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/focus_staff.webp",
+      "status": "superseded",
+      "source": "/workspace/eldervane-equipment-type-icons/focus_staff.webp",
+      "sha256": "8399f7126593a3c5f12d9824176cf754be4a40a7ed680204eafd5396ea30742b"
+    },
+    {
+      "id": "equipment/bases/guard_armor",
+      "label": "guard_armor",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/guard_armor.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-equipment-type-icons/guard_armor.webp",
+      "sha256": "88654e7212dd87ce06f475664db44559337eb019f23616dd047810b5365c941f"
+    },
+    {
+      "id": "equipment/bases/heavy_blade",
+      "label": "heavy_blade",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/heavy_blade.webp",
+      "status": "superseded",
+      "source": "/workspace/eldervane-equipment-type-icons/heavy_blade.webp",
+      "sha256": "55d5a08f71b9e7bc3a257a7e2a24a901af62044605ecdada2e0571c2f71bbd76"
+    },
+    {
+      "id": "equipment/bases/longbow",
+      "label": "longbow",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/longbow.webp",
+      "status": "superseded",
+      "source": "/workspace/eldervane-equipment-type-icons/longbow.webp",
+      "sha256": "916049224c4c44110f0d63018b9b491a368444d6a12be6d7e88778f8593dc57a"
+    },
+    {
+      "id": "equipment/bases/trinket",
+      "label": "trinket",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/trinket.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-equipment-type-icons/trinket.webp",
+      "sha256": "72ad58667ab1e80b511ed6085c8b1663971dff11c9a9759d9fc925f9cb11ef51"
+    },
+    {
+      "id": "equipment/bases/twin_daggers",
+      "label": "twin_daggers",
+      "group": "equipment-base",
+      "url": "/ui/generated/equipment/bases/twin_daggers.webp",
+      "status": "superseded",
+      "source": "/workspace/eldervane-equipment-type-icons/twin_daggers.webp",
+      "sha256": "0a7bb8688240ef33cafac7fe9a50998bd2b651dd559ccfd3306d3c20bc44ae3e"
+    },
+    {
+      "id": "equipment/swords/foreground/common",
+      "label": "common",
+      "group": "sword-foreground",
+      "url": "/ui/generated/equipment/swords/foreground/common.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/foreground/common.webp",
+      "sha256": "1953b5fc129ebd7c617140e9d7e2ba41ca4213ba5df09d6c6b74fe9f46019d3a"
+    },
+    {
+      "id": "equipment/swords/foreground/elite",
+      "label": "elite",
+      "group": "sword-foreground",
+      "url": "/ui/generated/equipment/swords/foreground/elite.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/foreground/elite.webp",
+      "sha256": "0db20d4589a42466c80509e5c3ed022c22822ba1fbfdeebecfc32e0738def05c"
+    },
+    {
+      "id": "equipment/swords/foreground/epic",
+      "label": "epic",
+      "group": "sword-foreground",
+      "url": "/ui/generated/equipment/swords/foreground/epic.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/foreground/epic.webp",
+      "sha256": "cdcf181720f4c3ccb3bb8edaf7ad1e912c368a11fdce0c8e4952a07b643dc026"
+    },
+    {
+      "id": "equipment/swords/foreground/rare",
+      "label": "rare",
+      "group": "sword-foreground",
+      "url": "/ui/generated/equipment/swords/foreground/rare.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/foreground/rare.webp",
+      "sha256": "76472eb8a329119f749aa838b71045458b7d7f45765150afdb76b2ff97effb54"
+    },
+    {
+      "id": "equipment/swords/foreground/uncommon",
+      "label": "uncommon",
+      "group": "sword-foreground",
+      "url": "/ui/generated/equipment/swords/foreground/uncommon.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/foreground/uncommon.webp",
+      "sha256": "57a1db6505213dff88d326c24af40a5e45b02eb147f5bc1c6d1ff37a0e8898a9"
+    },
+    {
+      "id": "equipment/swords/aura/common",
+      "label": "common",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/common.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/aura/common.webp",
+      "sha256": "d3e993a9fe7e7871b9525bb3179c971256dc6a4838d58aae70b3a40c879733e3"
+    },
+    {
+      "id": "equipment/swords/aura/elite",
+      "label": "elite",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/elite.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/aura/elite.webp",
+      "sha256": "f08bf7f05d2ed602bb828d5710b12515ae9666cba2926960ba48515c62b37dcd"
+    },
+    {
+      "id": "equipment/swords/aura/epic",
+      "label": "epic",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/epic.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/aura/epic.webp",
+      "sha256": "aa511d86182d789c0b666646b17dc3f2ae4e5bbcf885c507f30b2f6a68f41189"
+    },
+    {
+      "id": "equipment/swords/aura/rare",
+      "label": "rare",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/rare.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/aura/rare.webp",
+      "sha256": "5cd3cf82f82b9ca1f5e99f01722b693fa28511e2e3e9688ce479be32c34ddcf2"
+    },
+    {
+      "id": "equipment/swords/aura/uncommon",
+      "label": "uncommon",
+      "group": "sword-aura",
+      "url": "/ui/generated/equipment/swords/aura/uncommon.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/aura/uncommon.webp",
+      "sha256": "e96cbb15c61a0a460181cefd3daef766896c52974cdf962817b0d9fd72e2f64d"
+    },
+    {
+      "id": "equipment/palace-forge",
+      "label": "palace-forge",
+      "group": "environment",
+      "url": "/ui/generated/equipment/palace-forge.webp",
+      "status": "active",
+      "source": "/workspace/eldervane-sword-tier-assets/environment/palace-forge.webp",
+      "sha256": "c6dbaf7a1a994d833c109030786836602450c347fc8f6ee83e3d2c971cf3c18c"
+    },
+    {
+      "id": "concepts/equipment-tier-board",
+      "label": "equipment-tier-board",
+      "group": "concept-board",
+      "status": "concept_only",
+      "url": "/ui/generated/concepts/equipment-tier-board.webp",
+      "source": "/workspace/eldervane-equipment-tier-concepts/01-tier-progression.png",
+      "sha256": "424dcb6ea53fc9c6f915630d6e652d15ee212f1521a247803d662f878f3347f9"
+    },
+    {
+      "id": "concepts/forge-inventory-equipped",
+      "label": "forge-inventory-equipped",
+      "group": "concept-board",
+      "status": "concept_only",
+      "url": "/ui/generated/concepts/forge-inventory-equipped.webp",
+      "source": "/workspace/eldervane-equipment-tier-concepts/02-forge-inventory-equipped.png",
+      "sha256": "5edf4a6ad6e071afdd8f8e63035aeeb8908343d842e8f455f212991b298781a2"
+    },
+    {
+      "id": "concepts/forge-screen-draft",
+      "label": "forge-screen-draft",
+      "group": "concept-board",
+      "status": "concept_only",
+      "url": "/ui/generated/concepts/forge-screen-draft.webp",
+      "source": "/workspace/generated_images/exec-ef56d703-a202-4ef0-aeca-e87243df3558.png",
+      "sha256": "e93f091cc34e253dc73774636551886a3c88bf0b30f8e0ffcba4da19d1679f5d"
+    }
+  ]
+}

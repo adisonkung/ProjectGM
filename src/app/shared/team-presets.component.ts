@@ -1,3 +1,4 @@
+import { CitadelFrameComponent } from './citadel-frame.component';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { TeamService } from '../core/services/team.service';
 import { IconComponent } from './icon.component';
@@ -8,12 +9,12 @@ import { SaveService } from '../core/services/save.service';
 @Component({
   selector: 'app-team-presets',
   host: { '[class.compact]': 'compact()' },
-  imports: [IconComponent, HeroPortraitComponent],
+  imports: [CitadelFrameComponent, IconComponent, HeroPortraitComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="presets" role="group" aria-label="ทีมที่บันทึกไว้">
+    <div class="presets" [class.reference-tabs]="tabs()" role="group" aria-label="ทีมที่บันทึกไว้">
       @for (p of team.presets(); track $index; let i = $index) {
-        <div class="preset" [class.active]="team.activePreset() === i" [class.empty]="!p.team.length">
+        <div class="preset citadel-surface" [class.active]="team.activePreset() === i" [class.empty]="!p.team.length"><app-citadel-frame [shape]="tabs() ? 'tab' : 'rect'" [crimson]="team.activePreset() === i" [lacquer]="team.activePreset() === i" />
           @if (editing() === i) {
             <input #nm class="name-in" [value]="p.name" maxlength="16" aria-label="ชื่อทีม"
                    (keydown.enter)="rename(i, nm.value)" (keydown.escape)="editing.set(null)" (blur)="rename(i, nm.value)" />
@@ -28,12 +29,21 @@ import { SaveService } from '../core/services/save.service';
               </span>
             </button>
           }
+          @if (tabs()) {
+            <details #options class="preset-options"><summary [attr.aria-label]="'จัดการ ' + p.name"><app-icon name="gear" [size]="15" /></summary>
+              <div class="preset-options-panel"><app-citadel-frame [cut]="12" />
+                <button type="button" (click)="store(i); options.open = false"><app-icon name="save" [size]="18" />บันทึกทีมปัจจุบัน</button>
+                <button type="button" (click)="editing.set(i); options.open = false"><app-icon name="edit" [size]="18" />เปลี่ยนชื่อทีม</button>
+              </div>
+            </details>
+          } @else {
           <span class="tools">
-            <button type="button" class="ico" (click)="store(i)" [title]="'บันทึกทีมปัจจุบันลง ' + p.name" aria-label="บันทึกทีมปัจจุบัน">
-              <app-icon name="save" [size]="15" />
+            <button type="button" class="ico citadel-surface citadel-control" (click)="store(i)" [title]="'บันทึกทีมปัจจุบันลง ' + p.name" aria-label="บันทึกทีมปัจจุบัน"><app-citadel-frame shape="hex" [cut]="9" [crimson]="false" [lacquer]="false" />
+              <app-icon name="save" [size]="18" />
             </button>
-            <button type="button" class="ico" (click)="editing.set(i)" title="เปลี่ยนชื่อ" aria-label="เปลี่ยนชื่อทีม"><app-icon name="edit" [size]="15" /></button>
+            <button type="button" class="ico citadel-surface citadel-control" (click)="editing.set(i)" title="เปลี่ยนชื่อ" aria-label="เปลี่ยนชื่อทีม"><app-citadel-frame shape="hex" [cut]="9" [crimson]="false" [lacquer]="false" /><app-icon name="edit" [size]="18" /></button>
           </span>
+          }
           @if (flash() === i) { <em class="ok" aria-live="polite">บันทึกแล้ว</em> }
         </div>
       }
@@ -55,23 +65,30 @@ import { SaveService } from '../core/services/save.service';
     .ico:hover { color: var(--gold-hi); border-color: #d9b46480; }
     .name-in { flex: 1; min-width: 0; font: 600 13px var(--body); color: var(--text); background: #0008; border: 1px solid var(--gold); border-radius: 2px; padding: 4px 8px; }
     .ok { position: absolute; right: 8px; top: -9px; font: 600 10px var(--body); font-style: normal; color: #9fe6b6; background: #141921; border: 1px solid #56c07a80; padding: 0 6px; border-radius: 99px; animation: fade 1.6s forwards; }
+    :host .presets .preset.citadel-surface { background: transparent; border: 0; box-shadow: none; }
     @keyframes fade { 70% { opacity: 1; } to { opacity: 0; } }
     :host(.compact) { display: block; min-width: 0; }
-    :host(.compact) .presets { gap: 8px; }
-    :host(.compact) .preset { border-radius: 2px; background: #12161dd6; padding: 3px; }
-    :host(.compact) .preset.active { background: linear-gradient(120deg, #ab82422b, #191f29e8); }
-    :host(.compact) .load { padding: 6px 8px; }
-    :host(.compact) .name { font-size: 13px; }
+    :host(.compact) .presets { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+    :host(.compact) .presets .preset { display: flex; align-items: center; gap: 12px; padding: 16px; min-height: 78px; }
+    :host(.compact) .load { padding: 6px 8px; min-height: 44px; }
+    :host(.compact) .name { font-size: 15px; }
     :host(.compact) .faces { display: none; }
-    :host(.compact) .tools { display: flex; gap: 1px; align-items: center; }
-    :host(.compact) .ico { width: 32px; height: 44px; border-color: transparent; background: none; }
-    :host(.compact) .name-in { width: 45px; }
-    @media (max-width: 560px) { :host(.compact) .presets { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; } :host(.compact) .load { padding: 5px; } :host(.compact) .tools { display: grid; } :host(.compact) .ico { width: 28px; height: 36px; } }
-    @media (max-width: 560px) { .presets { grid-template-columns: 1fr; } }
+    :host(.compact) .tools { display: flex; flex: none; flex-wrap: nowrap; gap: 10px; align-items: center; }
+    :host(.compact) .presets .tools .ico { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; min-height: 44px; padding: 12px; border: 0; background: transparent; }
+    :host(.compact) .ico app-icon { flex-shrink: 0; }
+    :host(.compact) .name-in { width: 60px; min-height: 44px; }
+    @media (max-width:720px) {
+      :host(.compact) .presets { grid-template-columns: minmax(0,1fr); gap: 8px; }
+      :host(.compact) .presets .preset { padding: 12px 16px; min-height: 68px; }
+      :host(.compact) .tools { gap: 12px; }
+    }
+    @media (max-width:560px) { :host:not(.compact) .presets { grid-template-columns: 1fr; } }
+
   `],
 })
 export class TeamPresetsComponent {
   readonly compact = input(false);
+  readonly tabs = input(false);
   readonly team = inject(TeamService);
   private readonly save = inject(SaveService);
   readonly editing = signal<number | null>(null);

@@ -1,0 +1,338 @@
+[
+  {
+    "file": "account-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "c822af872cb2bdf4fd128074007b8f92bf71bcc5b5c7d6735ec394295f27aa4b"
+  },
+  {
+    "file": "account-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "8915018efe3d9f300bc7cc74e965f619f7229d7ef763caa839463944d14ae090"
+  },
+  {
+    "file": "armory-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "a08005de8c027dac975865f74a357dfde0c8daaa90789934352de4d5fa64591f"
+  },
+  {
+    "file": "armory-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "f2b194e9e2dee5a6c6dc1a2b34e02b724eb1910db49c25ce2e92bab9d836a00f"
+  },
+  {
+    "file": "ascension-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "ada65448d96057dca57d4c611a2b3337f55c648d8448d5101bc84ec2b3f9627d"
+  },
+  {
+    "file": "ascension-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "5ee31cd43478c38fac203243d8cd937d65ff66bbd641e3aec553784c10a08130"
+  },
+  {
+    "file": "battle-pause-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "a427c926aaa81fc63f22f0fc74a4764031165402e68b16185fe4054c045b05f0"
+  },
+  {
+    "file": "battle-prep-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "fa781393e91b69b4a0252b3b3e4b78fa40ebe2cc5345240060f682a73a0fb726"
+  },
+  {
+    "file": "battle-prep-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "6a6b8cd307d555d5bc5c057d84bace2573a832f0884343fdd7208975b4f3dd8d"
+  },
+  {
+    "file": "battle-victory-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "64a39730b9ecc378a1ae47dfdd0c271a40c65cd6f8a4dbbb9971a723346a1fee"
+  },
+  {
+    "file": "battle-victory-landscape.webp",
+    "width": 844,
+    "height": 390,
+    "originalPngSha256": "b7f23a1312529b1a9559d534a91b2545c2cba13668a96a6ad15abd1d10ea69e0"
+  },
+  {
+    "file": "catalog-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "8e433ce5b33f3eca5f4bd8663feabbff7c47547cb54e9643fde952c261317b09"
+  },
+  {
+    "file": "catalog-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "141497d0a4098a5da5610da3987ebdeb6c0f999b4bf9e2ae17e497dc0a4ec4ba"
+  },
+  {
+    "file": "catalog-paused-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "9ab7f593c62682ec6ceb547716e7c752be752c0fb38cd6403b96462dbed23206"
+  },
+  {
+    "file": "crafted-epic.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "872b0a6b119bba666797b7acf234fbdeab36a86477ca6f9701280b84590597df"
+  },
+  {
+    "file": "enhance-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "56fd94dba53c9c8401075190523e1c34e865ff428c2668e97aa2aaf814dec6ab"
+  },
+  {
+    "file": "enhance-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "a2ad788f99b2cb031939a512e027c2e75321e52b3242f8d0296f71ddb77d2485"
+  },
+  {
+    "file": "equipped-weapon.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "b56b51008a2ec1b79d039d7f0b24d44e4e763e673fc4f80c1c5c972c282cadc7"
+  },
+  {
+    "file": "forge-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "041db0cabb4eef2a91405f6ee5370d4fa72dd8eedc01a6607f40eea7bd70eb79"
+  },
+  {
+    "file": "forge-elite.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "8fe1dc3be481ea09b302627413955b7f57c77c30575e323f1f7ff0eb596c6f4e"
+  },
+  {
+    "file": "forge-epic-mobile-detail.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "50fe16e8d235ec831877fac513c91d6403340ad56a84d35cabf670ab2b89cb23"
+  },
+  {
+    "file": "forge-epic.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "e816a62ef694132c885b889b1033bff157900a969647cb26643eadf47c695752"
+  },
+  {
+    "file": "forge-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "2426584e8990669e0b5a8d98c7503810bd3e137b3de34ee88dfa5cccd274cab2"
+  },
+  {
+    "file": "forge-rare.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "53091852b187e853ec5e7de3cded18255023522f285561ec99be6369a55fb77f"
+  },
+  {
+    "file": "forge-uncommon.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "0a231b00746a5439f86d38659e794c7e7edd28ed26b003489a40c466eda342e7"
+  },
+  {
+    "file": "hero-equipped.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "7d0183d5beafc44a1b4724b637c77ae59386fa4eebaac6071fbd7cc3ee2e9589"
+  },
+  {
+    "file": "hero-gear-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "862bdc147fb4ff26bcbf7817ba41003fbed77d9490f3b67630a1e1cd74a1aa04"
+  },
+  {
+    "file": "hero-gear-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "3162497fed4207868d656e0ab1b53e529714ac16fc2759076ac183fb4ded9b23"
+  },
+  {
+    "file": "hero-growth-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "bfdea661a1a4e3c04c77cd50af96af68bc798f1d8cacbe8aa85dd627e0478537"
+  },
+  {
+    "file": "hero-growth-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "7d156c6bdf7fb5d13ad9a6dc1feb5f3f437544529319d69588a5f4a39b1f4180"
+  },
+  {
+    "file": "hero-overview-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "460d7f20f85e9dbcb68f72166899f50c7101538f9cb58922d351fc34d4331224"
+  },
+  {
+    "file": "hero-overview-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "5a33028c58e86320cd36e62504d75b44081a03bda1bc60777f9e78d8b1c68fc2"
+  },
+  {
+    "file": "hero-skills-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "b796387b6def86ed47ceda660432e2b8280e05ca74342490d3c400ff26cd3ea1"
+  },
+  {
+    "file": "hero-skills-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "21727085a5e42b0d45842f2a6f8a748fcee8c400b60238e0345d850a973fdb2c"
+  },
+  {
+    "file": "hero-stats-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "4605eb2ee85a18be4197464673aedf14d3093860925dda12af2c4bfbd7be8d76"
+  },
+  {
+    "file": "hero-stats-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "7904637e3aeb18cf4160287a211978f90701f256d5778d7330744c43f98e4636"
+  },
+  {
+    "file": "heroes-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "f012145c47a01faa7d99d660d6746242046438433b70d63493f08ab56d2b2036"
+  },
+  {
+    "file": "heroes-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "4b527a9c2d3b6678369b6805841f7cede69894eb9887a24556bbfd9049b14465"
+  },
+  {
+    "file": "home-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "651fcb0dd7e5a14e4a685437004f1d74616a819dde2e78463379e90badfdcedc"
+  },
+  {
+    "file": "home-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "d1ed039ea05d722b0ddd58ab18d8324069458378edda38278a9ef9efee6610cb"
+  },
+  {
+    "file": "hunt-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "b218940d1f4a4dc911186759637624b37a6d84ced37b34649a1ca55812dd13ca"
+  },
+  {
+    "file": "hunt-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "05391f763af24567bf9eceb7c750940824e313294d38a081df19a5258a84cf66"
+  },
+  {
+    "file": "salvage-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "9107826c12599bc7298f2ed3f2e7d2ea3fc6d0acf1e9a2ac67ae461c1b326fa1"
+  },
+  {
+    "file": "salvage-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "9c9a15d82e28f06c3d8b451057ca560f8dcfa99fd1d7b079fb1f79f71a384fab"
+  },
+  {
+    "file": "summon-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "8875bc582ac1422f529e67577f800aece273ab841e0a35233971b093816c9e76"
+  },
+  {
+    "file": "summon-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "991ea1d2fda151991d55d7a78a51b109e4d4f42160a2a387b83ed65bcf66bee4"
+  },
+  {
+    "file": "summon-pool-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "a2cd6cb0896ebb1b14a95595b31f73283b31910bb6d2812196e077dffe7c759f"
+  },
+  {
+    "file": "summon-pool-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "c339a2a9a315a42062feb109b5018fd2612121793a63d47ca2397cfc3c8d9d90"
+  },
+  {
+    "file": "team-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "ec800c6f34ea0147c26dae8bae36322eeb19c8192c15139d2a26ca8b429a8892"
+  },
+  {
+    "file": "team-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "9205434677e2067d27475c338be14833f07f21859a696754cdb43270e81eb13b"
+  },
+  {
+    "file": "tower-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "d9192ebebbcc9ae6ba06f613d4ea17fc334866cce56c6ea7bfcc49d6fb035235"
+  },
+  {
+    "file": "tower-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "eafd79c9f2b97e9ff495ed6c75864ddddc80d82f45113dbcc5c53f7221b827ea"
+  },
+  {
+    "file": "training-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "00012cace1689b0fadedeb248273956b9b0fae9866be4f15debae58ea7541b88"
+  },
+  {
+    "file": "training-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "4e0f514e71b4db296485c24e37c62ea8a1adfc5463574f79fef1fed9811d820b"
+  },
+  {
+    "file": "trial-desktop.webp",
+    "width": 1440,
+    "height": 1000,
+    "originalPngSha256": "cbbc6664000f1cbd6261306cca4e6f8ab0554c1dd6ac04123de3f5eafbd07910"
+  },
+  {
+    "file": "trial-mobile.webp",
+    "width": 390,
+    "height": 844,
+    "originalPngSha256": "b83f73fdb0aa5ccd5b28762b6f433ccad743a226a1eb8f497a59cdc2cdb2a0ba"
+  }
+]

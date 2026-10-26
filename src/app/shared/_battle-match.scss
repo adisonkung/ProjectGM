@@ -1,0 +1,129 @@
+// Follow sheets 11A/11B/13. Isolated from approved Home, Formation and lab.
+html body .app app-battle .lab.reference-battle {
+  --ornament-gold-light: #f1d398; --ornament-gold-low: #805323; --ornament-gold-mid: #d9b471;
+  --ornament-gold-shadow: #715025; --ornament-gold-end: #e3bd76; --ornament-inner-color: #cfab66;
+  --citadel-gold-stop-0:#fff0bb;--citadel-gold-stop-1:#84521f;--citadel-gold-stop-2:#f1d18d;--citadel-gold-stop-3:#c09240;--citadel-gold-stop-4:#60401b;--citadel-gold-stop-5:#f1d08e;--citadel-gold-stop-6:#ab792e;
+  gap: 10px;
+  >.run-head { width: fit-content; max-width: 100%; min-height: 80px; padding: 14px 45px 14px 28px; gap: 28px; margin: 0 0 -9px; z-index: 4; }
+  .reference-back { display: flex; align-items: center; gap: 12px; color: #f7e9ca; text-decoration: none; h1 { font: 700 28px/1.5 'Eldervane Trirong',var(--body); margin: 0; } }
+  .run-title { flex: none; border-left: 1px solid #b4905477; padding-left: 20px; b { font-size: 17px; color: #f3dfb9; } small { font-size: 10px; } }
+  .run-head .power { border-left: 1px solid #b4905477; padding-left: 20px; gap: 9px; color: #e2d1ad; b { font-size: 22px; } }
+  >.status { display: none; }
+  app-placement .battle-layout {
+    display: grid; grid-template-columns: minmax(0,1.9fr) minmax(160px,.9fr) minmax(220px,1.05fr); gap: 12px;
+    >.board { grid-column: 1/-1; width: max-content; border: 4px double #d8b365; box-shadow: inset 0 0 0 4px #0a1019,0 5px 14px #0007; }
+    .zone-headings { top: 7px; left: 7px; right: 7px; span { background: linear-gradient(120deg,#082a57e6,#1764a699); border-color:#addbff99; text-shadow:0 2px 4px #000; } span:nth-child(2) { color:#ffe5b6; background:linear-gradient(120deg,#102332ed,#244657c9); border-inline:1px solid #d5b475; } span:last-child { background:linear-gradient(120deg,#54211ee6,#a24c3899); border-color:#e4b78499; } }
+    >.hint { grid-column: 1/-1; grid-row: 3; background: none; margin: 0; padding: 0 8px; font-size: 11px; min-height: 16px; color: #e6d8b9; }
+  }
+  .battle-squad,.battle-reserves { position: relative; isolation: isolate; min-width: 0; padding: 10px; }
+  .battle-squad { padding-top: 0; display: grid; grid-template-rows: 44px 1fr; }
+  .battle-team-cards { display: flex; gap: 6px; padding-top: 5px; min-height: 116px; }
+  .battle-hero { position: relative; isolation: isolate; flex: 1 1 0; min-width: 0; border: 0; background: none; color: #f5deb1; padding: 5px; display: grid; grid-template-rows: 1fr 19px 15px; overflow: hidden; >img { position: absolute; inset: 5px; width: calc(100% - 10px); height: calc(100% - 10px); object-fit: cover; clip-path: polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px); z-index: -1; } &::after { content: ''; position: absolute; inset: 5px; z-index: -1; background:linear-gradient(transparent 40%,#060d14ee 80%); pointer-events: none; } &:focus-visible { outline: 2px solid #fff0bb; outline-offset: 1px; } }
+  .battle-hero-level { grid-row: 2; display: flex; align-items: center; justify-content: space-between; gap: 2px; padding-inline: 4px; font-size: 11px; }
+  .battle-hero-stars { grid-row: 3; text-align: center; font-size: 14px; color:#f4cb72; line-height: 1; }
+  app-team-presets[ battle-presets],app-team-presets[battle-presets] { min-width: 0; }
+  app-team-presets .presets.reference-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0; .preset { padding:0; min-height:44px; gap:0; border:0; border-radius:0; background:none; box-shadow:none; } .load { min-height:44px; padding:8px 38px 8px 16px; gap:0; } .name { font:700 15px 'Eldervane Trirong',var(--body); color:#ecdbb5; } .faces { display:none; } .preset.active .name { color:#fff2d4; } .preset-options { position:absolute; right:4px; top:0; z-index:20; summary { cursor:pointer; min-width:36px; min-height:44px; display:grid; place-items:center; list-style:none; color:#d3b47b; } summary::-webkit-details-marker { display:none; } } .preset-options-panel { position:absolute; right:0; top:44px; width:220px; padding:12px; isolation:isolate; display:grid; gap:6px; button { display:flex;align-items:center;gap:10px;min-height:44px;padding:10px;border:0;background:none;color:#f3e3c3;text-align:left;font-size:13px; } } }
+  .battle-reserves { display: grid; grid-template-rows: 30px 1fr; align-content: start; header { display:flex;align-items:center;justify-content:space-between;padding:0 5px;border-bottom:1px solid #9f804450; } h2 { font:700 15px 'Eldervane Trirong',var(--body);margin:0;color:#eedcb7; } .reserve-clear { display:grid;place-items:center;background:none;border:0;min-width:32px;min-height:30px;color:#c5af83; } .bench { display:flex;flex-wrap:nowrap;gap:6px;padding:7px 2px 0;border:0;background:none;min-height:0;overflow-x:auto; } .bench .card { position:relative;isolation:isolate;flex:0 0 66px;display:block;width:66px;min-height:89px;padding:3px;border:1px solid #ad8b4d;background:#070e18;box-shadow:inset 0 0 0 2px #07111a; } .portrait { width:100%;height:100%;min-height:80px; } .info { position:absolute;inset:auto 4px 5px;background:#07111bba; b{font-size:10px;}small{display:none;} } .empty { font-size:11px;line-height:1.7; } }
+  .battle-actions { display:grid;grid-template-rows:56px 1fr;gap:10px;align-content:stretch; button { position:relative;isolation:isolate;border:0;border-radius:0;clip-path:none;background:none;box-shadow:none;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:55px;padding:12px 22px;color:#f8e9cc;font:700 19px/1.5 'Eldervane Trirong',var(--body); } .battle-start { font-size:28px;filter:drop-shadow(0 0 8px #f650232b); } }
+  .screen { --foot: 165px; }
+  .battle-field-frame { bottom:calc(var(--foot) - 3px); }
+  .party-in { left:0;bottom:0;width:100%;max-width:100%; }
+  app-party-bar .bar.compact { position:relative;isolation:isolate;flex-wrap:nowrap;padding:12px;gap:8px;align-items:center; }
+  .battle-party-frame { z-index:-1; }
+  app-party-bar .compact .card { flex:1 1 0;min-width:0;width:auto;grid-template-columns:58px minmax(0,1fr);grid-template-rows:21px 8px 8px 44px 13px 12px;grid-template-areas:'frame name' 'frame hp' 'frame mana' 'skills skills' 'modes modes' 'intent intent';gap:3px 8px;padding:9px;border-radius:0;background:linear-gradient(130deg,#28313b,#08101a 70%);box-shadow:inset 0 0 0 1px #d6b16a,inset 0 0 0 4px #050b12;clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 9px,100% 100%,0 100%,0 9px); .frame {width:58px;height:50px;} .name {font-size:13px;align-self:center;height:20px;line-height:20px;} .skills {gap:5px;} .sk {aspect-ratio:auto;min-height:40px;border-radius:0;box-shadow:inset 0 0 0 1px #c6a765;} .modes {gap:5px;} .mode {font-size:8px;padding:1px 0;} .intent {font-size:8px;line-height:11px;height:12px;} }
+  .party-in .auto { flex:0 0 61px;width:61px;height:61px;padding:0;border-radius:50%;background:#07101a;border:1px solid #d6b16a;font-size:11px; >app-citadel-frame {display:none;} }
+  .party-in .special { width:61px;height:61px;flex:0 0 61px;margin:0 5px 0 0; }
+}
+@media(max-width:760px){html body .app app-battle .lab.reference-battle {
+  >.run-head { gap:12px;padding:12px 26px 12px 20px;min-height:68px; }.reference-back {gap:8px;h1{font-size:19px;}app-citadel-icon{width:30px;}}.run-title{padding-left:10px;b{font-size:13px;}}.run-head .power {padding-left:10px;font-size:11px;span{display:none;}b{font-size:16px;}}
+  app-placement .battle-layout {grid-template-columns:minmax(0,1.4fr) minmax(120px,1fr);gap:8px;>.board{grid-column:1/-1;}.battle-squad{grid-column:1;}.battle-reserves{grid-column:2;}.battle-actions{grid-column:1/-1;grid-template-columns:1fr 1fr;grid-template-rows:1fr;}.hint{grid-row:auto;}}
+  .battle-team-cards {gap:3px;min-height:90px;}.battle-hero{padding:3px;>.img{inset:3px;}}.battle-hero-level{font-size:8px;padding-inline:1px;app-icon{display:none;}}.battle-hero-stars{font-size:10px;}.battle-squad{padding:4px;grid-template-rows:38px 1fr;}app-team-presets .presets.reference-tabs{.load{padding:6px 20px 6px 6px;min-height:38px;}.name{font-size:11px;}.preset-options{right:0;summary{min-width:22px;min-height:38px;}}}.battle-actions{button{font-size:15px;padding:12px 15px;}.battle-start{font-size:20px;}}.battle-reserves{padding:7px;.bench .card{flex-basis:55px;width:55px;min-height:76px;}.portrait{min-height:68px;}}
+}}
+@media(orientation:landscape) and (max-height:500px){html body .app app-battle .lab.reference-battle{
+  .screen{--foot:111px;}.party-in{left:0;bottom:0;}app-party-bar .bar.compact{padding:6px;gap:4px;}app-party-bar .compact .card{padding:5px;grid-template-columns:34px minmax(0,1fr);grid-template-rows:15px 4px 4px 28px 10px;grid-template-areas:'frame name' 'frame hp' 'frame mana' 'skills skills' 'modes modes';gap:2px 4px;.frame{width:34px;height:32px;}.name{font-size:9px;display:block;height:15px;line-height:15px;}.skills{gap:3px;}.sk{min-height:26px;}.intent{display:none;}.mode{font-size:7px;padding:0;}.modes{gap:2px;}}.party-in .auto,.party-in .special{width:40px;height:40px;flex-basis:40px;margin:0;font-size:9px;}
+}}
+html body .app app-battle .lab.reference-battle {
+  .menu.citadel-surface,.result-card.citadel-surface {
+    width:min(555px,100%); padding:25px 30px; gap:10px; overflow-x:hidden;
+    &::before { inset:8px; height:auto; opacity:.85; background:linear-gradient(0deg,#060b11fa 0%,#080e15ed 40%,#0c151a44 85%),url('/ui/eldervane/sanctum.webp') center 30% / cover; }
+    >app-battle-emblem { position:relative;z-index:1;justify-self:center;height:126px;width:170px;margin-top:-4px; }
+    h2 { font-size:34px;gap:3px;small{font-size:17px;color:#f2deaf;} }
+    .facts {font-size:12px;line-height:1.8;}
+  }
+  .result-card.citadel-surface:not(.win)::before { background:radial-gradient(ellipse at 50% 20%,#a7231e44,transparent 55%),linear-gradient(0deg,#070a10 5%,#070b13bb 65%),url('/ui/eldervane/sanctum.webp') center 30%/cover; filter:saturate(.55) brightness(.7); }
+  .menu.citadel-surface {gap:13px;h2{font-size:30px;margin-bottom:10px;}.gm-btn{min-height:61px;font-size:24px;app-icon{width:24px;height:24px;svg{width:24px;height:24px;}}}}
+  .result-card.citadel-surface .loot {padding-block:12px;gap:12px;b{font-size:17px;margin-bottom:0;}.loot-item{min-width:110px;max-width:150px;min-height:104px;padding:10px;gap:5px;strong{font-size:20px;}app-icon,app-citadel-icon{width:36px;height:36px;svg{width:36px;height:36px;}}}}
+  .exp-medal{font:700 17px var(--title)!important;color:#b5f0c2!important;background:radial-gradient(circle,#68c78866,#173c29)!important;border:1px solid #a0ce8c!important;border-radius:50%!important;display:grid;place-items:center;width:42px;height:42px;text-shadow:0 0 5px #cdf8b3;}
+  .hero-experience {position:relative;z-index:1;width:100%;color:#dbc596;summary{cursor:pointer;font-size:11px;padding:5px;}.exp-strip{padding-block:10px;justify-content:center;}}
+  .result-card.citadel-surface .actions.reference-result-actions {display:grid;grid-template-columns:1fr 1fr;width:100%;gap:8px;margin-top:5px;button{font-size:18px;padding:12px 16px;gap:8px;min-height:58px;grid-column:auto!important;}}
+  .result-options{position:relative;z-index:1;justify-self:center;color:#c7b68e;font-size:11px;summary{cursor:pointer;padding:4px;}div{display:flex;gap:8px;}button{background:#111e2a;border:1px solid #ac8a4b;padding:9px 12px;color:#eddbb6;min-height:40px;}}
+}
+@media(orientation:landscape) and (max-height:500px){html body .app app-battle .lab.reference-battle {
+ .menu.citadel-surface,.result-card.citadel-surface {padding:20px 24px;>app-battle-emblem{display:none;}h2{font-size:26px;}}
+ .result-card.citadel-surface {width:min(740px,100%);grid-template-columns:1fr 1.3fr;>.hero-experience{grid-column:2;grid-row:3;}.reference-result-actions{grid-column:1/-1;grid-row:4;button{font-size:16px;min-height:44px;}}>.result-options{grid-column:1/-1;grid-row:5;}}
+ .result-card.citadel-surface:not(.win){grid-template-columns:1fr;>.result-options{grid-column:1;grid-row:auto;}}
+}}
+@media(max-width:480px){html body .app app-battle .lab.reference-battle {.result-card.citadel-surface .actions.reference-result-actions button{font-size:14px;padding-inline:10px;gap:5px;}}}
+html body .app app-battle .lab.reference-battle app-placement .battle-layout {
+  --cell:min(77px,calc((100vw - 64px)/16));
+  >.battle-board-shell { grid-column:1/-1;position:relative;isolation:isolate;padding:8px;width:max-content;max-width:100%;justify-self:center;box-shadow:0 6px 18px #0008;>app-tower-ornament {z-index:10;>.face,>.inner-face{display:none;}} }
+  .board {border:0;box-shadow:none;clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px);}
+  .zone-headings {left:0;right:0;top:0;span{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:space-between;padding:7px 16px;}span:nth-child(2){justify-content:center;border:0;background:none;z-index:1;}span app-icon{color:#a0dcf4;}span:last-child app-icon{color:#f19d8d;} }
+}
+@media(max-width:760px){html body .app app-battle .lab.reference-battle {
+  >.run-head {display:grid;grid-template-columns:auto 1fr auto;gap:8px;padding:12px 22px 12px 17px;}.reference-back{gap:6px;h1{font-size:17px;}app-citadel-icon{width:24px;height:32px;svg{width:24px;height:32px;}}}.run-title{padding-left:8px;min-width:0;b{font-size:11px;}small{font-size:9px;white-space:normal;}}.run-head .power{padding-left:0;border:0;gap:4px;app-citadel-icon{display:none;}b{font-size:16px;}}
+  app-placement .battle-layout .zone-headings {font-size:10px;span{padding:3px 5px;}app-icon{width:10px;height:10px;svg{width:10px;height:10px;}}}
+}}
+@media(max-width:480px){html body .app app-battle .lab.reference-battle app-placement .battle-layout {
+ grid-template-columns:minmax(0,1fr);>.battle-squad,>.battle-reserves,>.battle-actions{grid-column:1/-1;}.battle-team-cards{min-height:110px;}.battle-squad{grid-template-rows:40px 1fr;}.battle-hero-level{font-size:10px;}.battle-hero-stars{font-size:13px;}.battle-reserves .bench .card{flex-basis:65px;width:65px;min-height:85px;}.battle-actions{grid-template-columns:1fr 1fr;}
+}}
+html body .app app-battle:has(.reference-battle) {
+  display:block;position:relative;isolation:isolate;
+  &::before {content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#fff7df08,#13263926),url('/ui/eldervane/sanctum.webp') center 42%/cover;}
+}
+html body .app app-battle .lab.reference-battle .result-card.citadel-surface {
+ padding:20px 25px;gap:5px;
+ >app-battle-emblem{height:90px;width:145px;margin:0;}
+ h2{font-size:33px;line-height:1.2;small{font-size:16px;line-height:1.4;}}
+ .loot{padding-block:9px;gap:10px;b{font-size:15px;}.loot-item{min-height:88px;padding:8px;min-width:104px;gap:3px;}}
+ .hero-experience summary,.result-options summary{padding:3px;}
+ .actions.reference-result-actions{margin-top:3px;button{min-height:53px;font-size:18px;}}
+}
+@media(orientation:portrait) and (max-width:700px){html body .app app-battle .lab.reference-battle.fighting {
+ .arena,.screen,app-board{min-width:0;max-width:100%;}.screen{overflow:hidden;}.party-in{position:absolute;max-width:100%;overflow:hidden;}
+}}
+html body .app app-battle .lab.reference-battle {
+ .battle-squad:has(.preset-options[open]) {z-index:40;}
+ app-team-presets[battle-presets] {position:relative;z-index:30;}
+ .reference-tabs .preset:first-child .preset-options-panel {left:0;right:auto;}
+ .reference-tabs .preset:nth-child(2) .preset-options-panel {left:-80px;right:auto;}
+}
+html body .app app-battle .lab.reference-battle {
+ .menu.citadel-surface,.result-card.citadel-surface {
+  &::before {opacity:1;background:linear-gradient(0deg,#060a0fff 0%,#080c12f0 36%,#08101822 75%,transparent 100%),url('/ui/eldervane/sanctum.webp') center 30%/cover;}
+  >app-battle-emblem{width:200px;height:150px;}.result-close{position:absolute;isolation:isolate;z-index:5;right:14px;top:12px;width:44px;height:44px;display:grid;place-items:center;border:0;background:none;color:#f7e4b3;padding:0;cursor:pointer;}
+ }
+ .result-card.citadel-surface {h2{font-size:37px;small{font-size:21px;line-height:1.5;}}.loot{position:relative;isolation:isolate;border:0;padding:12px;margin-block:6px;gap:10px;b{flex-basis:100%;font-size:16px;padding:5px;margin-bottom:3px;border-bottom:1px solid #9e7b4055;}}}
+ .result-card.citadel-surface:not(.win){.facts{max-width:390px;font-size:15px;line-height:1.9;padding-block:8px;}}
+ .result-options {position:absolute;right:18px;bottom:17px;z-index:10;summary{list-style:none;padding:0;width:24px;height:24px;display:grid;place-items:center;cursor:pointer;}summary::-webkit-details-marker{display:none;}div{position:absolute;right:0;bottom:30px;width:270px;display:grid;padding:15px;background:linear-gradient(125deg,#1b2737,#070d16);border:1px solid #c7a366;box-shadow:0 5px 20px #0008;color:#dfcfb0;}.result-stage{font-size:12px;margin:0;}.facts{font-size:11px!important;padding:0!important;}}
+ .result-card.citadel-surface .actions.reference-result-actions{padding-right:8px;margin-bottom:4px;button{font-size:20px;}}
+}
+@media(orientation:landscape) and (max-height:500px){html body .app app-battle .lab.reference-battle {
+ .menu.citadel-surface,.result-card.citadel-surface{>app-battle-emblem{display:none;}h2{font-size:26px;small{font-size:15px;}}}
+ .result-card.citadel-surface .actions.reference-result-actions{grid-row:4;button{min-height:44px;font-size:16px;}}
+ .result-options{position:absolute;right:15px;bottom:16px;}.result-close{top:8px;right:9px;}
+}}
+html body .app app-battle .lab.reference-battle {
+ &:not(.fighting){padding-top:30px;}
+ .reference-back h1{font-size:34px;}
+ .wave-panel.citadel-surface .wv{font-size:28px;em{font-size:30px;}}
+ .clock.citadel-surface{font-size:30px;}
+ app-party-bar .compact .card{.name{font-size:15px;}.hp,.mana{height:6px;}}
+ .party-in .auto,.party-in .special{width:76px;height:76px;flex-basis:76px;}
+ .result-card.citadel-surface {h2{font-size:44px;small{font-size:25px;}}.actions.reference-result-actions button{font-size:24px;min-height:61px;}}
+ .menu.citadel-surface{h2{font-size:35px;}.gm-btn{font-size:27px;}}
+}
+@media(max-width:760px){html body .app app-battle .lab.reference-battle{&:not(.fighting){padding-top:0;}.reference-back h1{font-size:17px;}.result-card.citadel-surface{h2{font-size:34px;small{font-size:19px;}}.actions.reference-result-actions button{font-size:17px;min-height:54px;}}}}
+@media(orientation:landscape) and (max-height:500px){html body .app app-battle .lab.reference-battle{
+ .wave-panel.citadel-surface .wv{font-size:14px;em{font-size:17px;}}.clock.citadel-surface{font-size:17px;}app-party-bar .compact .card{.name{font-size:9px;}.hp,.mana{height:4px;}}.party-in .auto,.party-in .special{width:40px;height:40px;flex-basis:40px;}.result-card.citadel-surface{h2{font-size:26px;small{font-size:15px;}}.actions.reference-result-actions button{font-size:16px;min-height:44px;}}.menu.citadel-surface{h2{font-size:25px;}.gm-btn{font-size:18px;}}
+}}

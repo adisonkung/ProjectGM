@@ -1,16 +1,21 @@
-<div class="wrap" [class.own-team]="allyOnly()" cdkDropListGroup>
+<div class="wrap" [class.own-team]="allyOnly()" [class.battle-layout]="battleLayout()" cdkDropListGroup>
   @if (allyOnly()) {
     <div class="formation-overview">
       <ng-content select="[formation-presets]" />
-      <div class="team-totals" aria-label="ภาพรวมทีม"><span><app-icon name="team" [size]="20" /><b>{{ count() }}</b><small>/ {{ teamSize }}</small></span><span><app-icon name="armory" [size]="20" />พลังทีม <b>{{ totalPower() }}</b></span></div>
+      <div class="team-totals citadel-surface" aria-label="ภาพรวมทีม"><app-citadel-frame shape="rect" [cut]="10" [crimson]="false" [lacquer]="false" /><span><app-icon name="team" [size]="20" /><b>{{ count() }}</b><small>/ {{ teamSize }}</small></span><span><app-icon name="armory" [size]="20" />พลังทีม <b>{{ totalPower() }}</b></span></div>
     </div>
     <div class="formation-labels" aria-hidden="true"><span>แนวหลัง <small>/ BACK</small></span><span>แนวหน้า <small>/ FRONT</small></span></div>
   }
-  <div class="board" [style.--cols]="cols" [style.--rows]="rows">
+  @if (battleLayout()) {
+    <div class="battle-board-shell"><ng-container [ngTemplateOutlet]="field" /><app-tower-ornament [grooved]="true" [ornate]="true" /></div>
+  } @else { <ng-container [ngTemplateOutlet]="field" /> }
+  <ng-template #field>
+  <div class="board" [style.padding-top]="battleLayout() ? 'calc(var(--cell) * ' + sceneryExtraRows() + ')' : null" [style.--cols]="cols" [style.--rows]="rows">
     @if (!allyOnly()) {
-      <app-field [bg]="background()" />
+      <app-field [sceneryExtraRows]="battleLayout() ? sceneryExtraRows() : 0" [bg]="background()" />
+      <div class="zone-headings" aria-hidden="true"><span><app-icon name="arrow" [size]="19" />เขตวางทีม<app-icon name="back" [size]="19" /></span><span><app-citadel-frame shape="hex" [cut]="18" />พื้นที่กลาง</span><span><app-icon name="arrow" [size]="19" />ศัตรู<app-icon name="back" [size]="19" /></span></div>
       <!-- ฟอร์เมชัน: แถวหลัง | แถวหน้า (ฝั่งเรา) · แถวหน้า | แถวหลัง (ศัตรู) -->
-      <div class="lines" [style.top]="'calc(var(--cell) * ' + scenery + ')'">
+      <div class="lines" [style.top]="'calc(var(--cell) * ' + (scenery + (battleLayout() ? sceneryExtraRows() : 0)) + ')'">
         <span class="div" [style.left]="'calc(var(--cell) * ' + frontDepth + ')'"></span>
         <span class="div foe" [style.left]="'calc(var(--cell) * ' + (cols - frontDepth) + ')'"></span>
         <b class="lbl" [style.left]="'calc(var(--cell) * ' + frontDepth / 2 + ')'">BACK</b>
@@ -48,9 +53,10 @@
       </div>
     }
   </div>
+  </ng-template>
 
   @if (allyOnly()) {
-    <aside class="formation-roster" aria-label="รายละเอียดทีมปัจจุบัน">
+    <aside class="formation-roster citadel-surface" aria-label="รายละเอียดทีมปัจจุบัน"><app-citadel-frame shape="rect" [cut]="22" [crimson]="false" [lacquer]="false" />
       <h2>รายละเอียดทีม</h2>
       <div class="roster-power"><app-icon name="armory" [size]="22" /><span>พลังทีม</span><b>{{ totalPower() }}</b></div>
       @for (h of occupied().values(); track h.uid) {
@@ -63,10 +69,33 @@
     </aside>
   }
 
-  <div class="bar">
+  @if (battleLayout()) {
+    <section class="battle-squad" aria-label="ทีมปัจจุบัน"><app-citadel-frame [cut]="18" />
+      <ng-content select="[battle-presets]" />
+      <div class="battle-team-cards">
+        @for (h of occupied().values(); track h.uid) {
+          <button type="button" class="battle-hero" [class.selected]="selected() === h.uid" [attr.aria-pressed]="selected() === h.uid" [attr.aria-label]="h.name + ' เลเวล ' + h.level" (click)="tapHero(h.uid,$event)">
+            <app-citadel-frame [cut]="9" [crimson]="selected() === h.uid" />
+            @if (h.portrait) { <img [src]="h.portrait" [alt]="h.name" draggable="false" /> }
+            <span class="battle-hero-level"><app-icon [name]="classIcon(h.cls)" [size]="15" />Lv.{{ h.level }}</span>
+            <span class="battle-hero-stars" [attr.aria-label]="h.star + ' ดาว'">{{ '★'.repeat(h.star) }}</span>
+          </button>
+        } @empty { <p class="empty">เลือกฮีโร่สำรอง แล้วแตะช่องฝั่งซ้ายเพื่อวาง</p> }
+      </div>
+    </section>
+    <section class="battle-reserves" aria-label="ฮีโร่สำรอง"><app-citadel-frame [cut]="18" />
+      <header><h2>ตัวสำรอง</h2><button type="button" class="reserve-clear" (click)="clear()" [disabled]="!count()" aria-label="ล้างทีม" title="ล้างทีม"><app-icon name="restart" [size]="16" /></button></header>
+      <ng-container [ngTemplateOutlet]="reserveBench" />
+    </section>
+    <div class="battle-actions">
+      <button type="button" class="battle-auto" (click)="auto()"><app-citadel-frame shape="hex" [cut]="20" /><app-icon name="heroes" [size]="24" />จัดทีมอัตโนมัติ</button>
+      <ng-content select="[battle-start]" />
+    </div>
+  } @else {
+  <div class="bar">@if (allyOnly()) { <app-citadel-frame [cut]="16" /> }
     @if (allyOnly()) {
       <div class="class-filters" role="group" aria-label="กรองฮีโร่สำรองตามคลาส">
-        @for (cls of benchClasses; track cls) { <button type="button" [attr.aria-pressed]="benchClass() === cls" (click)="setBenchClass(cls)" [attr.aria-label]="benchClassName(cls)"><app-icon [name]="classIcon(cls)" [size]="15" /><span>{{ benchClassName(cls) }}</span><small>{{ benchClassCount(cls) }}</small></button> }
+        @for (cls of benchClasses; track cls) { <button type="button" [attr.aria-pressed]="benchClass() === cls" (click)="setBenchClass(cls)" [attr.aria-label]="benchClassName(cls)"><app-citadel-frame shape="hex" [cut]="10" [crimson]="benchClass() === cls" [lacquer]="benchClass() === cls" /><app-icon [name]="classIcon(cls)" [size]="15" /><span>{{ benchClassName(cls) }}</span><small>{{ benchClassCount(cls) }}</small></button> }
       </div>
       <label class="class-select"><app-icon [name]="classIcon(benchClass())" [size]="16" /><select aria-label="กรองคลาสฮีโร่สำรอง" [value]="benchClass()" (change)="setBenchClass($any($event.target).value)">@for (cls of benchClasses; track cls) { <option [value]="cls">{{ benchClassName(cls) }} ({{ benchClassCount(cls) }})</option> }</select></label>
     } @else {
@@ -74,12 +103,13 @@
     }
     <div class="formation-actions">
       @if (selectedInTeam() && !allyOnly()) { <button type="button" (click)="removeSelected()">ถอดออก</button> }
-      <button type="button" class="auto-action" (click)="auto()">@if (allyOnly()) { <app-icon name="team" [size]="16" /> }จัดอัตโนมัติ</button>
-      <button type="button" class="clear-action" aria-label="ล้างทีม" (click)="clear()" [disabled]="!count()">@if (allyOnly()) { <app-icon name="restart" [size]="15" /> }<span>ล้างทีม</span></button>
+      <button type="button" class="auto-action" (click)="auto()">@if (allyOnly()) { <app-citadel-frame shape="hex" [cut]="12" /> }@if (allyOnly()) { <app-icon name="team" [size]="16" /> }จัดอัตโนมัติ</button>
+      <button type="button" class="clear-action" aria-label="ล้างทีม" (click)="clear()" [disabled]="!count()">@if (allyOnly()) { <app-citadel-frame shape="hex" [cut]="12" /> }@if (allyOnly()) { <app-icon name="restart" [size]="15" /> }<span>ล้างทีม</span></button>
     </div>
   </div>
 
-  <p class="hint" aria-live="polite">
+  }
+  <p class="hint" aria-live="polite">@if (allyOnly()) { <app-citadel-frame [cut]="12" /> }
     @if (message(); as m) {
       <span class="warn">{{ m }}</span>
     } @else {
@@ -89,19 +119,21 @@
         @if (allyOnly() && selectedInTeam()) { <button type="button" class="remove-action" (click)="removeSelected()">ถอดออก</button> }
       } @else {
         @if (pendingCell()) { เลือกช่องแล้ว · แตะฮีโร่ด้านล่างเพื่อวาง }
-        @else { {{ allyOnly() ? 'เลือกฮีโร่ แล้วแตะวง + เพื่อวาง · ลากเพื่อย้ายหรือสลับตำแหน่ง' : 'ลากฮีโร่ลงฝั่งซ้ายของกระดาน หรือแตะฮีโร่แล้วแตะช่อง' }} }
+        @else { {{ allyOnly() ? 'เลือกฮีโร่ แล้วแตะช่อง + เพื่อวาง · ลากเพื่อย้ายหรือสลับตำแหน่ง' : 'ลากฮีโร่ลงฝั่งซ้ายของกระดาน หรือแตะฮีโร่แล้วแตะช่อง' }} }
       }
     }
   </p>
 
   @if (allyOnly()) { <div class="bench-heading"><span><app-icon name="heroes" [size]="19" />ฮีโร่สำรอง</span><small>{{ filteredBench().length }} / {{ bench().length }} คน</small></div> }
+  @if (!battleLayout()) { <ng-container [ngTemplateOutlet]="reserveBench" /> }
+  <ng-template #reserveBench>
   <div class="bench" cdkDropList cdkDropListOrientation="mixed" cdkDropListSortingDisabled
-       (cdkDropListDropped)="dropOnBench($event)" (click)="tapBench()" [class.drop-out]="selectedInTeam()">
+       (cdkDropListDropped)="dropOnBench($event)" (click)="tapBench()" [class.drop-out]="selectedInTeam()">@if (allyOnly()) { <app-citadel-frame [cut]="18" /> }
     @for (h of filteredBench(); track h.uid) {
       <button type="button" class="card" cdkDrag [cdkDragData]="h.uid"
               (cdkDragStarted)="dragStarted(h.uid)" (click)="tapHero(h.uid, $event)"
               [class.selected]="selected() === h.uid"
-              [style.--rc]="'var(--r' + h.star + ')'" [attr.aria-pressed]="selected() === h.uid">
+              [style.--rc]="'var(--r' + h.star + ')'" [attr.aria-pressed]="selected() === h.uid">@if (allyOnly()) { <app-citadel-frame [cut]="12" [crimson]="selected() === h.uid" [lacquer]="selected() === h.uid" /> }
         <span class="portrait">@if (h.portrait) { <img [src]="h.portrait" alt="" draggable="false" /> } @else { <app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [star]="h.star" /> }</span>
         <span class="info">
           <b>{{ h.name }}</b>
@@ -113,4 +145,5 @@
       <p class="empty">{{ selectedInTeam() ? 'แตะที่นี่เพื่อถอดออกจากทีม' : bench().length ? 'ไม่มีฮีโร่สำรองคลาสนี้ · ลองเลือกคลาสอื่นหรือทั้งหมด' : 'ฮีโร่ทุกตัวอยู่บนกระดานแล้ว · ลากมาไว้ตรงนี้เพื่อถอดออก' }}</p>
     }
   </div>
+  </ng-template>
 </div>
