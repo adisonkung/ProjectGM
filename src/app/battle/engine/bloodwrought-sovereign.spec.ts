@@ -13,12 +13,12 @@ import { hasStatus, modifier } from './buffs';
 
 /** Draeven Morcant — The Bloodwrought Sovereign (Phase A): taunt → Blood Debt → Blood Reprisal · Blood Brand · heavy ult */
 describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
-  it('28 × 8 atlas 260 × 170: idle 12 · walk 8 · hurt 3 · attack 21 (19 played) · die 14 · S1 28 · S2 27 · Ult 28', () => {
+  it('28 × 8 atlas 290 × 170: idle 12 · walk 8 · hurt 3 · attack 21 (19 played) · die 14 · S1 28 · S2 = attack row · Ult 28', () => {
     const sh = SHEETS['hero-draeven.png'];
     expect([sh.cols, sh.rows, sh.cellW, sh.cellH, !!sh.pixelated]).toEqual([28, 8, 290, 170, false]);
     const a = sh.anims;
     expect((['idle', 'walk', 'hurt', 'attack', 'die', 'skill', 'skill2', 'ult'] as const).map(k => [a[k]!.row, a[k]!.frames]))
-      .toEqual([[0, 12], [1, 8], [2, 3], [3, 21], [4, 14], [5, 28], [6, 27], [7, 28]]);
+      .toEqual([[0, 12], [1, 8], [2, 3], [3, 21], [4, 14], [5, 28], [3, 21], [7, 28]]);
     expect(HERO_BY_ID['draeven']).toEqual(jasmine.objectContaining({ cls: 'tank', star: 3, sprite: 'hero-draeven.png' }));
     expect(HERO_ART['draeven']).toEqual({ portrait: 'portraits/draeven.webp' });
   });
@@ -30,6 +30,12 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(at('attack', 'DAMAGE').map(t => Math.round(t * 1000))).toEqual([340]);
     expect(at('skill', 'DAMAGE').length).toBe(1);
     expect(at('skill2', 'DAMAGE').length).toBe(1);
+    // S2: charge from 0.05 s, the release (Crimson Wave F1 at max size + damage) at 0.50 s, the clip ends by 1.0 s
+    expect(Math.round(at('skill2', 'DAMAGE')[0] * 1000)).toBe(500);
+    expect(at('skill2', 'VFX_SPAWN')[0]).toBeCloseTo(at('skill2', 'DAMAGE')[0], 5);
+    expect(SHEETS['hero-draeven.png'].anims.skill2!.steps!.reduce((x, y) => x + y, 0)).toBeLessThanOrEqual(1000);
+    const ch = FX['dr-s2-charge'];
+    expect((ch.delayMs! + ch.frames * ch.frameMs + ch.fadeOutMs!) / 1000).toBeCloseTo(0.5, 3);
     expect(at('ult', 'DAMAGE').length).toBe(1);
     expect(at('ult', 'CHARGE_START')[0]).toBeLessThan(at('ult', 'DAMAGE')[0]);
     expect(Math.max(...SHEETS['hero-draeven.png'].anims.ult!.steps!)).toBe(1500);
@@ -151,7 +157,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     expect(f.hp).toBe(fhp);
   });
 
-  it('Sovereign\'s Reprisal: frontal wave + Blood Brand (ATK −15 %); his hits on a branded foe heal him', () => {
+  it('Sovereign\'s Reprisal: 1 × 3 sweep down the lane (not the lanes beside) + Blood Brand (ATK −15 %); his hits on a branded foe heal him', () => {
     const b = battle();
     const [f] = b.foes();
     b.place(f, { r: b.dr.pos.r, c: b.dr.pos.c + 1 });
@@ -159,6 +165,7 @@ describe('Draeven (3★ Tank / Fighter label → Tank class, Phase A)', () => {
     const hp = f.hp;
     b.e.skills.applyEffects(b.dr, kitOf('draeven', 'tank').skill2, 'skill2', f, f.pos);
     expect(f.hp).toBeLessThan(hp);
+    expect(kitOf('draeven', 'tank').skill2.effects[0]).toEqual(jasmine.objectContaining({ area: 'FRONT_LINE_3' }));
     expect(hasStatus(f, 'blood_brand')).toBeTrue();
     expect(modifier(f, 'attackMultiplier')).toBeCloseTo(atk * 0.85, 5);
     b.dr.hp = 3000;

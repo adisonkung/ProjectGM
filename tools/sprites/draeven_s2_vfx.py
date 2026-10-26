@@ -1,0 +1,130 @@
+"""Draeven S2 Sovereign's Reprisal VFX (user 2026-10-26). Never modifies the source PNGs.
+
+python3 tools/sprites/draeven_s2_vfx.py [source dir] [out dir]
+Sources (assets/heroes/Draeven/vfx/, 8 frames in one row on a magenta key):
+  Draeven_S2_Charge_VFX.png      (2172 × 724) → fx-draeven-s2-charge.png  ground ring + crimson swirl around him
+  Draeven_S2_CrimsonWave_VFX.png (2508 × 627) → fx-draeven-s2-wave.png    the 1 × 3 sweep in front of him
+No separate impact VFX (user: cancelled).
+
+Charge: every frame on its ground-ring centre = his ground pivot (same method as draeven_s1_vfx.py).
+Wave: F1 is the biggest (the sword has already swung — no build-up), then it shrinks away. Each frame keeps the crescent's
+front (convex, right) edge on a travel path down the lane: from WAVE_FROM to WAVE_TO atlas px ahead of his feet (ease-out),
+so the sweep runs across the three cells in front of him while it decays. The crescent is centred on his body height
+(WAVE_Y atlas px above the feet). Baked at RES × atlas px — FxDef scale 1/3 (× FX_SCALE 1.5) = 1/RES atlas px.
+"""
+import sys
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
+from scipy import ndimage
+
+sys.path.insert(0, str(Path(__file__).parent))
+from draeven_s1_vfx import RES, clean, ring, unmix  # noqa: E402
+
+N = 8
+CHARGE_RING = 112      # ring width of the peak frame (f7) in atlas px — ~1.4 cells around his feet
+CHARGE_PEAK = 6
+WAVE_H = 130           # F1 crescent height in atlas px (~1.6 cells: "Large Crimson Sweep")
+WAVE_FROM, WAVE_TO = 128, 290  # front edge ahead of the feet, F1 → F8 (cell 1 starts at 40, cell 3 ends at 280)
+WAVE_Y = 40            # crescent centre above the feet (his body centre)
+# drawn frame centres along the wave sheet (the small late frames break into pieces, so they are given, not searched)
+WAVE_CENTRES = [272, 700, 1045, 1358, 1640, 1905, 2165, 2412]
+
+
+def pieces(im: np.ndarray, centres) -> list:
+    """every connected piece goes to the drawn frame whose centre is nearest — nothing is cut at a slot edge"""
+    al = im[..., 3]
+    lab, n = ndimage.label(ndimage.binary_dilation(al > 25, iterations=2))
+    owner = np.zeros(n + 1, int)
+    for i, sl in enumerate(ndimage.find_objects(lab), 1):
+        xs = np.nonzero(lab[sl] == i)[1] + sl[1].start
+        owner[i] = int(np.argmin(np.abs(np.asarray(centres) - xs.mean())))
+    out = []
+    for k in range(len(centres)):
+        part = np.where(((lab > 0) & (owner[lab] == k))[..., None], im, 0)
+        part[..., 3] = clean(part[..., 3])
+        out.append(part)
+    return out
+
+
+def runs(im: np.ndarray):
+    cols = im[..., 3].max(0) > 25
+    out, x, W = [], 0, len(cols)
+    while x < W:
+        if cols[x]:
+            e = x
+            while e < W and cols[e]:
+                e += 1
+            out.append((x, e))
+            x = e
+        x += 1
+    return sorted(sorted(out, key=lambda r: r[1] - r[0])[-N:])
+
+
+def to_img(a: np.ndarray, scale: float) -> Image.Image:
+    img = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), 'RGBA')
+    return img.resize((max(1, round(img.width * scale)), max(1, round(img.height * scale))), Image.LANCZOS)
+
+
+def charge(src: Path, out: Path):
+    im = unmix(np.array(Image.open(src).convert('RGB')))
+    im[-30:] = 0
+    frames = pieces(im, [(a + b) / 2 for a, b in runs(im)])
+    rings = [ring(f[..., 3]) for f in frames]
+    scale = CHARGE_RING * RES / rings[CHARGE_PEAK][2]
+    ry = float(np.median([rings[k][1] for k in (0, 1, 2)]))  # the early frames: only the ring is wide
+    placed = []
+    for f, (cx, _, _) in zip(frames, rings):
+        img = to_img(f, scale)
+        placed.append((img, cx * scale, ry * scale, img.getbbox()))
+    half = int(np.ceil(max(max(px - b[0], b[2] - px) for _, px, _, b in placed))) + 2
+    up = max(py - b[1] for _, _, py, b in placed)
+    down = max(b[3] - py for _, _, py, b in placed)
+    cw, ch, top = 2 * half, int(np.ceil(up + down)) + 4, int(np.ceil(up)) + 2
+    strip = Image.new('RGBA', (cw * N, ch))
+    for k, (img, px, py, _) in enumerate(placed):
+        strip.alpha_composite(img, (int(round(k * cw + half - px)), int(round(top - py))))
+    strip.save(out, optimize=True)
+    return {'frames': N, 'w': cw, 'h': ch, 'pivot': [0.5, round(top / ch, 4)], 'scale': round(scale, 4)}
+
+
+def wave(src: Path, out: Path):
+    im = unmix(np.array(Image.open(src).convert('RGB')))
+    im[-20:] = 0
+    frames = pieces(im, WAVE_CENTRES)
+    boxes = []
+    for f in frames:
+        ys, xs = np.nonzero(f[..., 3] > 40)
+        boxes.append((xs.min(), ys.min(), xs.max(), ys.max()))
+    b0 = boxes[0]
+    scale = WAVE_H * RES / (b0[3] - b0[1])
+    cy = (b0[1] + b0[3]) / 2  # one vertical centre for the strip (the artist's row)
+    # canvas around his feet (baked px): from just behind him to past the 3rd cell
+    left, right = -10 * RES, (WAVE_TO + 12) * RES
+    imgs = [to_img(f, scale) for f in frames]
+    up = max(cy * scale - i.getbbox()[1] for i in imgs) + WAVE_Y * RES
+    down = max(i.getbbox()[3] - cy * scale for i in imgs) - WAVE_Y * RES
+    top, bottom = -int(np.ceil(up)) - 2, int(np.ceil(max(down, 0))) + 2
+    cw, ch = right - left, bottom - top
+    strip = Image.new('RGBA', (cw * N, ch))
+    for k, (img, (x0, y0, x1, y1)) in enumerate(zip(imgs, boxes)):
+        t = k / (N - 1)
+        front = (WAVE_FROM + (WAVE_TO - WAVE_FROM) * (1 - (1 - t) ** 2)) * RES  # ease-out
+        x = front - x1 * scale - left
+        y = -WAVE_Y * RES - cy * scale - top
+        strip.alpha_composite(img, (int(round(k * cw + x)), int(round(y))))
+    strip.save(out, optimize=True)
+    return {'frames': N, 'w': cw, 'h': ch, 'pivot': [round(-left / cw, 4), round(-top / ch, 4)], 'scale': round(scale, 4)}
+
+
+def main():
+    src = Path(sys.argv[1] if len(sys.argv) > 1 else 'assets/heroes/Draeven/vfx')
+    out = Path(sys.argv[2] if len(sys.argv) > 2 else 'public/sprites')
+    out.mkdir(parents=True, exist_ok=True)
+    print('charge', charge(src / 'Draeven_S2_Charge_VFX.png', out / 'fx-draeven-s2-charge.png'))
+    print('wave', wave(src / 'Draeven_S2_CrimsonWave_VFX.png', out / 'fx-draeven-s2-wave.png'))
+
+
+if __name__ == '__main__':
+    main()
