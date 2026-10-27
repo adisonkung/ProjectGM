@@ -78,21 +78,9 @@
   ],
   "frameMs": 75.0
  },
- "ult-charge": {
-  "file": "fx-lucien-ult-charge.png",
-  "frames": 27,
-  "w": 228,
-  "h": 279,
-  "scale": 0.333333,
-  "pivot": [
-   0.50658,
-   0.85663
-  ],
-  "frameMs": 80
- },
  "ult-aura": {
   "file": "fx-lucien-ult-aura.png",
-  "frames": 16,
+  "frames": 21,
   "w": 236,
   "h": 276,
   "scale": 0.333333,
@@ -115,14 +103,20 @@
  },
  "ult-wave": {
   "file": "fx-lucien-ult-wave.png",
-  "frames": 10,
-  "w": 182,
-  "h": 134,
+  "frames": 12,
+  "w": 1110,
+  "h": 734,
   "scale": 0.333333,
   "pivot": [
-   0.5,
-   0.61194
-  ]
+   0.49427,
+   0.64168
+  ],
+  "ringCells": [
+   0.54,
+   3.0
+  ],
+  "growFrames": 6,
+  "frameMs": 70
  },
  "atk-glow": {
   "file": "fx-lucien-atk-glow.png",

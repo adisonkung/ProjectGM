@@ -1,4 +1,5 @@
 import { ENEMIES } from '../../core/data/enemies';
+import { FX, SHEETS } from '../../core/data/sprites';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { kitOf } from '../../core/data/hero-skills';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
@@ -130,5 +131,18 @@ describe('Lucien Valthorne (3★ Healer) — The Black Saint', () => {
     const five = heal(5);
     expect(five.gained / zero.gained).toBeCloseTo(1.75, 2);
     expect(five.hot / zero.hot).toBeCloseTo(2.25, 3); // potency × (1 + 0.25 × 5)
+  });
+
+  it('Ult visuals (user 2026-10-28): no Ult_Charge, ash aura from the raise, ONE team wave from Lucien + a pulse per ally on arrival', () => {
+    const ult = SHEETS['hero-lucien.png'].fx!.ult as string[];
+    expect(ult).not.toContain('lu-ult-charge');
+    expect(FX['lu-ult-charge']).toBeUndefined();
+    expect(FX['lu-ult-aura'].event).toBe('CHARGE_START');
+    expect(FX['lu-ult-release'].at).toBe('self');
+    const wave = FX['lu-ult-wave'];
+    expect([wave.at, wave.perHit, wave.attach]).toEqual(['self', undefined, false]);
+    const halo = FX['lu-ult-halo'];
+    expect([halo.at, halo.perHit, halo.exceptPrimary]).toEqual(['target', 'all', true]);
+    expect(halo.arrival!.speed).toBeGreaterThan(0);
   });
 });

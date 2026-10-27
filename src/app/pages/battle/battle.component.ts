@@ -965,7 +965,10 @@ export class BattleComponent implements OnDestroy {
             flip = false;
             stretch = Math.hypot(p.c - q.c, p.r - q.r) / fxWidthCells(def);
           }
-          fx.push({ id: ++this.floatId, r: cell.r, c: cell.c, name, angle, flip, stretch, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
+          // wave arrival (FxDef.arrival): the copy on this unit waits until a wave from the caster reaches it
+          const delayMs = def.arrival && q !== p
+            ? Math.max(0, Math.hypot(q.c - p.c, q.r - p.r) - def.arrival.from) / def.arrival.speed * 1000 : undefined;
+          fx.push({ id: ++this.floatId, r: cell.r, c: cell.c, name, angle, flip, stretch, delayMs, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
             follow: fxAttached(name) ? id : undefined });
         }
       }

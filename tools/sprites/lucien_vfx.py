@@ -15,8 +15,10 @@ Strips (fx-lucien-*.png → sprites.ts FX `lu-*`):
   s2-source    LinkSource on the linked ally (CHARGE_START)  · s2-link  BurdenLink tether ally → Lucien (span)
   s2-absorb    BurdenAbsorb on Lucien (the link lands)
   ult-staff    StaffCharge on the raised staff head (CHARGE_START → lowering, 75 ms, staff-tracked)
-  ult-charge   Ult_Charge under Lucien (CHARGE_START → release) · ult-aura  SacredAshAuraLoop under him (CHARGE_PEAK)
-  ult-release  BurdenRelease on Lucien (release)              · ult-wave  TeamHealingWave on every healed ally
+  ult-aura     SacredAshAuraLoop under Lucien (CHARGE_START → release, replaces Ult_Charge — user 2026-10-28)
+  ult-release  BurdenRelease on Lucien (release)
+  ult-wave     ONE TeamHealingWave expanding from Lucien across the allied side (ring 6 cells at full size); the
+               per-ally pulse reuses s1-heal (sprites.ts `lu-ult-halo`, delayed by the wave's arrival)
   atk-glow     StaffCharge f1–f4, small, on the attack staff head · fx-lucien-bolt  procedural dark-sacred bolt
 Writes tools/sprites/lucien_vfx_report.json (w, h, frames, pivot, scale per strip).
 """
@@ -262,6 +264,66 @@ def bolt(out: Path):
     return {'file': 'fx-lucien-bolt.png', 'frames': 5, 'w': W, 'h': H, 'scale': round(1 / 1.8, 6)}   # ×1.44 the 2 × bake: a readable bolt
 
 
+def team_wave(src, out, name, sheet, *, width_cells=6.0, sy_dome=0.55, sy_ring=2.1, grow_frames=6,
+              seq=(0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 9), alphas=None, start=0.18):
+    """ONE team-heal wave from the caster's feet: the TeamHealingWave frames played in `seq` while the whole wave
+    grows linearly from `start` to full size over `grow_frames` frames, then holds full size while it fades.
+    Full size: the ground ring spans `width_cells` board cells. Ground perspective: the ring band (below the ring
+    top) is stretched vertically `sy_ring` × the horizontal scale so it reaches the lanes above / below; the dome
+    above it is squashed (`sy_dome`) so the wave stays low over the formation. Returns the strip meta + the growth
+    (radius in cells at frame 0, cells/s) for the per-ally pulses."""
+    cells, _ = grid(src, sheet)
+    # ring geometry from the first frame (the bare ground ring): its top edge (the first wide row), its bottom edge,
+    # centre = the pivot on the caster's feet
+    f0 = cells[0][..., 3] > 60
+    rows = f0.sum(1)
+    top = int(np.nonzero(rows > 60)[0].min())
+    bottom = int(np.nonzero(rows > 30)[0].max())
+    cols = np.nonzero(f0[top - 3:bottom + 3].any(0))[0]
+    ring_w = float(cols.max() - cols.min())
+    px, py = float(cols.min() + cols.max()) / 2, (top + bottom) / 2
+    split = float(top - 3)                               # top of the ring band
+    sx = width_cells * 80 * RES / ring_w                 # output px per source px at full size
+    H0, W0 = cells[0].shape[:2]
+    left, right = px * sx, (W0 - px) * sx
+    up = (split - 0) * sx * sy_dome + (py - split) * sx * sy_ring
+    down = (H0 - py) * sx * sy_ring
+    Wc, Hc = int(np.ceil(left + right)) + 2, int(np.ceil(up + down)) + 2
+    cx, cy = left + 1, up + 1
+    yy, xx = np.mgrid[0:Hc, 0:Wc].astype(np.float32)
+    frames = []
+    for j, i in enumerate(seq):
+        e = start + (1 - start) * min(1.0, j / grow_frames)
+        c = cells[i].astype(np.float32) / 255
+        pm = np.dstack([c[..., :3] * c[..., 3:], c[..., 3:]])
+        mx = px + (xx - cx) / (sx * e)
+        dy = yy - cy
+        ds = (split - py) * sx * sy_ring * e              # the ring top in output px (negative)
+        my = np.where(dy >= ds, py + dy / (sx * sy_ring * e), split + (dy - ds) / (sx * sy_dome * e))
+        # downscaling: blur the source by the reduction so the remap does not alias
+        k = 1 / max(1e-3, min(sx * e, sx * sy_dome * e))
+        src_im = cv2.GaussianBlur(pm, (0, 0), 0.5 * k) if k > 1.2 else pm
+        r = cv2.remap(src_im, mx.astype(np.float32), my.astype(np.float32), cv2.INTER_LINEAR,
+                      borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+        al = r[..., 3:] * (alphas[j] if alphas else 1.0)
+        rgb = np.where(r[..., 3:] > 1e-3, r[..., :3] / np.maximum(r[..., 3:], 1e-3), 0)
+        frames.append((np.clip(np.dstack([rgb, al]), 0, 1) * 255).astype(np.uint8))
+    # trim (keep the pivot inside)
+    al = np.zeros((Hc, Wc), bool)
+    for f in frames:
+        al |= f[..., 3] > 2
+    ys_, xs_ = np.nonzero(al)
+    x0, x1 = min(xs_.min(), int(cx)) - 2, max(xs_.max(), int(cx)) + 3
+    y0, y1 = min(ys_.min(), int(cy)) - 2, max(ys_.max(), int(cy)) + 3
+    frames = [f[max(0, y0):y1, max(0, x0):x1] for f in frames]
+    x0, y0 = max(0, x0), max(0, y0)
+    h, w = frames[0].shape[:2]
+    meta = save(out, name, frames, {'pivot': [round((cx - x0) / w, 5), round((cy - y0) / h, 5)]})
+    meta['ringCells'] = [round(start * width_cells / 2, 3), width_cells / 2]   # radius frame 0 → full
+    meta['growFrames'] = grow_frames
+    return meta
+
+
 # ---------------------------------------------------------------- clip timing (= sprites.ts 'hero-lucien.png')
 ULT_STEPS = [100] * 4 + [86] * 7 + [260] * 5 + [100] * 8 + [250, 250]
 ULT_CHARGE_START = sum(ULT_STEPS[:4]) / 1000      # 0.40 s, the raise begins
@@ -308,20 +370,17 @@ def main():
         keys.append((t, i, a)); t += MS
     R['ult-staff'] = staff_tracked(src, out, 'ult-staff', 'Lucien_ULT_StaffCharge_VFX', 0.17, keys, heads['ult'], ult_step_at)
     R['ult-staff']['frameMs'] = MS * 1000
-    # Ult_Charge under him: grow f1–f5 to the peak, loop f6/f7 to the release, f8–f10 out
-    n = round((ULT_PEAK - ULT_CHARGE_START) / 0.08)
-    grow = [min(4, int(j / max(1, n - 1) * 4 + 0.5)) for j in range(n)]
-    nl = round((ULT_RELEASE - ULT_PEAK) / 0.08)
-    R['ult-charge'] = sheet_strip(src, out, 'ult-charge', 'Lucien_Ult_Charge_VFX', 0.36,
-                                  grow + [5 + (j // 2) % 2 for j in range(nl)] + [7, 8, 9])
-    R['ult-charge']['frameMs'] = 80
-    # Sacred ash aura from the peak: build f1–f5, breathe f4/f5 to the release, dissolve f6–f10
-    nb = round((ULT_RELEASE - ULT_PEAK) / 0.12) - 5
+    # Sacred ash aura under him from CHARGE_START (user 2026-10-28: replaces Ult_Charge): build f1–f5 to the staff
+    # peak, breathe f4/f5 through the hold, dissolve f6–f10 from the release
+    nb = round((ULT_RELEASE - ULT_PEAK) / 0.12)
     R['ult-aura'] = sheet_strip(src, out, 'ult-aura', 'Lucien_ULT_SacredAshAuraLoop_VFX', 0.36,
-                                [0, 1, 2, 3, 4] + [3 + (j + 1) % 2 for j in range(max(0, nb))] + [5, 6, 7, 8, 9])
+                                [0, 1, 2, 3, 4] + [3 + (j + 1) % 2 for j in range(nb)] + [5, 6, 7, 8, 9])
     R['ult-aura']['frameMs'] = 120
     R['ult-release'] = sheet_strip(src, out, 'ult-release', 'Lucien_ULT_BurdenRelease_VFX', 0.38, list(range(10)))
-    R['ult-wave'] = sheet_strip(src, out, 'ult-wave', 'Lucien_ULT_TeamHealingWave_VFX', 0.21, list(range(10)))
+    # ONE team-heal wave expanding from Lucien over the allied side (user 2026-10-28) + a small pulse per ally
+    R['ult-wave'] = team_wave(src, out, 'ult-wave', 'Lucien_ULT_TeamHealingWave_VFX',
+                              alphas=[1, 1, 1, 1, 0.92, 0.88, 0.85, 0.85, 0.8, 0.72, 0.55, 0.3])
+    R['ult-wave']['frameMs'] = 70
     # attack: a small StaffCharge glint on the (nearly still) staff head
     ah = heads['attack']
     mean = [sum(p[0] for p in ah[2:9]) / 7, sum(p[1] for p in ah[2:9]) / 7]

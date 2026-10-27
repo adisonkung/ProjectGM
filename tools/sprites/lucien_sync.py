@@ -20,9 +20,9 @@ REP = json.loads((Path(__file__).parent / 'lucien_vfx_report.json').read_text())
 S = 2                   # preview px per atlas px
 CELL = 80               # atlas px per board cell
 FPS = 60
-W, H = 900, 420
-GROUND = 330            # preview y of the feet line
-LX = 170                # preview x of Lucien's feet
+W, H = 1500, 480
+GROUND = 360            # preview y of the feet line
+LX = 560                # preview x of Lucien's feet
 
 HERO = Image.open(SP / 'hero-lucien.png').convert('RGBA')
 ALLY = Image.open(SP / 'hero-bailong.png').convert('RGBA')
@@ -42,11 +42,12 @@ LAYERS = {
     'skill2': [('s2-source', 'CHARGE_START', 0, 100, 150, 'target', {}),
                ('s2-link', 'CHARGE_START', 0, 100, 150, 'target', {'span': True, 'dy': -22}),
                ('s2-absorb', 'DAMAGE', 0, 65, 0, 'self', {})],
-    'ult': [('ult-charge', 'CHARGE_START', 0, 80, 0, 'self', {'under': True}),
-            ('ult-aura', 'CHARGE_PEAK', 0, 120, 0, 'self', {'under': True}),
+    'ult': [('ult-aura', 'CHARGE_START', 0, 120, 0, 'self', {'under': True}),
             ('ult-staff', 'CHARGE_START', 0, 75, 0, 'self', {}),
+            ('ult-wave', 'DAMAGE', 0, 70, 120, 'self', {'under': True}),
             ('ult-release', 'DAMAGE', 0, 60, 0, 'self', {}),
-            ('ult-wave', 'DAMAGE', 0, 90, 0, 'self', {}), ('ult-wave', 'DAMAGE', 0, 90, 0, 'target', {})],
+            # the ally's pulse when the wave (0.54 → 3 cells at 5.86 cells/s) reaches it, 2 cells away
+            ('s1-heal', 'DAMAGE', round((2 - 0.54) / 5.86 * 1000), 55, 0, 'target', {'scale': 0.85})],
 }
 STRIPS = {}
 
@@ -71,9 +72,9 @@ def paste_unit(cv, img, root, feet_x, flip=False):
     cv.alpha_composite(big, (int(feet_x - root[0] * S), int(GROUND - root[1] * S)))
 
 
-def paste_fx(cv, fr, r, x, y, alpha=1.0, angle=0.0, stretch=1.0):
+def paste_fx(cv, fr, r, x, y, alpha=1.0, angle=0.0, stretch=1.0, extra_scale=1.0):
     """pivot of the FX frame on preview (x, y); width = w × scale × 1.5 atlas px"""
-    k = r['scale'] * 1.5 * S
+    k = r['scale'] * 1.5 * S * extra_scale
     w, h = max(1, round(fr.width * k * stretch)), max(1, round(fr.height * k))
     im = fr.resize((w, h), Image.LANCZOS)
     if alpha < 1:
@@ -127,7 +128,7 @@ def render(clip, out: Path):
                 base = r['w'] * r['scale'] * 1.5 * S
                 layers.append((extra.get('under', False), fr[k], r, ox, y, a, 180.0, length / base))
             else:
-                layers.append((extra.get('under', False), fr[k], r, x0, y, a, 0.0, 1.0))
+                layers.append((extra.get('under', False), fr[k], r, x0, y, a, 0.0, 1.0, extra.get('scale', 1.0)))
         for L in [l for l in layers if l[0]]:
             paste_fx(cv, *L[1:])
         ally = cell_frame(ALLY, 220, 0, 0)
