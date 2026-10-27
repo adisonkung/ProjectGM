@@ -35,7 +35,7 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     expect(at('skill2', 'VFX_SPAWN')[0]).toBeLessThan(at('skill2', 'CHARGE_START')[0]);
     expect(at('skill2', 'CHARGE_START')[0]).toBeLessThan(at('skill2', 'DAMAGE')[0]);
     expect(at('ult', 'DAMAGE').length).toBe(1);
-    expect(at('ult', 'CHARGE_PEAK')[0] - at('ult', 'CHARGE_START')[0]).toBe(630);
+    expect(at('ult', 'CHARGE_PEAK')[0] - at('ult', 'CHARGE_START')[0]).toBe(930);
     expect(at('ult', 'DAMAGE')[0]).toBeGreaterThan(at('ult', 'STRIKE_START')[0]);
   });
 
@@ -173,19 +173,26 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
     const at = (ev: string) => animEvents('hero-mordrienne.png', 'ult').filter(e => e.event === ev).map(e => Math.round(e.t * 1000));
     expect(at('CAST_START')).toEqual([50]);
     expect(at('CHARGE_START')).toEqual([1030]);
-    expect(at('CHARGE_PEAK')).toEqual([1660]);
-    expect(at('STRIKE_START')).toEqual([1840]);
-    expect(at('VFX_SPAWN')).toEqual([2020]);
-    expect(at('DAMAGE')).toEqual([2270]);
-    expect(sh.anims.ult!.steps!.reduce((a, b) => a + b, 0)).toBe(2430);
-    expect(sh.fx!.ult).toEqual(['mo-ult-circle', 'mo-ult-charge', 'mo-ult-burst']);
+    expect(at('CHARGE_PEAK')).toEqual([1960]);
+    expect(at('STRIKE_START')).toEqual([2140]);
+    expect(at('VFX_SPAWN')).toEqual([2320]);
+    expect(at('DAMAGE')).toEqual([2570]);
+    expect(sh.anims.ult!.steps!.reduce((a, b) => a + b, 0)).toBe(2730);
+    expect(sh.fx!.ult).toEqual(['mo-ult-aura', 'mo-ult-circle', 'mo-ult-charge', 'mo-ult-burst']);
     expect(sh.fieldFx).toEqual({ loop: 'mo-ult-field', end: 'mo-ult-field-end' });
     const ci = FX['mo-ult-circle'], ch = FX['mo-ult-charge'], bu = FX['mo-ult-burst'], fl = FX['mo-ult-field'], en = FX['mo-ult-field-end'];
     // the circle is drawn until the raise, the charge holds its peak until the wand-down frame then collapses
     expect([ci.event, Math.round(50 + ci.frames * ci.frameMs)]).toEqual(['CAST_START', 1030]);
-    expect([ch.event, 1030 + (ch.frames - 3) * ch.frameMs]).toEqual(['CHARGE_START', 1840]);
+    expect([ch.event, 1030 + (ch.frames - 3) * ch.frameMs]).toEqual(['CHARGE_START', 2140]);
+    // the cast aura: from the press (CAST_START) until the wand hits the ground (VFX_SPAWN), then its fade frames
+    const au = FX['mo-ult-aura'];
+    expect([au.event, au.at, au.layer, au.attach]).toEqual(['CAST_START', 'self', 'under', true]);
+    expect(50 + (au.frames - 4) * au.frameMs).toBeGreaterThanOrEqual(2320 - au.frameMs);
+    expect(50 + (au.frames - 4) * au.frameMs).toBeLessThanOrEqual(2320);
+    // the field ring = 3 cells: 175 source px × scale × FX_SCALE 1.5 × 1.25 % per atlas px = 300 % of a cell
+    expect(175 * bu.scale! * 1.5 * 1.25).toBeCloseTo(300, 0);
     // burst peak f6 = DAMAGE; the loop starts on the burst's last frame and its cycles end with the 6 s field
-    expect(2020 + 5 * bu.frameMs).toBe(2270);
+    expect(2320 + 5 * bu.frameMs).toBe(2570);
     expect(fl.delayMs).toBe(bu.frames * bu.frameMs - 5 * bu.frameMs);
     expect((6000 - fl.delayMs!) / (fl.frames * fl.frameMs)).toBeCloseTo(6, 2);
     for (const d of [bu, fl, en]) {
