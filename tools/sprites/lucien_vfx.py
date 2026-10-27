@@ -85,14 +85,22 @@ def crop_union(cells, pad=4):
 
 
 def ground_pivot(cells):
-    """the ground ring: the widest alpha row in the lower 45 % of the union"""
-    s = sum(c[..., 3].astype(float) for c in cells)
-    H = s.shape[0]
-    lo = int(H * 0.55)
-    rows = (s[lo:] > 40).sum(1)
-    y = lo + int(np.argmax(rows))
-    xs = np.nonzero(s[y] > 40)[0]
-    return float((xs.min() + xs.max()) / 2), float(y)
+    """the ground ring centre line: per frame the widest solid row in the lower half (the ring ellipse is the widest
+    thing near the ground), median over the frames — the union of all frames is wide everywhere and put the pivot
+    above the ring (art drawn below the feet, user 2026-10-28)"""
+    H = cells[0].shape[0]
+    lo = H // 2
+    ys, xs = [], []
+    for c in cells:
+        a = c[lo:, :, 3] > 60
+        rows = a.sum(1)
+        if rows.max() < 20:
+            continue
+        y = int(np.argmax(rows))
+        cols = np.nonzero(a[y])[0]
+        ys.append(lo + y)
+        xs.append((cols.min() + cols.max()) / 2)
+    return float(np.median(xs)), float(np.median(ys))
 
 
 def gem_of(rgb: np.ndarray, rgba: np.ndarray):

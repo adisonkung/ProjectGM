@@ -133,7 +133,7 @@ describe('Lucien Valthorne (3★ Healer) — The Black Saint', () => {
     expect(five.hot / zero.hot).toBeCloseTo(2.25, 3); // potency × (1 + 0.25 × 5)
   });
 
-  it('Ult visuals (user 2026-10-28): no Ult_Charge, ash aura from the raise, ONE team wave from Lucien + a pulse per ally on arrival', () => {
+  it('Ult visuals (user 2026-10-28): no Ult_Charge, ash aura from the raise, release peak → ONE team wave from Lucien → BurdenRelease on each ally on arrival', () => {
     const ult = SHEETS['hero-lucien.png'].fx!.ult as string[];
     expect(ult).not.toContain('lu-ult-charge');
     expect(FX['lu-ult-charge']).toBeUndefined();
@@ -141,8 +141,11 @@ describe('Lucien Valthorne (3★ Healer) — The Black Saint', () => {
     expect(FX['lu-ult-release'].at).toBe('self');
     const wave = FX['lu-ult-wave'];
     expect([wave.at, wave.perHit, wave.attach]).toEqual(['self', undefined, false]);
-    const halo = FX['lu-ult-halo'];
-    expect([halo.at, halo.perHit, halo.exceptPrimary]).toEqual(['target', 'all', true]);
-    expect(halo.arrival!.speed).toBeGreaterThan(0);
+    // the wave waits for BurdenRelease's peak (frame 6)
+    expect(wave.delayMs).toBe(5 * FX['lu-ult-release'].frameMs);
+    const ally = FX['lu-ult-ally-release'];
+    expect(ally.file).toBe(FX['lu-ult-release'].file);
+    expect([ally.at, ally.perHit, ally.exceptPrimary, ally.delayMs]).toEqual(['target', 'all', true, wave.delayMs]);
+    expect(ally.arrival!.speed).toBeGreaterThan(0);
   });
 });

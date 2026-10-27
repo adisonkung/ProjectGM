@@ -44,10 +44,10 @@ LAYERS = {
                ('s2-absorb', 'DAMAGE', 0, 65, 0, 'self', {})],
     'ult': [('ult-aura', 'CHARGE_START', 0, 120, 0, 'self', {'under': True}),
             ('ult-staff', 'CHARGE_START', 0, 75, 0, 'self', {}),
-            ('ult-wave', 'DAMAGE', 0, 70, 120, 'self', {'under': True}),
+            ('ult-wave', 'DAMAGE', 300, 70, 120, 'self', {'under': True}),
             ('ult-release', 'DAMAGE', 0, 60, 0, 'self', {}),
-            # the ally's pulse when the wave (0.54 → 3 cells at 5.86 cells/s) reaches it, 2 cells away
-            ('s1-heal', 'DAMAGE', round((2 - 0.54) / 5.86 * 1000), 55, 0, 'target', {'scale': 0.85})],
+            # BurdenRelease on the ally when the wave (0.54 → 3 cells at 5.86 cells/s, after the release peak) reaches it
+            ('ult-release', 'DAMAGE', 300 + round((2 - 0.54) / 5.86 * 1000), 60, 0, 'target', {})],
 }
 STRIPS = {}
 

@@ -350,7 +350,7 @@ export const SHEETS: Record<string, SheetDef> = {
     attackFx: ['lu-atk-glow'],
     fx: { skill: ['lu-s1-cross', 'lu-s1-heal', 'lu-s1-gain'],
       skill2: ['lu-s2-source', 'lu-s2-link', 'lu-s2-absorb'],
-      ult: ['lu-ult-aura', 'lu-ult-staff', 'lu-ult-release', 'lu-ult-wave', 'lu-ult-halo'] },
+      ult: ['lu-ult-aura', 'lu-ult-staff', 'lu-ult-release', 'lu-ult-wave', 'lu-ult-ally-release'] },
     anims: {
       idle: { row: 0, frames: 16, ms: 125 }, walk: { row: 1, frames: 15, ms: 60, pace: runPace(15, 60) },
       hurt: { row: 2, frames: 13, ms: 35 },
@@ -366,8 +366,8 @@ export const SHEETS: Record<string, SheetDef> = {
       skill2: { row: 6, frames: 28, ms: 64, events: { CAST_START: 0, CHARGE_START: 3, DAMAGE: 9, IMPACT: 9, RECOVERY_START: 20 } },
       // Ult Black Miracle: entry 0–0.40 → raise (CHARGE_START: sacred ash aura under him, StaffCharge on the staff
       // head) → staff up 1.00 (CHARGE_PEAK) → hold / prayer → release 2.30 = DAMAGE (all Burden consumed: team heal +
-      // ward + recovery · BurdenRelease on him · ONE healing wave expands from him over the allied side · each healed
-      // ally gets a small pulse when the wave reaches it) → lower → 3.60
+      // ward + recovery · BurdenRelease on him → at its peak (frame 6, +0.30 s) ONE healing wave expands from him over
+      // the allied side · each healed ally gets BurdenRelease when the wave reaches it) → lower → 3.60
       ult: { row: 7, frames: 26, ms: 100, seq: Array.from({ length: 26 }, (_, i) => i),
         steps: [...Array(4).fill(100), ...Array(7).fill(86), ...Array(5).fill(260), ...Array(8).fill(100), 250, 250],
         events: { CAST_START: 0, CHARGE_START: 4, CHARGE_PEAK: 11, FINAL_ANTICIPATION: 15, DAMAGE: 16, IMPACT: 16,
@@ -1633,15 +1633,15 @@ export const FX: Record<string, FxDef> = {
   },
   'lu-s1-heal': {
     file: 'fx-lucien-s1-heal.png', frames: 10, w: 139, h: 102, frameMs: 60, at: 'target',
-    pivot: [0.4964, 0.61765], dy: 27.25, scale: 1 / 3, attach: true,
+    pivot: [0.4982, 0.78922], dy: 27.25, scale: 1 / 3, attach: true,
   },
   'lu-s1-gain': {
     file: 'fx-lucien-s1-gain.png', frames: 10, w: 185, h: 217, frameMs: 50, at: 'self',
-    pivot: [0.5027, 0.87097], dy: 27.25, scale: 1 / 3, attach: true,
+    pivot: [0.5027, 0.84332], dy: 27.25, scale: 1 / 3, attach: true,
   },
   'lu-s2-source': {
     file: 'fx-lucien-s2-source.png', frames: 12, w: 186, h: 248, frameMs: 100, fadeOutMs: 150, at: 'target',
-    event: 'CHARGE_START', pivot: [0.50806, 0.72581], dy: 27.25, scale: 1 / 3, attach: true,
+    event: 'CHARGE_START', pivot: [0.50269, 0.76613], dy: 27.25, scale: 1 / 3, attach: true,
   },
   // Burden Link tether: from the linked ally's chest back to Lucien (span), grow f1–f4 → breathe → release f6–f8
   'lu-s2-link': {
@@ -1650,12 +1650,12 @@ export const FX: Record<string, FxDef> = {
   },
   'lu-s2-absorb': {
     file: 'fx-lucien-s2-absorb.png', frames: 10, w: 191, h: 229, frameMs: 65, at: 'self',
-    pivot: [0.50524, 0.68996], dy: 27.25, scale: 1 / 3, attach: true,
+    pivot: [0.53534, 0.84498], dy: 27.25, scale: 1 / 3, attach: true,
   },
   // sacred ash aura under him from the raise (user 2026-10-28: replaces Ult_Charge): build → breathe → dissolve
   'lu-ult-aura': {
     file: 'fx-lucien-ult-aura.png', frames: 21, w: 236, h: 276, frameMs: 120, at: 'self', event: 'CHARGE_START',
-    pivot: [0.49153, 0.62681], dy: 27.25, scale: 1 / 3, layer: 'under', attach: true,
+    pivot: [0.49894, 0.81522], dy: 27.25, scale: 1 / 3, layer: 'under', attach: true,
   },
   'lu-ult-staff': {
     file: 'fx-lucien-ult-staff.png', frames: 33, w: 121, h: 229, frameMs: 75, at: 'self', event: 'CHARGE_START',
@@ -1663,20 +1663,21 @@ export const FX: Record<string, FxDef> = {
   },
   'lu-ult-release': {
     file: 'fx-lucien-ult-release.png', frames: 10, w: 269, h: 313, frameMs: 60, at: 'self',
-    pivot: [0.49814, 0.79553], dy: 27.25, scale: 1 / 3, attach: true,
+    pivot: [0.50465, 0.83067], dy: 27.25, scale: 1 / 3, attach: true,
   },
-  // ONE team-heal wave from his feet over the allied side (user 2026-10-28): grows linearly from a 0.54-cell ring
-  // radius to 3 cells in 6 × 70 ms (5.86 cells/s), then fades at full size · ground perspective (ring band stretched
-  // to reach the lanes above / below, dome kept low) · stays where it was released
+  // ONE team-heal wave from his feet over the allied side (user 2026-10-28): starts once BurdenRelease reaches its
+  // peak (frame 6 = +300 ms), grows linearly from a 0.54-cell ring radius to 3 cells in 6 × 70 ms (5.86 cells/s), then
+  // fades at full size · ground perspective (ring band stretched to reach the lanes above / below, dome kept low) ·
+  // stays where it was released
   'lu-ult-wave': {
-    file: 'fx-lucien-ult-wave.png', frames: 12, w: 1110, h: 734, frameMs: 70, fadeOutMs: 120, at: 'self',
+    file: 'fx-lucien-ult-wave.png', frames: 12, w: 1110, h: 734, frameMs: 70, fadeOutMs: 120, delayMs: 300, at: 'self',
     pivot: [0.49427, 0.64168], dy: 27.25, scale: 1 / 3, layer: 'under', attach: false,
   },
-  // the personal heal pulse: once on each healed ally (not Lucien — he has the release) when the wave reaches it
-  'lu-ult-halo': {
-    file: 'fx-lucien-s1-heal.png', frames: 10, w: 139, h: 102, frameMs: 55, at: 'target', perHit: 'all',
-    exceptPrimary: true, arrival: { from: 0.54, speed: 5.86 }, pivot: [0.4964, 0.61765], dy: 27.25, scale: 0.85 / 3,
-    attach: true,
+  // each healed ally (not Lucien — he has his own) gets the same BurdenRelease when the wave reaches it
+  'lu-ult-ally-release': {
+    file: 'fx-lucien-ult-release.png', frames: 10, w: 269, h: 313, frameMs: 60, delayMs: 300, at: 'target',
+    perHit: 'all', exceptPrimary: true, arrival: { from: 0.54, speed: 5.86 },
+    pivot: [0.50465, 0.83067], dy: 27.25, scale: 1 / 3, attach: true,
   },
   'lu-atk-glow': {
     file: 'fx-lucien-atk-glow.png', frames: 6, w: 52, h: 178, frameMs: 50, fadeOutMs: 100, delayMs: 120, at: 'self',
