@@ -17,6 +17,10 @@
       @if (backup()) { <p class="undo"><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="undo()"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="restart" [size]="18" />ย้อนกลับเป็นเซฟก่อนนำเข้า</button></p> }
     </section>
   </div>
+  <section class="gm-panel card test-rooms citadel-surface" aria-labelledby="test-rooms-title"><app-tower-ornament [grooved]="true" [ornate]="true" />
+    <header class="section-heading"><app-icon name="lab" [size]="34" /><div><h2 id="test-rooms-title" class="gm-h2">ห้องทดสอบ</h2><p>ลองท่าและสกิลของฮีโร่กับหุ่นฝึก หรือทดลองต่อสู้ด่านไหนก็ได้<br />ไม่มีผลกับเซฟ</p></div></header>
+    <div class="test-room-actions"><a class="gm-btn primary citadel-surface citadel-control" routerLink="/sprite-lab"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-icon name="lab" [size]="22" />ห้องทดสอบท่า (หุ่นฝึก)</a><a class="gm-btn ghost citadel-surface citadel-control" routerLink="/lab"><app-citadel-frame shape="hex" [cut]="18" /><app-icon name="sword" [size]="22" />ห้องทดลองต่อสู้</a></div>
+  </section>
   <p class="soon muted"><app-icon name="lock" [size]="14" />ระบบล็อกอินและเซฟบนคลาวด์จะตามมาในขั้นถัดไป</p>
   @if (editing()) {
     <div class="account-overlay" (click)="editing.set(false)" (keydown.escape)="editing.set(false)"><section class="rename-dialog citadel-surface" role="dialog" aria-modal="true" aria-labelledby="rename-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" (click)="$event.stopPropagation()"><app-tower-ornament [grooved]="true" [ornate]="true" />

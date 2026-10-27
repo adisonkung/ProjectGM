@@ -28,6 +28,9 @@
 .rename input, .code { border-radius: 3px; background: #192332; min-height: 46px; }
 .steps, .muted { font-size: 13px; line-height: 1.8; }
 .soon { padding: 14px; background: #202a39ed; }
+.test-rooms { margin-top: 20px; }
+.test-room-actions { display: flex; flex-wrap: wrap; gap: 12px;
+  .gm-btn { text-decoration: none; display: inline-flex; align-items: center; gap: 8px; } }
 @media (max-width:850px) { .grid { grid-template-columns: minmax(0,1fr); } }
 @media (max-width:400px) { .card { padding: 16px; } .row .gm-btn { white-space: normal; text-align: center; } }
 
