@@ -198,8 +198,12 @@ def aura_frames(path: Path):
     of their centre (the full-size frames' sigil tops reach into the row above); pivot = centre of the ground ring"""
     rgb = np.array(Image.open(path).convert('RGB')).astype(np.float32)
     mx = rgb.max(2)
-    a = np.clip((mx - 10) / 200, 0, 1) ** 0.85 * 255
-    col = rgb / np.maximum(mx[..., None], 1) * np.clip(mx[..., None] * 1.25, 0, 255)
+    # revision #3 (user: deeper colour): denser alpha + deep emerald (a little darker, more saturated, ash stays dark)
+    a = np.clip((mx - 8) / 110, 0, 1) ** 0.7 * 255
+    hue = rgb / np.maximum(mx[..., None], 1)
+    grey = hue.mean(2, keepdims=True)
+    hue = np.clip(grey + (hue - grey) * 1.35, 0, 1)
+    col = hue * np.clip(mx[..., None] * 0.92, 0, 255)
     im = np.dstack([np.clip(col, 0, 255), a])
     H, W = im.shape[:2]
     ch, cw = H / 3, W / 4
