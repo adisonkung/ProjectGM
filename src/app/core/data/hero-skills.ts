@@ -585,6 +585,59 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
     },
   },
+  // Mordrienne Vale (user 2026-10-26, Mage — Control / Debuff, existing Mage class ids / cooldowns / rank tables;
+  // numbers provisional, no balance pass): Deep Emerald Curse. Identity = curses / hexes / slow + root / ATK + cast-speed
+  // down / zone control rather than raw burst. Her spells hit Hex-Marked foes ×1.2 (`DAMAGE.bonusVsStatus`).
+  mordrienne: {
+    id: 'mordrienne', cls: 'mage', identity: 'Mage · Control / Debuff · Hex Mark · Slow / Root · ATK & Cast Speed Down · Curse Field',
+    kit: {
+      ...mage,
+      // S1 Ashen Mark: one bolt from the wand at the current target → Hex Mark (8 s)
+      skill: {
+        ...mage.skill, name: 'ตราเถ้าธุลี', label: 'Ashen Mark', target: 'CURRENT', delivery: 'PROJECTILE',
+        effects: [
+          { type: 'DAMAGE', area: 'SINGLE', primary: 1.3, damageType: 'MAGIC', bonusVsStatus: { status: 'hex_mark', mul: 1.2 } },
+          { type: 'APPLY_STATUS', status: 'hex_mark', to: 'HIT', duration: 8 },
+        ],
+        ai: { tier: 'NORMAL' },
+      },
+      // S2 Cinderbind Hex: strike 1 places the hex on the ground (2 × 2 around the cluster), twirl = charge, strike 2
+      // activates it: AoE magic + Slow 3 s + Cinder Hex (ATK −15 %, cast speed −20 %, 4 s) · Hex-Marked foes are Rooted
+      skill2: {
+        ...mage.skill2, name: 'พันธนาการเถ้าถ่าน', label: 'Cinderbind Hex', target: 'CLUSTER', fallback: ['CURRENT'],
+        delivery: 'INSTANT',
+        effects: [
+          { type: 'DAMAGE', area: 'SQUARE_2', primary: 1.0, secondary: 1.0, damageType: 'MAGIC',
+            bonusVsStatus: { status: 'hex_mark', mul: 1.2 } },
+          { type: 'APPLY_STATUS', status: 'root', to: 'HIT', duration: 1.5, when: { status: 'hex_mark', present: true } },
+          { type: 'APPLY_STATUS', status: 'slow', to: 'HIT', duration: 3 },
+          { type: 'APPLY_STATUS', status: 'cinder_hex', to: 'HIT', duration: 4 },
+        ],
+        ai: { tier: 'HIGH_VALUE', minTargets: 1, countArea: 'SQUARE_2' },
+      },
+      // Ult House of Ashes: draw the circle → raise to the sky → charge hold → slam → a curse field (3 × 3, 6 s).
+      // Timeline Sync (user 2026-10-27): at the activation peak the field opens with its first pulse (initial magic
+      // damage + Ash Curse: DEF −15 %, ATK −15 %, cast −20 %) + the Hex Mark bonus burst on already-marked foes,
+      // then a pulse every 1 s (pulses 0…5 — the same 6 pulses as before, the first one moved to the opening)
+      ult: {
+        ...mage.ult, name: 'เรือนแห่งเถ้าธุลี', label: 'House of Ashes', target: 'CLUSTER', fallback: ['CURRENT'],
+        delivery: 'INSTANT',
+        effects: [
+          { type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 1.2, secondary: 1.2, damageType: 'MAGIC',
+            requireStatus: 'hex_mark' },
+          { type: 'FIELD', field: {
+            area: 'ADJACENT_8', duration: 6, interval: 1, pulseOnStart: true,
+            effects: [
+              { type: 'DAMAGE', area: 'ADJACENT_8', primary: 0.25, secondary: 0.25, damageType: 'MAGIC',
+                bonusVsStatus: { status: 'hex_mark', mul: 1.2 } },
+              { type: 'APPLY_STATUS', status: 'ash_curse', to: 'AREA', area: 'ADJACENT_8', duration: 1.1 },
+            ],
+          } },
+        ],
+        ai: { tier: 'HIGH_VALUE', minTargets: 1, countArea: 'ADJACENT_8' },
+      },
+    },
+  },
 };
 
 /** the kit a unit fights with: its hero's own kit, else its class kit */

@@ -132,6 +132,22 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     id: 'blood_brand', name: 'ตราโลหิต', duration: 5, stackPolicy: 'REFRESH_DURATION',
     modifiers: { attackMultiplier: 0.85 }, drainToSource: 0.12,
   },
+  // ---- Mordrienne Vale (Mage — Control / Debuff, provisional numbers)
+  /** Hex Mark (S1 Ashen Mark): a marker — her spells hit marked foes harder (`DAMAGE.bonusVsStatus`), Cinderbind roots
+   * them, the House of Ashes field bursts on them */
+  hex_mark: {
+    id: 'hex_mark', name: 'ตราสาปเถ้า', duration: 8, stackPolicy: 'REFRESH_DURATION', modifiers: {},
+  },
+  /** Cinderbind Hex (S2): ATK −15 %, channelled casts 20 % slower */
+  cinder_hex: {
+    id: 'cinder_hex', name: 'คำสาปพันธนาการ', duration: 4, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { attackMultiplier: 0.85, castSpeedMultiplier: 0.8 },
+  },
+  /** House of Ashes (Ult field, refreshed every pulse): DEF / resistance −15 %, ATK −15 %, casts 20 % slower */
+  ash_curse: {
+    id: 'ash_curse', name: 'คำสาปเรือนเถ้า', duration: 1.1, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { defenseMultiplier: 0.85, attackMultiplier: 0.85, castSpeedMultiplier: 0.8 },
+  },
   /** Draeven Sovereign's Dominion (self, Ultimate): −20 % damage taken for 6 s */
   sovereign_dominion: {
     // Blood Dominion (user 2026-10-26): damage taken ↓, Blood Reprisal damage ↑, its self-heal ↑ a little (provisional)

@@ -20,6 +20,9 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
+  // Mordrienne UI art (user 2026-10-27, assets/heroes/Mordrienne/art → tools/sprites/mordrienne_art.py): portrait, the
+  // three skill icons (Ashen Mark broken hex / Cinderbind Hex thorned ground hex / House of Ashes serpent field) and banner.
+  mordrienne: { ...art('mordrienne'), banner: 'banners/mordrienne.webp' },
   // Draeven UI art (user 2026-10-26, assets/heroes/Draeven/art → tools/sprites/draeven_art.py): portrait, the three
   // skill icons (Blood Debt sigil / crimson slash / Blood Dominion sword impact) and banner.
   draeven: { ...art('draeven'), banner: 'banners/draeven.webp' },

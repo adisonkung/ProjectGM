@@ -217,6 +217,19 @@ export interface FxDef {
    * ที่ทะลุไปหาตัวหลัง · เฟรมสุดท้าย (จาง) แสดงที่ปลายทาง
    */
   overshoot?: number;
+  /**
+   * projectiles: where the shot leaves the shooter, as [dx, dy] in % of a cell from the default origin (cell centre,
+   * 42 % height) — dx mirrored with the shooter's facing (e.g. a wand tip; Mordrienne S1 Hex Bolt)
+   */
+  muzzle?: [number, number];
+}
+
+/** a projectile's start point (board cells): the shooter's cell, moved by the FX `muzzle` mirrored with the facing */
+export function projectileOrigin(name: string, from: { x: number; y: number }, toX: number, fallbackFace = 1): { x: number; y: number } {
+  const mz = FX[name]?.muzzle;
+  if (!mz) return from;
+  const face = Math.sign(toX - from.x) || fallbackFace;
+  return { x: from.x + (face * mz[0]) / 100, y: from.y + mz[1] / 100 };
 }
 
 /** เวลาต่อเฟรมปกติ และของท่ายืน (ช้ากว่า ไม่เร่งตามความเร็วการต่อสู้) */
@@ -255,6 +268,62 @@ export const runPace = (frames: number, ms: number, cycles = 1): number =>
 export const SHEETS: Record<string, SheetDef> = {
   // Draeven Morcant Phase A (user 2026-10-22, tools/sprites/draeven.py): Autosprite sheets mapped to one body scale
   // (idle 80 px), soft alpha (painted art, not pixelated). Skill VFX not supplied yet — all skill timings provisional.
+  // Mordrienne Vale Phase A (user 2026-10-26, tools/sprites/mordrienne.py from assets/heroes/Mordrienne): painted art
+  // (not pixelated) · idle 78 px · attack / hurt provisional (S1 point → release / death stagger) · S1 / S2 / Ult
+  // character clips from the user's sheets (the Ult keeps its baked green wand trail + ground splash) · S1 + S2
+  // Timeline Sync done (user 2026-10-26) · Ult VFX (curse field, snake / skull) + sync still to come
+  'hero-mordrienne.png': {
+    cols: 31, rows: 8, cellW: 260, cellH: 170,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    projectile: { attack: 'mo-hex-bolt', skill: 'mo-s1-bolt' },
+    fx: { skill: 'mo-s1-charge', skill2: ['mo-s2-spawn', 'mo-s2-loop', 'mo-s2-burst', 'mo-s2-tip1', 'mo-s2-tip2'],
+      ult: ['mo-ult-aura', 'mo-ult-circle', 'mo-ult-charge', 'mo-ult-burst'] },
+    // House of Ashes field: the loop + end fade are owned by the engine FIELD (start = activation peak, 6 s)
+    fieldFx: { loop: 'mo-ult-field', end: 'mo-ult-field-end' },
+    // Hex Mark: appears on the hit and lives exactly as long as the status
+    statusFx: { hex_mark: { start: 'mo-s1-mark-in', loop: 'mo-s1-mark' } },
+    anims: {
+      // idle (user 2026-10-27): the new wand-forward sheet, 18 frames (every 2nd of 36) — one loop 2.16 s
+      idle: { row: 0, frames: 18, ms: 120 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
+      // hurt (user 2026-10-27, own sheet): hit → recoil → recover to standing · 0.45 s
+      hurt: { row: 2, frames: 8, ms: 60, seq: Array.from({ length: 8 }, (_, i) => i), steps: [50, 60, 70, 60, 50, 50, 50, 60] },
+      // provisional: S1 point → raise → thrust → spark F14 (bolt released) → recover · 0.74 s
+      attack: { row: 3, frames: 10, ms: 70, seq: Array.from({ length: 10 }, (_, i) => i),
+        steps: [70, 80, 70, 60, 70, 90, 80, 70, 70, 80], events: { DAMAGE: 4, RECOVERY_START: 6 } },
+      die: { row: 4, frames: 14, ms: 80 },
+      // S1 Ashen Mark — Timeline Sync (user 2026-10-26): idle 0.00 → aim + CastCharge at the wand tip 0.05 (CAST_START)
+      // → wand-release frame (source F13) 0.30 s = DAMAGE → the Hex Bolt leaves the tip (muzzle) → flight → hit =
+      // magic damage + Hex Mark status + HexMark VFX → recovery 0.71 s → idle 1.11 s
+      skill: { row: 5, frames: 17, ms: 60, seq: Array.from({ length: 17 }, (_, i) => i),
+        steps: [50, 45, 45, 45, 55, 60, 120, 80, 70, 70, 70, 60, 60, 60, 60, 70, 90],
+        events: { CAST_START: 1, ANTICIPATION_PEAK: 5, STRIKE_START: 6, DAMAGE: 6, RECOVERY_START: 11 } },
+      // S2 Cinderbind Hex — Timeline Sync (user 2026-10-26): idle 0.00 → 0.05 animation begins → STRIKE 1 (source
+      // F13) 0.40 s = GroundHexSpawn under the target area (VFX_SPAWN #0) → wand spin 0.65 s = GroundHexLoop charging
+      // on the same ground point (CHARGE_START, no damage) → STRIKE 2 (source F32) 1.27 s = the loop ends and the
+      // HexActivationBurst erupts on the same centre (VFX_SPAWN #1) → burst peak 1.37 s = MAIN HIT (DAMAGE: magic AoE +
+      // Slow + ATK / Cast Speed down, Root if already Hex Marked) → burst decays (no second impact VFX) → recovery
+      // 1.46 s → idle 1.89 s
+      skill2: { row: 6, frames: 30, ms: 60, seq: Array.from({ length: 30 }, (_, i) => i),
+        steps: [50, ...Array(7).fill(50), 100, 50, 50, 50, ...Array(6).fill(70), 50, 50, 50, 50, 100, 90,
+          70, 70, 70, 70, 70, 80],
+        events: { CAST_START: 1, STRIKE_START: [7, 21], VFX_SPAWN: [8, 22], CHARGE_START: 12, DAMAGE: 23, IMPACT: 23,
+          RECOVERY_START: 24 },
+        impact: { hitStopMs: 40, shakePx: 3, shakeMs: 120 } },
+      // Ult House of Ashes — Timeline Sync (user 2026-10-27): idle 0.00 → 0.05 draw the circle (CAST_START, MagicCircleDraw
+      // at the drawn circle) → raise 1.03 (CHARGE_START, ChargeHold at the wand tip) → HOLD 1.21–1.66 → over the head =
+      // charge peak (CHARGE_PEAK 1.96, hold +0.3 s in revision #2) → wand down 2.14 (STRIKE_START, the charge collapses)
+      // → wand on the ground 2.32 = activation (VFX_SPAWN: FieldActivationBurst on the target field, the cast aura
+      // fades) → burst peak 2.57 = DAMAGE: the field opens (opening pulse = initial damage + Ash Curse, + Hex Mark bonus
+      // burst) → the burst settles into the House of Ashes loop (fieldFx, owned by the FIELD) · recovery from 2.41,
+      // idle 2.73 — the field stays on its own
+      ult: { row: 7, frames: 31, ms: 70, seq: Array.from({ length: 31 }, (_, i) => i),
+        steps: [50, ...Array(14).fill(70), 60, 60, 60, 750, 60, 60, 60, 45, 45, 45, 45, 90, 80, 80, 80, 80],
+        events: { CAST_START: 1, CHARGE_START: 15, CHARGE_PEAK: 19, STRIKE_START: 22, VFX_SPAWN: 26, RECOVERY_START: 27,
+          DAMAGE: 29, IMPACT: 29 },
+        eventFeel: { VFX_SPAWN: { hitStopMs: 0, shakePx: 3, shakeMs: 100 } },
+        impact: { hitStopMs: 80, shakePx: 6, shakeMs: 200, flashMs: 100 } },
+    },
+  },
   'hero-draeven.png': {
     // cell 290 wide (root 145, 155): the S2 burst / impact disc reach 140 px ahead of the feet
     cols: 28, rows: 8, cellW: 290, cellH: 170,
@@ -1417,6 +1486,95 @@ export const FX: Record<string, FxDef> = {
     hitIndex: 2, perHit: 1, exceptPrimary: true, pivot: [0.4968, 0.8935], dy: 27.25, scale: 1 / 1.5,
   },
   'linxue-lotus': { file: 'fx-linxue-lotus.png', frames: 1, w: 22, h: 14, frameMs: 60, at: 'target', angle0: 0, scale: 1.3, noRotate: true, pixelated: true },
+  // Mordrienne S1 Ashen Mark (tools/sprites/mordrienne_s1_vfx.py, baked at 2 × atlas px, pixelated). CastCharge: baked
+  // along the clip's wand tip on a canvas anchored at her feet — grows f1 → f5 from 0.05 s to the release (0.30 s),
+  // collapses in 75 ms
+  'mo-s1-charge': {
+    file: 'fx-mordrienne-s1-charge.png', frames: 13, w: 186, h: 226, frameMs: 25, delayMs: 50, at: 'self', on: 'cast',
+    pivot: [0.0269, 0.9956], dy: 27.25, scale: 1 / 3, pixelated: true,
+  },
+  // Hex Bolt: f1 spawn orb at the wand tip (muzzle = release tip, atlas (203, 96)) → f6 full bolt, tip leading;
+  // last frame = ash-rune dispersal at the target
+  'mo-s1-bolt': {
+    file: 'fx-mordrienne-s1-bolt.png', frames: 7, w: 248, h: 82, frameMs: 60, at: 'target', angle0: 0,
+    scale: 1 / 2.6, pixelated: true, muzzle: [91.25, -38.5],
+  },
+  // Hex Mark on the target's upper body: appear (f1 → f5 burst → settle) then a breathing loop while the status lasts
+  'mo-s1-mark-in': {
+    file: 'fx-mordrienne-s1-mark-in.png', frames: 9, w: 88, h: 118, frameMs: 40, at: 'target',
+    dy: -10.25, scale: 1 / 3, pixelated: true, attach: true,
+  },
+  'mo-s1-mark': {
+    file: 'fx-mordrienne-s1-mark.png', frames: 4, w: 88, h: 118, frameMs: 100, delayMs: 360, at: 'target',
+    dy: -10.25, scale: 1 / 3, pixelated: true, attach: true,
+  },
+  // Mordrienne S2 Cinderbind Hex (tools/sprites/mordrienne_s2_vfx.py, the artist's pixels unresampled, pixelated): all
+  // three on the SAME ground point = the centre of the 2 × 2 hex area (groundArea SQUARE_2, at the feet line), pivot =
+  // the hex-ring centre, ring ≈ 150 atlas px (1.9 cells) in every sheet. Spawn on STRIKE 1 (9 × 27.8 ms = ends at the
+  // spin) → Loop from the spin (one cycle 8 × 77.5 ms = ends exactly at STRIKE 2, no damage) → Burst on STRIKE 2
+  // (peak f3 = DAMAGE, full decay + fade; the ground hex is gone with it) — all on the ground layer, under the units
+  'mo-s2-spawn': {
+    file: 'fx-mordrienne-s2-spawn.png', frames: 9, w: 274, h: 336, frameMs: 27.78, at: 'target', groundArea: 'SQUARE_2',
+    event: 'VFX_SPAWN', eventIndex: 0, pivot: [0.5, 0.723214], dy: 27.25, scale: 0.5, layer: 'under', attach: false,
+    pixelated: true,
+  },
+  'mo-s2-loop': {
+    file: 'fx-mordrienne-s2-loop.png', frames: 8, w: 286, h: 291, frameMs: 77.5, at: 'target', groundArea: 'SQUARE_2',
+    event: 'CHARGE_START', pivot: [0.5, 0.67354], dy: 27.25, scale: 0.5, layer: 'under', attach: false, pixelated: true,
+  },
+  'mo-s2-burst': {
+    file: 'fx-mordrienne-s2-burst.png', frames: 8, w: 384, h: 457, frameMs: 50, fadeOutMs: 150, at: 'target',
+    groundArea: 'SQUARE_2', event: 'VFX_SPAWN', eventIndex: 1, pivot: [0.5, 0.85558], dy: 27.25, scale: 0.4,
+    layer: 'under', attach: false, pixelated: true,
+  },
+  // S2 wand-tip strike flash (user 2026-10-27: green light on the wand tip, the skill's emerald): the S1 CastCharge
+  // sigil f3 → f5 peak → collapse, 36 px, on each strike (VFX_SPAWN #0 / #1) at the strike pose's tip (atlas 181, 101)
+  'mo-s2-tip1': {
+    file: 'fx-mordrienne-s2-tip.png', frames: 7, w: 80, h: 104, frameMs: 35, fadeOutMs: 80, at: 'self',
+    event: 'VFX_SPAWN', eventIndex: 0, dx: 63.75, dy: -40.25, scale: 1 / 3, blend: 'add', attach: true, pixelated: true,
+  },
+  'mo-s2-tip2': {
+    file: 'fx-mordrienne-s2-tip.png', frames: 7, w: 80, h: 104, frameMs: 35, fadeOutMs: 80, at: 'self',
+    event: 'VFX_SPAWN', eventIndex: 1, dx: 63.75, dy: -40.25, scale: 1 / 3, blend: 'add', attach: true, pixelated: true,
+  },
+  // Mordrienne Ult House of Ashes (tools/sprites/mordrienne_ult_vfx.py). MagicCircleDraw: on the circle she draws
+  // (atlas 166, 107), f1 → f8 with the drawing, fades as she raises the wand · ChargeHold: at the raised wand tip
+  // (atlas 136, 48), spins, grows f1 → f5 over 0.42 s, loops f5 → f6 → f5 → f4 over the hold, collapses at the
+  // wand-down frame · revision #2: the circle 5 px further forward
+  'mo-ult-circle': {
+    file: 'fx-mordrienne-ult-circle.png', frames: 10, w: 126, h: 210, frameMs: 98, fadeOutMs: 120, at: 'self',
+    event: 'CAST_START', dx: 51.25, dy: -32.75, scale: 1 / 3, attach: true, pixelated: true,
+  },
+  // Cast aura (user 2026-10-27, Mordrienne_ULT_CastAura_VFX.png): behind her from the moment the ult is pressed,
+  // rises f1 → f4, loops f5 → f8 (cyclic cross-fade), fades f9 → f12 when the wand hits the ground (VFX_SPAWN) ·
+  // pivot = ground-ring centre at her feet, ring 120 atlas px (1.5 cells)
+  'mo-ult-aura': {
+    file: 'fx-mordrienne-ult-aura.png', frames: 49, w: 310, h: 276, frameMs: 50, fadeOutMs: 80, at: 'self',
+    event: 'CAST_START', pivot: [0.5, 0.851449], dy: 27.25, scale: 1 / 3, layer: 'under', attach: true, pixelated: true,
+  },
+  'mo-ult-charge': {
+    file: 'fx-mordrienne-ult-charge.png', frames: 40, w: 154, h: 154, frameMs: 30, at: 'self',
+    event: 'CHARGE_START', dx: 7.5, dy: -106.5, scale: 1 / 3, attach: true, pixelated: true,
+  },
+  // FieldActivationBurst → House of Ashes loop → end fade: ONE canvas / pivot (star on the ground ring) / scale (ring
+  // 240 atlas px = 3 cells, revision #2), loop artist pixels unresampled · the burst frames are split along a seam (no
+  // shaved sides) and erupt at a smaller ring (180) that widens into the field in f7 → f10 · burst on the activation frame at the target's field
+  // cell, peak f6 (+250 ms) = DAMAGE = FIELD_STARTED · the loop waits for the burst's last frame (250 ms), its 6
+  // cycles (95.83 ms frames) end on f10 exactly as the 6 s field expires → the end strip fades from f1
+  'mo-ult-burst': {
+    file: 'fx-mordrienne-ult-burst.png', frames: 10, w: 260, h: 338, frameMs: 50, at: 'target', event: 'VFX_SPAWN',
+    pivot: [0.5, 0.627219], dy: 27.25, scale: 0.914286, layer: 'under', attach: false, pixelated: true,
+  },
+  'mo-ult-field': {
+    file: 'fx-mordrienne-ult-field.png', frames: 10, w: 260, h: 338, frameMs: 95.83, delayMs: 250, at: 'target',
+    pivot: [0.5, 0.627219], dy: 27.25, scale: 0.914286, layer: 'under', attach: false, pixelated: true,
+  },
+  'mo-ult-field-end': {
+    file: 'fx-mordrienne-ult-field-end.png', frames: 8, w: 260, h: 338, frameMs: 90, fadeOutMs: 120, at: 'target',
+    pivot: [0.5, 0.627219], dy: 27.25, scale: 0.914286, layer: 'under', attach: false, pixelated: true,
+  },
+  // Mordrienne provisional hex bolt (procedural, tools/sprites/mordrienne.py): 4 flight frames + impact ring
+  'mo-hex-bolt': { file: 'fx-mordrienne-hex-bolt.png', frames: 5, w: 48, h: 48, frameMs: 60, at: 'target', angle0: 0, scale: 0.6 },
   'lumina-orb': { file: 'fx-lumina-orb.png', frames: 5, w: 57, h: 63, frameMs: 60, at: 'target', angle0: 0, scale: 0.8 },
   // Alpha Howl (tools/sprites/fx_alpha_howl.py จากแผ่น 8 เฟรมของผู้ใช้): frame 5 = FX PEAK = SKILL_ACTIVATE,
   // started early by the engine's 'fx' event · wave origin sits at the wolf's raised mouth and travels forward
