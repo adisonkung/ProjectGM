@@ -678,6 +678,8 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       ult: {
         ...archer.ult, name: 'ประหารรัตติกาล', label: 'Nightfall Execution', range: Infinity,
         target: 'FOCUS', fallback: ['MARKED', 'LOWEST_HP_ENEMY', 'CURRENT'], markStatus: 'dusk_mark',
+        // the Execution Bolt flies 1.8 × faster than a normal bolt (user 2026-10-27)
+        projectileSpeed: 1.8,
         delivery: 'PROJECTILE',
         effects: [
           { type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 3.4, secondary: 0.8,

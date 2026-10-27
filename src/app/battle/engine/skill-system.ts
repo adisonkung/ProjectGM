@@ -36,7 +36,7 @@ export interface SkillHost {
   createField(u: BattleUnit, center: Cell, definition: FieldDefinition, pulse: () => void): void;
   /** arrival-based projectile: `onArrive` runs when it lands (even if the shooter died meanwhile) */
   /** `index` = the shot of a multi-shot skill (repeat hit i) — lets the view pick that shot's projectile art */
-  shoot(u: BattleUnit, t: BattleUnit, slot: SkillSlot, sky: boolean, onArrive: () => void, index?: number): void;
+  shoot(u: BattleUnit, t: BattleUnit, slot: SkillSlot, sky: boolean, onArrive: () => void, index?: number, speed?: number): void;
   /** one hit through DamageResolver (+ dodge); false = missed / target gone */
   hit(src: BattleUnit, dst: BattleUnit, mul: number, o: { crit?: boolean; damageType?: DamageKind; sourceId: string; slot?: SkillSlot }): boolean;
   heal(dst: BattleUnit, amount: number, src: BattleUnit): void;
@@ -623,7 +623,7 @@ export class SkillSystem {
           if (target.alive) last = { ...target.pos };
           const at = { ...last };
           if (delivery === 'INSTANT' || target === u) land(target, at, weighted(i), i);
-          else this.h.shoot(u, target, slot, delivery === 'SKY', () => land(target, target.alive ? { ...target.pos } : at, weighted(i), i), i);
+          else this.h.shoot(u, target, slot, delivery === 'SKY', () => land(target, target.alive ? { ...target.pos } : at, weighted(i), i), i, s.projectileSpeed);
         });
       }
     });

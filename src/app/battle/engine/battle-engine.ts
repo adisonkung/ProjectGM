@@ -2059,8 +2059,8 @@ export class BattleEngine {
       },
       later: (d, u, fn) => self.later(d, u, fn),
       createField: (u, center, definition, pulse) => self.fields.add(u.id, center, definition, pulse, () => u.alive, u.side),
-      shoot: (u, t, slot, sky, onArrive, index) => {
-        const flight = sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
+      shoot: (u, t, slot, sky, onArrive, index, speed) => {
+        const flight = (sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos)) / (speed && speed > 0 ? speed : 1);
         self.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: slot, flight, ...(sky ? { sky } : {}), ...(index ? { index } : {}) });
         self.pending.push({ at: self.time + flight, fn: onArrive });
       },

@@ -283,8 +283,8 @@ export const SHEETS: Record<string, SheetDef> = {
     projectile: { attack: 'sy-bolt', skill: 'sy-s1-bolt', skill2: ['sy-s2-bolt', 'sy-s2-bolt', 'sy-s2-final'], ult: 'sy-ult-bolt' },
     fx: {
       skill: 'sy-s1-charge',
-      skill2: ['sy-s2-muzzle1', 'sy-s2-muzzle2', 'sy-s2-muzzle3', 'sy-s2-burst'],
-      ult: ['sy-ult-lock', 'sy-ult-aura', 'sy-ult-charge', 'sy-ult-impact', 'sy-ult-marked'],
+      skill2: ['sy-s2-muzzle1', 'sy-s2-muzzle2', 'sy-s2-muzzle3', 'sy-s2-hit1', 'sy-s2-hit2', 'sy-s2-burst'],
+      ult: ['sy-ult-lock', 'sy-ult-aura', 'sy-ult-charge', 'sy-ult-impact', 'sy-ult-flash', 'sy-ult-marked'],
     },
     // Dusk Mark: appears on the hit, lives exactly as long as the status
     statusFx: { dusk_mark: { start: 'sy-s1-mark-in', loop: 'sy-s1-mark' } },
@@ -303,11 +303,12 @@ export const SHEETS: Record<string, SheetDef> = {
         steps: [40, 40, 40, 40, 40, 70, 70, 80, 90, 80, 55, 55, 55, 60, 60, 60, 55, 55, 55],
         events: { CAST_START: 0, CHARGE_START: 5, CHARGE_PEAK: 8, DAMAGE: 9, RECOVERY_START: 13 },
         impact: { hitStopMs: 30, shakePx: 2, shakeMs: 100 } },
-      // S2 Reaver Volley: draw → aim 0.27 → SHOT 1 0.27 · SHOT 2 0.495 · SHOT 3 = Final Piercing Shot 0.735 (each
-      // DAMAGE = a bolt leaves the tip + its muzzle flash) → hold → recovery 0.89 → idle 1.18 · Marked Burst on the
-      // final bolt's hit when the target carries Dusk Mark
+      // S2 Reaver Volley: draw → aim 0.27 → SHOT 1 0.27 · SHOT 2 0.495 · (a beat longer, user 2026-10-27) SHOT 3 =
+      // Final Piercing Shot 0.835 (each DAMAGE = a bolt leaves the tip + its muzzle flash ahead of it) → hold →
+      // recovery 0.99 → idle 1.28 · shots 1–2 spark on the target · Marked Burst on the final bolt's hit when the target
+      // carries Dusk Mark
       skill2: { row: 6, frames: 21, ms: 55, seq: Array.from({ length: 21 }, (_, i) => i),
-        steps: [40, 40, 40, 45, 50, 55, 60, 55, 55, 55, 60, 55, 55, 70, 90, 60, 60, 60, 55, 55, 60],
+        steps: [40, 40, 40, 45, 50, 55, 60, 55, 55, 55, 70, 75, 85, 110, 90, 60, 60, 60, 55, 55, 60],
         events: { CAST_START: 0, ANTICIPATION_PEAK: 5, DAMAGE: [6, 10, 14], RECOVERY_START: 17 },
         impact: [
           { hitStopMs: 0, shakePx: 1, shakeMs: 70 },
@@ -320,8 +321,12 @@ export const SHEETS: Record<string, SheetDef> = {
       ult: { row: 7, frames: 23, ms: 60, seq: Array.from({ length: 23 }, (_, i) => i),
         steps: [50, 50, 50, 50, 50, 60, 60, 60, 60, 70, 1200, 90, 70, 70, 70, 80, 50, 50, 50, 50, 50, 50, 60],
         events: { CAST_START: 0, CHARGE_START: 10, CHARGE_PEAK: 10.8, DAMAGE: 11, RECOVERY_START: 12 },
-        eventFeel: { CHARGE_PEAK: { zoomPct: 2, shakeMs: 240 } },
-        impact: { hitStopMs: 90, shakePx: 8, shakeMs: 240, flashMs: 120, zoomPct: 4 } },
+        // recoil (user 2026-10-27): the release kicks him back 0.7 cell (56 atlas px, ease-out over ~0.2 s), he holds
+        // there, then eases back while standing up (visual root motion — his board cell does not change)
+        root: [[0, 0, 0], [11, 0, 0], [11.25, -15.2, 0], [11.5, -27.3, 0], [11.75, -36.8, 0], [12, -43.9, 0], [12.25, -49, 0], [12.5, -52.4, 0], [12.75, -54.5, 0], [13, -55.6, 0], [13.25, -55.9, 0], [13.5, -56, 0], [15.5, -56, 0], [16.2, -54.4, 0], [16.9, -50.2, 0], [17.6, -43.9, 0], [18.3, -36.3, 0], [19, -28, 0], [19.7, -19.7, 0], [20.4, -12.1, 0], [21.1, -5.8, 0], [21.8, -1.6, 0], [22.5, 0, 0]],
+        // the release itself shakes the screen; the hit lands harder and longer
+        eventFeel: { CHARGE_PEAK: { zoomPct: 2, shakeMs: 240 }, DAMAGE: { shakePx: 7, shakeMs: 220, flashMs: 70 } },
+        impact: { hitStopMs: 130, shakePx: 12, shakeMs: 420, flashMs: 180, zoomPct: 6 } },
     },
   },
   'hero-mordrienne.png': {
@@ -1674,16 +1679,26 @@ export const FX: Record<string, FxDef> = {
   'sy-s1-mark': {
     file: 'fx-sylas-s1-mark.png', frames: 4, w: 78, h: 82, pivot: [0.494456, 0.495715], frameMs: 110, delayMs: 225, at: 'target', dy: -14, scale: 1 / 3, attach: true,
   },
-  // S2 muzzle flash at the crossbow tip on each shot (the final, piercing shot flashes bigger)
+  // S2 muzzle flash just AHEAD of the crossbow tip on each shot (user 2026-10-27: dx ≈ its radius, like the charges;
+  // the final, piercing shot flashes bigger)
   'sy-s2-muzzle1': {
-    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 28, at: 'self', event: 'DAMAGE', eventIndex: 0, anchor: 'tipS2', scale: 1 / 3, blend: 'add',
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 28, at: 'self', event: 'DAMAGE', eventIndex: 0, anchor: 'tipS2', dx: 22, scale: 1 / 3, blend: 'add',
   },
   'sy-s2-muzzle2': {
-    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 28, at: 'self', event: 'DAMAGE', eventIndex: 1, anchor: 'tipS2', scale: 1 / 3, blend: 'add',
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 28, at: 'self', event: 'DAMAGE', eventIndex: 1, anchor: 'tipS2', dx: 22, scale: 1 / 3, blend: 'add',
   },
   'sy-s2-muzzle3': {
-    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 32, at: 'self', event: 'DAMAGE', eventIndex: 2, anchor: 'tipS2', scale: 0.47, blend: 'add',
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 32, at: 'self', event: 'DAMAGE', eventIndex: 2, anchor: 'tipS2', dx: 30, scale: 0.47, blend: 'add',
     particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 10 }],
+  },
+  // shots 1–2: a small burst on the target as each rapid bolt lands (user 2026-10-27; the muzzle-flash burst, smaller)
+  'sy-s2-hit1': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 30, at: 'target', on: 'impact', hitIndex: 0, dy: -14, scale: 0.27, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 5 }],
+  },
+  'sy-s2-hit2': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 30, at: 'target', on: 'impact', hitIndex: 1, dy: -14, scale: 0.27, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 5 }],
   },
   // S2 projectiles: two rapid bolts, then the Final Piercing Shot (keeps flying through the line)
   'sy-s2-bolt': {
@@ -1701,24 +1716,31 @@ export const FX: Record<string, FxDef> = {
   'sy-ult-lock': {
     file: 'fx-sylas-ult-lock.png', frames: 26, w: 125, h: 136, pivot: [0.497433, 0.496708], frameMs: 75, at: 'target', event: 'CAST_START', dy: -14, scale: 1 / 3, attach: true,
   },
-  // ChargeAura ring around him + CrossbowCharge just ahead of the tip (dx = its radius), both looping over the 1.2 s hold
-  // (2 × 8 × 75 ms)
+  // ChargeAura v2 (user 2026-10-27): ground ring → a swirling sphere builds around him → swirls through the hold → thins
+  // and fades (16 × 75 ms = the 1.2 s hold, once) · CrossbowCharge just ahead of the tip (dx = its radius, 2 × 8 × 75 ms)
   'sy-ult-aura': {
-    file: 'fx-sylas-ult-aura.png', frames: 8, w: 212, h: 209, pivot: [0.498084, 0.985347], frameMs: 75, repeat: 2, fadeOutMs: 120, at: 'self', event: 'CHARGE_START', anchor: 'feet', scale: 1 / 3,
+    file: 'fx-sylas-ult-aura.png', frames: 16, w: 229, h: 267, pivot: [0.499838, 0.988578], frameMs: 75, fadeOutMs: 120, at: 'self', event: 'CHARGE_START', anchor: 'feet', scale: 1 / 3,
     layer: 'under', particles: [{ name: 'spirit-rise', colors: [0xd8fbff, 0x63e6f0], duration: 1.2 }],
   },
   'sy-ult-charge': {
     file: 'fx-sylas-ult-charge.png', frames: 8, w: 89, h: 103, pivot: [0.496285, 0.496242], frameMs: 75, repeat: 2, fadeOutMs: 80, at: 'self', event: 'CHARGE_START', anchor: 'tipUlt', dx: 26, scale: 1 / 3,
     blend: 'add',
   },
-  // Execution Bolt: grows as it flies (7 frames), heavy
+  // Execution Bolt: grows as it flies (7 frames), heavy · bigger (150 atlas px) and 1.8 × faster (kit projectileSpeed)
   'sy-ult-bolt': {
-    file: 'fx-sylas-ult-bolt.png', frames: 8, w: 443, h: 194, pivot: [0.499726, 0.505312], frameMs: 50, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [43.4, -23.5],
+    file: 'fx-sylas-ult-bolt.png', frames: 8, w: 603, h: 263, pivot: [0.499424, 0.505516], frameMs: 50, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [43.4, -23.5],
   },
-  // Impact Burst: the vortex collapses into its centre on the target · Marked Execution on a Dusk-Marked target
+  // Impact Burst (user 2026-10-27: bigger, longer): the vortex bursts open f7 → f1 (0.2 s) → spins at full size
+  // (170 atlas px ≈ 2.1 cells, 0.55 s) → collapses slowly into its centre (0.35 s) + fade · Marked Execution on a
+  // Dusk-Marked target
   'sy-ult-impact': {
-    file: 'fx-sylas-ult-impact.png', frames: 8, w: 245, h: 228, pivot: [0.498463, 0.498376], frameMs: 55, at: 'target', on: 'impact', dy: -14, scale: 1 / 3,
-    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 24, scale: 1.2 }, { name: 'debris', count: 10 }],
+    file: 'fx-sylas-ult-impact.png', frames: 22, w: 351, h: 356, pivot: [0.498744, 0.499105], frameMs: 50, fadeOutMs: 220, at: 'target', on: 'impact', dy: -14, scale: 1 / 3,
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 40, scale: 1.4 }, { name: 'debris', count: 18 },
+      { name: 'dust', count: 12 }, { name: 'spirit-rise', colors: [0xd8fbff, 0x63e6f0], duration: 1 }],
+  },
+  // white-teal blast flash at the heart of the impact (the muzzle-flash burst, ~120 atlas px, additive)
+  'sy-ult-flash': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 40, at: 'target', on: 'impact', dy: -14, scale: 1, blend: 'add',
   },
   'sy-ult-marked': {
     file: 'fx-sylas-ult-marked.png', frames: 8, w: 165, h: 203, pivot: [0.498103, 0.49878], frameMs: 55, at: 'target', on: 'impact', bonusOnly: true, dy: -14, scale: 1 / 3, blend: 'add',

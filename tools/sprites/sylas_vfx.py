@@ -38,10 +38,16 @@ BAKE = {
     # lock on f1–f5, pulse f4 ↔ f5 through the charge (≈ 1.35 s), dissolve f6–f8 as the bolt lands
     'fx-sylas-ult-lock.png': ('Sylas_ULT_TargetLock_VFX.png', 'centre', 60, [0, 1, 2, 3, 4] + [3, 4] * 9 + [5, 6, 7]),
     'fx-sylas-ult-charge.png': ('Sylas_ULT_CrossbowCharge_VFX.png', 'centre', 42, None),
-    'fx-sylas-ult-aura.png': ('Sylas_ULT_ChargeAuraLoop_VFX.png', 'ground', 104, None),
+    # ChargeAuraLoop v2 (user 2026-10-27): ground ring f1 → sphere builds f2–f6 → swirls f5 ↔ f6 through the hold →
+    # thins f7 → fades f8 · 16 × 75 ms = the 1.2 s charge hold, played once
+    'fx-sylas-ult-aura.png': ('Sylas_ULT_ChargeAuraLoop_VFX.png', 'ground', 112, [0, 1, 2, 3, 4, 5, 4, 5, 4, 5, 4, 5, 4, 5, 6, 7]),
     # 7 frames only in this sheet (growing as it flies)
-    'fx-sylas-ult-bolt.png': ('Sylas_ULT_ExecutionBolt_VFX.png', 'tip', 110, [0, 1, 2, 3, 4, 5, 6, 6]),
-    'fx-sylas-ult-impact.png': ('Sylas_ULT_ImpactBurst_VFX.png', 'centre', 118, None),
+    # bigger Execution Bolt (user 2026-10-27: ult bolt bigger + faster)
+    'fx-sylas-ult-bolt.png': ('Sylas_ULT_ExecutionBolt_VFX.png', 'tip', 150, [0, 1, 2, 3, 4, 5, 6, 6]),
+    # Impact Burst (user 2026-10-27: bigger, longer, don't vanish fast): the vortex bursts OPEN (f7 → f1) → spins at
+    # full size (f1 rotated +14° a frame) → collapses slowly into its centre (f2 … f8) · (frame, degrees) = rotated
+    'fx-sylas-ult-impact.png': ('Sylas_ULT_ImpactBurst_VFX.png', 'centre', 170,
+                                [6, 4, 2, 1] + [(0, 14 * i) for i in range(11)] + [(1, 154), (2, 168), (3, 182), (4, 196), (5, 210), 6, 7]),
     'fx-sylas-ult-marked.png': ('Sylas_ULT_MarkedExecution_VFX.png', 'centre', 80, None),
 }
 
@@ -163,6 +169,17 @@ def rescale(f: np.ndarray, r: float) -> np.ndarray:
     return np.dstack([np.clip(rgb, 0, 255), a])
 
 
+def rotate(f: np.ndarray, deg: float, cx: float, cy: float) -> np.ndarray:
+    """rotate a frame about its pivot (premultiplied, bicubic) — counter-clockwise for positive degrees"""
+    if not deg:
+        return f
+    pm = np.dstack([f[..., :3] * f[..., 3:] / 255, f[..., 3]]).astype(np.float32)
+    ch = [np.asarray(Image.fromarray(pm[..., c]).rotate(deg, Image.BICUBIC, center=(cx, cy))) for c in range(4)]
+    a = np.clip(ch[3], 0, 255)
+    rgb = np.stack(ch[:3], -1) / np.maximum(a[..., None] / 255, 1e-3)
+    return np.dstack([np.clip(rgb, 0, 255), a])
+
+
 def bake(name, src, mode, size_px, order, out: Path):
     im = unmix(np.array(Image.open(src).convert('RGB')))
     name_ = Path(src).name
@@ -171,7 +188,14 @@ def bake(name, src, mode, size_px, order, out: Path):
     # the board size refers to the widest frame (bolts: the longest)
     widest = max(np.ptp(np.nonzero(f[..., 3] > 24)[1]) + 1 for f in frames)
     r = 2 * size_px / widest
-    picks = order if order is not None else list(range(len(frames)))
+    picks = list(order) if order is not None else list(range(len(frames)))
+    # (frame, degrees) entries: the frame rotated about its own pivot
+    for i, k in enumerate(picks):
+        if isinstance(k, tuple):
+            frames.append(rotate(frames[k[0]], k[1], *piv[k[0]]))
+            piv.append(piv[k[0]])
+            picks[i] = len(frames) - 1
+    picks = list(picks)
     # common canvas around the pivot (tips: the pivot in the middle so the bolt rotates about its point)
     L = R = U = D = 0
     for k in picks:

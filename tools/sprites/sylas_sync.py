@@ -32,11 +32,17 @@ CLIPS = {  # row, steps (ms), events (step index) — sprites.ts
     'attack': (3, [45, 45, 45, 50, 60, 70, 50, 50, 50, 55, 55, 60], {'DAMAGE': [5]}),
     'skill': (5, [40, 40, 40, 40, 40, 70, 70, 80, 90, 80, 55, 55, 55, 60, 60, 60, 55, 55, 55],
               {'CAST_START': [0], 'CHARGE_START': [5], 'DAMAGE': [9]}),
-    'skill2': (6, [40, 40, 40, 45, 50, 55, 60, 55, 55, 55, 60, 55, 55, 70, 90, 60, 60, 60, 55, 55, 60],
+    'skill2': (6, [40, 40, 40, 45, 50, 55, 60, 55, 55, 55, 70, 75, 85, 110, 90, 60, 60, 60, 55, 55, 60],
                {'CAST_START': [0], 'DAMAGE': [6, 10, 14]}),
     'ult': (7, [50, 50, 50, 50, 50, 60, 60, 60, 60, 70, 1200, 90, 70, 70, 70, 80, 50, 50, 50, 50, 50, 50, 60],
             {'CAST_START': [0], 'CHARGE_START': [10], 'DAMAGE': [11]}),
 }
+# ult recoil root motion [step, dx atlas px] (sprites.ts) — 0.7 cell back after the release, eased home while standing
+ROOT = {'ult': [[0, 0], [11, 0]] + [[11 + 2.5 * i / 10, -56 * (1 - (1 - i / 10) ** 3)] for i in range(1, 11)] + [[15.5, -56]]
+        + [[15.5 + 7 * i / 10, -56 * (1 - (3 - 2 * i / 10) * (i / 10) ** 2)] for i in range(1, 11)]}
+ULT_SPEED = 1.8  # kit projectileSpeed
+# screen shakes (sprites.ts eventFeel DAMAGE on the release, impact on the hit): (px, ms)
+SHAKE_RELEASE, SHAKE_HIT = (7, 220), (12, 420)
 # FxDefs: file, frames, w, h, pivot, frameMs, scale, at, anchor/dy, extra
 REP = json.load(open(Path(__file__).parent / 'sylas_vfx_report.json'))
 
@@ -50,13 +56,15 @@ FX = {
     'sy-s1-charge': fxdef('fx-sylas-s1-charge.png', 40, at='self', anchor='tipS1', dx=24, add=True),
     'sy-s1-mark-in': fxdef('fx-sylas-s1-mark-in.png', 45, at='target', dy=-14),
     'sy-s1-mark': fxdef('fx-sylas-s1-mark.png', 110, at='target', dy=-14, loop=True),
-    'sy-s2-muzzle': fxdef('fx-sylas-s2-muzzle.png', 28, at='self', anchor='tipS2', add=True),
-    'sy-s2-muzzle3': fxdef('fx-sylas-s2-muzzle.png', 32, scale=0.47, at='self', anchor='tipS2', add=True),
+    'sy-s2-muzzle': fxdef('fx-sylas-s2-muzzle.png', 28, at='self', anchor='tipS2', dx=22, add=True),
+    'sy-s2-muzzle3': fxdef('fx-sylas-s2-muzzle.png', 32, scale=0.47, at='self', anchor='tipS2', dx=30, add=True),
+    'sy-s2-hit': fxdef('fx-sylas-s2-muzzle.png', 30, scale=0.27, at='target', dy=-14, add=True),
     'sy-s2-burst': fxdef('fx-sylas-s2-burst.png', 50, at='target', dy=27.25),
     'sy-ult-lock': fxdef('fx-sylas-ult-lock.png', 75, at='target', dy=-14),
-    'sy-ult-aura': fxdef('fx-sylas-ult-aura.png', 75, at='self', anchor='feet', repeat=2, fade=120, under=True),
+    'sy-ult-aura': fxdef('fx-sylas-ult-aura.png', 75, at='self', anchor='feet', fade=120, under=True),
     'sy-ult-charge': fxdef('fx-sylas-ult-charge.png', 75, at='self', anchor='tipUlt', dx=26, repeat=2, fade=80, add=True),
-    'sy-ult-impact': fxdef('fx-sylas-ult-impact.png', 55, at='target', dy=-14),
+    'sy-ult-impact': fxdef('fx-sylas-ult-impact.png', 50, at='target', dy=-14, fade=220),
+    'sy-ult-flash': fxdef('fx-sylas-s2-muzzle.png', 40, scale=1, at='target', dy=-14, add=True),
     'sy-ult-marked': fxdef('fx-sylas-ult-marked.png', 55, at='target', dy=-14, add=True),
 }
 PROJ = {
@@ -153,7 +161,7 @@ def render(kind, t, sched):
         k = None
     hero = ATLAS.crop((k * 260, row * 170, k * 260 + 260, row * 170 + 170)) if k is not None else ATLAS.crop((0, 0, 260, 170))
     hero = hero.resize((260 * UP, 170 * UP), Image.LANCZOS)
-    c.alpha_composite(hero, (int(hx - 130 * UP), int(ROW * C + 0.96 * C - 170 * UP)))
+    c.alpha_composite(hero, (int(hx - 130 * UP + root_dx(kind, t) * UP), int(ROW * C + 0.96 * C - 170 * UP)))
     for d, t0, base in sched['fx']:
         if not d.get('under'):
             draw_fx(c, d, t0, t, base)
@@ -173,9 +181,39 @@ def render(kind, t, sched):
             continue
         fr = frames_of(p, p['scale'] * 1.3 * UP * CELL / 80)[kf]
         put(c, fr, x - fr.width / 2, ty + (sy - ty) * (1 - dt / fl) - fr.height / 2, True)
+    ox = 0
+    for t0, (px, dur) in sched.get('shake', []):
+        u = (t - t0) * 1000
+        if 0 <= u < dur:
+            ox += px * UP * (1 - u / dur) * (1 if int(u / 35) % 2 == 0 else -1)
+    if ox:
+        c = _shift(c, int(round(ox)))
     d = ImageDraw.Draw(c)
     d.text((8, 8), f'{kind}  T{int(round(t * FPS)):03d}  {t:.3f}s{"  (target Dusk-Marked)" if MARKED else ""}', fill='white')
     return c
+
+
+def _shift(im, ox):
+    out = Image.new('RGBA', im.size, (0, 0, 0, 255))
+    out.paste(im, (ox, 0))
+    return out
+
+
+def root_dx(kind, t):
+    if kind not in ROOT:
+        return 0.0
+    steps = CLIPS[kind][1]
+    acc, st = 0, len(steps)
+    for i, s_ in enumerate(steps):
+        if t * 1000 < acc + s_:
+            st = i + (t * 1000 - acc) / s_
+            break
+        acc += s_
+    keys = ROOT[kind]
+    for (a, x0), (b, x1) in zip(keys, keys[1:]):
+        if a <= st <= b:
+            return x0 + (x1 - x0) * (st - a) / (b - a) if b > a else x1
+    return 0.0
 
 
 def schedule(kind):
@@ -200,6 +238,8 @@ def schedule(kind):
             t = at(s)
             fx.append((FX['sy-s2-muzzle3' if i == 2 else 'sy-s2-muzzle'], t, hxy))
             proj.append((PROJ['sy-s2-final' if i == 2 else 'sy-s2-bolt'], t, flight))
+            if i < 2:
+                fx.append((FX['sy-s2-hit'], t + flight, fxy))
         if MARKED:
             fx.append((FX['sy-s2-burst'], at(ev['DAMAGE'][2]) + flight, fxy))
     if kind == 'ult':
@@ -207,10 +247,13 @@ def schedule(kind):
         fx.append((FX['sy-ult-aura'], at(ev['CHARGE_START'][0]), hxy))
         fx.append((FX['sy-ult-charge'], at(ev['CHARGE_START'][0]), hxy))
         t = at(ev['DAMAGE'][0])
-        proj.append((PROJ['sy-ult-bolt'], t, flight))
-        fx.append((FX['sy-ult-impact'], t + flight, fxy))
+        uf = flight / ULT_SPEED
+        proj.append((PROJ['sy-ult-bolt'], t, uf))
+        fx.append((FX['sy-ult-impact'], t + uf, fxy))
+        fx.append((FX['sy-ult-flash'], t + uf, fxy))
         if MARKED:
-            fx.append((FX['sy-ult-marked'], t + flight, fxy))
+            fx.append((FX['sy-ult-marked'], t + uf, fxy))
+        return {'fx': fx, 'proj': proj, 'shake': [(t, SHAKE_RELEASE), (t + uf, SHAKE_HIT)]}, max(sum(steps) / 1000, t + uf + 1.3)
     return {'fx': fx, 'proj': proj}, sum(steps) / 1000
 
 

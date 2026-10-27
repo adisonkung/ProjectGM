@@ -323,6 +323,9 @@ export interface SkillDefinition {
   fallback?: TargetRule[];
   /** the status the MARKED target rule looks for (e.g. 'open_wound') */
   markStatus?: string;
+  /** projectile speed multiplier of this skill's shots (flight time ÷ speed; 2 = twice as fast, the damage lands
+   *  sooner) — omitted = the engine's default flight */
+  projectileSpeed?: number;
   movement?: SkillMovement;
   /** Opt-in action lock: absolute semantic hit times, explicit interruption and optional authored retreat/finishing turn. */
   action?: { type: 'STATIONARY'; interruptible: boolean; lockedTarget?: boolean;

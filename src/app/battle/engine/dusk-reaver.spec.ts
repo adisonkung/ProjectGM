@@ -35,7 +35,7 @@ describe('Sylas Veyrn (3★ Archer) — data / timeline', () => {
     expect(ms('attack', 'DAMAGE')).toEqual([245]);
     expect(ms('skill', 'CHARGE_START')).toEqual([200]);
     expect(ms('skill', 'DAMAGE')).toEqual([510]);
-    expect(ms('skill2', 'DAMAGE')).toEqual([270, 495, 735]);
+    expect(ms('skill2', 'DAMAGE')).toEqual([270, 495, 835]); // 3rd shot a beat later (user 2026-10-27)
     expect(ms('ult', 'CHARGE_START')).toEqual([560]);
     expect(ms('ult', 'DAMAGE')).toEqual([1760]);
     expect(SHEETS[SPRITE].anims.ult!.steps!.reduce((x, y) => x + y, 0)).toBe(2500);
@@ -46,11 +46,27 @@ describe('Sylas Veyrn (3★ Archer) — data / timeline', () => {
     expect(ms('skill', 'CHARGE_START')[0] + ch.frames * ch.frameMs).toBe(ms('skill', 'DAMAGE')[0] + 10);
     for (const i of [0, 1, 2]) expect(fxFor(SPRITE, 'skill2', { on: 'event', event: 'DAMAGE', index: i })).toEqual([`sy-s2-muzzle${i + 1}`]);
     const hold = ms('ult', 'DAMAGE')[0] - ms('ult', 'CHARGE_START')[0];
-    for (const n of ['sy-ult-charge', 'sy-ult-aura']) expect(FX[n].frames * FX[n].frameMs * FX[n].repeat!).toBe(hold);
+    for (const n of ['sy-ult-charge', 'sy-ult-aura']) expect(FX[n].frames * FX[n].frameMs * (FX[n].repeat ?? 1)).toBe(hold);
     expect(fxFor(SPRITE, 'ult', { on: 'event', event: 'CAST_START' })).toEqual(['sy-ult-lock']);
-    expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 0 })).toEqual(['sy-ult-impact', 'sy-ult-marked']);
+    expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 0 })).toEqual(['sy-ult-impact', 'sy-ult-flash', 'sy-ult-marked']);
     expect([FX['sy-ult-marked'].bonusOnly, FX['sy-s2-burst'].bonusOnly, FX['sy-s2-burst'].hitIndex]).toEqual([true, true, 2]);
     expect(SHEETS[SPRITE].statusFx!['dusk_mark']).toEqual({ start: 'sy-s1-mark-in', loop: 'sy-s1-mark' });
+  });
+
+  it('revision (user 2026-10-27): S2 flashes ahead of the tip + sparks shots 1–2 on the target · Ult recoil / shake / bigger impact', () => {
+    for (const i of [1, 2, 3]) expect(FX[`sy-s2-muzzle${i}`].dx).toBeGreaterThan(0);
+    expect(fxFor(SPRITE, 'skill2', { on: 'impact', hit: 0 })).toEqual(['sy-s2-hit1']);
+    expect(fxFor(SPRITE, 'skill2', { on: 'impact', hit: 1 })).toEqual(['sy-s2-hit2']);
+    expect(fxFor(SPRITE, 'skill2', { on: 'impact', hit: 2 })).toEqual(['sy-s2-burst']);
+    const ult = SHEETS[SPRITE].anims.ult!;
+    expect(ult.eventFeel!.DAMAGE!.shakePx).toBeGreaterThan(0); // the release shakes the screen
+    const root = ult.root!;
+    expect(Math.min(...root.map(k => k[1]))).toBe(-56); // 0.7 cell back (80 atlas px a cell)
+    expect(root[root.length - 1]).toEqual([22.5, 0, 0]); // back home before the clip ends (23 steps)
+    expect(root.find(k => k[1] < 0)![0]).toBeGreaterThan(11); // only after the release
+    const imp = FX['sy-ult-impact'];
+    expect(imp.frames * imp.frameMs + imp.fadeOutMs!).toBeGreaterThan(1000);
+    expect(kitOf('sylas', 'archer').ult.projectileSpeed).toBe(1.8);
   });
 
   it('projectiles: Dusk Bolt from the crossbow tip · S2 two rapid bolts then the Final Piercing Shot (per shot)', () => {
@@ -154,6 +170,18 @@ describe('Sylas Veyrn (3★ Archer) — engine', () => {
     expect(shots.map(s => projectileOf(SPRITE, 'skill2', s.index))).toEqual(['sy-s2-bolt', 'sy-s2-bolt', 'sy-s2-final']);
     const imp = ev.filter(x => x.type === 'impact' && x.src === b.sy.id && x.kind === 'skill2') as Extract<BattleEvent, { type: 'impact' }>[];
     expect(imp.find(i => i.index === 2)!.bonus).toContain(f.id);
+  });
+
+  it('the Execution Bolt flies 1.8 × faster than his normal bolt (projectileSpeed)', () => {
+    const b = battle();
+    const [f] = b.foes();
+    b.place(f, { r: 1, c: 8 });
+    b.sy.mana = b.sy.maxMana;
+    expect(b.e.requestUlt(b.sy.id)).toBeTrue();
+    const ev = run(b.e, 3);
+    const shot = ev.find(x => x.type === 'projectile' && x.src === b.sy.id && x.kind === 'ult') as Extract<BattleEvent, { type: 'projectile' }>;
+    const d = Math.max(Math.abs(b.sy.pos.r - f.pos.r), Math.abs(b.sy.pos.c - f.pos.c));
+    expect(shot.flight).toBeCloseTo((0.1 + 0.06 * d) / 1.8, 3);
   });
 
   it('Nightfall Execution: locks the focus, else a Dusk-Marked foe; a marked target takes the execution bonus ×1.4', () => {

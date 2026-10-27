@@ -121,37 +121,37 @@
   "sizePx": 42
  },
  "fx-sylas-ult-aura.png": {
-  "frames": 8,
-  "w": 212,
-  "h": 209,
+  "frames": 16,
+  "w": 229,
+  "h": 267,
   "pivot": [
-   0.498084,
-   0.985347
+   0.499838,
+   0.988578
   ],
-  "bake": 0.8125,
-  "sizePx": 104
+  "bake": 0.9256,
+  "sizePx": 112
  },
  "fx-sylas-ult-bolt.png": {
   "frames": 8,
-  "w": 443,
-  "h": 194,
+  "w": 603,
+  "h": 263,
   "pivot": [
-   0.499726,
-   0.505312
+   0.499424,
+   0.505516
   ],
-  "bake": 0.6215,
-  "sizePx": 110
+  "bake": 0.8475,
+  "sizePx": 150
  },
  "fx-sylas-ult-impact.png": {
-  "frames": 8,
-  "w": 245,
-  "h": 228,
+  "frames": 22,
+  "w": 351,
+  "h": 356,
   "pivot": [
-   0.498463,
-   0.498376
+   0.498744,
+   0.499105
   ],
-  "bake": 0.6067,
-  "sizePx": 118
+  "bake": 0.874,
+  "sizePx": 170
  },
  "fx-sylas-ult-marked.png": {
   "frames": 8,
