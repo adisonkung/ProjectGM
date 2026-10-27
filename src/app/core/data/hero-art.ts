@@ -20,8 +20,10 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
-  // Lucien: temporary portrait cropped from the master reference (tools/sprites/lucien.py) — no UI art supplied yet
-  lucien: { portrait: 'portraits/lucien.webp' },
+  // Lucien UI art (user 2026-10-28, assets/heroes/Lucien/art → tools/sprites/lucien_art.py): portrait, the three
+  // skill icons cut from one framed strip (Black Benediction cross / Martyr's Veil linked crosses / Black Miracle
+  // radiant cross) and banner.
+  lucien: { ...art('lucien'), banner: 'banners/lucien.webp' },
   // Mordrienne UI art (user 2026-10-27, assets/heroes/Mordrienne/art → tools/sprites/mordrienne_art.py): portrait, the
   // three skill icons (Ashen Mark broken hex / Cinderbind Hex thorned ground hex / House of Ashes serpent field) and banner.
   mordrienne: { ...art('mordrienne'), banner: 'banners/mordrienne.webp' },

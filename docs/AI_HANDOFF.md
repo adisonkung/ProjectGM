@@ -14,7 +14,8 @@ Branch `wip/claude-hero-lucien` from origin/master ecf539b (after the S1 hold co
 - Validation: app/spec typecheck, Karma 853/853, `npm run sprites:optimize` run. No balance run.
 - Ult VFX revision (user 2026-10-28): Ult_Charge removed (source kept); SacredAshAuraLoop under Lucien from CHARGE_START; BurdenRelease on Lucien at the release; ONE TeamHealingWave expanding from his feet over the allied side (`lu-ult-wave`, ring 0.54 → 3 cells in 0.42 s, under, not attached; baked by `team_wave` in lucien_vfx.py with a ground-perspective warp) + a small pulse once on each healed ally when the wave reaches it (`lu-ult-halo`, new generic `FxDef.arrival {from, speed}` → per-copy `delayMs` in battle addFx). Karma 854/854.
 - Ult VFX revision #2 (user 2026-10-28): the wave starts at BurdenRelease's peak (frame 6, `delayMs` 300); each healed ally now gets BurdenRelease (same art/size as Lucien's, `lu-ult-ally-release`, on the wave's arrival) instead of the small heal pulse; ground pivots of the grid-cut VFX fixed (per-frame widest lower row, median) — AshAura / BurdenAbsorb / LinkSource no longer sit below the feet. Karma 854/854.
-- Missing assets: Sacred Burden stack / ward / recovery status visuals, UI art (icons, banner, real portrait), a final Timeline Sync. Not merged; awaiting review.
+- UI art (user 2026-10-28): `assets/heroes/Lucien/art/{portrait,skills,banner}.png` (skills = one strip of three framed panels, S1 / S2 / Ult) → `tools/sprites/lucien_art.py` → portrait 288 / icons 160 / banner 1400; `HERO_ART.lucien` now has all five. Karma 854/854.
+- Missing assets: Sacred Burden stack / ward / recovery status visuals, a final Timeline Sync. Not merged; awaiting review.
 
 ## Previous task — Lucien Valthorne Skill 1 sources held (Claude, 2026-10-27)
 
