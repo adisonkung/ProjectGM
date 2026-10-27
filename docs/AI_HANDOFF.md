@@ -2,6 +2,14 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Latest task — Lucien Valthorne Skill 1 sources held (Claude, 2026-10-27)
+
+Branch `wip/claude-hero-lucien` from origin/master ecf539b. The user supplied a 56-frame staff-raise cast (two copies of the same animation on junk backgrounds) plus a holy-cross VFX sheet and said: remember this pose + VFX as **Skill 1 of Lucien Valthorne** for now. Not in the game yet (no hero registration, kit, atlas or FxDef).
+
+- Sources tracked unchanged: `assets/heroes/Lucien/skill/lucien_s1_sheet_{a,b}.png` (8 × 7 cells of 512 px), `assets/heroes/Lucien/vfx/Lucien_S1_StaffCross_VFX.png` (5 × 2, magenta key).
+- `python3 tools/sprites/lucien_s1_prep.py <out>` → clean transparent sheet (background cut; sheet b + frames 4/43 from sheet a), staff-head track, VFX mapping (grow with the raise → pulse at the top → stays until the staff is planted → fades at frames 51–53) and a 20 FPS preview. Timing provisional.
+- Still unknown: class, kit, the base sheets (idle / run / hurt / death), S2 / Ult.
+
 ## Latest task — Mordrienne Vale Phase A (Claude, 2026-10-26)
 
 Branch `wip/claude-hero-mordrienne` from origin/master 43b1099. User supplied idle (×2 variants) / run / death / S1 / S2 / Ult sheets + master reference and the kit concept (Mage — Control / Debuff); answered: sheet mapping as proposed, provisional attack + hurt, Phase A + all three skill clips, full name Mordrienne Vale.

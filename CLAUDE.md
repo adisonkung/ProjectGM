@@ -16,6 +16,10 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Lucien Valthorne — Skill 1 sources (2026-10-27, Claude, ยังไม่อยู่ในเกม)
+
+branch `wip/claude-hero-lucien` (ฐาน origin/master ecf539b) · ผู้ใช้: "จำท่าและ VFX นี้ว่าเป็น skill 1 ของ Lucien Valthorne ไว้ก่อน" · ต้นฉบับ track ห้ามแก้ `assets/heroes/Lucien/skill/lucien_s1_sheet_{a,b}.png` (ท่าชูคทา 56 เฟรม 8 × 7 ช่อง 512 สองชุดเดียวกันบนพื้นขยะ: a ชมพู/เทา/กล่องขาว/วงชมพู · b เขียวโปร่ง + กล่องขาว/วงชมพู) + `vfx/Lucien_S1_StaffCross_VFX.png` (ไม้กางเขนพลอยแดง 10 เฟรม 5 × 2 พื้น magenta: f1–f5 โต · f6–f10 หด) · `python3 tools/sprites/lucien_s1_prep.py <out>` = ตัดพื้นหลังต่อช่อง (flood จากขอบผ่านสีพื้นหลัง + ช่องปิด, เก็บชิ้นตัวละคร, ลบเส้นบาง/เศษซีดชมพู, ขอบนุ่ม 1.5 px, ดึง spill ชมพู) ใช้ชุด b (เก็บซี่คทา/โซ่กระถางธูป) + เฟรม 4/43 จากชุด a · VFX unmix magenta (แสงคงทอง, ควันเข้มโทนอุ่น) วางพลอยที่หัวคทาที่ track ทุกเฟรม (centroid 40 px บนสุดฝั่งคทา): โตตอนยก → เต้น f4/f5 ตอนชู → อยู่จนคทาลงพื้น (ผู้ใช้) → จางเฟรม 51–53 · พรีวิว 20 FPS (ชั่วคราว) · ยังไม่มี: คลาส/kit/base sheet/S2/Ult
+
 ## Mordrienne Vale — Mage (Control / Debuff) · Phase A (2026-10-26, Claude)
 
 branch `wip/claude-hero-mordrienne` (ฐาน origin/master 43b1099, ยังไม่ merge — รอรีวิว) · ฮีโร่ #13 `mordrienne` / มอร์เดรียนน์ เวล · คลาส **mage** เดิม · 3★ ชั่วคราว · ไม่แจก starter/bench · ธีม aristocratic dark-fantasy academy witch · VFX ธีม Deep Emerald Curse + Black Ash + Broken Hex Geometry · identity = คำสาป/Hex/Slow/Root/ลด ATK + Cast Speed/คุมพื้นที่ ไม่ใช่ระเบิดดาเมจ
