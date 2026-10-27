@@ -27,7 +27,8 @@ describe('Sylas Veyrn (3★ Archer) — data / timeline', () => {
       .toEqual([[0, 18], [1, 8], [2, 11], [3, 12], [4, 19], [5, 19], [6, 21], [7, 23]]);
     for (const k of ['attack', 'skill', 'skill2', 'ult'] as const) expect(a[k]!.steps!.length).toBe(a[k]!.frames);
     expect(HERO_BY_ID['sylas']).toEqual(jasmine.objectContaining({ cls: 'archer', star: 3, sprite: SPRITE }));
-    expect(HERO_ART['sylas']).toEqual({ portrait: 'portraits/sylas.webp' });
+    expect(HERO_ART['sylas']).toEqual({ portrait: 'portraits/sylas.webp', s1: 'skills/sylas-s1.webp', s2: 'skills/sylas-s2.webp',
+      ult: 'skills/sylas-ult.webp', banner: 'banners/sylas.webp' });
     for (const n of fxNames(SPRITE, 'skill').concat(fxNames(SPRITE, 'skill2'), fxNames(SPRITE, 'ult'))) expect(FX[n]).toBeDefined();
   });
 

@@ -20,8 +20,9 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
-  // Sylas Phase A (2026-10-27): temporary portrait cropped from the master reference — no UI art supplied yet
-  sylas: { portrait: 'portraits/sylas.webp' },
+  // Sylas UI art (user 2026-10-27, assets/heroes/Sylas/art → tools/sprites/sylas_art.py): portrait, the three skill
+  // icons (Dusk Mark bolt + crosshair / Reaver Volley three bolts / Nightfall Execution vortex) and banner (2:1).
+  sylas: { ...art('sylas'), banner: 'banners/sylas.webp' },
   // Mordrienne UI art (user 2026-10-27, assets/heroes/Mordrienne/art → tools/sprites/mordrienne_art.py): portrait, the
   // three skill icons (Ashen Mark broken hex / Cinderbind Hex thorned ground hex / House of Ashes serpent field) and banner.
   mordrienne: { ...art('mordrienne'), banner: 'banners/mordrienne.webp' },
