@@ -21,7 +21,8 @@ describe('Mordrienne Vale (3★ Mage, Phase A)', () => {
       .toEqual([[0, 18], [1, 8], [2, 8], [3, 10], [4, 14], [5, 17], [6, 30], [7, 31]]);
     for (const k of ['attack', 'skill', 'skill2', 'ult'] as const) expect(a[k]!.steps!.length).toBe(a[k]!.frames);
     expect(HERO_BY_ID['mordrienne']).toEqual(jasmine.objectContaining({ cls: 'mage', star: 3, sprite: 'hero-mordrienne.png' }));
-    expect(HERO_ART['mordrienne']).toEqual({ portrait: 'portraits/mordrienne.webp' });
+    expect(HERO_ART['mordrienne']).toEqual(jasmine.objectContaining({ portrait: 'portraits/mordrienne.webp',
+      banner: 'banners/mordrienne.webp' }));
     expect(sh.projectile).toEqual({ attack: 'mo-hex-bolt', skill: 'mo-s1-bolt' });
     expect(FX['mo-hex-bolt'].file).toBe('fx-mordrienne-hex-bolt.png');
   });

@@ -195,7 +195,11 @@ def main():
         meta[anim] = {'row': row, 'frames': len(picks), 'source': sheet, 'sourceFrames': picks}
     out.mkdir(parents=True, exist_ok=True)
     Image.fromarray(atlas).save(out / 'hero-mordrienne.png', optimize=True)
-    portrait(src / 'reference/mordrienne_master_reference.png', portraits / 'mordrienne.webp')
+    if (src / 'art/portrait.png').is_file():  # the user's painted UI art (2026-10-27) wins over the reference crop
+        import mordrienne_art
+        mordrienne_art.bake_ui(src / 'art', portraits.parent)
+    else:
+        portrait(src / 'reference/mordrienne_master_reference.png', portraits / 'mordrienne.webp')
     hex_bolt(out / 'fx-mordrienne-hex-bolt.png')
     body = atlas[:CELL_H, :CELL_W, 3] > 96
     ys = np.nonzero(body.any(1))[0]
