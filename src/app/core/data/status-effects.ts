@@ -138,6 +138,11 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
   hex_mark: {
     id: 'hex_mark', name: 'ตราสาปเถ้า', duration: 8, stackPolicy: 'REFRESH_DURATION', modifiers: {},
   },
+  /** Dusk Mark (Sylas S1): a marker — Sylas's shots hit the marked foe harder (`DAMAGE.bonusVsStatus` on his attack /
+   * skills), Reaver Volley's final bolt bursts on it, Nightfall Execution executes it */
+  dusk_mark: {
+    id: 'dusk_mark', name: 'ตราสนธยา', duration: 8, stackPolicy: 'REFRESH_DURATION', modifiers: {},
+  },
   /** Cinderbind Hex (S2): ATK −15 %, channelled casts 20 % slower */
   cinder_hex: {
     id: 'cinder_hex', name: 'คำสาปพันธนาการ', duration: 4, stackPolicy: 'REFRESH_DURATION',

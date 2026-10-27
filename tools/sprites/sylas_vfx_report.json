@@ -1,0 +1,167 @@
+{
+ "fx-sylas-s1-charge.png": {
+  "frames": 8,
+  "w": 73,
+  "h": 85,
+  "pivot": [
+   0.494942,
+   0.494299
+  ],
+  "bake": 0.2615,
+  "sizePx": 34
+ },
+ "fx-sylas-s1-bolt.png": {
+  "frames": 6,
+  "w": 235,
+  "h": 59,
+  "pivot": [
+   0.499904,
+   0.494427
+  ],
+  "bake": 0.5225,
+  "sizePx": 58
+ },
+ "fx-sylas-bolt.png": {
+  "frames": 5,
+  "w": 145,
+  "h": 36,
+  "pivot": [
+   0.497794,
+   0.464464
+  ],
+  "bake": 0.3423,
+  "sizePx": 38
+ },
+ "fx-sylas-s1-mark-in.png": {
+  "frames": 5,
+  "w": 93,
+  "h": 93,
+  "pivot": [
+   0.496222,
+   0.49782
+  ],
+  "bake": 0.2973,
+  "sizePx": 44
+ },
+ "fx-sylas-s1-mark.png": {
+  "frames": 4,
+  "w": 78,
+  "h": 82,
+  "pivot": [
+   0.494456,
+   0.495715
+  ],
+  "bake": 0.2973,
+  "sizePx": 44
+ },
+ "fx-sylas-s2-muzzle.png": {
+  "frames": 8,
+  "w": 85,
+  "h": 88,
+  "pivot": [
+   0.495531,
+   0.496383
+  ],
+  "bake": 0.2402,
+  "sizePx": 40
+ },
+ "fx-sylas-s2-bolt.png": {
+  "frames": 6,
+  "w": 188,
+  "h": 55,
+  "pivot": [
+   0.498466,
+   0.48994
+  ],
+  "bake": 0.2884,
+  "sizePx": 46
+ },
+ "fx-sylas-s2-final.png": {
+  "frames": 6,
+  "w": 332,
+  "h": 135,
+  "pivot": [
+   0.498746,
+   0.486558
+  ],
+  "bake": 0.4162,
+  "sizePx": 82
+ },
+ "fx-sylas-s2-burst.png": {
+  "frames": 8,
+  "w": 160,
+  "h": 154,
+  "pivot": [
+   0.498514,
+   0.982737
+  ],
+  "bake": 0.4756,
+  "sizePx": 78
+ },
+ "fx-sylas-ult-lock.png": {
+  "frames": 26,
+  "w": 125,
+  "h": 136,
+  "pivot": [
+   0.497433,
+   0.496708
+  ],
+  "bake": 0.3582,
+  "sizePx": 60
+ },
+ "fx-sylas-ult-charge.png": {
+  "frames": 8,
+  "w": 89,
+  "h": 103,
+  "pivot": [
+   0.496285,
+   0.496242
+  ],
+  "bake": 0.3387,
+  "sizePx": 42
+ },
+ "fx-sylas-ult-aura.png": {
+  "frames": 8,
+  "w": 212,
+  "h": 209,
+  "pivot": [
+   0.498084,
+   0.985347
+  ],
+  "bake": 0.8125,
+  "sizePx": 104
+ },
+ "fx-sylas-ult-bolt.png": {
+  "frames": 8,
+  "w": 443,
+  "h": 194,
+  "pivot": [
+   0.499726,
+   0.505312
+  ],
+  "bake": 0.6215,
+  "sizePx": 110
+ },
+ "fx-sylas-ult-impact.png": {
+  "frames": 8,
+  "w": 245,
+  "h": 228,
+  "pivot": [
+   0.498463,
+   0.498376
+  ],
+  "bake": 0.6067,
+  "sizePx": 118
+ },
+ "fx-sylas-ult-marked.png": {
+  "frames": 8,
+  "w": 165,
+  "h": 203,
+  "pivot": [
+   0.498103,
+   0.49878
+  ],
+  "bake": 0.3738,
+  "sizePx": 80
+ }
+}

@@ -35,7 +35,8 @@ export interface SkillHost {
   later(delay: number, u: BattleUnit, fn: () => void): void;
   createField(u: BattleUnit, center: Cell, definition: FieldDefinition, pulse: () => void): void;
   /** arrival-based projectile: `onArrive` runs when it lands (even if the shooter died meanwhile) */
-  shoot(u: BattleUnit, t: BattleUnit, slot: SkillSlot, sky: boolean, onArrive: () => void): void;
+  /** `index` = the shot of a multi-shot skill (repeat hit i) — lets the view pick that shot's projectile art */
+  shoot(u: BattleUnit, t: BattleUnit, slot: SkillSlot, sky: boolean, onArrive: () => void, index?: number): void;
   /** one hit through DamageResolver (+ dodge); false = missed / target gone */
   hit(src: BattleUnit, dst: BattleUnit, mul: number, o: { crit?: boolean; damageType?: DamageKind; sourceId: string; slot?: SkillSlot }): boolean;
   heal(dst: BattleUnit, amount: number, src: BattleUnit): void;
@@ -135,6 +136,8 @@ export class SkillSystem {
   private supported: BattleUnit[] = [];
   /** the last applyEffects launched a travelling wave (it emits its own impacts per collision) */
   private travelled = false;
+  /** units of the last resolved hit that took a `bonusVsStatus` bonus (impact presentation: marked-target bursts) */
+  private bonused: BattleUnit[] = [];
 
   constructor(private readonly h: SkillHost) {}
 
@@ -576,7 +579,8 @@ export class SkillSystem {
       if (slot !== 'attack' && !this.travelled) {
         // contact presentation after the effects resolved: which units this hit really damaged (impact FX per target)
         if (authoredImpact) this.h.emit({ type: 'animEvent', src: u.id, event: 'IMPACT', name: `${s.id.toUpperCase()}_IMPACT`, kind: kind as SkillKind, index });
-        this.h.emit({ type: 'impact', src: u.id, dst, kind: kind as SkillKind, index, hits: shown.map(f => f.id) });
+        const bonus = this.bonused.length ? { bonus: this.bonused.map(f => f.id) } : {};
+        this.h.emit({ type: 'impact', src: u.id, dst, kind: kind as SkillKind, index, hits: shown.map(f => f.id), ...bonus });
       }
       if (mv?.type === 'DASH_THROUGH' && (!mv.firstHitOnly || index === 0)) this.dashThrough(u, primary, at);
     };
@@ -619,7 +623,7 @@ export class SkillSystem {
           if (target.alive) last = { ...target.pos };
           const at = { ...last };
           if (delivery === 'INSTANT' || target === u) land(target, at, weighted(i), i);
-          else this.h.shoot(u, target, slot, delivery === 'SKY', () => land(target, target.alive ? { ...target.pos } : at, weighted(i), i));
+          else this.h.shoot(u, target, slot, delivery === 'SKY', () => land(target, target.alive ? { ...target.pos } : at, weighted(i), i), i);
         });
       }
     });
@@ -639,6 +643,7 @@ export class SkillSystem {
     const damaged = new Set<BattleUnit>();
     this.supported = [];
     this.travelled = false;
+    this.bonused = [];
     for (const e of s.effects) {
       switch (e.type) {
         case 'FIELD': {
@@ -712,7 +717,10 @@ export class SkillSystem {
             if (mul <= 0) continue;
             if (e.requireStatus && !had(f, e.requireStatus)) continue;
             mul *= rankPower(u, slot);
-            if (e.bonusVsStatus && had(f, e.bonusVsStatus.status)) mul *= e.bonusVsStatus.mul;
+            if (e.bonusVsStatus && had(f, e.bonusVsStatus.status)) {
+              mul *= e.bonusVsStatus.mul;
+              if (!this.bonused.includes(f)) this.bonused.push(f);
+            }
             if (e.executeBonus && hpPct(f) <= e.executeBonus.hpBelow) mul *= e.executeBonus.mul;
             if (e.bonusVsGuard && this.h.guarded(f)) mul *= e.bonusVsGuard;
             const crit = !!e.guaranteedCrit || this.h.rng() < (u.mods?.critChance ?? CRIT_CHANCE);

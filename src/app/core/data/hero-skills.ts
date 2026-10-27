@@ -638,6 +638,55 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
     },
   },
+  // Sylas Veyrn — The Dusk Reaver (user 2026-10-27): Archer class ids + cooldowns (rank tables apply), repeating
+  // hand-crossbow · Dusk Mark makes the target take more from HIS shots (bonusVsStatus on every Sylas hit) and powers
+  // the rest of the kit · provisional numbers (no balance pass yet)
+  sylas: {
+    id: 'sylas', cls: 'archer', identity: 'Ranged DPS · Hunter · Dusk Mark · Rapid Volley · Execution Shot',
+    kit: {
+      ...archer,
+      attack: {
+        ...archer.attack, name: 'ลูกดอกสนธยา', label: 'Dusk Shot',
+        effects: [{ type: 'DAMAGE', area: 'SINGLE', primary: 1, bonusVsStatus: { status: 'dusk_mark', mul: 1.15 } }],
+      },
+      // S1 Dusk Mark: aim → short charge at the crossbow tip → one Dusk Bolt → the target carries Dusk Mark (8 s)
+      skill: {
+        ...archer.skill, name: 'ตราสนธยา', label: 'Dusk Mark', target: 'CURRENT', delivery: 'PROJECTILE', repeat: undefined,
+        effects: [
+          { type: 'DAMAGE', area: 'SINGLE', primary: 1.8, bonusVsStatus: { status: 'dusk_mark', mul: 1.15 } },
+          { type: 'APPLY_STATUS', status: 'dusk_mark', to: 'HIT', duration: 8 },
+        ],
+        ai: { tier: 'NORMAL' },
+      },
+      // S2 Reaver Volley: three bolts on the clip's shots (two rapid bolts, then the Final Piercing Shot through the line
+      // 1 × 3) · a Dusk-Marked target also takes the Marked Burst on the final bolt
+      skill2: {
+        ...archer.skill2, name: 'ห่าลูกดอกอสูร', label: 'Reaver Volley', target: 'CURRENT', fallback: ['NEAREST_ENEMY'],
+        delivery: 'PROJECTILE',
+        repeat: { count: 3, gap: 0.24, weights: [0.25, 0.25, 0.5] },
+        effects: [
+          { type: 'DAMAGE', area: 'SINGLE', primary: 2.0, bonusVsStatus: { status: 'dusk_mark', mul: 1.15 }, onHits: [0, 1] },
+          { type: 'DAMAGE', area: 'LINE_3', primary: 2.0, secondary: 1.0, pierceDelays: [0.05, 0.08],
+            bonusVsStatus: { status: 'dusk_mark', mul: 1.15 }, onHits: [2] },
+          { type: 'DAMAGE', area: 'SINGLE', primary: 1.0, requireStatus: 'dusk_mark', onHits: [2] },
+        ],
+        ai: { tier: 'NORMAL' },
+      },
+      // Ult Nightfall Execution: lock the target (the player's focus → a Dusk-Marked foe → the weakest) → heavy charge →
+      // one Execution Bolt → the vortex Impact Burst (small splash around it) · a Dusk-Marked target takes the
+      // execution bonus
+      ult: {
+        ...archer.ult, name: 'ประหารรัตติกาล', label: 'Nightfall Execution', range: Infinity,
+        target: 'FOCUS', fallback: ['MARKED', 'LOWEST_HP_ENEMY', 'CURRENT'], markStatus: 'dusk_mark',
+        delivery: 'PROJECTILE',
+        effects: [
+          { type: 'DAMAGE', area: 'ADJACENT_8', center: 'TARGET', primary: 3.4, secondary: 0.8,
+            bonusVsStatus: { status: 'dusk_mark', mul: 1.4 } },
+        ],
+        ai: { tier: 'NORMAL' },
+      },
+    },
+  },
 };
 
 /** the kit a unit fights with: its hero's own kit, else its class kit */

@@ -32,7 +32,7 @@ import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
-import { animOf, appliedStatusFx, retaliateFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, projectileOrigin, SHEETS, SkillKind } from '../../core/data/sprites';
+import { animOf, appliedStatusFx, retaliateFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, projectileOf, projectileOrigin, SHEETS, SkillKind } from '../../core/data/sprites';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
@@ -925,7 +925,7 @@ export class BattleComponent implements OnDestroy {
     const posOf = (id: number) => this.screenOf(unitOf(id));
     const set = (id: number, anim: AnimState['anim'], extra: Partial<AnimState> = {}) => (anims[id] = { anim, key: ++this.animKey, ...extra });
     /** FX layers of this skill that start on this trigger (data: FxDef.on / event / hitIndex / perHit / anchor / layer) */
-    const addFx = (src: number, dst: number | undefined, kind: SkillKind, trig: FxTrigger, hits?: number[]) => {
+    const addFx = (src: number, dst: number | undefined, kind: SkillKind, trig: FxTrigger, hits?: number[], bonus?: number[]) => {
       const sprite = unitOf(src).sprite;
       for (const name of fxFor(sprite, kind, trig)) {
         const def = FX[name];
@@ -936,6 +936,8 @@ export class BattleComponent implements OnDestroy {
         const at = def.at === 'target'
           ? (def.perHit ? [...new Set([...(def.hitsOnly ? [] : [target]), ...(hits ?? [])].filter((x): x is number => x != null && !(def.exceptPrimary && x === target) && !!this.engine.units.find(u => u.id === x)))].slice(0, def.perHit === 'all' ? undefined : def.perHit) : target != null ? [target] : [src])
           : [src];
+        // marked-target bursts: only on the units this hit struck with a status bonus
+        if (def.bonusOnly) at.splice(0, at.length, ...at.filter(id => bonus?.includes(id)));
         if (def.at === 'allies') {
           // team field: the centre of the caster's living formation (lanes / columns averaged), never rotated
           const team = this.engine.units.filter(u => u.side === unitOf(src).side && u.alive).map(u => posOf(u.id));
@@ -1023,7 +1025,7 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'impact': {
-          addFx(e.src, e.dst, e.kind, { on: 'impact', hit: e.index }, e.hits);
+          addFx(e.src, e.dst, e.kind, { on: 'impact', hit: e.index }, e.hits, e.bonus);
           // contact feel authored on the clip (AnimDef.impact, per hit): hit-stop + shake (+ flash) — only on a real hit
           if (e.hits?.length !== 0) {
             const ip = posOf(e.dst != null && this.engine.units.some(u => u.id === e.dst) ? e.dst : e.src);
@@ -1077,7 +1079,7 @@ export class BattleComponent implements OnDestroy {
         }
         case 'projectile': {
           const src = unitOf(e.src);
-          const name = SHEETS[src.sprite ?? '']?.projectile?.[e.kind] ?? CLASS_PROJECTILE[src.cls];
+          const name = projectileOf(src.sprite, e.kind, e.index) ?? CLASS_PROJECTILE[src.cls];
           if (!name || !FX[name]) break;
           const p = posOf(e.src), q = posOf(e.dst);
           const to = { x: q.c, y: q.r + SCENERY_ROWS };

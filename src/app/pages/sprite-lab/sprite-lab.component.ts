@@ -17,7 +17,7 @@ import { MONSTERS } from '../../core/data/monsters';
 import { HEROES } from '../../core/data/heroes';
 import { animEvents, animOf, animTiming, clipClock, eventFeelOf, FX, fxAttached, fxFor, fxOffset, FxTrigger, FRAME_MS, IDLE_FRAME_MS, impactFeelOf, SHEETS, SkillKind, SpriteAnim } from '../../core/data/sprites';
 import { kitOf } from '../../core/data/hero-skills';
-import { appliedStatusFx, projectileOrigin } from '../../core/data/sprites';
+import { appliedStatusFx, projectileOf, projectileOrigin } from '../../core/data/sprites';
 import { STATUS_ICONS } from '../../core/data/visuals';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
@@ -309,7 +309,7 @@ export class SpriteLabComponent implements OnDestroy {
 
   /** Presentation demo only: engine hero flight rule (0.1 + 0.06 × cell distance), not a fixed VFX delay. */
   private launchSingleProjectile(kind: SkillKind, release: number, contact: () => void): void {
-    const name = this.sheet()?.projectile?.[kind];
+    const name = projectileOf(this.hero().sprite, kind);
     const [me] = this.units();
     const target = this.units().find(u => u.id === this.dummyIds[0])!;
     const flight = 0.1 + 0.06 * Math.max(Math.abs(target.c - me.c), Math.abs(target.r - me.r));
@@ -324,7 +324,8 @@ export class SpriteLabComponent implements OnDestroy {
   }
 
   /** the FX layers bound to this trigger (same `fxFor` / `fxOffset` the battle page uses) */
-  private spawn(kind: SkillKind, trig: FxTrigger, hits: number[] = []): void {
+  /** `bonus` (engine-driven runs) = units struck with a status bonus — `bonusOnly` FX only there; the demo shows them */
+  private spawn(kind: SkillKind, trig: FxTrigger, hits: number[] = [], bonus?: number[]): void {
     const sprite = this.hero().sprite;
     const names = fxFor(sprite, kind, trig);
     if (!names.length && !SHEETS[sprite ?? '']?.sequenceFx?.[kind]?.length && trig.on === 'event' && trig.event === 'VFX_SPAWN') this.note(-1, 'no VFX for VFX_SPAWN → skipped (combat unaffected)');
@@ -334,6 +335,7 @@ export class SpriteLabComponent implements OnDestroy {
       const def = FX[name];
       const at = def.at === 'target' ? (trig.on === 'event' ? this.dummyIds.slice(0, 1) : hits).slice(def.exceptPrimary ? 1 : 0).slice(0, def.perHit === 'all' ? undefined : def.perHit ?? 1).map(id => units.find(x => x.id === id)!) : [me];
       for (const u of at) {
+        if (def.bonusOnly && bonus && !bonus.includes(u.id)) continue;
         const cell = groundFxCell(def, { r: me.r, c: me.c }, { r: u.r, c: u.c }, !!me.flip);
         const f: FxView = { id: ++this.id, r: cell.r, c: cell.c, name, angle: 0, flip: !!me.flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
           follow: fxAttached(name) ? u.id : undefined };
@@ -406,7 +408,7 @@ export class SpriteLabComponent implements OnDestroy {
         } else if (e.type === 'projectile') {
           const from = units.find(u => u.id === id(e.src))!;
           const to = units.find(u => u.id === id(e.dst))!;
-          const name = SHEETS[from.sprite ?? '']?.projectile?.[e.kind];
+          const name = projectileOf(from.sprite, e.kind, e.index);
           if (name && FX[name]) {
             const p: ProjectileView = { id: ++this.id, name, flight: e.flight * 1000,
               from: e.sky ? { x: to.c + (from.c < to.c ? -1.2 : 1.2), y: to.r + SCENERY_ROWS - 3.2 }
@@ -415,7 +417,7 @@ export class SpriteLabComponent implements OnDestroy {
             this.at(projectileLife(p.flight) / 1000, () => this.projectiles.update(l => l.filter(x => x.id !== p.id)));
           }
         } else if (e.type === 'impact') {
-          this.spawn(kind, { on: 'impact', hit: e.index }, (e.hits ?? []).map(id));
+          this.spawn(kind, { on: 'impact', hit: e.index }, (e.hits ?? []).map(id), e.bonus?.map(id));
         } else if (e.type === 'shield') {
           const target = units.find(u => u.id === id(e.dst))!;
           const f: FloatText = { id: ++this.id, r: target.r, c: target.c, text: `+โล่ ${e.amount}`, kind: 'shield' };

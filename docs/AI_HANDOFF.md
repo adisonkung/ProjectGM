@@ -2,7 +2,19 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Mordrienne Vale Phase A (Claude, 2026-10-26)
+## Latest task — Sylas Veyrn, The Dusk Reaver (Claude, 2026-10-27)
+
+Branch `wip/claude-hero-sylas` from origin/master ecf539b (after the Mordrienne + settings merges). User supplied hero_sylas.zip (idle / run / hurt / death / S1 / S2 / Ult Autosprite sheets, 13 VFX sheets, master reference) + the kit concept; basic attack = the S1 sheet; "sync the skills with the VFX first, a Timeline Sync Sheet may follow".
+
+- Hero #14 `sylas`, existing Archer class, provisional 3★, no starter/bench. Sources tracked in `assets/heroes/Sylas/`.
+- `tools/sprites/sylas.py` → `hero-sylas.png` (23 × 8, 260 × 170) + temporary portrait; baked muzzle flashes erased from the skill sheets. `tools/sprites/sylas_vfx.py` → 15 `fx-sylas-*.png`. `npm run sprites:optimize` run.
+- Kit: `dusk_mark` marker (every Sylas shot ×1.15 on it), S1 Dusk Mark, S2 Reaver Volley (2 rapid bolts + final piercing LINE_3 + Marked Burst on a marked target), Ult Nightfall Execution (FOCUS → MARKED lock, one bolt, ×1.4 on a marked target). Provisional numbers.
+- Generic engine / view additions: projectile event `index` + per-shot projectile arrays (`projectileOf`), impact event `bonus` + `FxDef.bonusOnly`.
+- VFX sync (provisional): S1 release 0.51 s, S2 shots 0.27 / 0.495 / 0.735 s, Ult charge hold 0.56–1.76 s. Preview: `python3 tools/sprites/sylas_sync.py <out> [marked]`.
+- Validation: app/spec typecheck, Karma 856/856.
+- Not merged; awaiting review (and the user's Timeline Sync Sheet if the timing needs changes). Note: `wip/claude-bailong-ult-charge` (Bai Long charge aura) is a separate pending branch.
+
+## Previous task — Mordrienne Vale Phase A (Claude, 2026-10-26, merged)
 
 Branch `wip/claude-hero-mordrienne` from origin/master 43b1099. User supplied idle (×2 variants) / run / death / S1 / S2 / Ult sheets + master reference and the kit concept (Mage — Control / Debuff); answered: sheet mapping as proposed, provisional attack + hurt, Phase A + all three skill clips, full name Mordrienne Vale.
 

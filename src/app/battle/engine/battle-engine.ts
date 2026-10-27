@@ -45,7 +45,7 @@ export type BattleEvent =
   /** one unique live enemy intersected by a committed path dash; not a status or a damage event */
   | { type: 'dashMark'; src: number; dst: number }
   /** จังหวะที่สกิลโดนจริง (ตรงเฟรม hit ของท่า) — ใช้เล่นเอฟเฟกต์ที่เป้าหมาย */
-  | { type: 'impact'; src: number; dst?: number; kind: SkillKind; index?: number; hits?: number[] }
+  | { type: 'impact'; src: number; dst?: number; kind: SkillKind; index?: number; hits?: number[]; bonus?: number[] }
   /** ย้ายตัวแบบวาร์ป (ไม่ต้องเลื่อนตัวบนจอ) */
   | { type: 'blink'; src: number }
   /** hurt = play the hit reaction (monsters: rate-limited, never while attacking/casting) */
@@ -54,7 +54,7 @@ export type BattleEvent =
   /** player special skill (Blade Trace): trails landed with their multipliers, total damage dealt */
   | { type: 'special'; skill: string; multipliers: number[]; targets: number; total: number }
   /** ลูกธนู/ลูกแสงที่บินไปหาเป้า (sky = ตกจากฟ้า) ดาเมจเข้าเมื่อถึง */
-  | { type: 'projectile'; src: number; dst: number; kind: 'attack' | SkillKind; flight: number; sky?: boolean; pid?: number }
+  | { type: 'projectile'; src: number; dst: number; kind: 'attack' | SkillKind; flight: number; sky?: boolean; pid?: number; index?: number }
   /** a real (colliding) projectile hit a unit / ran out of lifetime */
   | { type: 'projectileHit'; pid: number; dst: number }
   | { type: 'projectileExpire'; pid: number }
@@ -2059,9 +2059,9 @@ export class BattleEngine {
       },
       later: (d, u, fn) => self.later(d, u, fn),
       createField: (u, center, definition, pulse) => self.fields.add(u.id, center, definition, pulse, () => u.alive, u.side),
-      shoot: (u, t, slot, sky, onArrive) => {
+      shoot: (u, t, slot, sky, onArrive, index) => {
         const flight = sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos);
-        self.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: slot, flight, ...(sky ? { sky } : {}) });
+        self.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: slot, flight, ...(sky ? { sky } : {}), ...(index ? { index } : {}) });
         self.pending.push({ at: self.time + flight, fn: onArrive });
       },
       hit: (src, dst, mul, o) => self.hit(src, dst, mul, o),
