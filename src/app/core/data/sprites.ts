@@ -1654,9 +1654,10 @@ export const FX: Record<string, FxDef> = {
   // muzzle = the crossbow tip of the release frame (projectile origin is drawn at 42 % of the cell → anchor dy + 8)
   // ---- Sylas Veyrn (tools/sprites/sylas_vfx.py from assets/heroes/Sylas/vfx, magenta unmixed, Dusk Teal; baked at
   //      2 × board size: FX scale 1/3, projectiles 1/2.6) ----
-  // S1 AimCharge: spiral gathers at the crossbow tip from CHARGE_START, peaks just before the release, collapses with it
+  // S1 AimCharge: spiral gathers just AHEAD of the crossbow tip (user 2026-10-27: tip → orb, dx = its radius) from
+  // CHARGE_START, peaks just before the release, collapses with it
   'sy-s1-charge': {
-    file: 'fx-sylas-s1-charge.png', frames: 8, w: 73, h: 85, pivot: [0.494942, 0.494299], frameMs: 40, at: 'self', event: 'CHARGE_START', anchor: 'tipS1', scale: 1 / 3, blend: 'add',
+    file: 'fx-sylas-s1-charge.png', frames: 8, w: 73, h: 85, pivot: [0.494942, 0.494299], frameMs: 40, at: 'self', event: 'CHARGE_START', anchor: 'tipS1', dx: 24, scale: 1 / 3, blend: 'add',
   },
   // Dusk Bolt (S1): grows in flight (f2 → f6), last frame = the bolt bursting into motes on the target
   'sy-s1-bolt': {
@@ -1700,13 +1701,14 @@ export const FX: Record<string, FxDef> = {
   'sy-ult-lock': {
     file: 'fx-sylas-ult-lock.png', frames: 26, w: 125, h: 136, pivot: [0.497433, 0.496708], frameMs: 75, at: 'target', event: 'CAST_START', dy: -14, scale: 1 / 3, attach: true,
   },
-  // ChargeAura ring around him + CrossbowCharge at the tip, both looping over the 1.2 s hold (2 × 8 × 75 ms)
+  // ChargeAura ring around him + CrossbowCharge just ahead of the tip (dx = its radius), both looping over the 1.2 s hold
+  // (2 × 8 × 75 ms)
   'sy-ult-aura': {
     file: 'fx-sylas-ult-aura.png', frames: 8, w: 212, h: 209, pivot: [0.498084, 0.985347], frameMs: 75, repeat: 2, fadeOutMs: 120, at: 'self', event: 'CHARGE_START', anchor: 'feet', scale: 1 / 3,
     layer: 'under', particles: [{ name: 'spirit-rise', colors: [0xd8fbff, 0x63e6f0], duration: 1.2 }],
   },
   'sy-ult-charge': {
-    file: 'fx-sylas-ult-charge.png', frames: 8, w: 89, h: 103, pivot: [0.496285, 0.496242], frameMs: 75, repeat: 2, fadeOutMs: 80, at: 'self', event: 'CHARGE_START', anchor: 'tipUlt', scale: 1 / 3,
+    file: 'fx-sylas-ult-charge.png', frames: 8, w: 89, h: 103, pivot: [0.496285, 0.496242], frameMs: 75, repeat: 2, fadeOutMs: 80, at: 'self', event: 'CHARGE_START', anchor: 'tipUlt', dx: 26, scale: 1 / 3,
     blend: 'add',
   },
   // Execution Bolt: grows as it flies (7 frames), heavy

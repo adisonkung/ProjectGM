@@ -5,7 +5,7 @@ python3 tools/sprites/sylas_sync.py <out dir> [marked]
 the Marked Burst / Marked Execution layers show)
 
 Mirrors sprites.ts `hero-sylas.png` + the sy-* FxDefs (keep in sync): board cell 80 px (rendered × UP), the hero
-sprite 1 atlas px = 1 board px with its root on the feet (cell 96 %), FX width = w · scale · 1.5 (projectiles · 1.3),
+sprite 1 atlas px = 1 board px, sheet bottom on the cell's 96 % line (feet 15 px above = +27.25 %), FX width = w · scale · 1.5 (projectiles · 1.3),
 pivot on its anchor (% of a cell from the cell centre), projectiles from the muzzle (cell 42 % + muzzle) to the
 target (cell 42 %), flight 0.1 + 0.06 / cell, flight frames 0 … n−2 once, last frame held 0.14 s.
 """
@@ -47,7 +47,7 @@ def fxdef(file, frame_ms, scale=1 / 3, **kw):
 
 
 FX = {
-    'sy-s1-charge': fxdef('fx-sylas-s1-charge.png', 40, at='self', anchor='tipS1', add=True),
+    'sy-s1-charge': fxdef('fx-sylas-s1-charge.png', 40, at='self', anchor='tipS1', dx=24, add=True),
     'sy-s1-mark-in': fxdef('fx-sylas-s1-mark-in.png', 45, at='target', dy=-14),
     'sy-s1-mark': fxdef('fx-sylas-s1-mark.png', 110, at='target', dy=-14, loop=True),
     'sy-s2-muzzle': fxdef('fx-sylas-s2-muzzle.png', 28, at='self', anchor='tipS2', add=True),
@@ -55,7 +55,7 @@ FX = {
     'sy-s2-burst': fxdef('fx-sylas-s2-burst.png', 50, at='target', dy=27.25),
     'sy-ult-lock': fxdef('fx-sylas-ult-lock.png', 75, at='target', dy=-14),
     'sy-ult-aura': fxdef('fx-sylas-ult-aura.png', 75, at='self', anchor='feet', repeat=2, fade=120, under=True),
-    'sy-ult-charge': fxdef('fx-sylas-ult-charge.png', 75, at='self', anchor='tipUlt', repeat=2, fade=80, add=True),
+    'sy-ult-charge': fxdef('fx-sylas-ult-charge.png', 75, at='self', anchor='tipUlt', dx=26, repeat=2, fade=80, add=True),
     'sy-ult-impact': fxdef('fx-sylas-ult-impact.png', 55, at='target', dy=-14),
     'sy-ult-marked': fxdef('fx-sylas-ult-marked.png', 55, at='target', dy=-14, add=True),
 }
@@ -125,6 +125,7 @@ def draw_fx(canvas, d, t0, t, base_xy):
     fr = frames_of(d, d['scale'] * 1.5 * UP * CELL / 80)[k]
     if 'anchor' in d:
         ax, ay = ANCH[d['anchor']]
+        ax += d.get('dx', 0)
     else:
         ax, ay = 0, d.get('dy', 0)
     x = base_xy[0] + ax / 100 * C - d['pivot'][0] * fr.width
@@ -140,8 +141,8 @@ def render(kind, t, sched):
     for d, t0, base in sched['fx']:
         if d.get('under'):
             draw_fx(c, d, t0, t, base)
-    # target (feet on the cell's 96 % line)
-    c.alpha_composite(FOE, (int(fx_ - 66 * UP), int(ROW * C + 0.96 * C - 86 * UP)))
+    # target (sheet bottom on the cell's 96 % line, like the board)
+    c.alpha_composite(FOE, (int(fx_ - 66 * UP), int(ROW * C + 0.96 * C - 100 * UP)))
     acc, k = 0, len(steps) - 1
     for i, s in enumerate(steps):
         if t * 1000 < acc + s:
@@ -152,7 +153,7 @@ def render(kind, t, sched):
         k = None
     hero = ATLAS.crop((k * 260, row * 170, k * 260 + 260, row * 170 + 170)) if k is not None else ATLAS.crop((0, 0, 260, 170))
     hero = hero.resize((260 * UP, 170 * UP), Image.LANCZOS)
-    c.alpha_composite(hero, (int(hx - 130 * UP), int(ROW * C + 0.96 * C - 155 * UP)))
+    c.alpha_composite(hero, (int(hx - 130 * UP), int(ROW * C + 0.96 * C - 170 * UP)))
     for d, t0, base in sched['fx']:
         if not d.get('under'):
             draw_fx(c, d, t0, t, base)
