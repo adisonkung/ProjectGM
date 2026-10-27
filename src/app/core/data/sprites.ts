@@ -104,6 +104,8 @@ export interface SheetDef {
   anims: Partial<Record<SpriteAnim, AnimDef>>;
   /** เอฟเฟกต์ที่เล่นตอนใช้สกิลแต่ละแบบ (คีย์ของ FX) — หลายชั้นได้ (ชาร์จ / VFX หลัก / กระทบ) แต่ละอันบอกเองว่าเกิดตอนไหน */
   fx?: Partial<Record<SkillKind, string | string[]>>;
+  /** FX on the caster when a basic attack starts (e.g. a staff glint before the bolt leaves) — FxDef.delayMs times it */
+  attackFx?: string[];
   /**
    * named anchors on the hero, [dx, dy] in % of a board cell from the cell centre (same units as FX dx/dy; dx is
    * mirrored with the facing) — e.g. bodyCenter, weaponTip, skillOrigin. FX pick one with `FxDef.anchor`.
@@ -200,6 +202,11 @@ export interface FxDef {
   fitCells?: number;
   /** Optional independent height in board cells for a rectangular area layer. */
   fitRows?: number;
+  /**
+   * a link / tether at 'target': drawn from the target back to the caster — pivot on the target end (use pivot [0, y]),
+   * rotated toward the caster and stretched lengthwise to their distance (height kept) — e.g. Lucien's Burden Link
+   */
+  span?: boolean;
   /** 'under' = drawn below the units (ground aura), default above them */
   layer?: 'under' | 'over';
   /** Pixi renderer: particle presets spawned at the FX's pivot when it starts (data/particles.ts) */
@@ -223,6 +230,9 @@ export interface FxDef {
    */
   muzzle?: [number, number];
 }
+
+/** an FX's drawn width in board cells (before any per-cast scale) */
+export const fxWidthCells = (d: FxDef): number => d.fitCells ?? (d.w * PX_TO_CELL * (d.scale ?? 1) * FX_SCALE) / 100;
 
 /** a projectile's start point (board cells): the shooter's cell, moved by the FX `muzzle` mirrored with the facing */
 export function projectileOrigin(name: string, from: { x: number; y: number }, toX: number, fallbackFace = 1): { x: number; y: number } {
@@ -322,6 +332,41 @@ export const SHEETS: Record<string, SheetDef> = {
           DAMAGE: 29, IMPACT: 29 },
         eventFeel: { VFX_SPAWN: { hitStopMs: 0, shakePx: 3, shakeMs: 100 } },
         impact: { hitStopMs: 80, shakePx: 6, shakeMs: 200, flashMs: 100 } },
+    },
+  },
+  // Lucien Valthorne — The Black Saint (user 2026-10-28, tools/sprites/lucien.py + lucien_vfx.py from
+  // assets/heroes/Lucien): painted art (not pixelated) · idle 78 px · 28 × 8 cells · the S1 / S2 / Ult rows come from the
+  // user's own staff-raise sheets · VFX from the user's magenta sheets (lucien_vfx.py) · timings provisional (no
+  // Timeline Sync yet) · normal attack = staff glint + dark-sacred bolt (procedural `lu-bolt`)
+  'hero-lucien.png': {
+    cols: 28, rows: 8, cellW: 260, cellH: 170,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
+    projectile: { attack: 'lu-bolt' },
+    attackFx: ['lu-atk-glow'],
+    fx: { skill: ['lu-s1-cross', 'lu-s1-heal', 'lu-s1-gain'],
+      skill2: ['lu-s2-source', 'lu-s2-link', 'lu-s2-absorb'],
+      ult: ['lu-ult-charge', 'lu-ult-aura', 'lu-ult-staff', 'lu-ult-release', 'lu-ult-wave'] },
+    anims: {
+      idle: { row: 0, frames: 16, ms: 125 }, walk: { row: 1, frames: 15, ms: 60, pace: runPace(15, 60) },
+      hurt: { row: 2, frames: 13, ms: 35 },
+      // staff push: the glint gathers on the staff head (CAST_START + 120 ms) → the bolt leaves it at F8 (0.32 s)
+      attack: { row: 3, frames: 19, ms: 40, events: { CAST_START: 0, DAMAGE: 8, RECOVERY_START: 11 } },
+      die: { row: 4, frames: 22, ms: 70 },
+      // S1 Black Benediction: raise the staff (StaffCross grows on its head) → staff up = the heal lands on the ally
+      // (0.27 s, DAMAGE) + Burden gain on Lucien → the cross stays until the staff is planted · 1.22 s
+      skill: { row: 5, frames: 27, ms: 45, events: { CAST_START: 0, ANTICIPATION_PEAK: 6, DAMAGE: 6, IMPACT: 6, RECOVERY_START: 14 } },
+      // S2 Martyr's Veil: the link reaches out as he lifts the staff (CHARGE_START 0.19 s: LinkSource on the ally +
+      // the Burden Link tether ally → Lucien) → staff upright = the link holds (DAMAGE 0.58 s: veil + 2 Burden,
+      // BurdenAbsorb on Lucien) → lower → 1.79 s
+      skill2: { row: 6, frames: 28, ms: 64, events: { CAST_START: 0, CHARGE_START: 3, DAMAGE: 9, IMPACT: 9, RECOVERY_START: 20 } },
+      // Ult Black Miracle: entry 0–0.40 → raise (CHARGE_START: Ult_Charge under him, StaffCharge on the staff head)
+      // → staff up 1.00 (CHARGE_PEAK: sacred ash aura) → hold / prayer → release 2.30 = DAMAGE (all Burden consumed:
+      // team heal + ward + recovery, BurdenRelease on him, TeamHealingWave on every healed ally) → lower → 3.60
+      ult: { row: 7, frames: 26, ms: 100, seq: Array.from({ length: 26 }, (_, i) => i),
+        steps: [...Array(4).fill(100), ...Array(7).fill(86), ...Array(5).fill(260), ...Array(8).fill(100), 250, 250],
+        events: { CAST_START: 0, CHARGE_START: 4, CHARGE_PEAK: 11, FINAL_ANTICIPATION: 15, DAMAGE: 16, IMPACT: 16,
+          RECOVERY_START: 24 },
+        impact: { hitStopMs: 0, shakePx: 3, shakeMs: 150, flashMs: 120 } },
     },
   },
   'hero-draeven.png': {
@@ -1572,6 +1617,64 @@ export const FX: Record<string, FxDef> = {
   'mo-ult-field-end': {
     file: 'fx-mordrienne-ult-field-end.png', frames: 8, w: 260, h: 338, frameMs: 90, fadeOutMs: 120, at: 'target',
     pivot: [0.5, 0.627219], dy: 27.25, scale: 0.914286, layer: 'under', attach: false, pixelated: true,
+  },
+  // Lucien Valthorne (tools/sprites/lucien_vfx.py, baked at 2 × atlas px → scale 1/3, painted, not pixelated).
+  // Staff-tracked strips (s1-cross, ult-staff, atk-glow) sit on a canvas anchored on his feet (pivot = root) and carry
+  // the staff head of every clip frame, so they follow the staff while he moves it.
+  'lu-s1-cross': {
+    file: 'fx-lucien-s1-cross.png', frames: 27, w: 123, h: 253, frameMs: 45, at: 'self', on: 'cast',
+    pivot: [0.34146, 0.98814], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  'lu-s1-heal': {
+    file: 'fx-lucien-s1-heal.png', frames: 10, w: 139, h: 102, frameMs: 60, at: 'target',
+    pivot: [0.4964, 0.61765], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  'lu-s1-gain': {
+    file: 'fx-lucien-s1-gain.png', frames: 10, w: 185, h: 217, frameMs: 50, at: 'self',
+    pivot: [0.5027, 0.87097], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  'lu-s2-source': {
+    file: 'fx-lucien-s2-source.png', frames: 12, w: 186, h: 248, frameMs: 100, fadeOutMs: 150, at: 'target',
+    event: 'CHARGE_START', pivot: [0.50806, 0.72581], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  // Burden Link tether: from the linked ally's chest back to Lucien (span), grow f1–f4 → breathe → release f6–f8
+  'lu-s2-link': {
+    file: 'fx-lucien-s2-link.png', frames: 12, w: 180, h: 68, frameMs: 100, fadeOutMs: 150, at: 'target',
+    event: 'CHARGE_START', span: true, pivot: [0, 0.5], dy: -22, scale: 1 / 3, attach: false,
+  },
+  'lu-s2-absorb': {
+    file: 'fx-lucien-s2-absorb.png', frames: 10, w: 191, h: 229, frameMs: 65, at: 'self',
+    pivot: [0.50524, 0.68996], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  'lu-ult-charge': {
+    file: 'fx-lucien-ult-charge.png', frames: 27, w: 228, h: 279, frameMs: 80, at: 'self', event: 'CHARGE_START',
+    pivot: [0.50658, 0.85663], dy: 27.25, scale: 1 / 3, layer: 'under', attach: true,
+  },
+  'lu-ult-aura': {
+    file: 'fx-lucien-ult-aura.png', frames: 16, w: 236, h: 276, frameMs: 120, at: 'self', event: 'CHARGE_PEAK',
+    pivot: [0.49153, 0.62681], dy: 27.25, scale: 1 / 3, layer: 'under', attach: true,
+  },
+  'lu-ult-staff': {
+    file: 'fx-lucien-ult-staff.png', frames: 33, w: 121, h: 229, frameMs: 75, at: 'self', event: 'CHARGE_START',
+    pivot: [0.1405, 0.99127], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  'lu-ult-release': {
+    file: 'fx-lucien-ult-release.png', frames: 10, w: 269, h: 313, frameMs: 60, at: 'self',
+    pivot: [0.49814, 0.79553], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  'lu-ult-wave': {
+    file: 'fx-lucien-ult-wave.png', frames: 10, w: 182, h: 134, frameMs: 90, at: 'target', perHit: 'all',
+    pivot: [0.5, 0.61194], dy: 27.25, scale: 1 / 3, attach: true,
+  },
+  'lu-atk-glow': {
+    file: 'fx-lucien-atk-glow.png', frames: 6, w: 52, h: 178, frameMs: 50, fadeOutMs: 100, delayMs: 120, at: 'self',
+    on: 'cast', pivot: [0.07692, 0.99438], dy: 27.25, scale: 1 / 3, blend: 'add', attach: true,
+  },
+  // dark-sacred bolt (procedural): gold-white core, dark ash trail; last frame = burst · muzzle = the attack staff
+  // head at the release (atlas 141.2, 79.1)
+  'lu-bolt': {
+    file: 'fx-lucien-bolt.png', frames: 5, w: 72, h: 40, frameMs: 60, at: 'target', angle0: 0, scale: 1 / 1.8,
+    muzzle: [14, -59.6],
   },
   // Mordrienne provisional hex bolt (procedural, tools/sprites/mordrienne.py): 4 flight frames + impact ring
   'mo-hex-bolt': { file: 'fx-mordrienne-hex-bolt.png', frames: 5, w: 48, h: 48, frameMs: 60, at: 'target', angle0: 0, scale: 0.6 },

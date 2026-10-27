@@ -116,9 +116,12 @@ export function fxPlacement(
   angle: number,
   offset?: [number, number],
   scale = 1,
+  /** width-only multiplier (a stretched tether, FxDef.span) */
+  stretch = 1,
 ): FxPlacement {
-  const width = (d.fitCells ? d.fitCells * cell : ((d.w * PX_TO_CELL * (d.scale ?? 1) * FX_SCALE) / 100) * cell) * scale;
-  const height = d.fitRows != null ? d.fitRows * cell : (width * d.h) / d.w;
+  const base = (d.fitCells ? d.fitCells * cell : ((d.w * PX_TO_CELL * (d.scale ?? 1) * FX_SCALE) / 100) * cell) * scale;
+  const width = base * stretch;
+  const height = d.fitRows != null ? d.fitRows * cell : (base * d.h) / d.w;
   const [dx, dy] = offset ?? [d.dx ?? 0, d.dy ?? 0];
   return {
     x: x + cell / 2 + ((dx * (flip ? -1 : 1)) / 100) * cell,

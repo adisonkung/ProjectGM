@@ -2,7 +2,19 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Lucien Valthorne Skill 1 sources held (Claude, 2026-10-27)
+## Latest task — Lucien Valthorne, The Black Saint · Phase A (Claude, 2026-10-28)
+
+Branch `wip/claude-hero-lucien` from origin/master ecf539b (after the S1 hold commit). User supplied `lucien.zip` (base idle/run/hurt/death, normal attack, S2, Ult, 9 VFX sheets), `Lucien_Valthorne_Timeline_Sync.xlsx`, the master reference and the kit concept; confirmed the V1 prototype numbers (keep configurable) and the VFX plan (Ult_Charge under him while charging + a small TeamHealingWave as the S1 heal burst).
+
+- Hero #15 `lucien` / ลูเซียน วัลธอร์น · existing class **healer** · 3★ provisional · not in starter/bench. Sylas (#14) is on its own unmerged branch — the roster lists (`roster-remodel.spec.ts`, `bailong.spec.ts`, `HEROES`) will conflict on merge; keep both entries.
+- Kit (class skill ids, values in data): **Sacred Burden** `sacred_burden` (max 5, −4 % damage taken per stack additive, no expiry until the Ult) · attack **Black Sacred Bolt** 100 % MAGIC (no Heal Bolt) · S1 **Black Benediction** (lowest HP % ally: heal 180 % ATK + 6 % max HP, +1 Burden) · S2 **Martyr's Veil** (lowest HP % *other* ally, 5 s `martyr_veil`: 30 % of its damage redirected, Lucien takes it × 0.85 × his own damage-taken modifiers; +2 Burden) · Ult **Black Miracle** (heal all 120 % ATK + 8 % max HP × (1 + 0.15 × stacks), `miracle_ward` ×0.85 5 s, `miracle_recovery` HoT 4 s × (1 + 0.25 × stacks), then consume all Burden).
+- Generic engine additions: `StatusEffectDefinition.additiveStacks`, `damageTransferTaken {mul, protectorModifiers}` (opt-in; Garrick gate_ward / soul_link unchanged), `StackBonus` on HEAL / APPLY_STATUS, `APPLY_STATUS.stacks`, effect `CONSUME_STATUS`, TargetRule `LOWEST_HP_OTHER_ALLY`, `statusStacks()`, `SkillHost.removeStatus`. Visual generics: `FxDef.span` (tether stretched target → caster, width-only stretch in DOM + Pixi, skipped when the target is the caster), `SheetDef.attackFx` (FX on the caster when a basic attack starts; preloaded in Pixi).
+- Art: `tools/sprites/lucien.py` → `hero-lucien.png` 28 × 8 (260 × 170, body 78 px) + staff-head track `lucien_report.json` + temporary portrait from the reference. `tools/sprites/lucien_vfx.py` → 13 `fx-lucien-*` strips (S1 cross + Ult StaffCharge staff-tracked on a feet-anchored canvas; others grid-cut, ground pivots) + procedural bolt. Preview `python3 tools/sprites/lucien_sync.py <out> [clip]` (60 FPS mp4 + contact sheet, mirrors sprites.ts timing — provisional, not a final Timeline Sync).
+- Clip timings (provisional): attack 19 × 40 ms, bolt at 0.32 s · S1 27 × 45 ms, heal 0.27 s · S2 28 × 64 ms, link CHARGE_START 0.19 s, veil 0.58 s · Ult 3.60 s (CHARGE_START 0.40, PEAK 1.00, release/DAMAGE 2.30).
+- Validation: app/spec typecheck, Karma 853/853, `npm run sprites:optimize` run. No balance run.
+- Missing assets: Sacred Burden stack / ward / recovery status visuals, UI art (icons, banner, real portrait), a final Timeline Sync. Not merged; awaiting review.
+
+## Previous task — Lucien Valthorne Skill 1 sources held (Claude, 2026-10-27)
 
 Branch `wip/claude-hero-lucien` from origin/master ecf539b. The user supplied a 56-frame staff-raise cast (two copies of the same animation on junk backgrounds) plus a holy-cross VFX sheet and said: remember this pose + VFX as **Skill 1 of Lucien Valthorne** for now. Not in the game yet (no hero registration, kit, atlas or FxDef).
 

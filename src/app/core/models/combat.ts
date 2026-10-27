@@ -61,6 +61,9 @@ export type StatusFlag =
   | 'unstoppable';
 
 /** Periodic effect: every `interval` s deal / heal `perSecond × sourceAtk × interval` (snapshot at application) */
+/** scales an effect by the stacks of a status the caster carries (read when the effect runs) */
+export interface StackBonus { status: string; perStack: number }
+
 export interface StatusTick {
   kind: 'DAMAGE' | 'HEAL';
   /** fraction of the source's ATK per second */
@@ -89,6 +92,11 @@ export interface StatusEffectDefinition {
   pauseDuringWaveTransition?: boolean;
   /** SOUL LINK: this share of the carrier's final damage goes to the status source instead (no crit, no on-hit, no chain) */
   damageTransfer?: number;
+  /** how the redirected share lands on the source (Lucien Martyr's Veil): × `mul`, and × the source's own
+   *  damageTakenMultiplier statuses when `protectorModifiers` (default: the share lands unmodified — Garrick / soul link) */
+  damageTransferTaken?: { mul?: number; protectorModifiers?: boolean };
+  /** stacks add up linearly (1 − n × (1 − m)) instead of multiplying (m^n) — e.g. 4 % DR per stack, 5 stacks = 20 % */
+  additiveStacks?: boolean;
   /** control statuses (stun / root / taunt) only land on bosses when true */
   bossValid?: boolean;
   /** COUNTER (Garrick Brace for Impact): the first direct hit from a foe while this status is up puts `status` on the
@@ -173,7 +181,7 @@ export type DamageKind = 'PHYSICAL' | 'MAGIC' | 'TRUE';
  */
 export type TargetRule =
   | 'CURRENT' | 'NEAREST_ENEMY' | 'CASTING_INTERRUPTIBLE' | 'CLUSTER' | 'FOCUS_OR_LOWEST_HP' | 'FARTHEST_BACKROW'
-  | 'LOWEST_HP_ENEMY' | 'LOWEST_HP_ALLY' | 'FOCUS' | 'MARKED' | 'SELF';
+  | 'LOWEST_HP_ENEMY' | 'LOWEST_HP_ALLY' | 'LOWEST_HP_OTHER_ALLY' | 'FOCUS' | 'MARKED' | 'SELF';
 
 /** Effects run in order at the skill's hit moment (or on projectile arrival) */
 export type SkillEffect = SkillEffectCore & {
@@ -239,7 +247,11 @@ export type SkillEffectCore =
    * heal allies: atk × sourceAtk + maxHpPct × recipient max HP. `center: 'TARGET'` centres the area on the primary
    * (an ally), `skipPrimary` leaves the primary out (splash part of a targeted heal)
    */
-  | { type: 'HEAL'; area: AreaPattern | 'PRIMARY'; center?: AreaCenter; atk: number; maxHpPct?: number; skipPrimary?: boolean }
+  | { type: 'HEAL'; area: AreaPattern | 'PRIMARY'; center?: AreaCenter; atk: number; maxHpPct?: number; skipPrimary?: boolean;
+      /** × (1 + perStack × stacks of `status` on the caster at this moment) — e.g. Lucien's Sacred Burden */
+      stackBonus?: StackBonus }
+  /** remove a status from the caster (e.g. consume all Sacred Burden stacks after the effects that read them) */
+  | { type: 'CONSUME_STATUS'; status: string }
   /** remove up to `count` debuffs (newest first; untargetable seals excluded) from the primary ally or every living ally */
   | { type: 'CLEANSE'; to: 'PRIMARY' | 'ALL_ALLIES'; count?: number }
   /** apply a status to: the units hit by the previous DAMAGE ('HIT'), the caster, the primary, or an area */
@@ -253,6 +265,10 @@ export type SkillEffectCore =
       duration?: number;
       /** skill rank: DoT / HoT magnitude = final ATK × potency (default 1) */
       potency?: number;
+      /** potency × (1 + perStack × stacks of `status` on the caster) */
+      stackBonus?: StackBonus;
+      /** apply this many stacks at once (STACK_MAGNITUDE statuses; default 1) */
+      stacks?: number;
       /** skill rank: this application's modifiers replace the status's defaults (e.g. taunt_guard 0.60 → 0.55) */
       modifiers?: Partial<StatusModifiers>;
     }

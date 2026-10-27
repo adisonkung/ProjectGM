@@ -22,6 +22,9 @@ export const HEROES: HeroTemplate[] = [
   { id: 'draeven', name: 'เดรเวน มอร์แคนต์', cls: 'tank', star: 3, sprite: 'hero-draeven.png' },
   // User 2026-10-26: Mordrienne Vale — Mage (Control / Debuff), existing Mage class; Phase A, provisional 3★.
   { id: 'mordrienne', name: 'มอร์เดรียนน์ เวล', cls: 'mage', star: 3, sprite: 'hero-mordrienne.png' },
+  // User 2026-10-28: Lucien Valthorne — The Black Saint (sacrifice healer / damage-redirect support), existing Healer;
+  // provisional 3★.
+  { id: 'lucien', name: 'ลูเซียน วัลธอร์น', cls: 'healer', star: 3, sprite: 'hero-lucien.png' },
 ];
 
 export const HERO_BY_ID: Record<string, HeroTemplate> = Object.fromEntries(HEROES.map(h => [h.id, h]));

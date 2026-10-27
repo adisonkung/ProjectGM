@@ -638,6 +638,50 @@ export const HERO_DEFINITIONS: Record<string, HeroDefinition> = {
       },
     },
   },
+  // Lucien Valthorne — The Black Saint (user 2026-10-28, existing Healer class ids / cooldowns / rank tables; V1
+  // prototype values, NOT final balance). Sacrifice healer: he takes on the team's burden (Sacred Burden stacks, −4 %
+  // damage taken each, additive, max 5) and later releases it as a big delayed team recovery. Normal attack is offensive
+  // (a small dark-sacred magic bolt from the staff, 100 % MAGIC) — no Heal Bolt.
+  lucien: {
+    id: 'lucien', cls: 'healer', identity: 'Sacrifice Healer · Damage Redirect Support · Stored Burden · Delayed Recovery',
+    kit: {
+      attack: { ...magicBolt, id: 'light_bolt', name: 'ลูกเวทศักดิ์สิทธิ์ดำ', label: 'Black Sacred Bolt' },
+      // S1 Black Benediction: immediate heal on the lowest HP % ally (180 % ATK + 6 % of the target's max HP) + 1 Burden
+      skill: {
+        ...healer.skill, name: 'พรแห่งนักบุญดำ', label: 'Black Benediction', target: 'LOWEST_HP_ALLY', range: Infinity,
+        delivery: 'INSTANT',
+        effects: [
+          { type: 'HEAL', area: 'PRIMARY', atk: 1.8, maxHpPct: 0.06 },
+          { type: 'APPLY_STATUS', status: 'sacred_burden', to: 'SELF' },
+        ],
+        ai: { tier: 'HEAL', allyHpBelow: 0.75, emergencyHpBelow: 0.35 },
+      },
+      // S2 Martyr's Veil: link the lowest HP % ally (not himself) for 5 s — 30 % of its incoming damage is redirected to
+      // Lucien (× 0.85, then his Sacred Burden DR) · +2 Burden on cast
+      skill2: {
+        ...healer.skill2, name: 'ม่านผู้พลีชีพ', label: "Martyr's Veil", target: 'LOWEST_HP_OTHER_ALLY', fallback: ['SELF'],
+        range: Infinity, delivery: 'INSTANT',
+        effects: [
+          { type: 'APPLY_STATUS', status: 'martyr_veil', to: 'PRIMARY', duration: 5 },
+          { type: 'APPLY_STATUS', status: 'sacred_burden', to: 'SELF', stacks: 2 },
+        ],
+        ai: { tier: 'HEAL', allyHpBelow: 0.7, emergencyHpBelow: 0.4 },
+      },
+      // Ult Black Miracle: consume ALL Sacred Burden → team heal 120 % ATK + 8 % max HP × (1 + 0.15 × stacks) · team
+      // ×0.85 damage taken 5 s · 4 s delayed recovery HoT (potency × (1 + 0.25 × stacks), configurable)
+      ult: {
+        ...healer.ult, name: 'ปาฏิหาริย์ทมิฬ', label: 'Black Miracle', target: 'SELF', delivery: 'INSTANT',
+        effects: [
+          { type: 'HEAL', area: 'ALL_ALLIES', atk: 1.2, maxHpPct: 0.08, stackBonus: { status: 'sacred_burden', perStack: 0.15 } },
+          { type: 'APPLY_STATUS', status: 'miracle_ward', to: 'AREA', area: 'ALL_ALLIES', team: 'ALLY', duration: 5 },
+          { type: 'APPLY_STATUS', status: 'miracle_recovery', to: 'AREA', area: 'ALL_ALLIES', team: 'ALLY', duration: 4, potency: 1,
+            stackBonus: { status: 'sacred_burden', perStack: 0.25 } },
+          { type: 'CONSUME_STATUS', status: 'sacred_burden' },
+        ],
+        ai: { tier: 'HEAL', allyHpBelow: 0.6, alliesBelowCount: 2, emergencyHpBelow: 0.35 },
+      },
+    },
+  },
 };
 
 /** the kit a unit fights with: its hero's own kit, else its class kit */

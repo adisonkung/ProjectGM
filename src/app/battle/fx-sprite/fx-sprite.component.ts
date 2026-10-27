@@ -9,9 +9,9 @@ import { FX, FX_SCALE, PX_TO_CELL } from '../../core/data/sprites';
 @Component({
   selector: 'app-fx-sprite',
   template: `<div #el class="fx" [style.background-image]="'url(' + url() + ')'"
-    [style.background-size]="grid().cols * 100 + '% ' + grid().rows * 100 + '%'" [style.width.%]="def().fitCells ? def().fitCells! * 100 * scale() : def().w * pxToCell * (def().scale ?? 1) * fxScale * scale()"
+    [style.background-size]="grid().cols * 100 + '% ' + grid().rows * 100 + '%'" [style.width.%]="(def().fitCells ? def().fitCells! * 100 * scale() : def().w * pxToCell * (def().scale ?? 1) * fxScale * scale()) * stretch()"
     [style.height.%]="def().fitRows != null ? def().fitRows! * 100 : null"
-    [style.aspect-ratio]="def().w + ' / ' + def().h" [style.left]="'calc(50% + ' + (offset()?.[0] ?? def().dx ?? 0) * (flip() ? -1 : 1) + '%)'"
+    [style.aspect-ratio]="def().w * stretch() + ' / ' + def().h" [style.left]="'calc(50% + ' + (offset()?.[0] ?? def().dx ?? 0) * (flip() ? -1 : 1) + '%)'"
     [style.top]="'calc(50% + ' + (offset()?.[1] ?? def().dy ?? 0) + '%)'" [style.transform-origin]="origin()" [class.pixelated]="!!def().pixelated || !!track()" [class.add]="def().blend === 'add' || additive()"
     [style.transform]="'translate(' + -pivot()[0] * 100 + '%, ' + -pivot()[1] * 100 + '%) rotate(' + angle() + 'deg)' + (flip() !== !!def().mirror ? ' scaleX(-1)' : '')"></div>`,
   styles: `
@@ -32,6 +32,8 @@ export class FxSpriteComponent {
   readonly loop = input(false);
   readonly delayMs = input(0);
   readonly scale = input(1);
+  /** width-only multiplier (a stretched tether, FxDef.span) */
+  readonly stretch = input(1);
   readonly track = input<FxTrack | undefined>();
   readonly additive = input(false);
   /** ผู้ใช้หันซ้าย: กลับภาพและค่า dx (ใช้กับเอฟเฟกต์ที่ตัวเอง) */

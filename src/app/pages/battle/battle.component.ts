@@ -32,7 +32,7 @@ import { PlacementComponent } from '../../battle/placement/placement.component';
 import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
-import { animOf, appliedStatusFx, retaliateFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, impactFeelOf, projectileOrigin, SHEETS, SkillKind } from '../../core/data/sprites';
+import { animOf, appliedStatusFx, retaliateFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, fxWidthCells, impactFeelOf, projectileOrigin, SHEETS, SkillKind } from '../../core/data/sprites';
 import { groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
@@ -947,6 +947,7 @@ export class BattleComponent implements OnDestroy {
         }
         for (const id of at) {
           const q = id === src ? p : posOf(id);
+          if (def.span && q === p) continue; // a tether to himself (no ally to link) draws nothing
           const areaCell = (def.groundArea && this.groundLock.get(src)) || groundFxCell(def, unitOf(src).pos, aim?.at ?? unitOf(id).pos,
             unitOf(src).actionFacing?.left ?? this.facing.get(src));
           if (def.groundArea && !this.groundLock.has(src)) this.groundLock.set(src, areaCell);
@@ -954,10 +955,17 @@ export class BattleComponent implements OnDestroy {
             ? { r: areaCell.r, c: areaCell.c + this.engine.formation.originPosition - this.engine.cameraX }
             : q;
           const rotate = q !== p && def.orient !== 'flip';
-          const angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
+          let angle = rotate ? (Math.atan2(q.r - p.r, q.c - p.c) * 180) / Math.PI : 0;
           // หันตามผู้ใช้ (หรือตามทิศไปหาเป้าหมาย ถ้าเป้าไม่ได้อยู่คอลัมน์เดียวกัน)
-          const flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(src);
-          fx.push({ id: ++this.floatId, r: cell.r, c: cell.c, name, angle, flip, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
+          let flip = rotate ? false : q.c !== p.c ? q.c < p.c : !!this.facing.get(src);
+          // tether (FxDef.span): from the target back to the caster, stretched to their distance
+          let stretch: number | undefined;
+          if (def.span && def.at === 'target' && q !== p) {
+            angle = (Math.atan2(p.r - q.r, p.c - q.c) * 180) / Math.PI;
+            flip = false;
+            stretch = Math.hypot(p.c - q.c, p.r - q.r) / fxWidthCells(def);
+          }
+          fx.push({ id: ++this.floatId, r: cell.r, c: cell.c, name, angle, flip, stretch, offset: fxOffset(name, def.at === 'self' ? sprite : undefined), under: def.layer === 'under',
             follow: fxAttached(name) ? id : undefined });
         }
       }
@@ -1004,9 +1012,20 @@ export class BattleComponent implements OnDestroy {
         case 'HERO_REVIVED':
           set(e.unit, 'idle');
           break;
-        case 'attack':
+        case 'attack': {
           set(e.src, 'attack');
+          const sheet = SHEETS[unitOf(e.src).sprite ?? ''];
+          if (sheet?.attackFx) {
+            const p = posOf(e.src);
+            for (const name of sheet.attackFx) {
+              if (!FX[name]) continue;
+              fx.push({ id: ++this.floatId, r: p.r, c: p.c, name, angle: 0, flip: !!this.facing.get(e.src),
+                offset: fxOffset(name, unitOf(e.src).sprite), under: FX[name].layer === 'under',
+                follow: fxAttached(name) ? e.src : undefined });
+            }
+          }
           break;
+        }
         case 'move':
           if (anims[e.src]?.anim !== 'die') set(e.src, 'walk');
           break;
