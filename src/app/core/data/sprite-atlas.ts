@@ -31,6 +31,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-bailong-dragon-thrust.png': { url: 'opt/fx-bailong-dragon-thrust.webp', cols: 10, rows: 2 },
   'fx-bailong-sweeping-moon-hit.png': { url: 'opt/fx-bailong-sweeping-moon-hit.webp' },
   'fx-bailong-sweeping-moon.png': { url: 'opt/fx-bailong-sweeping-moon.webp' },
+  'fx-bailong-ult-charge.png': { url: 'opt/fx-bailong-ult-charge.webp' },
   'fx-bailong-v3-ascent.png': { url: 'opt/fx-bailong-v3-ascent.webp' },
   'fx-bailong-v3-core.png': { url: 'opt/fx-bailong-v3-core.webp' },
   'fx-bailong-v3-dive.png': { url: 'opt/fx-bailong-v3-dive.webp' },

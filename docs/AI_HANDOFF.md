@@ -2,7 +2,16 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Mordrienne Vale Phase A (Claude, 2026-10-26)
+## Latest task — Bai Long Ult charge stance + charge aura (Claude, 2026-10-27)
+
+Branch `wip/claude-bailong-ult-charge` from origin/master ecf539b (after the Mordrienne + settings test-room merges). User supplied a 10-frame charge-aura sheet (white dragon rising from a ground ring, black background, F1…F10 captions): on ult press Bai Long should hold a charge stance and only start the dance once the aura is complete.
+
+- Source tracked unchanged: `assets/heroes/BaiLong/vfx/Bailong_ULT_ChargeAura_VFX.png` → new `tools/sprites/bailong_ult_charge.py` → `fx-bailong-ult-charge.png` (12 frames 292 × 233: F1–F10 + F10 held twice; alpha from brightness, captions dropped, frames aligned on the ground ring's lower edge). `npm run sprites:optimize` run.
+- `sprites.ts`: ult step 1 (art F2, spear upright) 90 → 950 ms = the charge stance; new `CHARGE_PEAK` 1.76 (0.81 s = aura F10) with a 2 % push-in; FX `bl-ult-charge` (CHARGE_START, feet, under, 80 ms + 300 ms fade, scale 0.345 → ring ≈ 1.7 cells, painted). Clip 2.47 → 3.33 s; hits at 1.26 / 1.54 / 3.03 s. Damage, areas and weights unchanged; the cast lock is 0.86 s longer (as requested).
+- Tests: `bailong.spec.ts` ult duration range 3.0–3.5 s + charge-stance test. app/spec typecheck + Karma 848/848.
+- Not merged; awaiting review.
+
+## Previous task — Mordrienne Vale Phase A (Claude, 2026-10-26, merged into master by the user 2026-10-27)
 
 Branch `wip/claude-hero-mordrienne` from origin/master 43b1099. User supplied idle (×2 variants) / run / death / S1 / S2 / Ult sheets + master reference and the kit concept (Mage — Control / Debuff); answered: sheet mapping as proposed, provisional attack + hurt, Phase A + all three skill clips, full name Mordrienne Vale.
 
