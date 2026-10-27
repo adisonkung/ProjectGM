@@ -180,6 +180,8 @@ export interface FxDef {
   hitsOnly?: boolean;
   /** on 'impact': only on the units this hit struck with a `bonusVsStatus` bonus (e.g. a burst on a marked target) */
   bonusOnly?: boolean;
+  /** on 'impact': the opposite — only on the units this hit struck WITHOUT a bonus (the light version of a bonusOnly burst) */
+  noBonusOnly?: boolean;
   /** with perHit: leave the primary out (e.g. the light splash heal around the healed ally — the primary has its own FX) */
   exceptPrimary?: boolean;
   /** placed on the owner's named anchor (SheetDef.anchors) + dx/dy */
@@ -283,7 +285,7 @@ export const SHEETS: Record<string, SheetDef> = {
     projectile: { attack: 'sy-bolt', skill: 'sy-s1-bolt', skill2: ['sy-s2-bolt', 'sy-s2-bolt', 'sy-s2-final'], ult: 'sy-ult-bolt' },
     fx: {
       skill: 'sy-s1-charge',
-      skill2: ['sy-s2-muzzle1', 'sy-s2-muzzle2', 'sy-s2-muzzle3', 'sy-s2-hit1', 'sy-s2-hit2', 'sy-s2-burst'],
+      skill2: ['sy-s2-muzzle1', 'sy-s2-muzzle2', 'sy-s2-muzzle3', 'sy-s2-hit1', 'sy-s2-hit2', 'sy-s2-hit3', 'sy-s2-hit3-marked', 'sy-s2-burst'],
       ult: ['sy-ult-lock', 'sy-ult-aura', 'sy-ult-charge', 'sy-ult-impact', 'sy-ult-flash', 'sy-ult-marked'],
     },
     // Dusk Mark: appears on the hit, lives exactly as long as the status
@@ -1707,6 +1709,16 @@ export const FX: Record<string, FxDef> = {
   'sy-s2-final': {
     file: 'fx-sylas-s2-final.png', frames: 6, w: 332, h: 135, pivot: [0.498746, 0.486558], frameMs: 45, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [53.1, -35.6], overshoot: 2,
   },
+  // shot 3 (user 2026-10-27): an unmarked target gets the same light spark as shots 1–2 (a touch bigger) · a Dusk-Marked
+  // target gets the heavy version: a big additive blast + the Marked Burst at its feet
+  'sy-s2-hit3': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 30, at: 'target', on: 'impact', hitIndex: 2, noBonusOnly: true, dy: -14, scale: 0.32, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 6 }],
+  },
+  'sy-s2-hit3-marked': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 40, at: 'target', on: 'impact', hitIndex: 2, bonusOnly: true, dy: -14, scale: 0.6, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 18, scale: 1.2 }],
+  },
   // Marked Burst: on the final bolt's hit, only on a target struck with the Dusk Mark bonus (ground burst at its feet)
   'sy-s2-burst': {
     file: 'fx-sylas-s2-burst.png', frames: 8, w: 160, h: 154, pivot: [0.498514, 0.982737], frameMs: 50, at: 'target', on: 'impact', hitIndex: 2, bonusOnly: true, dy: 27.25, scale: 1 / 3,
@@ -1717,10 +1729,10 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-sylas-ult-lock.png', frames: 26, w: 125, h: 136, pivot: [0.497433, 0.496708], frameMs: 75, at: 'target', event: 'CAST_START', dy: -14, scale: 1 / 3, attach: true,
   },
   // ChargeAura v2 (user 2026-10-27): ground ring → a swirling sphere builds around him → swirls through the hold → thins
-  // and fades (16 × 75 ms = the 1.2 s hold, once) · CrossbowCharge just ahead of the tip (dx = its radius, 2 × 8 × 75 ms)
+  // and fades (16 × 75 ms = the 1.2 s hold, once), drawn IN FRONT of him (user: aura in front of the hero) · CrossbowCharge just ahead of the tip (dx = its radius, 2 × 8 × 75 ms)
   'sy-ult-aura': {
     file: 'fx-sylas-ult-aura.png', frames: 16, w: 229, h: 267, pivot: [0.499838, 0.988578], frameMs: 75, fadeOutMs: 120, at: 'self', event: 'CHARGE_START', anchor: 'feet', scale: 1 / 3,
-    layer: 'under', particles: [{ name: 'spirit-rise', colors: [0xd8fbff, 0x63e6f0], duration: 1.2 }],
+    particles: [{ name: 'spirit-rise', colors: [0xd8fbff, 0x63e6f0], duration: 1.2 }],
   },
   'sy-ult-charge': {
     file: 'fx-sylas-ult-charge.png', frames: 8, w: 89, h: 103, pivot: [0.496285, 0.496242], frameMs: 75, repeat: 2, fadeOutMs: 80, at: 'self', event: 'CHARGE_START', anchor: 'tipUlt', dx: 26, scale: 1 / 3,
@@ -1730,11 +1742,11 @@ export const FX: Record<string, FxDef> = {
   'sy-ult-bolt': {
     file: 'fx-sylas-ult-bolt.png', frames: 8, w: 603, h: 263, pivot: [0.499424, 0.505516], frameMs: 50, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [43.4, -23.5],
   },
-  // Impact Burst (user 2026-10-27: bigger, longer): the vortex bursts open f7 → f1 (0.2 s) → spins at full size
-  // (170 atlas px ≈ 2.1 cells, 0.55 s) → collapses slowly into its centre (0.35 s) + fade · Marked Execution on a
+  // Impact Burst (user 2026-10-27: bigger, longer; then a little smaller): the vortex bursts open f7 → f1 (0.2 s) →
+  // spins at full size (baked 170, shown at 150 atlas px ≈ 1.9 cells, 0.55 s) → collapses slowly into its centre (0.35 s) + fade · Marked Execution on a
   // Dusk-Marked target
   'sy-ult-impact': {
-    file: 'fx-sylas-ult-impact.png', frames: 22, w: 351, h: 356, pivot: [0.498744, 0.499105], frameMs: 50, fadeOutMs: 220, at: 'target', on: 'impact', dy: -14, scale: 1 / 3,
+    file: 'fx-sylas-ult-impact.png', frames: 22, w: 351, h: 356, pivot: [0.498744, 0.499105], frameMs: 50, fadeOutMs: 220, at: 'target', on: 'impact', dy: -14, scale: 150 / 170 / 3,
     particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 40, scale: 1.4 }, { name: 'debris', count: 18 },
       { name: 'dust', count: 12 }, { name: 'spirit-rise', colors: [0xd8fbff, 0x63e6f0], duration: 1 }],
   },
@@ -1742,8 +1754,11 @@ export const FX: Record<string, FxDef> = {
   'sy-ult-flash': {
     file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 40, at: 'target', on: 'impact', dy: -14, scale: 1, blend: 'add',
   },
+  // Marked Execution on a Dusk-Marked target (user 2026-10-27: it must read): 130 atlas px, bursts over the vortex once
+  // it is fully open (+200 ms), normal blend so its dark shards + cyan cross read on top of the vortex, extra sparks
   'sy-ult-marked': {
-    file: 'fx-sylas-ult-marked.png', frames: 8, w: 165, h: 203, pivot: [0.498103, 0.49878], frameMs: 55, at: 'target', on: 'impact', bonusOnly: true, dy: -14, scale: 1 / 3, blend: 'add',
+    file: 'fx-sylas-ult-marked.png', frames: 8, w: 265, h: 327, pivot: [0.499259, 0.499343], frameMs: 60, delayMs: 200, fadeOutMs: 150, at: 'target', on: 'impact', bonusOnly: true, dy: -14, scale: 1 / 3,
+    particles: [{ name: 'sparks', colors: [0xffffff, 0xd8fbff, 0x63e6f0], count: 28, scale: 1.3 }],
   },
   // ---- Bai Long ult v3 dragons (bailong.py VFX_SHEETS 'v3_*', strips cut at 0.5 of the 2172 × 724 sources) ----
   // thrust: thin dragon launches from the spear tip forward (tail = left pivot)

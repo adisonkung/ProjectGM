@@ -49,6 +49,7 @@ describe('Sylas Veyrn (3★ Archer) — data / timeline', () => {
     for (const n of ['sy-ult-charge', 'sy-ult-aura']) expect(FX[n].frames * FX[n].frameMs * (FX[n].repeat ?? 1)).toBe(hold);
     expect(fxFor(SPRITE, 'ult', { on: 'event', event: 'CAST_START' })).toEqual(['sy-ult-lock']);
     expect(fxFor(SPRITE, 'ult', { on: 'impact', hit: 0 })).toEqual(['sy-ult-impact', 'sy-ult-flash', 'sy-ult-marked']);
+    expect(FX['sy-ult-marked'].bonusOnly).toBeTrue();
     expect([FX['sy-ult-marked'].bonusOnly, FX['sy-s2-burst'].bonusOnly, FX['sy-s2-burst'].hitIndex]).toEqual([true, true, 2]);
     expect(SHEETS[SPRITE].statusFx!['dusk_mark']).toEqual({ start: 'sy-s1-mark-in', loop: 'sy-s1-mark' });
   });
@@ -57,7 +58,10 @@ describe('Sylas Veyrn (3★ Archer) — data / timeline', () => {
     for (const i of [1, 2, 3]) expect(FX[`sy-s2-muzzle${i}`].dx).toBeGreaterThan(0);
     expect(fxFor(SPRITE, 'skill2', { on: 'impact', hit: 0 })).toEqual(['sy-s2-hit1']);
     expect(fxFor(SPRITE, 'skill2', { on: 'impact', hit: 1 })).toEqual(['sy-s2-hit2']);
-    expect(fxFor(SPRITE, 'skill2', { on: 'impact', hit: 2 })).toEqual(['sy-s2-burst']);
+    // shot 3: light spark on an unmarked target, heavy blast + Marked Burst on a marked one
+    expect(fxFor(SPRITE, 'skill2', { on: 'impact', hit: 2 })).toEqual(['sy-s2-hit3', 'sy-s2-hit3-marked', 'sy-s2-burst']);
+    expect([FX['sy-s2-hit3'].noBonusOnly, FX['sy-s2-hit3-marked'].bonusOnly]).toEqual([true, true]);
+    expect(FX['sy-ult-aura'].layer).toBeUndefined(); // the charge aura is drawn in front of him
     const ult = SHEETS[SPRITE].anims.ult!;
     expect(ult.eventFeel!.DAMAGE!.shakePx).toBeGreaterThan(0); // the release shakes the screen
     const root = ult.root!;
@@ -182,6 +186,18 @@ describe('Sylas Veyrn (3★ Archer) — engine', () => {
     const shot = ev.find(x => x.type === 'projectile' && x.src === b.sy.id && x.kind === 'ult') as Extract<BattleEvent, { type: 'projectile' }>;
     const d = Math.max(Math.abs(b.sy.pos.r - f.pos.r), Math.abs(b.sy.pos.c - f.pos.c));
     expect(shot.flight).toBeCloseTo((0.1 + 0.06 * d) / 1.8, 3);
+  });
+
+  it('Nightfall Execution in battle: the impact on a Dusk-Marked target lists it as bonus (→ Marked Execution plays)', () => {
+    const b = battle();
+    const [f] = b.foes();
+    b.place(f, { r: 1, c: 7 });
+    b.e.skills.applyEffects(b.sy, b.kit.skill, 'skill', f, f.pos);
+    b.sy.mana = b.sy.maxMana;
+    expect(b.e.requestUlt(b.sy.id)).toBeTrue();
+    const ev = run(b.e, 3);
+    const imp = ev.find(x => x.type === 'impact' && x.src === b.sy.id && x.kind === 'ult') as Extract<BattleEvent, { type: 'impact' }>;
+    expect(imp.bonus).toContain(f.id);
   });
 
   it('Nightfall Execution: locks the focus, else a Dusk-Marked foe; a marked target takes the execution bonus ×1.4', () => {

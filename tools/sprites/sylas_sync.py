@@ -59,13 +59,15 @@ FX = {
     'sy-s2-muzzle': fxdef('fx-sylas-s2-muzzle.png', 28, at='self', anchor='tipS2', dx=22, add=True),
     'sy-s2-muzzle3': fxdef('fx-sylas-s2-muzzle.png', 32, scale=0.47, at='self', anchor='tipS2', dx=30, add=True),
     'sy-s2-hit': fxdef('fx-sylas-s2-muzzle.png', 30, scale=0.27, at='target', dy=-14, add=True),
+    'sy-s2-hit3': fxdef('fx-sylas-s2-muzzle.png', 30, scale=0.32, at='target', dy=-14, add=True),
+    'sy-s2-hit3-marked': fxdef('fx-sylas-s2-muzzle.png', 40, scale=0.6, at='target', dy=-14, add=True),
     'sy-s2-burst': fxdef('fx-sylas-s2-burst.png', 50, at='target', dy=27.25),
     'sy-ult-lock': fxdef('fx-sylas-ult-lock.png', 75, at='target', dy=-14),
-    'sy-ult-aura': fxdef('fx-sylas-ult-aura.png', 75, at='self', anchor='feet', fade=120, under=True),
+    'sy-ult-aura': fxdef('fx-sylas-ult-aura.png', 75, at='self', anchor='feet', fade=120),
     'sy-ult-charge': fxdef('fx-sylas-ult-charge.png', 75, at='self', anchor='tipUlt', dx=26, repeat=2, fade=80, add=True),
-    'sy-ult-impact': fxdef('fx-sylas-ult-impact.png', 50, at='target', dy=-14, fade=220),
+    'sy-ult-impact': fxdef('fx-sylas-ult-impact.png', 50, scale=150 / 170 / 3, at='target', dy=-14, fade=220),
     'sy-ult-flash': fxdef('fx-sylas-s2-muzzle.png', 40, scale=1, at='target', dy=-14, add=True),
-    'sy-ult-marked': fxdef('fx-sylas-ult-marked.png', 55, at='target', dy=-14, add=True),
+    'sy-ult-marked': fxdef('fx-sylas-ult-marked.png', 60, at='target', dy=-14, fade=150),
 }
 PROJ = {
     'sy-bolt': fxdef('fx-sylas-bolt.png', 60, 1 / 2.6, muzzle=(54, -42.9)),
@@ -240,8 +242,12 @@ def schedule(kind):
             proj.append((PROJ['sy-s2-final' if i == 2 else 'sy-s2-bolt'], t, flight))
             if i < 2:
                 fx.append((FX['sy-s2-hit'], t + flight, fxy))
+        t3 = at(ev['DAMAGE'][2]) + flight
         if MARKED:
-            fx.append((FX['sy-s2-burst'], at(ev['DAMAGE'][2]) + flight, fxy))
+            fx.append((FX['sy-s2-hit3-marked'], t3, fxy))
+            fx.append((FX['sy-s2-burst'], t3, fxy))
+        else:
+            fx.append((FX['sy-s2-hit3'], t3, fxy))
     if kind == 'ult':
         fx.append((FX['sy-ult-lock'], 0, fxy))
         fx.append((FX['sy-ult-aura'], at(ev['CHARGE_START'][0]), hxy))
@@ -252,7 +258,7 @@ def schedule(kind):
         fx.append((FX['sy-ult-impact'], t + uf, fxy))
         fx.append((FX['sy-ult-flash'], t + uf, fxy))
         if MARKED:
-            fx.append((FX['sy-ult-marked'], t + uf, fxy))
+            fx.append((FX['sy-ult-marked'], t + uf + 0.2, fxy))  # delayMs 200
         return {'fx': fx, 'proj': proj, 'shake': [(t, SHAKE_RELEASE), (t + uf, SHAKE_HIT)]}, max(sum(steps) / 1000, t + uf + 1.3)
     return {'fx': fx, 'proj': proj}, sum(steps) / 1000
 

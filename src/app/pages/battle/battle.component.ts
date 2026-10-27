@@ -938,6 +938,7 @@ export class BattleComponent implements OnDestroy {
           : [src];
         // marked-target bursts: only on the units this hit struck with a status bonus
         if (def.bonusOnly) at.splice(0, at.length, ...at.filter(id => bonus?.includes(id)));
+        if (def.noBonusOnly) at.splice(0, at.length, ...at.filter(id => !bonus?.includes(id)));
         if (def.at === 'allies') {
           // team field: the centre of the caster's living formation (lanes / columns averaged), never rotated
           const team = this.engine.units.filter(u => u.side === unitOf(src).side && u.alive).map(u => posOf(u.id));

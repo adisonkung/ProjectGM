@@ -48,7 +48,8 @@ BAKE = {
     # full size (f1 rotated +14° a frame) → collapses slowly into its centre (f2 … f8) · (frame, degrees) = rotated
     'fx-sylas-ult-impact.png': ('Sylas_ULT_ImpactBurst_VFX.png', 'centre', 170,
                                 [6, 4, 2, 1] + [(0, 14 * i) for i in range(11)] + [(1, 154), (2, 168), (3, 182), (4, 196), (5, 210), 6, 7]),
-    'fx-sylas-ult-marked.png': ('Sylas_ULT_MarkedExecution_VFX.png', 'centre', 80, None),
+    # Marked Execution bigger (user 2026-10-27: must read over the impact vortex)
+    'fx-sylas-ult-marked.png': ('Sylas_ULT_MarkedExecution_VFX.png', 'centre', 130, None),
 }
 
 
