@@ -1,0 +1,552 @@
+{
+  "errors": [],
+  "captures": [
+    "01-attack-with-buff",
+    "02-skill-with-buff"
+  ],
+  "fixture": "Isolated browser save; Lv8 starter team; hero skills MANUAL; S2 cooldown made ready after the first observed guarded basic attack.",
+  "states": [
+    {
+      "time": 0,
+      "guard": 0,
+      "state": "SPAWNING",
+      "fx": []
+    },
+    {
+      "time": 0.2,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 0.2,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 0.2,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 0.39999999999999997,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 0.6,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 0.8000000000000002,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 1.0000000000000002,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 1.3000000000000005,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 1.5500000000000007,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 1.7500000000000009,
+      "guard": 0,
+      "state": "IDLE",
+      "fx": []
+    },
+    {
+      "time": 1.950000000000001,
+      "guard": 0,
+      "state": "ATTACKING",
+      "fx": [
+        "ae-attack-thrust"
+      ]
+    },
+    {
+      "time": 1.950000000000001,
+      "guard": 0,
+      "state": "ATTACKING",
+      "fx": [
+        "ae-attack-thrust"
+      ]
+    },
+    {
+      "time": 2.1500000000000004,
+      "guard": 0,
+      "state": "ATTACKING",
+      "fx": []
+    },
+    {
+      "time": 2.3499999999999996,
+      "guard": 0,
+      "state": "ATTACKING",
+      "fx": []
+    },
+    {
+      "time": 2.549999999999999,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 2.7499999999999982,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 2.7499999999999982,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 2.9499999999999975,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 2.9499999999999975,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 2.9499999999999975,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.149999999999997,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.149999999999997,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.149999999999997,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.349999999999996,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.5499999999999954,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.7499999999999947,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.7499999999999947,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.949999999999994,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.949999999999994,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.949999999999994,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 3.949999999999994,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s2-charge"
+      ]
+    },
+    {
+      "time": 4.149999999999993,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": [
+        "ae-s2-muzzle",
+        "ae-s2-beam",
+        "ae-s2-impact",
+        "ae-s2-impact"
+      ]
+    },
+    {
+      "time": 4.149999999999993,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.149999999999993,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.149999999999993,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.149999999999993,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.3499999999999925,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.3499999999999925,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.3499999999999925,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.549999999999992,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.749999999999991,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.749999999999991,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.749999999999991,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.749999999999991,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.749999999999991,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.94999999999999,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 4.94999999999999,
+      "guard": 0,
+      "state": "RECOVERING",
+      "fx": []
+    },
+    {
+      "time": 5.14999999999999,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 5.14999999999999,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 5.349999999999989,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 5.549999999999988,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 5.549999999999988,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 5.749999999999988,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 5.949999999999987,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 6.149999999999986,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 6.149999999999986,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 6.349999999999985,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 6.499999999999985,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 6.699999999999984,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 6.8999999999999835,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 7.099999999999983,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 7.249999999999982,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 7.4499999999999815,
+      "guard": 0,
+      "state": "CASTING",
+      "cast": "aegis_guard",
+      "fx": []
+    },
+    {
+      "time": 7.649999999999981,
+      "guard": 8,
+      "state": "RECOVERING",
+      "fx": [
+        "ae-s1-in",
+        "ae-s1-loop"
+      ]
+    },
+    {
+      "time": 7.84999999999998,
+      "guard": 7.800000000000001,
+      "state": "RECOVERING",
+      "fx": [
+        "ae-s1-in",
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ]
+    },
+    {
+      "time": 7.84999999999998,
+      "guard": 7.800000000000001,
+      "state": "RECOVERING",
+      "fx": [
+        "ae-s1-in",
+        "ae-s1-loop"
+      ]
+    },
+    {
+      "time": 7.84999999999998,
+      "guard": 7.800000000000001,
+      "state": "RECOVERING",
+      "fx": [
+        "ae-s1-in",
+        "ae-s1-loop"
+      ]
+    },
+    {
+      "time": 8.04999999999998,
+      "guard": 7.600000000000001,
+      "state": "ATTACKING",
+      "fx": [
+        "ae-s1-loop",
+        "ae-attack-thrust"
+      ]
+    },
+    {
+      "time": 8.249999999999982,
+      "guard": 7.400000000000002,
+      "state": "ATTACKING",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ]
+    },
+    {
+      "time": 8.449999999999985,
+      "guard": 7.200000000000003,
+      "state": "ATTACKING",
+      "fx": [
+        "ae-s1-loop"
+      ]
+    },
+    {
+      "time": 8.649999999999988,
+      "guard": 7.0000000000000036,
+      "state": "ATTACKING",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ]
+    },
+    {
+      "time": 8.84999999999999,
+      "guard": 6.800000000000004,
+      "state": "RECOVERING",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ]
+    },
+    {
+      "time": 9.049999999999994,
+      "guard": 6.600000000000005,
+      "state": "CASTING",
+      "cast": "aegis_lance",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s2-charge"
+      ]
+    }
+  ]
+}

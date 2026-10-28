@@ -38,7 +38,7 @@ describe('Aegis Sentinel integration', () => {
     expect(AEGIS_SENTINEL.attack.delivery).toBe('MELEE');
   });
 
-  it('guard activates after the semantic cast, reduces damage for eight seconds without invented shield HP, then expires', () => {
+  it('guard lasts eight seconds while normal attacks and other skills resume after its brief recovery', () => {
     const s = duel('aegis_guard');
     s.run(8, () => hasStatus(s.boss, 'aegis_guard'));
     expect(hasStatus(s.boss, 'aegis_guard')).toBeTrue();
@@ -46,10 +46,14 @@ describe('Aegis Sentinel integration', () => {
     const appliedAt = s.e.time;
     expect(s.boss.buffs.find(b => b.def.id === 'aegis_guard')!.remaining).toBeCloseTo(8, 1);
     expect(STATUS_EFFECTS['aegis_guard'].modifiers.damageTakenMultiplier).toBe(.4);
-    s.run(7.8);
+    s.run(3);
     expect(hasStatus(s.boss, 'aegis_guard')).toBeTrue();
-    expect(s.events.filter(x => x.type === 'attack' && x.src === s.boss.id).length).toBe(0);
-    s.run(.3);
+    expect(s.events.filter(x => x.type === 'attack' && x.src === s.boss.id).length).toBeGreaterThan(0);
+    s.boss.castSkills.find(cs => cs.def.id === 'aegis_lance')!.cd = 0;
+    s.run(3, () => s.events.some(x => x.type === 'skillActivated' && x.skill === 'aegis_lance'));
+    expect(s.events.some(x => x.type === 'skillActivated' && x.skill === 'aegis_lance')).toBeTrue();
+    expect(hasStatus(s.boss, 'aegis_guard')).toBeTrue();
+    s.run(Math.max(0, 8.1 - (s.e.time - appliedAt)));
     expect(hasStatus(s.boss, 'aegis_guard')).toBeFalse();
     expect(s.e.time - appliedAt).toBeCloseTo(8.1, 1);
   });
@@ -68,10 +72,11 @@ describe('Aegis Sentinel integration', () => {
     expect(s.boss.pos).toEqual(start);
   });
 
-  it('guard pose and visual lifetime match the real buff; refresh retains the same orbit and death/expiry removes it', () => {
+  it('guard pose ends before the buff; surface lights retain ownership across refresh and stop on expiry/death', () => {
     const sh = SHEETS['enemy-aegis-sentinel.png'];
     const tl = clipTimeline(sh.casts!['guard'], 'cast', { anim: 'cast', castClip: 'guard', castTime: 2.5 });
-    expect(tl.duration).toBeCloseTo(10.5, 6);
+    expect(tl.duration).toBeCloseTo(2.8, 6);
+    expect(tl.duration).toBeLessThan(2.5 + STATUS_EFFECTS['aegis_guard'].duration);
     expect(castTimeline(AEGIS_SKILLS['aegis_judgement'], AEGIS_SENTINEL.animation).activation).toBe(3);
     let next = 0;
     const shown = new Map<number,string>();
@@ -85,7 +90,7 @@ describe('Aegis Sentinel integration', () => {
     expect([...shown.values()]).toEqual(['ae-s1-loop']);
     playback.sync([],8);
     expect(shown.size).toBe(0);
-    expect(FX['ae-s1-loop'].frames * FX['ae-s1-loop'].frameMs).toBe(1600);
+    expect(FX['ae-s1-loop'].frames * FX['ae-s1-loop'].frameMs).toBe(2560);
     expect(sh.casts!['broken'].frames * sh.casts!['broken'].ms!).toBe(3000);
   });
 });

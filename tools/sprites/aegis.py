@@ -6,11 +6,11 @@ from pathlib import Path
 import sys,json,math
 from functools import lru_cache
 import numpy as np
-from PIL import Image,ImageDraw,ImageFilter,ImageOps
+from PIL import Image,ImageDraw,ImageFilter,ImageOps,ImageChops
 ROOT=Path(__file__).resolve().parents[2]
 SRC=Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'assets/bosses/Aegis'
 OUT=ROOT/'public/sprites';REPORT=ROOT/'docs/art/aegis';REPORT.mkdir(parents=True,exist_ok=True)
-W,H=340,280;COLS=25;SCALE=180/252  # helmet-to-sole body, excluding upright spear
+W,H=340,280;COLS=24;SCALE=180/252  # helmet-to-sole body, excluding upright spear
 # Source bodies face left. Bake canonical right; enemy facing is applied by the game.
 @lru_cache(None)
 def source(name):return Image.open(SRC/(name+'.png')).convert('RGBA')
@@ -25,7 +25,7 @@ def actor(im,dx=0):
 rows=[('idle',list(range(0,48,2))),('aegis-walk-loop-24',list(range(24))),('idle',[0]*6),
  ('death',[0,8,11,13,15,17,19,21,23,25,27,29,31,33,35,39,43,47,51,55]),
  ('skill2',[0,8,10,12,14,16,17,17,16,13,10,0]),
- ('skill1',[0,4,8,12,16]+[22]*20),
+ ('skill1',[0,4,8,12,16,22,16,12,8,4,0]),
  ('skill2',[0,8,10,12,14,16,18,20,22,24,26,28,30,32,35,38,40,42,44,46,48,50,52,55]),
  ('ultimate',[0,3,5,7,8,9,10,11,12,13,13,14,16,17,18,19,20,21,23,27,31,35,39,47]),
  ('kneel-break',[0,4,7,10,13,16,19,22,25,28,31,34,37,40,43,46,49,52,54,55])]
@@ -64,30 +64,51 @@ bar=panels('01-fx-aegis-s1-barrier-loop.png',5,2)
 # Keep original per-cell coordinates; fit dome to canvas, fixed base, no per-frame fit/rescale.
 bar=[f.resize((300,250),Image.Resampling.LANCZOS) for f in bar]
 strip('barrier-in',bar[:5],(300,250))
-# First full dome is stable; low-opacity center keeps the character legible.
-base=bar[4];rgba=np.array(base);rgba[:,:,3]=(rgba[:,:,3]*.9).astype('uint8');base=Image.fromarray(rgba)
+# The supplied dome is the only shell. No additional outline or external orbit ring.
+base=bar[4];rgba=np.array(base);rgba[:,:,3]=(rgba[:,:,3]*.78).astype('uint8');base=Image.fromarray(rgba)
+field=Image.new('RGBA',(340,280));field.alpha_composite(base,(20,5))
+# Light is clipped to the actual painted VFX (including its hex pattern), not a second geometric dome.
+paint_mask=field.getchannel('A').point(lambda a:255 if a>=5 else 0).filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.GaussianBlur(1))
 loops=[]
-for i in range(32):
- phase=math.tau*i/32;canvas=Image.new('RGBA',(340,280))
- # Stationary shield; only the light travels. Fixed base anchor at (170,245).
+def star(d,x,y,r,color,alpha):
+ d.polygon([(x-r,y),(x-r*.2,y-r*.2),(x,y-r*1.6),(x+r*.2,y-r*.2),(x+r,y),
+            (x+r*.2,y+r*.2),(x,y+r*1.6),(x-r*.2,y+r*.2)],fill=(*color,round(alpha)))
+def clipped_light(canvas,layer):
+ glow=layer.filter(ImageFilter.GaussianBlur(3))
+ glow.putalpha(ImageChops.multiply(glow.getchannel('A'),paint_mask))
+ layer.putalpha(ImageChops.multiply(layer.getchannel('A'),paint_mask))
+ canvas.alpha_composite(glow);canvas.alpha_composite(layer)
+for i in range(64):
+ phase=math.tau*i/64;canvas=Image.new('RGBA',(340,280))
  for front in [False,True]:
   if front:
-   canvas.alpha_composite(base,(20,5))
-   rim=Image.new('RGBA',canvas.size);rd=ImageDraw.Draw(rim)
-   pts=[(170+141*math.cos(math.pi*k/100),218-188*math.sin(math.pi*k/100)) for k in range(101)]
-   rd.line(pts,fill=(69,222,255,210),width=2)
-   rd.ellipse((29,201,311,235),outline=(90,230,255,220),width=2)
-   canvas.alpha_composite(rim.filter(ImageFilter.GaussianBlur(4)));canvas.alpha_composite(rim)
+   breathing=field.copy();a=np.array(breathing);a[:,:,3]=(a[:,:,3]*(.9+.1*math.sin(phase))).astype('uint8');canvas.alpha_composite(Image.fromarray(a))
   light=Image.new('RGBA',canvas.size);d=ImageDraw.Draw(light)
-  for k in range(72):
-   a=phase-k*.021;b=a-.021
-   if (math.sin(a)>=0)!=front:continue
-   def pt(v):return(170+158*math.cos(v),157+31*math.sin(v)-16*math.cos(v))
-   fade=(1-k/72)**2;d.line((pt(a),pt(b)),fill=(255,218,127,round(240*fade)),width=2)
-  if (math.sin(phase)>=0)==front:
-   x=170+158*math.cos(phase);y=157+31*math.sin(phase)-16*math.cos(phase)
-   d.line((x-5,y,x+5,y),fill=(255,251,220,255),width=2);d.line((x,y-7,x,y+7),fill=(255,251,220,255),width=1)
-  canvas.alpha_composite(light.filter(ImageFilter.GaussianBlur(3)));canvas.alpha_composite(light)
+  # Three short travelling ribbons following the dome's interior, never a complete external ring.
+  for j,(rx,cy,ry,velocity) in enumerate([(83,105,15,1),(111,153,19,-1),(101,190,12,2)]):
+   head=phase*velocity+j*2.1
+   def pt(a):return(170+rx*math.cos(a),cy+ry*math.sin(a)-9*math.cos(a))
+   color=(255,214,118) if j!=1 else (91,235,255)
+   for k in range(36):
+    a=head-k*.024*(1 if velocity>0 else -1);b=a-.024*(1 if velocity>0 else -1)
+    if (math.sin(a)>=0)!=front:continue
+    fade=(1-k/36)**1.7;d.line((pt(a),pt(b)),fill=(*color,round(230*fade)),width=3)
+   if (math.sin(head)>=0)==front:
+    x,y=pt(head);star(d,x,y,6.5,color,245);star(d,x,y,2.5,(244,255,255),255)
+  if front:
+   # Large bright motes rise and circulate over the original surface; phase wraps where opacity is zero.
+   for j in range(40):
+    u=(j*.61803398875+i/64*(1 if j%3 else 2))%1
+    y=221-u*180;rx=117*math.sqrt(max(0,1-((y-211)/188)**2))
+    angle=phase*(1+j%2)+j*2.39996323
+    x=170+math.sin(angle)*rx*(.3+.65*((j*37%97)/97))
+    env=math.sin(math.pi*u)**1.2;alpha=230*env*(.62+.38*math.sin(phase*2+j)**2)
+    color=(255,221,139) if j%3==0 else (124,242,255)
+    size=3+(j%5)*.8
+    star(d,x,y,size,color,alpha)
+   # Highlight the existing central gold crest without adding a new frame.
+   star(d,170,147,7,(255,234,167),150+90*math.sin(phase)**2)
+  clipped_light(canvas,light)
  loops.append(canvas)
 strip('barrier-loop',loops,(340,280))
 strip('barrier-hit',panels('02-fx-aegis-s1-barrier-hit.png',4,2),(128,128))
@@ -119,7 +140,7 @@ thrust=[]
 for i in range(6):
  im=Image.new('RGBA',(120,48));d=ImageDraw.Draw(im);x=28+i*13;alpha=round(255*(1-i/6));d.line((max(0,x-46),24,x,24),fill=(75,228,255,alpha),width=3);d.polygon([(x-12,18),(x+12,24),(x-12,30)],fill=(237,254,255,alpha));thrust.append(im)
 strip('thrust',thrust,(120,48))
-(REPORT/'bake-report.json').write_text(json.dumps({'character':{'cols':COLS,'rows':len(rows),'w':W,'h':H,'scale':SCALE,'canonicalFacing':'right','mapping':mapping},'fx':meta,'notes':['RGB checkerboard FX alpha reconstructed; originals preserved unchanged.','Barrier idle: fixed frame + procedural 32-frame closed orbit; no generated frame-to-frame warping.','Beam crescent kept separate; shaft generated from code, not stretched source ornament.']},indent=2))
+(REPORT/'bake-report.json').write_text(json.dumps({'character':{'cols':COLS,'rows':len(rows),'w':W,'h':H,'scale':SCALE,'canonicalFacing':'right','mapping':mapping},'fx':meta,'notes':['RGB checkerboard FX alpha reconstructed; originals preserved unchanged.','Barrier idle: fixed frame + procedural 64-frame light within painted VFX; no generated frame-to-frame warping.','Beam crescent kept separate; shaft generated from code, not stretched source ornament.']},indent=2))
 # Dark-background alpha inspection plates.
 for name in ['barrier-loop','barrier-hit','tip-charge','beam','shockwave']:
  im=Image.open(OUT/('fx-aegis-'+name+'.png'));m=meta[name];f=im.crop((0,0,m['w'],m['h']));bg=Image.new('RGBA',f.size,'#162630');bg.alpha_composite(f);bg.convert('RGB').save(REPORT/(name+'-alpha-check.jpg'))

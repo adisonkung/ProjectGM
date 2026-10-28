@@ -6,7 +6,7 @@ export const AEGIS_SKILLS: Record<string, MonsterSkillDefinition> = {
     id: 'aegis_guard', name: 'ตั้งโล่พิทักษ์', label: 'AEGIS GUARD', type: 'BUFF',
     castTime: 2.5, cooldown: 20, firstCastDelay: 4, interruptible: true, interruptPriority: 'HIGH',
     clip: 'guard', target: { type: 'SELF' }, effects: [{ type: 'APPLY_STATUS', status: 'aegis_guard', to: 'SELF' }],
-    conditions: [{ type: 'SELF_LACKS_STATUS', status: 'aegis_guard' }], recovery: 8, interruptRecovery: .5,
+    conditions: [{ type: 'SELF_LACKS_STATUS', status: 'aegis_guard' }], recovery: .3, interruptRecovery: .5,
   },
   aegis_lance: {
     id: 'aegis_lance', name: 'ทวนแสงทะลวงแนว', label: 'PIERCING LIGHT LANCE', type: 'ATTACK',
@@ -41,7 +41,7 @@ export const AEGIS_SENTINEL: MonsterDefinition = {
     idle: { row: 1, frames: 24, frameMs: 85 }, move: { row: 2, frames: 24, frameMs: 60 },
     hurt: { row: 3, frames: 6, frameMs: 30 }, death: { row: 4, frames: 20, frameMs: 70 },
     attack: { row: 5, frames: 12, frameMs: 50, events: [{ frame: 7, event: 'DAMAGE', name: 'LANCE_THRUST' }] },
-    guard: { row: 6, frames: 25, frameMs: 400, castDriven: true,
+    guard: { row: 6, frames: 11, frameMs: 50, castDriven: true,
       events: [{ frame: 1, event: 'CAST_START', name: 'GUARD_WINDUP' }, { frame: 6, event: 'SKILL_ACTIVATE', name: 'GUARD_ACTIVE' }] },
     lance: { row: 7, frames: 24, frameMs: 80, castDriven: true,
       events: [{ frame: 1, event: 'CAST_START', name: 'LANCE_WINDUP' }, { frame: 13, event: 'SKILL_ACTIVATE', name: 'LANCE_RELEASE' }] },
