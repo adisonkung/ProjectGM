@@ -34,6 +34,7 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'fx-aegis-core.png': { url: 'opt/fx-aegis-core.webp' },
   'fx-aegis-death.png': { url: 'opt/fx-aegis-death.webp' },
   'fx-aegis-impact.png': { url: 'opt/fx-aegis-impact.webp' },
+  'fx-aegis-s2-charge.png': { url: 'opt/fx-aegis-s2-charge.webp', cols: 22, rows: 2 },
   'fx-aegis-shockwave.png': { url: 'opt/fx-aegis-shockwave.webp' },
   'fx-aegis-thrust.png': { url: 'opt/fx-aegis-thrust.png' },
   'fx-aegis-tip-charge.png': { url: 'opt/fx-aegis-tip-charge.webp' },

@@ -12,18 +12,18 @@ User request: replace the first Ascension guardian with ผู้พิทัก
 
 ## Provisional kit and timeline
 
-New kit/timings are content implementation requested by the user, not a global roster balance pass. Base tier-II HP 20,000 / ATK 85 / DEF 30 and tier multipliers retain the replaced guardian values. The boss remains one combat unit with one HP bar and its existing collision radius; no multi-cell targeting system was added.
+New kit/timings are content implementation requested by the user, not a global roster balance pass. Base tier-II HP 20,000 / ATK 85 / DEF 30 and tier multipliers retain the replaced guardian values. The boss remains one combat unit with one HP bar and its existing collision radius; no multi-cell targeting system was added. Its review spawn is bottom lane 2 / column 11 and a zero-leash arena prevents upward chasing.
 
 | Action | Behavior | Timing |
 | --- | --- | --- |
 | Basic attack | Reuses supplied S2 lowering/pointing poses; small baked forward thrust + cyan spear flash; one PHYSICAL melee hit ×1.1 | 12×50ms; semantic DAMAGE at 0.30s; existing 1.9s cooldown |
 | S1 ตั้งโล่พิทักษ์ | Crouch on activation, then resume actions; damage received ×0.4, no invented shield HP or invulnerability | Cast 2.5s, buff 8s, recovery 0.3s, cooldown 20s |
-| S2 ทวนแสงทะลวงแนว | Stationary release; MAGIC ×1.2 in the existing FRONT_LINE_4 footprint, each recipient once | Cast 1.2s, cooldown 13s, recovery 0.96s |
+| S2 ทวนแสงทะลวงแนว | Stationary horizontal beam; MAGIC ×1.2 across all three lanes ahead to the board edge, each recipient once | Cast 1.8s, cooldown 13s, recovery 0.96s |
 | S3 คำพิพากษาแห่งประตู | Overhead windup → ground contact; PHYSICAL ×1.5 in RADIUS_3 | Cast 3s, Break 100, cooldown 18s, recovery 0.78s |
 | BROKEN | Existing three-second action denial and ×1.25 damage received; supplied kneel-break clip + exposed-core effect | Optional `broken` cast clip, presentation only |
 | Hurt / death | Recoil from held base art and existing contact flash; death source + shutdown VFX / fade | No new generated hurt art |
 
-S2 uses the existing forward ground-area resolver; it is not a new free-angle laser or target-following projectile. S1 grants an eight-second defensive buff; its pose returns to idle after a 0.3-second recovery, allowing normal attacks, movement and other skills while the status remains active. Effects depend on semantic cast/activation/actual-damage/status events; texture sizes do not determine hitboxes.
+S2 uses the generic FRONT_BEAM_3 resolver with committed facing: all three playable lanes ahead to the board edge; it does not rotate to follow a target. S1 grants an eight-second defensive buff; its pose returns to idle after a 0.3-second recovery, allowing normal attacks, movement and other skills while the status remains active. Effects depend on semantic cast/activation/actual-damage/status events; texture sizes do not determine hitboxes.
 
 ## Asset preparation
 
@@ -50,7 +50,7 @@ Automated: app/spec TypeScript, full Karma suite, optimized atlases and producti
 
 Real local-game captures are under `docs/review-images/2026-10-28-aegis/` (desktop 1440×900; mobile menu 390×844; combat 932×430). Test browser only: named island, floor 10 unlocked, starter heroes Lv8; hero active skills set MANUAL so the boss sequence can be seen. This fixture does not modify a player's save. Source-reference comparisons are compositions of supplied art and actual screenshots, not generated screenshots.
 
-Remaining review limits: reconstructed RGB alpha can differ from the original glow; final art-direction approval is the user's. The other two guardians still use their existing assets/kits. Full 2×2 boss gameplay footprints and a redesigned locked-angle monster telegraph system are outside this change.
+Remaining review limits: reconstructed RGB alpha can differ from the original glow; final art-direction approval is the user's. The other two guardians still use their existing assets/kits. Full 2×2 boss gameplay footprints are not implemented: Aegis remains one logical anchor with its existing collision radius.
 
 ## Isolated clip review / source-grid correction
 
@@ -63,3 +63,13 @@ S1 recovery is now 0.3s rather than the whole eight-second buff. Guard artwork u
 Barrier formation and loop are about 28% wider (4.06 / 4.6 cells); base art is held stable. Lighting is clipped to an expanded alpha mask of the supplied image, with no additional geometric shell, perimeter line or external orbit. Three short interior ribbons and 40 larger stars circulate/rise over the hex surface on a periodic 64-frame cycle.
 
 Verification: app/spec TypeScript, sprite optimization, 874/874 Karma and production build pass. Browser capture confirms ATTACKING with 7.6s of guard remaining and S2 CASTING with 6.6s remaining. In the isolated browser fixture only, S2 is made ready after the first guarded basic attack so both paths can be inspected promptly. Real desktop/mobile captures and source comparison are in docs/review-images/2026-10-28-aegis-s1-active/. Isolated S1 playback in /workspace/aegis-s1-v3 uses current assets and clip/FX samplers, with four illustrative basic attacks during the buff; it is not an AI-combat recording.
+
+## S2 straight-beam revision (2026-10-29, work in progress)
+
+User asked for a brief charge, light spiralling into the spear tip, a horizontal three-lane beam to the left screen edge, and a lower boss position. Cast is deliberately 1.8s (was 1.2s); cooldown 13s, recovery 0.96s and multiplier ×1.2 remain. S2 body row holds source F17 after lowering the spear, through charge and release, before lifting it back. Other body rows are unchanged. New code-drawn inward spiral strip is separate from S3 charge. Cast ownership cancels it on release/cancellation/death.
+
+FRONT_BEAM_3 uses locked facing, excludes the caster column and behind, includes stacked units once and clamps to the three playable lanes. FxDef.toBoardEdge / edgeBeamStretch sizes the shaft from weaponTip to the visible board edge without changing height; separate emitter ornament keeps its proportions. Telegraph covers the forward three-lane corridor. Aegis is anchored on bottom lane 2, column 11 in all dungeon tiers with holdArena leash 0; no change to other guardian positions. This is a single-anchor placement change, not a new four-cell collision/targeting system.
+
+PENDING SOURCE IMPORT: Cyan Energy Beam Loop Sprite Sheet.png and Crescent Energy Beam Sprite Sheet.png are visible in chat, but their C:/Users/... paths are unavailable in the cloud workspace. Requested a ZIP containing the originals. Until supplied, previews explicitly retain the original muzzle and procedural shaft as temporary fallback; they do not claim to use the new art.
+
+Validation for this WIP checkpoint: app/spec TypeScript, sprite optimization, production build and 877/877 Karma pass. Under concurrent browser/build load, the default Karma launcher disconnected before executing tests; reran with a temporary local config extending browser/ping timeouts, with all assertions unchanged. Real desktop/mobile screenshots in docs/review-images/2026-10-29-aegis-s2 verify charge, bottom position, zero beam angle, tip-anchor-to-edge width and five contact recipients. New supplied PNG import remains blocked as described above.

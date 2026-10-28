@@ -1,8 +1,15 @@
 import { FxTrack } from '../../core/models/fx';
 import { trackPoseAt } from './fx-track';
-import { FX_SCALE, FxDef, PROJECTILE_SCALE, PX_TO_CELL } from '../../core/data/sprites';
+import { FX_SCALE, FxDef, PROJECTILE_SCALE, PX_TO_CELL, fxWidthCells } from '../../core/data/sprites';
 import { Cell } from '../../core/models/unit';
 import { square2Center } from '../engine/area';
+import { BOARD_COLS } from '../engine/grid';
+
+/** Length only; the separate emitter and the shaft's vertical thickness retain their authored size. */
+export function edgeBeamStretch(d: FxDef, column: number, left: boolean, offset: [number, number], columns = BOARD_COLS): number {
+  const origin = column + .5 + offset[0] / 100 * (left ? -1 : 1);
+  return Math.max(0, left ? origin : columns - origin) / fxWidthCells(d);
+}
 
 /** Ground footprint placement uses logical cells, never the art bounds or number of occupants. */
 export function groundFxCell(d: FxDef, caster: Cell, target: Cell, left?: boolean): Cell {

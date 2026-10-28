@@ -20,7 +20,7 @@ import { power } from '../../core/rules/stats';
 import { TeamService } from '../../core/services/team.service';
 import { AnimState, BoardComponent, FloatText, FxView, ProjectileView, UnitView, WorldDebug, ZoneView } from '../../battle/board/board.component';
 import { projectileLife } from '../../battle/projectile/projectile.component';
-import { ENEMY_ZONE_START, SCENERY_ROWS, SIDE_DEPTH } from '../../battle/engine/grid';
+import { BOARD_COLS, ENEMY_ZONE_START, SCENERY_ROWS, SIDE_DEPTH } from '../../battle/engine/grid';
 import { BattlePhase } from '../../battle/engine/stage/types';
 import { PartyBarComponent } from '../../battle/party-bar/party-bar.component';
 import { DEV_FLAGS } from '../../core/data/dev-flags';
@@ -33,7 +33,7 @@ import { fxDuration } from '../../battle/fx-sprite/fx-sprite.component';
 import { playImpactFeel } from '../../battle/impact-feel/impact-feel';
 import { BoardRenderer, savedRenderer, saveRenderer } from '../../battle/render/renderer-pref';
 import { animOf, appliedStatusFx, retaliateFx, CLASS_PROJECTILE, FX, fxFor, eventFeelOf, fxAttached, fxOffset, FxTrigger, fxWidthCells, impactFeelOf, projectileOf, projectileOrigin, SHEETS, SkillKind } from '../../core/data/sprites';
-import { groundFxCell } from '../../battle/render/fx-clip';
+import { edgeBeamStretch, groundFxCell } from '../../battle/render/fx-clip';
 import { FieldFxPlayback } from '../../battle/render/field-fx';
 import { BattleEngine, BattleEvent, BattleResult, BattleUnit } from '../../battle/engine/battle-engine';
 import { BattleOutcome, createBattle, modeStatus, outcomeOf } from '../../battle/battle-session';
@@ -881,6 +881,11 @@ export class BattleComponent implements OnDestroy {
       const dir = this.facing.get(caster.id) ? -1 : 1;
       return { r: q.r - 1, c: dir > 0 ? q.c : q.c - 2, w: 3, h: 3 };
     }
+    if (area === 'FRONT_BEAM_3') {
+      const q = this.screenOf(caster);
+      const left = caster.actionFacing?.left ?? !!this.facing.get(caster.id);
+      return { r: 0, c: left ? 0 : q.c + .5, w: Math.max(0, left ? q.c + .5 : BOARD_COLS - q.c - .5), h: 3 };
+    }
     return { r: p.r - k, c: p.c - k, w: 2 * k + 1, h: 2 * k + 1 };
   }
 
@@ -996,13 +1001,18 @@ export class BattleComponent implements OnDestroy {
         if (!d) continue;
         const flip = !!this.facing.get(src);
         const offset = fxOffset(name, u.sprite);
-        // A tall caster's forward beam starts at its real weapon tip and descends toward hero body height.
-        // Only the separate shaft rotates; its ornament is never stretched. Combat footprint stays in skill data.
+        // An edge beam is horizontal and starts at the weapon tip; only its separate shaft changes length.
+        const position = posOf(src);
+        const stretch = d.toBoardEdge ? edgeBeamStretch(d, position.c, flip, offset) : undefined;
         const angle = d.at === 'self' && d.orient === 'rotate'
           ? Math.atan2(-.25 - offset[1] / 100, fxWidthCells(d) * (flip ? -1 : 1)) * 180 / Math.PI - (flip ? 180 : 0) : 0;
-        fx.push({ id: ++this.floatId, ...posOf(src), name, angle, flip,
+        const durationMs = fxDuration(name);
+        fx.push({ id: ++this.floatId, ...position, name, angle, flip, stretch,
           offset, under: d.layer === 'under', follow: fxAttached(name) ? src : undefined,
-          ...(phase === 'cast' ? { owner: src, managed: true } : {}) });
+          owner: src, managed: true,
+          // Reuse the existing game-clock track lifecycle; pause/hit-stop must not consume a short release FX.
+          ...(phase === 'activate' ? { track: { durationMs,
+            alpha: [[0,1],[durationMs - (d.fadeOutMs ?? 0),1],[durationMs,0]] as [number,number][] } } : {}) });
       }
     };
     for (const e of events) {

@@ -142,7 +142,7 @@ export interface StatusEffectDefinition {
  * ALL_ALLIES / ALL_ENEMIES every living, valid unit of that team
  */
 export type AreaPattern =
-  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'RECT_6X3_CENTERED' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_RECT_2X3' | 'FRONT_LINE_4' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
+  | 'SINGLE' | 'SQUARE_2' | 'RECT_3X2' | 'RECT_6X3' | 'RECT_6X3_CENTERED' | 'ADJACENT_8' | 'CROSS_1' | 'LINE_2' | 'LINE_3' | 'FRONT_ARC' | 'FRONT_CELL' | 'FRONT_3X3' | 'FRONT_LINE_2' | 'FRONT_COLUMN_3' | 'FRONT_CROSS' | 'FRONT_T3' | 'FRONT_RECT_2X3' | 'FRONT_LINE_4' | 'FRONT_BEAM_3' | 'RADIUS_2' | 'RADIUS_3' | 'ALL_ALLIES' | 'ALL_ENEMIES';
 
 /** where an area is centred */
 export type AreaCenter = 'TARGET' | 'SELF';

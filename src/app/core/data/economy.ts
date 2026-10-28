@@ -381,7 +381,11 @@ const ASCENSION_BG = ['twilight-1', 'twilight-1', 'misty-1'];
 export function ascensionDuel(tier: number, boss: (typeof ASCENSION_BOSSES)[number]): StageDef {
   const [enrageAt, limit] = ASCENSION_LIMITS[tier - 1];
   const name = `Ascension ${['I', 'II', 'III'][tier - 1]} · ${DUNGEON_MONSTERS[boss].name}`;
-  return bossDuel(`ascension_${tier}`, name, `${boss}@${tier}`, enrageAt, limit, ASCENSION_BG[tier - 1]);
+  const stage = bossDuel(`ascension_${tier}`, name, `${boss}@${tier}`, enrageAt, limit, ASCENSION_BG[tier - 1]);
+  // Aegis review position: bottom anchor, leaving the upper lane clear. Keep the logical grid integral.
+  if (boss !== 'aegis_sentinel') return stage;
+  return { ...stage, enemies: [{ enemy: `${boss}@${tier}`, r: 1, c: 2 }],
+    waveDefs: [{ spawns: [{ monsterId: `${boss}@${tier}`, formationSlot: { depth: 1, lane: 2 } }] }] };
 }
 export const ASCENSION_WAVE_STAGES = ASCENSION_STAGES;
 

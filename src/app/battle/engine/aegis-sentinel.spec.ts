@@ -1,4 +1,5 @@
 import { AEGIS_SENTINEL, AEGIS_SKILLS } from '../../core/data/aegis-sentinel';
+import { ascensionDuel } from '../../core/data/economy';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { MONSTERS, castTimeline } from '../../core/data/monsters';
 import { SHEETS, FX } from '../../core/data/sprites';
@@ -10,6 +11,8 @@ import { StatusFxPlayback } from '../render/status-fx';
 import { clipTimeline } from '../render/unit-clip';
 import { BattleEvent } from './battle-engine';
 import { hasStatus } from './buffs';
+import { resolveArea } from './area';
+import { edgeBeamStretch, fxPlacement } from '../render/fx-clip';
 
 function duel(skill: string) {
   const h = HERO_BY_ID['bailong'];
@@ -28,6 +31,44 @@ function duel(skill: string) {
 }
 
 describe('Aegis Sentinel integration', () => {
+  it('the straight beam hits all three lanes ahead to the edge, once per unit, never behind the committed facing', () => {
+    const caster = { id: 1, pos: { r: 2, c: 11 }, actionFacing: { left: true } };
+    const candidates = [
+      { id: 2, pos: { r: 0, c: 0 } }, { id: 3, pos: { r: 1, c: 5 } },
+      { id: 4, pos: { r: 2, c: 10 } }, { id: 5, pos: { r: 2, c: 10 } },
+      { id: 6, pos: { r: 1, c: 12 } }, { id: 7, pos: { r: 2, c: 11 } },
+    ];
+    expect(resolveArea({ pattern: 'FRONT_BEAM_3', caster, primary: candidates[4], candidates }).map(u => u.id)).toEqual([2,3,4,5]);
+    const right = { ...caster, actionFacing: { left: false } };
+    expect(resolveArea({ pattern: 'FRONT_BEAM_3', caster: right,
+      primary: candidates[0], candidates }).map(u => u.id)).toEqual([6]);
+  });
+
+  it('the shaft reaches either screen edge from its tip anchor without changing vertical size or angle', () => {
+    const def = FX['ae-s2-beam'];
+    const offset: [number,number] = [186,-120];
+    for (const left of [true,false]) for (const cell of [40,80]) {
+      const at = fxPlacement(def,cell,11*cell,2*cell,left,0,offset,1,edgeBeamStretch(def,11,left,offset));
+      expect(at.x + (left ? -at.width : at.width)).toBeCloseTo(left ? 0 : 16*cell,6);
+      expect(at.height).toBe(3*cell);
+      expect(at.rotation).toBe(0);
+    }
+  });
+
+  it('all Aegis dungeon tiers start and stay on the bottom anchor instead of walking upward', () => {
+    for (const tier of [1,2,3]) {
+      const stage = ascensionDuel(tier,'aegis_sentinel');
+      expect(stage.waveDefs![0].spawns[0].formationSlot).toEqual({ depth: 1,lane: 2 });
+      const e = createBattle({ allies: [],seed: 7,stage });
+      const boss = e.units.find(u => u.monster)!;
+      expect(boss.pos).toEqual({ r: 2,c: 11 });
+    }
+    const s = duel('aegis_lance');
+    const start = { ...s.boss.pos };
+    s.run(15);
+    expect(s.boss.pos).toEqual(start);
+    expect(castTimeline(AEGIS_SKILLS['aegis_lance'],AEGIS_SENTINEL.animation).activation).toBe(1.8);
+  });
   it('all tiers share the three-skill kit and original guardian base stat progression', () => {
     for (const tier of [1,2,3]) {
       const d = MONSTERS[`aegis_sentinel@${tier}`];

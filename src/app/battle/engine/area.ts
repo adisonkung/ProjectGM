@@ -99,6 +99,16 @@ export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
   const facing: 1 | -1 = candidates.some(c => c.pos.c > caster.pos.c) || !candidates.length ? 1 : -1;
   let hit: T[];
   switch (pattern) {
+    case 'FRONT_BEAM_3': {
+      // A straight three-lane corridor, clamped vertically to the playable board, extending to its edge.
+      // The committed facing owns the direction; a target moving behind the caster cannot turn the beam.
+      const dir = caster.actionFacing ? (caster.actionFacing.left ? -1 : 1)
+        : primary ? direction(caster.pos, primary.pos, facing).dc : facing;
+      const lane = Math.max(1, Math.min(LANES - 2, caster.pos.r));
+      hit = candidates.filter(u => (u.pos.c - caster.pos.c) * dir > 0 &&
+        u.pos.c >= 0 && u.pos.c < BOARD_COLS && u.pos.r >= 0 && u.pos.r < LANES && Math.abs(u.pos.r - lane) <= 1);
+      break;
+    }
     case 'SINGLE':
       hit = primary && candidates.includes(primary) ? [primary] : [];
       break;

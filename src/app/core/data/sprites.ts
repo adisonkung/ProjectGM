@@ -222,6 +222,8 @@ export interface FxDef {
    * rotated toward the caster and stretched lengthwise to their distance (height kept) — e.g. Lucien's Burden Link
    */
   span?: boolean;
+  /** Straight beam shaft: stretch only its length from the anchor to the visible battlefield edge. */
+  toBoardEdge?: boolean;
   /**
    * per-hit copies (perHit) start when a wave from the caster reaches each unit: extra delay =
    * max(0, distance in cells − `from`) / `speed` (cells/s) — e.g. a pulse on each ally as a heal wave sweeps over it
@@ -1135,12 +1137,13 @@ export const FX: Record<string, FxDef> = {
     at: 'self', fitCells: 4.6, pivot: [.5,.77], dy: 35, delayMs: 350, attach: true },
   'ae-s1-hit': { file: 'fx-aegis-barrier-hit.png', frames: 8, w: 128, h: 128, frameMs: 40,
     at: 'self', fitCells: .85, dy: -65, dx: 75, attach: true, blend: 'add' },
-  'ae-s2-charge': { file: 'fx-aegis-tip-charge.png', frames: 24, w: 120, h: 120, frameMs: 50,
-    at: 'self', anchor: 'weaponTip', delayMs: 550, scale: .55, attach: true, blend: 'add' },
+  'ae-s2-charge': { file: 'fx-aegis-s2-charge.png', frames: 32, w: 180, h: 180, frameMs: 40,
+    at: 'self', anchor: 'weaponTip', delayMs: 750, fitCells: 2.1, attach: true, repeat: 2, blend: 'add' },
   'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 1, w: 110, h: 144, frameMs: 180,
     at: 'self', anchor: 'weaponTip', scale: .55, pivot: [.7,.5], attach: true, fadeOutMs: 180 },
   'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 80, frameMs: 45,
-    at: 'self', anchor: 'weaponTip', fitCells: 2.2, pivot: [.04,.5], orient: 'rotate', attach: false, blend: 'add' },
+    at: 'self', anchor: 'weaponTip', fitCells: 1, fitRows: 3, pivot: [0,.5], toBoardEdge: true,
+    orient: 'flip', attach: false, repeat: 2, fadeOutMs: 120, blend: 'add' },
   'ae-s2-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
     at: 'target', fitCells: .8, dy: -20 },
   'ae-s3-charge': { file: 'fx-aegis-tip-charge.png', frames: 24, w: 120, h: 120, frameMs: 50,

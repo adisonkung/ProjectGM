@@ -26,7 +26,8 @@ rows=[('idle',list(range(0,48,2))),('aegis-walk-loop-24',list(range(24))),('idle
  ('death',[0,8,11,13,15,17,19,21,23,25,27,29,31,33,35,39,43,47,51,55]),
  ('skill2',[0,8,10,12,14,16,17,17,16,13,10,0]),
  ('skill1',[0,4,8,12,16,22,16,12,8,4,0]),
- ('skill2',[0,8,10,12,14,16,18,20,22,24,26,28,30,32,35,38,40,42,44,46,48,50,52,55]),
+ # Lower the spear, hold a stable aiming pose through charge/release, then lift it back.
+ ('skill2',[0,8,10,12,14,16,16,16,16,16,16,16,16,16,16,16,16,16,16,42,44,48,52,55]),
  ('ultimate',[0,3,5,7,8,9,10,11,12,13,13,14,16,17,18,19,20,21,23,27,31,35,39,47]),
  ('kneel-break',[0,4,7,10,13,16,19,22,25,28,31,34,37,40,43,46,49,52,54,55])]
 atlas=Image.new('RGBA',(COLS*W,H*len(rows)));mapping=[]
@@ -118,6 +119,23 @@ held=charge[3];charges=[]
 for i in range(24):
  q=held.copy();a=np.array(q);a[:,:,3]=(a[:,:,3]*(.82+.18*math.sin(math.tau*i/24))).astype('uint8');charges.append(Image.fromarray(a))
 strip('tip-charge',charges,(120,120))
+# S2 only: inward-moving light spirals converge at the fixed spear-tip anchor.
+# Keep S3's approved charge strip unchanged.
+spirals=[]
+for i in range(32):
+ phase=i/32;light=Image.new('RGBA',(180,180));d=ImageDraw.Draw(light)
+ for arm in range(3):
+  for k in range(28):
+   u=(phase+k/84+arm/3)%1
+   radius=77*(1-u)**.85;angle=math.tau*(u*1.65+arm/3)
+   x=90+math.cos(angle)*radius;y=90+math.sin(angle)*radius*.8
+   color=(255,220,135) if arm==0 else (80,229,255)
+   star(d,x,y,1.6+u*2.6,color,70+round(175*u))
+ glow=light.filter(ImageFilter.GaussianBlur(3));glow.alpha_composite(light)
+ core=ImageDraw.Draw(glow);pulse=2+math.sin(phase*math.tau)**2
+ star(core,90,90,5+pulse,(198,253,255),250)
+ spirals.append(glow)
+strip('s2-charge',spirals,(180,180))
 strip('impact',panels('05-fx-aegis-s2-impact.png',4,2),(160,128))
 strip('shockwave',panels('06-fx-aegis-s3-ground-shockwave.png',4,2),(300,160))
 core=panels('07-fx-aegis-core-exposed-loop.png',5,2)
@@ -130,9 +148,9 @@ strip('beam-muzzle',[muzzle],(110,144))
 shaft=[]
 for i in range(8):
  a=Image.new('RGBA',(384,80));d=ImageDraw.Draw(a);env=math.sin(math.pi*(i+1)/9)
- for thickness,col in [(26,(20,178,255,round(65*env))),(12,(43,215,255,round(180*env))),(4,(228,254,255,round(255*env)))]:
-  d.line((12,40,356,40),fill=col,width=thickness)
- d.polygon([(350,34),(380,40),(350,46)],fill=(224,254,255,round(255*env)))
+ # Existing procedural fallback until the user's new beam PNGs are accessible. Full-height corridor, no arrowhead.
+ for thickness,col in [(80,(20,178,255,round(65*env))),(58,(43,215,255,round(180*env))),(18,(228,254,255,round(255*env)))]:
+  d.line((0,40,384,40),fill=col,width=thickness)
  shaft.append(a)
 strip('beam',shaft,(384,80))
 # Small normal thrust flash, transparent and distinct from the long S2 release.
