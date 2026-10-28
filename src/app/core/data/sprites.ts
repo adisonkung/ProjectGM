@@ -971,16 +971,18 @@ export const SHEETS: Record<string, SheetDef> = {
         events: { CAST_START: 2, ANTICIPATION_PEAK: 4, SKILL_ACTIVATE: 6, VFX_SPAWN: 6, DAMAGE: 7, IMPACT: 7, RECOVERY_START: 9 },
         impact: { hitStopMs: 60, shakePx: 3, shakeMs: 150 },
       },
-      // Nine Dragon Sequence (v3 art, 19 frames, 2 rows 9 + 10): ready → low dash F3–F4 → THRUST F5 (hit 1) → sweep F7
-      // (hit 2) → leap F10 → air F11–F14 (overhead gather F14) → dive F15–F16 → GROUND CONTACT F17 (hit 3) → recover
-      // · dragons on the board fx layer: hint (thrust) · emerge (sweep) · ascent (leap) · coil (air) · dive / impact /
-      // residual on the target. Damage 25 / 30 / 45 % (kit repeat weights).
+      // Nine Dragon Sequence (v3 art, 19 frames, 2 rows 9 + 10): ready → CHARGE STANCE F2 (spear upright, held 0.95 s
+      // while the charge-aura dragon rises — user 2026-10-27: dance only once the aura is complete) → low dash F3–F4 →
+      // THRUST F5 (hit 1) → sweep F7 (hit 2) → leap F10 → air F11–F14 (overhead gather F14) → dive F15–F16 → GROUND
+      // CONTACT F17 (hit 3) → recover · dragons on the board fx layer: charge (stance) · hint (thrust) · emerge (sweep)
+      // · ascent (leap) · coil (air) · dive / impact / residual on the target. Damage 25 / 30 / 45 % (kit repeat weights).
       ult: {
         row: 7, frames: 19, ms: 120,
         seq: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-        steps: [90, 90, 140, 80, 200, 100, 180, 100, 90, 140, 90, 90, 90, 300, 80, 120, 260, 120, 120],
+        steps: [90, 950, 140, 80, 200, 100, 180, 100, 90, 140, 90, 90, 90, 300, 80, 120, 260, 120, 120],
         events: {
-          CAST_START: 0, CHARGE_START: 1, ANTICIPATION_PEAK: 2, STRIKE_START: [3, 5, 9], VFX_SPAWN: [11, 14],
+          // CHARGE_PEAK = the aura's F10 (full dragon) appears: 0.09 + 9 × 80 ms = 0.81 s
+          CAST_START: 0, CHARGE_START: 1, CHARGE_PEAK: 1.76, ANTICIPATION_PEAK: 2, STRIKE_START: [3, 5, 9], VFX_SPAWN: [11, 14],
           FINAL_ANTICIPATION: 13, DAMAGE: [4, 6, 16], IMPACT: [4, 6, 16], RECOVERY_START: 17,
         },
         impact: [
@@ -988,14 +990,14 @@ export const SHEETS: Record<string, SheetDef> = {
           { hitStopMs: 40, shakePx: 4, shakeMs: 150 },
           { hitStopMs: 120, shakePx: 11, shakeMs: 320, flashMs: 180, zoomPct: 7 },
         ],
-        // overhead gather at the apex: a slow push-in before the dive
-        eventFeel: { FINAL_ANTICIPATION: { zoomPct: 3, shakeMs: 260 } },
+        // the risen charge dragon: a light push-in · overhead gather at the apex: a slow push-in before the dive
+        eventFeel: { CHARGE_PEAK: { zoomPct: 2, shakeMs: 220 }, FINAL_ANTICIPATION: { zoomPct: 3, shakeMs: 260 } },
       },
     },
     fx: {
       skill: 'bailong-dragon-thrust',
       skill2: ['bailong-sweeping-moon', 'bailong-sweeping-moon-hit'],
-      ult: ['bl3-hint', 'bl3-emerge', 'bl3-ascent', 'bl3-coil', 'bl3-dive', 'bl3-impact', 'bl3-residual'],
+      ult: ['bl-ult-charge', 'bl3-hint', 'bl3-emerge', 'bl3-ascent', 'bl3-coil', 'bl3-dive', 'bl3-impact', 'bl3-residual'],
     },
   },
 };
@@ -1759,6 +1761,15 @@ export const FX: Record<string, FxDef> = {
   'sy-ult-marked': {
     file: 'fx-sylas-ult-marked.png', frames: 8, w: 265, h: 327, pivot: [0.499259, 0.499343], frameMs: 60, delayMs: 200, fadeOutMs: 150, at: 'target', on: 'impact', bonusOnly: true, dy: -14, scale: 1 / 3,
     particles: [{ name: 'sparks', colors: [0xffffff, 0xd8fbff, 0x63e6f0], count: 28, scale: 1.3 }],
+  },
+  // ---- Bai Long ult charge aura (user 2026-10-27, tools/sprites/bailong_ult_charge.py from
+  // assets/heroes/BaiLong/vfx/Bailong_ULT_ChargeAura_VFX.png): ground ring + white dragon rising F1 → F10 around his
+  // feet while he holds the charge stance; F10 held 2 frames, fades as the dash starts · painted (not pixelated) ·
+  // ring ≈ 1.7 cells (263 strip px × 0.345 × 1.5 = 136 atlas px), dragon ≈ 1.4 × his body
+  'bl-ult-charge': {
+    file: 'fx-bailong-ult-charge.png', frames: 12, w: 292, h: 233, frameMs: 80, fadeOutMs: 300, at: 'self',
+    event: 'CHARGE_START', anchor: 'feet', pivot: [0.5, 0.901288], scale: 0.345, layer: 'under',
+    particles: [{ name: 'spirit-rise', duration: 0.95 }],
   },
   // ---- Bai Long ult v3 dragons (bailong.py VFX_SHEETS 'v3_*', strips cut at 0.5 of the 2172 × 724 sources) ----
   // thrust: thin dragon launches from the spear tip forward (tail = left pivot)

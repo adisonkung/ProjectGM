@@ -268,16 +268,32 @@ describe('Bai Long — Nine Dragon Sequence (Ultimate) visuals', () => {
   const ev = () => animEvents(SPRITE, 'ult');
   const at = (n: string, i = 0) => ev().find(x => x.event === n && x.index === i)!;
 
-  it('v3 19-frame dance, 2.0–2.7 s: thrust F5 · sweep F7 · ground contact F17 · overhead gather F14', () => {
+  it('v3 19-frame dance, 3.0–3.5 s (charge stance first): thrust F5 · sweep F7 · ground contact F17 · overhead gather F14', () => {
     const tm = animTiming(SPRITE, 'ult');
-    expect(tm.total).toBeGreaterThanOrEqual(2.0);
-    expect(tm.total).toBeLessThanOrEqual(2.7);
+    expect(tm.total).toBeGreaterThanOrEqual(3.0);
+    expect(tm.total).toBeLessThanOrEqual(3.5);
     expect([0, 1, 2].map(i => at('DAMAGE', i).art! + 1)).toEqual([5, 7, 17]);
     expect(at('FINAL_ANTICIPATION').art! + 1).toBe(14);
     expect(tm.hits.length).toBe(3);
     const ult = SHEETS[SPRITE].anims.ult!;
     expect(ult.seq!.length).toBe(ult.steps!.length);
     for (const i of [0, 1]) expect(at('STRIKE_START', i).t).toBeLessThan(at('DAMAGE', i).t);
+  });
+
+  it('charge stance: F2 held while the charge-aura dragon rises; the dance starts only once it is complete', () => {
+    expect(fxFor(SPRITE, 'ult', { on: 'event', event: 'CHARGE_START', index: 0 })).toEqual(['bl-ult-charge']);
+    const c = FX['bl-ult-charge'];
+    expect([c.at, c.layer, c.anchor]).toEqual(['self', 'under', 'feet']);
+    const start = at('CHARGE_START').t;
+    expect(at('CHARGE_START').art! + 1).toBe(2);
+    // the full dragon (art F10 = strip frame 9) appears at CHARGE_PEAK, before the dance (F3 crouch) begins
+    const full = start + (9 * c.frameMs) / 1000;
+    expect(Math.abs(full - at('CHARGE_PEAK').t)).toBeLessThan(0.02);
+    expect(at('ANTICIPATION_PEAK').t).toBeGreaterThan(full + 0.1);
+    expect(at('ANTICIPATION_PEAK').t - start).toBeGreaterThanOrEqual(0.85);
+    // the aura has faded out by the first strike's end, never lingering into the sweep
+    const gone = start + (c.frames * c.frameMs + c.fadeOutMs!) / 1000;
+    expect(gone).toBeLessThan(at('DAMAGE', 1).t);
   });
 
   it('dragon VFX phases: hint (thrust) · emerge (sweep) · ascent (leap, under) · coil (air) · dive on the target before contact', () => {
