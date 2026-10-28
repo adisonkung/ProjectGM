@@ -1,3 +1,4 @@
+import { visualGameClock } from '../render/visual-clock';
 import { StatusIconComponent } from '../../shared/status-icon.component';
 import { FxTrack } from '../../core/models/fx';
 import { FxAnchors } from '../render/fx-anchor';
@@ -217,6 +218,11 @@ export class BoardComponent {
   readonly sceneryExtraRows = input(0);
   /** battle: the game clock is frozen (paused / hit-stop) — the Pixi units hold their frame */
   readonly frozen = input<(() => boolean) | undefined>(undefined);
+  /** Battle engine snapshot time. Standalone views without one retain their display clock. */
+  readonly gameTime = input<number | undefined>(undefined);
+  readonly gameStep = input(.05);
+  private lastGameTime = 0;
+  private gameClockOffset = 0;
   /** debug: lines from each monster to its target (board cell coordinates incl. scenery rows) */
   readonly targetLines = computed(() => {
     if (!this.debug()) return [];
@@ -503,7 +509,15 @@ export class BoardComponent {
     const a = alphaFn ? alphaFn() : 0;
     const follow = 1 - Math.exp(-dt / 55);
     if (!this.frozen()?.()) {
-      this.vclock += (dt / 1000) * this.speed();
+      const snapshot = this.gameTime();
+      if (snapshot == null) this.vclock += (dt / 1000) * this.speed();
+      else {
+        const sample = visualGameClock(snapshot, alphaFn ? a : 1, this.gameStep() * this.speed());
+        // A new run may reset simulation time; existing visual instances still use a monotonic local clock.
+        if (snapshot < this.lastGameTime - 1e-8) this.gameClockOffset = this.vclock - sample;
+        this.lastGameTime = snapshot;
+        this.vclock = Math.max(this.vclock, this.gameClockOffset + sample);
+      }
       this.idleClock += dt / 1000;
     }
     const ease = 1 - Math.exp(-dt / 90);

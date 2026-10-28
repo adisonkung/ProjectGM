@@ -13,7 +13,7 @@ import { TeamPresetsComponent } from '../../shared/team-presets.component';
 import { DUNGEON_TYPES } from '../dungeons/dungeons.component';
 import { IconComponent } from '../../shared/icon.component';
 import { STAGES } from '../../core/data/stages';
-import { FARM_BY_ID } from '../../core/data/economy';
+import { ascensionSelection, FARM_BY_ID } from '../../core/data/economy';
 import { ITEMS } from '../../core/data/economy';
 import { ProgressionService, RunReward } from '../../core/services/progression.service';
 import { power } from '../../core/rules/stats';
@@ -74,6 +74,7 @@ export class BattleComponent implements OnDestroy {
   /** sandbox (no rewards), a tower run (clear EXP) or a farm dungeon run (?farm=training_1) */
   readonly mode = signal<'lab' | 'tower' | 'farm'>('lab');
   readonly farmId = signal<string | null>(null);
+  readonly guardianChoice = signal<string | null>(null);
   readonly reward = signal<RunReward | null>(null);
   /** finished tower / farm run (result card) · live special-mode HUD */
   readonly outcome = signal<BattleOutcome | null>(null);
@@ -142,6 +143,7 @@ export class BattleComponent implements OnDestroy {
   }
   readonly result = signal<BattleResult | null>(null);
   readonly time = signal(0);
+  readonly gameClock = signal(0);
   readonly views = signal<UnitView[]>([]);
   readonly floats = signal<FloatText[]>([]);
   readonly fx = signal<FxView[]>([]);
@@ -188,6 +190,7 @@ export class BattleComponent implements OnDestroy {
   readonly debug = signal(false);
   /** running cast FX per unit (removed on fxStop) */
   private castFx = new Map<number, number>();
+  private guardHitAt = new Map<number, number>();
   /** Target cell at cast start, for ground visuals when an aimed unit dies before activation. */
   private castAim = new Map<number, { id: number; at: { r: number; c: number } }>();
   /** ground footprint of the current cast per caster: every ground FX layer of one cast (spawn → loop → burst) lands
@@ -245,7 +248,11 @@ export class BattleComponent implements OnDestroy {
   /** มีสกิลร่ายที่ตัดได้อยู่ตอนนี้ → ไฮไลต์ฮีโร่ที่ท่าไม้ตายตัดได้ */
   readonly cuttable = computed(() => this.casts().some(v => v.cast!.interruptible));
 
-  readonly stage = computed(() => (this.farmId() ? FARM_BY_ID[this.farmId()!].stage : STAGES[this.floor() - 1]));
+  readonly stage = computed(() => {
+    const d = this.farmId() ? FARM_BY_ID[this.farmId()!] : null;
+    return d?.type === 'ASCENSION' ? ascensionSelection(Number(d.id.split('_')[1]), this.guardianChoice())
+      : d?.stage ?? STAGES[this.floor() - 1];
+  });
   readonly background = computed(() => BACKGROUNDS[this.stage().background ?? ''] ?? null);
   /** ก่อนกดเริ่ม: แสดงกระดานจัดตำแหน่ง */
   readonly placing = computed(() => !this.running() && !this.result());
@@ -340,6 +347,7 @@ export class BattleComponent implements OnDestroy {
     const farm = qp.get('farm');
     if (farm && FARM_BY_ID[farm]) {
       this.farmId.set(farm);
+      this.guardianChoice.set(qp.get('boss'));
       this.mode.set('farm');
     } else if (qp.get('mode') === 'tower' || !route.data['lab']) this.mode.set('tower');
     // real tower runs: never past the next unlocked floor (default = the next floor to clear)
@@ -435,6 +443,7 @@ export class BattleComponent implements OnDestroy {
     this.outcome.set(null);
     this.modeHud.set(modeStatus(this.engine));
     this.time.set(0);
+    this.gameClock.set(0);
     this.wave.set(0);
     this.totalWaves.set(this.engine.totalWaves);
     this.phase.set(this.engine.phase);
@@ -445,6 +454,7 @@ export class BattleComponent implements OnDestroy {
     this.movingUntil.clear();
     this.paces.clear();
     this.hits.clear();
+    this.guardHitAt.clear();
     this.selectedId.set(null);
     this.focusId.set(null);
     this.facing.clear();
@@ -612,6 +622,7 @@ export class BattleComponent implements OnDestroy {
     this.simTick.update(n => n + 1);
     this.handleEvents(this.engine.drainEvents());
     this.time.set(this.engine.fightTime);
+    this.gameClock.set(this.engine.time);
     this.phase.set(this.engine.phase);
     this.scroll.set(this.engine.cameraX);
     this.snapshot();
@@ -710,7 +721,7 @@ export class BattleComponent implements OnDestroy {
     this.specialReady.set(this.running() && e.canUseSpecial());
     const byId = new Map(e.units.map(u => [u.id, u]));
     this.statusVisuals.sync(e.units.filter(u => u.alive && u.visible).flatMap(u => u.buffs.filter(b => b.remaining > 0).map(b => ({
-      target: u.id, source: b.sourceId, status: b.def.id, sprite: byId.get(b.sourceId)?.sprite, at: this.screenOf(u),
+      target: u.id, source: b.sourceId, status: b.def.id, sprite: SHEETS[u.sprite ?? '']?.statusFx?.[b.def.id] ? u.sprite : byId.get(b.sourceId)?.sprite, at: this.screenOf(u),
     }))), e.time);
     const combat = e.phase === BattlePhase.COMBAT;
     for (const u of e.units) {
@@ -977,6 +988,23 @@ export class BattleComponent implements OnDestroy {
       }
     };
 
+    const monsterFx = (src: number, clip: string | undefined, phase: 'cast' | 'activate') => {
+      const u = unitOf(src);
+      const sheet = SHEETS[u?.sprite ?? ''];
+      for (const name of sheet?.monsterFx?.[clip ?? '']?.[phase] ?? []) {
+        const d = FX[name];
+        if (!d) continue;
+        const flip = !!this.facing.get(src);
+        const offset = fxOffset(name, u.sprite);
+        // A tall caster's forward beam starts at its real weapon tip and descends toward hero body height.
+        // Only the separate shaft rotates; its ornament is never stretched. Combat footprint stays in skill data.
+        const angle = d.at === 'self' && d.orient === 'rotate'
+          ? Math.atan2(-.25 - offset[1] / 100, fxWidthCells(d) * (flip ? -1 : 1)) * 180 / Math.PI - (flip ? 180 : 0) : 0;
+        fx.push({ id: ++this.floatId, ...posOf(src), name, angle, flip,
+          offset, under: d.layer === 'under', follow: fxAttached(name) ? src : undefined,
+          ...(phase === 'cast' ? { owner: src, managed: true } : {}) });
+      }
+    };
     for (const e of events) {
       switch (e.type) {
         case 'FIELD_STARTED':
@@ -1083,6 +1111,14 @@ export class BattleComponent implements OnDestroy {
           // white hit flash (Pixi renderer): every real, non-poison hit
           if (e.amount > 0 && !e.poison) this.hits.set(e.dst, (this.hits.get(e.dst) ?? 0) + 1);
           const p = posOf(e.dst);
+          const hitUnit = unitOf(e.dst);
+          if (e.amount > 0 && !e.poison && this.engine.time - (this.guardHitAt.get(e.dst) ?? -Infinity) >= .15) {
+            const name = Object.entries(SHEETS[hitUnit.sprite ?? '']?.damageFx ?? {}).find(([status]) => hasStatus(hitUnit, status))?.[1];
+            if (name && FX[name]) {
+              this.guardHitAt.set(e.dst, this.engine.time);
+              fx.push({ id: ++this.floatId, ...p, name, angle: 0, flip: !!this.facing.get(e.dst), offset: fxOffset(name), follow: e.dst });
+            }
+          }
           const text = e.amount > 0 ? `-${e.amount}` : 'บล็อก';
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text, kind: e.poison ? 'poison' : e.crit ? 'crit' : 'dmg' });
           break;
@@ -1156,11 +1192,15 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'broken': {
+          this.fx.update(list => list.filter(f => f.owner !== e.dst));
+          fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.dst));
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'BREAK!!', kind: 'break' });
           this.dropZones(e.dst);
           this.showBanner('💥 BREAK! บอสเสียหลัก 3 วิ — รับดาเมจ +25%', 1600);
-          set(e.dst, 'hurt', { force: true });
+          const sh = SHEETS[unitOf(e.dst).sprite ?? ''];
+          if (sh?.casts?.['broken']) set(e.dst, 'cast', { castTime: 0, castClip: 'broken', force: true });
+          else set(e.dst, 'hurt', { force: true });
           break;
         }
         case 'bossPhase':
@@ -1184,6 +1224,7 @@ export class BattleComponent implements OnDestroy {
         }
         case 'castStart': {
           this.telegraph(e.src, e.skill, e.castTime, e.dst);
+          monsterFx(e.src, this.skillByName(unitOf(e.src), e.skill)?.clip, 'cast');
           // monster cast clip (e.g. Alpha Howl): frames stretched over the cast time; sheets without one fall back
           if (SHEETS[unitOf(e.src).sprite ?? '']?.anims.cast) {
             const sk = this.skillByName(unitOf(e.src), e.skill);
@@ -1208,6 +1249,9 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'skillActivated': {
+          this.fx.update(list => list.filter(f => f.owner !== e.src));
+          fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.src));
+          monsterFx(e.src, this.skillByName(unitOf(e.src), e.skill)?.clip, 'activate');
           this.flash(e.src, e.skill);
           // sprite FX on every unit the skill landed on (Starfall, Devour, Arcane Seal …)
           const hitFx = this.skillByName(unitOf(e.src), e.skill)?.hitFx;
@@ -1277,12 +1321,16 @@ export class BattleComponent implements OnDestroy {
           fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.src));
           this.dropZones(e.src);
           break;
-        case 'death':
+        case 'death': {
+          const name = SHEETS[unitOf(e.dst).sprite ?? '']?.deathFx;
+          if (name && FX[name]) fx.push({ id: ++this.floatId, ...posOf(e.dst), name, angle: 0,
+            offset: fxOffset(name), flip: !!this.facing.get(e.dst) });
           this.fx.update(list => list.filter(f => f.owner !== e.dst));
           fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.dst));
           this.dropZones(e.dst);
           set(e.dst, 'die');
           break;
+        }
       }
     }
     this.anims.set(anims);

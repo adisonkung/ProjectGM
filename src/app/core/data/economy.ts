@@ -5,6 +5,7 @@
 import { BreakthroughDefinition, FarmDungeonDefinition, HeroLevelDefinition, ItemDefinition, RewardBundle } from '../models/economy';
 import { EquipmentDropTable, Rarity } from '../models/equipment';
 import { ChallengeRule, EnemyPlacement, EnemySpawn, StageDef, WaveDefinition } from '../models/stage';
+import { DEV_FLAGS } from './dev-flags';
 import { ASCENSION_BOSSES, DUNGEON_ROLE_MAP, DUNGEON_MONSTERS, variantId } from './monsters-dungeon';
 
 /** EXP for level → level + 1 (Lv1→2 … Lv9→10) — total 27,600 (rebalance spec: claude/patch1-rebalance-spec.md) */
@@ -349,7 +350,7 @@ const SURVIVAL_TUNING: [number, number, number, [number, number]][] = [
 
 const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]): FarmDungeonDefinition => ({
   id: `ascension_${n}`, type: 'ASCENSION', name: `Ascension ${['I', 'II', 'III'][n - 1]}`, unlockFloor, recommendedLevel: levels,
-  // today's guardian (weekday rotation) — read when a page / battle asks for the stage
+  // Default guardian; the battle menu may select any guardian while free choice is enabled.
   get stage() {
     return ascensionDuel(n, ascensionBossFor());
   },
@@ -360,15 +361,21 @@ const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]):
 } as FarmDungeonDefinition);
 
 /**
- * Ascension = the Sky Shrine guardians, one per weekday (user decision): Mon–Tue Brass Shishi · Wed–Thu Moonblade
+ * Future calendar (currently suspended by user): Mon–Tue Aegis · Wed–Thu Moonblade
  * Ronin · Fri–Sun Astral Seraph. Tier I–III = that guardian's stat step (`<boss>@<tier>`), enrage / hard limit per tier.
  */
 export const ASCENSION_SCHEDULE: Record<number, (typeof ASCENSION_BOSSES)[number]> = {
-  1: 'brass_shishi', 2: 'brass_shishi', 3: 'moonblade_ronin', 4: 'moonblade_ronin', 5: 'astral_seraph', 6: 'astral_seraph', 0: 'astral_seraph',
+  1: 'aegis_sentinel', 2: 'aegis_sentinel', 3: 'moonblade_ronin', 4: 'moonblade_ronin', 5: 'astral_seraph', 6: 'astral_seraph', 0: 'astral_seraph',
 };
-export const ASCENSION_DAY_LABEL: Record<string, string> = { brass_shishi: 'จ.–อ.', moonblade_ronin: 'พ.–พฤ.', astral_seraph: 'ศ.–อา.' };
-/** the guardian on duty for a local date (default: now) */
-export const ascensionBossFor = (date: Date = new Date()): (typeof ASCENSION_BOSSES)[number] => ASCENSION_SCHEDULE[date.getDay()];
+export const ASCENSION_DAY_LABEL: Record<string, string> = { aegis_sentinel: 'จ.–อ.', moonblade_ronin: 'พ.–พฤ.', astral_seraph: 'ศ.–อา.' };
+/** Default guardian: Aegis during free choice, calendar guardian when the temporary flag is disabled. */
+export const ascensionBossFor = (date: Date = new Date()): (typeof ASCENSION_BOSSES)[number] => DEV_FLAGS.ascensionFreeChoice ? ASCENSION_BOSSES[0] : ASCENSION_SCHEDULE[date.getDay()];
+/** Validate external guardian choices; calendar restriction is suspended until all three new bosses ship. */
+export function ascensionSelection(tier: number, requested: string | null, date = new Date()): StageDef {
+  const boss = DEV_FLAGS.ascensionFreeChoice && ASCENSION_BOSSES.some(id => id === requested)
+    ? requested as (typeof ASCENSION_BOSSES)[number] : ascensionBossFor(date);
+  return ascensionDuel(tier, boss);
+}
 const ASCENSION_LIMITS: [number, number][] = [[90, 180], [110, 210], [130, 240]];
 const ASCENSION_BG = ['twilight-1', 'twilight-1', 'misty-1'];
 export function ascensionDuel(tier: number, boss: (typeof ASCENSION_BOSSES)[number]): StageDef {

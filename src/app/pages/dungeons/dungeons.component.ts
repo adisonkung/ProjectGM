@@ -1,7 +1,8 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { DEV_FLAGS } from '../../core/data/dev-flags';
 import { ASCENSION_DAY_LABEL, ascensionBossFor, DAILY_BONUS, FARM_DUNGEONS, ITEMS } from '../../core/data/economy';
 import { ASCENSION_BOSSES, DUNGEON_MONSTERS } from '../../core/data/monsters-dungeon';
 import { HuntTarget } from '../../core/models/equipment';
@@ -37,7 +38,7 @@ export const DUNGEON_TYPES: DungeonType[] = [
   },
   {
     id: 'ascension', pool: 'ASCENSION', name: 'Ascension Trial', label: 'บททดสอบเลื่อนขั้น', mode: 'ตีบอสเดี่ยว', icon: 'ascension', tone: 'boss_duel',
-    blurb: 'ดวลผู้พิทักษ์ศาลเทพตัวเดียว (สลับตัวตามวัน) ล้มให้ได้ก่อนมันคลั่ง — เกินเวลาแล้วบอสแรงขึ้นมาก',
+    blurb: 'ดวลผู้พิทักษ์ศาลเทพตัวเดียว (เลือกผู้พิทักษ์ได้ทุกวัน) ล้มให้ได้ก่อนมันคลั่ง — เกินเวลาแล้วบอสแรงขึ้นมาก',
     rules: ['บอสตัวเดียว เลือดหนา', 'ถึงเวลาที่กำหนดบอสจะคลั่ง', '3★ = ไม่มีใครล้ม + ทันเวลา'],
     reward: 'หิน Breakthrough',
   },
@@ -97,7 +98,9 @@ export class DungeonsComponent {
 
   // Hunt: favoured drop slot
   readonly targets: HuntTarget[] = ['ANY', 'WEAPON', 'ARMOR', 'ACCESSORY'];
-  /** Ascension: today's guardian + the weekday rotation */
-  readonly guardians = ASCENSION_BOSSES.map(id => ({ id, name: DUNGEON_MONSTERS[id].name, days: ASCENSION_DAY_LABEL[id], today: id === ascensionBossFor() }));
+  readonly freeGuardians = DEV_FLAGS.ascensionFreeChoice;
+  readonly selectedGuardian = signal(ascensionBossFor());
+  /** Future calendar retained behind the temporary free-choice flag. */
+  readonly guardians = ASCENSION_BOSSES.map(id => ({ id, name: DUNGEON_MONSTERS[id].name, days: DEV_FLAGS.ascensionFreeChoice ? 'ทุกวัน' : ASCENSION_DAY_LABEL[id] }));
   readonly targetLabel: Record<HuntTarget, string> = { ANY: 'ทุกช่อง', WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
 }

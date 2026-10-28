@@ -1,5 +1,6 @@
+import { DEV_FLAGS } from '../../core/data/dev-flags';
 import '../../../testing/legacy-roster';
-import { ascensionBossFor, ascensionDuel, FARM_BY_ID, FARM_DUNGEONS } from '../../core/data/economy';
+import { ascensionBossFor, ascensionDuel, ascensionSelection, FARM_BY_ID, FARM_DUNGEONS } from '../../core/data/economy';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { ASCENSION_TIER_SCALE, DUNGEON_MONSTERS, DUNGEON_ROLE_MAP, variantId } from '../../core/data/monsters-dungeon';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
@@ -84,15 +85,16 @@ describe('Special-dungeon monsters: data', () => {
     }
   });
 
-  it('Ascension: guardian by weekday (Mon–Tue Shishi · Wed–Thu Ronin · Fri–Sun Seraph), tiers are stat steps', () => {
+  it('Ascension: free guardian choice every day until all replacement bosses ship, tiers remain stat steps', () => {
     // 2026-09-28 is a Monday
     const day = (d: number) => new Date(2026, 8, 28 + d);
     expect([0, 1, 2, 3, 4, 5, 6].map(d => ascensionBossFor(day(d)))).toEqual([
-      'brass_shishi', 'brass_shishi', 'moonblade_ronin', 'moonblade_ronin', 'astral_seraph', 'astral_seraph', 'astral_seraph',
+      'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel',
     ]);
-    for (const boss of ['brass_shishi', 'moonblade_ronin', 'astral_seraph'] as const) {
+    for (const boss of ['aegis_sentinel', 'moonblade_ronin', 'astral_seraph'] as const) {
       for (const t of [1, 2, 3]) {
         const st = ascensionDuel(t, boss);
+        for (let d = 0; d < 7; d++) expect(ascensionSelection(t, boss, day(d)).enemies[0].enemy).toBe(`${boss}@${t}`);
         expect(st.special!.kind).toBe('BOSS_DUEL');
         const id = st.enemies[0].enemy;
         expect(id).toBe(`${boss}@${t}`);
@@ -100,8 +102,19 @@ describe('Special-dungeon monsters: data', () => {
         expect(MONSTERS[id].rank).toBe('BOSS');
       }
     }
-    // the dungeon definition hands out today's guardian
+    expect(ascensionSelection(1, 'forest_slime', day(5)).enemies[0].enemy).toBe('aegis_sentinel@1');
+    // Default is Aegis while weekday rotation is suspended.
     expect(FARM_BY_ID['ascension_2'].stage.enemies[0].enemy).toBe(`${ascensionBossFor()}@2`);
+  });
+
+  it('restoring the calendar flag restricts external guardian overrides again', () => {
+    const previous = DEV_FLAGS.ascensionFreeChoice;
+    try {
+      DEV_FLAGS.ascensionFreeChoice = false;
+      const wednesday = new Date(2026, 8, 30);
+      expect(ascensionBossFor(wednesday)).toBe('moonblade_ronin');
+      expect(ascensionSelection(2, 'aegis_sentinel', wednesday).enemies[0].enemy).toBe('moonblade_ronin@2');
+    } finally { DEV_FLAGS.ascensionFreeChoice = previous; }
   });
 
   it('sprite sheets: every design has a generated sheet, big bosses use wide cells, one cast row per skill clip', () => {

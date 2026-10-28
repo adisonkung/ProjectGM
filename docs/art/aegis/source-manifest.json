@@ -1,0 +1,77 @@
+[
+  {
+    "file": "01-fx-aegis-s1-barrier-loop.png",
+    "bytes": 1701578,
+    "sha256": "31b2c41978b16ab7113c950db6becc2bb3a6f596a464bd0dc0b3a653545b207c"
+  },
+  {
+    "file": "02-fx-aegis-s1-barrier-hit.png",
+    "bytes": 1539691,
+    "sha256": "87a520de8de1e858ad526063e58ee0b865262ff0f310cfae303841c9830a0e9d"
+  },
+  {
+    "file": "03-fx-aegis-s2-tip-charge.png",
+    "bytes": 1483263,
+    "sha256": "788dda9b66bd8965c2b7dc653f12d2f5e3fa527497d79b12ad5ea858b0b70e58"
+  },
+  {
+    "file": "04-fx-aegis-s2-beam.png",
+    "bytes": 1447239,
+    "sha256": "499fbe9d0645ef5b0b51c83bbdd9aff71d064ec221696575d6a5a685e5499e8c"
+  },
+  {
+    "file": "05-fx-aegis-s2-impact.png",
+    "bytes": 2449792,
+    "sha256": "7298accac61a861d531013b209e22a9ffb9f565b75f972147416979625a9a5bd"
+  },
+  {
+    "file": "06-fx-aegis-s3-ground-shockwave.png",
+    "bytes": 1557702,
+    "sha256": "dab8d8b0cff88405824c1aea29878e12aed413b68674b00805c7337980383c83"
+  },
+  {
+    "file": "07-fx-aegis-core-exposed-loop.png",
+    "bytes": 1844231,
+    "sha256": "33da83b40fe41675afd00d3b79fb33302748b7111f38ffb94ceb686f6571666a"
+  },
+  {
+    "file": "08-fx-aegis-death-dissolve.png",
+    "bytes": 2583179,
+    "sha256": "691f5d810ec753292ae1c4ac6941b8090f0fc791315dc6ce097f3cd1ec719ca6"
+  },
+  {
+    "file": "death.png",
+    "bytes": 1106605,
+    "sha256": "fab77326b87986c7fedac1e0ce7c486871658ffd9abc447bbbdecbc111016f4f"
+  },
+  {
+    "file": "idle.png",
+    "bytes": 1302993,
+    "sha256": "db0a42f81739a6d81edc19cb4cb60baa1458135157cff47e8c5f538e35f25229"
+  },
+  {
+    "file": "kneel-break.png",
+    "bytes": 1253623,
+    "sha256": "fa248fab589bf2552af906730bf510756841df35889119a6849db7dfc52efead"
+  },
+  {
+    "file": "skill1.png",
+    "bytes": 1103991,
+    "sha256": "54484229e51f3fc42f97381cd4a7fe2ae3054be10066b24baa6c2c686113fd33"
+  },
+  {
+    "file": "skill2.png",
+    "bytes": 1276239,
+    "sha256": "d376a674e57fa31dfb9c09f10abac6493b7511cacc603d16cfdf57e7d42b158d"
+  },
+  {
+    "file": "ultimate.png",
+    "bytes": 1461952,
+    "sha256": "9ab7fdaf20bd9d0ed558c914bad9732a50c84257fdc875d170d67e99eafbbea7"
+  },
+  {
+    "file": "aegis-walk-loop-24.png",
+    "bytes": 1474602,
+    "sha256": "bbdf2a345e5cb92cc911071e5df15e5c7ec026dc4873614ea953c5ce585cb4a4"
+  }
+]

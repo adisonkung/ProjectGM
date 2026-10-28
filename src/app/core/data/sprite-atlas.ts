@@ -8,6 +8,7 @@ export interface SpriteFile {
 }
 
 export const SPRITE_ATLAS: Record<string, SpriteFile> = {
+  'enemy-aegis-sentinel.png': { url: 'opt/enemy-aegis-sentinel.webp' },
   'enemy-alpha-wolf.png': { url: 'opt/enemy-alpha-wolf.webp' },
   'enemy-arcane-examiner.png': { url: 'opt/enemy-arcane-examiner.png' },
   'enemy-astral-seraph.png': { url: 'opt/enemy-astral-seraph.png' },
@@ -25,6 +26,17 @@ export const SPRITE_ATLAS: Record<string, SpriteFile> = {
   'enemy-slime.png': { url: 'opt/enemy-slime.webp' },
   'enemy-straw-recruit.png': { url: 'opt/enemy-straw-recruit.webp' },
   'enemy-wolf.png': { url: 'opt/enemy-wolf.webp' },
+  'fx-aegis-barrier-hit.png': { url: 'opt/fx-aegis-barrier-hit.webp' },
+  'fx-aegis-barrier-in.png': { url: 'opt/fx-aegis-barrier-in.webp' },
+  'fx-aegis-barrier-loop.png': { url: 'opt/fx-aegis-barrier-loop.png', cols: 12, rows: 3 },
+  'fx-aegis-beam-muzzle.png': { url: 'opt/fx-aegis-beam-muzzle.webp' },
+  'fx-aegis-beam.png': { url: 'opt/fx-aegis-beam.png' },
+  'fx-aegis-core.png': { url: 'opt/fx-aegis-core.webp' },
+  'fx-aegis-death.png': { url: 'opt/fx-aegis-death.webp' },
+  'fx-aegis-impact.png': { url: 'opt/fx-aegis-impact.webp' },
+  'fx-aegis-shockwave.png': { url: 'opt/fx-aegis-shockwave.webp' },
+  'fx-aegis-thrust.png': { url: 'opt/fx-aegis-thrust.png' },
+  'fx-aegis-tip-charge.png': { url: 'opt/fx-aegis-tip-charge.webp' },
   'fx-alpha-howl.png': { url: 'opt/fx-alpha-howl.webp' },
   'fx-arcane-seal.png': { url: 'opt/fx-arcane-seal.png' },
   'fx-arrow-normal.png': { url: 'opt/fx-arrow-normal.webp' },

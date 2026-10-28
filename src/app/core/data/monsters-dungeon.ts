@@ -1,3 +1,4 @@
+import { AEGIS_SENTINEL, AEGIS_SKILLS } from './aegis-sentinel';
 import { AnimClip, AnimationConfig, MonsterDefinition, MonsterSkillDefinition, MonsterStats } from '../models/monster';
 
 /**
@@ -5,7 +6,7 @@ import { AnimClip, AnimationConfig, MonsterDefinition, MonsterSkillDefinition, M
  * never in the tower. Pure data like Stage 4–10; art = the user's sheets cut by tools/sprites/sheet_cut.py (Training +
  * Ascension, FX by tools/sprites/fx_cut.py) or code-drawn pixel sheets (tools/sprites/dungeon/anim.py, the rest).
  *   Training (SURVIVAL)   straw_recruit · crossbow_dummy · drill_sergeant (ELITE: Rally Whistle)
- *   Ascension (BOSS DUEL) brass_shishi · moonblade_ronin · astral_seraph — one boss per weekday (economy.ts)
+ *   Ascension (BOSS DUEL) aegis_sentinel · moonblade_ronin · astral_seraph — free guardian selection for now (economy.ts)
  *   Hunt (TREASURE)       gem_beetle · mimic_chest (dormant ambusher) · coin_kobold (carrier, Smoke Pouch)
  *   Skill Trial (CHALLENGE) rune_wisp · grimoire_familiar · arcane_examiner (ELITE: Arcane Seal = silence)
  * Sheet layout (every sheet): row 1 IDLE 4 · 2 MOVE 6 · 3 HURT 3 · 4 DEATH · 5 ATTACK 6 (strike / spawn = frame 4) · 6+ skills.
@@ -54,6 +55,7 @@ export const DUNGEON_PROJECTILES = {
 };
 
 export const DUNGEON_SKILLS: Record<string, MonsterSkillDefinition> = {
+  ...AEGIS_SKILLS,
   // ------------------------------------------------ Training
   triple_volley: {
     id: 'triple_volley', name: 'ยิงสามดอก', label: 'TRIPLE VOLLEY', type: 'ATTACK',
@@ -215,6 +217,7 @@ export const DUNGEON_SKILLS: Record<string, MonsterSkillDefinition> = {
 const noAttack = { id: 'none', damageType: 'PHYSICAL' as const, damageMultiplier: 0, delivery: 'MELEE' as const, clip: 'attack', event: 'DAMAGE' as const, hitTolerance: 0 };
 
 export const DUNGEON_MONSTERS: Record<string, MonsterDefinition> = {
+  aegis_sentinel: AEGIS_SENTINEL,
   // ------------------------------------------------ Training — Iron Drill Yard
   straw_recruit: {
     id: 'straw_recruit', name: 'หุ่นฟางพลทหาร', rank: 'COMMON', role: 'SWARM MELEE', tags: ['construct', 'training'],
@@ -389,8 +392,8 @@ export function roleVariant(base: MonsterDefinition, source: MonsterDefinition, 
   };
 }
 
-/** Ascension guardians: one design per weekday, each tier a stat step of it (base = tier II) */
-export const ASCENSION_BOSSES = ['brass_shishi', 'moonblade_ronin', 'astral_seraph'] as const;
+/** Selectable Ascension guardians; calendar can return after all replacements are ready. Base stats = tier II. */
+export const ASCENSION_BOSSES = ['aegis_sentinel', 'moonblade_ronin', 'astral_seraph'] as const;
 export const ASCENSION_TIER_SCALE = [
   { hp: 0.75, atk: 0.78 },
   { hp: 1, atk: 1 },
@@ -415,7 +418,7 @@ export function dungeonVariants(all: Record<string, MonsterDefinition>): Record<
       out[v.id] = v;
     }
   }
-  for (const id of ASCENSION_BOSSES) for (const t of [1, 2, 3]) {
+  for (const id of [...ASCENSION_BOSSES, 'brass_shishi']) for (const t of [1, 2, 3]) {
     const v = tierVariant(all[id], t);
     out[v.id] = v;
   }

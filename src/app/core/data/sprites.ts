@@ -96,6 +96,16 @@ export interface SequenceFxCue {
 }
 
 export interface SheetDef {
+  /** Monster clip presentation; combat events own cast cancellation and activation, never PNG frame checks. */
+  monsterFx?: Record<string, { cast?: string[]; activate?: string[] }>;
+  /** Contact sparks while the holder actually has a guarding status (rate-limited by the view). */
+  damageFx?: Record<string, string>;
+  deathFx?: string;
+  /** Extra contact strips to warm before the first short-lived effect. */
+  preloadFx?: string[];
+  /** Optional cap for a large actor’s white contact flash; default .85. */
+  hitFlashStrength?: number;
+
   sequenceFx?: Partial<Record<SkillKind, SequenceFxCue[]>>;
   /** Event-owned dash visuals; both layers follow the caster and stop on actual DASH_END or cancellation. */
   motionFx?: Partial<Record<SkillKind, { start?: string; loop: string }>>;
@@ -1097,7 +1107,53 @@ for (const m of Object.values(MONSTERS)) {
   SHEETS[sheet] = monsterSheet(m.animation, m.attack.event, proj);
 }
 
+// Aegis: all tiers share one source-pixel sheet, status-owned barrier and core effects.
+Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
+  pixelated: true, hitFlashStrength: .35,
+  attackFx: ['ae-attack-thrust'], preloadFx: ['ae-s2-impact', 'ae-s3-impact'],
+  anchors: { weaponTip: [186, -120] },
+  statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' } },
+  damageFx: { aegis_guard: 'ae-s1-hit' }, deathFx: 'ae-death',
+  monsterFx: {
+    lance: { cast: ['ae-s2-charge'], activate: ['ae-s2-muzzle', 'ae-s2-beam'] },
+    judgement: { cast: ['ae-s3-charge'], activate: ['ae-s3-wave'] },
+  },
+} satisfies Partial<SheetDef>);
+// The supplied death settles in place: fade with the shutdown VFX rather than leaving a standing corpse.
+Object.assign(SHEETS['enemy-aegis-sentinel.png'].anims.die!, {
+  seq: Array.from({ length: 20 }, (_, i) => i), steps: Array(20).fill(70),
+  opacity: [[0, 1], [10, .9], [19, 0]],
+} satisfies Partial<AnimDef>);
+
+
 export const FX: Record<string, FxDef> = {
+  'ae-attack-thrust': { file: 'fx-aegis-thrust.png', frames: 6, w: 120, h: 48, frameMs: 35,
+    at: 'self', anchor: 'weaponTip', delayMs: 270, scale: .55, pivot: [.15,.5], attach: true, blend: 'add' },
+  'ae-s1-in': { file: 'fx-aegis-barrier-in.png', frames: 5, w: 300, h: 250, frameMs: 70,
+    at: 'self', fitCells: 3.18, pivot: [.5,.84], dy: 35, attach: true },
+  'ae-s1-loop': { file: 'fx-aegis-barrier-loop.png', frames: 32, w: 340, h: 280, frameMs: 50,
+    at: 'self', fitCells: 3.6, pivot: [.5,.77], dy: 35, delayMs: 350, attach: true },
+  'ae-s1-hit': { file: 'fx-aegis-barrier-hit.png', frames: 8, w: 128, h: 128, frameMs: 40,
+    at: 'self', fitCells: .85, dy: -65, dx: 75, attach: true, blend: 'add' },
+  'ae-s2-charge': { file: 'fx-aegis-tip-charge.png', frames: 24, w: 120, h: 120, frameMs: 50,
+    at: 'self', anchor: 'weaponTip', delayMs: 550, scale: .55, attach: true, blend: 'add' },
+  'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 1, w: 110, h: 144, frameMs: 180,
+    at: 'self', anchor: 'weaponTip', scale: .55, pivot: [.7,.5], attach: true, fadeOutMs: 180 },
+  'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 80, frameMs: 45,
+    at: 'self', anchor: 'weaponTip', fitCells: 2.2, pivot: [.04,.5], orient: 'rotate', attach: false, blend: 'add' },
+  'ae-s2-impact': { file: 'fx-aegis-impact.png', frames: 10, w: 160, h: 128, frameMs: 40,
+    at: 'target', fitCells: .8, dy: -20 },
+  'ae-s3-charge': { file: 'fx-aegis-tip-charge.png', frames: 24, w: 120, h: 120, frameMs: 50,
+    at: 'self', dx: 65, dy: -210, delayMs: 900, scale: .7, attach: true, repeat: 2, blend: 'add' },
+  'ae-s3-wave': { file: 'fx-aegis-shockwave.png', frames: 10, w: 300, h: 160, frameMs: 50,
+    at: 'self', fitCells: 4, pivot: [.5,.75], dy: 35, layer: 'under' },
+  'ae-s3-impact': { file: 'fx-aegis-impact.png', frames: 10, w: 160, h: 128, frameMs: 40,
+    at: 'target', fitCells: .65, dy: -20 },
+  'ae-core': { file: 'fx-aegis-core.png', frames: 10, w: 100, h: 100, frameMs: 80,
+    at: 'self', fitCells: .65, dy: -125, attach: true, blend: 'add' },
+  'ae-death': { file: 'fx-aegis-death.png', frames: 10, w: 210, h: 180, frameMs: 65,
+    at: 'self', fitCells: 1.6, dy: -75, delayMs: 350 },
+
   // V5 supplied retreat, six accumulated states and five whole ribbons (runtime reveal).
   'vn-ult-retreat': { ground: [203,204,204,205,205], file: 'fx-vaelric-ult-retreat.png', frames: 5, w: 204, h: 220,
     frameMs: 80, at: 'self', scale: .6, pivot: [.5,208/220], dy: 27.25, pixelated: true, attach: true },

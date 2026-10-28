@@ -270,7 +270,9 @@ export class PixiUnitLayer {
 
   /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
   private preloadFx(def: SheetDef): void {
-    const names = [...Object.values(def.fx ?? {}).flat(), ...(def.attackFx ?? []), ...Object.values(def.projectile ?? {}).flat(),
+    const names = [...(def.preloadFx ?? []), def.deathFx, ...Object.values(def.damageFx ?? {}),
+      ...Object.values(def.monsterFx ?? {}).flatMap(f => [...(f.cast ?? []), ...(f.activate ?? [])]),
+      ...Object.values(def.fx ?? {}).flat(), ...(def.attackFx ?? []), ...Object.values(def.projectile ?? {}).flat(),
       ...Object.values(def.motionFx ?? {}).flatMap(f => [f.start, f.loop]),
       ...Object.values(def.appliedStatusFx ?? {}), ...Object.values(def.statusFx ?? {}).flatMap(f => [f.start, f.loop]),
       ...[def.fieldFx?.start, def.fieldFx?.loop, def.fieldFx?.end, def.fieldFx?.residual, def.fieldFx?.wave?.rain, def.fieldFx?.wave?.impact],
@@ -587,7 +589,7 @@ export class PixiUnitLayer {
     let flash: ColorMatrixFilter | undefined;
     if (fk > 0) {
       flash = s.flash ??= new this.pixi.ColorMatrixFilter();
-      const w = 0.85 * fk;
+      const w = (SHEETS[u.sheet]?.hitFlashStrength ?? .85) * fk;
       flash.matrix = [1 - w, 0, 0, 0, w, 0, 1 - w, 0, 0, w, 0, 0, 1 - w, 0, w, 0, 0, 0, 1, 0];
     }
     // state glow (buffed pulses)

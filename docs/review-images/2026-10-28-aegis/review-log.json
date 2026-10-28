@@ -1,0 +1,1218 @@
+{
+  "errors": [],
+  "captures": [
+    "04-lance-desktop",
+    "03-guard-desktop",
+    "05-judgement-desktop",
+    "06-normal-desktop"
+  ],
+  "linkSelection": "/battle?farm=ascension_1&boss=moonblade_ronin",
+  "states": [
+    {
+      "time": 0.2,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 0.39999999999999997,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 0.39999999999999997,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 0.6,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 1.0000000000000002,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 1.2000000000000004,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 1.4000000000000006,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 1.6000000000000008,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 1.6000000000000008,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 1.800000000000001,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.000000000000001,
+      "guard": false,
+      "anim": "attack",
+      "fx": [
+        "ae-attack-thrust"
+      ],
+      "result": null
+    },
+    {
+      "time": 2.2,
+      "guard": false,
+      "anim": "attack",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.2,
+      "guard": false,
+      "anim": "attack",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.3999999999999995,
+      "guard": false,
+      "anim": "attack",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.3999999999999995,
+      "guard": false,
+      "anim": "attack",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.5999999999999988,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.5999999999999988,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.799999999999998,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.799999999999998,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 2.9999999999999973,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 2.9999999999999973,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 3.1999999999999966,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 3.399999999999996,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 3.399999999999996,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 3.599999999999995,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 3.7999999999999945,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 3.999999999999994,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 3.999999999999994,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 4.199999999999993,
+      "guard": false,
+      "anim": "idle",
+      "fx": [
+        "ae-s2-muzzle",
+        "ae-s2-beam",
+        "ae-s2-impact",
+        "ae-s2-impact"
+      ],
+      "result": null
+    },
+    {
+      "time": 4.399999999999992,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 4.599999999999992,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 4.799999999999991,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 4.99999999999999,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 4.99999999999999,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 5.1999999999999895,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 5.1999999999999895,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 5.399999999999989,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 5.599999999999988,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 5.799999999999987,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 5.999999999999987,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 6.199999999999986,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 6.399999999999985,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 6.5999999999999845,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 6.799999999999984,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 6.999999999999983,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 7.199999999999982,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 7.399999999999982,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 7.599999999999981,
+      "cast": "aegis_guard",
+      "guard": false,
+      "anim": "cast",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 7.79999999999998,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-in",
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 7.99999999999998,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 8.199999999999982,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 8.399999999999984,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 8.599999999999987,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 8.79999999999999,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 8.999999999999993,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 9.199999999999996,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 9.399999999999999,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 9.600000000000001,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 9.800000000000004,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 10.000000000000007,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 10.20000000000001,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 10.400000000000013,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 10.600000000000016,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 10.800000000000018,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 11.000000000000021,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 11.200000000000024,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 11.400000000000027,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 11.60000000000003,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 11.60000000000003,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 11.800000000000033,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.000000000000036,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit",
+        "ae-s1-hit",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.200000000000038,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.200000000000038,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.200000000000038,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.400000000000041,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.400000000000041,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.600000000000044,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.600000000000044,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 12.800000000000047,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 13.00000000000005,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 13.200000000000053,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 13.200000000000053,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 13.400000000000055,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 13.600000000000058,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 13.800000000000061,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 14.000000000000064,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 14.200000000000067,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 14.40000000000007,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 14.600000000000072,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 14.800000000000075,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 15.000000000000078,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 15.000000000000078,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 15.200000000000081,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop",
+        "ae-s1-hit"
+      ],
+      "result": null
+    },
+    {
+      "time": 15.200000000000081,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 15.400000000000084,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 15.400000000000084,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 15.600000000000087,
+      "guard": true,
+      "anim": "idle",
+      "fx": [
+        "ae-s1-loop"
+      ],
+      "result": null
+    },
+    {
+      "time": 15.80000000000009,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 15.80000000000009,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 16.000000000000092,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 16.000000000000092,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 16.000000000000092,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 16.000000000000092,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 16.200000000000095,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 16.200000000000095,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 16.400000000000098,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 16.6000000000001,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 16.800000000000104,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 17.000000000000107,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 17.20000000000011,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 17.400000000000112,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 17.600000000000115,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 17.800000000000118,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 18.00000000000012,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 18.200000000000124,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 18.400000000000126,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 18.60000000000013,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 18.75000000000013,
+      "cast": "aegis_judgement",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s3-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 18.950000000000134,
+      "guard": false,
+      "anim": "idle",
+      "fx": [
+        "ae-s3-wave",
+        "ae-s3-impact",
+        "ae-s3-impact",
+        "ae-s3-impact"
+      ],
+      "result": null
+    },
+    {
+      "time": 19.150000000000137,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 19.35000000000014,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 19.650000000000144,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 19.850000000000147,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 20.05000000000015,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 20.250000000000153,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 20.450000000000156,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 20.65000000000016,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 20.85000000000016,
+      "cast": "aegis_lance",
+      "guard": false,
+      "anim": "cast",
+      "fx": [
+        "ae-s2-charge"
+      ],
+      "result": null
+    },
+    {
+      "time": 21.050000000000164,
+      "guard": false,
+      "anim": "idle",
+      "fx": [
+        "ae-s2-muzzle",
+        "ae-s2-beam",
+        "ae-s2-impact",
+        "ae-s2-impact"
+      ],
+      "result": null
+    },
+    {
+      "time": 21.250000000000167,
+      "guard": false,
+      "anim": "idle",
+      "fx": [
+        "ae-s2-muzzle",
+        "ae-s2-beam",
+        "ae-s2-impact",
+        "ae-s2-impact"
+      ],
+      "result": null
+    },
+    {
+      "time": 21.45000000000017,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 21.650000000000173,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 21.800000000000175,
+      "guard": false,
+      "anim": "idle",
+      "fx": [],
+      "result": null
+    },
+    {
+      "time": 22.15000000000018,
+      "guard": false,
+      "anim": "attack",
+      "fx": [
+        "ae-attack-thrust"
+      ],
+      "result": null
+    }
+  ]
+}

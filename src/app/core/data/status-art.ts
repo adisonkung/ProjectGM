@@ -187,6 +187,12 @@ export const STATUS_ART: Readonly<Record<string, StatusArt>> = {
     "col": 0,
     "row": 2
   },
+  "aegis_guard": {
+    "label": "ตั้งโล่พิทักษ์",
+    "sheet": "/ui/status/hero-guards.webp",
+    "col": 0,
+    "row": 0
+  },
   "taunt_guard": {
     "label": "ตั้งรับ",
     "sheet": "/ui/status/hero-guards.webp",
