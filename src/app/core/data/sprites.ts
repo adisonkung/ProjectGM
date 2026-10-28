@@ -124,8 +124,9 @@ export interface SheetDef {
     /** Defer loop playback until the formation finishes; default preserves existing overlays. */
     loopAfterStart?: boolean;
     wave?: { rain: string; impact: string; leadMs: number; impactCells?: boolean } };
-  /** กระสุน (คีย์ของ FX) ของการยิงแต่ละแบบ */
-  projectile?: Partial<Record<'attack' | SkillKind, string>>;
+  /** กระสุน (คีย์ของ FX) ของการยิงแต่ละแบบ · an array = one per shot of a multi-shot skill (repeat hit i; the last
+   * entry repeats) — e.g. two rapid bolts then the final piercing shot */
+  projectile?: Partial<Record<'attack' | SkillKind, string | string[]>>;
   /** ความสูงช่อง (ค่าเริ่มต้น 100) — แผ่นที่มีท่ายกอาวุธสูงใช้ 120 */
   cellH?: number;
   /** ความกว้างช่อง (ค่าเริ่มต้น 132) — บอสตัวใหญ่ใช้ช่องกว้างกว่า สเกลพิกเซลเท่าเดิม */
@@ -177,6 +178,10 @@ export interface FxDef {
   perHit?: number | 'all';
   /** Contact layers may require actual affected recipients, without an extra aimed primary. */
   hitsOnly?: boolean;
+  /** on 'impact': only on the units this hit struck with a `bonusVsStatus` bonus (e.g. a burst on a marked target) */
+  bonusOnly?: boolean;
+  /** on 'impact': the opposite — only on the units this hit struck WITHOUT a bonus (the light version of a bonusOnly burst) */
+  noBonusOnly?: boolean;
   /** with perHit: leave the primary out (e.g. the light splash heal around the healed ally — the primary has its own FX) */
   exceptPrimary?: boolean;
   /** placed on the owner's named anchor (SheetDef.anchors) + dx/dy */
@@ -272,6 +277,60 @@ export const SHEETS: Record<string, SheetDef> = {
   // (not pixelated) · idle 78 px · attack / hurt provisional (S1 point → release / death stagger) · S1 / S2 / Ult
   // character clips from the user's sheets (the Ult keeps its baked green wand trail + ground splash) · S1 + S2
   // Timeline Sync done (user 2026-10-26) · Ult VFX (curse field, snake / skull) + sync still to come
+  // Sylas Veyrn — The Dusk Reaver (user 2026-10-27, tools/sprites/sylas.py from assets/heroes/Sylas): 23 × 8 cells
+  // 260 × 170 (root 130,155, idle body 78 px), painted (not pixelated) · crossbow tips measured on the release frames
+  'hero-sylas.png': {
+    cols: 23, rows: 8, cellW: 260, cellH: 170,
+    anchors: { feet: [0, 27.25], bodyCenter: [0, -21.5], tipS1: [54, -50.9], tipS2: [53.1, -43.6], tipUlt: [43.4, -31.5] },
+    projectile: { attack: 'sy-bolt', skill: 'sy-s1-bolt', skill2: ['sy-s2-bolt', 'sy-s2-bolt', 'sy-s2-final'], ult: 'sy-ult-bolt' },
+    fx: {
+      skill: 'sy-s1-charge',
+      skill2: ['sy-s2-muzzle1', 'sy-s2-muzzle2', 'sy-s2-muzzle3', 'sy-s2-hit1', 'sy-s2-hit2', 'sy-s2-hit3', 'sy-s2-hit3-marked', 'sy-s2-burst'],
+      ult: ['sy-ult-lock', 'sy-ult-aura', 'sy-ult-charge', 'sy-ult-impact', 'sy-ult-flash', 'sy-ult-marked'],
+    },
+    // Dusk Mark: appears on the hit, lives exactly as long as the status
+    statusFx: { dusk_mark: { start: 'sy-s1-mark-in', loop: 'sy-s1-mark' } },
+    anims: {
+      // idle: every 3rd of the 55-frame breathing loop · run: one 16-frame cycle, every 2nd
+      idle: { row: 0, frames: 18, ms: 125 }, walk: { row: 1, frames: 8, ms: 85, pace: runPace(8, 85) },
+      // hurt: hit → recoil → crouch → rise (source F13–F44) · 0.44 s
+      hurt: { row: 2, frames: 11, ms: 40 },
+      // basic attack (user: the S1 sprite): aim → release F17 = DAMAGE (the bolt leaves the tip) 0.245 s → lower · 0.635 s
+      attack: { row: 3, frames: 12, ms: 50, seq: Array.from({ length: 12 }, (_, i) => i),
+        steps: [45, 45, 45, 50, 60, 70, 50, 50, 50, 55, 55, 60], events: { DAMAGE: 5, RECOVERY_START: 7 } },
+      die: { row: 4, frames: 19, ms: 70 },
+      // S1 Dusk Mark: draw 0–0.20 → aim + AimCharge at the crossbow tip (CHARGE_START 0.20, peak 0.42) → RELEASE
+      // 0.51 = DAMAGE (the Dusk Bolt leaves the tip) → flight → hit = damage + Dusk Mark → recovery 0.86 → idle 1.10
+      skill: { row: 5, frames: 19, ms: 55, seq: Array.from({ length: 19 }, (_, i) => i),
+        steps: [40, 40, 40, 40, 40, 70, 70, 80, 90, 80, 55, 55, 55, 60, 60, 60, 55, 55, 55],
+        events: { CAST_START: 0, CHARGE_START: 5, CHARGE_PEAK: 8, DAMAGE: 9, RECOVERY_START: 13 },
+        impact: { hitStopMs: 30, shakePx: 2, shakeMs: 100 } },
+      // S2 Reaver Volley: draw → aim 0.27 → SHOT 1 0.27 · SHOT 2 0.495 · (a beat longer, user 2026-10-27) SHOT 3 =
+      // Final Piercing Shot 0.835 (each DAMAGE = a bolt leaves the tip + its muzzle flash ahead of it) → hold →
+      // recovery 0.99 → idle 1.28 · shots 1–2 spark on the target · Marked Burst on the final bolt's hit when the target
+      // carries Dusk Mark
+      skill2: { row: 6, frames: 21, ms: 55, seq: Array.from({ length: 21 }, (_, i) => i),
+        steps: [40, 40, 40, 45, 50, 55, 60, 55, 55, 55, 70, 75, 85, 110, 90, 60, 60, 60, 55, 55, 60],
+        events: { CAST_START: 0, ANTICIPATION_PEAK: 5, DAMAGE: [6, 10, 14], RECOVERY_START: 17 },
+        impact: [
+          { hitStopMs: 0, shakePx: 1, shakeMs: 70 },
+          { hitStopMs: 0, shakePx: 1, shakeMs: 70 },
+          { hitStopMs: 50, shakePx: 4, shakeMs: 140 },
+        ] },
+      // Ult Nightfall Execution: draw → kneel → aim (TargetLock on the target from CAST_START) → CHARGE HOLD 0.56–1.76
+      // (CrossbowCharge at the tip + ChargeAura around him, peak 1.52) → RELEASE 1.76 = DAMAGE (Execution Bolt) →
+      // flight → vortex Impact Burst (+ Marked Execution on a Dusk-Marked target) → re-aim → stand up · idle 2.50
+      ult: { row: 7, frames: 23, ms: 60, seq: Array.from({ length: 23 }, (_, i) => i),
+        steps: [50, 50, 50, 50, 50, 60, 60, 60, 60, 70, 1200, 90, 70, 70, 70, 80, 50, 50, 50, 50, 50, 50, 60],
+        events: { CAST_START: 0, CHARGE_START: 10, CHARGE_PEAK: 10.8, DAMAGE: 11, RECOVERY_START: 12 },
+        // recoil (user 2026-10-27): the release kicks him back 0.7 cell (56 atlas px, ease-out over ~0.2 s), he holds
+        // there, then eases back while standing up (visual root motion — his board cell does not change)
+        root: [[0, 0, 0], [11, 0, 0], [11.25, -15.2, 0], [11.5, -27.3, 0], [11.75, -36.8, 0], [12, -43.9, 0], [12.25, -49, 0], [12.5, -52.4, 0], [12.75, -54.5, 0], [13, -55.6, 0], [13.25, -55.9, 0], [13.5, -56, 0], [15.5, -56, 0], [16.2, -54.4, 0], [16.9, -50.2, 0], [17.6, -43.9, 0], [18.3, -36.3, 0], [19, -28, 0], [19.7, -19.7, 0], [20.4, -12.1, 0], [21.1, -5.8, 0], [21.8, -1.6, 0], [22.5, 0, 0]],
+        // the release itself shakes the screen; the hit lands harder and longer
+        eventFeel: { CHARGE_PEAK: { zoomPct: 2, shakeMs: 240 }, DAMAGE: { shakePx: 7, shakeMs: 220, flashMs: 70 } },
+        impact: { hitStopMs: 130, shakePx: 12, shakeMs: 420, flashMs: 180, zoomPct: 6 } },
+    },
+  },
   'hero-mordrienne.png': {
     cols: 31, rows: 8, cellW: 260, cellH: 170,
     anchors: { feet: [0, 27.25], bodyCenter: [0, -22] },
@@ -1599,6 +1658,108 @@ export const FX: Record<string, FxDef> = {
     file: 'fx-bailong-sweeping-moon-hit.png', frames: 8, w: 160, h: 145, frameMs: 55, at: 'target', orient: 'flip', on: 'impact',
     perHit: 3, dy: -16.5, scale: 0.43, pixelated: true,
   },
+  // muzzle = the crossbow tip of the release frame (projectile origin is drawn at 42 % of the cell → anchor dy + 8)
+  // ---- Sylas Veyrn (tools/sprites/sylas_vfx.py from assets/heroes/Sylas/vfx, magenta unmixed, Dusk Teal; baked at
+  //      2 × board size: FX scale 1/3, projectiles 1/2.6) ----
+  // S1 AimCharge: spiral gathers just AHEAD of the crossbow tip (user 2026-10-27: tip → orb, dx = its radius) from
+  // CHARGE_START, peaks just before the release, collapses with it
+  'sy-s1-charge': {
+    file: 'fx-sylas-s1-charge.png', frames: 8, w: 73, h: 85, pivot: [0.494942, 0.494299], frameMs: 40, at: 'self', event: 'CHARGE_START', anchor: 'tipS1', dx: 24, scale: 1 / 3, blend: 'add',
+  },
+  // Dusk Bolt (S1): grows in flight (f2 → f6), last frame = the bolt bursting into motes on the target
+  'sy-s1-bolt': {
+    file: 'fx-sylas-s1-bolt.png', frames: 6, w: 235, h: 59, pivot: [0.499904, 0.494427], frameMs: 60, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [54, -42.9],
+  },
+  // basic attack: the same Dusk Bolt, smaller
+  'sy-bolt': {
+    file: 'fx-sylas-bolt.png', frames: 5, w: 145, h: 36, pivot: [0.497794, 0.464464], frameMs: 60, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [54, -42.9],
+  },
+  // Dusk Mark on the target's upper body: appear f1 → f5 crosshair burst, then a slow pulse while the status lasts
+  'sy-s1-mark-in': {
+    file: 'fx-sylas-s1-mark-in.png', frames: 5, w: 93, h: 93, pivot: [0.496222, 0.49782], frameMs: 45, at: 'target', dy: -14, scale: 1 / 3, attach: true,
+  },
+  'sy-s1-mark': {
+    file: 'fx-sylas-s1-mark.png', frames: 4, w: 78, h: 82, pivot: [0.494456, 0.495715], frameMs: 110, delayMs: 225, at: 'target', dy: -14, scale: 1 / 3, attach: true,
+  },
+  // S2 muzzle flash just AHEAD of the crossbow tip on each shot (user 2026-10-27: dx ≈ its radius, like the charges;
+  // the final, piercing shot flashes bigger)
+  'sy-s2-muzzle1': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 28, at: 'self', event: 'DAMAGE', eventIndex: 0, anchor: 'tipS2', dx: 22, scale: 1 / 3, blend: 'add',
+  },
+  'sy-s2-muzzle2': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 28, at: 'self', event: 'DAMAGE', eventIndex: 1, anchor: 'tipS2', dx: 22, scale: 1 / 3, blend: 'add',
+  },
+  'sy-s2-muzzle3': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 32, at: 'self', event: 'DAMAGE', eventIndex: 2, anchor: 'tipS2', dx: 30, scale: 0.47, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 10 }],
+  },
+  // shots 1–2: a small burst on the target as each rapid bolt lands (user 2026-10-27; the muzzle-flash burst, smaller)
+  'sy-s2-hit1': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 30, at: 'target', on: 'impact', hitIndex: 0, dy: -14, scale: 0.27, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 5 }],
+  },
+  'sy-s2-hit2': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 30, at: 'target', on: 'impact', hitIndex: 1, dy: -14, scale: 0.27, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 5 }],
+  },
+  // S2 projectiles: two rapid bolts, then the Final Piercing Shot (keeps flying through the line)
+  'sy-s2-bolt': {
+    file: 'fx-sylas-s2-bolt.png', frames: 6, w: 188, h: 55, pivot: [0.498466, 0.48994], frameMs: 45, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [53.1, -35.6],
+  },
+  'sy-s2-final': {
+    file: 'fx-sylas-s2-final.png', frames: 6, w: 332, h: 135, pivot: [0.498746, 0.486558], frameMs: 45, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [53.1, -35.6], overshoot: 2,
+  },
+  // shot 3 (user 2026-10-27): an unmarked target gets the same light spark as shots 1–2 (a touch bigger) · a Dusk-Marked
+  // target gets the heavy version: a big additive blast + the Marked Burst at its feet
+  'sy-s2-hit3': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 30, at: 'target', on: 'impact', hitIndex: 2, noBonusOnly: true, dy: -14, scale: 0.32, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 6 }],
+  },
+  'sy-s2-hit3-marked': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 40, at: 'target', on: 'impact', hitIndex: 2, bonusOnly: true, dy: -14, scale: 0.6, blend: 'add',
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 18, scale: 1.2 }],
+  },
+  // Marked Burst: on the final bolt's hit, only on a target struck with the Dusk Mark bonus (ground burst at its feet)
+  'sy-s2-burst': {
+    file: 'fx-sylas-s2-burst.png', frames: 8, w: 160, h: 154, pivot: [0.498514, 0.982737], frameMs: 50, at: 'target', on: 'impact', hitIndex: 2, bonusOnly: true, dy: 27.25, scale: 1 / 3,
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 14 }],
+  },
+  // Ult TargetLock on the target from CAST_START: locks on f1–f5, pulses through the charge, dissolves as the bolt lands
+  'sy-ult-lock': {
+    file: 'fx-sylas-ult-lock.png', frames: 26, w: 125, h: 136, pivot: [0.497433, 0.496708], frameMs: 75, at: 'target', event: 'CAST_START', dy: -14, scale: 1 / 3, attach: true,
+  },
+  // ChargeAura v2 (user 2026-10-27): ground ring → a swirling sphere builds around him → swirls through the hold → thins
+  // and fades (16 × 75 ms = the 1.2 s hold, once), drawn IN FRONT of him (user: aura in front of the hero) · CrossbowCharge just ahead of the tip (dx = its radius, 2 × 8 × 75 ms)
+  'sy-ult-aura': {
+    file: 'fx-sylas-ult-aura.png', frames: 16, w: 229, h: 267, pivot: [0.499838, 0.988578], frameMs: 75, fadeOutMs: 120, at: 'self', event: 'CHARGE_START', anchor: 'feet', scale: 1 / 3,
+    particles: [{ name: 'spirit-rise', colors: [0xd8fbff, 0x63e6f0], duration: 1.2 }],
+  },
+  'sy-ult-charge': {
+    file: 'fx-sylas-ult-charge.png', frames: 8, w: 89, h: 103, pivot: [0.496285, 0.496242], frameMs: 75, repeat: 2, fadeOutMs: 80, at: 'self', event: 'CHARGE_START', anchor: 'tipUlt', dx: 26, scale: 1 / 3,
+    blend: 'add',
+  },
+  // Execution Bolt: grows as it flies (7 frames), heavy · bigger (150 atlas px) and 1.8 × faster (kit projectileSpeed)
+  'sy-ult-bolt': {
+    file: 'fx-sylas-ult-bolt.png', frames: 8, w: 603, h: 263, pivot: [0.499424, 0.505516], frameMs: 50, at: 'target', angle0: 0, scale: 1 / 2.6, muzzle: [43.4, -23.5],
+  },
+  // Impact Burst (user 2026-10-27: bigger, longer; then a little smaller): the vortex bursts open f7 → f1 (0.2 s) →
+  // spins at full size (baked 170, shown at 150 atlas px ≈ 1.9 cells, 0.55 s) → collapses slowly into its centre (0.35 s) + fade · Marked Execution on a
+  // Dusk-Marked target
+  'sy-ult-impact': {
+    file: 'fx-sylas-ult-impact.png', frames: 22, w: 351, h: 356, pivot: [0.498744, 0.499105], frameMs: 50, fadeOutMs: 220, at: 'target', on: 'impact', dy: -14, scale: 150 / 170 / 3,
+    particles: [{ name: 'sparks', colors: [0xd8fbff, 0x63e6f0, 0x1c8e98], count: 40, scale: 1.4 }, { name: 'debris', count: 18 },
+      { name: 'dust', count: 12 }, { name: 'spirit-rise', colors: [0xd8fbff, 0x63e6f0], duration: 1 }],
+  },
+  // white-teal blast flash at the heart of the impact (the muzzle-flash burst, ~120 atlas px, additive)
+  'sy-ult-flash': {
+    file: 'fx-sylas-s2-muzzle.png', frames: 8, w: 85, h: 88, pivot: [0.495531, 0.496383], frameMs: 40, at: 'target', on: 'impact', dy: -14, scale: 1, blend: 'add',
+  },
+  // Marked Execution on a Dusk-Marked target (user 2026-10-27: it must read): 130 atlas px, bursts over the vortex once
+  // it is fully open (+200 ms), normal blend so its dark shards + cyan cross read on top of the vortex, extra sparks
+  'sy-ult-marked': {
+    file: 'fx-sylas-ult-marked.png', frames: 8, w: 265, h: 327, pivot: [0.499259, 0.499343], frameMs: 60, delayMs: 200, fadeOutMs: 150, at: 'target', on: 'impact', bonusOnly: true, dy: -14, scale: 1 / 3,
+    particles: [{ name: 'sparks', colors: [0xffffff, 0xd8fbff, 0x63e6f0], count: 28, scale: 1.3 }],
+  },
   // ---- Bai Long ult v3 dragons (bailong.py VFX_SHEETS 'v3_*', strips cut at 0.5 of the 2172 × 724 sources) ----
   // thrust: thin dragon launches from the spear tip forward (tail = left pivot)
   'bl3-hint': {
@@ -1904,6 +2065,12 @@ export function fxNames(sprite: string | undefined, kind: SkillKind): string[] {
 export function appliedStatusFx(sprite: string | undefined, status: string): string | undefined {
   const name = sprite ? SHEETS[sprite]?.appliedStatusFx?.[status] : undefined;
   return name && FX[name] ? name : undefined;
+}
+
+/** the projectile FX of a sheet for a shot (`index` = repeat hit of a multi-shot skill) */
+export function projectileOf(sprite: string | undefined, kind: 'attack' | SkillKind, index = 0): string | undefined {
+  const p = SHEETS[sprite ?? '']?.projectile?.[kind];
+  return Array.isArray(p) ? p[Math.min(index, p.length - 1)] : p;
 }
 
 export type FxTrigger = { on: 'cast' } | { on: 'impact'; hit?: number } | { on: 'event'; event: SemanticEvent; index?: number };
