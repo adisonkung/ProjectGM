@@ -24,6 +24,9 @@ export const HEROES: HeroTemplate[] = [
   { id: 'mordrienne', name: 'มอร์เดรียนน์ เวล', cls: 'mage', star: 3, sprite: 'hero-mordrienne.png' },
   // User 2026-10-27: Sylas Veyrn — The Dusk Reaver (Ranged DPS / Hunter / Sharpshooter), existing Archer; provisional 3★.
   { id: 'sylas', name: 'ไซลัส เวิร์น', cls: 'archer', star: 3, sprite: 'hero-sylas.png' },
+  // User 2026-10-28: Lucien Valthorne — The Black Saint (sacrifice healer / damage-redirect support), existing Healer;
+  // provisional 3★.
+  { id: 'lucien', name: 'ลูเซียน วัลธอร์น', cls: 'healer', star: 3, sprite: 'hero-lucien.png' },
 ];
 
 export const HERO_BY_ID: Record<string, HeroTemplate> = Object.fromEntries(HEROES.map(h => [h.id, h]));

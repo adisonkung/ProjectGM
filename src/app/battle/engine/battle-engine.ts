@@ -2082,6 +2082,7 @@ export class BattleEngine {
         self.events.push({ type: 'shield', src: src.id, dst: dst.id, amount });
       },
       cleanse: (src, dst, count) => self.cleanse(src, dst, count),
+      removeStatus: (u, id) => self.removeStatus(u, id),
       canRevive: dead =>
         !self.flow.outcome && self.flow.rules.allowRevive && isDead(dead) && self.flow.limitedRevives < self.flow.rules.partyReviveLimit,
       revive: (src, dead, hpPct) =>
@@ -2109,8 +2110,13 @@ export class BattleEngine {
         const share = Math.round(total * link.def.damageTransfer!);
         if (share > 0) {
           total -= share;
-          this.events.push({ type: 'soulLink', src: dst.id, dst: protector.id, amount: share });
-          this.applyDamage(protector, share, false, false, src, true);
+          // what the protector actually takes of the share (opt-in: Martyr's Veil × 0.85 × his own DR statuses)
+          const taken = link.def.damageTransferTaken;
+          const landed = taken
+            ? Math.max(1, Math.round(share * (taken.mul ?? 1) * (taken.protectorModifiers ? modifier(protector, 'damageTakenMultiplier') : 1)))
+            : share;
+          this.events.push({ type: 'soulLink', src: dst.id, dst: protector.id, amount: landed });
+          this.applyDamage(protector, landed, false, false, src, true);
         }
         if (total <= 0) return;
       }

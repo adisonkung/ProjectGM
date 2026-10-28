@@ -20,6 +20,10 @@ const art = (id: string): HeroArt => ({
 });
 
 export const HERO_ART: Record<string, HeroArt> = {
+  // Lucien UI art (user 2026-10-28, assets/heroes/Lucien/art → tools/sprites/lucien_art.py): portrait, the three
+  // skill icons cut from one framed strip (Black Benediction cross / Martyr's Veil linked crosses / Black Miracle
+  // radiant cross) and banner.
+  lucien: { ...art('lucien'), banner: 'banners/lucien.webp' },
   // Sylas UI art (user 2026-10-27, assets/heroes/Sylas/art → tools/sprites/sylas_art.py): portrait, the three skill
   // icons (Dusk Mark bolt + crosshair / Reaver Volley three bolts / Nightfall Execution vortex) and banner (2:1).
   sylas: { ...art('sylas'), banner: 'banners/sylas.webp' },

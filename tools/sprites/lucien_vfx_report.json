@@ -1,0 +1,149 @@
+{
+ "s1-cross": {
+  "file": "fx-lucien-s1-cross.png",
+  "frames": 27,
+  "w": 123,
+  "h": 253,
+  "scale": 0.333333,
+  "pivot": [
+   0.34146,
+   0.98814
+  ],
+  "firstVisible": 1
+ },
+ "s1-gain": {
+  "file": "fx-lucien-s1-gain.png",
+  "frames": 10,
+  "w": 185,
+  "h": 217,
+  "scale": 0.333333,
+  "pivot": [
+   0.5027,
+   0.84332
+  ]
+ },
+ "s1-heal": {
+  "file": "fx-lucien-s1-heal.png",
+  "frames": 10,
+  "w": 139,
+  "h": 102,
+  "scale": 0.333333,
+  "pivot": [
+   0.4982,
+   0.78922
+  ]
+ },
+ "s2-source": {
+  "file": "fx-lucien-s2-source.png",
+  "frames": 12,
+  "w": 186,
+  "h": 248,
+  "scale": 0.333333,
+  "pivot": [
+   0.50269,
+   0.76613
+  ]
+ },
+ "s2-link": {
+  "file": "fx-lucien-s2-link.png",
+  "frames": 12,
+  "w": 180,
+  "h": 68,
+  "scale": 0.333333,
+  "pivot": [
+   0.0,
+   0.5
+  ]
+ },
+ "s2-absorb": {
+  "file": "fx-lucien-s2-absorb.png",
+  "frames": 10,
+  "w": 191,
+  "h": 229,
+  "scale": 0.333333,
+  "pivot": [
+   0.53534,
+   0.84498
+  ]
+ },
+ "ult-staff": {
+  "file": "fx-lucien-ult-staff.png",
+  "frames": 33,
+  "w": 121,
+  "h": 229,
+  "scale": 0.333333,
+  "pivot": [
+   0.1405,
+   0.99127
+  ],
+  "frameMs": 75.0
+ },
+ "ult-aura": {
+  "file": "fx-lucien-ult-aura.png",
+  "frames": 21,
+  "w": 236,
+  "h": 276,
+  "scale": 0.333333,
+  "pivot": [
+   0.49894,
+   0.81522
+  ],
+  "frameMs": 120
+ },
+ "ult-release": {
+  "file": "fx-lucien-ult-release.png",
+  "frames": 10,
+  "w": 269,
+  "h": 313,
+  "scale": 0.333333,
+  "pivot": [
+   0.50465,
+   0.83067
+  ]
+ },
+ "ult-wave": {
+  "file": "fx-lucien-ult-wave.png",
+  "frames": 12,
+  "w": 1110,
+  "h": 734,
+  "scale": 0.333333,
+  "pivot": [
+   0.49427,
+   0.64168
+  ],
+  "ringCells": [
+   0.54,
+   3.0
+  ],
+  "growFrames": 6,
+  "frameMs": 70
+ },
+ "atk-glow": {
+  "file": "fx-lucien-atk-glow.png",
+  "frames": 6,
+  "w": 52,
+  "h": 178,
+  "scale": 0.333333,
+  "pivot": [
+   0.07692,
+   0.99438
+  ],
+  "head": [
+   141.7,
+   79.6
+  ]
+ },
+ "bolt": {
+  "file": "fx-lucien-bolt.png",
+  "frames": 5,
+  "w": 72,
+  "h": 40,
+  "scale": 0.555556
+ },
+ "anchor": {
+  "muzzleAtlas": [
+   141.2,
+   79.1
+  ]
+ }
+}

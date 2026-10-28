@@ -2,7 +2,30 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Sylas Veyrn, The Dusk Reaver (Claude, 2026-10-27)
+## Latest task — Lucien Valthorne, The Black Saint · Phase A (Claude, 2026-10-28)
+
+Branch `wip/claude-hero-lucien` from origin/master ecf539b (after the S1 hold commit). User supplied `lucien.zip` (base idle/run/hurt/death, normal attack, S2, Ult, 9 VFX sheets), `Lucien_Valthorne_Timeline_Sync.xlsx`, the master reference and the kit concept; confirmed the V1 prototype numbers (keep configurable) and the VFX plan (Ult_Charge under him while charging + a small TeamHealingWave as the S1 heal burst).
+
+- Hero #15 `lucien` / ลูเซียน วัลธอร์น · existing class **healer** · 3★ provisional · not in starter/bench. Sylas (#14) is on its own unmerged branch — the roster lists (`roster-remodel.spec.ts`, `bailong.spec.ts`, `HEROES`) will conflict on merge; keep both entries.
+- Kit (class skill ids, values in data): **Sacred Burden** `sacred_burden` (max 5, −4 % damage taken per stack additive, no expiry until the Ult) · attack **Black Sacred Bolt** 100 % MAGIC (no Heal Bolt) · S1 **Black Benediction** (lowest HP % ally: heal 180 % ATK + 6 % max HP, +1 Burden) · S2 **Martyr's Veil** (lowest HP % *other* ally, 5 s `martyr_veil`: 30 % of its damage redirected, Lucien takes it × 0.85 × his own damage-taken modifiers; +2 Burden) · Ult **Black Miracle** (heal all 120 % ATK + 8 % max HP × (1 + 0.15 × stacks), `miracle_ward` ×0.85 5 s, `miracle_recovery` HoT 4 s × (1 + 0.25 × stacks), then consume all Burden).
+- Generic engine additions: `StatusEffectDefinition.additiveStacks`, `damageTransferTaken {mul, protectorModifiers}` (opt-in; Garrick gate_ward / soul_link unchanged), `StackBonus` on HEAL / APPLY_STATUS, `APPLY_STATUS.stacks`, effect `CONSUME_STATUS`, TargetRule `LOWEST_HP_OTHER_ALLY`, `statusStacks()`, `SkillHost.removeStatus`. Visual generics: `FxDef.span` (tether stretched target → caster, width-only stretch in DOM + Pixi, skipped when the target is the caster), `SheetDef.attackFx` (FX on the caster when a basic attack starts; preloaded in Pixi).
+- Art: `tools/sprites/lucien.py` → `hero-lucien.png` 28 × 8 (260 × 170, body 78 px) + staff-head track `lucien_report.json` + temporary portrait from the reference. `tools/sprites/lucien_vfx.py` → 13 `fx-lucien-*` strips (S1 cross + Ult StaffCharge staff-tracked on a feet-anchored canvas; others grid-cut, ground pivots) + procedural bolt. Preview `python3 tools/sprites/lucien_sync.py <out> [clip]` (60 FPS mp4 + contact sheet, mirrors sprites.ts timing — provisional, not a final Timeline Sync).
+- Clip timings (provisional): attack 19 × 40 ms, bolt at 0.32 s · S1 27 × 45 ms, heal 0.27 s · S2 28 × 64 ms, link CHARGE_START 0.19 s, veil 0.58 s · Ult 3.60 s (CHARGE_START 0.40, PEAK 1.00, release/DAMAGE 2.30).
+- Validation: app/spec typecheck, Karma 853/853, `npm run sprites:optimize` run. No balance run.
+- Ult VFX revision (user 2026-10-28): Ult_Charge removed (source kept); SacredAshAuraLoop under Lucien from CHARGE_START; BurdenRelease on Lucien at the release; ONE TeamHealingWave expanding from his feet over the allied side (`lu-ult-wave`, ring 0.54 → 3 cells in 0.42 s, under, not attached; baked by `team_wave` in lucien_vfx.py with a ground-perspective warp) + a small pulse once on each healed ally when the wave reaches it (`lu-ult-halo`, new generic `FxDef.arrival {from, speed}` → per-copy `delayMs` in battle addFx). Karma 854/854.
+- Ult VFX revision #2 (user 2026-10-28): the wave starts at BurdenRelease's peak (frame 6, `delayMs` 300); each healed ally now gets BurdenRelease (same art/size as Lucien's, `lu-ult-ally-release`, on the wave's arrival) instead of the small heal pulse; ground pivots of the grid-cut VFX fixed (per-frame widest lower row, median) — AshAura / BurdenAbsorb / LinkSource no longer sit below the feet. Karma 854/854.
+- UI art (user 2026-10-28): `assets/heroes/Lucien/art/{portrait,skills,banner}.png` (skills = one strip of three framed panels, S1 / S2 / Ult) → `tools/sprites/lucien_art.py` → portrait 288 / icons 160 / banner 1400; `HERO_ART.lucien` now has all five. Karma 854/854.
+- Missing assets: Sacred Burden stack / ward / recovery status visuals, a final Timeline Sync. Not merged; awaiting review.
+
+## Previous task — Lucien Valthorne Skill 1 sources held (Claude, 2026-10-27)
+
+Branch `wip/claude-hero-lucien` from origin/master ecf539b. The user supplied a 56-frame staff-raise cast (two copies of the same animation on junk backgrounds) plus a holy-cross VFX sheet and said: remember this pose + VFX as **Skill 1 of Lucien Valthorne** for now. Not in the game yet (no hero registration, kit, atlas or FxDef).
+
+- Sources tracked unchanged: `assets/heroes/Lucien/skill/lucien_s1_sheet_{a,b}.png` (8 × 7 cells of 512 px), `assets/heroes/Lucien/vfx/Lucien_S1_StaffCross_VFX.png` (5 × 2, magenta key).
+- `python3 tools/sprites/lucien_s1_prep.py <out>` → clean transparent sheet (background cut; sheet b + frames 4/43 from sheet a), staff-head track, VFX mapping (grow with the raise → pulse at the top → stays until the staff is planted → fades at frames 51–53) and a 20 FPS preview. Timing provisional.
+- Still unknown: class, kit, the base sheets (idle / run / hurt / death), S2 / Ult.
+
+## Previous task — Sylas Veyrn, The Dusk Reaver (Claude, 2026-10-27)
 
 Branch `wip/claude-hero-sylas` from origin/master ecf539b (after the Mordrienne + settings merges). User supplied hero_sylas.zip (idle / run / hurt / death / S1 / S2 / Ult Autosprite sheets, 13 VFX sheets, master reference) + the kit concept; basic attack = the S1 sheet; "sync the skills with the VFX first, a Timeline Sync Sheet may follow".
 

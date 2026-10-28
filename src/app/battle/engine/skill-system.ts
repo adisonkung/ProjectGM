@@ -18,6 +18,7 @@ import type { BattleEvent, BattleUnit } from './battle-engine';
 import { effectiveAttack } from './damage-resolver';
 import { distance } from './grid';
 import { fieldAnchor } from './fields';
+import { statusStacks } from './buffs';
 
 /** What the skill system needs from the battle (implemented by BattleEngine — the skill system never runs AI loops itself) */
 export interface SkillHost {
@@ -51,6 +52,8 @@ export interface SkillHost {
   shield(src: BattleUnit, dst: BattleUnit, amount: number, duration: number): void;
   /** remove up to `count` debuffs from `dst` (newest first); returns how many were removed */
   cleanse(src: BattleUnit, dst: BattleUnit, count: number): number;
+  /** remove a status from the unit (CONSUME_STATUS) */
+  removeStatus(u: BattleUnit, id: string): void;
   revive(src: BattleUnit, dead: BattleUnit, hpPct: number): boolean;
   /** would `revive` succeed right now (stage running, revives allowed, still dead, party limit left)? */
   canRevive?(dead: BattleUnit): boolean;
@@ -147,7 +150,7 @@ export class SkillSystem {
 
   rangeOf(u: BattleUnit, s: SkillDefinition): number {
     if (s.range != null) return s.range;
-    return s.target === 'LOWEST_HP_ALLY' ? Infinity : u.range;
+    return s.target === 'LOWEST_HP_ALLY' || s.target === 'LOWEST_HP_OTHER_ALLY' ? Infinity : u.range;
   }
 
   // ------------------------------------------------------------------ targeting
@@ -192,6 +195,9 @@ export class SkillSystem {
         return foes.filter(t => inRange(t) && landable(t)).sort(byHp)[0] ?? null;
       case 'LOWEST_HP_ALLY':
         return this.h.allies(u).filter(inRange).sort(byHp)[0] ?? null;
+      // lowest HP % ally other than the caster (links / redirects that make no sense on oneself)
+      case 'LOWEST_HP_OTHER_ALLY':
+        return this.h.allies(u).filter(a => a !== u).filter(inRange).sort(byHp)[0] ?? null;
       case 'FOCUS': {
         const focus = this.h.focus(u);
         return focus && focus.alive && inRange(focus) && landable(focus) ? focus : null;
@@ -230,7 +236,7 @@ export class SkillSystem {
     let pool =
       ai.countArea || (target === u && s.effects.some(e => e.type === 'HEAL' && e.area !== 'PRIMARY' && e.area !== 'ALL_ALLIES'))
         ? this.areaUnits(u, s, target, 'ALLY', ai.countArea)
-        : s.target === 'LOWEST_HP_ALLY'
+        : s.target === 'LOWEST_HP_ALLY' || s.target === 'LOWEST_HP_OTHER_ALLY'
           ? [target]
           : this.h.allies(u);
     const field = s.effects.find((e): e is Extract<SkillEffect, { type: 'FIELD' }> => e.type === 'FIELD' && e.field.aura?.team === 'ALLY');
@@ -739,7 +745,8 @@ export class SkillSystem {
               }).filter(a => !(e.skipPrimary && a === primary));
           const boost = rankPower(u, slot) * (u.mods?.healing ?? 1);
           for (const a of targets) if (!this.supported.includes(a)) this.supported.push(a);
-          for (const a of targets) this.h.heal(a, (effectiveAttack(u) * e.atk + a.maxHp * (e.maxHpPct ?? 0)) * boost, u);
+          const stackMul = e.stackBonus ? 1 + e.stackBonus.perStack * statusStacks(u, e.stackBonus.status) : 1;
+          for (const a of targets) this.h.heal(a, (effectiveAttack(u) * e.atk + a.maxHp * (e.maxHpPct ?? 0)) * boost * stackMul, u);
           if (slot === 'attack' && targets.length) this.h.basicGauge(u);
           break;
         }
@@ -753,13 +760,17 @@ export class SkillSystem {
             const pool = e.team === 'ALLY' ? this.h.allies(u) : this.h.foes(u);
             targets = resolveArea({ pattern: e.area ?? 'SINGLE', caster, primary: focusOf(primary), center: e.center, candidates: pool });
           }
-          const opts = e.potency != null || e.modifiers ? { potency: e.potency, modifiers: e.modifiers } : undefined;
+          const potency = e.stackBonus ? (e.potency ?? 1) * (1 + e.stackBonus.perStack * statusStacks(u, e.stackBonus.status)) : e.potency;
+          const opts = potency != null || e.modifiers ? { potency, modifiers: e.modifiers } : undefined;
           for (const t of targets) {
             if (e.when && had(t, e.when.status) !== e.when.present) continue;
-            this.h.applyStatus(t, e.status, u, e.duration, opts);
+            for (let n = 0; n < (e.stacks ?? 1); n++) this.h.applyStatus(t, e.status, u, e.duration, opts);
           }
           break;
         }
+        case 'CONSUME_STATUS':
+          this.h.removeStatus(u, e.status);
+          break;
         case 'INTERRUPT': {
           const foes = this.h.foes(u);
           for (const f of resolveArea({ pattern: e.area, caster, primary: focusOf(primary), center: e.center, candidates: foes })) {

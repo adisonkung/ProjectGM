@@ -38,6 +38,7 @@ export interface PixiFx {
   additive?: boolean;
   delayMs?: number;
   scale?: number;
+  stretch?: number;
   id: number;
   name: string;
   /** top-left of the cell it sits on (board px) — the unit's drawn cell for an attached FX */
@@ -269,7 +270,7 @@ export class PixiUnitLayer {
 
   /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
   private preloadFx(def: SheetDef): void {
-    const names = [...Object.values(def.fx ?? {}).flat(), ...Object.values(def.projectile ?? {}).flat(),
+    const names = [...Object.values(def.fx ?? {}).flat(), ...(def.attackFx ?? []), ...Object.values(def.projectile ?? {}).flat(),
       ...Object.values(def.motionFx ?? {}).flatMap(f => [f.start, f.loop]),
       ...Object.values(def.appliedStatusFx ?? {}), ...Object.values(def.statusFx ?? {}).flatMap(f => [f.start, f.loop]),
       ...[def.fieldFx?.start, def.fieldFx?.loop, def.fieldFx?.end, def.fieldFx?.residual, def.fieldFx?.wave?.rain, def.fieldFx?.wave?.impact],
@@ -329,7 +330,7 @@ export class PixiUnitLayer {
         continue;
       }
       const f = s.last;
-      const at = fxPlacement(d, cell, f.x, f.y, f.flip, f.angle, f.offset, (f.scale ?? 1) * (pose.scale ?? 1));
+      const at = fxPlacement(d, cell, f.x, f.y, f.flip, f.angle, f.offset, (f.scale ?? 1) * (pose.scale ?? 1), f.stretch ?? 1);
       at.x += (pose.dx ?? 0) * (f.flip ? -1 : 1) / 100 * cell;
       at.y += (pose.dy ?? 0) * (f.motionY ?? 1) / 100 * cell;
       const tex = this.fxFrame(d.file, base, d.stripFrames ?? d.frames, pose.frame, d.pixelated || !!f.track);

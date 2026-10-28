@@ -254,6 +254,30 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     modifiers: { attackSpeedMultiplier: 1.15 },
   },
 
+  // ---- Lucien Valthorne — The Black Saint (Healer / sacrifice support, provisional V1 values, user 2026-10-28)
+  /** Sacred Burden (self): 5 stacks max, each −4 % damage taken (additive: 5 = −20 %), kept until Black Miracle consumes them */
+  sacred_burden: {
+    id: 'sacred_burden', name: 'ภาระศักดิ์สิทธิ์', duration: Infinity, stackPolicy: 'STACK_MAGNITUDE', maxStacks: 5, buff: true,
+    additiveStacks: true, modifiers: { damageTakenMultiplier: 0.96 },
+  },
+  /** Martyr's Veil (on the linked ally, source = Lucien): 30 % of the ally's incoming damage is redirected to Lucien, who
+   *  takes it × 0.85 and × his own damage-taken statuses (Sacred Burden) */
+  martyr_veil: {
+    id: 'martyr_veil', name: 'ม่านผู้พลีชีพ', duration: 5, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: {}, damageTransfer: 0.3, damageTransferTaken: { mul: 0.85, protectorModifiers: true },
+  },
+  /** Black Miracle protection (team): ×0.85 damage taken for 5 s */
+  miracle_ward: {
+    id: 'miracle_ward', name: 'ปาฏิหาริย์คุ้มครอง', duration: 5, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0.85 },
+  },
+  /** Black Miracle delayed recovery (team): 4 s HoT, first tick after 1 s; magnitude = Lucien's ATK × potency (scaled
+   *  by the Burden consumed — kit stackBonus) */
+  miracle_recovery: {
+    id: 'miracle_recovery', name: 'ฟื้นฟูปาฏิหาริย์', duration: 4, stackPolicy: 'INDEPENDENT_BY_SOURCE', buff: true,
+    modifiers: {}, tick: { kind: 'HEAL', perSecond: 0.15, interval: 1 },
+  },
+
   // ---- monster buffs
   alpha_howl_buff: {
     id: 'alpha_howl_buff', name: 'เสียงหอนจ่าฝูง', duration: 10, stackPolicy: 'REFRESH_DURATION', buff: true,

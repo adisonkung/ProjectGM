@@ -128,6 +128,8 @@ export interface FxView {
   /** Per-cast presentation overrides, independent of the shared FX definition. */
   delayMs?: number;
   scale?: number;
+  /** width-only multiplier on top of `scale` (a stretched tether, FxDef.span) */
+  stretch?: number;
   owner?: number;
   id: number;
   r: number;
@@ -416,7 +418,7 @@ export class BoardComponent {
         angle: anchor?.outward && f.role === 'trail' ? anchor.outward.angle : f.angle,
         flip: anchor?.outward && f.role !== 'trail' ? anchor.outward.flip : !!f.flip,
         motionY: anchor?.outward?.dySign,
-        offset: f.offset, delayMs: f.delayMs, scale: f.scale, track: f.track, additive: f.additive,
+        offset: f.offset, delayMs: f.delayMs, scale: f.scale, stretch: f.stretch, track: f.track, additive: f.additive,
         under: !!f.under,
         managed: !!f.managed,
         loop: !!f.loop,

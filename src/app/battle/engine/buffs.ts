@@ -110,11 +110,18 @@ export const tickBuffs = (u: Buffable, dt: number, transition = false): ActiveBu
 export const buffRemaining = (u: Buffable, id: string): number =>
   Math.max(0, ...u.buffs.filter(b => b.def.id === id).map(b => b.remaining));
 export const hasStatus = (u: Buffable, id: string): boolean => u.buffs.some(b => b.def.id === id);
+/** stacks of a status on the unit (0 when absent; independent applications add up) */
+export const statusStacks = (u: Buffable, id: string): number =>
+  u.buffs.filter(b => b.def.id === id).reduce((n, b) => n + b.stacks, 0);
 export const hasFlag = (u: Buffable, flag: StatusFlag): boolean => u.buffs.some(b => b.def.flags?.includes(flag));
 
 /** product of one modifier over all active statuses (1 when none) */
+/** one status's factor for a modifier: m^stacks, or linear 1 − n × (1 − m) for `additiveStacks` (never below 0) */
+const stackedFactor = (m: number, stacks: number, additive?: boolean): number =>
+  additive ? Math.max(0, 1 + (m - 1) * stacks) : Math.pow(m, stacks);
+
 export const modifier = (u: Buffable, key: Exclude<keyof StatusModifiers, 'dodgeChance'>): number =>
-  u.buffs.reduce((m, b) => m * Math.pow(b.def.modifiers[key] ?? 1, b.stacks), 1) *
+  u.buffs.reduce((m, b) => m * stackedFactor(b.def.modifiers[key] ?? 1, b.stacks, b.def.additiveStacks), 1) *
   (u.auraModifiers?.() ?? []).reduce((m, modifiers) => m * (modifiers[key] ?? 1), 1);
 
 export const attackModifier = (u: Buffable): number => modifier(u, 'attackMultiplier');
