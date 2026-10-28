@@ -264,12 +264,12 @@
       "h": 120
     },
     "impact": {
-      "frames": 10,
+      "frames": 8,
       "w": 160,
       "h": 128
     },
     "shockwave": {
-      "frames": 10,
+      "frames": 8,
       "w": 300,
       "h": 160
     },

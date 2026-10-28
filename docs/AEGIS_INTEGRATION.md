@@ -51,3 +51,7 @@ Automated: app/spec TypeScript, full Karma suite, optimized atlases and producti
 Real local-game captures are under `docs/review-images/2026-10-28-aegis/` (desktop 1440×900; mobile menu 390×844; combat 932×430). Test browser only: named island, floor 10 unlocked, starter heroes Lv8; hero active skills set MANUAL so the boss sequence can be seen. This fixture does not modify a player's save. Source-reference comparisons are compositions of supplied art and actual screenshots, not generated screenshots.
 
 Remaining review limits: reconstructed RGB alpha can differ from the original glow; final art-direction approval is the user's. The other two guardians still use their existing assets/kits. Full 2×2 boss gameplay footprints and a redesigned locked-angle monster telegraph system are outside this change.
+
+## Isolated clip review / source-grid correction
+
+The isolated preview exposed an incorrect grid assumption for supplied VFX 05 (impact) and 06 (ground shockwave): both are 4×2 / 8 frames, not 5×2 / 10. The bake and three FxDef entries now use the correct grid; hitboxes, damage and character/cast timing are unchanged. Preview-only exports under /workspace/aegis-isolated-preview use current runtime assets and the actual clip/FX samplers, at ×1, with no other units/HUD. This is an isolated asset view, not a combat simulation or a gameplay screenshot. Source art stays unchanged.

@@ -97,8 +97,8 @@ held=charge[3];charges=[]
 for i in range(24):
  q=held.copy();a=np.array(q);a[:,:,3]=(a[:,:,3]*(.82+.18*math.sin(math.tau*i/24))).astype('uint8');charges.append(Image.fromarray(a))
 strip('tip-charge',charges,(120,120))
-strip('impact',panels('05-fx-aegis-s2-impact.png',5,2),(160,128))
-strip('shockwave',panels('06-fx-aegis-s3-ground-shockwave.png',5,2),(300,160))
+strip('impact',panels('05-fx-aegis-s2-impact.png',4,2),(160,128))
+strip('shockwave',panels('06-fx-aegis-s3-ground-shockwave.png',4,2),(300,160))
 core=panels('07-fx-aegis-core-exposed-loop.png',5,2)
 strip('core',core[1:7]+core[5:1:-1],(100,100))
 strip('death',panels('08-fx-aegis-death-dissolve.png',5,2),(210,180))
