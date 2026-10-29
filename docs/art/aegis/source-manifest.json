@@ -93,5 +93,10 @@
     "file": "12-fx-aegis-s3-ground-charge.png",
     "bytes": 429131,
     "sha256": "c452595d7c3fc722ea4e91d6714214db822f39232a319f6b13f17a13f20fc5f2"
+  },
+  {
+    "file": "13-fx-aegis-s3-impact.png",
+    "bytes": 1578618,
+    "sha256": "e07b082db55d487968e5dae2b64e4f8c278eecee0c63c280d3f59f2342676fde"
   }
 ]

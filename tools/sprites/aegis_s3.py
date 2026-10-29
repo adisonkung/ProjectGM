@@ -56,10 +56,24 @@ def bake_s3(src,out,report,strip,star):
   a=ImageOps.mirror(a);floor_frames.append(a)
   bottoms.append(floor)
  strip('s3-tip-charge',tip_frames,(160,160));strip('s3-ground-charge',floor_frames,(360,240))
- # Read the real visible bottom of each impact frame; ground contact never uses the PNG centre.
- im=Image.open(out/'fx-aegis-shockwave.png').convert('RGBA');impact_ground=[]
+ # Supplied replacement is RGB with a baked pale checkerboard. Reconstruct coloured
+ # light alpha; retain enclosed white cores so the slam does not become a hollow ring.
+ from scipy.ndimage import binary_fill_holes
+ im=Image.open(src/'13-fx-aegis-s3-impact.png').convert('RGB');impacts=[];impact_ground=[]
  for i in range(8):
-  alpha=np.array(im.crop((i*300,0,(i+1)*300,160)).getchannel('A'));ys=np.flatnonzero((alpha>=8).any(1));impact_ground.append(int(ys[-1])+1 if len(ys) else 160)
+  f=im.crop((round(i%4*im.width/4),round(i//4*im.height/2),round((i%4+1)*im.width/4),round((i//4+1)*im.height/2)))
+  rgb=np.array(f).astype(float);sat=rgb.max(2)-rgb.min(2);paint=sat>8
+  alpha=np.clip(sat/65,0,1);alpha[~paint]=0
+  # Recover the bounded white core with a feathered edge, avoiding hard white cutouts.
+  core=binary_fill_holes(paint)&~paint&(rgb.min(2)>225)
+  feather=np.array(Image.fromarray((core*255).astype('uint8')).filter(ImageFilter.GaussianBlur(1.2)))/255
+  alpha=np.maximum(alpha,feather*np.clip((rgb.min(2)-220)/30,0,1));alpha[alpha<.025]=0
+  # Keep the native light colour: dividing a pale flattened glow by alpha creates dark fringes.
+  col=rgb
+  q=Image.fromarray(np.dstack((col,alpha*255)).astype('uint8')).resize((360,240),Image.Resampling.LANCZOS)
+  a=np.array(q);a[a[:,:,3]<8,3]=0;q=Image.fromarray(a);impacts.append(q)
+  ys=np.flatnonzero((a[:,:,3]>=8).any(1));impact_ground.append(int(ys[-1])+1 if len(ys) else 240)
+ strip('s3-slam',impacts,(360,240))
  # Authored spear-tip positions in the supplied Ultimate windup frames (source pixels).
  tips=[(190,95),(216,78),(284,58),(360,79),(385,118),(395,134),(405,161),(405,173),(405,172),(392,136),(392,136),(292,70)]
  offsets=[((264-x)*180/252*1.25,46+(-14+(y-414)*180/252)*1.25) for x,y in tips]

@@ -5,7 +5,7 @@
  */
 
 import type { FxTrack } from '../models/fx';
-import { AEGIS_S3_GROUND_BOTTOMS, AEGIS_S3_IMPACT_BOTTOMS, AEGIS_S3_TIP_ANCHOR, AEGIS_S3_TIP_MOTION } from './aegis-s3-presentation';
+import { AEGIS_S3_IMPACT_BOTTOMS, AEGIS_S3_TIP_ANCHOR, AEGIS_S3_TIP_MOTION } from './aegis-s3-presentation';
 import type { ParticleRef } from './particles';
 import { AnimationConfig, SemanticEvent } from '../models/monster';
 import { MONSTERS, PROJECTILES } from './monsters';
@@ -1153,11 +1153,11 @@ export const FX: Record<string, FxDef> = {
   'ae-s3-charge': { file: 'fx-aegis-s3-tip-charge.png', frames: 75, w: 160, h: 160, frameMs: 40,
     at: 'self', anchor: 'judgementTip', fitCells: 1.7, attach: true, blend: 'add' },
   'ae-s3-ground-charge': { file: 'fx-aegis-s3-ground-charge.png', frames: 75, w: 360, h: 240, frameMs: 40,
-    at: 'self', fitCells: 3.4, ground: AEGIS_S3_GROUND_BOTTOMS, pivot: [.5,1], dy: 27.25,
+    at: 'self', fitCells: 3.4, pivot: [.5,162/240], dy: 27.25,
     attach: true, layer: 'under' },
-  'ae-s3-wave': { file: 'fx-aegis-shockwave.png', frames: 8, w: 300, h: 160, frameMs: 50,
+  'ae-s3-wave': { file: 'fx-aegis-s3-slam.png', frames: 8, w: 360, h: 240, frameMs: 50,
     at: 'self', groundArea: 'FRONT_RECT_3X2', fitCells: 3, fitRows: 2,
-    ground: AEGIS_S3_IMPACT_BOTTOMS, pivot: [.5,1], dy: 27.25, attach: false, layer: 'under' },
+    ground: AEGIS_S3_IMPACT_BOTTOMS, pivot: [.5,1], dy: 50, attach: false, layer: 'under' },
   'ae-s3-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
     at: 'target', fitCells: .65, dy: -20 },
   'ae-core': { file: 'fx-aegis-core.png', frames: 10, w: 100, h: 100, frameMs: 80,

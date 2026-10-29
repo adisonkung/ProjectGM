@@ -34,7 +34,14 @@ atlas=Image.new('RGBA',(COLS*W,H*len(rows)));mapping=[]
 for r,(name,indices) in enumerate(rows):
  for j,i in enumerate(indices):
   dx=([0,-1,-3,-2,-1,0][j] if r==2 else [0,0,0,1,3,5,7,5,3,1,0,0][j] if r==4 else 0)
-  atlas.paste(actor(frame(name,i),dx),(j*W,r*H))
+  body=frame(name,i)
+  if r==7 and i>=16:
+   # Old white contact dust is baked into the slam pose. Separate it from the
+   # replacement world-space impact without touching coloured spear/arm/armour.
+   a=np.array(body);yy,xx=np.indices(a.shape[:2]);rgb=a[:,:,:3].astype(int)
+   dust=(xx<250)&(yy>190)&(rgb.max(2)-rgb.min(2)<45)&(rgb.min(2)>90)
+   a[dust,3]=0;body=Image.fromarray(a)
+  atlas.paste(actor(body,dx),(j*W,r*H))
  mapping.append({'row':r+1,'source':name,'frames1Based':[i+1 for i in indices]})
 atlas.save(OUT/'enemy-aegis-sentinel.png',optimize=True)
 

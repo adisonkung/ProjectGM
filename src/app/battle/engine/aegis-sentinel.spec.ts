@@ -58,7 +58,7 @@ describe('Aegis Sentinel integration', () => {
     expect(s.boss.casting).toBeNull();
   });
 
-  it('ground charge and front impact pin every visible lower edge to the feet plane, with full half-cell widths', () => {
+  it('charge centres on the feet while the forward impact meets the bottom cell edge', () => {
     const body = { r: 2,c: 11 },cell = 50;
     for (const name of ['ae-s3-ground-charge','ae-s3-wave']) {
       const d = FX[name],point = groundFxCell(d,body,body,true);
@@ -67,7 +67,12 @@ describe('Aegis Sentinel integration', () => {
         const at = fxPlacement(d,cell,point.c*cell,point.r*cell,true,0);
         const pivot = fxPivot(d,frame);
         const top = at.y-pivot[1]*at.height;
-        expect(top+d.ground![frame]/d.h*at.height).toBeCloseTo((2+.5+.2725)*cell,6);
+        if (name === 'ae-s3-wave') {
+          expect(top+d.ground![frame]/d.h*at.height).toBeCloseTo(3*cell,6);
+          expect(d.layer).toBe('under'); // dust stays behind the boss and spear.
+        } else {
+          expect(top+162/240*at.height).toBeCloseTo((2+.5+.2725)*cell,6);
+        }
         if (name === 'ae-s3-wave') {
           expect(at.x-at.width/2).toBe(8*cell);
           expect(at.x+at.width/2).toBe(11*cell);
