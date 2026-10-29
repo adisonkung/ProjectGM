@@ -396,3 +396,6 @@ Branch `fix/lobby-profile-customization` based on freshly fetched origin/master 
 
 ### Profile frame visual follow-up — 2026-10-29
 User requested ornate frames with flowing/sparkling effects. Implemented four theme-specific SVG ornaments and CSS animation in shared/profile-portrait.component.{ts,html,scss}; no save logic change. App/spec checks,890 Karma,production build and real desktop/mobile/motion checks pass. Review pairs and actual-game motion: profile-frame-review/README.md. Same task branch. No deploy/master merge; confirmed canonical sync base unchanged.
+
+### Full hero banner follow-up — 2026-10-29
+Hero detail now displays full native-ratio banner and puts identity/status below artwork. Review: banner-fit-review/README.md. App/spec,890 Karma,production build pass; desktop/mobile browser ratio checks. Same local task branch; no new push attempted because approval for previous rejected push is pending. No deploy/master merge; confirmed canonical sync base unchanged.
