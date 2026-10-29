@@ -1,5 +1,6 @@
 import { AreaCenter, AreaPattern } from '../../core/models/combat';
-import { Cell } from '../../core/models/unit';
+import { Cell, UnitFootprint } from '../../core/models/unit';
+import { footprintCells } from './footprint';
 import { BOARD_COLS, distance, LANES } from './grid';
 
 /** What the resolver needs of a unit */
@@ -7,6 +8,7 @@ export interface AreaUnit {
   id: number;
   pos: Cell;
   actionFacing?: { left: boolean };
+  footprint?: UnitFootprint;
 }
 
 export interface AreaQuery<T extends AreaUnit> {
@@ -69,6 +71,10 @@ export const GROUND_SHAPES: Partial<Record<AreaPattern, [number, number, boolean
 
 /** the ground shape cell a unit stands in: true = main, false = splash, null = outside */
 export function groundCell<T extends AreaUnit>(pattern: AreaPattern, caster: T, primary: T | null, candidates: T[], u: T): boolean | null {
+  if (u.footprint) {
+    const cells = footprintCells(u).map(pos => groundCell(pattern,caster,primary,candidates,{ ...u,pos,footprint: undefined }));
+    return cells.includes(true) ? true : cells.includes(false) ? false : null;
+  }
   const shape = GROUND_SHAPES[pattern];
   if (!shape) return null;
   const f = frontCell(caster, primary, candidates);
@@ -95,6 +101,14 @@ export function rect6x3Center(primary: Cell): Cell {
 
 export function resolveArea<T extends AreaUnit>(q: AreaQuery<T>): T[] {
   const { pattern, caster, primary, candidates } = q;
+  // One health bar can intersect several cells. Resolve the logical shape, then return each real unit once.
+  if (pattern !== 'SINGLE' && candidates.some(u => u.footprint)) {
+    const expanded = candidates.flatMap(u => u.footprint ? footprintCells(u).map(pos => ({ ...u, pos, footprint: undefined })) : [u]);
+    const aimed = primary ? expanded.find(u => u.id === primary.id && u.pos.r === primary.pos.r && u.pos.c === primary.pos.c) ?? primary : null;
+    const ids = new Set(resolveArea({ ...q, candidates: expanded, primary: aimed }).map(u => u.id));
+    const hit = candidates.filter(u => ids.has(u.id));
+    return primary && hit.includes(primary) ? [primary,...hit.filter(u => u !== primary)] : hit;
+  }
   const centerCell = (q.center ?? 'TARGET') === 'SELF' || !primary ? caster.pos : primary.pos;
   const facing: 1 | -1 = candidates.some(c => c.pos.c > caster.pos.c) || !candidates.length ? 1 : -1;
   let hit: T[];

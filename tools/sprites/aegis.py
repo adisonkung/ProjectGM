@@ -141,24 +141,28 @@ strip('shockwave',panels('06-fx-aegis-s3-ground-shockwave.png',4,2),(300,160))
 core=panels('07-fx-aegis-core-exposed-loop.png',5,2)
 strip('core',core[1:7]+core[5:1:-1],(100,100))
 strip('death',panels('08-fx-aegis-death-dissolve.png',5,2),(210,180))
-# Beam: keep the supplied crescent at the muzzle, synthesize shaft/tip separately so its ornament never stretches.
-beams=panels('04-fx-aegis-s2-beam.png',4,2)
-muzzle=beams[2].crop((0,0,round(beams[2].width*.42),beams[2].height))
-strip('beam-muzzle',[muzzle],(110,144))
-shaft=[]
-for i in range(8):
- a=Image.new('RGBA',(384,80));d=ImageDraw.Draw(a);env=math.sin(math.pi*(i+1)/9)
- # Existing procedural fallback until the user's new beam PNGs are accessible. Full-height corridor, no arrowhead.
- for thickness,col in [(80,(20,178,255,round(65*env))),(58,(43,215,255,round(180*env))),(18,(228,254,255,round(255*env)))]:
-  d.line((0,40,384,40),fill=col,width=thickness)
- shaft.append(a)
-strip('beam',shaft,(384,80))
+# New supplied native-alpha S2 emitter and beam. Only discard effectively invisible black alpha noise.
+def clean_native(im):
+ a=np.array(im.convert('RGBA'));a[a[:,:,3]<=2,3]=0
+ return Image.fromarray(a)
+emitter=panels('10-fx-aegis-s2-emitter.png',4,2)
+# Source faces LEFT. Keep a fixed 356,222 source-pixel core; canonicalize RIGHT for runtime facing.
+strip('beam-muzzle',[ImageOps.mirror(clean_native(f)) for f in emitter],(256,256))
+beams=panels('09-fx-aegis-s2-beam-loop.png',4,2)
+# Common crop on every frame: keep the white beam centre at y=254, remove unused transparent top/bottom.
+shafts=[]
+for f in beams:
+ q=np.array(ImageOps.mirror(clean_native(f).crop((8,132,436,376))))
+ # Blend the repeatable body's near edge under the separate emitter, avoiding a hard rectangular seam.
+ x=np.clip(np.arange(q.shape[1])/(q.shape[1]*.16),0,1);feather=x*x*(3-2*x)
+ q[:,:,3]=(q[:,:,3]*feather[None,:]).astype('uint8');shafts.append(Image.fromarray(q))
+strip('beam',shafts,(384,219))
 # Small normal thrust flash, transparent and distinct from the long S2 release.
 thrust=[]
 for i in range(6):
  im=Image.new('RGBA',(120,48));d=ImageDraw.Draw(im);x=28+i*13;alpha=round(255*(1-i/6));d.line((max(0,x-46),24,x,24),fill=(75,228,255,alpha),width=3);d.polygon([(x-12,18),(x+12,24),(x-12,30)],fill=(237,254,255,alpha));thrust.append(im)
 strip('thrust',thrust,(120,48))
-(REPORT/'bake-report.json').write_text(json.dumps({'character':{'cols':COLS,'rows':len(rows),'w':W,'h':H,'scale':SCALE,'canonicalFacing':'right','mapping':mapping},'fx':meta,'notes':['RGB checkerboard FX alpha reconstructed; originals preserved unchanged.','Barrier idle: fixed frame + procedural 64-frame light within painted VFX; no generated frame-to-frame warping.','Beam crescent kept separate; shaft generated from code, not stretched source ornament.']},indent=2))
+(REPORT/'bake-report.json').write_text(json.dumps({'character':{'cols':COLS,'rows':len(rows),'w':W,'h':H,'scale':SCALE,'canonicalFacing':'right','mapping':mapping},'fx':meta,'notes':['RGB checkerboard FX alpha reconstructed; originals preserved unchanged.','Barrier idle: fixed frame + procedural 64-frame light within painted VFX; no generated frame-to-frame warping.','Native-alpha supplied S2 emitter kept separate; only the supplied beam body stretches to the edge.']},indent=2))
 # Dark-background alpha inspection plates.
 for name in ['barrier-loop','barrier-hit','tip-charge','beam','shockwave']:
  im=Image.open(OUT/('fx-aegis-'+name+'.png'));m=meta[name];f=im.crop((0,0,m['w'],m['h']));bg=Image.new('RGBA',f.size,'#162630');bg.alpha_composite(f);bg.convert('RGB').save(REPORT/(name+'-alpha-check.jpg'))

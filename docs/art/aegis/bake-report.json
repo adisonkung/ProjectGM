@@ -275,14 +275,14 @@
       "h": 180
     },
     "beam-muzzle": {
-      "frames": 1,
-      "w": 110,
-      "h": 144
+      "frames": 8,
+      "w": 256,
+      "h": 256
     },
     "beam": {
       "frames": 8,
       "w": 384,
-      "h": 80
+      "h": 219
     },
     "thrust": {
       "frames": 6,
@@ -293,6 +293,6 @@
   "notes": [
     "RGB checkerboard FX alpha reconstructed; originals preserved unchanged.",
     "Barrier idle: fixed frame + procedural 64-frame light within painted VFX; no generated frame-to-frame warping.",
-    "Beam crescent kept separate; shaft generated from code, not stretched source ornament."
+    "Native-alpha supplied S2 emitter kept separate; only the supplied beam body stretches to the edge."
   ]
 }

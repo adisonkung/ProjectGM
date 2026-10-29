@@ -1113,7 +1113,7 @@ for (const m of Object.values(MONSTERS)) {
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
   pixelated: true, hitFlashStrength: .35,
   attackFx: ['ae-attack-thrust'], preloadFx: ['ae-s2-impact', 'ae-s3-impact'],
-  anchors: { weaponTip: [186, -120] },
+  anchors: { weaponTip: [186, -110] },
   statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' } },
   damageFx: { aegis_guard: 'ae-s1-hit' }, deathFx: 'ae-death',
   monsterFx: {
@@ -1139,9 +1139,9 @@ export const FX: Record<string, FxDef> = {
     at: 'self', fitCells: .85, dy: -65, dx: 75, attach: true, blend: 'add' },
   'ae-s2-charge': { file: 'fx-aegis-s2-charge.png', frames: 32, w: 180, h: 180, frameMs: 40,
     at: 'self', anchor: 'weaponTip', delayMs: 750, fitCells: 2.1, attach: true, repeat: 2, blend: 'add' },
-  'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 1, w: 110, h: 144, frameMs: 180,
-    at: 'self', anchor: 'weaponTip', scale: .55, pivot: [.7,.5], attach: true, fadeOutMs: 180 },
-  'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 80, frameMs: 45,
+  'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 8, w: 256, h: 256, frameMs: 90,
+    at: 'self', anchor: 'weaponTip', fitCells: 3.2, pivot: [1-356/444,222/444], attach: false, fadeOutMs: 120 },
+  'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 219, frameMs: 45,
     at: 'self', anchor: 'weaponTip', fitCells: 1, fitRows: 3, pivot: [0,.5], toBoardEdge: true,
     orient: 'flip', attach: false, repeat: 2, fadeOutMs: 120, blend: 'add' },
   'ae-s2-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,

@@ -1,5 +1,6 @@
+import { unitDistance } from './footprint';
 import { ROLE_BEHAVIOR, RoleBehavior, THREAT_PADDING } from '../../core/data/classes';
-import { Cell } from '../../core/models/unit';
+import { Cell, UnitFootprint } from '../../core/models/unit';
 import type { BattleUnit } from './battle-engine';
 import { BOARD_COLS, BOARD_ROWS, distance, Grid } from './grid';
 import { isPlayerUnit } from './stage/party';
@@ -25,6 +26,7 @@ export interface ThreatZone {
   unitId: number;
   pos: Cell;
   radius: number;
+  footprint?: UnitFootprint;
 }
 
 export interface SafeEngagementResult {
@@ -65,11 +67,11 @@ export class Positioning {
   threats(u: BattleUnit): ThreatZone[] {
     return this.h.units
       .filter(t => t.side !== u.side && this.h.isValidTarget(u, t) && this.h.attackRangeOf(t) < 2.5)
-      .map(t => ({ unitId: t.id, pos: t.pos, radius: this.h.attackRangeOf(t) + THREAT_PADDING }));
+      .map(t => ({ unitId: t.id, pos: t.pos, footprint: t.footprint, radius: this.h.attackRangeOf(t) + THREAT_PADDING }));
   }
 
   threatCount(cell: Cell, zones: ThreatZone[]): number {
-    return zones.filter(z => distance(cell, z.pos) <= z.radius + 1e-9).length;
+    return zones.filter(z => unitDistance({ pos: cell },z) <= z.radius + 1e-9).length;
   }
 
   /** column of the allied frontline (furthest-forward melee hero); null = no melee left */
@@ -106,7 +108,7 @@ export class Positioning {
     const role = roleOf(u);
     let d = 0;
     for (const z of zones) {
-      const dist = distance(cell, z.pos);
+      const dist = unitDistance({ pos: cell },z);
       if (dist <= z.radius + 1e-9) d += DANGER.threatZone;
       else if (role.minSafeRange != null && dist < role.minSafeRange) d += DANGER.minSafeRange;
     }
@@ -149,7 +151,7 @@ export class Positioning {
         const cell = { r, c };
         const here = r === u.pos.r && c === u.pos.c;
         if (!here && (!this.h.grid.canEnter(cell) || blocked?.(cell))) continue;
-        const dt = distance(cell, t.pos);
+        const dt = unitDistance({ pos: cell }, t);
         if (dt > u.range) continue;
         const move = distance(cell, u.pos);
         if (o.maxMove != null && move > o.maxMove + 1e-9) continue;
@@ -175,7 +177,7 @@ export class Positioning {
       ({ canAttackNow: false, canRepositionSafely: false, safePosition: null, blockedReason });
     if (!this.h.isValidTarget(u, t)) return no('INVALID');
     const role = roleOf(u);
-    const d = distance(u.pos, t.pos);
+    const d = unitDistance(u, t);
     if (d <= u.range) return { canAttackNow: true, canRepositionSafely: true, safePosition: null, blockedReason: null };
     if (isRanged(u)) {
       const spot = this.firingCell(u, t, { respectLeash: true, maxMove: role.maxFocusChase, safeOnly: true });
@@ -184,7 +186,7 @@ export class Positioning {
     if (u.cls === 'assassin') return { canAttackNow: false, canRepositionSafely: true, safePosition: null, blockedReason: null };
     if (d - u.range > role.maxFocusChase + 1e-9) return no('TOO_FAR');
     const anchor = this.h.anchorOf(u);
-    if (anchor && distance(anchor, t.pos) > role.leash + u.range + 1e-9) return no('LEASH');
+    if (anchor && unitDistance({ pos: anchor }, t) > role.leash + u.range + 1e-9) return no('LEASH');
     if (d > 2) {
       const lo = Math.min(u.pos.c, t.pos.c);
       const hi = Math.max(u.pos.c, t.pos.c);

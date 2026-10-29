@@ -1,3 +1,4 @@
+import { unitDistance } from './footprint';
 import { kitOf } from '../../core/data/hero-skills';
 import { SKILL_RANK_LIMITS } from '../../core/data/skill-ranks';
 import type { FieldDefinition, StatusModifiers } from '../../core/models/combat';
@@ -16,7 +17,6 @@ import { Cell } from '../../core/models/unit';
 import { frontCell, GROUND_SHAPES, groundCell, resolveArea } from './area';
 import type { BattleEvent, BattleUnit } from './battle-engine';
 import { effectiveAttack } from './damage-resolver';
-import { distance } from './grid';
 import { fieldAnchor } from './fields';
 import { statusStacks } from './buffs';
 
@@ -160,23 +160,23 @@ export class SkillSystem {
     const range = this.rangeOf(u, s);
     const foes = this.h.foes(u);
     const path = s.movement?.type === 'DASH_PATH' ? s.movement : undefined;
-    const inRange = (t: BattleUnit) => distance(t.pos, u.pos) <= range && (!path ||
+    const inRange = (t: BattleUnit) => unitDistance(t, u) <= range && (!path ||
       (t.pos.r === u.pos.r && Math.abs(t.pos.c - u.pos.c) > 0 && Math.abs(t.pos.c - u.pos.c) < path.distance));
     const blink = s.movement?.type === 'BLINK_BEHIND';
-    const landable = (t: BattleUnit) => !blink || distance(t.pos, u.pos) <= 1 || !!this.h.freeCellNear(t.pos, u.pos);
-    const byHp = (a: BattleUnit, b: BattleUnit) => hpPct(a) - hpPct(b) || distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id;
+    const landable = (t: BattleUnit) => !blink || unitDistance(t, u) <= 1 || !!this.h.freeCellNear(t.pos, u.pos);
+    const byHp = (a: BattleUnit, b: BattleUnit) => hpPct(a) - hpPct(b) || unitDistance(a, u) - unitDistance(b, u) || a.id - b.id;
     switch (rule) {
       case 'SELF':
         return u;
       case 'CURRENT':
         return current && current.alive && inRange(current) ? current : null;
       case 'NEAREST_ENEMY':
-        return foes.filter(inRange).sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0] ?? null;
+        return foes.filter(inRange).sort((a, b) => unitDistance(a, u) - unitDistance(b, u) || a.id - b.id)[0] ?? null;
       case 'CASTING_INTERRUPTIBLE':
         return this.stoppableCasts(u, s, inRange)[0] ?? null;
       case 'CLUSTER': {
         const min = s.ai?.minTargets ?? 2;
-        const score = (t: BattleUnit) => s.ai?.countArea ? this.areaUnits(u, s, t, 'ENEMY', s.ai.countArea).length : foes.filter(f => distance(f.pos, t.pos) <= 1).length;
+        const score = (t: BattleUnit) => s.ai?.countArea ? this.areaUnits(u, s, t, 'ENEMY', s.ai.countArea).length : foes.filter(f => unitDistance(f, t) <= 1).length;
         const best = foes.filter(inRange).sort((a, b) => score(b) - score(a) || Number(b === current) - Number(a === current) || a.id - b.id)[0];
         return best && score(best) >= min ? best : null;
       }
@@ -189,7 +189,7 @@ export class SkillSystem {
         return (
           foes
             .filter(t => t.line === 'back' && inRange(t) && landable(t))
-            .sort((a, b) => distance(b.pos, u.pos) - distance(a.pos, u.pos) || a.id - b.id)[0] ?? null
+            .sort((a, b) => unitDistance(b, u) - unitDistance(a, u) || a.id - b.id)[0] ?? null
         );
       case 'LOWEST_HP_ENEMY':
         return foes.filter(t => inRange(t) && landable(t)).sort(byHp)[0] ?? null;
@@ -407,7 +407,7 @@ export class SkillSystem {
       if (s.ai?.tier !== 'INTERRUPT' || (slot === 'skill2' ? u.cd2 : u.cd1) > 0.5) continue;
       const range = this.rangeOf(u, s);
       if (this.mode(u, slot) === 'MANUAL') continue;
-      const c = this.stoppableCasts(u, s, f => distance(f.pos, u.pos) > range && distance(f.pos, u.pos) <= range + 3 && (this.h.chaseAllowed?.(u, f) ?? true))[0];
+      const c = this.stoppableCasts(u, s, f => unitDistance(f, u) > range && unitDistance(f, u) <= range + 3 && (this.h.chaseAllowed?.(u, f) ?? true))[0];
       if (c) return c;
     }
     return null;
@@ -419,7 +419,7 @@ export class SkillSystem {
     if (!hb) return null;
     return (
       this.h.allies(u)
-        .filter(a => hpPct(a) < hb.allyHpBelow && distance(a.pos, u.pos) <= u.range)
+        .filter(a => hpPct(a) < hb.allyHpBelow && unitDistance(a, u) <= u.range)
         .sort((a, b) => hpPct(a) - hpPct(b) || a.id - b.id)[0] ?? null
     );
   }
@@ -432,7 +432,7 @@ export class SkillSystem {
     const s = this.kit(u).ult;
     const ai = s.ai;
     const foes = this.h.foes(u);
-    if (ai?.enemyWithin != null && !foes.some(f => distance(f.pos, u.pos) <= ai.enemyWithin!)) return null;
+    if (ai?.enemyWithin != null && !foes.some(f => unitDistance(f, u) <= ai.enemyWithin!)) return null;
     const t = this.pickTarget(u, s, current);
     if (!t) return null;
     const heals = s.effects.some(e => e.type === 'HEAL' || e.type === 'REVIVE' ||
@@ -459,7 +459,7 @@ export class SkillSystem {
     const foes = this.h.foes(u);
     if (interrupts) {
       const r = this.ultReach(u);
-      const casts = this.stoppableCasts(u, s, f => distance(f.pos, u.pos) <= r);
+      const casts = this.stoppableCasts(u, s, f => unitDistance(f, u) <= r);
       if (casts.some(f => rankOf(priorityOf(f.casting!.def)) >= rankOf('HIGH')) || casts.length >= 2) return true;
     }
     if (shields) {
@@ -512,7 +512,7 @@ export class SkillSystem {
         return true;
       }
     }
-    if (!enemy || distance(enemy.pos, u.pos) > u.range) return false;
+    if (!enemy || unitDistance(enemy, u) > u.range) return false;
     this.use(u, 'attack', kit.attack, enemy);
     return true;
   }
@@ -560,7 +560,7 @@ export class SkillSystem {
     if (target !== u && target.side !== u.side) u.targetId = target.id;
 
     const mv = s.movement;
-    if (mv?.type === 'CHARGE' && distance(u.pos, target.pos) > 1) {
+    if (mv?.type === 'CHARGE' && unitDistance(u, target) > 1) {
       const cell = this.h.freeCellNear(target.pos, { r: target.pos.r, c: target.pos.c + Math.sign(target.pos.c - u.pos.c) * 3 }) ??
         this.h.freeCellNear(target.pos, target.pos);
       if (cell) this.h.relocate(u, cell, 'dash');
@@ -888,7 +888,7 @@ export class SkillSystem {
       delete u.actionFacing;
       const foes = this.h.foes(u);
       const next = foes.find(f => f.id === u.targetId) ?? this.h.focus(u) ??
-        foes.sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0];
+        foes.sort((a, b) => unitDistance(a, u) - unitDistance(b, u) || a.id - b.id)[0];
       u.targetId = next?.id ?? null;
     });
   }
@@ -934,7 +934,7 @@ export class SkillSystem {
       delete u.actionFacing;
       const foes = this.h.foes(u);
       const next = foes.find(f => f.id === u.targetId) ?? this.h.focus(u) ??
-        foes.sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0];
+        foes.sort((a, b) => unitDistance(a, u) - unitDistance(b, u) || a.id - b.id)[0];
       u.targetId = next?.id ?? null;
     });
   }

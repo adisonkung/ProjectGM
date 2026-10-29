@@ -1,3 +1,4 @@
+import { unitDistance } from './footprint';
 import { attackEventName, attackWindupOf, clipDuration, MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SkillCondition } from '../../core/models/monster';
 import { Cell } from '../../core/models/unit';
@@ -210,7 +211,7 @@ export class MonsterController {
   /** IDLE / SEARCHING / MOVING: skills → target → position → attack */
   private think(u: BattleUnit, s: MonsterCombatState, def: MonsterDefinition): void {
     if (s.dormant) {
-      const near = this.ctx.opponentsOf(u).some(t => distance(t.pos, u.pos) <= def.ai.dormant!.wakeRange);
+      const near = this.ctx.opponentsOf(u).some(t => unitDistance(t, u) <= def.ai.dormant!.wakeRange);
       if (!near && u.hp >= u.maxHp) return this.setState(s, 'IDLE', 'idle');
       s.dormant = false;
       this.ctx.emit({ type: 'animEvent', src: u.id, event: 'FX_START', name: 'WAKE' });
@@ -236,7 +237,7 @@ export class MonsterController {
     }
     if (t.pos.c !== u.pos.c) s.facingDirection = t.pos.c < u.pos.c ? -1 : 1;
     const st = def.stats;
-    const d = distance(u.pos, t.pos);
+    const d = unitDistance(u, t);
 
     if (def.ai.movement === 'RANGED_HOLD') {
       const tol = st.rangeTolerance ?? 0.5;
@@ -244,7 +245,7 @@ export class MonsterController {
       if (d > st.attackRange || (s.approaching && d > st.preferredRange + tol)) {
         if (!this.mayChase(u, s, def, t, st.attackRange)) return this.setState(s, 'IDLE', 'idle');
         s.approaching = true;
-        return this.move(u, s, t.pos, c => distance(c, t.pos) <= st.preferredRange + tol && this.onGround(s, def, c));
+        return this.move(u, s, t.pos, c => unitDistance({ ...u, pos: c }, t) <= st.preferredRange + tol && this.onGround(s, def, c));
       }
       s.approaching = false;
       if (s.attackCooldownRemaining <= 0) return this.startAttack(u, s, def, t);
@@ -269,7 +270,7 @@ export class MonsterController {
       return;
     }
     if (!this.mayChase(u, s, def, t, st.attackRange)) return this.setState(s, 'IDLE', 'idle');
-    this.move(u, s, t.pos, c => distance(c, t.pos) <= st.attackRange && this.onGround(s, def, c));
+    this.move(u, s, t.pos, c => unitDistance({ ...u, pos: c }, t) <= st.attackRange && this.onGround(s, def, c));
   }
 
   /** `holdArena`: a cell the boss may stand on */
@@ -283,7 +284,7 @@ export class MonsterController {
     const a = def.ai.holdArena;
     if (!a || !s.home) return true;
     if (distance(u.pos, s.home) > a.leash) return false; // off its ground (after a pounce): no chasing further out
-    return distance(t.pos, s.home) <= a.leash + range;
+    return unitDistance(t, { ...u, pos: s.home }) <= a.leash + range;
   }
 
   /**
@@ -386,7 +387,7 @@ export class MonsterController {
       return;
     }
     // small tolerance so a tiny step during the swing doesn't whiff
-    if (distance(u.pos, t.pos) > def.stats.attackRange + a.hitTolerance) {
+    if (unitDistance(u, t) > def.stats.attackRange + a.hitTolerance) {
       this.ctx.emit({ type: 'miss', src: u.id, dst: t.id });
       return;
     }
@@ -435,7 +436,7 @@ export class MonsterController {
       case 'TARGETS_NEED_BUFF':
         return this.skillTargets(u, skill).some(t => buffRemaining(t, c.buffId) < c.refreshBelow);
       case 'ENEMY_WITHIN':
-        return this.ctx.opponentsOf(u).some(t => distance(t.pos, u.pos) <= c.range);
+        return this.ctx.opponentsOf(u).some(t => unitDistance(t, u) <= c.range);
       case 'ALLIES_BELOW':
         return allies().filter(a => pct(a) < c.pct).length >= c.count;
       case 'ELITE_ALLY_BELOW':
@@ -471,12 +472,12 @@ export class MonsterController {
   aimTarget(u: BattleUnit, skill: MonsterSkillDefinition): BattleUnit | null {
     const sel = skill.target;
     const range = skill.range ?? Infinity;
-    const heroes = this.ctx.opponentsOf(u).filter(h => distance(h.pos, u.pos) <= range);
+    const heroes = this.ctx.opponentsOf(u).filter(h => unitDistance(h, u) <= range);
     const pct = (a: BattleUnit) => (a.maxHp > 0 ? a.hp / a.maxHp : 0);
-    const near = (a: BattleUnit, b: BattleUnit) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id;
+    const near = (a: BattleUnit, b: BattleUnit) => unitDistance(a, u) - unitDistance(b, u) || a.id - b.id;
     const current = () => {
       const t = u.monster?.currentTargetId != null ? this.ctx.unit(u.monster.currentTargetId) : undefined;
-      return t && this.ctx.isValidTarget(u, t) && distance(t.pos, u.pos) <= range ? t : null;
+      return t && this.ctx.isValidTarget(u, t) && unitDistance(t, u) <= range ? t : null;
     };
     switch (sel.type) {
       case 'SELF':

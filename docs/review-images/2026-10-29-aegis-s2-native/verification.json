@@ -1,0 +1,349 @@
+{
+  "errors": [],
+  "charge": true,
+  "beam": true,
+  "spacing": true,
+  "assetStatus": "Both original native-alpha PNGs from skill2.zip integrated. Actual game captures; 3x2 logical footprint with bottom-centre anchor and reserved perimeter.",
+  "sampleCount": 86,
+  "intrusionsObserved": 0,
+  "checkpoints": [
+    {
+      "time": 0,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "intrusions": [],
+      "units": [
+        {
+          "id": 1,
+          "name": "\u0e44\u0e1b\u0e4b\u0e2b\u0e25\u0e07",
+          "pos": {
+            "r": 1,
+            "c": 5
+          }
+        },
+        {
+          "id": 2,
+          "name": "\u0e40\u0e22\u0e27\u0e48\u0e40\u0e08\u0e34\u0e49\u0e07",
+          "pos": {
+            "r": 0,
+            "c": 5
+          }
+        },
+        {
+          "id": 3,
+          "name": "\u0e42\u0e21\u0e48\u0e40\u0e22\u0e48",
+          "pos": {
+            "r": 2,
+            "c": 5
+          }
+        },
+        {
+          "id": 4,
+          "name": "\u0e16\u0e31\u0e07\u0e0b\u0e27\u0e34\u0e48\u0e19",
+          "pos": {
+            "r": 1,
+            "c": 2
+          }
+        },
+        {
+          "id": 5,
+          "name": "\u0e2b\u0e25\u0e34\u0e19\u0e40\u0e2a\u0e27\u0e35\u0e48\u0e22",
+          "pos": {
+            "r": 0,
+            "c": 2
+          }
+        },
+        {
+          "id": 6,
+          "name": "\u0e1c\u0e39\u0e49\u0e1e\u0e34\u0e17\u0e31\u0e01\u0e29\u0e4c\u0e15\u0e23\u0e32\u0e1b\u0e10\u0e21",
+          "pos": {
+            "r": 2,
+            "c": 11
+          },
+          "footprint": {
+            "cols": 3,
+            "rows": 2,
+            "anchorC": 1,
+            "anchorR": 1
+          }
+        }
+      ],
+      "fx": []
+    },
+    {
+      "time": 3.4499999999999957,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "aegis_lance",
+      "left": 0.349999999999999,
+      "intrusions": [],
+      "units": [
+        {
+          "id": 1,
+          "name": "\u0e44\u0e1b\u0e4b\u0e2b\u0e25\u0e07",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "\u0e40\u0e22\u0e27\u0e48\u0e40\u0e08\u0e34\u0e49\u0e07",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "\u0e42\u0e21\u0e48\u0e40\u0e22\u0e48",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "\u0e16\u0e31\u0e07\u0e0b\u0e27\u0e34\u0e48\u0e19",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "\u0e2b\u0e25\u0e34\u0e19\u0e40\u0e2a\u0e27\u0e35\u0e48\u0e22",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        },
+        {
+          "id": 6,
+          "name": "\u0e1c\u0e39\u0e49\u0e1e\u0e34\u0e17\u0e31\u0e01\u0e29\u0e4c\u0e15\u0e23\u0e32\u0e1b\u0e10\u0e21",
+          "pos": {
+            "r": 2,
+            "c": 11
+          },
+          "footprint": {
+            "cols": 3,
+            "rows": 2,
+            "anchorC": 1,
+            "anchorR": 1
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "ae-s2-charge",
+          "offset": [
+            186,
+            -110
+          ],
+          "angle": 0,
+          "flip": true
+        }
+      ]
+    },
+    {
+      "time": 4.049999999999994,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "intrusions": [],
+      "units": [
+        {
+          "id": 1,
+          "name": "\u0e44\u0e1b\u0e4b\u0e2b\u0e25\u0e07",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "\u0e40\u0e22\u0e27\u0e48\u0e40\u0e08\u0e34\u0e49\u0e07",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "\u0e42\u0e21\u0e48\u0e40\u0e22\u0e48",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "\u0e16\u0e31\u0e07\u0e0b\u0e27\u0e34\u0e48\u0e19",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "\u0e2b\u0e25\u0e34\u0e19\u0e40\u0e2a\u0e27\u0e35\u0e48\u0e22",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        },
+        {
+          "id": 6,
+          "name": "\u0e1c\u0e39\u0e49\u0e1e\u0e34\u0e17\u0e31\u0e01\u0e29\u0e4c\u0e15\u0e23\u0e32\u0e1b\u0e10\u0e21",
+          "pos": {
+            "r": 2,
+            "c": 11
+          },
+          "footprint": {
+            "cols": 3,
+            "rows": 2,
+            "anchorC": 1,
+            "anchorR": 1
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "ae-s2-muzzle",
+          "offset": [
+            186,
+            -110
+          ],
+          "angle": 0,
+          "flip": true
+        },
+        {
+          "name": "ae-s2-beam",
+          "offset": [
+            186,
+            -110
+          ],
+          "stretch": 9.64,
+          "angle": 0,
+          "flip": true
+        },
+        {
+          "name": "ae-s2-impact",
+          "angle": 0,
+          "flip": true
+        },
+        {
+          "name": "ae-s2-impact",
+          "angle": 0,
+          "flip": true
+        },
+        {
+          "name": "ae-s2-impact",
+          "angle": 0,
+          "flip": true
+        }
+      ]
+    },
+    {
+      "time": 9.199999999999996,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "intrusions": [],
+      "units": [
+        {
+          "id": 1,
+          "name": "\u0e44\u0e1b\u0e4b\u0e2b\u0e25\u0e07",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "\u0e40\u0e22\u0e27\u0e48\u0e40\u0e08\u0e34\u0e49\u0e07",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "\u0e42\u0e21\u0e48\u0e40\u0e22\u0e48",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "\u0e16\u0e31\u0e07\u0e0b\u0e27\u0e34\u0e48\u0e19",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "\u0e2b\u0e25\u0e34\u0e19\u0e40\u0e2a\u0e27\u0e35\u0e48\u0e22",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        },
+        {
+          "id": 6,
+          "name": "\u0e1c\u0e39\u0e49\u0e1e\u0e34\u0e17\u0e31\u0e01\u0e29\u0e4c\u0e15\u0e23\u0e32\u0e1b\u0e10\u0e21",
+          "pos": {
+            "r": 2,
+            "c": 11
+          },
+          "footprint": {
+            "cols": 3,
+            "rows": 2,
+            "anchorC": 1,
+            "anchorR": 1
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "ae-s1-loop",
+          "offset": [
+            0,
+            35
+          ],
+          "angle": 0
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "karma": "881/881",
+    "appTypecheck": "passed",
+    "specTypecheck": "passed",
+    "productionBuild": "passed",
+    "desktop": [
+      1440,
+      900
+    ],
+    "mobile": [
+      932,
+      430
+    ]
+  }
+}

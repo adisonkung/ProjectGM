@@ -7,7 +7,8 @@ import { ENEMY_SKILL_START_CD, ENEMY_SKILLS, EnemySkillDef } from '../../core/da
 import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
-import { Cell, Side, UnitSpec } from '../../core/models/unit';
+import { Cell, Side, UnitSpec, UnitFootprint } from '../../core/models/unit';
+import { occupiesCell, unitDistance } from './footprint';
 import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
@@ -253,6 +254,7 @@ export interface BattleUnit {
   defenseIgnore?: number;
   /** heavy body: hostile units can't walk through its cell (Corrupted Treant) */
   bodyBlock?: boolean;
+  footprint?: UnitFootprint;
   /** summoned by this unit (skill / boss phase) */
   summonedBy?: number;
   /** hero AI use mode per slot (player / tactical override; default = the skill's useMode or AUTO) */
@@ -650,8 +652,8 @@ export class BattleEngine {
     if (t.alive) return t;
     return (
       this.alive(foeSideOf(u.side))
-        .filter(f => distance(f.pos, u.pos) <= u.range + 1)
-        .sort((a, b) => distance(a.pos, u.pos) - distance(b.pos, u.pos) || a.id - b.id)[0] ?? null
+        .filter(f => unitDistance(f, u) <= u.range + 1)
+        .sort((a, b) => unitDistance(a, u) - unitDistance(b, u) || a.id - b.id)[0] ?? null
     );
   }
 
@@ -785,6 +787,7 @@ export class BattleEngine {
     u.collisionRadius = st.collisionRadius;
     u.defenseIgnore = st.defenseIgnore;
     u.bodyBlock = st.bodyBlock;
+    u.footprint = st.footprint;
     u.moveCd = 0;
     // first cast: firstCastDelay (default cooldown × 0.5) ± initialDelayRandom (casters of one kind don't sync)
     u.castSkills = def.skills
@@ -957,7 +960,7 @@ export class BattleEngine {
     // ranged heroes: safe positioning (leash, threat zones, preferred range, frontline) instead of walking to max range
     if (isPlayerUnit(u) && isRanged(u)) return this.rangedMove(u, goal, !!chase);
     if (!goal) return;
-    if (!chase && distance(u.pos, goal.pos) <= u.range) {
+    if (!chase && unitDistance(u, goal) <= u.range) {
       // ranged: keep distance while reloading — step back once when a foe is adjacent
       if (u.range >= 3 && u.moveCd <= 0) this.kite(u, goal);
       return;
@@ -969,7 +972,7 @@ export class BattleEngine {
       // advance straight down the placed lane first; turn toward the target only when close (not while chasing an interrupt)
       const step =
         (chase ? null : laneStep(this.grid, u.pos, goal.pos, blocked)) ??
-        nextStep(this.grid, u.pos, c => distance(c, goal.pos) <= (chase ? this.skills.interruptReach(u) : u.range), blocked) ??
+        nextStep(this.grid, u.pos, c => unitDistance({ pos: c }, goal) <= (chase ? this.skills.interruptReach(u) : u.range), blocked) ??
         greedyStep(this.grid, u.pos, goal.pos, blocked);
       // assassin without an active dive: never the first to make contact — no step past the allied frontline
       if (step && this.assassinHeldBack(u, step)) {
@@ -1030,7 +1033,7 @@ export class BattleEngine {
     }
 
     // ล็อกเป้า: ยังไม่หมดเวลาล็อก + เป้าเดิมยังตีได้อยู่ → ไม่เปลี่ยน (โฟกัสใหม่รีเซ็ตล็อกให้แล้ว)
-    if (current && pick !== current && this.time < u.lockUntil && distance(current.pos, u.pos) <= u.range) {
+    if (current && pick !== current && this.time < u.lockUntil && unitDistance(current, u) <= u.range) {
       return current;
     }
     if (pick !== current) u.lockUntil = this.time + TARGET_LOCK;
@@ -1041,7 +1044,7 @@ export class BattleEngine {
 
   /** AI ปกติตามสาย (STEP 8) */
   private normalTarget(u: BattleUnit, foes: BattleUnit[], current: BattleUnit | null): BattleUnit {
-    const d = (f: BattleUnit) => distance(f.pos, u.pos);
+    const d = (f: BattleUnit) => unitDistance(f, u);
     const inRange = foes.filter(f => d(f) <= u.range);
     if (current && (d(current) <= u.range || !inRange.length) && u.cls !== 'assassin') return current;
     const front = (f: BattleUnit) => (f.line === 'front' ? 0 : 1);
@@ -1090,7 +1093,7 @@ export class BattleEngine {
    * enemy line — with nothing in reach it rejoins the fight at the allied frontline (the enemy nearest our heroes).
    */
   private assassinTarget(u: BattleUnit, foes: BattleUnit[], current: BattleUnit | null): BattleUnit {
-    const d = (f: BattleUnit) => distance(f.pos, u.pos);
+    const d = (f: BattleUnit) => unitDistance(f, u);
     const threat = this.localThreat(u, u.pos);
     const dive = (u.diveUntil ?? 0) > this.time ? foes.find(f => f.id === u.diveTargetId) : undefined;
     if (dive) {
@@ -1107,7 +1110,7 @@ export class BattleEngine {
       return [...inReach].sort((a, b) => back(a) - back(b) || (order[a.cls] ?? 3) - (order[b.cls] ?? 3) || a.hp / a.maxHp - b.hp / b.maxHp || a.id - b.id)[0];
     }
     const mates = this.alive(u.side).filter(a => a !== u);
-    const toTeam = (f: BattleUnit) => (mates.length ? Math.min(...mates.map(a => distance(a.pos, f.pos))) : d(f));
+    const toTeam = (f: BattleUnit) => (mates.length ? Math.min(...mates.map(a => unitDistance(a, f))) : d(f));
     return [...foes].sort((a, b) => toTeam(a) - toTeam(b) || d(a) - d(b) || a.id - b.id)[0];
   }
 
@@ -1118,7 +1121,7 @@ export class BattleEngine {
     const here = this.localThreat(u, u.pos);
     if (here <= ASSASSIN_SAFE_THREAT) return false;
     const step = Grid.neighbors(u.pos)
-      .filter(c => this.grid.canEnter(c) && c.c <= u.pos.c)
+      .filter(c => this.grid.canEnter(c) && !this.bodyBlocked(u)?.(c) && c.c <= u.pos.c)
       .map(c => ({ c, t: this.localThreat(u, c) }))
       .filter(x => x.t < here)
       .sort((a, b) => a.t - b.t || a.c.c - b.c.c)[0];
@@ -1135,7 +1138,7 @@ export class BattleEngine {
   private assassinMayTakeFocus(u: BattleUnit, focus: BattleUnit): boolean {
     if (!isPlayerUnit(u) || u.cls !== 'assassin') return true;
     if ((u.diveUntil ?? 0) > this.time && u.diveTargetId === focus.id) return true;
-    return distance(u.pos, focus.pos) <= u.range + 1;
+    return unitDistance(u, focus) <= u.range + 1;
   }
 
   /** player assassin (no dive): a step beyond the furthest-forward other melee hero is refused */
@@ -1146,7 +1149,7 @@ export class BattleEngine {
     if (!melee.length || step.c <= Math.max(...melee.map(a => a.pos.c))) return false;
     // only before contact: once an allied melee hero is engaged the assassin joins in; never into an unthreatened cell
     const foes = this.alive(foeSideOf(u.side));
-    if (melee.some(m => foes.some(f => distance(f.pos, m.pos) <= 1))) return false;
+    if (melee.some(m => foes.some(f => unitDistance(f, m) <= 1))) return false;
     return this.localThreat(u, step) > 0;
   }
 
@@ -1162,7 +1165,7 @@ export class BattleEngine {
    */
   private holdTarget(u: BattleUnit, foes: BattleUnit[], current: BattleUnit | null): BattleUnit | null {
     if (u.cls !== 'tank') return null;
-    const engaged = foes.filter(f => distance(f.pos, u.pos) <= 1);
+    const engaged = foes.filter(f => unitDistance(f, u) <= 1);
     if (!engaged.length) return null;
     if (current && engaged.includes(current)) return current;
     const mine = new Set(this.alive(u.side).filter(a => a.line === 'back').map(a => a.id));
@@ -1179,7 +1182,7 @@ export class BattleEngine {
   canEngage(u: BattleUnit, t: BattleUnit, _foes?: BattleUnit[]): boolean {
     if (!isPlayerUnit(u)) {
       if (!this.isValidTarget(u, t)) return false;
-      if (u.range >= 3 || u.cls === 'assassin' || distance(u.pos, t.pos) <= 2) return true;
+      if (u.range >= 3 || u.cls === 'assassin' || unitDistance(u, t) <= 2) return true;
     }
     const r = this.positioning.canSafelyEngage(u, t);
     return r.canAttackNow || r.canRepositionSafely;
@@ -1238,7 +1241,7 @@ export class BattleEngine {
       // never into the enemy line after a diver: only allies at or behind the allied frontline (encounter pass)
       const front = this.positioning.frontlineX(u);
       const hurt = this.units
-        .filter(a => a !== u && a.alive && a.side === u.side && a.visible && a.hp < a.maxHp * hb.allyHpBelow && distance(a.pos, u.pos) > u.range)
+        .filter(a => a !== u && a.alive && a.side === u.side && a.visible && a.hp < a.maxHp * hb.allyHpBelow && unitDistance(a, u) > u.range)
         .filter(a => a.cls !== 'assassin' || front == null || a.pos.c <= Math.max(...this.alive(u.side).filter(m => !isRanged(m) && m.cls !== 'assassin').map(m => m.pos.c), -Infinity))
         .sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
       if (hurt) goal = hurt;
@@ -1259,10 +1262,10 @@ export class BattleEngine {
       this.events.push({ type: 'move', src: u.id });
       if (u.intent === 'focus' && here < SAFE_DANGER && P.threatCount(step, zones) > 0) this.metrics.unsafeFocusChaseCount++;
     };
-    if (goal && distance(u.pos, goal.pos) <= u.range) {
+    if (goal && unitDistance(u, goal) <= u.range) {
       // already firing: only step if a clearly safer cell still keeps the target in range
       const alt = [u.pos, ...Grid.neighbors(u.pos)]
-        .filter(c => (c === u.pos || (this.grid.canEnter(c) && !blocked?.(c))) && distance(c, goal.pos) <= u.range)
+        .filter(c => (c === u.pos || (this.grid.canEnter(c) && !blocked?.(c))) && unitDistance({ pos: c },goal) <= u.range)
         .map(c => ({ c, d: P.danger(u, c, zones, frontX) }))
         .sort((a, b) => a.d - b.d)[0];
       if (alt && alt.d < here - 2) stepTo(alt.c);
@@ -1279,18 +1282,18 @@ export class BattleEngine {
     }
     // nothing safe to shoot: drift back toward the (fight-following) formation anchor
     const anchor = P.anchorOf(u);
-    if (anchor && distance(u.pos, anchor) > 0.5 && this.grid.canEnter(anchor)) stepTo(anchor);
+    if (anchor && distance(u.pos, anchor) > 0.5 && this.grid.canEnter(anchor) && !blocked?.(anchor)) stepTo(anchor);
   }
 
   /** สายระยะไกลถอยหนีศัตรูที่ประชิดตัว 1 ก้าว ไปทางฝั่งตัวเอง (ต้องยังยิงเป้าถึง) — ROOT ห้ามขยับ */
   private kite(u: BattleUnit, target: BattleUnit): void {
     if (hasFlag(u, 'root')) return;
     const foes = this.alive(foeSideOf(u.side));
-    const nearest = (c: Cell) => Math.min(...foes.map(f => distance(f.pos, c)));
+    const nearest = (c: Cell) => Math.min(...foes.map(f => unitDistance(f,{ pos: c })));
     if (nearest(u.pos) > 1) return;
     const back = isPlayerUnit(u) ? -1 : 1;
     const step = Grid.neighbors(u.pos)
-      .filter(c => this.grid.canEnter(c) && Math.sign(c.c - u.pos.c) !== -back && distance(c, target.pos) <= u.range)
+      .filter(c => this.grid.canEnter(c) && !this.bodyBlocked(u)?.(c) && Math.sign(c.c - u.pos.c) !== -back && unitDistance({ pos: c },target) <= u.range)
       .sort((a, b) => nearest(b) - nearest(a) || Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r))[0];
     if (!step || nearest(step) <= nearest(u.pos)) return;
     this.grid.move(u.id, u.pos, step);
@@ -1305,13 +1308,13 @@ export class BattleEngine {
   private tryStartCast(u: BattleUnit): boolean {
     const foes = this.alive(foeSideOf(u.side));
     if (!foes.length) return false;
-    const near = Math.min(...foes.map(f => distance(f.pos, u.pos)));
+    const near = Math.min(...foes.map(f => unitDistance(f, u)));
     for (const cs of u.castSkills) {
       if (cs.cd > 0 || isMonsterSkill(cs.def)) continue;
       const def = cs.def;
       let target: BattleUnit | null = null;
       if (def.effect === 'meteor') {
-        const inRange = foes.filter(f => distance(f.pos, u.pos) <= u.range);
+        const inRange = foes.filter(f => unitDistance(f, u) <= u.range);
         if (!inRange.length) continue;
         target = [...inRange].sort((a, b) => Number(a.line !== 'back') - Number(b.line !== 'back') || a.hp / a.maxHp - b.hp / b.maxHp)[0];
       } else if (def.effect === 'berserk') {
@@ -1393,7 +1396,7 @@ export class BattleEngine {
     if (dst.monster && this.monsterDefs[dst.monster.definitionId]?.immune?.includes('KNOCKBACK')) return;
     for (let i = 0; i < cells; i++) {
       const back = { r: dst.pos.r, c: dst.pos.c + (Math.sign(dst.pos.c - src.pos.c) || (isPlayerUnit(src) ? 1 : -1)) };
-      if (!this.grid.canEnter(back)) break;
+      if (!this.grid.canEnter(back) || this.reservedBodyCell(back,dst)) break;
       this.grid.move(dst.id, dst.pos, back);
       dst.pos = back;
       dst.dashUntil = this.time + 0.3;
@@ -1580,7 +1583,7 @@ export class BattleEngine {
         for (let dc = -r; dc <= r; dc++) {
           if (Math.max(Math.abs(dr), Math.abs(dc)) !== r) continue;
           const c = { r: u.pos.r + dr, c: u.pos.c + dc };
-          if (this.grid.isFree(c)) ring.push(c);
+          if (this.grid.isFree(c) && !this.reservedBodyCell(c)) ring.push(c);
         }
       }
       ring.sort((a, b) => Math.sign(b.c - u.pos.c) * back - Math.sign(a.c - u.pos.c) * back || Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r) || a.c - b.c);
@@ -1630,7 +1633,7 @@ export class BattleEngine {
       case 'meteor': {
         const t = foes.find(f => f.id === c.target) ?? foes[0];
         if (!t) break;
-        for (const f of foes.filter(f => distance(f.pos, t.pos) <= 1)) this.damage(u, f, f === t ? c.def.power : c.def.power * 0.6);
+        for (const f of foes.filter(f => unitDistance(f, t) <= 1)) this.damage(u, f, f === t ? c.def.power : c.def.power * 0.6);
         break;
       }
       case 'massHeal':
@@ -1722,7 +1725,7 @@ export class BattleEngine {
     const t = this.units.find(x => x.id === targetId);
     if (!u || !t || !u.alive || !t.alive) return false;
     const range = this.skills.rangeOf(u, this.skills.kit(u)[slot]);
-    const d = distance(u.pos, t.pos);
+    const d = unitDistance(u, t);
     if (d <= range) return true;
     return d <= range + 3 && (this.skillHost().chaseAllowed?.(u, t) ?? true);
   }
@@ -1910,9 +1913,14 @@ export class BattleEngine {
 
   /** cells a hero can't walk through: hostile heavy bodies (Corrupted Treant) */
   private bodyBlocked(u: BattleUnit): ((c: Cell) => boolean) | undefined {
-    const blockers = this.units.filter(b => b.alive && b.bodyBlock && b.side !== u.side);
+    const blockers = this.units.filter(b => b !== u && b.alive && b.bodyBlock && (b.side !== u.side || b.footprint));
     if (!blockers.length) return undefined;
-    return c => blockers.some(b => b.pos.r === c.r && b.pos.c === c.c);
+    return c => blockers.some(b => occupiesCell(b,c));
+  }
+
+  /** Multi-cell bodies reserve all their cells for both teams; the owner may occupy its own anchor. */
+  private reservedBodyCell(cell: Cell, owner?: BattleUnit): boolean {
+    return this.units.some(b => b !== owner && b.alive && b.bodyBlock && b.footprint && occupiesCell(b,cell));
   }
 
   // ---------------------------------------------------------------- boss phases
@@ -1987,13 +1995,21 @@ export class BattleEngine {
 
   /** ช่องว่างรอบ ๆ ตำแหน่ง ที่อยู่ไกลจาก `from` ที่สุด (= ด้านหลังเป้าหมาย) */
   private freeCellNear(at: Cell, from: Cell): Cell | null {
-    const free = Grid.neighbors(at).filter(c => this.grid.isFree(c));
+    const body = this.units.find(b => b.alive && b.footprint && b.pos.r === at.r && b.pos.c === at.c);
+    const radius = body ? Math.max(body.footprint!.cols,body.footprint!.rows) : 1;
+    const free: Cell[] = [];
+    for (let r = at.r-radius; r <= at.r+radius; r++) for (let c = at.c-radius; c <= at.c+radius; c++) {
+      const cell = { r,c };
+      if ((r !== at.r || c !== at.c) && this.grid.isFree(cell) && !this.reservedBodyCell(cell) &&
+        (!body || unitDistance({ pos: cell },body) === 1)) free.push(cell);
+    }
     free.sort((a, b) => distance(b, from) - distance(a, from) || Math.abs(a.r - at.r) - Math.abs(b.r - at.r));
     return free[0] ?? null;
   }
 
   /** move a unit on the combat grid: blink = instant (fade in), dash = fast visible slide */
   private relocate(u: BattleUnit, cell: Cell, how: 'blink' | 'dash', duration?: number): void {
+    if (this.reservedBodyCell(cell,u)) return;
     this.grid.move(u.id, u.pos, cell);
     u.pos = cell;
     if (how === 'blink') {
@@ -2045,7 +2061,7 @@ export class BattleEngine {
         const anchor = self.flow.formation.localAnchorOf(u.id);
         if (anchor && distance(anchor, f.pos) > P.leashOf(u) + u.range + 1e-9) return false;
         // the tank does not abandon a held frontline to chase a caster
-        return u.cls !== 'tank' || !self.units.some(o => o.side !== u.side && self.isValidTarget(u, o) && distance(o.pos, u.pos) <= 1);
+        return u.cls !== 'tank' || !self.units.some(o => o.side !== u.side && self.isValidTarget(u, o) && unitDistance(o, u) <= 1);
       },
       onSkillUse: (u, slot, s) => {
         if (isPlayerUnit(u) && slot !== 'attack') {
@@ -2089,7 +2105,7 @@ export class BattleEngine {
         self.reviveHero({ unitId: dead.id, reviveHpPercent: hpPct, sourceUnitId: src.id, sourceId: `ult:${src.heroId ?? src.cls}`, countsTowardLimit: true }).ok,
       freeCellNear: (at, from) => self.freeCellNear(at, from),
       relocate: (u, cell, how, duration) => self.relocate(u, cell, how, duration),
-      canLand: cell => Grid.inBounds(cell) && self.grid.isFree(cell),
+      canLand: cell => Grid.inBounds(cell) && self.grid.isFree(cell) && !self.reservedBodyCell(cell),
       basicGauge: u => self.gainMana(u, MANA_PER_ATTACK),
     };
   }
@@ -2224,7 +2240,7 @@ export class BattleEngine {
     this.removeStatus(u, def.id);
     this.events.push({ type: 'retaliateStart', src: u.id, status: def.id, stacks });
     this.later(rt.delay ?? 0, u, () => {
-      const foes = this.units.filter(t => this.isValidTarget(u, t) && distance(t.pos, u.pos) <= rt.radius);
+      const foes = this.units.filter(t => this.isValidTarget(u, t) && unitDistance(t, u) <= rt.radius);
       // status modifiers on the holder (Blood Dominion) scale the eruption and its capped self-heal
       const dmg = rt.damage * modifier(u, 'retaliationDamageMultiplier');
       const healMul = modifier(u, 'retaliationHealMultiplier');
@@ -2335,7 +2351,8 @@ export class BattleEngine {
       alliesOf: u => self.units.filter(a => a.alive && a.side === u.side && (a.wave < 0 || a.wave === self.flow.waveIndex)),
       isValidTarget: (u, t) => self.isValidTarget(u, t),
       stepToward: (u, target, goal) => {
-        const step = laneStep(self.grid, u.pos, target) ?? nextStep(self.grid, u.pos, goal) ?? greedyStep(self.grid, u.pos, target);
+        const blocked = self.bodyBlocked(u);
+        const step = laneStep(self.grid, u.pos, target, blocked) ?? nextStep(self.grid, u.pos, goal, blocked) ?? greedyStep(self.grid, u.pos, target, blocked);
         if (!step) return false;
         self.grid.move(u.id, u.pos, step);
         u.pos = step;
@@ -2345,7 +2362,7 @@ export class BattleEngine {
       stepAway: (u, threat, keep, range) => {
         const back = isPlayerUnit(u) ? -1 : 1;
         const step = Grid.neighbors(u.pos)
-          .filter(c => self.grid.canEnter(c) && Math.sign(c.c - u.pos.c) === back && distance(c, threat) > distance(u.pos, threat) && distance(c, keep) <= range)
+          .filter(c => self.grid.canEnter(c) && !self.bodyBlocked(u)?.(c) && Math.sign(c.c - u.pos.c) === back && distance(c, threat) > distance(u.pos, threat) && distance(c, keep) <= range)
           .sort((a, b) => Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r))[0];
         if (!step) return false;
         self.grid.move(u.id, u.pos, step);

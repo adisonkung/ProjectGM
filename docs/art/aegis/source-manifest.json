@@ -73,5 +73,15 @@
     "file": "aegis-walk-loop-24.png",
     "bytes": 1474602,
     "sha256": "bbdf2a345e5cb92cc911071e5df15e5c7ec026dc4873614ea953c5ce585cb4a4"
+  },
+  {
+    "file": "09-fx-aegis-s2-beam-loop.png",
+    "bytes": 1117425,
+    "sha256": "2664d9d07d25c6933ce05b1836f12ce170492d8379f3ea80a0f2b29f129a7e87"
+  },
+  {
+    "file": "10-fx-aegis-s2-emitter.png",
+    "bytes": 1375375,
+    "sha256": "d53e559ce2b5539a1c5947200aa7007efd25a9873bfe5022b924935a9e347cbb"
   }
 ]

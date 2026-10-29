@@ -29,6 +29,8 @@ export type SemanticEvent =
   | 'DASH_START' | 'DASH_END';
 
 export interface MonsterStats {
+  /** Explicit logical body, independent of sprite dimensions. Omitted = one cell. */
+  footprint?: import('./unit').UnitFootprint;
   maxHp: number;
   attack: number;
   defense: number;

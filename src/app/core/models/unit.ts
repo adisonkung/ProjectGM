@@ -9,6 +9,14 @@ export interface Cell {
   c: number;
 }
 
+/** Logical occupied cells; anchor offsets are measured from the rectangle's top-left cell. */
+export interface UnitFootprint {
+  cols: number;
+  rows: number;
+  anchorC: number;
+  anchorR: number;
+}
+
 /** ข้อมูลตั้งต้นของยูนิตก่อนเข้าสนาม */
 export interface UnitSpec {
   name: string;
