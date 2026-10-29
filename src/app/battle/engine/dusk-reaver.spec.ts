@@ -183,10 +183,17 @@ describe('Sylas Veyrn (3★ Archer) — engine', () => {
     b.place(f, { r: 1, c: 8 });
     b.sy.mana = b.sy.maxMana;
     expect(b.e.requestUlt(b.sy.id)).toBeTrue();
-    const ev = run(b.e, 3);
-    const shot = ev.find(x => x.type === 'projectile' && x.src === b.sy.id && x.kind === 'ult') as Extract<BattleEvent, { type: 'projectile' }>;
-    const d = Math.max(Math.abs(b.sy.pos.r - f.pos.r), Math.abs(b.sy.pos.c - f.pos.c));
-    expect(shot.flight).toBeCloseTo((0.1 + 0.06 * d) / 1.8, 3);
+    let shot: Extract<BattleEvent, { type: 'projectile' }> | undefined;
+    let distanceAtRelease = 0;
+    for (let t = 0; t < 3 && !shot; t += .05) {
+      // Flight is fixed when released, not from positions after another second of chasing/kiting.
+      const d = Math.max(Math.abs(b.sy.pos.r - f.pos.r), Math.abs(b.sy.pos.c - f.pos.c));
+      b.e.step(.05);
+      shot = b.e.drainEvents().find(x => x.type === 'projectile' && x.src === b.sy.id && x.kind === 'ult') as typeof shot;
+      if (shot) distanceAtRelease = d;
+    }
+    expect(shot).toBeDefined();
+    expect(shot!.flight).toBeCloseTo((0.1 + 0.06 * distanceAtRelease) / 1.8, 3);
   });
 
   it('Nightfall Execution in battle: the impact on a Dusk-Marked target lists it as bonus (→ Marked Execution plays)', () => {

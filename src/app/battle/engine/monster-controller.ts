@@ -1,3 +1,4 @@
+import { inBasicAttackRange } from './melee-contact';
 import { unitDistance } from './footprint';
 import { attackEventName, attackWindupOf, clipDuration, MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SkillCondition } from '../../core/models/monster';
@@ -265,6 +266,10 @@ export class MonsterController {
 
     // MELEE_CHASE
     if (d <= st.attackRange) {
+      if (def.attack.delivery === 'MELEE' && !inBasicAttackRange(u, t, st.attackRange)) {
+        this.setState(s, hasFlag(u, 'root') ? 'IDLE' : 'MOVING', hasFlag(u, 'root') ? 'idle' : 'move');
+        return;
+      }
       if (s.attackCooldownRemaining <= 0) return this.startAttack(u, s, def, t);
       this.setState(s, 'IDLE', 'idle');
       return;
@@ -387,7 +392,7 @@ export class MonsterController {
       return;
     }
     // small tolerance so a tiny step during the swing doesn't whiff
-    if (unitDistance(u, t) > def.stats.attackRange + a.hitTolerance) {
+    if (!inBasicAttackRange(u, t, def.stats.attackRange, a.hitTolerance)) {
       this.ctx.emit({ type: 'miss', src: u.id, dst: t.id });
       return;
     }

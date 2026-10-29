@@ -381,10 +381,11 @@ describe('Stage 1–3 monsters', () => {
     const b = battle([hero('Tank', 'tank', 0, 1)], [mon('forest_slime', 0, 1)]);
     b.freeze();
     const slime = b.monsters('forest_slime')[0];
-    runUntilAttack: for (let i = 0; i < 40; i++) {
+    runUntilAttack: for (let i = 0; i < 200; i++) {
       b.run(DT);
       if (b.of('attack').length) break runUntilAttack;
     }
+    expect(b.of('attack').some(a => a.src === slime.id)).toBeTrue();
     b.kill(slime);
     b.run(3);
     expect(b.hero('Tank').hp).toBe(b.hero('Tank').maxHp);

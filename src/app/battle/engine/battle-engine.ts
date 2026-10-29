@@ -1,3 +1,4 @@
+import { isMeleeRange, meleeStandY } from './melee-contact';
 import { BLADE_TRACE, SlashTraceDefinition } from '../../core/data/special-skills';
 import { CombatModifiers, ResistableStatus } from '../../core/models/progression';
 import { MANA_PER_ATTACK, MANA_PER_HIT, RECEIVE_GAUGE_ICD, START_CD } from '../../core/data/classes';
@@ -172,7 +173,7 @@ export interface BattleUnit {
   pos: Cell;
   /**
    * continuous world position (x = world column, y = lane) — what the battlefield renders.
-   * During COMBAT it glides toward the logical cell; during transitions it is driven directly (advance / regroup).
+   * During COMBAT it glides toward its logical cell plus a fractional melee contact stance; transitions drive it directly.
    */
   x: number;
   y: number;
@@ -542,16 +543,26 @@ export class BattleEngine {
     }
   }
 
+  /** Fractional close-combat stance; roots/stuns and active clips never cause a new approach. */
+  private glideTargetY(u: BattleUnit): number {
+    if (!isMeleeRange(u.range)) return u.pos.r;
+    if (hasFlag(u, 'root') || hasFlag(u, 'stun') || u.casting || u.castLock > 0 || u.monster?.state === 'ATTACKING') return u.y;
+    const t = this.units.find(t => t.id === u.targetId);
+    if (t && this.isValidTarget(u, t) && unitDistance(u, t) <= u.range) return meleeStandY(u, t);
+    return u.pos.r;
+  }
+
   /** still travelling into its logical cell (not a dash, which is part of a skill clip) */
   private gliding(u: BattleUnit): boolean {
     if (u.dashMotion) return false;
     const tx = this.flow.formation.originPosition + u.pos.c;
-    return Math.hypot(tx - u.x, u.pos.r - u.y) > SETTLE_EPS;
+    return Math.hypot(tx - u.x, this.glideTargetY(u) - u.y) > SETTLE_EPS;
   }
 
-  /** visual positions follow the logical cells continuously (no cell-centre locking on screen) */
+  /** Physical positions follow cell/stance destinations continuously; melee contact uses these same positions. */
   private glide(dt: number): void {
     const origin = this.flow.formation.originPosition;
+    const ys = new Map(this.units.map(u => [u.id, this.glideTargetY(u)]));
     for (const u of this.units) {
       // dead units stop where they fell (movement cancelled)
       if (!u.visible || (u.life !== 'ALIVE' && u.life !== 'REVIVING')) continue;
@@ -562,7 +573,7 @@ export class BattleEngine {
         continue;
       }
       const tx = origin + u.pos.c;
-      const ty = u.pos.r;
+      const ty = ys.get(u.id)!;
       const d = Math.hypot(tx - u.x, ty - u.y);
       if (d < 1e-4) continue;
       // cruise at the unit's own step rate (one cell per step interval) so the body is still travelling when the next
