@@ -6,8 +6,9 @@
 .board {
   position: relative;
   width: calc(var(--cols) * var(--cell));
+  --ground-extra: calc(var(--cell) * var(--ground-extra-rows, 0));
   // --foot: optional free strip under the lanes (battle screen puts the party bar there) — never holds units
-  height: calc(var(--rows) * var(--cell) + var(--foot, 0px));
+  height: calc(var(--rows) * var(--cell) + var(--foot, 0px) + var(--ground-extra));
   margin-inline: auto;
   border-radius: 12px;
   overflow: hidden;
@@ -257,6 +258,6 @@ app-projectile.px { visibility: hidden; }
 // A display-only offset shared by DOM units, Pixi, projectiles, FX and hit targets.
 .board.expanded-scenery {
   --scenery-extra: calc(var(--cell) * var(--scenery-extra-rows));
-  height: calc(var(--rows) * var(--cell) + var(--foot, 0px) + var(--scenery-extra));
+  height: calc(var(--rows) * var(--cell) + var(--foot, 0px) + var(--scenery-extra) + var(--ground-extra));
   >.cam { top: var(--scenery-extra); >app-field { top: calc(-1 * var(--scenery-extra)); } }
 }

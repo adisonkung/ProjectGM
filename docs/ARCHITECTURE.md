@@ -380,3 +380,5 @@ Lab UI uses _labs-reference.scss under reference-lab/reference-sprite-lab. Real 
 ### Monster cast presentation tracks and forward 3×2 ground area (2026-10-29)
 
 SheetDef.monsterFx may provide per-FX cast tracks, reusing existing FxTrack motion/alpha and game-clock cleanup. Aegis S3 uses a generated authored spear-tip curve and a separate ground charge; it does not implement general live FOLLOW_ANCHOR. FxDef.ground values pin source-visible lower edges to the feet plane. FRONT_RECT_3X2 is three columns strictly forward, the caster row and the row above; its impact uses a lower-middle presentation anchor. Monster cast facing is committed until resolution. DAMAGE skills with zero hits report an empty skillActivated.targets list; SELF support skills retain their intended target list.
+
+Battle presentation: `battleViewport` reserves 0.8 decorative floor rows below the three playable lanes; `BoardComponent.groundExtraRows` defaults to zero for standalone/lab views. The added CSS/Pixi bounds and `FieldComponent` ground continuation do not translate unit coordinates or extend the logical grid.

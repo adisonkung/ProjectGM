@@ -37,7 +37,7 @@
     <div class="arena" [class.paused]="paused()">
       <div class="screen" [class.boss]="!!bossBar()">
         @if (mode() !== 'lab') { <app-tower-ornament class="battle-field-frame" [grooved]="true" [ornate]="true" /> } @else { <app-tower-ornament class="lab-field-frame" [grooved]="true" [ornate]="true" /> }
-        <app-board [sceneryExtraRows]="sceneryExtraRows()" (finishedFx)="onFxFinished($event)" [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
+        <app-board [groundExtraRows]="mode() === 'lab' ? 0 : fieldLayout().groundRows" [sceneryExtraRows]="sceneryExtraRows()" (finishedFx)="onFxFinished($event)" [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
                    [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [gameTime]="result() ? undefined : gameClock()" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
 
         <!-- top HUD (scenery rows only — never over the lanes' units) -->

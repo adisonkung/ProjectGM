@@ -216,6 +216,8 @@ export class BoardComponent {
   readonly renderer = input<'dom' | 'pixi'>('dom');
   /** Extra decorative sky, in visual cell heights. Does not change rows or unit coordinates. */
   readonly sceneryExtraRows = input(0);
+  /** Display-only room below the last lane for ground VFX. */
+  readonly groundExtraRows = input(0);
   /** battle: the game clock is frozen (paused / hit-stop) — the Pixi units hold their frame */
   readonly frozen = input<(() => boolean) | undefined>(undefined);
   /** Battle engine snapshot time. Standalone views without one retain their display clock. */

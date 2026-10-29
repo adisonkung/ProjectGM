@@ -22,6 +22,18 @@ describe('BoardComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('extends the render floor without shifting unit or logical grid coordinates', () => {
+    const host=fixture.nativeElement as HTMLElement;
+    host.style.setProperty('--cell','40px');
+    const board=host.querySelector<HTMLElement>('.board')!;
+    const initialHeight=board.getBoundingClientRect().height;
+    const before=component.pos(2,11);
+    fixture.componentRef.setInput('groundExtraRows',.8);fixture.detectChanges();
+    expect(board.getBoundingClientRect().height-initialHeight).toBeCloseTo(32,1);
+    expect(component.pos(2,11)).toBe(before);
+    expect(component.rows).toBe(5);
+    expect(component.cols).toBe(16);
+  });
   it('lingering auras / guards / fields are attached to their unit; slashes, waves and bursts stay where they happened', () => {
     for (const n of ['gr-s1-aura', 'gr-ult-aura', 'lx-s2-guard', 'yz-ult-field-back', 'yz-ult-field-front']) expect(fxAttached(n)).withContext(n).toBeTrue();
     for (const n of ['kl-ult-wave', 'kl-ult-slam', 'gr-s2-main', 'lx-ult-main', 'kl-s1-impact', 'nope']) expect(fxAttached(n)).withContext(n).toBeFalse();

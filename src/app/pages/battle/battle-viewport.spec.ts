@@ -19,6 +19,14 @@ describe('battle viewport presentation', () => {
     expect(v.height).toBeLessThanOrEqual(720-112);
     expect(v.extraRows).toBeGreaterThanOrEqual(0);
   });
+  it('reserves decorative floor without adding combat lanes, including short phones', () => {
+    for (const [w,h] of [[1440,900],[932,430],[844,390],[1920,720]]) {
+      const v=battleViewport(w,h);
+      expect(v.groundRows).toBe(.8);
+      expect(v.height).toBeCloseTo(v.cell*(5+v.extraRows+v.groundRows)+v.foot+2,5);
+      expect(v.height).toBeLessThanOrEqual(h-(h<=500?8:112));
+    }
+  });
   it('does not expand the scene behind the portrait rotation prompt', () => {
     const v = battleViewport(390,844);
     expect(v.extraRows).toBe(0);

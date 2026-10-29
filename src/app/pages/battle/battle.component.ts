@@ -120,7 +120,7 @@ export class BattleComponent implements OnDestroy {
   readonly stages = STAGES;
   readonly floor = signal(1);
   readonly viewport = signal({ width: typeof window === 'undefined' ? 1280 : window.innerWidth, height: typeof window === 'undefined' ? 900 : window.innerHeight });
-  readonly fieldLayout = computed(() => battleViewport(this.viewport().width,this.viewport().height));
+  readonly fieldLayout = computed(() => battleViewport(this.viewport().width,this.viewport().height,this.mode() === 'lab' ? 0 : .8));
   readonly sceneryExtraRows = computed(() => {
     if (this.mode() === 'lab') return 0;
     const requested = this.placing() ? (this.viewport().width >= 900 ? .65 : 0) : this.fieldLayout().extraRows;

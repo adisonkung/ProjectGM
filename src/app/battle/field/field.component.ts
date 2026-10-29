@@ -17,7 +17,7 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
       <div class="layers" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + sceneryExtraRows() + ')' : null" [style.height]="sceneryExtraRows() ? 'calc(var(--cell) * ' + baseRows + ')' : null" [style.--shift]="live() ? null : shift()" [style.--dur]="live() ? '0ms' : duration() + 'ms'">
         <div class="img" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + -sceneryExtraRows() + ')' : null" [style.height]="'calc(var(--cell) * ' + (g.cut * baseRows + sceneryExtraRows()) + ')'" [style.background-image]="g.url" [style.background-size]="g.size"
              [style.background-position]="'calc(var(--shift) * var(--screen) * -0.4) ' + g.yUpper"></div>
-        <div class="img" [style.top.%]="g.cut * 100" [style.bottom]="0" [style.background-image]="g.url" [style.background-size]="g.size"
+        <div class="img" [style.top.%]="g.cut * 100" [style.bottom]="'calc(-1 * var(--ground-extra, 0px))'" [style.background-image]="g.url" [style.background-size]="g.groundSize"
              [style.background-position]="'calc(var(--shift) * var(--screen) * -1) ' + g.yGround"></div>
         <div class="mid faint" [style.top.%]="g.cut * 100"></div>
       </div>
@@ -34,12 +34,16 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
       <div class="tint" [style.top.%]="skyPct"></div>
       <div class="mid" [style.top.%]="skyPct"></div>
     </div>
+    <div class="ground-margin plain"></div>
     <div class="foot plain"></div>
     }
   `,
   styles: `
     :host { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-    .layers { position: absolute; left: 0; right: 0; top: 0; bottom: var(--foot, 0px); --screen: var(--cell); }
+    .layers { position: absolute; left: 0; right: 0; top: 0; bottom: calc(var(--foot, 0px) + var(--ground-extra, 0px)); --screen: var(--cell); }
+    .ground-margin { position:absolute;left:0;right:0;bottom:var(--foot,0px);height:var(--ground-extra,0px);
+      background-repeat:repeat-x;image-rendering:pixelated;transition:background-position var(--dur,0ms) linear; }
+    .ground-margin.plain { background:#28462d; }
     .foot { position: absolute; left: 0; right: 0; bottom: 0; height: var(--foot, 0px); background-repeat: repeat-x; image-rendering: pixelated;
       transition: background-position var(--dur, 0ms) linear; }
     .foot::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #0b081400 0%, #0b081499 35%, #0b0814d9 100%); }
@@ -117,6 +121,7 @@ export class FieldComponent {
   readonly live = input(false);
   /** Cosmetic sky extension; the ground and logical board keep their original projection. */
   readonly sceneryExtraRows = input(0);
+  readonly groundExtraRows = input(0);
   readonly baseRows = BOARD_ROWS + SCENERY_ROWS;
   /** ภาพพื้นหลังของด่าน (ไม่มี = วาดฉากด้วย CSS) */
   readonly bg = input<BackgroundDef | null | undefined>(null);
@@ -129,12 +134,15 @@ export class FieldComponent {
     const imgH = rows * b.zoom;
     const top = rows - imgH;
     const cut = (top + b.cut * imgH) / rows;
+    // Extend only the terrain below the horizon. Sky/trees retain their original projection.
+    const groundH = imgH + this.groundExtraRows() / (1-b.cut);
     const cells = (n: number) => `calc(var(--cell) * ${n.toFixed(4)})`;
     return {
       url: `url(${b.file})`,
       size: `auto ${cells(imgH)}`,
       yUpper: cells(top + this.sceneryExtraRows()),
-      yGround: cells(top - cut * rows),
+      groundSize: `${cells(imgH*b.w/b.h)} ${cells(groundH)}`,
+      yGround: cells(-b.cut*groundH),
       cut,
     };
   });
