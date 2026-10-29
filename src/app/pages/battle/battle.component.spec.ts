@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
 
 import { provideRouter } from '@angular/router';
+import { applyBuff } from '../../battle/engine/buffs';
+import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { BattleComponent } from './battle.component';
 import { BattleEngine, BattleEvent } from '../../battle/engine/battle-engine';
 
@@ -20,6 +22,20 @@ describe('BattleComponent', () => {
     fixture.detectChanges();
   });
 
+  it('keeps the Break pose through same-batch and later hits, and resolves the shield FX anchor/facing', fakeAsync(() => {
+    component.start();component.openMenu();
+    const host=component as unknown as {engine:BattleEngine;handleEvents(events:BattleEvent[]):void;snapshot():void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!, hero=host.engine.units.find(u=>u.side==='ally')!;
+    boss.sprite='enemy-aegis-sentinel.png';applyBuff(boss,STATUS_EFFECTS['broken'],hero.id);
+    const hit:BattleEvent={type:'damage',dst:boss.id,amount:1,crit:false,blocked:0};
+    host.handleEvents([{type:'broken',src:hero.id,dst:boss.id,skill:'aegis_judgement'},hit]);
+    const key=component.anims()[boss.id].key;
+    expect(component.anims()[boss.id].castClip).toBe('broken');
+    host.handleEvents([hit]);expect(component.anims()[boss.id].key).toBe(key);
+    host.snapshot();const core=component.fx().find(f=>f.name==='ae-core')!;
+    expect(core.offset).toEqual([0,-44]);expect(core.flip).toBeTrue();
+    tick(2000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
   it('shows the placement board before the battle starts', () => {
     expect(component).toBeTruthy();
     const el: HTMLElement = fixture.nativeElement;

@@ -206,9 +206,9 @@ export class BattleComponent implements OnDestroy {
     remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
   });
   private statusVisuals = new StatusFxPlayback({
-    spawn: (name, target, at, loop) => {
+    spawn: (name, target, at, loop, sprite) => {
       const id = ++this.floatId;
-      this.fx.update(l => [...l, { id, name, ...at, angle: 0, offset: fxOffset(name),
+      this.fx.update(l => [...l, { id, name, ...at, angle: 0, flip: this.facing.get(target), offset: fxOffset(name, sprite),
         under: FX[name].layer === 'under', follow: target, managed: true, loop }]);
       return id;
     },
@@ -1125,7 +1125,9 @@ export class BattleComponent implements OnDestroy {
           else this.ownFade.delete(e.src);
           break;
         case 'damage': {
-          if (!e.poison && e.hurt !== false && anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
+          // Preserve the status-owned break pose even when damage arrives before its first rendered frame.
+          const breakPose = anims[e.dst]?.castClip === 'broken' && hasFlag(unitOf(e.dst), 'broken');
+          if (!e.poison && e.hurt !== false && !breakPose && anims[e.dst]?.anim !== 'die') set(e.dst, 'hurt');
           // white hit flash (Pixi renderer): every real, non-poison hit
           if (e.amount > 0 && !e.poison) this.hits.set(e.dst, (this.hits.get(e.dst) ?? 0) + 1);
           const p = posOf(e.dst);

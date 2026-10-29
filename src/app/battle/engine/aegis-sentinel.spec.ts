@@ -175,6 +175,19 @@ describe('Aegis Sentinel integration', () => {
     expect(s.boss.pos).toEqual(start);
   });
 
+  it('Break core follows a shield anchor and expires with the status rather than leaving a body-centre aura', () => {
+    const sheet=SHEETS['enemy-aegis-sentinel.png'];
+    expect(sheet.anchors!['shieldCore']).toEqual([0,-44]);
+    expect(FX['ae-core'].anchor).toBe('shieldCore');
+    expect(FX['ae-core'].frames*FX['ae-core'].frameMs).toBe(3000);
+    const shown=new Map<number,string>();let next=0;let ownerSprite: string|undefined;
+    const playback=new StatusFxPlayback({spawn:(name,_target,_at,_loop,sprite)=>{ownerSprite=sprite;shown.set(++next,name);return next},remove:ids=>ids.forEach(id=>shown.delete(id))});
+    const instance={target:2,source:1,status:'broken',sprite:'enemy-aegis-sentinel.png',at:{r:2,c:11}};
+    playback.sync([instance],0);playback.sync([instance],2.9);
+    expect([...shown.values()]).toEqual(['ae-core']);expect(next).toBe(1);
+    expect(ownerSprite).toBe(instance.sprite);
+    playback.sync([],3);expect(shown.size).toBe(0);
+  });
   it('guard pose ends before the buff; surface lights retain ownership across refresh and stop on expiry/death', () => {
     const sh = SHEETS['enemy-aegis-sentinel.png'];
     const tl = clipTimeline(sh.casts!['guard'], 'cast', { anim: 'cast', castClip: 'guard', castTime: 2.5 });

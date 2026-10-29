@@ -98,5 +98,10 @@
     "file": "13-fx-aegis-s3-impact.png",
     "bytes": 1578618,
     "sha256": "e07b082db55d487968e5dae2b64e4f8c278eecee0c63c280d3f59f2342676fde"
+  },
+  {
+    "file": "14-fx-aegis-break-core.png",
+    "bytes": 1844231,
+    "sha256": "33da83b40fe41675afd00d3b79fb33302748b7111f38ffb94ceb686f6571666a"
   }
 ]

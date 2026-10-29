@@ -148,8 +148,8 @@ for i in range(32):
 strip('s2-charge',spirals,(180,180))
 strip('impact',panels('05-fx-aegis-s2-impact.png',4,2),(160,128))
 strip('shockwave',panels('06-fx-aegis-s3-ground-shockwave.png',4,2),(300,160))
-core=panels('07-fx-aegis-core-exposed-loop.png',5,2)
-strip('core',core[1:7]+core[5:1:-1],(100,100))
+from aegis_break import bake_break
+bake_break(SRC,OUT,REPORT,strip,star)
 strip('death',panels('08-fx-aegis-death-dissolve.png',5,2),(210,180))
 # New supplied native-alpha S2 emitter and beam. Only discard effectively invisible black alpha noise.
 def clean_native(im):

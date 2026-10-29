@@ -1114,7 +1114,7 @@ for (const m of Object.values(MONSTERS)) {
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
   pixelated: true, hitFlashStrength: .35,
   attackFx: ['ae-attack-thrust'], preloadFx: ['ae-s2-impact', 'ae-s3-impact'],
-  anchors: { weaponTip: [186, -110], judgementTip: AEGIS_S3_TIP_ANCHOR },
+  anchors: { weaponTip: [186, -110], judgementTip: AEGIS_S3_TIP_ANCHOR, shieldCore: [0,-44] },
   statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' } },
   damageFx: { aegis_guard: 'ae-s1-hit' }, deathFx: 'ae-death',
   monsterFx: {
@@ -1160,8 +1160,8 @@ export const FX: Record<string, FxDef> = {
     ground: AEGIS_S3_IMPACT_BOTTOMS, pivot: [.5,1], dy: 50, attach: false, layer: 'under' },
   'ae-s3-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
     at: 'target', fitCells: .65, dy: -20 },
-  'ae-core': { file: 'fx-aegis-core.png', frames: 10, w: 100, h: 100, frameMs: 80,
-    at: 'self', fitCells: .65, dy: -125, attach: true, blend: 'add' },
+  'ae-core': { file: 'fx-aegis-core.png', frames: 75, w: 320, h: 260, frameMs: 40,
+    at: 'self', anchor: 'shieldCore', fitCells: 2.4, attach: true, blend: 'add' },
   'ae-death': { file: 'fx-aegis-death.png', frames: 10, w: 210, h: 180, frameMs: 65,
     at: 'self', fitCells: 1.6, dy: -75, delayMs: 350 },
 

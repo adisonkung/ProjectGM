@@ -10,7 +10,7 @@ export interface StatusFxInstance {
   at: Cell;
 }
 interface Host {
-  spawn(name: string, target: number, at: Cell, loop: boolean): number;
+  spawn(name: string, target: number, at: Cell, loop: boolean, sprite?: string): number;
   remove(ids: number[]): void;
 }
 
@@ -28,8 +28,8 @@ export class StatusFxPlayback {
       live.add(key);
       let state = this.active.get(key);
       if (!state) {
-        const start = def.start && FX[def.start] ? this.host.spawn(def.start, instance.target, instance.at, false) : undefined;
-        const loop = this.host.spawn(def.loop, instance.target, instance.at, true);
+        const start = def.start && FX[def.start] ? this.host.spawn(def.start, instance.target, instance.at, false, instance.sprite) : undefined;
+        const loop = this.host.spawn(def.loop, instance.target, instance.at, true, instance.sprite);
         state = { ids: start == null ? [loop] : [start, loop], start,
           startEnd: clock + (def.start && FX[def.start] ? fxLength(FX[def.start]) : 0) };
         this.active.set(key, state);

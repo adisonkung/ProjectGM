@@ -1,0 +1,33 @@
+{
+  "errors": [],
+  "fixture": "Isolated browser; inject 100 Break through the real engine interrupt path during S3; observe status and cast-VFX cleanup.",
+  "before": {
+    "time": 2.3,
+    "cast": "aegis_judgement",
+    "left": 1.300000000000003,
+    "fx": [
+      "ae-s3-ground-charge",
+      "ae-s3-charge"
+    ]
+  },
+  "after": {
+    "time": 2.499999999999999,
+    "broken": true,
+    "fx": [
+      "ae-core"
+    ],
+    "core": [
+      {
+        "offset": [
+          0,
+          -44
+        ],
+        "flip": true
+      }
+    ]
+  },
+  "recoveryVerified": {
+    "predicate": "BROKEN absent and ae-core absent after game resumes",
+    "passed": true
+  }
+}
