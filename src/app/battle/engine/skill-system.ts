@@ -1,3 +1,4 @@
+import { inBasicAttackRange, isMeleeRange } from './melee-contact';
 import { unitDistance } from './footprint';
 import { kitOf } from '../../core/data/hero-skills';
 import { SKILL_RANK_LIMITS } from '../../core/data/skill-ranks';
@@ -512,7 +513,7 @@ export class SkillSystem {
         return true;
       }
     }
-    if (!enemy || unitDistance(enemy, u) > u.range) return false;
+    if (!enemy || !inBasicAttackRange(u, enemy, u.range)) return false;
     this.use(u, 'attack', kit.attack, enemy);
     return true;
   }
@@ -628,6 +629,11 @@ export class SkillSystem {
           if (clipHits) this.h.emit({ type: 'animEvent', src: u.id, event: evName, name: `${s.id.toUpperCase()}_HIT_${i + 1}`, kind: kind as SkillKind, index: i });
           if (target.alive) last = { ...target.pos };
           const at = { ...last };
+          if (slot === 'attack' && delivery === 'INSTANT' && target.side !== u.side && isMeleeRange(u.range)
+            && target.alive && !inBasicAttackRange(u, target, u.range)) {
+            this.h.emit({ type: 'miss', src: u.id, dst: target.id });
+            return;
+          }
           if (delivery === 'INSTANT' || target === u) land(target, at, weighted(i), i);
           else this.h.shoot(u, target, slot, delivery === 'SKY', () => land(target, target.alive ? { ...target.pos } : at, weighted(i), i), i, s.projectileSpeed);
         });

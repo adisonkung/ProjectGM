@@ -9,7 +9,8 @@
 - Active team: **5 heroes**.
 - Board: 5 × 16 cells. The 3 bottom lanes are playable.
 - Zones: our zone is columns 0–5, the neutral zone is 6–9 (no placement), the enemy zone is 10–15.
-- Square cells, 8-direction range (a diagonal step = 1 cell).
+- Square cells, 8-direction logical range (a diagonal step = 1 cell).
+- User update 2026-10-29: basic melee (range ≤1.5) also requires real body contact: at most ½ lane apart vertically, with a small 0.01-cell sampling tolerance. Units close within their current cell (up to ½ lane each, typically ¼ each when both approach) before attacking across lanes. Recheck contact at the hit event; roots/stuns prevent the approach. Grid occupancy, skill areas, ranged reach and authored attack timings stay unchanged.
 - Units may share a cell during combat.
 
 ## Stars
