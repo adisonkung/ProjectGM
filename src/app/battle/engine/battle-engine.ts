@@ -1339,6 +1339,7 @@ export class BattleEngine {
     const mdef = isMonsterSkill(def) ? def : null;
     if (cs) cs.cd = mdef?.once ? Infinity : this.monsterAI.cooldownOf(u, def);
     const token = this.seq++;
+    if (u.monster) u.actionFacing = { left: u.monster.facingDirection < 0 };
     u.casting = { def, left: def.castTime, target: target?.id ?? null, token, nextProgress: CAST_PROGRESS_STEP, breakDamage: 0 };
     if (!isPlayerUnit(u) && canStopCast(def)) this.metrics.interruptOpportunities++;
     if (u.monster) this.metrics.cast(def.id, 'started');
@@ -1537,7 +1538,8 @@ export class BattleEngine {
     this.events.push({ type: 'animEvent', src: u.id, event: 'SKILL_ACTIVATE', name: mark?.name ?? def.id });
     this.events.push({
       type: 'skillActivated', src: u.id, skill: def.id, name: def.name,
-      targets: (hits.length ? hits : targets).map(t => t.id),
+      // A missed damage area has no contact recipients; a SELF aim must not create an impact on its caster.
+      targets: (def.effects.some(e => e.type === 'DAMAGE') ? hits : targets).map(t => t.id),
     });
   }
 

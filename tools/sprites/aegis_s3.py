@@ -1,0 +1,77 @@
+"""Supplied S3 charges plus surface-following light. Invoked by aegis.py; originals stay unchanged."""
+import json,math
+import numpy as np
+from PIL import Image,ImageDraw,ImageFilter,ImageChops,ImageOps
+
+def bake_s3(src,out,report,strip,star):
+ def panels(name):
+  im=Image.open(src/name).convert('RGBA');frames=[]
+  for i in range(8):
+   f=im.crop((round(i%4*im.width/4),round(i//4*im.height/2),round((i%4+1)*im.width/4),round((i//4+1)*im.height/2)))
+   a=np.array(f);a[a[:,:,3]<=4,3]=0;frames.append(Image.fromarray(a))
+  return frames
+ tip=panels('11-fx-aegis-s3-tip-charge.png');ground=panels('12-fx-aegis-s3-ground-charge.png')
+ centres=[]
+ for f in tip:
+  a=np.array(f).astype(float);v=a[170:275,170:275,:3].min(2)*a[170:275,170:275,3]/255
+  y,x=np.where(v>230);centres.append((float(x.mean()+170),float(y.mean()+170)))
+ tip_frames=[];floor_frames=[];bottoms=[]
+ for i in range(75):
+  t=i*.04;phase=math.tau*t/1.2;index=min(7,int(t/.13))
+  # Keep the source's registration. Never resize independently to a frame's alpha bounds.
+  cx,cy=centres[index];f=tip[index]
+  a=Image.new('RGBA',(160,160));a.alpha_composite(f.resize((144,144),Image.Resampling.LANCZOS),(round(80-cx*144/f.width),round(80-cy*144/f.height)))
+  light=Image.new('RGBA',a.size);d=ImageDraw.Draw(light)
+  for arm in range(5):
+   for k in range(30):
+    theta=phase+arm*math.tau/5-k*.025;r=55+7*math.sin(theta*5+.4)
+    theta2=theta-.025;r2=55+7*math.sin(theta2*5+.4)
+    color=(255,223,134) if arm==0 else (108,242,255)
+    d.line((80+r*math.cos(theta),80+r*math.sin(theta),80+r2*math.cos(theta2),80+r2*math.sin(theta2)),fill=(*color,round(240*(1-k/30)**1.5)),width=2)
+   theta=phase+arm*math.tau/5;r=55+7*math.sin(theta*5+.4)
+   star(d,80+r*math.cos(theta),80+r*math.sin(theta),3.3,color,245)
+  mask=a.getchannel('A').point(lambda v:255 if v>12 else 0).filter(ImageFilter.GaussianBlur(1))
+  light.putalpha(ImageChops.multiply(light.getchannel('A'),mask))
+  a.alpha_composite(light.filter(ImageFilter.GaussianBlur(2)));a.alpha_composite(light)
+  # Flip source art and its moving lights together, so facing cannot reverse just one layer.
+  tip_frames.append(ImageOps.mirror(a))
+  a=Image.new('RGBA',(360,240));f=ground[index].crop((0,128,444,444)).resize((320,228),Image.Resampling.LANCZOS);a.alpha_composite(f,(20,0))
+  pixels=np.array(a.getchannel('A'));ys=np.flatnonzero((pixels>=8).sum(1)>2);floor=int(ys[-1])+1
+  # Orbit glints may brighten the ground edge, but cannot pull a held aura up/down as they pass underneath.
+  pixels[floor:]=0;a.putalpha(Image.fromarray(pixels))
+  light=Image.new('RGBA',a.size);d=ImageDraw.Draw(light)
+  # Moving short arcs follow the source's projected ground ellipse, never an upright circular ring.
+  for j,(rx,ry,cy) in enumerate([(146,43,162),(100,28,162)]):
+   head=phase+j*math.pi
+   for k in range(44):
+    u=head-k*.025;v=u-.025;col=(255,222,128) if j==0 else (100,244,255)
+    d.line((180+rx*math.cos(u),cy+ry*math.sin(u),180+rx*math.cos(v),cy+ry*math.sin(v)),fill=(*col,round(240*(1-k/44)**1.6)),width=3)
+   star(d,180+rx*math.cos(head),cy+ry*math.sin(head),5,col,250)
+  for j in range(18):
+   u=phase+j*2.39996323;star(d,180+(70+j%4*18)*math.cos(u),162+(16+j%3*7)*math.sin(u),2+j%3,(156,248,255),140+int(90*math.sin(u)**2))
+  mask=a.getchannel('A').point(lambda v:255 if v>10 else 0).filter(ImageFilter.MaxFilter(5))
+  alpha=np.array(ImageChops.multiply(light.getchannel('A'),mask));alpha[floor:]=0;light.putalpha(Image.fromarray(alpha))
+  glow=light.filter(ImageFilter.GaussianBlur(2));alpha=np.array(glow.getchannel('A'));alpha[floor:]=0;glow.putalpha(Image.fromarray(alpha))
+  a.alpha_composite(glow);a.alpha_composite(light)
+  a=ImageOps.mirror(a);floor_frames.append(a)
+  bottoms.append(floor)
+ strip('s3-tip-charge',tip_frames,(160,160));strip('s3-ground-charge',floor_frames,(360,240))
+ # Read the real visible bottom of each impact frame; ground contact never uses the PNG centre.
+ im=Image.open(out/'fx-aegis-shockwave.png').convert('RGBA');impact_ground=[]
+ for i in range(8):
+  alpha=np.array(im.crop((i*300,0,(i+1)*300,160)).getchannel('A'));ys=np.flatnonzero((alpha>=8).any(1));impact_ground.append(int(ys[-1])+1 if len(ys) else 160)
+ # Authored spear-tip positions in the supplied Ultimate windup frames (source pixels).
+ tips=[(190,95),(216,78),(284,58),(360,79),(385,118),(395,134),(405,161),(405,173),(405,172),(392,136),(392,136),(292,70)]
+ offsets=[((264-x)*180/252*1.25,46+(-14+(y-414)*180/252)*1.25) for x,y in tips]
+ motion=[]
+ for i,(x,y) in enumerate(offsets):
+  relative=[round(x-offsets[0][0],4),round(y-offsets[0][1],4)]
+  motion.append([i*250,*relative]);motion.append([(i+1)*250-1,*relative])
+ data={'sourceTipPoints':tips,'auraCoreCentres':centres,'tipAnchor':[round(v,4) for v in offsets[0]],'tipMotion':motion,'groundBottoms':bottoms,'impactBottoms':impact_ground}
+ (report/'s3-presentation.json').write_text(json.dumps(data,indent=2))
+ target=out.parents[1]/'src/app/core/data/aegis-s3-presentation.ts'
+ target.write_text('// Generated by tools/sprites/aegis_s3.py via aegis.py; presentation data only.\n'+
+  'export const AEGIS_S3_TIP_ANCHOR: [number,number] = '+json.dumps(data['tipAnchor'])+';\n'+
+  'export const AEGIS_S3_TIP_MOTION: [number,number,number][] = '+json.dumps(motion)+';\n'+
+  'export const AEGIS_S3_GROUND_BOTTOMS: number[] = '+json.dumps(bottoms)+';\n'+
+  'export const AEGIS_S3_IMPACT_BOTTOMS: number[] = '+json.dumps(impact_ground)+';\n')

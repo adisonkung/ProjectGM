@@ -13,6 +13,11 @@ export function edgeBeamStretch(d: FxDef, column: number, left: boolean, offset:
 
 /** Ground footprint placement uses logical cells, never the art bounds or number of occupants. */
 export function groundFxCell(d: FxDef, caster: Cell, target: Cell, left?: boolean): Cell {
+  if (d.groundArea === 'FRONT_RECT_3X2') {
+    const direction = (left ?? target.c < caster.c) ? -1 : 1;
+    // Lower middle anchor: a three-cell image spans the left/right half-cells of all three columns.
+    return { r: caster.r, c: caster.c + direction * 2 };
+  }
   if (d.groundArea === 'FRONT_RECT_2X3') {
     // Nominal footprint: board clipping trims cells outside the battlefield, without shifting it.
     const direction = (left ?? target.c < caster.c) ? -1 : 1;

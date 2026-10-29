@@ -19,7 +19,7 @@ New kit/timings are content implementation requested by the user, not a global r
 | Basic attack | Reuses supplied S2 lowering/pointing poses; small baked forward thrust + cyan spear flash; one PHYSICAL melee hit ×1.1 | 12×50ms; semantic DAMAGE at 0.30s; existing 1.9s cooldown |
 | S1 ตั้งโล่พิทักษ์ | Crouch on activation, then resume actions; damage received ×0.4, no invented shield HP or invulnerability | Cast 2.5s, buff 8s, recovery 0.3s, cooldown 20s |
 | S2 ทวนแสงทะลวงแนว | Stationary horizontal beam; MAGIC ×1.2 across all three lanes ahead to the board edge, each recipient once | Cast 1.8s, cooldown 13s, recovery 0.96s |
-| S3 คำพิพากษาแห่งประตู | Overhead windup → ground contact; PHYSICAL ×1.5 in RADIUS_3 | Cast 3s, Break 100, cooldown 18s, recovery 0.78s |
+| S3 คำพิพากษาแห่งประตู | Overhead windup → ground contact; PHYSICAL ×1.5 in FRONT_RECT_3X2 (six full cells directly ahead) | Cast 3s, Break 100, cooldown 18s, recovery 0.78s |
 | BROKEN | Existing three-second action denial and ×1.25 damage received; supplied kneel-break clip + exposed-core effect | Optional `broken` cast clip, presentation only |
 | Hurt / death | Recoil from held base art and existing contact flash; death source + shutdown VFX / fade | No new generated hurt art |
 
@@ -27,7 +27,7 @@ S2 uses the generic FRONT_BEAM_3 resolver with committed facing: all three playa
 
 ## Asset preparation
 
-Original 17 PNGs (15 from Aegis.zip + 2 from skill2.zip) are kept unchanged in `assets/bosses/Aegis/`. Rebuild with `python3 tools/sprites/aegis.py`, then `npm run sprites:optimize`.
+Original 19 PNGs (15 from Aegis.zip + 2 from skill2.zip + 2 S3 charge sheets) are kept unchanged in `assets/bosses/Aegis/`. Rebuild with `python3 tools/sprites/aegis.py`, then `npm run sprites:optimize`.
 
 - Palette-alpha character sheets are cropped at native grid coordinates, scaled together (body around 180 atlas pixels, excluding spear), canonicalized to face right and foot-anchored. Runtime flips the enemy left. Corrected 24-frame walk is used.
 - RGB VFX have a baked checkerboard. The script keys/unmixes neutral white backgrounds; pure white light on a white background is not fully recoverable. Native-alpha impact/death sheets retain their alpha. No square checkerboard is shipped intentionally.
@@ -90,3 +90,24 @@ Aegis occupies logical columns 10–12 / lanes 1–2, anchored at (r=2,c=11), ac
 Range checks use Chebyshev distance between body edges, so melee can attack across the reserved front/rear cell and the boss can strike back. Heroes/monsters without a footprint retain their previous point-to-point distance. Area queries intersect all body cells then deduplicate recipients; a main ground cell still chooses the main multiplier. Projectiles retain their authored presentation travel to their target anchor. This is the user-requested Aegis spacing/geometry change; HP/ATK/DEF, cooldowns, damage multipliers, other bosses and rewards are not retuned.
 
 Validation: 881/881 Karma; app/spec TypeScript; sprite optimization; production build. New tests cover exact lower-centre layout, unchanged point-unit distances, area deduplication/main-cell contact, real melee damage both ways without entering the reserved cells, and Moye S2 blinking behind the perimeter and damaging the boss. Actual desktop/mobile captures in docs/review-images/2026-10-29-aegis-s2-native verify no incursions across the observed sequence, the charge, native beam and stable bottom position. Source/game comparison includes the two supplied sheets and the user's 3×2 diagram. Isolated S2 MP4/HTML uses current runtime clip/FX samplers and assets, not a combat recording. No merge or deployment.
+
+## S3 supplied charges, moving light and forward impact (2026-10-29, current)
+
+The two native palette-alpha charge sources are preserved unchanged as 11-fx-aegis-s3-tip-charge.png and 12-fx-aegis-s3-ground-charge.png. Both are 1774×887 / 4×2 / 8 panels. The generator converts palette alpha correctly, normalizes the tip aura's bright core, plays formation then holds the mature art, and adds moving short light trails clipped to the painted aura. Tip trails follow the circular spiral; ground trails follow its projected ellipse. Art and moving light mirror together with facing. S2's inward spiral also gains connected light streaks. The superseded original 03 charge source/raw strip remains archived; its unreferenced optimized copy is no longer shipped.
+
+S3 charges are each 75×40ms (3 seconds), driven by existing FxTrack presentation on SheetDef.monsterFx bindings. Measured spear-tip points from the supplied windup poses become a generated hold-at-pose motion curve; the aura follows the raised weapon rather than a fixed point above the body. This is bounded authored choreography for the current three-second cast, not a general live skeletal-anchor system. Ground aura stays beneath the character, tip aura above it. Both are removed on activation, Break, interrupt, cancellation or death. The mature ground aura's baseline is stable as lights circulate.
+
+User confirmed the impact area:
+
+```
+x x x | x x
+x x x | O x
+```
+
+FRONT_RECT_3X2 covers three full columns immediately ahead of O and O's row plus the row above. For O=(r2,c11), the six nominal cells are rows1–2 / columns8–10. All six take the same authored multiplier, including stacked recipients once; O's own column, behind and the top playable lane are excluded. This is relative to the anchor, as confirmed, rather than shifted beyond the previously reserved boss body. The mirrored orientation is supported. Telegraph and impact share this logical shape. The impact's placement anchor is its lower middle (r2,c9 when facing left), width three cells so each outer column gets its full half-cell extent; height two cells.
+
+Visible lower alpha bounds author each ground frame's pivot: aura and impact bottom edges land at the feet plane (dy27.25%), not the PNG centre. Moving glints cannot extend below or bob the held ground aura. Character atlas remains byte-identical. Cast time 3s, cooldown18s, recovery0.78s, Break100 and damage ×1.5 remain; the area change is explicitly user requested.
+
+Generic corrections: monster casts commit their facing through resolution, then release it at cast end. A missed DAMAGE skill reports no hit recipients, so a SELF aim cannot create a false contact burst on the boss. Support/buff skills still report their intended targets.
+
+Validation: 884/884 Karma; app/spec TypeScript, sprite optimization and production build pass. Tests cover both directions of the exact six-cell area, stacked targets, excluding under/beyond/behind O, a target moving behind during charge, true whiffs with no caster contact, all ground-frame foot pivots, full three-cell half-widths, moving tip presentation and charge lifetime. Actual desktop/mobile captures and source comparison are in docs/review-images/2026-10-29-aegis-s3-cast. Mobile uses a fresh context at its own viewport. A separate fixture injects 100 Break through the real interrupt path and verifies both charge layers disappear with no impact. Isolated S2/S3 MP4s use current runtime assets and samplers, not a full combat recording. All 19 original SHA256 values and the unchanged character atlas are checked. No merge or deployment.

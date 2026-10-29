@@ -886,6 +886,10 @@ export class BattleComponent implements OnDestroy {
       const left = caster.actionFacing?.left ?? !!this.facing.get(caster.id);
       return { r: 0, c: left ? 0 : q.c + .5, w: Math.max(0, left ? q.c + .5 : BOARD_COLS - q.c - .5), h: 3 };
     }
+    if (area === 'FRONT_RECT_3X2') {
+      const q = this.screenOf(caster),left = caster.actionFacing?.left ?? !!this.facing.get(caster.id);
+      return { r: q.r-1,c: q.c+(left ? -3 : 1),w: 3,h: 2 };
+    }
     return { r: p.r - k, c: p.c - k, w: 2 * k + 1, h: 2 * k + 1 };
   }
 
@@ -996,13 +1000,16 @@ export class BattleComponent implements OnDestroy {
     const monsterFx = (src: number, clip: string | undefined, phase: 'cast' | 'activate') => {
       const u = unitOf(src);
       const sheet = SHEETS[u?.sprite ?? ''];
-      for (const name of sheet?.monsterFx?.[clip ?? '']?.[phase] ?? []) {
+      const binding = sheet?.monsterFx?.[clip ?? ''];
+      for (const name of binding?.[phase] ?? []) {
         const d = FX[name];
         if (!d) continue;
-        const flip = !!this.facing.get(src);
+        const flip = u.actionFacing?.left ?? !!this.facing.get(src);
         const offset = fxOffset(name, u.sprite);
         // An edge beam is horizontal and starts at the weapon tip; only its separate shaft changes length.
-        const position = posOf(src);
+        const p = posOf(src);
+        const at = d.groundArea ? groundFxCell(d,u.pos,u.pos,flip) : u.pos;
+        const position = { r: p.r+at.r-u.pos.r,c: p.c+at.c-u.pos.c };
         const stretch = d.toBoardEdge ? edgeBeamStretch(d, position.c, flip, offset) : undefined;
         const angle = d.at === 'self' && d.orient === 'rotate'
           ? Math.atan2(-.25 - offset[1] / 100, fxWidthCells(d) * (flip ? -1 : 1)) * 180 / Math.PI - (flip ? 180 : 0) : 0;
@@ -1011,7 +1018,8 @@ export class BattleComponent implements OnDestroy {
           offset, under: d.layer === 'under', follow: fxAttached(name) ? src : undefined,
           owner: src, managed: true,
           // Reuse the existing game-clock track lifecycle; pause/hit-stop must not consume a short release FX.
-          ...(phase === 'activate' ? { track: { durationMs,
+          ...(phase === 'cast' && binding?.tracks?.[name] ? { track: binding.tracks[name] }
+            : phase === 'activate' ? { track: { durationMs,
             alpha: [[0,1],[durationMs - (d.fadeOutMs ?? 0),1],[durationMs,0]] as [number,number][] } } : {}) });
       }
     };

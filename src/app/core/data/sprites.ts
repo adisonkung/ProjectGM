@@ -5,6 +5,7 @@
  */
 
 import type { FxTrack } from '../models/fx';
+import { AEGIS_S3_GROUND_BOTTOMS, AEGIS_S3_IMPACT_BOTTOMS, AEGIS_S3_TIP_ANCHOR, AEGIS_S3_TIP_MOTION } from './aegis-s3-presentation';
 import type { ParticleRef } from './particles';
 import { AnimationConfig, SemanticEvent } from '../models/monster';
 import { MONSTERS, PROJECTILES } from './monsters';
@@ -97,7 +98,7 @@ export interface SequenceFxCue {
 
 export interface SheetDef {
   /** Monster clip presentation; combat events own cast cancellation and activation, never PNG frame checks. */
-  monsterFx?: Record<string, { cast?: string[]; activate?: string[] }>;
+  monsterFx?: Record<string, { cast?: string[]; activate?: string[]; tracks?: Record<string,FxTrack> }>;
   /** Contact sparks while the holder actually has a guarding status (rate-limited by the view). */
   damageFx?: Record<string, string>;
   deathFx?: string;
@@ -162,7 +163,7 @@ export interface FxDef {
   /** 'allies' = centre of the caster's living team formation (team-wide field, e.g. a healer's ritual) */
   at: 'self' | 'target' | 'allies';
   /** Place a ground effect at the logical footprint centre, independent of its PNG dimensions. */
-  groundArea?: 'SQUARE_2' | 'FRONT_RECT_2X3';
+  groundArea?: 'SQUARE_2' | 'FRONT_RECT_2X3' | 'FRONT_RECT_3X2';
   /** เลื่อนจากกลางช่อง เป็น % ของช่อง (+x ขวา, +y ลง) */
   dx?: number;
   dy?: number;
@@ -1113,12 +1114,15 @@ for (const m of Object.values(MONSTERS)) {
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
   pixelated: true, hitFlashStrength: .35,
   attackFx: ['ae-attack-thrust'], preloadFx: ['ae-s2-impact', 'ae-s3-impact'],
-  anchors: { weaponTip: [186, -110] },
+  anchors: { weaponTip: [186, -110], judgementTip: AEGIS_S3_TIP_ANCHOR },
   statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' } },
   damageFx: { aegis_guard: 'ae-s1-hit' }, deathFx: 'ae-death',
   monsterFx: {
     lance: { cast: ['ae-s2-charge'], activate: ['ae-s2-muzzle', 'ae-s2-beam'] },
-    judgement: { cast: ['ae-s3-charge'], activate: ['ae-s3-wave'] },
+    judgement: { cast: ['ae-s3-ground-charge','ae-s3-charge'], activate: ['ae-s3-wave'], tracks: {
+      'ae-s3-charge': { durationMs: 3000, alpha: [[0,0],[120,.8],[1000,1],[3000,1]], motion: AEGIS_S3_TIP_MOTION },
+      'ae-s3-ground-charge': { durationMs: 3000, alpha: [[0,0],[180,1],[3000,1]] },
+    } },
   },
 } satisfies Partial<SheetDef>);
 // The supplied death settles in place: fade with the shutdown VFX rather than leaving a standing corpse.
@@ -1146,10 +1150,14 @@ export const FX: Record<string, FxDef> = {
     orient: 'flip', attach: false, repeat: 2, fadeOutMs: 120, blend: 'add' },
   'ae-s2-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
     at: 'target', fitCells: .8, dy: -20 },
-  'ae-s3-charge': { file: 'fx-aegis-tip-charge.png', frames: 24, w: 120, h: 120, frameMs: 50,
-    at: 'self', dx: 65, dy: -210, delayMs: 900, scale: .7, attach: true, repeat: 2, blend: 'add' },
+  'ae-s3-charge': { file: 'fx-aegis-s3-tip-charge.png', frames: 75, w: 160, h: 160, frameMs: 40,
+    at: 'self', anchor: 'judgementTip', fitCells: 1.7, attach: true, blend: 'add' },
+  'ae-s3-ground-charge': { file: 'fx-aegis-s3-ground-charge.png', frames: 75, w: 360, h: 240, frameMs: 40,
+    at: 'self', fitCells: 3.4, ground: AEGIS_S3_GROUND_BOTTOMS, pivot: [.5,1], dy: 27.25,
+    attach: true, layer: 'under' },
   'ae-s3-wave': { file: 'fx-aegis-shockwave.png', frames: 8, w: 300, h: 160, frameMs: 50,
-    at: 'self', fitCells: 4, pivot: [.5,.75], dy: 35, layer: 'under' },
+    at: 'self', groundArea: 'FRONT_RECT_3X2', fitCells: 3, fitRows: 2,
+    ground: AEGIS_S3_IMPACT_BOTTOMS, pivot: [.5,1], dy: 27.25, attach: false, layer: 'under' },
   'ae-s3-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
     at: 'target', fitCells: .65, dy: -20 },
   'ae-core': { file: 'fx-aegis-core.png', frames: 10, w: 100, h: 100, frameMs: 80,

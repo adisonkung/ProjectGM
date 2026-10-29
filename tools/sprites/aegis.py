@@ -130,6 +130,9 @@ for i in range(32):
    radius=77*(1-u)**.85;angle=math.tau*(u*1.65+arm/3)
    x=90+math.cos(angle)*radius;y=90+math.sin(angle)*radius*.8
    color=(255,220,135) if arm==0 else (80,229,255)
+   # Short connected flashes share the inward spiral's direction, rather than isolated dots only.
+   v=(u+.018)%1;r2=77*(1-v)**.85;a2=math.tau*(v*1.65+arm/3)
+   if v>u:d.line((x,y,90+math.cos(a2)*r2,90+math.sin(a2)*r2*.8),fill=(*color,round(100+145*u)),width=2)
    star(d,x,y,1.6+u*2.6,color,70+round(175*u))
  glow=light.filter(ImageFilter.GaussianBlur(3));glow.alpha_composite(light)
  core=ImageDraw.Draw(glow);pulse=2+math.sin(phase*math.tau)**2
@@ -162,6 +165,8 @@ thrust=[]
 for i in range(6):
  im=Image.new('RGBA',(120,48));d=ImageDraw.Draw(im);x=28+i*13;alpha=round(255*(1-i/6));d.line((max(0,x-46),24,x,24),fill=(75,228,255,alpha),width=3);d.polygon([(x-12,18),(x+12,24),(x-12,30)],fill=(237,254,255,alpha));thrust.append(im)
 strip('thrust',thrust,(120,48))
+from aegis_s3 import bake_s3
+bake_s3(SRC,OUT,REPORT,strip,star)
 (REPORT/'bake-report.json').write_text(json.dumps({'character':{'cols':COLS,'rows':len(rows),'w':W,'h':H,'scale':SCALE,'canonicalFacing':'right','mapping':mapping},'fx':meta,'notes':['RGB checkerboard FX alpha reconstructed; originals preserved unchanged.','Barrier idle: fixed frame + procedural 64-frame light within painted VFX; no generated frame-to-frame warping.','Native-alpha supplied S2 emitter kept separate; only the supplied beam body stretches to the edge.']},indent=2))
 # Dark-background alpha inspection plates.
 for name in ['barrier-loop','barrier-hit','tip-charge','beam','shockwave']:

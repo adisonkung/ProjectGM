@@ -83,5 +83,15 @@
     "file": "10-fx-aegis-s2-emitter.png",
     "bytes": 1375375,
     "sha256": "d53e559ce2b5539a1c5947200aa7007efd25a9873bfe5022b924935a9e347cbb"
+  },
+  {
+    "file": "11-fx-aegis-s3-tip-charge.png",
+    "bytes": 545090,
+    "sha256": "de1ee4c3d6b4025c3545f97d12819500621b6bd5edee10cb110710bd47834465"
+  },
+  {
+    "file": "12-fx-aegis-s3-ground-charge.png",
+    "bytes": 429131,
+    "sha256": "c452595d7c3fc722ea4e91d6714214db822f39232a319f6b13f17a13f20fc5f2"
   }
 ]

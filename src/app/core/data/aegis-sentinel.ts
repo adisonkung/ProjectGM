@@ -20,9 +20,9 @@ export const AEGIS_SKILLS: Record<string, MonsterSkillDefinition> = {
     id: 'aegis_judgement', name: 'คำพิพากษาแห่งประตู', label: 'GATE JUDGEMENT', type: 'ATTACK',
     castTime: 3, cooldown: 18, firstCastDelay: 14, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 100,
     brokenStatus: 'broken', clip: 'judgement', target: { type: 'SELF' },
-    effects: [{ type: 'DAMAGE', mul: 1.5, area: 'RADIUS_3', center: 'SELF' }],
+    effects: [{ type: 'DAMAGE', mul: 1.5, area: 'FRONT_RECT_3X2', center: 'SELF' }],
     conditions: [{ type: 'ENEMY_WITHIN', range: 3 }], recovery: .78, interruptRecovery: 0,
-    mockFx: { color: '#efc66d', area: 'RADIUS_3' }, hitFx: 'ae-s3-impact',
+    mockFx: { color: '#efc66d', area: 'FRONT_RECT_3X2' }, hitFx: 'ae-s3-impact',
   },
 };
 

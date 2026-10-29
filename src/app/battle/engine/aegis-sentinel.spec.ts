@@ -12,7 +12,7 @@ import { clipTimeline } from '../render/unit-clip';
 import { BattleEvent } from './battle-engine';
 import { hasStatus } from './buffs';
 import { resolveArea } from './area';
-import { edgeBeamStretch, fxPlacement } from '../render/fx-clip';
+import { edgeBeamStretch, fxPlacement, fxPivot, groundFxCell, fxPoseAt } from '../render/fx-clip';
 
 function duel(skill: string) {
   const h = HERO_BY_ID['bailong'];
@@ -31,6 +31,63 @@ function duel(skill: string) {
 }
 
 describe('Aegis Sentinel integration', () => {
+  it('S3 covers exactly the six cells directly ahead of the lower O anchor, including stacked targets once', () => {
+    for (const left of [true,false]) {
+      const caster = { id: 1,pos: { r: 2,c: 7 },actionFacing: { left } };
+      const dir = left ? -1 : 1;
+      const cells = [1,2,3].flatMap(c => [1,2].map(r => ({ id: c*10+r,pos: { r,c: 7+dir*c } })));
+      const stacked = { id: 99,pos: cells[0].pos };
+      const outside = [{ id: 100,pos: { r: 2,c: 7 } },{ id: 101,pos: { r: 0,c: 7+dir*2 } },
+        { id: 102,pos: { r: 2,c: 7-dir } },{ id: 103,pos: { r: 2,c: 7+dir*4 } }];
+      const hits = resolveArea({ pattern: 'FRONT_RECT_3X2',caster,primary: outside[0],candidates: [...cells,stacked,...outside] });
+      expect(hits.map(x => x.id)).toEqual([...cells,stacked].map(x => x.id));
+    }
+  });
+
+  it('S3 keeps its committed forward area if its only opponent moves behind during charge', () => {
+    const s = duel('aegis_judgement');
+    s.run(4,() => s.boss.casting?.def.id === 'aegis_judgement');
+    expect(s.boss.actionFacing?.left).toBeTrue();
+    const hero = s.e.units.find(u => !u.monster)!;
+    const cell = { r: s.boss.pos.r,c: s.boss.pos.c+3 };
+    s.e.grid.move(hero.id,hero.pos,cell);hero.pos = cell;hero.x = cell.c;hero.y = cell.r;
+    hero.moveCd = 999;hero.atkCd = 999;
+    s.run(4,() => s.events.some(e => e.type === 'skillActivated' && e.skill === 'aegis_judgement'));
+    const hit = s.events.find(e => e.type === 'skillActivated' && e.skill === 'aegis_judgement');
+    expect(hit?.type === 'skillActivated' ? hit.targets : []).toEqual([]);
+    expect(s.boss.casting).toBeNull();
+  });
+
+  it('ground charge and front impact pin every visible lower edge to the feet plane, with full half-cell widths', () => {
+    const body = { r: 2,c: 11 },cell = 50;
+    for (const name of ['ae-s3-ground-charge','ae-s3-wave']) {
+      const d = FX[name],point = groundFxCell(d,body,body,true);
+      expect(point).toEqual(name === 'ae-s3-wave' ? { r: 2,c: 9 } : body);
+      for (let frame = 0; frame < d.frames; frame++) {
+        const at = fxPlacement(d,cell,point.c*cell,point.r*cell,true,0);
+        const pivot = fxPivot(d,frame);
+        const top = at.y-pivot[1]*at.height;
+        expect(top+d.ground![frame]/d.h*at.height).toBeCloseTo((2+.5+.2725)*cell,6);
+        if (name === 'ae-s3-wave') {
+          expect(at.x-at.width/2).toBe(8*cell);
+          expect(at.x+at.width/2).toBe(11*cell);
+        }
+      }
+    }
+    const sheet = SHEETS['enemy-aegis-sentinel.png'];
+    const binding = sheet.monsterFx!['judgement'];
+    for (const name of binding.cast!) {
+      const track = binding.tracks![name];
+      expect(fxPoseAt(FX[name],2.95,false,track).visible).toBeTrue();
+      expect(fxPoseAt(FX[name],3,false,track).done).toBeTrue();
+    }
+    const track = binding.tracks!['ae-s3-charge'];
+    const upright = fxPoseAt(FX['ae-s3-charge'],.2,false,track),raised = fxPoseAt(FX['ae-s3-charge'],1.9,false,track);
+    expect(upright.dx).toBe(0);
+    expect(raised.dx).toBeLessThan(-150); // follows the spear raised behind the boss, not its old fixed position.
+    expect(AEGIS_SKILLS['aegis_judgement'].breakRequired).toBe(100);
+    expect(AEGIS_SKILLS['aegis_judgement'].castTime).toBe(3);
+  });
   it('the straight beam hits all three lanes ahead to the edge, once per unit, never behind the committed facing', () => {
     const caster = { id: 1, pos: { r: 2, c: 11 }, actionFacing: { left: true } };
     const candidates = [

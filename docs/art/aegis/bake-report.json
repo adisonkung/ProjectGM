@@ -288,6 +288,16 @@
       "frames": 6,
       "w": 120,
       "h": 48
+    },
+    "s3-tip-charge": {
+      "frames": 75,
+      "w": 160,
+      "h": 160
+    },
+    "s3-ground-charge": {
+      "frames": 75,
+      "w": 360,
+      "h": 240
     }
   },
   "notes": [
