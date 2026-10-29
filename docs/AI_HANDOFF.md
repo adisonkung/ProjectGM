@@ -393,3 +393,6 @@ Home deployment authorization (2026-10-24 Bangkok): user approved the reviewed H
 
 ## 2026-10-29 — Home/profile UI task
 Branch `fix/lobby-profile-customization` based on freshly fetched origin/master f85731d. Compact Home, square contained profile portrait, zoom-out with viewport-filling sky, adventure text contrast, Account > ตกแต่ง with roster portraits/four frame themes. Optional profile cosmetic fields preserve v6 compatibility and transfer with save. Existing untracked karma.ci.cjs preserved and excluded from commit. No deploy/master merge. See PROFILE_CUSTOMIZATION_REVIEW.md for checks/screenshots. Last confirmed canonical-local sync base above is unchanged.
+
+### Profile frame visual follow-up — 2026-10-29
+User requested ornate frames with flowing/sparkling effects. Implemented four theme-specific SVG ornaments and CSS animation in shared/profile-portrait.component.{ts,html,scss}; no save logic change. App/spec checks,890 Karma,production build and real desktop/mobile/motion checks pass. Review pairs and actual-game motion: profile-frame-review/README.md. Same task branch. No deploy/master merge; confirmed canonical sync base unchanged.
