@@ -12,7 +12,7 @@
 
     <aside class="chapter-panel gilded" aria-label="อาณาจักรและความคืบหน้า">
       <app-citadel-frame shape="chapter" [cut]="30" />
-      <div class="chapter-illustration" aria-hidden="true"></div>
+      <a class="chapter-illustration" routerLink="/account" aria-label="ตกแต่งโปรไฟล์"><app-profile-portrait /></a>
       <header class="chapter-art">
         <h1>{{ island().name }}</h1>
         <span class="realm-stage">{{ stageName() }}</span>

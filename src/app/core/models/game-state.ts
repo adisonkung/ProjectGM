@@ -27,6 +27,8 @@ export interface FarmRecord {
 
 export interface GameState {
   version: 6;
+  /** Optional cosmetics keep existing v6 saves compatible. */
+  profile?: { portrait: string; frame: string };
   gems: number;
   gold: number;
   pity: number;

@@ -103,3 +103,9 @@ dialog[open]:not(.scene), [role='dialog']:not(.event) { animation: citadel-dialo
   button:active:not(:disabled), a.gm-btn:active { scale: none; }
   dialog[open]:not(.scene), [role='dialog']:not(.event), .app main > router-outlet + * { animation: none; }
 }
+
+// Account reference skin uses global selectors; keep the new square portrait uncut.
+html body .app app-account .profile-card app-profile-portrait.island-thumb {
+  width:72px; height:72px; flex:0 0 72px; border:0; clip-path:none;
+}
+html body .app:has(.cosmetic-dialog) .bar { z-index:0; }
