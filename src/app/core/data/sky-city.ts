@@ -98,8 +98,7 @@ export const SKY_LAYERS = {
 };
 /** island heroes are drawn smaller here (the city is painted at a smaller scale than the battle sprites) */
 export const SKY_HERO_SCALE = 0.62;
-/** camera zoom over fit-to-height. Fixed at 1: the whole city fills a big screen (zooming in made the GPU
- *  re-rasterize the huge layers at 2–3× and stutter); kept as a knob — min < max shows the +/− buttons again */
+/** Camera zoom over the scene fit. Home fits the main island beside its HUD at `start`; buttons allow manual zoom. */
 export const SKY_ZOOM = { min: 0.65, start: 0.82, max: 1.5 };
 
 /** every image the city paints (preloaded + decoded at app start by PreloadService) */

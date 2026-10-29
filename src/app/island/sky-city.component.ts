@@ -142,9 +142,10 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
       el.addEventListener('wheel', e => this.onWheel(e), { passive: false });
     });
     this.fit();
-    this.panTo(SKY_NODES[SKY_SPAWN].x, SKY_NODES[SKY_SPAWN].y - 120, false);
-    // start with the whole sky under the app bar (top of the world just below it)
-    this.setPan(this.panX(), -this.topInset);
+    if (!this.referenceLook()) {
+      this.panTo(SKY_NODES[SKY_SPAWN].x, SKY_NODES[SKY_SPAWN].y - 120, false);
+      this.setPan(this.panX(), -this.topInset);
+    }
   }
 
   ngOnDestroy(): void {
@@ -165,9 +166,28 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
     this.vpW.set(w);
     this.vpH.set(h);
     this.topInset = Math.min(top, h * 0.3);
-    const sceneHeight = (h - this.topInset) * (this.referenceLook() && w <= 720 ? .68 : 1);
+    if (this.referenceLook()) {
+      const style = getComputedStyle(el);
+      this.homeInsets = { left: parseFloat(style.paddingLeft) || 0, right: parseFloat(style.paddingRight) || 0,
+        top: parseFloat(style.paddingTop) || 0, bottom: parseFloat(style.paddingBottom) || 0 };
+      const width = Math.max(1, w - this.homeInsets.left - this.homeInsets.right);
+      const height = Math.max(1, h - this.homeInsets.top - this.homeInsets.bottom);
+      // The main island occupies the middle 82% of the authored base; satellite islands may remain in the margins.
+      // At default zoom its complete body/spire fits beside the profile and above the enlarged team/actions.
+      this.fitK.set(Math.min(width / (SKY_BASE.w * .82), height / SKY_BASE.h) / SKY_ZOOM.start);
+      const f = this.focus();
+      this.panTo(f?.x ?? SKY_BASE.w * .51, f?.y ?? SKY_BASE.y + SKY_BASE.h / 2, false);
+      return;
+    }
+    const sceneHeight = h - this.topInset;
     this.fitK.set(Math.max(sceneHeight / this.H, w / this.W));
     if (!first) this.panTo(cx, cy, false);
+  }
+  private homeInsets = { left: 0, right: 0, top: 0, bottom: 0 };
+  private viewCenter(): { x: number; y: number } {
+    const i = this.homeInsets;
+    return this.referenceLook() ? { x: (i.left + this.vpW() - i.right) / 2, y: (i.top + this.vpH() - i.bottom) / 2 }
+      : { x: this.vpW() / 2, y: this.vpH() / 2 };
   }
   private topInset = 0;
   private fitted = false;
@@ -175,6 +195,12 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   private clampPan(x: number, y: number): [number, number] {
     const k = this.k();
     const y0 = -this.topInset;
+    if (this.referenceLook()) {
+      const i = this.homeInsets;
+      // A contained island needs negative pan (positive translation) to sit to the right of the HUD.
+      return [Math.max(Math.min(0, this.W * k - this.vpW(), -i.left), Math.min(Math.max(0, this.W * k - this.vpW() + i.right), x)),
+        Math.max(Math.min(y0, this.H * k - this.vpH(), -i.top), Math.min(Math.max(y0, this.H * k - this.vpH() + i.bottom), y))];
+    }
     return [Math.max(0, Math.min(this.W * k - this.vpW(), x)), Math.max(y0, Math.min(Math.max(y0, this.H * k - this.vpH()), y))];
   }
   private setPan(x: number, y: number): void {
@@ -187,7 +213,8 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
   /** centre the camera on a world point */
   panTo(x: number, y: number, smooth: boolean): void {
     cancelAnimationFrame(this.tween);
-    const [tx, ty] = this.clampPan(x * this.k() - this.vpW() / 2, y * this.k() - this.vpH() / 2);
+    const center = this.viewCenter();
+    const [tx, ty] = this.clampPan(x * this.k() - center.x, y * this.k() - center.y);
     if (!smooth || typeof requestAnimationFrame === 'undefined') return this.setPan(tx, ty);
     const fx = this.panX(), fy = this.panY(), t0 = performance.now(), dur = 600;
     const step = (now: number) => {
@@ -203,7 +230,8 @@ export class SkyCityComponent implements AfterViewInit, OnDestroy {
     const nz = Math.max(SKY_ZOOM.min, Math.min(SKY_ZOOM.max, z));
     if (nz === this.zoom()) return;
     const k0 = this.k();
-    const cx = (this.panX() + this.vpW() / 2) / k0, cy = (this.panY() + this.vpH() / 2) / k0;
+    const center = this.viewCenter();
+    const cx = (this.panX() + center.x) / k0, cy = (this.panY() + center.y) / k0;
     this.zoom.set(nz);
     this.panTo(cx, cy, false);
   }

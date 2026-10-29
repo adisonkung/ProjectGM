@@ -1,4 +1,4 @@
-<div class="vp" #vp [class.loading]="!ready()" [class.lite]="lite()" [class.reference-look]="referenceLook()" (pointerdown)="onPointerDown($event)">
+<div class="vp" #vp [class.loading]="!ready()" [class.lite]="lite()" [class.reference-look]="referenceLook()" [class.compact-labels]="referenceLook() && k() < 0.22" (pointerdown)="onPointerDown($event)">
   <!-- sky, clouds, far islands, whale, dragon: drawn on a screen-sized canvas (see sky-canvas.ts) -->
   <canvas class="cv" #back aria-hidden="true"></canvas>
   <div class="stage">
@@ -101,7 +101,7 @@
           </button>
           <div class="plate" [class.locked]="b.locked && !b.usable" [class.future]="b.future" [style.left.px]="b.plate.x" [style.top.px]="b.plate.y">
             @if (referenceLook()) { <app-citadel-frame shape="hex" [cut]="15" /> }
-            <b>@if (referenceLook()) { <app-citadel-icon [name]="b.id === 'tower' ? 'tower' : b.icon" [size]="21" /> } @else { <app-icon [name]="b.icon" [size]="16" /> } {{ b.name }}</b>
+            <b>@if (referenceLook()) { <app-citadel-icon [name]="b.id === 'tower' ? 'tower' : b.icon" [size]="21" /> } @else { <app-icon [name]="b.icon" [size]="16" /> } <span class="plate-name">{{ b.name }}</span></b>
             @if (b.usable) { <small class="open">✦ ใช้งานได้</small> }
             @else if (b.locked) { <small>🔒 ชั้น {{ b.requirement }}</small> }
             @else if (b.future) { <small class="soon">เร็ว ๆ นี้</small> }
