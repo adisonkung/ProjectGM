@@ -2,7 +2,7 @@
 <section class="account reference-account">
   <header class="head citadel-surface"><app-citadel-frame shape="chapter" [cut]="26" /><app-citadel-icon name="people" [size]="44" /><div><h1 class="gm-title">บัญชีและย้ายเซฟ</h1><p class="gm-sub">เซฟเก็บอยู่ในเบราว์เซอร์เครื่องนี้</p></div></header>
   @if (notice()) { <p class="notice" role="status"><app-icon name="check" [size]="20" />{{ notice() }}</p> }
-  <div class="profile-card citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" /><img class="island-thumb" src="/ui/eldervane/citadel.webp" alt="" /><span class="profile-label"><app-citadel-icon name="tower" [size]="31" />ชื่อเกาะ</span><b class="isle-name">{{ account.islandName() }}</b><button type="button" class="gm-btn ghost citadel-surface citadel-control" (click)="edit()"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="edit" [size]="20" />เปลี่ยนชื่อ</button></div>
+  <div class="profile-card citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" /><app-profile-portrait class="island-thumb" /><span class="profile-label"><app-citadel-icon name="tower" [size]="31" />ชื่อเกาะ</span><b class="isle-name">{{ account.islandName() }}</b><button type="button" class="gm-btn ghost citadel-surface citadel-control" (click)="edit()"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="edit" [size]="20" />เปลี่ยนชื่อ</button><button type="button" class="gm-btn ghost" (click)="decorating.set(true)">✧ ตกแต่ง</button></div>
   <div class="grid">
     <section class="gm-panel card export-card citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" />
       <header class="section-heading"><app-icon name="export" [size]="34" /><div><h2 class="gm-h2">ส่งออกเซฟ</h2><p>สร้างรหัสย้ายเซฟ หรือดาวน์โหลดไฟล์เซฟ<br />เพื่อนำไปใช้กับเครื่องอื่น</p></div></header>
@@ -30,3 +30,29 @@
     </section></div>
   }
 </section>
+
+@if (decorating()) {
+  <div class="account-overlay" (click)="decorating.set(false)" (keydown.escape)="decorating.set(false)">
+    <section class="cosmetic-dialog" role="dialog" aria-modal="true" aria-labelledby="cosmetic-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" (click)="$event.stopPropagation()">
+      <button type="button" class="dialog-close" cdkFocusInitial (click)="decorating.set(false)" aria-label="ปิดตกแต่ง">×</button>
+      <h2 id="cosmetic-title">ตกแต่งโปรไฟล์</h2>
+      <div class="cosmetic-preview"><app-profile-portrait /><span>{{ account.islandName() }}<small>บันทึกอัตโนมัติ · ใช้กับหน้าหลักทันที</small></span></div>
+      <nav class="cosmetic-tabs" aria-label="หมวดตกแต่ง">
+        <button type="button" [attr.aria-pressed]="cosmeticTab() === 'portrait'" (click)="cosmeticTab.set('portrait')">รูปโปรไฟล์</button>
+        <button type="button" [attr.aria-pressed]="cosmeticTab() === 'frame'" (click)="cosmeticTab.set('frame')">กรอบรูปโปรไฟล์</button>
+      </nav>
+      <div class="cosmetic-grid">
+        @if (cosmeticTab() === 'portrait') {
+          @for (p of portraits; track p.id) {
+            <button type="button" [attr.aria-pressed]="account.portraitId() === p.id" (click)="account.setPortrait(p.id)"><app-profile-portrait [src]="p.src" /><span>{{ p.name }}</span></button>
+          }
+        } @else {
+          @for (f of account.frames; track f.id) {
+            <button type="button" [attr.aria-pressed]="account.frame() === f.id" (click)="account.setFrame(f.id)"><app-profile-portrait [frame]="f.id" [motif]="f.motif" /><span>{{ f.name }}</span></button>
+          }
+        }
+      </div>
+      <button type="button" class="gm-btn primary" (click)="decorating.set(false)">เสร็จสิ้น</button>
+    </section>
+  </div>
+}

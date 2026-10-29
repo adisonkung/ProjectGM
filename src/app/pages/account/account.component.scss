@@ -35,3 +35,12 @@
 @media (max-width:400px) { .card { padding: 16px; } .row .gm-btn { white-space: normal; text-align: center; } }
 
 @include material.surfaces;
+
+.profile-card { flex-wrap:wrap; .island-thumb { width:72px; height:72px; flex:0 0 72px; object-fit:unset; } }
+.cosmetic-dialog { position:relative; width:min(640px,94vw); max-height:85dvh; overflow:auto; box-sizing:border-box; padding:28px; color:#fff0d0; background:linear-gradient(145deg,#24323e,#101820); border:1px solid #c2a16b; box-shadow:0 20px 90px #000b; }
+.cosmetic-preview { display:flex; align-items:center; gap:20px; margin:18px 0; app-profile-portrait { width:92px; flex:none; } small { display:block; font-size:12px; margin-top:8px; color:#c8cbd0; } }
+.cosmetic-tabs { display:flex; gap:8px; margin-bottom:18px; button { flex:1; min-height:44px; } }
+.cosmetic-dialog button { color:#f9e4b9; background:#18242e; border:1px solid #806d4d; cursor:pointer; }
+.cosmetic-dialog button[aria-pressed=true] { border-color:#ffe2a0; background:#3b3c36; box-shadow:inset 0 0 0 1px #ffe2a0; }
+.cosmetic-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:20px; button { padding:8px; } span { display:block; font-size:12px; margin-top:8px; } }
+@media(max-width:500px) { .cosmetic-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .cosmetic-dialog { padding:20px; } }

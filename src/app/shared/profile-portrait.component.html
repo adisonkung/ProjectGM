@@ -1,0 +1,58 @@
+<span class="portrait" [attr.data-frame]="theme()">
+  <span class="halo" aria-hidden="true"></span>
+  <span class="image-well"><img [src]="src() || account.portrait()" alt="รูปโปรไฟล์" /></span>
+  <svg class="metalwork" viewBox="0 0 120 120" fill="none" aria-hidden="true" focusable="false">
+    <path class="foundation" d="M21 6H99L114 21V99L99 114H21L6 99V21Z" />
+    <path class="outer-rim" d="M21 6H99L114 21V99L99 114H21L6 99V21Z" />
+    <path class="inner-rim" d="M25 14H95L106 25V95L95 106H25L14 95V25Z" />
+    <path class="engraving" d="M25 10H95M110 25V95M95 110H25M10 95V25 M29 17H91M103 29V91M91 103H29M17 91V29" />
+    <path class="flow-trail" pathLength="100" d="M21 6H99L114 21V99L99 114H21L6 99V21Z" />
+    <path class="flow-head" pathLength="100" d="M21 6H99L114 21V99L99 114H21L6 99V21Z" />
+    @switch (theme()) {
+      @case ('wuxia') {
+        <!-- Jade cloud scrolls, paired sword-like corner fittings and a lotus seal. -->
+        <g class="ornament">
+          <path d="M8 37C0 29 3 16 15 14C12 7 23 2 30 9L36 5M112 37C120 29 117 16 105 14C108 7 97 2 90 9L84 5 M8 83C0 91 3 104 15 106C12 113 23 118 30 111L36 115M112 83C120 91 117 104 105 106C108 113 97 118 90 111L84 115" />
+          <path d="M8 28C11 19 25 21 20 28C16 34 7 25 15 21M112 28C109 19 95 21 100 28C104 34 113 25 105 21 M8 92C11 101 25 99 20 92C16 86 7 95 15 99M112 92C109 101 95 99 100 92C104 86 113 95 105 99" />
+          <path class="inlay" d="M17 10L29 4L23 16L10 29L4 30L6 23Z M103 10L91 4L97 16L110 29L116 30L114 23Z M17 110L29 116L23 104L10 91L4 90L6 97Z M103 110L91 116L97 104L110 91L116 90L114 97Z" />
+        </g>
+        <path class="crest" d="M44 9C47 3 52 4 55 9L60 1L65 9C68 4 73 3 76 9L67 16H53Z" />
+        <path class="sigil" d="M50 10Q60 19 70 10M55 9L60 13L65 9" />
+      }
+      @case ('fantasy') {
+        <!-- A star crown with feathered celestial wings. -->
+        <g class="ornament">
+          <path class="inlay" d="M20 9L4 2L7 18L1 13L5 28L14 35L16 21L31 16Z M100 9L116 2L113 18L119 13L115 28L106 35L104 21L89 16Z M20 111L4 118L7 102L1 107L5 92L14 85L16 99L31 104Z M100 111L116 118L113 102L119 107L115 92L106 85L104 99L89 104Z" />
+          <path d="M8 8L21 21M6 17L16 26M112 8L99 21M114 17L104 26 M8 112L21 99M6 103L16 94M112 112L99 99M114 103L104 94" />
+          <path d="M33 7L39 12L44 7M76 7L81 12L87 7M33 113L39 108L44 113M76 113L81 108L87 113" />
+        </g>
+        <path class="crest" d="M43 12L40 2L51 7L60 0L69 7L80 2L77 12L68 18H52Z" />
+        <path class="gem" d="M60 3L65 10L60 17L55 10Z" />
+      }
+      @case ('dark') {
+        <!-- Obsidian horns, thorn filigree, garnet blood seal. -->
+        <g class="ornament">
+          <path class="inlay" d="M26 12C11 16 6 11 5 1C0 17 5 30 17 32L14 22L32 17Z M94 12C109 16 114 11 115 1C120 17 115 30 103 32L106 22L88 17Z M26 108C11 104 6 109 5 119C0 103 5 90 17 88L14 98L32 103Z M94 108C109 104 114 109 115 119C120 103 115 90 103 88L106 98L88 103Z" />
+          <path d="M7 40L1 35L5 51L1 59L7 64M113 40L119 35L115 51L119 59L113 64 M7 80L1 85L5 69M113 80L119 85L115 69 M38 7L33 1L49 5M82 7L87 1L71 5 M38 113L33 119L49 115M82 113L87 119L71 115" />
+        </g>
+        <path class="crest" d="M46 13L43 1L54 7L60 0L66 7L77 1L74 13L66 20H54Z" />
+        <path class="gem" d="M60 4L65 11L60 18L55 11Z" />
+      }
+      @default {
+        <!-- Gilded sky-island architecture with a rising crystal spire. -->
+        <g class="ornament">
+          <path class="inlay" d="M21 5H34L25 12L12 25L5 34V21Z M99 5H86L95 12L108 25L115 34V21Z M21 115H34L25 108L12 95L5 86V99Z M99 115H86L95 108L108 95L115 86V99Z" />
+          <path d="M20 10L10 20M100 10L110 20M20 110L10 100M100 110L110 100 M36 7L41 11L46 7M74 7L79 11L84 7 M36 113L41 109L46 113M74 113L79 109L84 113" />
+        </g>
+        <path class="crest" d="M47 13L46 6L53 9L60 1L67 9L74 6L73 13L65 18H55Z" />
+        <path class="gem" d="M60 3L64 10L60 16L56 10Z" />
+      }
+    }
+    <path class="crest lower-crest" d="M46 109L53 104H67L74 109L67 116H53Z" />
+    <path class="gem lower-gem" d="M60 106L65 110L60 114L55 110Z" />
+    <g class="spark spark-a"><path d="M18 12V24M12 18H24M15 15L21 21M15 21L21 15" /></g>
+    <g class="spark spark-b"><path d="M102 94V110M94 102H110M98 98L106 106M98 106L106 98" /></g>
+    <g class="spark spark-c"><path d="M110 28V36M106 32H114" /></g>
+  </svg>
+  <span class="motes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+</span>

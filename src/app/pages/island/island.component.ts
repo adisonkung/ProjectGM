@@ -1,3 +1,5 @@
+import { AccountService } from '../../core/services/account.service';
+import { ProfilePortraitComponent } from '../../shared/profile-portrait.component';
 import { Component, computed, effect, ElementRef, HostListener, inject, NgZone, OnDestroy, OnInit, signal, untracked, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { BUILDING_BY_ID, ISLAND_BUILDINGS, PLOT_BY_ID } from '../../core/data/island-layout';
@@ -49,12 +51,13 @@ const EVENT_TITLE: Record<IslandEvent['type'], string> = {
  */
 @Component({
   selector: 'app-island',
-  imports: [A11yModule, TowerOrnamentComponent, IslandDetailArtComponent, IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent, RouterLink],
+  imports: [ProfilePortraitComponent, A11yModule, TowerOrnamentComponent, IslandDetailArtComponent, IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent, RouterLink],
   templateUrl: './island.component.html',
   styleUrl: './island.component.scss',
 })
 export class IslandComponent implements OnInit, OnDestroy {
   private readonly save = inject(SaveService);
+  readonly account = inject(AccountService);
   readonly isl = inject(IslandService);
   private readonly roster = inject(RosterService);
   private readonly router = inject(Router);

@@ -142,3 +142,4 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .reference-look .plate.locked, .reference-look .plate.future { opacity: 0; }
 .reference-look .hit:is(:hover,:focus-visible,.sel) + .plate { opacity: 1; }
 @media (max-width: 720px) { .vp.reference-look { --ui-top: 170px; } .reference-look .plate b { font-size: 12px; } }
+.zoom { left:auto; right:14px; bottom:auto; top:46%; button { min-width:36px; min-height:36px; } }

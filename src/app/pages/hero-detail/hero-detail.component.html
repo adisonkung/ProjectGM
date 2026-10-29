@@ -11,7 +11,7 @@
         </span>
       }
     </nav>
-    <header class="show"><app-citadel-frame [cut]="28" />
+    <header class="show" [class.has-banner]="!!banner()"><app-citadel-frame [cut]="28" />
       @if (banner(); as bn) {
         <div class="key-art"><img class="key" [src]="bn" [alt]="tp.name" fetchpriority="high" /></div>
       } @else {

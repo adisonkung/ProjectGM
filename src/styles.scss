@@ -103,3 +103,25 @@ dialog[open]:not(.scene), [role='dialog']:not(.event) { animation: citadel-dialo
   button:active:not(:disabled), a.gm-btn:active { scale: none; }
   dialog[open]:not(.scene), [role='dialog']:not(.event), .app main > router-outlet + * { animation: none; }
 }
+
+// Account reference skin uses global selectors; keep the new square portrait uncut.
+html body .app app-account .profile-card app-profile-portrait.island-thumb {
+  width:72px; height:72px; flex:0 0 72px; border:0; clip-path:none;
+}
+html body .app:has(.cosmetic-dialog) .bar { z-index:0; }
+
+// Preserve every banner's native ratio; keep identity and progress off the artwork.
+html body .app app-hero-detail .detail.reference-overview .show.has-banner {
+  height:auto; min-height:0; padding:9px; background:linear-gradient(145deg,#1d2b38,#101923);
+  .key-art { position:relative; inset:auto; height:auto; width:100%; clip-path:none; overflow:visible; &::after { display:none; } }
+  .key { width:100%; height:auto; aspect-ratio:auto; object-fit:contain; object-position:center; }
+  .plate { position:relative; inset:auto; width:auto; max-width:none; margin:0; padding:22px 25px; box-sizing:border-box; }
+  .hero-status { right:25px; bottom:25px; }
+}
+@media(max-width:720px) {
+  html body .app app-hero-detail .detail.reference-overview .show.has-banner {
+    .plate { padding:18px 16px; }
+    .hero-status { position:relative; inset:auto; }
+    .name-line h1 { font-size:clamp(22px,6vw,31px); overflow-wrap:anywhere; }
+  }
+}

@@ -1,3 +1,4 @@
+import { HERO_ART } from '../data/hero-art';
 import { computed, inject, Injectable } from '@angular/core';
 import { decodeSaveText, DecodeResult, encodeSaveCode, islandNameError, needsIslandName, setIslandName } from '../rules/account';
 import { SaveService } from './save.service';
@@ -6,6 +7,30 @@ import { SaveService } from './save.service';
 @Injectable({ providedIn: 'root' })
 export class AccountService {
   private readonly save = inject(SaveService);
+
+  readonly frames = [
+    { id: 'default', name: 'เกาะลอยฟ้า', motif: '◇' },
+    { id: 'wuxia', name: 'Wuxia · หยกเมฆา', motif: '☯︎' },
+    { id: 'fantasy', name: 'Fantasy · มงกุฎดารา', motif: '✧' },
+    { id: 'dark', name: 'Dark Fantasy · บัลลังก์รัตติกาล', motif: '✦' },
+  ];
+  readonly portrait = computed(() => {
+    const id = this.save.state().profile?.portrait;
+    return id && HERO_ART[id] ? HERO_ART[id].portrait : 'ui/eldervane/citadel.webp';
+  });
+  readonly frame = computed(() => {
+    const id = this.save.state().profile?.frame;
+    return this.frames.some(f => f.id === id) ? id! : 'default';
+  });
+  readonly portraitId = computed(() => this.save.state().profile?.portrait ?? 'default');
+  setPortrait(id: string): void {
+    if (id !== 'default' && !HERO_ART[id]) return;
+    this.save.update(s => ({ ...s, profile: { portrait: id, frame: this.frame() } }));
+  }
+  setFrame(id: string): void {
+    if (!this.frames.some(f => f.id === id)) return;
+    this.save.update(s => ({ ...s, profile: { portrait: this.portraitId(), frame: id } }));
+  }
 
   readonly islandName = computed(() => this.save.state().island?.name ?? '');
   readonly needsName = computed(() => needsIslandName(this.save.state()));

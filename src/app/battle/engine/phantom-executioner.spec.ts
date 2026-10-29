@@ -51,7 +51,7 @@ describe('Vaelric — Phantom Executioner, provisional Phase A', () => {
   });
 
   it('Phantom Draw deals one contact hit and no projectile', () => {
-    const b = battle(); b.use('attack'); b.run(.25);
+    const b = battle(); b.place(b.foes[0], { r: 1, c: 6 }); b.use('attack'); b.run(.25);
     expect(b.foes.every(f => f.hp === 1e6)).toBeTrue();
     b.run(.65);
     const ev = b.e.drainEvents();

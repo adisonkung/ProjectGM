@@ -100,7 +100,7 @@ export const SKY_LAYERS = {
 export const SKY_HERO_SCALE = 0.62;
 /** camera zoom over fit-to-height. Fixed at 1: the whole city fills a big screen (zooming in made the GPU
  *  re-rasterize the huge layers at 2–3× and stutter); kept as a knob — min < max shows the +/− buttons again */
-export const SKY_ZOOM = { min: 1, start: 1, max: 1 };
+export const SKY_ZOOM = { min: 0.65, start: 0.82, max: 1.5 };
 
 /** every image the city paints (preloaded + decoded at app start by PreloadService) */
 export const SKY_CITY_ASSETS: readonly string[] = [

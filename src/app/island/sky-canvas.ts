@@ -124,22 +124,21 @@ export class SkyCanvasRenderer {
 
   private sky(ctx: CanvasRenderingContext2D, cam: SkyCamera): void {
     const im = this.img(SKY_LAYERS.sky);
-    // the DOM sky box was (−200, 0, W + 400, H), cover, position 30 % 100 %; reaches 400 px higher for the area behind the app bar
-    const bx = -200, bw = W + 400, bh = H + 400;
     if (!im) return;
-    const sc = Math.max(bw / im.naturalWidth, bh / im.naturalHeight);
+    // Sky covers the viewport independently of island zoom, including the newly exposed margins.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const vw = ctx.canvas.width, vh = ctx.canvas.height;
+    const sc = Math.max(vw / im.naturalWidth, vh / im.naturalHeight);
     const dw = im.naturalWidth * sc, dh = im.naturalHeight * sc;
-    this.at(ctx, cam, 0.04);
     ctx.globalAlpha = 1;
-    ctx.drawImage(im, bx + (bw - dw) * 0.3, H - dh, dw, dh);
+    ctx.drawImage(im, (vw - dw) * .3, vh - dh, dw, dh);
     if (this.daylight) {
-      // Grade only the sky layer: creatures and painted floating islands keep their own colors.
-      const daylight = ctx.createLinearGradient(0, -400, 0, H);
+      const daylight = ctx.createLinearGradient(0, 0, 0, vh);
       daylight.addColorStop(0, '#6babda'); daylight.addColorStop(.55, '#b3d7e8'); daylight.addColorStop(1, '#ffcfb4');
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
       ctx.fillStyle = daylight;
-      ctx.fillRect(bx, -400, bw, bh);
+      ctx.fillRect(0, 0, vw, vh);
       ctx.restore();
     }
   }

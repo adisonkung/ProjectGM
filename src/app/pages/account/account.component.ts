@@ -1,3 +1,6 @@
+import { HEROES } from '../../core/data/heroes';
+import { HERO_ART } from '../../core/data/hero-art';
+import { ProfilePortraitComponent } from '../../shared/profile-portrait.component';
 import { RouterLink } from '@angular/router';
 import { GameAccessService } from '../../core/services/game-access.service';
 import { A11yModule } from '@angular/cdk/a11y';
@@ -13,7 +16,7 @@ import { SaveImportComponent } from '../../shared/save-import.component';
 /** island name + move the save to another device (transfer code / file) — step 1 before cloud login */
 @Component({
   selector: 'app-account',
-  imports: [RouterLink, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, IconComponent, SaveImportComponent],
+  imports: [ProfilePortraitComponent, RouterLink, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, IconComponent, SaveImportComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss',
@@ -23,6 +26,9 @@ export class AccountComponent {
   readonly access = inject(GameAccessService);
   readonly max = ISLAND_NAME_MAX;
 
+  readonly decorating = signal(false);
+  readonly cosmeticTab = signal<'portrait' | 'frame'>('portrait');
+  readonly portraits = [{ id: 'default', name: 'Default · เกาะลอยฟ้า', src: 'ui/eldervane/citadel.webp' }, ...HEROES.filter(h => HERO_ART[h.id]).map(h => ({ id: h.id, name: h.name, src: HERO_ART[h.id].portrait }))];
   readonly editing = signal(false);
   readonly draft = signal('');
   readonly draftLength = computed(() => nameLength(normalizeIslandName(this.draft())));
