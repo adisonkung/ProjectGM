@@ -1,0 +1,20 @@
+{
+  "heroes": 15,
+  "variants": 90,
+  "size": [
+    512,
+    512
+  ],
+  "transparentPaddingPixels": 50,
+  "allPortraitHashesUnchanged": true,
+  "zipPngs": 90,
+  "zipCrc": "pass",
+  "appTypecheck": "pass",
+  "specTypecheck": "pass",
+  "karma": {
+    "passed": 902,
+    "total": 902
+  },
+  "productionBuild": "pass",
+  "buildWarnings": "Existing optional-chain and bundle/CSS budgets"
+}

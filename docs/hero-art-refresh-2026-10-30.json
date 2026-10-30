@@ -1,0 +1,342 @@
+{
+  "source": "assets/ui/hero-refresh-2026-10-30.zip",
+  "source_sha256": "55513781719da83b70e1bbbb18505f073a50e8b512c514fb793d90b4bda9cb76",
+  "images": [
+    {
+      "source_file": "bai_banner.png",
+      "hero": "bailong",
+      "kind": "banner",
+      "source_size": [
+        1672,
+        941
+      ],
+      "size": [
+        1600,
+        900
+      ],
+      "output": "public/banners/bailong.webp",
+      "source_sha256": "b3bcaf2ce5d0ca9aaebc266c3d356a0b38d8ce9ac341c949c89bc3d68c4e8573",
+      "output_sha256": "8a8939ab8a8ed5465a9203b2bbf015ab4550210edbbb2a5a0e178d099a391249"
+    },
+    {
+      "source_file": "bai_portrait.png",
+      "hero": "bailong",
+      "kind": "portrait",
+      "source_size": [
+        1199,
+        1312
+      ],
+      "size": [
+        702,
+        768
+      ],
+      "output": "public/portraits/bailong.webp",
+      "source_sha256": "fd662c1ae15e4ac568c7d4cb844122dbf5c7eb4f92629d675526b5b020d5ec04",
+      "output_sha256": "ce3fa860b96ef32f6ac235671b492c7f2b4447a0a1a26ad03f0ae1533885e02f"
+    },
+    {
+      "source_file": "dra_portrait.png",
+      "hero": "draeven",
+      "kind": "portrait",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "size": [
+        768,
+        768
+      ],
+      "output": "public/portraits/draeven.webp",
+      "source_sha256": "86abafae101d5ba2d837a2d28ebe27a93c2197af57ffe3a159bfe29058756af4",
+      "output_sha256": "5b6d721ada353958981909f9c4e0ff27741b5d031f90e2201aa8250aa06b6e09"
+    },
+    {
+      "source_file": "elira_banner.png",
+      "hero": "elira",
+      "kind": "banner",
+      "source_size": [
+        1942,
+        809
+      ],
+      "size": [
+        1600,
+        667
+      ],
+      "output": "public/banners/elira.webp",
+      "source_sha256": "b274481aebbf157e1af7dcd60e96aea2146ed35fc348e177119092ed96678f6a",
+      "output_sha256": "f96122cd0877b860dc921783a66f963e9e0d87a2ac0d9733346c2cf953d253f2"
+    },
+    {
+      "source_file": "elira_portrait.png",
+      "hero": "elira",
+      "kind": "portrait",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "size": [
+        512,
+        768
+      ],
+      "output": "public/portraits/elira.webp",
+      "source_sha256": "fe5ff9c25bfecb6d79907d9ae7c66f9cf38225e9dfc7e57dac241e09a148d281",
+      "output_sha256": "5a0e5f6a5de1d76ef8be81266afb0215ccb2944e66666a634ea8d6ebf7c5ef08"
+    },
+    {
+      "source_file": "garrick_banner.png",
+      "hero": "garrick",
+      "kind": "banner",
+      "source_size": [
+        1672,
+        941
+      ],
+      "size": [
+        1600,
+        900
+      ],
+      "output": "public/banners/garrick.webp",
+      "source_sha256": "aacb5731c810cce758084803d51dfc08c6c0be7f60738e89d6e1ff2d62875578",
+      "output_sha256": "e395b4e11ab0f370dc1a107adaa0e8018ccb8aac6aa746959ba5d0bee2c51156"
+    },
+    {
+      "source_file": "garrick_portrait2.png",
+      "hero": "garrick",
+      "kind": "portrait",
+      "source_size": [
+        1024,
+        1210
+      ],
+      "size": [
+        650,
+        768
+      ],
+      "output": "public/portraits/garrick.webp",
+      "source_sha256": "7a1ca14014ad717014b688320de5d4cf15b15b74b2cddb11f4c80382a629b5c4",
+      "output_sha256": "7b4d079aea91ee6d6b91a1e840b017a5233916cd5e309167ce7b648999db299c"
+    },
+    {
+      "source_file": "kael_banner.png",
+      "hero": "kael",
+      "kind": "banner",
+      "source_size": [
+        1672,
+        941
+      ],
+      "size": [
+        1600,
+        900
+      ],
+      "output": "public/banners/kael.webp",
+      "source_sha256": "a5aed9cca80e865294163e86f2901e5b52fb2bd90ab233634602f425a5314ac7",
+      "output_sha256": "a763d550f305521844f4a370a31fe43e7f168ee41ccb64f680b292ae039a4b38"
+    },
+    {
+      "source_file": "kael_portrait.png",
+      "hero": "kael",
+      "kind": "portrait",
+      "source_size": [
+        1024,
+        1535
+      ],
+      "size": [
+        512,
+        768
+      ],
+      "output": "public/portraits/kael.webp",
+      "source_sha256": "550c3740104b8ea6892e04b6f8d843c61c46255c1a79f60ab53efea91f2a1ce4",
+      "output_sha256": "de9cd9262f002228062fd2e69a7c19ffbc43c99e30a23878dd37afc5daf93af7"
+    },
+    {
+      "source_file": "lin_banner.png",
+      "hero": "linxue",
+      "kind": "banner",
+      "source_size": [
+        1774,
+        887
+      ],
+      "size": [
+        1600,
+        800
+      ],
+      "output": "public/banners/linxue.webp",
+      "source_sha256": "9ac768a69e2a0e53ca369eb3e4e052c8eaa598392d5598e521e3707f641184b1",
+      "output_sha256": "79c58061d0c2b85226783ee771ef67e6f28f97d45c7b20e862754e9ca7b2e322"
+    },
+    {
+      "source_file": "lin_portrait.png",
+      "hero": "linxue",
+      "kind": "portrait",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "size": [
+        512,
+        768
+      ],
+      "output": "public/portraits/linxue.webp",
+      "source_sha256": "672abe03f0a58f90f25352430cc6ed33a3588ddd3ec9e9ebba82110bbf0c2ef1",
+      "output_sha256": "c2990f05f69880737b4d2bf7683041da13493ca313872868039e863eca801daf"
+    },
+    {
+      "source_file": "mir_banner.png",
+      "hero": "mirelle",
+      "kind": "banner",
+      "source_size": [
+        1774,
+        887
+      ],
+      "size": [
+        1600,
+        800
+      ],
+      "output": "public/banners/mirelle.webp",
+      "source_sha256": "d3e614ed42fd47624c5e562afafff30ec48b05007021124ba536666dc198ae04",
+      "output_sha256": "14159ae37d485e6e92f3952b1c580e5afc7284bdcc96e58d379f6dfb9fff6a8f"
+    },
+    {
+      "source_file": "mir_portrait.png",
+      "hero": "mirelle",
+      "kind": "portrait",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "size": [
+        512,
+        768
+      ],
+      "output": "public/portraits/mirelle.webp",
+      "source_sha256": "dd016c5629ba9ac343f30d9e173360a29fe9e15081aa24dd3329979eac2f5226",
+      "output_sha256": "95957515ab14985dd2a5120cc79a845f0bb752de3e1128d8b37637347eb6117b"
+    },
+    {
+      "source_file": "mo_banner.png",
+      "hero": "moye",
+      "kind": "banner",
+      "source_size": [
+        1774,
+        887
+      ],
+      "size": [
+        1600,
+        800
+      ],
+      "output": "public/banners/moye.webp",
+      "source_sha256": "1159b84df4ee4548c9e2718d728000f924f044d66de87ad5bc1e3167c1b97eb2",
+      "output_sha256": "75037f846fdfeab3b5ae7f572e3e28c268e7ed509b668192bbca2510e5dc1ce2"
+    },
+    {
+      "source_file": "mo_portrait.png",
+      "hero": "moye",
+      "kind": "portrait",
+      "source_size": [
+        1024,
+        1536
+      ],
+      "size": [
+        512,
+        768
+      ],
+      "output": "public/portraits/moye.webp",
+      "source_sha256": "8f8d85aaa4f2103036147e5e1d7bc36172a541c4beecf05f590dbdd6cf6ced9f",
+      "output_sha256": "03520afcb83309948494cfec925b64d539d16b00e61907ee602aea0905f15ef9"
+    },
+    {
+      "source_file": "syl_banner.png",
+      "hero": "sylvara",
+      "kind": "banner",
+      "source_size": [
+        1672,
+        941
+      ],
+      "size": [
+        1600,
+        900
+      ],
+      "output": "public/banners/sylvara.webp",
+      "source_sha256": "ff29ab51e86e39c86c3719330c0c13b67d29aa734e86926cf2b49a2ce2b47770",
+      "output_sha256": "f283686c765abfca88148fea413a79bf437240a363d9773c6a462a229c727059"
+    },
+    {
+      "source_file": "syl_portrait.png",
+      "hero": "sylvara",
+      "kind": "portrait",
+      "source_size": [
+        1086,
+        1448
+      ],
+      "size": [
+        576,
+        768
+      ],
+      "output": "public/portraits/sylvara.webp",
+      "source_sha256": "b1d10fcf9d2b373c9c459f2115ea6ac191221fd9f4a6b20e0dc5f0b12a128f27",
+      "output_sha256": "dd476d8c1223b80c67ab8843a846e80f1dea664a0351211f17f920814f8df431"
+    },
+    {
+      "source_file": "tang_banner.png",
+      "hero": "tangxun",
+      "kind": "banner",
+      "source_size": [
+        1677,
+        938
+      ],
+      "size": [
+        1600,
+        895
+      ],
+      "output": "public/banners/tangxun.webp",
+      "source_sha256": "db29bc8a506ebe7e8fd705d32e33230c892f3c3de0ad1c8c95915d3a149a25ac",
+      "output_sha256": "90b22d5cb229196a12e36795d2686030942a1748d070056aa38a12de496d5fc6"
+    },
+    {
+      "source_file": "tang_portrait.png",
+      "hero": "tangxun",
+      "kind": "portrait",
+      "source_size": [
+        1024,
+        1535
+      ],
+      "size": [
+        512,
+        768
+      ],
+      "output": "public/portraits/tangxun.webp",
+      "source_sha256": "e268ce71d8775af5a3f0d60b04d967a7ae23ac1b42e51d42b2d36c4331348988",
+      "output_sha256": "4cac5d1061cf53b74e838d9bc06f7b59ad28ca482a581975ae8e8e7433a9196e"
+    },
+    {
+      "source_file": "yue_banner.png",
+      "hero": "yuezheng",
+      "kind": "banner",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "size": [
+        1536,
+        1024
+      ],
+      "output": "public/banners/yuezheng.webp",
+      "source_sha256": "e6b9b4cb4cb6d92f37774f289639d4b21f98211aaf575425a1328604d539e4df",
+      "output_sha256": "6315409fe91769cb1bd70fdf0e3071c93eaa2588c6dcd629822285a3e5f84066"
+    },
+    {
+      "source_file": "yue_portrait.png",
+      "hero": "yuezheng",
+      "kind": "portrait",
+      "source_size": [
+        1199,
+        1312
+      ],
+      "size": [
+        702,
+        768
+      ],
+      "output": "public/portraits/yuezheng.webp",
+      "source_sha256": "f60bb8986475c419613741e02b71ef94d1726bb32ce6df4596877d6c5d0d2bbe",
+      "output_sha256": "97305c2e8c787b248a848a7ad576f3edb645320bd5b8474951438df45d24dd48"
+    }
+  ]
+}

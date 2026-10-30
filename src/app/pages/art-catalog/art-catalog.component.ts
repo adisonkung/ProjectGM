@@ -1,3 +1,5 @@
+import { HEROES } from '../../core/data/heroes';
+import { HERO_BREAKTHROUGH_ART } from '../../core/data/hero-breakthrough-art';
 import { AFFIXES } from '../../core/data/equipment';
 import { AFFIX_ART } from '../../core/data/affix-art';
 import { AffixIconComponent } from '../../shared/affix-icon.component';
@@ -16,7 +18,7 @@ import { EquipmentArtComponent } from '../../shared/equipment-art.component';
   imports: [AffixIconComponent, UiSymbolComponent, StatusIconComponent, RouterLink, EquipmentArtComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section><header><a routerLink="/account">‹ กลับบัญชี</a><h1>คลังอาร์ต Eldervane</h1><p>ภาพทั้งหมด {{ all.length }} ไฟล์ · ใช้งานแล้ว / แบบร่าง / ตัวอย่างที่พักไว้</p></header>
+    <section><header><a routerLink="/account">‹ กลับบัญชี</a><h1>คลังอาร์ต Eldervane</h1><p>ภาพทั้งหมด {{ all.length }} ไฟล์ · ใช้งานแล้ว / ภาพพร้อมตรวจ / แบบร่าง</p></header>
       <nav aria-label="หมวดอาร์ต">@for (g of groups; track g) { <button type="button" [class.on]="group() === g" [attr.aria-pressed]="group() === g" (click)="group.set(g)">{{ g === 'all' ? 'ทั้งหมด' : g }}</button> }</nav>
       @if (group() === 'all' || group() === 'equipment-tiered' || group() === 'sword-foreground') {<div class="tier-collection">
         @for (f of families; track f.id) { <h2>{{ f.label }} · 5 Tier</h2><div class="tiers">@for (t of tiers; track t) { <article><app-equipment-art [definitionId]="f.base" [appearance]="f.id" [rarity]="t" /><b>{{ t }}</b></article> }</div> }
@@ -24,24 +26,40 @@ import { EquipmentArtComponent } from '../../shared/equipment-art.component';
       @if (group() === 'all' || group() === 'status-icons') { <div class="status-collection"><h2>สถานะต่อสู้ · {{ statuses.length }} แบบ</h2><div class="status-grid">@for (s of statuses; track s.id) { <article><app-status-icon [statusId]="s.id" [size]="72" /><h3>{{ s.label }}</h3><small>{{ s.id }}</small><div class="combat-sizes"><app-status-icon [statusId]="s.id" [size]="22" /><app-status-icon [statusId]="s.id" [size]="28" /></div></article> }</div></div> }
       @if (group() === 'all' || group() === 'ui-symbols') { <div class="symbol-collection"><h2>สัญลักษณ์และเครื่องมือ · {{ symbols.length }} แบบ</h2><div class="status-grid">@for (s of symbols; track s.id) { <article><app-ui-symbol [name]="s.id" [size]="72" /><h3>{{ s.label }}</h3><small>{{ s.id }}</small><div class="combat-sizes"><app-ui-symbol [name]="s.id" [size]="18" /><app-ui-symbol [name]="s.id" [size]="28" /></div></article> }</div></div> }
       @if (group() === 'all' || group() === 'affix-icons') { <div class="affix-collection"><h2>คุณสมบัติพิเศษอุปกรณ์ · {{ affixes.length }} แบบ</h2><div class="status-grid">@for (a of affixes; track a.id) { <article><app-affix-icon [affixId]="a.id" [size]="72" /><h3>{{ a.name }}</h3><small>{{ a.description }}</small><div class="combat-sizes"><app-affix-icon [affixId]="a.id" [size]="24" /><app-affix-icon [affixId]="a.id" [size]="28" /></div></article> }</div></div> }
-      <h2>ไฟล์แยกรายภาพ</h2><div class="assets">@for (a of visible(); track a.id) {
+      @if (group() === 'all' || group() === 'hero-breakthrough') {
+        <section class="hero-stones"><h2>หินเลื่อนขั้นเฉพาะฮีโร่ · {{ stoneArt.length }} ภาพ</h2><p>ภาพพร้อมตรวจ · หินเต็ม I–III และเศษหินที่เข้าคู่กัน</p>
+          @for (h of stoneHeroes; track h.id) { <h3 class="stone-hero-name">{{ h.name }}</h3><div class="stone-grid">
+            @for (a of h.art; track a.id) { <article><a [href]="a.url" target="_blank" rel="noopener"><img [src]="a.url" [alt]="h.name + ' · ' + stoneLabel(a.itemId)" loading="lazy" /></a><h3>{{ stoneLabel(a.itemId) }}</h3><span class="status">ภาพพร้อมตรวจ</span></article> }
+          </div> }
+        </section>
+      }
+      @if (visible().length) { <h2>ไฟล์แยกรายภาพ</h2><div class="assets">@for (a of visible(); track a.id) {
         <article [class.board]="a.group === 'concept-board'"><a [href]="a.url" target="_blank" rel="noopener"><img [src]="a.url" [alt]="a.label" loading="lazy" /></a><h3>{{ a.label }}</h3><small>{{ a.group }}</small><span class="status" [class.active]="a.status === 'active'">{{ statusLabel[a.status] }}</span></article>
-      }</div>
+      }</div> }
     </section>
   `,
   styles: `
+    .hero-stones { padding:0; }.stone-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; }.stone-hero-name { margin-top:28px; font-size:20px; color:#fff0cc; } .stone-grid article { text-align:center; } @media(max-width:800px){.stone-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stone-grid article{padding:8px}}
+
     :host { display: block; background: #0d151be8; color: #f5e6c6; min-height: 100vh; } section { max-width: 1400px; margin: auto; padding: 24px; } h1 { font-size: 28px; } p,small { color: #c9b794; } a { color: #efce8b; } nav { display: flex; flex-wrap: wrap; gap: 8px; padding: 18px 0; } button { padding: 10px 16px; border: 1px solid #9d783d; color: #f4ddae; background: #15212a; cursor: pointer; }.on { background: #7e131a; } .assets,.tiers { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 16px; } article { min-width: 0; padding: 12px; border: 1px solid #8c6d38; background: #10191f; } article>a { display: block; background: radial-gradient(#313b44,#090e14); } img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; } h3 { font-size: 14px; overflow-wrap: anywhere; } .status { display: block; margin-top: 8px; color: #f4b879; font-size: 12px; } .active { color: #90d6ba; } .board { grid-column: span 2; } .board img { aspect-ratio: 1.5; } .status-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}.status-grid article{text-align:center}.status-grid small{overflow-wrap:anywhere}.combat-sizes{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px}@media(max-width:800px){.status-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.status-grid small{font-size:9px}} .tiers b { display: block; text-align: center; margin-top: 10px; font-size: 12px; } @media(max-width:800px) { section { padding: 16px; }.assets,.tiers { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; } }
   `,
 })
 export class ArtCatalogComponent {
-  readonly all = GENERATED_ART;
+  readonly stoneArt = HERO_BREAKTHROUGH_ART;
+  readonly stoneHeroes = HEROES.filter(h => HERO_BREAKTHROUGH_ART.some(a => a.heroId === h.id))
+    .map(h => ({ ...h, art: HERO_BREAKTHROUGH_ART.filter(a => a.heroId === h.id) }));
+  readonly all = [...GENERATED_ART.map(a => a.group === 'hero-examples/bailong' ? { ...a, status: 'superseded' } : a), ...HERO_BREAKTHROUGH_ART];
+  stoneLabel(id: string): string {
+    const tier = ['I', 'II', 'III'][Number(id.slice(-1)) - 1];
+    return (id.startsWith('bt_fragment') ? 'เศษหิน ' : 'หินเลื่อนขั้น ') + tier;
+  }
   readonly affixes = Object.keys(AFFIX_ART).map(id => AFFIXES[id]);
   readonly symbols = Object.entries(UI_SYMBOL_ART).map(([id, art]) => ({ id, ...art }));
   readonly statuses = Object.entries(STATUS_ART).map(([id, art]) => ({ id, ...art }));
-  readonly groups = ['all', 'affix-icons', 'ui-symbols', 'status-icons', ...new Set(GENERATED_ART.map(a => a.group))];
+  readonly groups = ['all', 'affix-icons', 'ui-symbols', 'status-icons', ...new Set(this.all.map(a => a.group))];
   readonly group = signal('all');
-  readonly visible = computed(() => this.all.filter(a => this.group() === 'all' || a.group === this.group()));
+  readonly visible = computed(() => this.all.filter(a => a.group !== 'hero-breakthrough' && (this.group() === 'all' || a.group === this.group())));
   readonly families = [{ id: 'sword', label: 'ดาบ', base: 'heavy_blade' }, { id: 'armor', label: 'เกราะ', base: 'guard_armor' }, { id: 'necklace', label: 'สร้อย', base: 'trinket' }, { id: 'ring', label: 'แหวน', base: 'trinket' }] as const;
   readonly tiers = ['COMMON', 'UNCOMMON', 'RARE', 'ELITE', 'EPIC'] as const;
-  readonly statusLabel: Record<string, string> = { active: 'เชื่อมใช้งานแล้ว', example_paused: 'ตัวอย่างไป๋หลง · พักรอเปลี่ยน Portrait', concept_only: 'แบบร่าง · ยังไม่ใช่ไอเทมใช้งาน', superseded: 'แบบเก่า · มีชุดใหม่แทนแล้ว' };
+  readonly statusLabel: Record<string, string> = { art_ready: 'ภาพพร้อมตรวจ', active: 'เชื่อมใช้งานแล้ว', example_paused: 'ตัวอย่างไป๋หลง · พักรอเปลี่ยน Portrait', concept_only: 'แบบร่าง · ยังไม่ใช่ไอเทมใช้งาน', superseded: 'แบบเก่า · มีชุดใหม่แทนแล้ว' };
 }

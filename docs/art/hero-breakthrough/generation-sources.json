@@ -1,0 +1,94 @@
+{
+  "yuezheng": {
+    "path": "/workspace/generated_images/exec-019a4138-c02c-4038-8331-9f35ab2e2757.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-019a4138-c02c-4038-8331-9f35ab2e2757.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/yuezheng.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/yuezheng.png"
+  },
+  "moye": {
+    "path": "/workspace/generated_images/exec-773dd5c2-fd1a-4301-a73f-71ea6a59d06b.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-773dd5c2-fd1a-4301-a73f-71ea6a59d06b.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/moye.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/moye.png"
+  },
+  "tangxun": {
+    "path": "/workspace/generated_images/exec-62464de4-db3b-4458-89dc-e5a989c488c0.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-62464de4-db3b-4458-89dc-e5a989c488c0.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/tangxun.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/tangxun.png"
+  },
+  "linxue": {
+    "path": "/workspace/generated_images/exec-da8d3d4f-daf6-4fe5-8224-29b41714b900.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-da8d3d4f-daf6-4fe5-8224-29b41714b900.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/linxue.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/linxue.png"
+  },
+  "garrick": {
+    "path": "/workspace/generated_images/exec-032e4092-b74b-4acc-bafb-f05be726b301.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-032e4092-b74b-4acc-bafb-f05be726b301.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/garrick.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/garrick.png"
+  },
+  "kael": {
+    "path": "/workspace/generated_images/exec-58ef70a3-f061-4d8c-92b1-4fc9768f36f7.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-58ef70a3-f061-4d8c-92b1-4fc9768f36f7.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/kael.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/kael.png"
+  },
+  "mirelle": {
+    "path": "/workspace/generated_images/exec-e42c44e2-da50-44a8-aae8-30b85ef89330.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-e42c44e2-da50-44a8-aae8-30b85ef89330.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "layout_repair_of": "/workspace/generated_images/exec-75989f39-07aa-46ad-9e75-14acc82c95f9.png",
+    "portrait": "public/portraits/mirelle.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/mirelle.png"
+  },
+  "sylvara": {
+    "path": "/workspace/generated_images/exec-e6007f57-9c9d-485b-b40d-f899727f57c8.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-e6007f57-9c9d-485b-b40d-f899727f57c8.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/sylvara.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/sylvara.png"
+  },
+  "elira": {
+    "path": "/workspace/generated_images/exec-3b0f7ca1-05da-41b8-9035-c6b5c20646aa.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-3b0f7ca1-05da-41b8-9035-c6b5c20646aa.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/elira.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/elira.png"
+  },
+  "vaelric": {
+    "path": "/workspace/generated_images/exec-26d0c0d4-75a2-43a8-be65-79f4b98a65e1.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-26d0c0d4-75a2-43a8-be65-79f4b98a65e1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/vaelric.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/vaelric.png"
+  },
+  "draeven": {
+    "path": "/workspace/generated_images/exec-0524de90-ca55-4a90-aeed-8b25258bcffe.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-0524de90-ca55-4a90-aeed-8b25258bcffe.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/draeven.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/draeven.png"
+  },
+  "mordrienne": {
+    "path": "/workspace/generated_images/exec-996b3a64-0c18-4b4e-8a4e-81376977c36c.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-996b3a64-0c18-4b4e-8a4e-81376977c36c.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/mordrienne.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/mordrienne.png"
+  },
+  "sylas": {
+    "path": "/workspace/generated_images/exec-84ecfd37-33c5-4cc9-ac39-a5a0ea8bb8a1.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-84ecfd37-33c5-4cc9-ac39-a5a0ea8bb8a1.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "portrait": "public/portraits/sylas.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/sylas.png"
+  },
+  "lucien": {
+    "path": "/workspace/generated_images/exec-11ef9887-a414-4e5d-a691-251c35d7a585.png",
+    "output_hint": "Generated images are saved to /workspace/generated_images as /workspace/generated_images/exec-11ef9887-a414-4e5d-a691-251c35d7a585.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+    "layout_repair_of": "/workspace/generated_images/exec-d9ba03a8-c08c-4f64-942b-ee34f6091fa2.png",
+    "portrait": "public/portraits/lucien.webp",
+    "retained_sheet": "assets/generated/hero-breakthrough/lucien.png"
+  },
+  "bailong": {
+    "path": "/workspace/generated_images/exec-4acbf3af-d38f-4ef8-8917-644ff69de489.png",
+    "portrait": "public/portraits/bailong.webp",
+    "note": "First family sheet generated using current portrait plus prior reviewed Bai Long stone family examples.",
+    "retained_sheet": "assets/generated/hero-breakthrough/bailong.png"
+  }
+}

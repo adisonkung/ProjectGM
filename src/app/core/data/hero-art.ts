@@ -19,6 +19,9 @@ const art = (id: string): HeroArt => ({
   ult: `skills/${id}-ult.webp`,
 });
 
+// Latest portrait/banner override: user new_portrait_banner.zip (2026-10-30), retained as
+// assets/ui/hero-refresh-2026-10-30.zip and imported by tools/dev/import_hero_ui_art.py.
+// 11 portraits (including Draeven) + 10 banners; original aspect ratios retained. Skill icons unchanged.
 export const HERO_ART: Record<string, HeroArt> = {
   // Lucien UI art (user 2026-10-28, assets/heroes/Lucien/art → tools/sprites/lucien_art.py): portrait, the three
   // skill icons cut from one framed strip (Black Benediction cross / Martyr's Veil linked crosses / Black Miracle

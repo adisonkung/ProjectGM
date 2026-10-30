@@ -112,14 +112,16 @@ export class SkyCanvasRenderer {
 
   private strip(ctx: CanvasRenderingContext2D, cam: SkyCamera, s: Strip, t: number): void {
     const im = this.img(SKY_LAYERS[s.img]);
-    if (!im || !this.visibleY(cam, s.top, s.top + s.h)) return;
+    // Zoomed-out Home views expose more sky below the island: keep both cloud seas painted to the viewport edge.
+    const h = this.daylight && s.img === 'sea' ? Math.max(s.h, (cam.vh - cam.ty) / cam.s - s.top + 2) : s.h;
+    if (!im || !this.visibleY(cam, s.top, s.top + h)) return;
     const f = frac(t / s.dur);
     const off = s.dir > 0 ? -f * s.T : -(1 - f) * s.T;
     const [x0, x1] = this.span(cam, s.p);
     this.at(ctx, cam, s.p);
     ctx.globalAlpha = s.a;
     // tiles overlap by a hair so no seam line shows between them at fractional scales
-    for (let n = Math.floor((x0 - off) / s.T); off + n * s.T < x1; n++) ctx.drawImage(im, off + n * s.T, s.top, s.T + 0.5, s.h);
+    for (let n = Math.floor((x0 - off) / s.T); off + n * s.T < x1; n++) ctx.drawImage(im, off + n * s.T, s.top, s.T + 0.5, h);
   }
 
   private sky(ctx: CanvasRenderingContext2D, cam: SkyCamera): void {

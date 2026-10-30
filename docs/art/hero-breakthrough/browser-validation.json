@@ -1,0 +1,19 @@
+{
+  "heroRows": 15,
+  "decodedImages": 90,
+  "errors": [],
+  "bad": [],
+  "layouts": [
+    {
+      "width": 1600,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false
+    }
+  ],
+  "saveUnchanged": true
+}

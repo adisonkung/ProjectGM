@@ -143,3 +143,10 @@ img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
 .reference-look .hit:is(:hover,:focus-visible,.sel) + .plate { opacity: 1; }
 @media (max-width: 720px) { .vp.reference-look { --ui-top: 170px; } .reference-look .plate b { font-size: 12px; } }
 .zoom { left:auto; right:14px; bottom:auto; top:46%; button { min-width:36px; min-height:36px; } }
+
+// Absolute canvas/world layers still cover the viewport; padding describes the unobscured Home camera region.
+.vp.reference-look { box-sizing:border-box; padding:var(--home-scene-top,96px) var(--home-scene-right,64px) var(--home-scene-bottom,230px) var(--home-scene-left,440px); }
+
+// At distant Home scales, show compact building emblems; the full name remains on the tap target and on focus.
+.reference-look.compact-labels .plate { padding:8px; b { gap:0; } .plate-name { display:none; } small { display:none; } }
+.reference-look.compact-labels .hit:is(:hover,:focus-visible,.sel) + .plate { padding:8px 14px; b { gap:7px; font-size:12px; } .plate-name { display:inline; } small { display:block; } }

@@ -1,0 +1,25 @@
+# หินเลื่อนขั้นเฉพาะฮีโร่ — 30 ต.ค. 2026
+
+ผลิตครบ **15 ฮีโร่ × (หินเต็ม 3 ระดับ + เศษหิน 3 ระดับ) = 90 ภาพ** จาก Portrait ปัจจุบัน ขนาด 512×512 พื้นหลังโปร่งใส พร้อมตรวจในเกม `/art-catalog` หมวด `hero-breakthrough`.
+
+- [ดาวน์โหลด PNG ทั้ง 90 ภาพ](hero-breakthrough-icons.zip)
+- [ภาพรวมพร้อม Portrait อ้างอิง](contact-sheet.jpg)
+- [เกมจริง desktop](catalog-desktop.png) · [เกมจริงมือถือแนวนอน](catalog-landscape.png)
+- [อ้างอิงเทียบภาพจริงในเกม](reference-vs-game.jpg)
+- [Manifest: hash ต้นฉบับ/portrait/ผลลัพธ์ทุกไฟล์](manifest.json)
+- [Prompt กลาง](common-prompt.txt) · [แหล่งไฟล์ที่เจน](generation-sources.json)
+
+หิน I สีอำพันยอดเดี่ยว, II สีฟ้ายอดคู่, III ประกายมุกทรงมงกุฎ เศษหินแต่ละระดับจับคู่หน้าตาและสีของหินเต็ม แผ่นต้นฉบับเก็บใน `assets/generated/hero-breakthrough/` ไฟล์ WebP สำหรับเกมอยู่ `public/items/heroes/<hero>/` และ PNG รวมอยู่ใน ZIP. ใช้ imagegen สร้างภาพ และสคริปต์ `tools/dev/pack_hero_breakthrough_art.py` แยก sprite ตาม alpha โดยไม่วาดภาพทับ; รันด้วย Python + Pillow + NumPy + SciPy.
+
+ฐานงาน `1e9f103` มี Portrait ใหม่ล่าสุด งานนี้เป็นอาร์ตและหน้าตรวจ GM ส่วนระบบหินผูกเจ้าของ/ดรอป/แปลงเป็นหินรวมยังเป็น backlog gameplay แยกต่างหาก ไม่มีการเปลี่ยนเซฟหรือเศรษฐกิจเกม และยังไม่ merge/deploy.
+
+ภาพอ้างอิงของงานนี้คือ Portrait จริงทั้ง 15 ตัว และตระกูลหินตาม prompt เดิม ไม่มีแบบหน้า GM ใหม่ที่ผู้ใช้เลือก จึงคงหน้าคลังเดิมและเพิ่มแถว 6 ภาพต่อฮีโร่ ภาพคู่เทียบแสดง Portrait และภาพเจนด้านซ้ายเทียบ screenshot เกมจริงด้านขวา ไม่ใช่การอ้างว่าตรงแบบหน้า UI ใหม่.
+
+## ผลตรวจ
+
+- App/spec TypeScript ผ่าน; Karma **902/902** ผ่าน; production build ผ่าน (มี warning เดิมเรื่อง optional chain และขนาด bundle/CSS).
+- ตรวจครบ 90 ภาพ: RGBA 512×512, ขอบว่างโปร่งใสอย่างน้อย 50px, hash Portrait ต้นฉบับตรงครบ15ตัว, ZIP CRC ผ่านและมี PNG90ไฟล์.
+- เกมจริง desktop1600×900 และมือถือแนวนอน844×390: แสดงครบ15แถว/90ภาพ โหลดภาพครบ ไม่มี browser error หรือแนวนอนล้น; ข้อมูลเซฟเท่ากันเมื่อเทียบ JSON หลังเข้าออกหน้าคลัง.
+- [ผลตรวจไฟล์](validation.json) · [ผลตรวจ browser](browser-validation.json) · [ทดสอบภาพเล็ก32/48/64pxบนพื้นสว่างและมืด](small-sizes.jpg).
+
+สถานะ: ผลิต/ทดสอบครบและ push เฉพาะ task branch `wip/codex-hero-breakthrough-art`; รอผู้ใช้ตรวจภาพ ยังไม่ merge หรือ deploy.
