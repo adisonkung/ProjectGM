@@ -1,0 +1,12 @@
+{
+  "heroes": 15,
+  "variants": 90,
+  "size": [
+    512,
+    512
+  ],
+  "transparentPaddingPixels": 50,
+  "allPortraitHashesUnchanged": true,
+  "zipPngs": 90,
+  "zipCrc": "pass"
+}

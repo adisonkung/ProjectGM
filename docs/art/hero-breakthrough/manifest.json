@@ -1,0 +1,1779 @@
+{
+  "date": "2026-10-30",
+  "status": "art_ready",
+  "portrait_base": "1e9f103",
+  "scope": "15 heroes \u00d7 3 whole stones + 3 matching fragments = 90 art variants; economy/save rules unchanged",
+  "heroes": [
+    {
+      "id": "bailong",
+      "portrait": "public/portraits/bailong.webp",
+      "portrait_sha256": "ce3fa860b96ef32f6ac235671b492c7f2b4447a0a1a26ad03f0ae1533885e02f",
+      "sheet": "assets/generated/hero-breakthrough/bailong.png",
+      "status": "art_ready",
+      "sheet_sha256": "a76fdc417026593c1a6c737c9b32be95b4141bec986724688da1de59e5e2365a",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/bailong/bt_stone_1.webp",
+          "png_archive_entry": "bailong/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "d6634a839de15f20693c4a333bb096d29e46891d9d153f9ab297c38fa524afa5",
+          "primary_component": 3,
+          "crop_rect": [
+            83,
+            19,
+            413,
+            521
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/bailong/bt_stone_2.webp",
+          "png_archive_entry": "bailong/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "76906eb0e3bf5e392bf8ce3595b87b08d2fc8f4983699386358bdc291ef14c20",
+          "primary_component": 2,
+          "crop_rect": [
+            564,
+            15,
+            930,
+            537
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/bailong/bt_stone_3.webp",
+          "png_archive_entry": "bailong/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "1d185f1691db5af572cd462cc103c632e04e7d9608622a449633cbb6604dcac5",
+          "primary_component": 1,
+          "crop_rect": [
+            1012,
+            13,
+            1486,
+            537
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/bailong/bt_fragment_1.webp",
+          "png_archive_entry": "bailong/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "697bafeb7ccd9427283210ecb1e010806e0c9904ee726e8f536e70891c1eaa3f",
+          "primary_component": 4,
+          "crop_rect": [
+            79,
+            527,
+            459,
+            1000
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/bailong/bt_fragment_2.webp",
+          "png_archive_entry": "bailong/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "161efc462d0b716380f27078f39401404753c7870062b4894506f4ac59a34bb3",
+          "primary_component": 6,
+          "crop_rect": [
+            564,
+            536,
+            951,
+            1011
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/bailong/bt_fragment_3.webp",
+          "png_archive_entry": "bailong/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "91883c060539ec7fd7ae1f8101bb9e5b0b33d7f80732ee94a4e3e612db47bc36",
+          "primary_component": 5,
+          "crop_rect": [
+            1034,
+            533,
+            1491,
+            1012
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "yuezheng",
+      "portrait": "public/portraits/yuezheng.webp",
+      "portrait_sha256": "97305c2e8c787b248a848a7ad576f3edb645320bd5b8474951438df45d24dd48",
+      "sheet": "assets/generated/hero-breakthrough/yuezheng.png",
+      "status": "art_ready",
+      "sheet_sha256": "15e9a1f653412da7df42aae8fe5b12d2bef0c8baf438432d0f6ff806a4157c22",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/yuezheng/bt_stone_1.webp",
+          "png_archive_entry": "yuezheng/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "48c2851af0e852434206e764ed1b557c534f44b7135f430396cf0c3c8a95a07c",
+          "primary_component": 3,
+          "crop_rect": [
+            89,
+            18,
+            437,
+            524
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/yuezheng/bt_stone_2.webp",
+          "png_archive_entry": "yuezheng/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "08722ff3cc605608a374cdec229c20ff227f9cc5fc84b0b7b44ac668c1c12266",
+          "primary_component": 2,
+          "crop_rect": [
+            579,
+            16,
+            950,
+            531
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/yuezheng/bt_stone_3.webp",
+          "png_archive_entry": "yuezheng/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "cb6a501771679417121c8f22547200b57b1893d9892f8c1e8c7c3dd7c6b5c489",
+          "primary_component": 1,
+          "crop_rect": [
+            1034,
+            15,
+            1492,
+            536
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/yuezheng/bt_fragment_1.webp",
+          "png_archive_entry": "yuezheng/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "a19da7b5b6b1e1256d15c81c94a2b756205b19566de50b27d75598f6125140a7",
+          "primary_component": 4,
+          "crop_rect": [
+            57,
+            522,
+            481,
+            1008
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/yuezheng/bt_fragment_2.webp",
+          "png_archive_entry": "yuezheng/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "7ca5a66a80e34cb01d5828ad85653736db71ec5b2520250e14a6b04d15fa0064",
+          "primary_component": 7,
+          "crop_rect": [
+            574,
+            528,
+            986,
+            1008
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/yuezheng/bt_fragment_3.webp",
+          "png_archive_entry": "yuezheng/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "3f1962b8fcafa9d4cf24f448504eda7fd2b4fe43db0c755922fc40f04306d7af",
+          "primary_component": 6,
+          "crop_rect": [
+            1040,
+            527,
+            1514,
+            1008
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "moye",
+      "portrait": "public/portraits/moye.webp",
+      "portrait_sha256": "03520afcb83309948494cfec925b64d539d16b00e61907ee602aea0905f15ef9",
+      "sheet": "assets/generated/hero-breakthrough/moye.png",
+      "status": "art_ready",
+      "sheet_sha256": "ab78b75dd6079fb02e0f455c5f4d95e159fc549168d734fb00ab6f2a5107670b",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/moye/bt_stone_1.webp",
+          "png_archive_entry": "moye/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "c18cb71828a43fb3c8ceb9a6b244e981cf9058799ce6e994c5da37d9b76fdde0",
+          "primary_component": 3,
+          "crop_rect": [
+            71,
+            14,
+            433,
+            525
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/moye/bt_stone_2.webp",
+          "png_archive_entry": "moye/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "e26fed34fb6d3afd17af1a0c0583d30fc8494871558f7161893539cd80bf8362",
+          "primary_component": 2,
+          "crop_rect": [
+            556,
+            10,
+            936,
+            524
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/moye/bt_stone_3.webp",
+          "png_archive_entry": "moye/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "bed987a318d440207184ae9707772fa98668bb6cea37408d25836124f8b04490",
+          "primary_component": 1,
+          "crop_rect": [
+            1016,
+            9,
+            1499,
+            534
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/moye/bt_fragment_1.webp",
+          "png_archive_entry": "moye/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "bd64e429d03e4ce71f111e18564287e499286a10895cdc1bf8bf373487fcf7f8",
+          "primary_component": 4,
+          "crop_rect": [
+            64,
+            523,
+            483,
+            1008
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/moye/bt_fragment_2.webp",
+          "png_archive_entry": "moye/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "d2efc44e3a59d12ed69a392b28a02db3f9b45d66cc7ee62b0ecb44b40246d72c",
+          "primary_component": 5,
+          "crop_rect": [
+            561,
+            525,
+            975,
+            1015
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/moye/bt_fragment_3.webp",
+          "png_archive_entry": "moye/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "a86003012f6dd89959c85a66be6c573f3b5c147641f25c44498b1838769114b0",
+          "primary_component": 6,
+          "crop_rect": [
+            1034,
+            531,
+            1517,
+            1015
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "tangxun",
+      "portrait": "public/portraits/tangxun.webp",
+      "portrait_sha256": "4cac5d1061cf53b74e838d9bc06f7b59ad28ca482a581975ae8e8e7433a9196e",
+      "sheet": "assets/generated/hero-breakthrough/tangxun.png",
+      "status": "art_ready",
+      "sheet_sha256": "a8ac885849ac1d8315ee71df0a1f9bc68a0db18e0a6f28becf8bc8b10bee10ae",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/tangxun/bt_stone_1.webp",
+          "png_archive_entry": "tangxun/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "ea288f502ab11403e78426962f262ae0e408fa2f9a4a7611429886477a0d9b4c",
+          "primary_component": 2,
+          "crop_rect": [
+            86,
+            17,
+            439,
+            518
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/tangxun/bt_stone_2.webp",
+          "png_archive_entry": "tangxun/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "444118bee3bc56a1c6d42b1f1e4c6cb21c78b8c793dc3cd6b81704e174ee5ee9",
+          "primary_component": 3,
+          "crop_rect": [
+            562,
+            18,
+            948,
+            534
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/tangxun/bt_stone_3.webp",
+          "png_archive_entry": "tangxun/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "8dfa38ff60424339cae3f09ae356ebeae39fa105d44bb259f51e684db19bd6cd",
+          "primary_component": 1,
+          "crop_rect": [
+            1009,
+            14,
+            1480,
+            534
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/tangxun/bt_fragment_1.webp",
+          "png_archive_entry": "tangxun/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "86e9b21e822d0af46086c2ebe2ddc3d1093ab2d2aa0acef6d7918e316e0a6d13",
+          "primary_component": 4,
+          "crop_rect": [
+            78,
+            516,
+            489,
+            989
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/tangxun/bt_fragment_2.webp",
+          "png_archive_entry": "tangxun/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "ea81ce8cb60e76422365842f929b5328904935157a4a06df46aed35947c94e19",
+          "primary_component": 5,
+          "crop_rect": [
+            566,
+            520,
+            979,
+            998
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/tangxun/bt_fragment_3.webp",
+          "png_archive_entry": "tangxun/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "49a6c258b08e2d90dfffcdd1df098bf5543fd909e8aa7a6a90e3040527af7c40",
+          "primary_component": 6,
+          "crop_rect": [
+            1035,
+            525,
+            1504,
+            997
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "linxue",
+      "portrait": "public/portraits/linxue.webp",
+      "portrait_sha256": "c2990f05f69880737b4d2bf7683041da13493ca313872868039e863eca801daf",
+      "sheet": "assets/generated/hero-breakthrough/linxue.png",
+      "status": "art_ready",
+      "sheet_sha256": "cbd91c029b488fe64cffedb1cc01c0a0ea281868a69356584a8af52c3008eed0",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/linxue/bt_stone_1.webp",
+          "png_archive_entry": "linxue/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "2ce319f9322fb9d9d1cdcfa50d44a93b49a53310a34b7088f8d264923fcc253e",
+          "primary_component": 1,
+          "crop_rect": [
+            74,
+            5,
+            418,
+            514
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/linxue/bt_stone_2.webp",
+          "png_archive_entry": "linxue/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "fd48170ea018ff32b118ae84ed2cb216a4615c28c6797dbba555d8f46f267a81",
+          "primary_component": 3,
+          "crop_rect": [
+            562,
+            5,
+            934,
+            521
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/linxue/bt_stone_3.webp",
+          "png_archive_entry": "linxue/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "5ad8a8432105021114c6c37b801944d15b2aa9be05a60d500c05022b7769d744",
+          "primary_component": 2,
+          "crop_rect": [
+            1025,
+            4,
+            1477,
+            526
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/linxue/bt_fragment_1.webp",
+          "png_archive_entry": "linxue/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "a3a487aba3359155f1984bfe8ae6fd698b7fa864b18d22a86707713343567216",
+          "primary_component": 4,
+          "crop_rect": [
+            70,
+            512,
+            482,
+            1010
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/linxue/bt_fragment_2.webp",
+          "png_archive_entry": "linxue/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "5983b30a237c2139141465d7bf1128ea6b4ab9c3a3b04d25b4cbc2654478db55",
+          "primary_component": 6,
+          "crop_rect": [
+            554,
+            517,
+            983,
+            1016
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/linxue/bt_fragment_3.webp",
+          "png_archive_entry": "linxue/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "ac110527f6b9b7cfe644fc4d157d3ea01740e085317e9a6102f2044ee2dd13ce",
+          "primary_component": 5,
+          "crop_rect": [
+            1033,
+            514,
+            1510,
+            1016
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "garrick",
+      "portrait": "public/portraits/garrick.webp",
+      "portrait_sha256": "7b4d079aea91ee6d6b91a1e840b017a5233916cd5e309167ce7b648999db299c",
+      "sheet": "assets/generated/hero-breakthrough/garrick.png",
+      "status": "art_ready",
+      "sheet_sha256": "f5e4cf7ef433f42e701463ec319a9aaa2d83540a2d61db422f4e705512bcacc7",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/garrick/bt_stone_1.webp",
+          "png_archive_entry": "garrick/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "7cd941d9fc8f105ad1693aa7f2975a1a5807e00e4d0e73203341ff278c903306",
+          "primary_component": 1,
+          "crop_rect": [
+            76,
+            10,
+            430,
+            524
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/garrick/bt_stone_2.webp",
+          "png_archive_entry": "garrick/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "6a7b6769e8f1ce31248954bf850a339ad83c0a05dc623af78c38e403d31d19ab",
+          "primary_component": 3,
+          "crop_rect": [
+            557,
+            13,
+            934,
+            529
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/garrick/bt_stone_3.webp",
+          "png_archive_entry": "garrick/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "9805c07447a5dd10107f13875ac9d50452be0431e6bac233d90c68d0e910e788",
+          "primary_component": 2,
+          "crop_rect": [
+            1011,
+            11,
+            1490,
+            533
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/garrick/bt_fragment_1.webp",
+          "png_archive_entry": "garrick/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "17dbe4f418d37d770504a663bf97e10a971ef8f5bee911a7910871d2fa4d45ce",
+          "primary_component": 4,
+          "crop_rect": [
+            64,
+            518,
+            469,
+            1006
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/garrick/bt_fragment_2.webp",
+          "png_archive_entry": "garrick/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "a2b82bcd98d1fdb8bc64a399e9c8c2bbcb12d5d6b95dd8cb00587eab0998382d",
+          "primary_component": 5,
+          "crop_rect": [
+            556,
+            522,
+            957,
+            1012
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/garrick/bt_fragment_3.webp",
+          "png_archive_entry": "garrick/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "015dcd913a3df91a5f4e076828ec95225f7d1eb0c3ead73409dd9b3743394ee6",
+          "primary_component": 6,
+          "crop_rect": [
+            1028,
+            527,
+            1501,
+            1014
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "kael",
+      "portrait": "public/portraits/kael.webp",
+      "portrait_sha256": "de9cd9262f002228062fd2e69a7c19ffbc43c99e30a23878dd37afc5daf93af7",
+      "sheet": "assets/generated/hero-breakthrough/kael.png",
+      "status": "art_ready",
+      "sheet_sha256": "ea0d39a2272777649619eb7c89f061fc0ff05775ce76933af1771331decba223",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/kael/bt_stone_1.webp",
+          "png_archive_entry": "kael/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "ef512431da5032704b1215d02f960f80accd7fa441680c546a1cc0279e5e8f36",
+          "primary_component": 1,
+          "crop_rect": [
+            85,
+            4,
+            436,
+            521
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/kael/bt_stone_2.webp",
+          "png_archive_entry": "kael/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "ffc70b749aa56208473d4131dd735472a1c4b9a99fe2c11ba48a2a1511fee37f",
+          "primary_component": 2,
+          "crop_rect": [
+            560,
+            4,
+            948,
+            520
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/kael/bt_stone_3.webp",
+          "png_archive_entry": "kael/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "cee38aa1b9fbdd6a1052fe231c8f67101cda2f0d64a00057348346e42e60d07a",
+          "primary_component": 3,
+          "crop_rect": [
+            1006,
+            8,
+            1492,
+            536
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/kael/bt_fragment_1.webp",
+          "png_archive_entry": "kael/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "9a1a8fd8ca6bae29fb50d5fa9195b9d538f0bf669e6302d8dd9abaedb1ad0ff8",
+          "primary_component": 4,
+          "crop_rect": [
+            72,
+            512,
+            489,
+            1004
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/kael/bt_fragment_2.webp",
+          "png_archive_entry": "kael/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "0198515e8e35cc9cd91ad92afb3b8be7c66acffab7814b93f8912c4916b0dc03",
+          "primary_component": 5,
+          "crop_rect": [
+            552,
+            516,
+            966,
+            1011
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/kael/bt_fragment_3.webp",
+          "png_archive_entry": "kael/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "2e917b6e418d0e6aaf6120d1ac114a81ad0e601ddf98e67a10ad9325bc33d53f",
+          "primary_component": 6,
+          "crop_rect": [
+            1025,
+            519,
+            1504,
+            1017
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "mirelle",
+      "portrait": "public/portraits/mirelle.webp",
+      "portrait_sha256": "95957515ab14985dd2a5120cc79a845f0bb752de3e1128d8b37637347eb6117b",
+      "sheet": "assets/generated/hero-breakthrough/mirelle.png",
+      "status": "art_ready",
+      "sheet_sha256": "51122eacc72f09c108a8fbad8ad99a30d763bb8fdcf7650b9641f42798a62b6d",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/mirelle/bt_stone_1.webp",
+          "png_archive_entry": "mirelle/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "03c664a195ecf0ea007931fba7fdfe77b69c102d76d2fb2556f60b2610a23f50",
+          "primary_component": 2,
+          "crop_rect": [
+            93,
+            41,
+            402,
+            465
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/mirelle/bt_stone_2.webp",
+          "png_archive_entry": "mirelle/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "1898b77ed86d91c494a1754cad0bb3c3326d485493343ba46961ceda0b6ce6a9",
+          "primary_component": 3,
+          "crop_rect": [
+            592,
+            47,
+            918,
+            463
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/mirelle/bt_stone_3.webp",
+          "png_archive_entry": "mirelle/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "1a389ed5378a57e50e51c53dbee2bf220c8853a0ed30f1be2f448f2eb644457e",
+          "primary_component": 1,
+          "crop_rect": [
+            1079,
+            40,
+            1486,
+            471
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/mirelle/bt_fragment_1.webp",
+          "png_archive_entry": "mirelle/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "aab28d715621090fa3be604b0523b9ea214b6593f46eab317b4ca2d5a2752ccf",
+          "primary_component": 6,
+          "crop_rect": [
+            82,
+            541,
+            460,
+            963
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/mirelle/bt_fragment_2.webp",
+          "png_archive_entry": "mirelle/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "d2a9c67cea2cfdfaa52f23803bc6d11451fdefbbcddfc3b0ec5c590598a09708",
+          "primary_component": 4,
+          "crop_rect": [
+            590,
+            537,
+            970,
+            963
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/mirelle/bt_fragment_3.webp",
+          "png_archive_entry": "mirelle/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "2be4e3ef0b8368cf099bee066a9a5ba8d2b97ae9477b858794581082566e856c",
+          "primary_component": 5,
+          "crop_rect": [
+            1073,
+            536,
+            1508,
+            968
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "sylvara",
+      "portrait": "public/portraits/sylvara.webp",
+      "portrait_sha256": "dd476d8c1223b80c67ab8843a846e80f1dea664a0351211f17f920814f8df431",
+      "sheet": "assets/generated/hero-breakthrough/sylvara.png",
+      "status": "art_ready",
+      "sheet_sha256": "0d8d84076090666a158faa5f8e0c55004033842f5482aef8728c466661fd2535",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/sylvara/bt_stone_1.webp",
+          "png_archive_entry": "sylvara/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "e555557243cbf309ec0d3d096e78d3115794e138bfd00cd19c4b9de4a56f72cf",
+          "primary_component": 1,
+          "crop_rect": [
+            78,
+            8,
+            436,
+            528
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/sylvara/bt_stone_2.webp",
+          "png_archive_entry": "sylvara/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "e9c0d31a9e2aff3a1a07e011fba4462432557bdcc68ddf761b1c90c74cbf2494",
+          "primary_component": 3,
+          "crop_rect": [
+            564,
+            18,
+            936,
+            530
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/sylvara/bt_stone_3.webp",
+          "png_archive_entry": "sylvara/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "cb826a23b2b69440e1e6f1a5e454dea79ef515331f9e4d9475e87a165148f3e5",
+          "primary_component": 2,
+          "crop_rect": [
+            1010,
+            8,
+            1494,
+            534
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/sylvara/bt_fragment_1.webp",
+          "png_archive_entry": "sylvara/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "38b1c83d1080f244d6b244a58c16988a76901f6cdf5f78cf30fd70c49e5fe8b5",
+          "primary_component": 5,
+          "crop_rect": [
+            66,
+            529,
+            487,
+            1008
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/sylvara/bt_fragment_2.webp",
+          "png_archive_entry": "sylvara/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "28da37f5ff8047101a3e98285350fb00e584d6670585c240e4444129a8ddb1a4",
+          "primary_component": 6,
+          "crop_rect": [
+            563,
+            531,
+            977,
+            1014
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/sylvara/bt_fragment_3.webp",
+          "png_archive_entry": "sylvara/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "a1d99e4b95486e6bef556a539a96f425bda937ff23b43b5dcdf5b84973d94367",
+          "primary_component": 4,
+          "crop_rect": [
+            1028,
+            528,
+            1513,
+            1015
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "elira",
+      "portrait": "public/portraits/elira.webp",
+      "portrait_sha256": "5a0e5f6a5de1d76ef8be81266afb0215ccb2944e66666a634ea8d6ebf7c5ef08",
+      "sheet": "assets/generated/hero-breakthrough/elira.png",
+      "status": "art_ready",
+      "sheet_sha256": "fe4c8b6c57969befacf51ef9bfad75b098ffd7fb3770d7ef0e3d658293411a8a",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/elira/bt_stone_1.webp",
+          "png_archive_entry": "elira/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "2650bf0bacc001ae4b9cf3919f2be2469ab7c12c1577ecab2bac847ab0826a43",
+          "primary_component": 1,
+          "crop_rect": [
+            77,
+            11,
+            412,
+            522
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/elira/bt_stone_2.webp",
+          "png_archive_entry": "elira/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "47b19ac77bdbfc38425e41686d298de4abd3402e7f64aa42827b33d610cf32a1",
+          "primary_component": 3,
+          "crop_rect": [
+            555,
+            16,
+            932,
+            521
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/elira/bt_stone_3.webp",
+          "png_archive_entry": "elira/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "03b70b400ff7fa41fdb79dec395cb7971bdc76398164e1ab1a226c09f3c4bf78",
+          "primary_component": 2,
+          "crop_rect": [
+            1026,
+            12,
+            1492,
+            533
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/elira/bt_fragment_1.webp",
+          "png_archive_entry": "elira/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "f64123f15a9dedbf47f761decf831defa026471b54afde6102514a51e5b200b1",
+          "primary_component": 4,
+          "crop_rect": [
+            65,
+            522,
+            466,
+            1003
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/elira/bt_fragment_2.webp",
+          "png_archive_entry": "elira/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "e1a4112ba4b1c65d847b37839bc21c6b4a1b10049a75287ab53764a4f9eda03b",
+          "primary_component": 6,
+          "crop_rect": [
+            556,
+            525,
+            974,
+            1007
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/elira/bt_fragment_3.webp",
+          "png_archive_entry": "elira/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "a42668eb6c84468201d5e0723ba8bde4035265104450d251019c03a5801062de",
+          "primary_component": 5,
+          "crop_rect": [
+            1033,
+            523,
+            1492,
+            1013
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "vaelric",
+      "portrait": "public/portraits/vaelric.webp",
+      "portrait_sha256": "59098fb1b3ffd0527fb10815f2f79c1c7932bd026b96480832e8f9a562e2af12",
+      "sheet": "assets/generated/hero-breakthrough/vaelric.png",
+      "status": "art_ready",
+      "sheet_sha256": "60a340f5cfe797ed33ba7c8dc0c8ea4fbad713d6837f3e148941284064e6eb8b",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/vaelric/bt_stone_1.webp",
+          "png_archive_entry": "vaelric/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "6e1c79641355dca36398601b6c8ddb57ad8adfe31e17a9f6a52e89507b323498",
+          "primary_component": 2,
+          "crop_rect": [
+            72,
+            11,
+            418,
+            514
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/vaelric/bt_stone_2.webp",
+          "png_archive_entry": "vaelric/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "1986ff281037fc476b671304b59c42818d7ab425d836295f62a340e059aecc40",
+          "primary_component": 1,
+          "crop_rect": [
+            564,
+            8,
+            937,
+            523
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/vaelric/bt_stone_3.webp",
+          "png_archive_entry": "vaelric/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "d3a04f5d22418c0be3496d45642d5f2e17de8c0aa6d5395643fea953a0cd6c74",
+          "primary_component": 3,
+          "crop_rect": [
+            1020,
+            12,
+            1493,
+            532
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/vaelric/bt_fragment_1.webp",
+          "png_archive_entry": "vaelric/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "480186771cf58a7638f11d9a8c4c214775e35d7db9bd3a34a600e182adb83996",
+          "primary_component": 4,
+          "crop_rect": [
+            67,
+            512,
+            514,
+            1000
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/vaelric/bt_fragment_2.webp",
+          "png_archive_entry": "vaelric/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "6008e8111008949ba7b19b8a1553a0d49094f924e6d83b447251dba908a2eafb",
+          "primary_component": 5,
+          "crop_rect": [
+            561,
+            523,
+            1001,
+            1008
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/vaelric/bt_fragment_3.webp",
+          "png_archive_entry": "vaelric/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "9e91967ff4dd9215f8c743bcbdfb9ede1e29e152709e430865c6b29ec5cf5102",
+          "primary_component": 7,
+          "crop_rect": [
+            1045,
+            528,
+            1521,
+            1012
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "draeven",
+      "portrait": "public/portraits/draeven.webp",
+      "portrait_sha256": "5b6d721ada353958981909f9c4e0ff27741b5d031f90e2201aa8250aa06b6e09",
+      "sheet": "assets/generated/hero-breakthrough/draeven.png",
+      "status": "art_ready",
+      "sheet_sha256": "adae9cd3ad2172966bec78fa222bc78aafc6aabe7153993b1c0ea81999068ab1",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/draeven/bt_stone_1.webp",
+          "png_archive_entry": "draeven/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "408afe0bff481f646db5e9beac840c3fa1109ea772816e684dc996f738d8ebd8",
+          "primary_component": 3,
+          "crop_rect": [
+            66,
+            14,
+            437,
+            523
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/draeven/bt_stone_2.webp",
+          "png_archive_entry": "draeven/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "0680acf85db66d8dad38fd7bff544dc64bda19b9b6cc0364ef55d04edf80ba21",
+          "primary_component": 2,
+          "crop_rect": [
+            569,
+            14,
+            957,
+            528
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/draeven/bt_stone_3.webp",
+          "png_archive_entry": "draeven/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "ef171aee293897bf586115af5e74a84672837740d71dc12d2525195f7362d423",
+          "primary_component": 1,
+          "crop_rect": [
+            1042,
+            12,
+            1509,
+            534
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/draeven/bt_fragment_1.webp",
+          "png_archive_entry": "draeven/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "f4a0d8d518c0eb79628e09e56b17919a6d40127a7aa6eb2fed985c88a7300d2d",
+          "primary_component": 4,
+          "crop_rect": [
+            62,
+            524,
+            482,
+            1010
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/draeven/bt_fragment_2.webp",
+          "png_archive_entry": "draeven/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "ea6002769d70cd44829261fedeb790e5b2e4a388f552ec7db0cd02abb7a576a8",
+          "primary_component": 5,
+          "crop_rect": [
+            574,
+            525,
+            980,
+            1011
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/draeven/bt_fragment_3.webp",
+          "png_archive_entry": "draeven/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "2b3d285adc610eaadf3f53c8920b425dd4ed5fedea7b968751d8a105c5e2cec3",
+          "primary_component": 6,
+          "crop_rect": [
+            1046,
+            531,
+            1516,
+            1012
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "mordrienne",
+      "portrait": "public/portraits/mordrienne.webp",
+      "portrait_sha256": "d4239d18cebb2b62ef1103ed57060a5f95ca736aed46493ce50a8ffe30b9162f",
+      "sheet": "assets/generated/hero-breakthrough/mordrienne.png",
+      "status": "art_ready",
+      "sheet_sha256": "19b037c868aad96e68a814890ec7cf2b3b84770cdc6fb7ecaad0a87c0a552c82",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/mordrienne/bt_stone_1.webp",
+          "png_archive_entry": "mordrienne/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "af615872fd093c823b09b11e254b439f08528b136fdcb8d31e5c951b2c96705d",
+          "primary_component": 1,
+          "crop_rect": [
+            86,
+            12,
+            435,
+            521
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/mordrienne/bt_stone_2.webp",
+          "png_archive_entry": "mordrienne/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "c3b94cbb913d5ca1bd5e020ba29a84ee22ca61d84e14206afd7709c8c23134b7",
+          "primary_component": 3,
+          "crop_rect": [
+            572,
+            15,
+            946,
+            530
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/mordrienne/bt_stone_3.webp",
+          "png_archive_entry": "mordrienne/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "7ab0ef2399cfce3228f0c8091129ad328e48fe21f96b4af189d8e95c788e0be7",
+          "primary_component": 2,
+          "crop_rect": [
+            1023,
+            13,
+            1499,
+            533
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/mordrienne/bt_fragment_1.webp",
+          "png_archive_entry": "mordrienne/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "7f51ceb78971ad01d8d79c73478ea9e7f95338b0de78cc91ef14b49ff177cf61",
+          "primary_component": 4,
+          "crop_rect": [
+            78,
+            518,
+            482,
+            1004
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/mordrienne/bt_fragment_2.webp",
+          "png_archive_entry": "mordrienne/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "b908c5dc3a847471004b761b8bd5c4a8ad49cc75f763a578d27089f54343c93e",
+          "primary_component": 6,
+          "crop_rect": [
+            576,
+            524,
+            977,
+            1010
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/mordrienne/bt_fragment_3.webp",
+          "png_archive_entry": "mordrienne/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "a14bc69343e483079eb7c29d1934ada514674c6c4dc6cc298f67578549fa6dd5",
+          "primary_component": 5,
+          "crop_rect": [
+            1048,
+            519,
+            1516,
+            1005
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "sylas",
+      "portrait": "public/portraits/sylas.webp",
+      "portrait_sha256": "45e6c5af438e8d0b0a78d71209bb36a4531d0a1c1f8505de5f9c526f86f1454f",
+      "sheet": "assets/generated/hero-breakthrough/sylas.png",
+      "status": "art_ready",
+      "sheet_sha256": "0bacf33aa98af76f126b89b7ce2f743e868c8d7adb5de49cdb3601f81c4085fa",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/sylas/bt_stone_1.webp",
+          "png_archive_entry": "sylas/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "437315b5fb67744758b604354b5b6a94ad3726d6e81048b4ddf340424625257f",
+          "primary_component": 1,
+          "crop_rect": [
+            58,
+            10,
+            422,
+            525
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/sylas/bt_stone_2.webp",
+          "png_archive_entry": "sylas/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "8fe3e44777ba0a04e7b08f1e203928b3f29bcb94ce154f456fa5e636bd5efc79",
+          "primary_component": 2,
+          "crop_rect": [
+            555,
+            10,
+            936,
+            527
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/sylas/bt_stone_3.webp",
+          "png_archive_entry": "sylas/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "aa9e9436a74527dc3181f8418ad4f9abfec28ed106c1c3fad3be54991550b383",
+          "primary_component": 3,
+          "crop_rect": [
+            1020,
+            10,
+            1503,
+            535
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/sylas/bt_fragment_1.webp",
+          "png_archive_entry": "sylas/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "7c7fa05771a9b5fe87c6564c7bdc6254dd825e89a20740998b756b9379915fce",
+          "primary_component": 4,
+          "crop_rect": [
+            58,
+            515,
+            474,
+            999
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/sylas/bt_fragment_2.webp",
+          "png_archive_entry": "sylas/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "c377d78eeab5fc878fa8cce9a2d42032bcfeac880e5ce454440f25e202c69aa0",
+          "primary_component": 5,
+          "crop_rect": [
+            558,
+            523,
+            982,
+            1005
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/sylas/bt_fragment_3.webp",
+          "png_archive_entry": "sylas/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "29a86becb8e8138cd7767da9a5148ef2ac3cc3a22329fbc09980cb5881bf1f12",
+          "primary_component": 6,
+          "crop_rect": [
+            1035,
+            528,
+            1513,
+            1011
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    },
+    {
+      "id": "lucien",
+      "portrait": "public/portraits/lucien.webp",
+      "portrait_sha256": "b7e20a61fb53cb5308953bdcd6e81884b6534602ec99ce139d6d73e07758b4e5",
+      "sheet": "assets/generated/hero-breakthrough/lucien.png",
+      "status": "art_ready",
+      "sheet_sha256": "39fd9006040f9d1bb51c8d170ab58548d15852630266ca877d63e73ecce664ca",
+      "variants": [
+        {
+          "item": "bt_stone_1",
+          "url": "/items/heroes/lucien/bt_stone_1.webp",
+          "png_archive_entry": "lucien/bt_stone_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "d2f4d9239db48e161fdb58f2aaa4a7adf7b80eec2f1160e19af6fcf5c0d326b1",
+          "primary_component": 1,
+          "crop_rect": [
+            81,
+            10,
+            439,
+            493
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_2",
+          "url": "/items/heroes/lucien/bt_stone_2.webp",
+          "png_archive_entry": "lucien/bt_stone_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "9a8315725222ff8e339795155b952490acf71d995da1e95ab84beb861858a5bb",
+          "primary_component": 3,
+          "crop_rect": [
+            584,
+            20,
+            947,
+            496
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_stone_3",
+          "url": "/items/heroes/lucien/bt_stone_3.webp",
+          "png_archive_entry": "lucien/bt_stone_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "d13cfe5f951570a61df1f5822780ecdea34257cc4ff8718aec201cb4def0cdc1",
+          "primary_component": 2,
+          "crop_rect": [
+            1059,
+            10,
+            1497,
+            496
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_1",
+          "url": "/items/heroes/lucien/bt_fragment_1.webp",
+          "png_archive_entry": "lucien/bt_fragment_1.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "ce6f7ae23fbfc105e845d74dec68d54ee9b24208c23efd3b4c15ee45ba4aa660",
+          "primary_component": 4,
+          "crop_rect": [
+            66,
+            515,
+            481,
+            989
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_2",
+          "url": "/items/heroes/lucien/bt_fragment_2.webp",
+          "png_archive_entry": "lucien/bt_fragment_2.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "803a9c54cbc74f07fe4abd15306aa9bf169a7c77eee750bfd4f0803375f49ad8",
+          "primary_component": 6,
+          "crop_rect": [
+            579,
+            519,
+            985,
+            996
+          ],
+          "alpha_padding": 50
+        },
+        {
+          "item": "bt_fragment_3",
+          "url": "/items/heroes/lucien/bt_fragment_3.webp",
+          "png_archive_entry": "lucien/bt_fragment_3.png",
+          "size": [
+            512,
+            512
+          ],
+          "sha256": "5ec75e0fc1060e0745b804227b65e95658443e2efe6c6348e9776eca6250e7ee",
+          "primary_component": 5,
+          "crop_rect": [
+            1053,
+            515,
+            1503,
+            995
+          ],
+          "alpha_padding": 50
+        }
+      ]
+    }
+  ],
+  "assetCount": 90
+}
