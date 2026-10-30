@@ -530,3 +530,5 @@ User new_portrait_banner.zip replaces11 portraits (including Draeven) and10 bann
 ## Hero breakthrough artwork — 2026-10-30 (Codex)
 
 Branch `wip/codex-hero-breakthrough-art`, portrait base `1e9f103`: generated 90 transparent 512px art variants for all 15 current heroes (3 whole + 3 matching fragments). Sources `assets/generated/hero-breakthrough`, lossless WebP `public/items/heroes`, manifest/PNG ZIP/review `docs/art/hero-breakthrough`. Repack with `tools/dev/pack_hero_breakthrough_art.py` (Pillow/NumPy/SciPy); generated registry `hero-breakthrough-art.ts`. GM art catalog has dedicated hero rows, art_ready status; original Bai Long examples are superseded in the gallery. No hero-owned item IDs, save/economy/conversion changes, merge or deploy.
+
+Validation for the hero breakthrough set: app/spec TypeScript,902/902 Karma,production build,all90 alpha/size/portrait-hash/ZIP checks and real GM gallery desktop1600x900 + landscape844x390 pass. Source Portrait/contact sheet, original imagegen sheets and unretouched actual game screenshots are paired in the review doc. Build retains pre-existing optional-chain/budget warnings.
