@@ -34,3 +34,7 @@ The movement event no longer replaces an active monster cast with walk, so the a
 `python3 tools/sprites/jadecrest.py` then `npm run sprites:optimize`. The helpers register/cut compressed panels without changing originals, stabilize the jade mane, and bake separate character and FX strips. Runtime atlas cells320×280; maximum strip width stays inside WebP's16,383px limit. No manual sprite-atlas edits.
 
 Real desktop/mobile screenshots and approved preview references: `docs/review-images/2026-10-31-jadecrest/`. Browser setup disables hero automatic skills and raises fixture hero HP only in isolated browser memory; it does not change saved production stats. See review README and verification JSON for the exact checks and any remaining differences.
+
+## Size review follow-up (2026-10-31)
+
+User requested +25% character size and actual battle screenshots during the ground charge with heroes present. `SheetDef.displayScale=1.25` scales every Jadecrest pose at runtime, with 14px root padding compensated so feet remain fixed. Shared `unitGeometry` drives both Pixi and DOM fallback; existing sheets default to 1. Charge/impact circles keep their reviewed size. Mouth/charge/core/contact anchors and airborne trail offset follow the larger body. No native source/atlas resampling or gameplay numbers/footprint change. Actual desktop/mobile captures and verification: `docs/review-images/2026-10-31-jadecrest-size/`.

@@ -63,7 +63,7 @@ describe('Jadecrest Guardian integration',()=>{
     expect(fxPoseAt(FX['jc-s2-trail'],1.35,false,trail).dy).toBeLessThan(-60);
     expect(FX['jc-s2-land'].pivot).toEqual(FX['jc-s2-rim'].pivot);
     expect(FX['jc-s2-land'].dy).toBe(FX['jc-s2-rim'].dy);
-    expect(FX['jc-s3-charge'].anchor).toBe('roarCharge');expect(sh.anchors!['roarCharge'][0]).toBe(105);
+    expect(FX['jc-s3-charge'].anchor).toBe('roarCharge');expect(sh.anchors!['roarCharge'][0]).toBe(131.25);
   });
   it('commits a free full-body destination, travels for 0.6 seconds, and damages only on landing',()=>{
     const s=duel('jadecrest_pounce');

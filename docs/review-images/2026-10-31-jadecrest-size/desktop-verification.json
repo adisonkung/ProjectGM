@@ -1,0 +1,117 @@
+{
+  "errors": [],
+  "shots": [
+    {
+      "time": 5.249999999999989,
+      "cast": "jadecrest_stomp",
+      "left": 0.6499999999999995,
+      "boss": {
+        "r": 2,
+        "c": 11
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "renderScale": -1.373046875,
+      "position": {
+        "x": 1010.5625,
+        "y": 439.70453125
+      },
+      "fx": [
+        "jc-charge-under",
+        "jc-charge-front"
+      ]
+    },
+    {
+      "time": 7.599999999999981,
+      "cast": "jadecrest_roar",
+      "left": 0.29999999999999966,
+      "boss": {
+        "r": 2,
+        "c": 11
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "renderScale": -1.373046875,
+      "position": {
+        "x": 1010.5625,
+        "y": 439.70453125
+      },
+      "fx": [
+        "jc-charge-under",
+        "jc-charge-front",
+        "jc-s3-charge"
+      ]
+    }
+  ],
+  "fixture": "Real battle screenshots; fixture hero HP/ATK and cooldowns only, no image compositing or sprite substitution."
+}

@@ -98,6 +98,8 @@ export interface SequenceFxCue {
 }
 
 export interface SheetDef {
+  /** Visual size multiplier around the feet; never changes logical range or collision. */
+  displayScale?: number;
   /** Monster clip presentation; combat events own cast cancellation and activation, never PNG frame checks. */
   monsterFx?: Record<string, { cast?: string[]; activate?: string[]; tracks?: Record<string,FxTrack> }>;
   /** Contact sparks while the holder actually has a guarding status (rate-limited by the view). */
