@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from
 
 import { provideRouter } from '@angular/router';
 import { applyBuff } from '../../battle/engine/buffs';
+import { JADECREST_SKILLS } from '../../core/data/jadecrest-guardian';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { BattleComponent } from './battle.component';
 import { BattleEngine, BattleEvent } from '../../battle/engine/battle-engine';
@@ -36,6 +37,20 @@ describe('BattleComponent', () => {
     expect(core.offset).toEqual([0,-44]);expect(core.flip).toBeTrue();
     tick(2000);component.ngOnDestroy();discardPeriodicTasks();
   }));
+  it('keeps a monster cast pose when its committed leap emits movement', fakeAsync(() => {
+    component.start();component.openMenu();
+    const host=component as unknown as {engine:BattleEngine;handleEvents(events:BattleEvent[]):void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!;
+    boss.sprite='enemy-jadecrest-guardian.png';
+    const def=JADECREST_SKILLS['jadecrest_pounce'];boss.castSkills=[{def,cd:0}];
+    boss.casting={def,left:1.8,target:null,token:1,nextProgress:.1,breakDamage:0};
+    host.handleEvents([{type:'castStart',src:boss.id,skill:def.name,label:def.label,castTime:1.8,interruptible:false}]);
+    const key=component.anims()[boss.id].key;
+    host.handleEvents([{type:'move',src:boss.id}]);
+    expect(component.anims()[boss.id].anim).toBe('cast');expect(component.anims()[boss.id].key).toBe(key);
+    tick(2000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
+
   it('shows the placement board before the battle starts', () => {
     expect(component).toBeTruthy();
     const el: HTMLElement = fixture.nativeElement;

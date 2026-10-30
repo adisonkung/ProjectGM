@@ -1079,7 +1079,7 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'move':
-          if (anims[e.src]?.anim !== 'die') set(e.src, 'walk');
+          if (!unitOf(e.src)?.casting && anims[e.src]?.anim !== 'die') set(e.src, 'walk');
           break;
         case 'cast': {
           this.groundLock.delete(e.src);

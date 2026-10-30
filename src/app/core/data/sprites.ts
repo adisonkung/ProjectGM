@@ -4,6 +4,7 @@
  * เอฟเฟกต์ใช้สเกลพิกเซลเดียวกับตัวละคร (1 px ต้นฉบับ = 1.25% ของความกว้างช่องกระดาน)
  */
 
+import { JADECREST_FX, JADECREST_PRESENTATION } from './jadecrest-presentation';
 import type { FxTrack } from '../models/fx';
 import { AEGIS_S3_IMPACT_BOTTOMS, AEGIS_S3_TIP_ANCHOR, AEGIS_S3_TIP_MOTION } from './aegis-s3-presentation';
 import type { ParticleRef } from './particles';
@@ -1110,6 +1111,8 @@ for (const m of Object.values(MONSTERS)) {
   SHEETS[sheet] = monsterSheet(m.animation, m.attack.event, proj);
 }
 
+Object.assign(SHEETS['enemy-jadecrest-guardian.png'], JADECREST_PRESENTATION);
+
 // Aegis: all tiers share one source-pixel sheet, status-owned barrier and core effects.
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
   pixelated: true, hitFlashStrength: .35,
@@ -1133,6 +1136,7 @@ Object.assign(SHEETS['enemy-aegis-sentinel.png'].anims.die!, {
 
 
 export const FX: Record<string, FxDef> = {
+  ...JADECREST_FX,
   'ae-attack-thrust': { file: 'fx-aegis-thrust.png', frames: 6, w: 120, h: 48, frameMs: 35,
     at: 'self', anchor: 'weaponTip', delayMs: 270, scale: .55, pivot: [.15,.5], attach: true, blend: 'add' },
   'ae-s1-in': { file: 'fx-aegis-barrier-in.png', frames: 5, w: 300, h: 250, frameMs: 70,

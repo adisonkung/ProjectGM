@@ -1,0 +1,482 @@
+{
+  "character": {
+    "cell": [
+      320,
+      280
+    ],
+    "cols": 50,
+    "root": [
+      160,
+      266
+    ],
+    "rows": [
+      {
+        "clip": "idle",
+        "row": 1,
+        "sourceFrames1Based": [
+          1,
+          3,
+          5,
+          7,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          21,
+          23,
+          25,
+          27,
+          29,
+          31,
+          33,
+          35,
+          37,
+          39,
+          41,
+          43,
+          45,
+          47
+        ]
+      },
+      {
+        "clip": "walk",
+        "row": 2,
+        "sourceFrames1Based": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32
+        ]
+      },
+      {
+        "clip": "hurt",
+        "row": 3,
+        "note": "idle recoil, no extra source generation"
+      },
+      {
+        "clip": "death",
+        "row": 4,
+        "sourceFrames1Based": [
+          1,
+          3,
+          5,
+          7,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          21,
+          23,
+          25,
+          27,
+          29,
+          31,
+          33,
+          35,
+          37,
+          39,
+          41,
+          43,
+          45,
+          47,
+          49,
+          51,
+          53,
+          55
+        ]
+      },
+      {
+        "clip": "attack",
+        "row": 5,
+        "sourceFrames1Based": [
+          1,
+          7,
+          13,
+          17,
+          21,
+          25,
+          27,
+          29,
+          31,
+          33,
+          37,
+          43,
+          49,
+          56
+        ]
+      },
+      {
+        "clip": "stomp",
+        "row": 6,
+        "sourceFrames1Based": [
+          3,
+          5,
+          7,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          21,
+          23,
+          25,
+          25,
+          25,
+          25,
+          25,
+          25,
+          25,
+          26,
+          33,
+          34,
+          35,
+          36,
+          38,
+          39,
+          41,
+          42,
+          44,
+          45,
+          47,
+          48,
+          50,
+          51,
+          53,
+          54,
+          56
+        ]
+      },
+      {
+        "clip": "pounce",
+        "row": 7,
+        "sourceFrames1Based": [
+          9,
+          10,
+          11,
+          13,
+          14,
+          16,
+          17,
+          19,
+          20,
+          22,
+          23,
+          25,
+          26,
+          28,
+          29,
+          31,
+          33,
+          35,
+          36,
+          37,
+          39,
+          40,
+          41,
+          41,
+          42,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56
+        ]
+      },
+      {
+        "clip": "roar",
+        "row": 8,
+        "sourceFrames1Based": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          22,
+          23,
+          24,
+          26,
+          27,
+          29,
+          31,
+          32,
+          34,
+          36,
+          37,
+          39,
+          41,
+          42,
+          44,
+          46,
+          47,
+          49,
+          51,
+          52,
+          54,
+          56,
+          21,
+          19,
+          17,
+          16,
+          14,
+          12,
+          11,
+          9,
+          7,
+          6,
+          4,
+          2,
+          1
+        ]
+      },
+      {
+        "clip": "broken",
+        "row": 9,
+        "sourceFrames1Based": [
+          1,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          19,
+          21,
+          23,
+          25,
+          27,
+          29,
+          31,
+          33,
+          35,
+          37,
+          38,
+          40,
+          42,
+          44,
+          46,
+          48,
+          50,
+          52,
+          54,
+          56
+        ]
+      }
+    ]
+  },
+  "fx": {
+    "charge-under": {
+      "file": "fx-jadecrest-charge-under.png",
+      "frames": 60,
+      "w": 360,
+      "h": 270
+    },
+    "charge-front": {
+      "file": "fx-jadecrest-charge-front.png",
+      "frames": 60,
+      "w": 360,
+      "h": 270
+    },
+    "s1-front": {
+      "file": "fx-jadecrest-s1-front.png",
+      "frames": 5,
+      "w": 384,
+      "h": 308
+    },
+    "s1-paw": {
+      "file": "fx-jadecrest-s1-paw.png",
+      "frames": 1,
+      "w": 180,
+      "h": 180
+    },
+    "s2-land": {
+      "file": "fx-jadecrest-s2-land.png",
+      "frames": 8,
+      "w": 480,
+      "h": 360
+    },
+    "s2-rim": {
+      "file": "fx-jadecrest-s2-rim.png",
+      "frames": 8,
+      "w": 480,
+      "h": 360
+    },
+    "s2-trail": {
+      "file": "fx-jadecrest-s2-trail.png",
+      "frames": 8,
+      "w": 280,
+      "h": 170
+    },
+    "s2-ripple": {
+      "file": "fx-jadecrest-s2-ripple.png",
+      "frames": 24,
+      "w": 400,
+      "h": 180
+    },
+    "s3-charge": {
+      "file": "fx-jadecrest-s3-charge.png",
+      "frames": 8,
+      "w": 180,
+      "h": 180
+    },
+    "s3-wave": {
+      "file": "fx-jadecrest-s3-wave.png",
+      "frames": 36,
+      "w": 600,
+      "h": 300
+    },
+    "hit": {
+      "file": "fx-jadecrest-hit.png",
+      "frames": 8,
+      "w": 110,
+      "h": 110
+    },
+    "break": {
+      "file": "fx-jadecrest-break.png",
+      "frames": 8,
+      "w": 160,
+      "h": 160
+    },
+    "death": {
+      "file": "fx-jadecrest-death.png",
+      "frames": 8,
+      "w": 240,
+      "h": 260
+    }
+  },
+  "sourceHashes": [
+    {
+      "file": "Jadecrest Guardian-mighty_roar.png",
+      "sha256": "49898d251ee29f1026f8273dd58f3dad4155637004e257e28d70f2efdfeff395"
+    },
+    {
+      "file": "Jadecrest Guardian-pounce_leap.png",
+      "sha256": "06cc05d07acce69350675391be9d7d59f7e44075a3b94021e371be2e1e7599c1"
+    },
+    {
+      "file": "jade_death.png",
+      "sha256": "51f1214b6041534af159f36acf47215539716e040e93893e742c0e3e4a297f50"
+    },
+    {
+      "file": "jade_idle.png",
+      "sha256": "929430174a5869d7b09010bca1e47fc0681ae60dbf887b5fef219c259a444916"
+    },
+    {
+      "file": "jade_normalAttack.png",
+      "sha256": "f2ecdd6f2daafd038e6044346061729449fb90deefbe7d2ca24f3ce221c22419"
+    },
+    {
+      "file": "jade_skill1.png",
+      "sha256": "0d033725fad508ca1daabed3d32b9ef224aa1a8ce02a811ea6bffe265787865f"
+    },
+    {
+      "file": "jade_walk.png",
+      "sha256": "733e8684f08535f91ff68d3c709a3cdf7422d18f8d066cfd0c81acab4c295459"
+    },
+    {
+      "file": "jadecrest-break-core.png",
+      "sha256": "27a6d842335b3270938b69bc1012debb6808ef2871d4c147b492f3767d2d7d5f"
+    },
+    {
+      "file": "jadecrest-death-dissolve.png",
+      "sha256": "1c9b9b9647388f2c389927e7e70e1d4de6fc35065dcb49eb26d7c5425d41b7ea"
+    },
+    {
+      "file": "jadecrest-ground-charge-held.png",
+      "sha256": "a516ab1e1efab4eae6d4e7f7636de4f96f3230ee09f1c237db9345d62efbad9e"
+    },
+    {
+      "file": "jadecrest-ground-charge-in.png",
+      "sha256": "3ac10910ec4df7d2ee5494f225de1b860a0d2f54b0eaaf2c2f7ddf8beb321c61"
+    },
+    {
+      "file": "jadecrest-hit-spark.png",
+      "sha256": "faddf4549be08422a7e7e78f2cae49b824e5db09864599dfb5291d61a2129edd"
+    },
+    {
+      "file": "jadecrest-pounce-landing-impact.png",
+      "sha256": "fd62a6c59d124f6de5e9f3eedd99d966de2ca21339fb4a7287242ae90bfb77ef"
+    },
+    {
+      "file": "jadecrest-pounce-trail.png",
+      "sha256": "6700a3e74622cef8fdab4ab22bce84ddb8266b0d944705625a013deddbb101ef"
+    },
+    {
+      "file": "jadecrest-roar-charge.png",
+      "sha256": "bb1f99aafe3409fe056845c9036a181f58d890dc8df108a311a85c97d16b47b2"
+    },
+    {
+      "file": "jadecrest-roar-wave.png",
+      "sha256": "50f50ba51a248b2480afb9ad88c81deeea101bebbacca022675fdec6b2c961a4"
+    },
+    {
+      "file": "jadecrest-stomp-front-impact.png",
+      "sha256": "7e334dc4a4abd100a60d9724e738a9ae68425c33d705c4718c1331f375d727c4"
+    },
+    {
+      "file": "jadecrest-stomp-paw-charge.png",
+      "sha256": "db9dcaecc8385ad8f97ff193dc3f0fb74d4bfaedf0800d1af6f8331c1e2c4ee8"
+    }
+  ],
+  "reviewVersions": {
+    "s1": "V4",
+    "allChargeRings": "V5",
+    "s2": "V5",
+    "s3": "V6"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "broken": {
+    "status": true,
+    "clip": {
+      "anim": "cast",
+      "key": 91,
+      "castTime": 0,
+      "castClip": "broken",
+      "force": true
+    },
+    "fx": [
+      "jc-core"
+    ]
+  },
+  "fixture": "100 Break injected through engine.tryInterrupt during real S3; fatal damage injected through engine.applyDamage for the death presentation only."
+}

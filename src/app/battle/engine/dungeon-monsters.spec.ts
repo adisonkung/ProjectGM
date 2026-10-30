@@ -91,7 +91,7 @@ describe('Special-dungeon monsters: data', () => {
     expect([0, 1, 2, 3, 4, 5, 6].map(d => ascensionBossFor(day(d)))).toEqual([
       'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel',
     ]);
-    for (const boss of ['aegis_sentinel', 'moonblade_ronin', 'astral_seraph'] as const) {
+    for (const boss of ['aegis_sentinel', 'jadecrest_guardian', 'astral_seraph'] as const) {
       for (const t of [1, 2, 3]) {
         const st = ascensionDuel(t, boss);
         for (let d = 0; d < 7; d++) expect(ascensionSelection(t, boss, day(d)).enemies[0].enemy).toBe(`${boss}@${t}`);
@@ -112,8 +112,8 @@ describe('Special-dungeon monsters: data', () => {
     try {
       DEV_FLAGS.ascensionFreeChoice = false;
       const wednesday = new Date(2026, 8, 30);
-      expect(ascensionBossFor(wednesday)).toBe('moonblade_ronin');
-      expect(ascensionSelection(2, 'aegis_sentinel', wednesday).enemies[0].enemy).toBe('moonblade_ronin@2');
+      expect(ascensionBossFor(wednesday)).toBe('jadecrest_guardian');
+      expect(ascensionSelection(2, 'aegis_sentinel', wednesday).enemies[0].enemy).toBe('jadecrest_guardian@2');
     } finally { DEV_FLAGS.ascensionFreeChoice = previous; }
   });
 

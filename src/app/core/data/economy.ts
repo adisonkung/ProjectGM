@@ -361,13 +361,13 @@ const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]):
 } as FarmDungeonDefinition);
 
 /**
- * Future calendar (currently suspended by user): Mon–Tue Aegis · Wed–Thu Moonblade
- * Ronin · Fri–Sun Astral Seraph. Tier I–III = that guardian's stat step (`<boss>@<tier>`), enrage / hard limit per tier.
+ * Future calendar (currently suspended by user): Mon–Tue Aegis · Wed–Thu Jadecrest
+ * Guardian · Fri–Sun Astral Seraph. Tier I–III = that guardian's stat step (`<boss>@<tier>`), enrage / hard limit per tier.
  */
 export const ASCENSION_SCHEDULE: Record<number, (typeof ASCENSION_BOSSES)[number]> = {
-  1: 'aegis_sentinel', 2: 'aegis_sentinel', 3: 'moonblade_ronin', 4: 'moonblade_ronin', 5: 'astral_seraph', 6: 'astral_seraph', 0: 'astral_seraph',
+  1: 'aegis_sentinel', 2: 'aegis_sentinel', 3: 'jadecrest_guardian', 4: 'jadecrest_guardian', 5: 'astral_seraph', 6: 'astral_seraph', 0: 'astral_seraph',
 };
-export const ASCENSION_DAY_LABEL: Record<string, string> = { aegis_sentinel: 'จ.–อ.', moonblade_ronin: 'พ.–พฤ.', astral_seraph: 'ศ.–อา.' };
+export const ASCENSION_DAY_LABEL: Record<string, string> = { aegis_sentinel: 'จ.–อ.', jadecrest_guardian: 'พ.–พฤ.', astral_seraph: 'ศ.–อา.' };
 /** Default guardian: Aegis during free choice, calendar guardian when the temporary flag is disabled. */
 export const ascensionBossFor = (date: Date = new Date()): (typeof ASCENSION_BOSSES)[number] => DEV_FLAGS.ascensionFreeChoice ? ASCENSION_BOSSES[0] : ASCENSION_SCHEDULE[date.getDay()];
 /** Validate external guardian choices; calendar restriction is suspended until all three new bosses ship. */
@@ -382,8 +382,8 @@ export function ascensionDuel(tier: number, boss: (typeof ASCENSION_BOSSES)[numb
   const [enrageAt, limit] = ASCENSION_LIMITS[tier - 1];
   const name = `Ascension ${['I', 'II', 'III'][tier - 1]} · ${DUNGEON_MONSTERS[boss].name}`;
   const stage = bossDuel(`ascension_${tier}`, name, `${boss}@${tier}`, enrageAt, limit, ASCENSION_BG[tier - 1]);
-  // Aegis review position: bottom anchor, leaving the upper lane clear. Keep the logical grid integral.
-  if (boss !== 'aegis_sentinel') return stage;
+  // Large guardians use the bottom anchor, leaving the upper lane clear. Keep the logical grid integral.
+  if (boss !== 'aegis_sentinel' && boss !== 'jadecrest_guardian') return stage;
   return { ...stage, enemies: [{ enemy: `${boss}@${tier}`, r: 1, c: 2 }],
     waveDefs: [{ spawns: [{ monsterId: `${boss}@${tier}`, formationSlot: { depth: 1, lane: 2 } }] }] };
 }

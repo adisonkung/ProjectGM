@@ -225,6 +225,8 @@ export interface BattleUnit {
     def: CastSkillDef; left: number; target: number | null; token: number; nextProgress: number;
     /** Break Gauge filled so far (breakable casts) */
     breakDamage: number;
+    /** Opt-in LEAP_BEHIND destination was committed at takeoff; never reselect it on landing. */
+    leapStarted?: boolean;
     /** interrupt / break commitments of heroes whose skills are on the way (InterruptReservation) */
     commits?: { by: number; breakPower: number; until: number }[];
   } | null;
@@ -1382,6 +1384,14 @@ export class BattleEngine {
       this.events.push({ type: 'castProgress', src: u.id, skill: c.def.id, pct: c.nextProgress });
       c.nextProgress += CAST_PROGRESS_STEP;
     }
+    if (isMonsterSkill(c.def) && c.def.leapTravel && !c.leapStarted && c.left <= c.def.leapTravel + 1e-9) {
+      c.leapStarted = true;
+      const aim = this.units.find(t => t.id === c.target && this.isValidTarget(u,t));
+      if (aim && c.def.effects.some(e => e.type === 'LEAP_BEHIND')) {
+        const cell = this.freeCellNear(aim.pos,u.pos,u);
+        if (cell) this.relocate(u,cell,'dash',Math.max(dt,c.left / modifier(u,'castSpeedMultiplier')));
+      }
+    }
     if (c.left <= 1e-9) this.finishCast(u);
   }
 
@@ -1415,7 +1425,7 @@ export class BattleEngine {
     }
   }
 
-  private activateMonsterSkill(u: BattleUnit, def: MonsterSkillDefinition, aimedId: number | null): void {
+  private activateMonsterSkill(u: BattleUnit, def: MonsterSkillDefinition, aimedId: number | null, leaped = false): void {
     const aimedUnit = aimedId != null ? this.units.find(x => x.id === aimedId) ?? null : null;
     // an aimed hero must still be a valid target; an aimed ally must still be alive
     let aim: BattleUnit | null = null;
@@ -1485,7 +1495,7 @@ export class BattleEngine {
         case 'LEAP_BEHIND': {
           if (!aim) break;
           // never overlap: land on a free cell next to the target, on its far side from the caster
-          const cell = this.freeCellNear(aim.pos, u.pos);
+          const cell = leaped ? null : this.freeCellNear(aim.pos, u.pos, u);
           if (cell) this.relocate(u, cell, 'dash');
           if (u.monster) {
             u.monster.currentTargetId = aim.id;
@@ -1630,7 +1640,7 @@ export class BattleEngine {
       // CHALLENGE strikes: only casts the heroes could have stopped (interruptible or breakable)
       if (!isPlayerUnit(u) && canStopCast(c.def)) this.flow.onEnemyCastCompleted(c.def.id);
       if (c.def.untargetableWhileCasting) this.removeStatus(u, 'untargetable');
-      this.activateMonsterSkill(u, c.def, c.target);
+      this.activateMonsterSkill(u, c.def, c.target, c.leapStarted);
       this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
       if (u.monster) this.monsterAI.onCastEnd(u, 'completed');
       return;
@@ -2007,12 +2017,21 @@ export class BattleEngine {
   }
 
   /** ช่องว่างรอบ ๆ ตำแหน่ง ที่อยู่ไกลจาก `from` ที่สุด (= ด้านหลังเป้าหมาย) */
-  private freeCellNear(at: Cell, from: Cell): Cell | null {
+  private freeCellNear(at: Cell, from: Cell, owner?: BattleUnit): Cell | null {
     const body = this.units.find(b => b.alive && b.footprint && b.pos.r === at.r && b.pos.c === at.c);
-    const radius = body ? Math.max(body.footprint!.cols,body.footprint!.rows) : 1;
+    const radius = Math.max(body?.footprint?.cols ?? 1,body?.footprint?.rows ?? 1,owner?.footprint?.cols ?? 1,owner?.footprint?.rows ?? 1);
     const free: Cell[] = [];
     for (let r = at.r-radius; r <= at.r+radius; r++) for (let c = at.c-radius; c <= at.c+radius; c++) {
       const cell = { r,c };
+      const fp = owner?.footprint;
+      if (fp) {
+        let fits = true;
+        for (let rr=r-fp.anchorR; rr<r-fp.anchorR+fp.rows; rr++) for (let cc=c-fp.anchorC; cc<c-fp.anchorC+fp.cols; cc++) {
+          const part={r:rr,c:cc};
+          if (!Grid.inBounds(part) || this.grid.occupants(part).some(id=>id!==owner!.id) || this.reservedBodyCell(part,owner)) fits=false;
+        }
+        if (!fits || unitDistance({ pos: cell, footprint: fp }, { pos: at }) !== 1) continue;
+      }
       if ((r !== at.r || c !== at.c) && this.grid.isFree(cell) && !this.reservedBodyCell(cell) &&
         (!body || unitDistance({ pos: cell },body) === 1)) free.push(cell);
     }

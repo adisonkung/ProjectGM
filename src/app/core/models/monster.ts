@@ -252,6 +252,8 @@ export interface MonsterSkillDefinition {
   type: 'BUFF' | 'ATTACK' | 'SUPPORT' | 'SUMMON' | 'MOVEMENT' | 'SPECIAL';
   /** 0 = instant */
   castTime: number;
+  /** LEAP_BEHIND: seconds of committed travel before activation; other skills keep instant relocation. */
+  leapTravel?: number;
   cooldown: number;
   /** cooldown after being interrupted (defaults to cooldown) */
   interruptedCooldown?: number;

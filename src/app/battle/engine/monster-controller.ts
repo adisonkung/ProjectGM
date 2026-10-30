@@ -189,10 +189,10 @@ export class MonsterController {
         if (s.stateTime >= (def.ai.spawnDuration ?? 0)) this.setState(s, 'SEARCHING', 'idle');
         return;
       case 'HURT':
-        if ((s.hurtTimer -= dt) <= 0) this.setState(s, 'SEARCHING', 'idle');
+        if ((s.hurtTimer -= dt) <= 0) { delete u.actionFacing; this.setState(s, 'SEARCHING', 'idle'); }
         return;
       case 'RECOVERING':
-        if ((s.recoverTimer -= dt) <= 0) this.setState(s, 'SEARCHING', 'idle');
+        if ((s.recoverTimer -= dt) <= 0) { delete u.actionFacing; this.setState(s, 'SEARCHING', 'idle'); }
         return;
       case 'ATTACKING':
         if ((s.attackTimer -= dt) <= 0) {
@@ -543,7 +543,7 @@ export class MonsterController {
 
   /** Called by the cast system when a cast ends */
   onCastEnd(u: BattleUnit, result: 'completed' | 'interrupted' | 'cancelled'): void {
-    delete u.actionFacing;
+    if (result !== 'completed') delete u.actionFacing;
     const s = u.monster!;
     const skill = s.currentSkillId ? this.skills[s.currentSkillId] : undefined;
     s.currentSkillId = null;
