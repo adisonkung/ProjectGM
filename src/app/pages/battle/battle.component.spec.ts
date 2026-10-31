@@ -65,6 +65,20 @@ describe('BattleComponent', () => {
     tick(2000);component.ngOnDestroy();discardPeriodicTasks();
   }));
 
+  it('keeps a large guardian forward telegraph and ground impact on the same body-front cells',fakeAsync(()=>{
+    component.start();component.openMenu();
+    const host=component as unknown as{engine:BattleEngine;handleEvents(events:BattleEvent[]):void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!;
+    boss.sprite='enemy-aegis-sentinel.png';boss.pos={r:2,c:11};boss.x=host.engine.formation.originPosition+11;boss.y=2;
+    boss.footprint={cols:4,rows:2,anchorC:2,anchorR:1};boss.actionFacing={left:true};
+    host.handleEvents([{type:'castStart',src:boss.id,skill:'aegis_judgement',label:'S2',castTime:1.8,interruptible:false}]);
+    const zone=component.zones().find(z=>z.kind==='telegraph')!;
+    expect(zone.c).toBe(6+host.engine.formation.originPosition-host.engine.cameraX);expect(zone.w).toBe(3);
+    host.handleEvents([{type:'skillActivated',src:boss.id,skill:'aegis_judgement',name:'S2',targets:[]}]);
+    const wave=component.fx().find(f=>f.name==='ae-s3-wave')!;expect(wave.c).toBe(7+host.engine.formation.originPosition-host.engine.cameraX);
+    tick(2000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
+
   it('shows the placement board before the battle starts', () => {
     expect(component).toBeTruthy();
     const el: HTMLElement = fixture.nativeElement;

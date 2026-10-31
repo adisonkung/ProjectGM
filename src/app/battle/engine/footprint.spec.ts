@@ -55,7 +55,7 @@ describe('logical boss footprint', () => {
   it('melee approaches the perimeter, both sides can attack, and no actor walks into the reserved space', () => {
     const s = fight();s.run(20);
     expect(s.boss.pos).toEqual({ r: 2,c: 11 });
-    expect(s.boss.footprint).toEqual(footprint);
+    expect(s.boss.footprint).toEqual({cols:4,rows:2,anchorC:2,anchorR:1});
     expect(s.events.some(e => e.type === 'attack' && e.src === s.hero.id && e.dst === s.boss.id)).toBeTrue();
     expect(s.events.some(e => e.type === 'damage' && e.dst === s.boss.id)).toBeTrue();
     expect(s.events.some(e => e.type === 'attack' && e.src === s.boss.id && e.dst === s.hero.id)).toBeTrue();
@@ -65,7 +65,7 @@ describe('logical boss footprint', () => {
 
   it('a blink lands behind the body perimeter and can still damage the single boss', () => {
     const s = fight('moye');
-    const cell = { r: 2,c: 9 };
+    const cell = { r: 2,c: 8 };
     s.e.grid.move(s.hero.id,s.hero.pos,cell);s.hero.pos = cell;s.hero.x = cell.c;s.hero.y = cell.r;
     s.run(.2);s.hero.cd2 = 0;
     expect(s.e.requestSkill(s.hero.id,'skill2')).toBeTrue();

@@ -169,6 +169,8 @@ export interface FxDef {
   at: 'self' | 'target' | 'allies';
   /** Place a ground effect at the logical footprint centre, independent of its PNG dimensions. */
   groundArea?: 'SQUARE_2' | 'FRONT_RECT_2X3' | 'FRONT_RECT_3X2';
+  /** Forward ground shape begins at the leading occupied column, not the authored anchor. */
+  groundFromBodyFront?: boolean;
   /** เลื่อนจากกลางช่อง เป็น % ของช่อง (+x ขวา, +y ลง) */
   dx?: number;
   dy?: number;
@@ -1156,26 +1158,26 @@ export const FX: Record<string, FxDef> = {
   'ae-s1-loop': { file: 'fx-aegis-barrier-loop.png', frames: 64, w: 340, h: 280, frameMs: 40,
     at: 'self', fitCells: 7.36, pivot: [.5,.77], dy: 35, delayMs: 350, attach: true },
   'ae-s1-hit': { file: 'fx-aegis-barrier-hit.png', frames: 8, w: 128, h: 128, frameMs: 40,
-    at: 'self', fitCells: 1.36, dy: bossPoint([0,-65],1.6)[1], dx: 120, attach: true, blend: 'add' },
+    at: 'self', fitCells: 1.65, dy: bossPoint([0,-65],1.6)[1], dx: 120, attach: true, blend: 'add' },
   'ae-s2-charge': { file: 'fx-aegis-s2-charge.png', frames: 32, w: 180, h: 180, frameMs: 200/3,
     at: 'self', anchor: 'weaponTip', delayMs: 1250, fitCells: 2.1, attach: true, repeat: 2, blend: 'add' },
   'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 8, w: 256, h: 256, frameMs: 90,
-    at: 'self', anchor: 'weaponTip', fitCells: 4, pivot: [1-356/444,222/444], attach: false, fadeOutMs: 120 },
+    at: 'self', anchor: 'weaponTip', fitCells: 4.6, pivot: [1-356/444,222/444], attach: false, fadeOutMs: 120 },
   'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 219, frameMs: 45,
     at: 'self', anchor: 'weaponTip', fitCells: 1, fitRows: 4.5, pivot: [0,.5], toBoardEdge: true,
     orient: 'flip', attach: false, repeat: 2, fadeOutMs: 120, blend: 'add' },
   'ae-s2-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
-    at: 'target', fitCells: .8, dy: -20 },
+    at: 'target', fitCells: 1.05, dy: -20 },
   'ae-s3-charge': { file: 'fx-aegis-s3-tip-charge.png', frames: 75, w: 160, h: 160, frameMs: 24,
     at: 'self', anchor: 'judgementTip', fitCells: 1.7, attach: true, blend: 'add' },
   'ae-s3-ground-charge': { file: 'fx-aegis-s3-ground-charge.png', frames: 75, w: 360, h: 320, frameMs: 24,
     at: 'self', fitCells: 4.4, pivot: [.5,204/320], dy: 27.25,
     attach: true, layer: 'under' },
   'ae-s3-wave': { file: 'fx-aegis-s3-slam.png', frames: 8, w: 360, h: 240, frameMs: 50,
-    at: 'self', groundArea: 'FRONT_RECT_3X2', fitCells: 3, fitRows: 2,
+    at: 'self', groundArea: 'FRONT_RECT_3X2', groundFromBodyFront:true, fitCells: 3.6, fitRows: 2.4,
     ground: AEGIS_S3_IMPACT_BOTTOMS, pivot: [.5,1], dy: 50, attach: false, layer: 'under' },
   'ae-s3-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
-    at: 'target', fitCells: .65, dy: -20 },
+    at: 'target', fitCells: .85, dy: -20 },
   'ae-core': { file: 'fx-aegis-core.png', frames: 75, w: 320, h: 260, frameMs: 40,
     at: 'self', anchor: 'shieldCore', fitCells: 3.2, attach: true, blend: 'add' },
   'ae-death': { file: 'fx-aegis-death.png', frames: 10, w: 210, h: 180, frameMs: 65,

@@ -1,5 +1,6 @@
 # Aegis / Jadecrest presentation size follow-up
 
+> Layout update, 1 November 2026: Aegis and Jade now use asymmetric **4×2** footprints. Earlier 3×2 descriptions/screenshots below are historical. See [GUARDIAN_4X2_LAYOUT.md](GUARDIAN_4X2_LAYOUT.md) for current anchors, skill origins and upper room.
 User feedback on the full-size game captures: both bosses were still too small. Jade's charge and landing rings also need to remain proportionate to its enlarged body.
 
 - Aegis display scale: **1 → 1.6** (+60%). Shield-core, normal spear-tip and raised Judgement-tip anchors follow the enlarged source geometry. Judgement's existing tip-motion track scales with the spear. Barrier and core effects grow with the body.

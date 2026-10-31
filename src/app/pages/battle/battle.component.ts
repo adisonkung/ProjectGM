@@ -1,3 +1,4 @@
+import { bodyFrontCell } from '../../battle/engine/footprint';
 import { battleViewport } from './battle-viewport';
 import { BattleEmblemComponent } from './battle-emblem.component';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
@@ -891,6 +892,11 @@ export class BattleComponent implements OnDestroy {
       const left = caster.actionFacing?.left ?? !!this.facing.get(caster.id);
       return { r: 0, c: left ? 0 : q.c + .5, w: Math.max(0, left ? q.c + .5 : BOARD_COLS - q.c - .5), h: 3 };
     }
+    if (area === 'FRONT_RECT_2X3') {
+      const q=this.screenOf(caster),left=caster.actionFacing?.left??!!this.facing.get(caster.id);
+      const r=Math.max(0,q.r-1);
+      return {r,c:q.c+(left?-2:1),w:2,h:Math.min(3,q.r+2)-r};
+    }
     if (area === 'FRONT_RECT_3X2') {
       const q = this.screenOf(caster),left = caster.actionFacing?.left ?? !!this.facing.get(caster.id);
       return { r: q.r-1,c: q.c+(left ? -3 : 1),w: 3,h: 2 };
@@ -909,7 +915,10 @@ export class BattleComponent implements OnDestroy {
     const sk = u ? this.skillByName(u, skillName) : undefined;
     if (!u || !sk?.mockFx) return;
     const center = dst != null ? this.engine.units.find(x => x.id === dst) ?? u : sk.target.type === 'ALL_HEROES' ? this.engine.alive(PLAYER_TEAM)[0] ?? u : u;
-    const z: ZoneView = { id: ++this.floatId, ...this.areaRect(sk.mockFx.area, center, u), color: sk.mockFx.color, kind: 'telegraph', sec: castTime / this.speed() };
+    const left=u.actionFacing?.left??!!this.facing.get(u.id);
+    const front=sk.effects.some(e=>e.type==='DAMAGE'&&e.center==='BODY_FRONT')?bodyFrontCell(u,left):u.pos;
+    const caster={...u,pos:front,x:u.x+front.c-u.pos.c};
+    const z: ZoneView = { id: ++this.floatId, ...this.areaRect(sk.mockFx.area, center, caster), color: sk.mockFx.color, kind: 'telegraph', sec: castTime / this.speed() };
     this.zones.update(l => [...l, z]);
     this.zoneOwner.set(src, [...(this.zoneOwner.get(src) ?? []), z.id]);
   }
@@ -976,7 +985,7 @@ export class BattleComponent implements OnDestroy {
         for (const id of at) {
           const q = id === src ? p : posOf(id);
           if (def.span && q === p) continue; // a tether to himself (no ally to link) draws nothing
-          const areaCell = (def.groundArea && this.groundLock.get(src)) || groundFxCell(def, unitOf(src).pos, aim?.at ?? unitOf(id).pos,
+          const areaCell = (def.groundArea && this.groundLock.get(src)) || groundFxCell(def, def.groundFromBodyFront?bodyFrontCell(unitOf(src),unitOf(src).actionFacing?.left??!!this.facing.get(src)):unitOf(src).pos, aim?.at ?? unitOf(id).pos,
             unitOf(src).actionFacing?.left ?? this.facing.get(src));
           if (def.groundArea && !this.groundLock.has(src)) this.groundLock.set(src, areaCell);
           const cell = def.groundArea
@@ -1013,7 +1022,8 @@ export class BattleComponent implements OnDestroy {
         const offset = fxOffset(name, u.sprite);
         // An edge beam is horizontal and starts at the weapon tip; only its separate shaft changes length.
         const p = posOf(src);
-        const at = d.groundArea ? groundFxCell(d,u.pos,u.pos,flip) : u.pos;
+        const origin=d.groundFromBodyFront?bodyFrontCell(u,flip):u.pos;
+        const at = d.groundArea ? groundFxCell(d,origin,origin,flip) : origin;
         const position = { r: p.r+at.r-u.pos.r,c: p.c+at.c-u.pos.c };
         const stretch = d.toBoardEdge ? edgeBeamStretch(d, position.c, flip, offset) : undefined;
         const angle = d.at === 'self' && d.orient === 'rotate'

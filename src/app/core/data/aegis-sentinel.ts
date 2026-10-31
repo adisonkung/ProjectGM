@@ -22,7 +22,7 @@ export const AEGIS_SKILLS: Record<string, MonsterSkillDefinition> = {
     id: 'aegis_judgement', name: 'คำพิพากษาแห่งประตู', label: 'S2 · GATE JUDGEMENT', type: 'ATTACK',
     castTime: 1.8, cooldown: 13, firstCastDelay: 2, interruptible: false,
     clip: 'judgement', target: { type: 'SELF' },
-    effects: [{ type: 'DAMAGE', mul: 1.2, area: 'FRONT_RECT_3X2', center: 'SELF' }],
+    effects: [{ type: 'DAMAGE', mul: 1.2, area: 'FRONT_RECT_3X2', center: 'BODY_FRONT' }],
     conditions: [{ type: 'ENEMY_WITHIN', range: 3 }], recovery: .78, interruptRecovery: 0,
     mockFx: { color: '#efc66d', area: 'FRONT_RECT_3X2' }, hitFx: 'ae-s3-impact',
   },
@@ -31,7 +31,7 @@ export const AEGIS_SKILLS: Record<string, MonsterSkillDefinition> = {
 export const AEGIS_SENTINEL: MonsterDefinition = {
   id: 'aegis_sentinel', name: 'ผู้พิทักษ์ตราปฐม', rank: 'BOSS', role: 'BOSS DUEL / GUARD / BREAK CHECK',
   tags: ['construct', 'ascension'], displayClass: 'tank', immune: ['KNOCKBACK', 'STUN'],
-  stats: { footprint: { cols: 3, rows: 2, anchorC: 1, anchorR: 1 }, bodyBlock: true,
+  stats: { footprint: { cols: 4, rows: 2, anchorC: 2, anchorR: 1 }, bodyBlock: true,
     maxHp: 20000, attack: 85, defense: 30, moveSpeed: 1.6, attackRange: 1.5, preferredRange: 1.3,
     attackCooldown: 1.9, attackWindup: .3, attackRecovery: .25, targetThinkInterval: .3,
     hitReactionDuration: .1, minHitReactionInterval: 3, collisionRadius: .8 },

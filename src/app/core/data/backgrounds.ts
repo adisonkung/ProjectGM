@@ -20,7 +20,7 @@ export interface BackgroundDef {
 }
 
 export const BACKGROUNDS: Record<string, BackgroundDef> = {
-  'ascension-aegis': {file:'backgrounds/ascension-aegis.webp',w:1672,h:941,cut:.5,zoom:1,arena:true,skyRows:.3,groundRows:.8},
+  'ascension-aegis': {file:'backgrounds/ascension-aegis.webp',w:1672,h:941,cut:.5,zoom:1,arena:true,skyRows:1.4,groundRows:.8},
   'ascension-jadecrest': {file:'backgrounds/ascension-jadecrest.webp',w:1672,h:941,cut:.48,zoom:1,arena:true},
   'ascension-solar': {file:'backgrounds/ascension-solar.webp',w:1672,h:941,cut:.52,zoom:1,arena:true,skyRows:.35,groundRows:.45},
   /** ป่าดอกซากุระกลางวัน (ชั้น 1-5) */

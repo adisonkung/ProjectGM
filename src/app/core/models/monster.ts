@@ -190,7 +190,7 @@ export type SkillEffect =
   | { type: 'APPLY_BUFF'; buffId: string }
   /** damage around the aim point / caster (mitigated normally; never interrupts heroes) */
   | {
-      type: 'DAMAGE'; mul: number; area: import('./combat').AreaPattern; center: 'TARGET' | 'SELF'; damageType?: DamageType;
+      type: 'DAMAGE'; mul: number; area: import('./combat').AreaPattern; center: 'TARGET' | 'SELF' | 'BODY_FRONT' | 'BODY'; damageType?: DamageType;
       /** extra multiplier against a unit carrying `status` (e.g. Mist Strike ×1.2 vs bleeding heroes) */
       bonusVsStatus?: { status: string; mul: number };
     }

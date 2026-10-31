@@ -74,8 +74,8 @@ describe('Aegis Sentinel integration', () => {
           expect(top+204/320*at.height).toBeCloseTo((2+.5+.2725)*cell,6);
         }
         if (name === 'ae-s3-wave') {
-          expect(at.x-at.width/2).toBe(8*cell);
-          expect(at.x+at.width/2).toBe(11*cell);
+          expect(at.x-at.width/2).toBeCloseTo(7.7*cell,6);
+          expect(at.x+at.width/2).toBeCloseTo(11.3*cell,6);
         }
       }
     }

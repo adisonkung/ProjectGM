@@ -1,5 +1,6 @@
 # Aegis slot correction and board-cell review — 1 November 2026
 
+> Layout update, 1 November 2026: Aegis and Jade now use asymmetric **4×2** footprints. Earlier 3×2 descriptions/screenshots below are historical. See [GUARDIAN_4X2_LAYOUT.md](GUARDIAN_4X2_LAYOUT.md) for current anchors, skill origins and upper room.
 The user expected the discussed S2/S3 swap to be implemented. It is now applied to the actual skill registry, every tier's ordered kit, priority, charge timing and Break ownership.
 
 | Slot | Current action | Charge | Cooldown / first delay | Effect |

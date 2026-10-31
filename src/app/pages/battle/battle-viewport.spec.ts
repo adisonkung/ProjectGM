@@ -38,8 +38,8 @@ describe('battle viewport presentation', () => {
   });
   it('fits raised Aegis spear effects while preserving the decorative floor margin',()=>{
     for(const [w,h]of [[1440,900],[932,430],[844,390]]){
-      const view=battleViewport(w,h,.8,.3);
-      expect(view.extraRows).toBeGreaterThanOrEqual(.3);
+      const view=battleViewport(w,h,.8,1.4);
+      expect(view.extraRows).toBeGreaterThanOrEqual(1.4);
       expect(view.height).toBeLessThanOrEqual(h-(h<=500?8:112));
       expect(view.groundRows).toBe(.8);
     }

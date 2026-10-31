@@ -1,5 +1,6 @@
 # Ascension specialist mechanics V1
 
+> Layout update, 1 November 2026: Aegis and Jade now use asymmetric **4×2** footprints. Earlier 3×2 descriptions/screenshots below are historical. See [GUARDIAN_4X2_LAYOUT.md](GUARDIAN_4X2_LAYOUT.md) for current anchors, skill origins and upper room.
 User-authorized follow-up to the three-boss audit (2026-10-31). This branch builds on the reviewed Solar/Aegis/Jade integration at `fef69f1`. The shared 3×2 bodies, arenas, large sprites, base HP/ATK/DEF, tier multipliers, rewards, unlocks and free-choice schedule remain as before. No hero kit or equipment balance changes.
 
 ## Aegis — original specialist V1 (S2/S3 order superseded)

@@ -9,6 +9,12 @@ export function footprintBounds(u: SpatialUnit) {
   return { r0, c0, r1: r0 + (f?.rows ?? 1) - 1, c1: c0 + (f?.cols ?? 1) - 1 };
 }
 
+/** The leading occupied column for a forward skill; independent of sprite dimensions. */
+export function bodyFrontCell(u:SpatialUnit,left:boolean):Cell {
+  const b=footprintBounds(u);
+  return {r:u.pos.r,c:left?b.c0:b.c1};
+}
+
 export function occupiesCell(u: SpatialUnit, c: Cell): boolean {
   const b = footprintBounds(u);
   return c.r >= b.r0 && c.r <= b.r1 && c.c >= b.c0 && c.c <= b.c1;

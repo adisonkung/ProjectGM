@@ -9,7 +9,7 @@ import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec, UnitFootprint } from '../../core/models/unit';
-import { occupiesCell, unitDistance } from './footprint';
+import { bodyFrontCell, occupiesCell, unitDistance } from './footprint';
 import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
@@ -1527,8 +1527,12 @@ export class BattleEngine {
             });
             hits=[];break;
           }
-          const list = def.groundTargets ? pool.filter(t=>(groundCells??[]).some(c=>occupiesCell(t,c)))
-            : eff.area === 'ALL_ENEMIES' ? pool : resolveArea({ pattern: eff.area, caster: u, primary: aim, center: eff.center, candidates: pool });
+          const areaCaster=eff.center==='BODY_FRONT'
+            ? {...u,pos:bodyFrontCell(u,u.actionFacing?.left??u.side==='enemy'),footprint:undefined} : u;
+          const bodyRadius=eff.center==='BODY'?(eff.area==='RADIUS_3'?3:2):null;
+          const list = bodyRadius!=null ? pool.filter(t=>unitDistance(u,t)<=bodyRadius)
+            : def.groundTargets ? pool.filter(t=>(groundCells??[]).some(c=>occupiesCell(t,c)))
+            : eff.area === 'ALL_ENEMIES' ? pool : resolveArea({ pattern: eff.area, caster: areaCaster, primary: aim, center: eff.center==='BODY_FRONT'||eff.center==='BODY'?'SELF':eff.center, candidates: pool });
           hits = [];
           for (const t of list) {
             if (single && this.dodged(u, t)) continue;
