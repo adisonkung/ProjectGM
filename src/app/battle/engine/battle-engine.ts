@@ -1845,6 +1845,19 @@ export class BattleEngine {
     return true;
   }
 
+  /** Manual data-driven monster cast for isolated review tools. Normal AI never calls this API. */
+  requestMonsterSkill(id: number, skillId: string): boolean {
+    const u=this.units.find(x=>x.id===id),cs=u?.castSkills.find(c=>c.def.id===skillId);
+    if(!u?.monster || !u.alive || u.casting || this.result || !cs || cs.cd>0) return false;
+    const def=MONSTER_SKILLS[skillId];
+    if(!def) return false;
+    const target=this.monsterAI.aimTarget(u,def);
+    if(!target) return false;
+    u.monster.state='CASTING';u.monster.currentSkillId=skillId;
+    this.beginCast(u,def,target===u?null:target);
+    return true;
+  }
+
   /** enemies the special skill can hit now (alive, on the field, targetable) */
   private specialTargets(): BattleUnit[] {
     return this.units.filter(t => t.alive && t.visible && t.targetable && !isPlayerUnit(t) && !hasFlag(t, 'untargetable'));

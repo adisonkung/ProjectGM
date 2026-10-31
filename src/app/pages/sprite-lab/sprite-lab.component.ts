@@ -1,3 +1,11 @@
+import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
+import { bodyFrontCell } from '../../battle/engine/footprint';
+import { monsterReview } from './monster-review';
+import { Cell } from '../../core/models/unit';
+import { footprintBounds } from '../../battle/engine/footprint';
+import { isBossRank } from '../../core/models/monster';
+import { MONSTER_SKILLS, PROJECTILES } from '../../core/data/monsters';
+import { edgeBeamStretch } from '../../battle/render/fx-clip';
 import { GameAccessService } from '../../core/services/game-access.service';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
@@ -26,7 +34,7 @@ import { MotionFxPlayback } from '../../battle/render/motion-fx';
 import { skillReview } from './skill-review';
 import { SkillDefinition } from '../../core/models/combat';
 
-type Action = 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
+type Action = 'broken' | 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
 
 const HERO_ID = 1;
 const DUMMY_IDS = [2, 3];
@@ -43,12 +51,19 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
   imports: [TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, RouterLink],
   templateUrl: './sprite-lab.component.html',
   styles: `
-    .lab { container-type: inline-size; padding: 12px; display: grid; gap: 10px; max-width: 980px; margin: 0 auto; }
+    .lab { container-type: inline-size; padding: 12px; display: grid; gap: 10px; max-width: 1500px; margin: 0 auto; }
     header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     h1 { font-size: 18px; margin: 0; flex: 1; }
     .comparison { margin: 0; text-align: center; font-size: 13px; color: #b9cee2; }
     .stage { position: relative; --cell: min(56px, 6.25cqw); width: calc(16 * var(--cell)); max-width: 100%; margin: 0 auto; }
     .stage app-board { --cell: min(56px, 6.25cqw); }
+    .lab-setup {position:relative;isolation:isolate;padding:16px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+    .lab-setup label {display:flex;align-items:center;gap:8px;font-size:14px;min-width:0;}
+    .lab-setup select,.position-row input {background:#101922;color:#f4e1bb;border:1px solid #b89653;padding:8px;max-width:100%;min-width:0;}
+    .position-settings {width:100%;}.position-settings p{font-size:13px;color:#cdbb94;margin:6px 0;}
+    .position-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;}.position-row button{min-width:180px;text-align:left;max-width:100%;}.position-row button.selected{border-color:#ffcc75;background:#503819;}.position-row input{width:65px;}.placement-error{color:#ffb6a0!important;}
+    .placement-grid{position:absolute;left:0;top:calc(var(--cell)*3.5);width:calc(var(--cell)*16);height:calc(var(--cell)*3);display:grid;grid-template-columns:repeat(16,1fr);grid-template-rows:repeat(3,1fr);z-index:80;}
+    .placement-grid button{position:relative;border:1px solid #ffe6aa44;border-radius:0;padding:0;background:transparent;color:#ffe6b4;min-width:0;overflow:hidden;}.placement-grid button.occupied{background:#c88d1b20;border-color:#f1c97588;}.placement-grid small{position:absolute;top:2px;left:2px;font:10px monospace;text-shadow:0 1px 3px #000;}.placement-grid span{font:9px sans-serif;text-shadow:0 1px 3px #000;}
     .mark { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; z-index: 300; pointer-events: none; }
     .mark.root { background: #ff3b3b; box-shadow: 0 0 0 2px #fff; }
     .mark.tip { background: #3bd1ff; box-shadow: 0 0 0 2px #fff; }
@@ -71,13 +86,29 @@ export class SpriteLabComponent implements OnDestroy {
   /** Optional lab-only comparison uses real roster sheets, never changes saves or combat. */
   readonly comparisonHeroes = HEROES.filter(h => (this.qp.get('compare') ?? '').split(',').includes(h.id) && h.sprite && SHEETS[h.sprite]).slice(0, 2);
   readonly comparisonNames = this.comparisonHeroes.map(h => h.name).join(' / ');
-  readonly previewBackground = BACKGROUNDS[this.qp.get('bg') ?? ''] ?? BACKGROUNDS['forest-1'];
-  private readonly comparisonMonster = MONSTERS[this.qp.get('enemy') ?? ''];
+  readonly targetId=signal(this.qp.get('enemy')??'dummy');
+  readonly targetMonster=computed(()=>MONSTERS[this.targetId()]);
+  readonly actorMonsterId=signal('');
+  readonly actorMonster=computed(()=>MONSTERS[this.actorMonsterId()]);
+  readonly spriteMonsters=Object.values(MONSTERS).filter(m=>!!SHEETS[m.animation.sheet??'']);
+  readonly ordinaryMonsters=this.spriteMonsters.filter(m=>!isBossRank(m.rank));
+  readonly bosses=this.spriteMonsters.filter(m=>isBossRank(m.rank));
+  readonly targetCount=signal<number|null>(null);
+  readonly cells=signal<Partial<Record<number,Cell>>>({});
+  readonly selectedUnit=signal(1);
+  readonly placementMessage=signal('');
+  readonly showGrid=signal(true);
+  readonly gridCells=Array.from({length:48},(_,i)=>({r:Math.floor(i/16),c:i%16}));
+  readonly backgroundId=signal(this.qp.get('bg')??'forest-1');
+  readonly backgrounds=Object.keys(BACKGROUNDS);
+  readonly previewBackground=computed(()=>BACKGROUNDS[this.backgroundId()]??BACKGROUNDS['forest-1']);
+
   private readonly targetDistance = Math.min(5, Math.max(1, Number(this.qp.get('distance')) || 1));
   readonly engineReview = this.qp.get('combat') === '1';
   readonly initialStatus = this.qp.get('status') ?? '';
-  private readonly dummyIds = this.qp.get('formation') === 'front2x3' ? [2, 3, 4, 5, 6, 7] : ['square', 'home', 'field'].includes(this.qp.get('formation') ?? '') ? [2, 3, 4, 5] : DUMMY_IDS;
+  private get dummyIds():number[]{if(this.targetCount()!=null)return Array.from({length:this.targetCount()!},(_,i)=>i+2);return this.qp.get('formation') === 'front2x3' ? [2, 3, 4, 5, 6, 7] : ['square', 'home', 'field'].includes(this.qp.get('formation') ?? '') ? [2, 3, 4, 5] : DUMMY_IDS;}
   private readonly reviewVitals = signal<Record<number, { hpPct: number; shieldPct: number }>>({});
+  private readonly reviewLogicalPositions=signal<Partial<Record<number,Cell>>>({});
   private readonly reviewPositions = signal<Partial<Record<number, { r: number; c: number; flip?: boolean }>>>({});
   private readonly motionVisuals = new MotionFxPlayback({
     spawn: (name, source, loop) => {
@@ -92,17 +123,18 @@ export class SpriteLabComponent implements OnDestroy {
   private readonly reviewStatuses = signal<Record<number, { id: string; left: number }[]>>({});
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
-  readonly heroName = computed(() => this.hero()?.name ?? '');
+  readonly heroName = computed(() => this.actorMonster()?.name ?? this.hero()?.name ?? '');
   readonly heroPortrait = computed(() => heroArt(this.hero()?.id)?.portrait);
-  readonly actionLabels: Record<Action, string> = { idle: 'Idle', walk: 'Walk', attack: 'Attack', hurt: 'Hurt', die: 'Die', skill: 'S1', skill2: 'S2', ult: 'ULT' };
+  readonly actionLabels: Record<Action, string> = { broken:'Break', idle: 'Idle', walk: 'Walk', attack: 'Attack', hurt: 'Hurt', die: 'Die', skill: 'S1', skill2: 'S2', ult: 'ULT' };
   readonly animationInfo = computed(() => {
     const sheet = this.sheet();
-    const clip = animOf(this.hero()?.sprite, this.last());
+    const m=this.actorMonster(),sk=m?.skills[['skill','skill2','ult'].indexOf(this.last())];
+    const clip = m ? (sk?this.sheet()?.casts?.[MONSTER_SKILLS[sk]?.clip??'']:(this.last()==='broken'?this.sheet()?.casts?.['broken']:this.sheet()?.anims[this.last() as SpriteAnim])) : animOf(this.hero()?.sprite, this.last() as SpriteAnim);
     if (!sheet || !clip) return null;
     const clock = clipClock(this.last() === 'idle' ? { ...clip, ms: clip.ms ?? IDLE_FRAME_MS } : clip);
     return { frames: clock.count, fps: (clock.count / clock.total).toFixed(1), seconds: clock.total.toFixed(2), size: `${sheet.cellW} × ${sheet.cellH}` };
   });
-  readonly sheet = computed(() => SHEETS[this.hero()?.sprite ?? '']);
+  readonly sheet = computed(() => SHEETS[this.actorMonster()?.animation.sheet ?? this.hero()?.sprite ?? '']);
 
   readonly speed = signal(1);
   /** same renderer switch as the battle (`?render=pixi|dom`, remembered) — check a clip exactly as the battle draws it */
@@ -117,6 +149,7 @@ export class SpriteLabComponent implements OnDestroy {
   readonly activeEngineReview = computed(() => {
     const action = this.last();
     if (action !== 'skill' && action !== 'skill2' && action !== 'ult') return false;
+    if(this.actorMonster())return true;
     const h = this.hero();
     return this.enginePlayback(kitOf(h.id, h.cls)[action]);
   });
@@ -136,7 +169,7 @@ export class SpriteLabComponent implements OnDestroy {
   private statusVisuals = new StatusFxPlayback({
     spawn: (name, target, at, loop) => {
       const id = ++this.id;
-      this.fx.update(l => [...l, { id, name, ...at, angle: 0, offset: fxOffset(name),
+      this.fx.update(l => [...l, { id, name, ...at, angle: 0, offset: fxOffset(name,this.units().find(u=>u.id===target)?.sprite),
         under: FX[name].layer === 'under', follow: target, managed: true, loop }]);
       return id;
     },
@@ -150,6 +183,58 @@ export class SpriteLabComponent implements OnDestroy {
 
   private enginePlayback(skill: SkillDefinition): boolean {
     return this.engineReview || skill.action?.type === 'STATIONARY' || skill.movement?.type === 'DASH_PATH' || skill.target === 'LOWEST_HP_ALLY' || skill.effects.some(e => e.type === 'FIELD') || (skill.delivery === 'PROJECTILE' && skill.effects.some(e => e.type === 'DAMAGE' && e.area !== 'SINGLE'));
+  }
+
+  selectActor(value:string):void {
+    if(value.startsWith('monster:')){
+      if(!this.access.isGm()||!MONSTERS[value.slice(8)])return;
+      this.actorMonsterId.set(value.slice(8));this.faceLeft.set(true);
+      this.cells.set({1:{r:2,c:11},2:{r:1,c:6},3:{r:2,c:6}});
+      this.backgroundId.set(value.includes('aegis')?'ascension-aegis':value.includes('jadecrest')?'ascension-jadecrest':value.includes('solar')?'ascension-solar':'forest-1');
+    }else{
+      if(!this.spriteHeroes.some(h=>h.id===value))return;
+      this.actorMonsterId.set('');this.heroId.set(value);this.faceLeft.set(false);this.cells.set({});
+    }
+    this.placementMessage.set('');if(this.targetMonster()?.stats.footprint)this.selectTarget(this.targetId());else this.reset();
+  }
+  selectTarget(value:string):void {
+    if(value!=='dummy'&&!MONSTERS[value])return;
+    this.targetId.set(value);if(MONSTERS[value]?.stats.footprint){this.targetCount.set(1);this.cells.update(c=>({...c,2:{r:2,c:this.actorMonster()?4:12}}));}
+    this.reset();
+  }
+  setTargetCount(value:number):void {
+    const requested=Math.max(1,Math.min(6,Math.round(value)||1)),fp=this.targetMonster()?.stats.footprint;
+    const actor=this.logicalCell(1),a=footprintBounds({pos:actor,footprint:this.actorMonster()?.stats.footprint}),positions:Cell[]=[];
+    const overlaps=(b:ReturnType<typeof footprintBounds>,q:ReturnType<typeof footprintBounds>)=>b.r0<=q.r1&&b.r1>=q.r0&&b.c0<=q.c1&&b.c1>=q.c0;
+    const direction=this.faceLeft()?-1:1;
+    const score=(c:number)=>{const d=(c-actor.c)*direction;return d>0?d:32+Math.abs(d);};
+    const columns=Array.from({length:16},(_,i)=>i).sort((a,b)=>score(a)-score(b));
+    const rows=[actor.r,...[0,1,2].filter(r=>r!==actor.r)];
+    for(const r of rows)for(const c of columns){
+      const p={r,c},b=footprintBounds({pos:p,footprint:fp});if(b.r0<0||b.r1>2||b.c0<0||b.c1>15||overlaps(b,a)||positions.some(q=>overlaps(b,footprintBounds({pos:q,footprint:fp}))))continue;
+      if(positions.length<requested)positions.push(p);
+    }
+    this.targetCount.set(positions.length);this.cells.set({1:actor,...Object.fromEntries(positions.map((p,i)=>[i+2,p]))});this.selectedUnit.set(1);this.placementMessage.set(positions.length<requested?'พื้นที่สนามวางเป้าขนาดนี้ได้ '+positions.length+' ตัว':'');this.reset();
+  }
+  logicalCell(id:number):Cell {const u=this.units().find(u=>u.id===id);return this.cells()[id]??{r:Math.round(u?.r??1),c:Math.round(u?.c??5)};}
+  setCell(id:number,axis:'r'|'c',human:number):void {
+    const u=this.units().find(u=>u.id===id);if(!u||!Number.isFinite(human))return;
+    this.place(id,{...this.logicalCell(id),[axis]:Math.round(human)-1});
+  }
+  place(id:number,at:Cell):void {
+    const def=id===1?this.actorMonster():this.targetMonster(),fp=def?.stats.footprint;
+    const b=footprintBounds({pos:at,footprint:fp});
+    if(b.r0<0||b.r1>2||b.c0<0||b.c1>15){this.placementMessage.set('พื้นที่ยืนของตัวนี้ต้องอยู่ในสนามครบทุกช่อง');return;}
+    for(const u of this.units().filter(u=>u.id!==id)){
+      const other=u.id===1?this.actorMonster():this.targetMonster(),of=other?.stats.footprint;
+      if(!fp&&!of)continue;
+      const q=footprintBounds({pos:this.logicalCell(u.id),footprint:of});
+      if(b.r0<=q.r1&&b.r1>=q.r0&&b.c0<=q.c1&&b.c1>=q.c0){this.placementMessage.set('ช่องนี้ทับพื้นที่ยืนของอีกตัว เลือกช่องข้างกันได้เลย');return;}
+    }
+    this.cells.update(c=>({...c,[id]:{...at}}));this.placementMessage.set('');this.reset();
+  }
+  cellOwner(cell:Cell):string {
+    return this.units().filter(u=>{const d=u.id===1?this.actorMonster():this.targetMonster(),b=footprintBounds({pos:this.reviewLogicalPositions()[u.id]??this.logicalCell(u.id),footprint:d?.stats.footprint});return cell.r>=b.r0&&cell.r<=b.r1&&cell.c>=b.c0&&cell.c<=b.c1;}).map(u=>u.id===1?'ตัวทดสอบ':'เป้า '+(u.id-1)).join(' / ');
   }
 
   setRenderer(r: BoardRenderer): void {
@@ -178,7 +263,7 @@ export class SpriteLabComponent implements OnDestroy {
     const hc = fieldSupport ? (left ? 12 : 3) : left ? 8 : 5;
     const b = this.blinked();
     return [
-      { ...base, id: HERO_ID, side: 'ally', name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left, ...(this.reviewVitals()[HERO_ID] ?? {}),
+      { ...base, id: HERO_ID, side: 'ally' as const, name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left, ...(this.reviewVitals()[HERO_ID] ?? {}),
         blink: !!b, blinkFade: !b?.ownFade, ...(this.reviewPositions()[HERO_ID] ?? {}),
         statuses: (this.reviewStatuses()[HERO_ID] ?? []).filter(s => STATUS_ICONS[s.id]).map(s => ({ ...s, icon: STATUS_ICONS[s.id] })), },
       ...this.comparisonHeroes.filter(other => other.id !== h.id).map((other, i) => ({
@@ -189,16 +274,23 @@ export class SpriteLabComponent implements OnDestroy {
         ...base, id, side: support ? 'ally' as const : 'enemy' as const,
         hpPct: this.reviewVitals()[id]?.hpPct ?? (support ? (i === 0 ? 40 : 70) : 100),
         shieldPct: this.reviewVitals()[id]?.shieldPct ?? 0,
-        name: support ? 'พันธมิตรฝึก' : this.comparisonMonster?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
+        name: support ? 'พันธมิตรฝึก' : this.targetMonster()?.name ?? 'หุ่นฝึก', cls: 'tank' as const,
         r: this.dummyIds.length === 6 ? Math.floor(i / 2) : centeredField ? [1, 0, 2, 2][i] : fieldSupport ? [0, 1, 2, 2][i] : this.dummyIds.length === 4 ? 1 + Math.floor(i / 2) : 1,
         c: centeredField ? (left ? 15 - [7, 6, 8, 3][i] : [7, 6, 8, 3][i]) : fieldSupport ? (left ? 15 - [1, 2, 4, 1][i] : [1, 2, 4, 1][i]) : hc + (this.targetDistance + (this.dummyIds.length >= 4 ? i % 2 : i)) * (left ? -1 : 1),
-        sprite: support ? 'hero-bailong.png' : this.comparisonMonster?.animation.sheet ?? DUMMY_SPRITE, flip: support ? left : !left,
+        sprite: support ? 'hero-bailong.png' : this.targetMonster()?.animation.sheet ?? DUMMY_SPRITE, boss:!support&&!!this.targetMonster()&&isBossRank(this.targetMonster()!.rank), flip: support ? left : !left,
         statuses: (this.reviewStatuses()[id] ?? []).filter(b => STATUS_ICONS[b.id]).map(b => ({ ...b, icon: STATUS_ICONS[b.id] })),
       })),
-    ];
+    ].filter(u=>!this.actorMonster() || u.id<100).map(u=>{
+      const monster=u.id===HERO_ID?this.actorMonster():this.targetMonster();
+      const result={...u,...(u.id===HERO_ID&&monster?{name:monster.name,sprite:monster.animation.sheet,boss:isBossRank(monster.rank),cls:monster.displayClass??'tank' as const,heroId:undefined}:{}),...(this.cells()[u.id]??{}),...(this.reviewPositions()[u.id]??{})};
+      if(u.id===1&&this.actorMonster()&&!this.reviewPositions()[1])result.c+=guardianPose(result.sprite).forward*(left?-1:1);
+      return result;
+    });
   });
 
   readonly actions = computed(() => {
+    const monster=this.actorMonster();
+    if(monster){const basic: {id:Action;label:string}[]=[{id:'idle',label:'Idle'},{id:'walk',label:'Walk'},{id:'attack',label:'Attack'},{id:'hurt',label:'Hurt'},{id:'die',label:'Die'}];if(this.sheet()?.casts?.['broken'])basic.push({id:'broken',label:'Break'});return this.access.isGm()?[...basic.filter(a=>a.id==='broken'||!!this.sheet()?.anims[a.id as SpriteAnim]),...monster.skills.slice(0,3).map((id,i)=>({id:['skill','skill2','ult'][i] as Action,label:MONSTER_SKILLS[id]?.name??id}))]:[];}
     const h = this.hero();
     const kit = kitOf(h.id, h.cls);
     const skills: { id: Action; label: string }[] = [
@@ -217,10 +309,10 @@ export class SpriteLabComponent implements OnDestroy {
   readonly mark = computed(() => {
     const u = this.units()[0];
     const cell = (k: number) => `calc(var(--cell) * ${k})`;
-    const root = { x: cell(u.c + 0.5), y: cell(u.r + SCENERY_ROWS + 0.7725) };
+    const root = { x: cell(u.c + 0.5), y: cell(u.r + SCENERY_ROWS + 1.5 + 0.7725) };
     const anchors = Object.entries(this.sheet()?.anchors ?? {})
       .filter(([n]) => n !== 'feet')
-      .map(([name, [dx, dy]]) => ({ name, x: cell(u.c + 0.5 + (dx / 100) * (u.flip ? -1 : 1)), y: cell(u.r + SCENERY_ROWS + 0.5 + dy / 100) }));
+      .map(([name, [dx, dy]]) => ({ name, x: cell(u.c + 0.5 + (dx / 100) * (u.flip ? -1 : 1)), y: cell(u.r + SCENERY_ROWS + 1.5 + 0.5 + dy / 100) }));
     return { root, anchors };
   });
 
@@ -229,7 +321,7 @@ export class SpriteLabComponent implements OnDestroy {
   }
 
   reset(): void {
-    this.clear();
+    this.clear();this.last.set('idle');
     this.blinked.set(null);
     this.fx.set([]);
     this.set(HERO_ID, 'idle');
@@ -237,7 +329,9 @@ export class SpriteLabComponent implements OnDestroy {
   }
 
   play(a: Action): void {
+    if(!this.actions().some(x=>x.id===a))return;
     if (!this.access.isGm() && a !== 'skill' && a !== 'skill2' && a !== 'ult') return;
+    if(this.actorMonster()){if(this.access.isGm())this.playMonster(a);return;}
     this.clear();
     this.last.set(a);
     this.log.set([]);
@@ -307,6 +401,86 @@ export class SpriteLabComponent implements OnDestroy {
     if (this.loop() && a === 'die') this.at(len + 1.2, () => (this.set(HERO_ID, 'idle'), this.play('die')));
   }
 
+  private monsterEffect(name:string,at:{r:number;c:number},owner?:number,track?:FxView['track']):void {
+    const d=FX[name],m=this.actorMonster();if(!d)return;
+    const offset=fxOffset(name,owner===1?m?.animation.sheet:undefined),flip=this.faceLeft();
+    const f:FxView={id:++this.id,...at,name,angle:0,flip,offset,under:d.layer==='under',owner,managed:!!track,track,
+      follow:fxAttached(name)?owner:undefined,stretch:d.toBoardEdge?edgeBeamStretch(d,at.c,flip,offset):undefined};
+    this.fx.update(l=>[...l,f]);
+    if(!track)this.at((fxDuration(name)+50)/1000,()=>this.fx.update(l=>l.filter(x=>x.id!==f.id)));
+  }
+
+  private playMonster(action:Action):void {
+    this.clear();this.last.set(action);this.log.set([]);
+    const m=this.actorMonster()!,sheet=this.sheet(),me=this.units()[0],targets=this.units().filter(u=>this.dummyIds.includes(u.id));
+    const slot=['skill','skill2','ult'].indexOf(action),skillId=m.skills[slot],def=MONSTER_SKILLS[skillId];
+    if(slot<0){
+      if(action==='broken'){this.set(1,'cast',{castTime:0,castClip:'broken',force:true});const name=sheet?.statusFx?.['broken']?.loop;if(name)this.monsterEffect(name,me,1);}else this.set(1,action as SpriteAnim,{force:true});
+      const clip=sheet?.anims[action as SpriteAnim],duration=clip?clipClock(clip).total:1;
+      if(action==='attack'){
+        for(const name of sheet?.attackFx??[])this.monsterEffect(name,me,1);
+        const projectile=PROJECTILES[m.attack.projectileId??''],name=projectile?.fx,target=targets[0];
+        if(name&&target){const hit=m.animation.clips['attack']?.events?.find(e=>e.event==='PROJECTILE_SPAWN')?.frame??1;
+          this.at((hit-1)*(m.animation.clips['attack']?.frameMs??80)/1000,()=>{
+            const flight=.1+.06*Math.max(Math.abs(target.c-me.c),Math.abs(target.r-me.r));
+            const p:ProjectileView={id:++this.id,name,from:projectileOrigin(name,{x:me.c,y:me.r+SCENERY_ROWS},target.c),to:{x:target.c,y:target.r+SCENERY_ROWS},flight:flight*1000};
+            this.projectiles.update(l=>[...l,p]);this.at(projectileLife(p.flight)/1000,()=>this.projectiles.update(l=>l.filter(x=>x.id!==p.id)));
+          });
+        }
+      }
+      if(action==='die'&&sheet?.deathFx)this.monsterEffect(sheet.deathFx,me,1);
+      this.note(0,'ดูท่าทาง '+action+' · ไม่คำนวณดาเมจ');
+      if(this.loop()&&action!=='idle')this.at(duration+.6,()=>this.play(action));return;
+    }
+    if(!def)return;
+    const review=monsterReview(m.id,skillId,this.logicalCell(1),targets.map(u=>({id:u.id,pos:{r:u.r,c:u.c}})),this.faceLeft(),this.targetId());
+    if(!review.ok){this.note(0,'ยังไม่มีเป้าที่ตรงเงื่อนไขหรืออยู่ในระยะ ลองขยับช่องเป้าหมาย');return;}
+    const id=(n:number)=>review.ids.get(n),binding=sheet?.monsterFx?.[def.clip??''];let released:number|undefined;
+    for(const sample of review.samples)this.at(sample.t,()=>{
+      this.reviewLogicalPositions.set(sample.positions);
+      const actor=sample.positions[1],pose=guardianPose(m.animation.sheet,released==null?undefined:sample.t-released);
+      const pos={...sample.positions};if(actor)pos[1]={...actor,c:actor.c+pose.forward*(this.faceLeft()?-1:1)};
+      this.reviewPositions.set(pos);this.reviewVitals.set(sample.vitals);this.reviewStatuses.set(sample.statuses);
+      const current=this.units()[0];
+      if(released!=null&&m.id.startsWith('aegis')){
+        const age=sample.t-released;
+        if(age>=AEGIS_BEAM_MOTION.holdUntil&&age<AEGIS_BEAM_MOTION.returnUntil)this.setWalkingPose(released);
+        if(age>=AEGIS_BEAM_MOTION.returnUntil&&this.anims()[1]?.anim==='walk')this.set(1,'idle');
+      }
+      this.fx.update(list=>list.map(f=>FX[f.name]?.toBoardEdge?{...f,stretch:edgeBeamStretch(FX[f.name],current.c,!!f.flip,f.offset??[0,0])}:f));
+      this.statusVisuals.sync(Object.entries(sample.statuses).flatMap(([target,buffs])=>buffs.filter(b=>b.left>0).map(b=>({target:+target,source:b.sourceId,status:b.id,sprite:+target===1?m.animation.sheet:this.units().find(u=>u.id===+target)?.sprite,at:pos[+target]??current}))),sample.t);
+      for(const e of sample.events){
+        if(e.type==='castStart'){this.set(1,'cast',{castTime:e.castTime,castClip:def.clip,force:true});this.note(sample.t,def.name+' · เริ่มร่าย');
+          for(const name of binding?.cast??[])this.monsterEffect(name,current,1,binding?.tracks?.[name]);
+        }else if(e.type==='skillActivated'){
+          this.set(1,'cast',{castTime:0,castClip:def.clip,force:true});
+          if(def.clip==='lance'&&m.id.startsWith('aegis')){released=sample.t;this.set(1,'cast',{castTime:0,castClip:'lance_firing',force:true});}
+          this.fx.update(l=>l.filter(f=>!(binding?.cast??[]).includes(f.name)));
+          for(const name of binding?.activate??[]){const d=FX[name],logical=actor??me,origin=d.groundFromBodyFront?bodyFrontCell({pos:{r:Math.round(logical.r),c:Math.round(logical.c)},footprint:m.stats.footprint},this.faceLeft()):logical;
+            const p=d.groundFromBodyFront?groundFxCell(d,origin,origin,this.faceLeft()):current;
+            this.monsterEffect(name,p,1);
+          }
+          for(const target of e.targets){const u=this.units().find(u=>u.id===id(target));if(u&&def.hitFx)this.monsterEffect(def.hitFx,u);}
+          this.note(sample.t,def.name+' · ออกสกิลจริง');
+        }else if(e.type==='monsterGround'){
+          for(const at of e.cells){const follow=e.followTarget!=null?id(e.followTarget):undefined;const point=follow!=null?pos[follow]:at,duration=e.durationMs??fxDuration(e.fx);
+            this.monsterEffect(e.fx,point??at,undefined,{durationMs:duration,alpha:[[0,1],[Math.max(0,duration-90),1],[duration,0]]});
+          }
+        }else if(e.type==='monsterBeam'){
+          const d=FX[e.fx],offset=fxOffset(e.fx,m.animation.sheet),x=current.c+.5+offset[0]/100*(this.faceLeft()?-1:1),y=current.r+.5+offset[1]/100;
+          const tx=this.faceLeft()?-1.5:17.5,ty=e.lane+.2,angle=Math.atan2(ty-y,tx-x)*180/Math.PI;
+          for(const name of[e.fx,e.emitterFx]){const duration=e.durationMs;this.fx.update(l=>[...l,{id:++this.id,r:y-.5,c:x-.5,name,angle,flip:false,offset:[0,0],stretch:name===e.fx?Math.hypot(tx-x,ty-y)/(d.fitCells??1):undefined,managed:true,track:{durationMs:duration,alpha:[[0,0],[70,1],[Math.max(70,duration-80),1],[duration,0]]}}]);}
+        }else if(e.type==='damage'){
+          const u=this.units().find(u=>u.id===id(e.dst));if(!u)continue;
+          const f:FloatText={id:++this.id,r:u.r,c:u.c,text:'-'+e.amount,kind:'dmg'};this.floats.update(l=>[...l,f]);this.set(u.id,'hurt',{force:true});this.at(.9,()=>this.floats.update(l=>l.filter(x=>x.id!==f.id)));
+        }else if(e.type==='move'&&id(e.src)!==1){const u=id(e.src);if(u)this.set(u,'walk');}
+      }
+    });
+    const duration=review.samples.at(-1)?.t??1;
+    if(this.loop())this.at(duration+.4,()=>this.play(action));
+  }
+  private setWalkingPose(key:number):void {if(this.anims()[1]?.anim!=='walk')this.anims.update(a=>({...a,1:{anim:'walk',key}}));}
+
   /** Presentation demo only: engine hero flight rule (0.1 + 0.06 × cell distance), not a fixed VFX delay. */
   private launchSingleProjectile(kind: SkillKind, release: number, contact: () => void): void {
     const name = projectileOf(this.hero().sprite, kind);
@@ -375,10 +549,11 @@ export class SpriteLabComponent implements OnDestroy {
     for (const f of sequence) if (!f.track) this.at((fxDuration(f.name) + (f.delayMs ?? 0) + 50) / 1000,
       () => this.fx.update(list => list.filter(x => x.id !== f.id)));
     const review = skillReview(this.hero().id, kind, { r: me.r, c: me.c }, targets.map((u, i) =>
-      ({ id: u.id, pos: { r: u.r, c: u.c }, statuses: i === 0 && this.initialStatus ? [this.initialStatus] : [] })), this.qp.get('enemy') ?? 'forest_slime', this.faceLeft() && kitOf(this.hero().id, this.hero().cls)[kind].effects.some(e => e.type === 'FIELD' && e.field.aura?.team === 'ALLY') ? 'enemy' : 'ally');
+      ({ id: u.id, pos: { r: u.r, c: u.c }, statuses: i === 0 && this.initialStatus ? [this.initialStatus] : [] })), this.targetId()==='dummy'?'forest_slime':this.targetId(), this.faceLeft() && kitOf(this.hero().id, this.hero().cls)[kind].effects.some(e => e.type === 'FIELD' && e.field.aura?.team === 'ALLY') ? 'enemy' : 'ally');
     const id = (n: number) => review.ids.get(n)!;
     for (const sample of review.samples) this.at(sample.t, () => {
       this.reviewStatuses.set(sample.statuses);
+      this.reviewLogicalPositions.set(sample.positions);
       this.reviewPositions.set(sample.positions);
       this.reviewVitals.set(sample.vitals);
       this.fieldVisuals.advance(sample.t);
@@ -475,5 +650,6 @@ export class SpriteLabComponent implements OnDestroy {
     this.reviewStatuses.set({});
     this.reviewVitals.set({});
     this.reviewPositions.set({});
+    this.reviewLogicalPositions.set({});
   }
 }

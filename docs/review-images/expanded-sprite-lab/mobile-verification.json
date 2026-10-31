@@ -1,0 +1,50 @@
+{
+  "errors": [],
+  "actions": [
+    {
+      "kind": "aegis",
+      "actor": "aegis_sentinel",
+      "units": [
+        {
+          "id": 1,
+          "r": 2,
+          "c": 12,
+          "sprite": "enemy-aegis-sentinel.png"
+        },
+        {
+          "id": 2,
+          "r": 1,
+          "c": 6,
+          "sprite": "enemy-straw-recruit.png"
+        },
+        {
+          "id": 3,
+          "r": 2,
+          "c": 6,
+          "sprite": "enemy-straw-recruit.png"
+        }
+      ],
+      "fx": [
+        "ae-s2-muzzle",
+        "ae-s2-beam"
+      ]
+    },
+    {
+      "kind": "placements",
+      "actor": {
+        "r": 1,
+        "c": 4
+      },
+      "target": {
+        "r": 2,
+        "c": 12
+      },
+      "targetId": "aegis_sentinel",
+      "overflow": false
+    }
+  ],
+  "viewport": {
+    "width": 932,
+    "height": 430
+  }
+}

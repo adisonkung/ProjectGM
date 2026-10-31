@@ -385,3 +385,6 @@ Battle presentation: `battleViewport` reserves 0.8 decorative floor rows below t
 
 ### Fractional melee contact (user request 2026-10-29)
 `battle/engine/melee-contact.ts` owns basic-contact geometry against real world footprint bounds. `BattleEngine` glides melee units toward a within-cell vertical contact stance (up to half a lane) using pre-glide opponent positions. Logical cells/occupancy and area resolution remain grid-based. `SkillSystem.basic` and the melee hit callback, plus `MonsterController` attack start/hit, require half-lane vertical contact. Ranged positioning is unchanged. See MELEE_CONTACT_REVIEW.md for semantics, tests and actual-game evidence.
+
+
+Animation-room extension: /sprite-lab supports sprite-backed monster/boss casters and targets, independently editable whole-body placements and larger visual margins. monster-review.ts samples isolated real engine casts through requestMonsterSkill; normal AI is unchanged. See [SPRITE_LAB_EXPANDED.md](SPRITE_LAB_EXPANDED.md).
