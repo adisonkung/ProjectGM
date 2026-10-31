@@ -67,7 +67,7 @@ export const STATUS_ICONS: Record<string, string> = {
   sovereign_dominion: '♛',
   slow: '❄', chill: '❄', frost_fatigue: '❄',
   poison: '☠', bleed: '🩸', corruption: '☣', root: '🌿', stun: '💫', untargetable: '👻', boss_seal: '🔒',
-  dark_fog: '🌫', soul_link: '🔗', broken: '💥', healing_reduction: '💔', panther_frenzy: '⚡', ancient_rage: '😡',
+  dark_fog: '🌫', soul_link: '🔗', broken: '💥', aegis_exposed:'💥', healing_reduction: '💔', panther_frenzy: '⚡', ancient_rage: '😡',
   guardian_empowered: '🩸', ancient_protection: '🛡', guardian_enrage: '🔥', stone_skin: '🪨', sentinel_fury: '💢', pack_fury: '🐺',
   lord_frenzy: '🌕', duel_enrage: '🔥', taunted: '❗', alpha_howl_buff: '🐺', blood_rage: '😡',
 };

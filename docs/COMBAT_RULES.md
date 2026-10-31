@@ -132,3 +132,7 @@ Constants are in `core/data/classes.ts`. Logic is in `battle-engine.ts`.
 | Variance and crit for monsters | Monsters: no variance and no crit (deterministic) | ±10 % and 10 % crit stated generally | Documented as: heroes roll, monsters are deterministic. |
 | Crit chance | 10 % base + gear crit (cap +20 %) + 6★ perk +3 % | 10 % | Consistent. Additive sources are documented. |
 | Gameplay timing tied to clips | Event times derived from clip data | "Avoid gameplay tied to frame numbers" | Uses events, so it complies in form. Clip length still drives DPS (hero-sim: F5 0 % with sprites vs 100 % with `--nosprite`). Open design question, deferred to the balance pass. |
+
+## Ascension specialist mechanics V1 — user update 2026-10-31
+
+The user authorized the proposed three-guardian mechanics pass. Aegis uses a boss-specific 4 s Exposed Core (+75% incoming damage) after interrupting Guard or breaking Judgement; Guard is removed on that Break. Generic BROKEN stays 3 s/+25% for other skills. Jadecrest Roar is unbreakable, and Pounce explicitly marks the strongest backliner before committing its landing. Solar rotates ground marks fairly and uses four lane pulses / three Eclipse team hits. Details and provisional values: [ASCENSION_MECHANICS_V1.md](ASCENSION_MECHANICS_V1.md). This authorizes these scoped mechanics values, without opening a general hero/gear rebalance.

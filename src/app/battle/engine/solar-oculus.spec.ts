@@ -55,9 +55,9 @@ describe('Solar Oculus integration',()=>{
  it('fires one lane per pulse, leaves later lanes safe, and reverses the next completed sweep',()=>{
   const s=fixture();s.cast('solar_sweep');const hp=s.heroes.map(h=>h.hp);s.run(2.1);
   expect(s.heroes[0].hp).toBeLessThan(hp[0]);expect(s.heroes[1].hp).toBe(hp[1]);expect(s.heroes[2].hp).toBe(hp[2]);
-  s.run(2.6);expect(s.events.filter(e=>e.type==='monsterBeam').map(e=>e.type==='monsterBeam'?e.lane:-1)).toEqual([0,1,2]);
-  s.cast('solar_sweep');s.run(4.7);
-  expect(s.events.filter(e=>e.type==='monsterBeam').map(e=>e.type==='monsterBeam'?e.lane:-1)).toEqual([0,1,2,2,1,0]);
+  s.run(3.1);expect(s.events.filter(e=>e.type==='monsterBeam').map(e=>e.type==='monsterBeam'?e.lane:-1)).toEqual([0,1,2,0]);
+  s.cast('solar_sweep');s.run(5.2);
+  expect(s.events.filter(e=>e.type==='monsterBeam').map(e=>e.type==='monsterBeam'?e.lane:-1)).toEqual([0,1,2,0,2,1,0,2]);
  });
  it('cancels remaining lane pulses when the source dies',()=>{
   const s=fixture();s.cast('solar_sweep');s.run(2.1);s.boss.alive=false;s.run(2);

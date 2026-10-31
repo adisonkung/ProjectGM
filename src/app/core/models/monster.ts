@@ -181,7 +181,7 @@ export type SkillTargetSelector =
   /** a back-row hero by class priority (falls back to any back-row hero, then any hero) */
   | { type: 'HERO_PRIORITY'; classes: HeroClass[]; backRowOnly: boolean }
   /** the living hero with the highest ATK */
-  | { type: 'HIGHEST_ATK_HERO' }
+  | { type: 'HIGHEST_ATK_HERO'; preferBackRow?: boolean }
   /** every living hero */
   | { type: 'ALL_HEROES' };
 
@@ -255,9 +255,17 @@ export interface MonsterSkillDefinition {
   /** LEAP_BEHIND: seconds of committed travel before activation; other skills keep instant relocation. */
   leapTravel?: number;
   /** Opt-in ground warning: lock distinct enemy cells during wind-up; activation hits occupants of those cells. */
-  groundTargets?: { count: number; lockAfter: number; markFx: string; impactFx: string };
+  groundTargets?: { count: number; lockAfter: number; markFx: string; impactFx: string; selection?: 'ROTATING_THREAT' };
+  /** Target-owned warning through wind-up; landing itself is committed at takeoff. */
+  targetWarningFx?: string;
+  /** Optional successful-cast combo; cooldown remains data driven. */
+  followUp?: { skill: string; delay: number };
+  /** Stopping this cast can remove protection and expose a timed weak point. */
+  onStopped?: { removeStatuses?: string[]; status?: string };
+  /** Team-wide recovery pulses, cancelled if the source dies or the wave ends. */
+  damagePulses?: { count: number; interval: number; impactFx: string };
   /** Opt-in recovery sequence: one lane at a time, reversing order on alternate completed casts. */
-  laneSweep?: { interval: number; reverseAlternate?: boolean; beamFx: string; emitterFx: string; durationMs: number };
+  laneSweep?: { interval: number; repeatFirst?: boolean; reverseAlternate?: boolean; beamFx: string; emitterFx: string; durationMs: number };
   cooldown: number;
   /** cooldown after being interrupted (defaults to cooldown) */
   interruptedCooldown?: number;

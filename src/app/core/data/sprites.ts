@@ -1127,7 +1127,7 @@ Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
   pixelated: true, hitFlashStrength: .35,
   attackFx: ['ae-attack-thrust'], preloadFx: ['ae-s2-impact', 'ae-s3-impact'],
   anchors: { weaponTip: [186, -110], judgementTip: AEGIS_S3_TIP_ANCHOR, shieldCore: [0,-44] },
-  statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' } },
+  statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' }, aegis_exposed: {loop:'ae-core'} },
   damageFx: { aegis_guard: 'ae-s1-hit' }, deathFx: 'ae-death',
   monsterFx: {
     lance: { cast: ['ae-s2-charge'], activate: ['ae-s2-muzzle', 'ae-s2-beam'] },

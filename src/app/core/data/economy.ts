@@ -377,11 +377,17 @@ export function ascensionSelection(tier: number, requested: string | null, date 
   return ascensionDuel(tier, boss);
 }
 const ASCENSION_LIMITS: [number, number][] = [[90, 180], [110, 210], [130, 240]];
+export const ASCENSION_TACTICS: Record<(typeof ASCENSION_BOSSES)[number],string> = {
+  aegis_sentinel:'ตัดตั้งโล่ แล้วใช้ท่าแรงตอนเปิดแกน',
+  jadecrest_guardian:'กางโล่ปกป้องแนวหลังที่ถูกเล็ง',
+  solar_oculus:'เก็บโล่และฮีลทั้งทีมรับแสงต่อเนื่อง',
+};
 const ASCENSION_BG: Record<string,string> = {aegis_sentinel:'ascension-aegis',jadecrest_guardian:'ascension-jadecrest',solar_oculus:'ascension-solar'};
 export function ascensionDuel(tier: number, boss: (typeof ASCENSION_BOSSES)[number]): StageDef {
   const [enrageAt, limit] = ASCENSION_LIMITS[tier - 1];
   const name = `Ascension ${['I', 'II', 'III'][tier - 1]} · ${DUNGEON_MONSTERS[boss].name}`;
   const stage = bossDuel(`ascension_${tier}`, name, `${boss}@${tier}`, enrageAt, limit, ASCENSION_BG[boss]);
+  if(stage.special?.kind==='BOSS_DUEL') stage.special={...stage.special,goal:ASCENSION_TACTICS[boss]};
   // Large guardians use the bottom anchor, leaving the upper lane clear. Keep the logical grid integral.
 
   return { ...stage, enemies: [{ enemy: `${boss}@${tier}`, r: 1, c: 2 }],

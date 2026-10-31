@@ -82,11 +82,11 @@ describe('Jadecrest Guardian integration',()=>{
     expect(s.boss.x).toBeCloseTo(s.e.formation.originPosition+s.boss.pos.c,5);
     expect(s.hero.hp).toBeLessThan(s.hero.maxHp);
   });
-  it('breaks S3 through the real interrupt path and does not release its roar',()=>{
+  it('requires protecting and recovering the party instead of cancelling roar with universal Break',()=>{
     const s=duel('jadecrest_roar');s.run(25,()=>s.boss.casting?.def.id==='jadecrest_roar');
     expect(s.boss.casting).not.toBeNull();
     (s.e as unknown as{tryInterrupt(a:typeof s.hero,b:typeof s.boss,n:number):void}).tryInterrupt(s.hero,s.boss,100);
-    expect(hasStatus(s.boss,'broken')).toBeTrue();expect(s.boss.casting).toBeNull();
-    s.run(1);expect(s.events.some(e=>e.type==='skillActivated'&&e.skill==='jadecrest_roar')).toBeFalse();
+    expect(hasStatus(s.boss,'broken')).toBeFalse();expect(s.boss.casting).not.toBeNull();
+    s.run(2);expect(s.events.some(e=>e.type==='skillActivated'&&e.skill==='jadecrest_roar')).toBeTrue();
   });
 });

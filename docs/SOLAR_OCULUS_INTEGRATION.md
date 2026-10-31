@@ -13,7 +13,9 @@ User approved Solar V2 (stronger eye charge and a continuous beam that exits the
 - All 13 uploaded VFX sources are used by the baker, producing 12 separate runtime FX strips. Formation/held rings share a calibrated ground pivot, and low-alpha matte haze is removed. Stronger eye spirals, three light arcs and orbiting glints are included. The shaft texture is tiled with overlap; only the shaft changes length, and it fades without collapsing vertically. Its endpoints extend beyond the viewport.
 - All three uploaded maps are retained unchanged under `assets/backgrounds/ascension`; runtime WebP copies use a fixed arena background, without a repeating/parallax split. Other tower/farm backgrounds retain their original rendering path.
 
-## Actual combat mechanics
+## Original integration mechanics (superseded by specialist V1)
+
+The current kit is documented in [ASCENSION_MECHANICS_V1.md](ASCENSION_MECHANICS_V1.md); the following records the original integration for comparison.
 
 - **Normal:** one travelling magic projectile, emitted at the attack's `PROJECTILE_SPAWN` semantic event (0.95 s). Native charge and physical recoil are synced to that event.
 - **S1 Solar Seals:** 2.7 s cast. After 0.8 s, lock up to two distinct valid enemy cells; native warning rings remain on those cells. On activation, hit their current occupants once each, including a replacement occupant. A hero who leaves the marked cells avoids the hit. Detonation VFX still appears at the marked ground even if no hero remains there.

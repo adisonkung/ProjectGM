@@ -36,6 +36,8 @@ export interface MonsterCombatState {
   currentSkillId: string | null;
   /** Completed opt-in lane sequences, per skill (per battle, never on static definitions). */
   sequenceCasts?: Record<string, number>;
+  /** Fair ground targeting: counts belong to this live encounter, never to static definitions. */
+  groundMarks?: Record<number, number>;
   castTimer: number;
   hurtTimer: number;
   recoverTimer: number;
@@ -518,8 +520,10 @@ export class MonsterController {
         const pool = back.length ? back : heroes; // backRowOnly: back row first, then anyone in range
         return [...pool].sort((a, b) => rank(a) - rank(b) || pct(a) - pct(b) || near(a, b))[0] ?? null;
       }
-      case 'HIGHEST_ATK_HERO':
-        return [...heroes].sort((a, b) => effectiveAttack(b) - effectiveAttack(a) || near(a, b))[0] ?? null;
+      case 'HIGHEST_ATK_HERO': {
+        const back = sel.preferBackRow ? heroes.filter(h => h.line === 'back') : [];
+        return [...(back.length ? back : heroes)].sort((a, b) => effectiveAttack(b) - effectiveAttack(a) || near(a, b))[0] ?? null;
+      }
     }
   }
 

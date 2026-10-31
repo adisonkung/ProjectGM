@@ -16,10 +16,12 @@ export const JADECREST_PRESENTATION: Partial<SheetDef> = {
         motion: Array.from({length:9},(_,i)=>[1200+i*75,0,-450*(i/8)*(1-i/8)] as [number,number,number]),
       },
     } },
-    roar: { cast: [...ground,'jc-s3-charge'], activate: ['jc-s3-wave'], tracks: tracks(1050) },
+    roar: { cast: [...ground,'jc-s3-charge'], activate: ['jc-s3-wave'], tracks: tracks(1600) },
   },
 };
 export const JADECREST_FX: Record<string,FxDef> = {
+  'jc-pounce-warning': {file:'fx-jadecrest-s2-ripple.png',frames:24,w:400,h:180,frameMs:50,repeat:2,
+    at:'target',fitCells:2.6,pivot:[.5,.5],dy:27.25,attach:false,layer:'under'},
   'jc-charge-under': { file: 'fx-jadecrest-charge-under.png',frames: 60,w: 360,h: 270,frameMs: 30,
     at: 'self',fitCells: 4.8,pivot: [.5,260/384],dy: 27.25,attach: false,layer: 'under' },
   'jc-charge-front': { file: 'fx-jadecrest-charge-front.png',frames: 60,w: 360,h: 270,frameMs: 30,
@@ -37,7 +39,7 @@ export const JADECREST_FX: Record<string,FxDef> = {
     at: 'self',fitCells: 5,pivot: [.5,430/600],dy: 35,attach: false },
   'jc-s2-ripple': { file: 'fx-jadecrest-s2-ripple.png',frames: 24,w: 400,h: 180,frameMs: 100/3,
     at: 'self',fitCells: 4,pivot: [.5,.5],dy: 35,attach: false,blend: 'add' },
-  'jc-s3-charge': { file: 'fx-jadecrest-s3-charge.png',frames: 8,w: 180,h: 180,frameMs: 131.25,
+  'jc-s3-charge': { file: 'fx-jadecrest-s3-charge.png',frames: 8,w: 180,h: 180,frameMs: 200,
     at: 'self',anchor: 'roarCharge',fitCells: 1.6,attach: true },
   'jc-s3-wave': { file: 'fx-jadecrest-s3-wave.png',frames: 36,w: 600,h: 300,frameMs: 30,
     at: 'self',anchor: 'mouth',fitCells: 4.4,pivot: [.1,.5],attach: false },

@@ -6,6 +6,7 @@ export const AEGIS_SKILLS: Record<string, MonsterSkillDefinition> = {
     id: 'aegis_guard', name: 'ตั้งโล่พิทักษ์', label: 'AEGIS GUARD', type: 'BUFF',
     castTime: 2.5, cooldown: 20, firstCastDelay: 4, interruptible: true, interruptPriority: 'HIGH',
     clip: 'guard', target: { type: 'SELF' }, effects: [{ type: 'APPLY_STATUS', status: 'aegis_guard', to: 'SELF' }],
+    onStopped: {status:'aegis_exposed'},
     conditions: [{ type: 'SELF_LACKS_STATUS', status: 'aegis_guard' }], recovery: .3, interruptRecovery: .5,
   },
   aegis_lance: {
@@ -19,7 +20,7 @@ export const AEGIS_SKILLS: Record<string, MonsterSkillDefinition> = {
   aegis_judgement: {
     id: 'aegis_judgement', name: 'คำพิพากษาแห่งประตู', label: 'GATE JUDGEMENT', type: 'ATTACK',
     castTime: 3, cooldown: 18, firstCastDelay: 14, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 100,
-    brokenStatus: 'broken', clip: 'judgement', target: { type: 'SELF' },
+    brokenStatus: 'aegis_exposed', onStopped: {removeStatuses:['aegis_guard']}, clip: 'judgement', target: { type: 'SELF' },
     effects: [{ type: 'DAMAGE', mul: 1.5, area: 'FRONT_RECT_3X2', center: 'SELF' }],
     conditions: [{ type: 'ENEMY_WITHIN', range: 3 }], recovery: .78, interruptRecovery: 0,
     mockFx: { color: '#efc66d', area: 'FRONT_RECT_3X2' }, hitFx: 'ae-s3-impact',

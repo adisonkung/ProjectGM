@@ -1222,7 +1222,8 @@ export class BattleComponent implements OnDestroy {
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'BREAK!!', kind: 'break' });
           this.dropZones(e.dst);
-          this.showBanner('💥 BREAK! บอสเสียหลัก 3 วิ — รับดาเมจ +25%', 1600);
+          const exposed=unitOf(e.dst).buffs.find(b=>b.def.flags?.includes('broken'));
+          this.showBanner(`💥 BREAK! ${exposed?.def.name??'บอสเสียหลัก'} ${Math.ceil(exposed?.remaining??3)} วิ — รับดาเมจ +${Math.round(((exposed?.def.modifiers.damageTakenMultiplier??1.25)-1)*100)}%`,1600);
           const sh = SHEETS[unitOf(e.dst).sprite ?? ''];
           if (sh?.casts?.['broken']) set(e.dst, 'cast', { castTime: 0, castClip: 'broken', force: true });
           else set(e.dst, 'hurt', { force: true });
@@ -1277,8 +1278,8 @@ export class BattleComponent implements OnDestroy {
           const u=unitOf(e.src),p=posOf(e.src),d=FX[e.fx];
           if(!d)break;
           for(const cell of e.cells){
-            const duration=e.durationMs??fxDuration(e.fx);
-            fx.push({id:++this.floatId,r:p.r+cell.r-u.pos.r,c:p.c+cell.c-u.pos.c,name:e.fx,angle:0,
+            const duration=e.durationMs??fxDuration(e.fx),target=e.followTarget!=null?posOf(e.followTarget):null;
+            fx.push({id:++this.floatId,r:target?.r??p.r+cell.r-u.pos.r,c:target?.c??p.c+cell.c-u.pos.c,name:e.fx,angle:0,follow:e.followTarget,
               offset:fxOffset(e.fx),under:d.layer==='under',owner:e.src,managed:true,
               track:{durationMs:duration,alpha:[[0,1],[Math.max(0,duration-90),1],[duration,0]]}});
           }
@@ -1317,6 +1318,8 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'buff': {
+          if(unitOf(e.dst).buffs.some(b=>b.def.id===e.buff && b.def.flags?.includes('broken')) && SHEETS[unitOf(e.dst).sprite??'']?.casts?.['broken'])
+            set(e.dst,'cast',{castTime:0,castClip:'broken',force:true});
           const p = posOf(e.dst);
           const name = appliedStatusFx(unitOf(e.src).sprite, e.buff);
           if (name) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name, angle: 0,

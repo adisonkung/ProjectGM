@@ -141,14 +141,14 @@ describe('Aegis Sentinel integration', () => {
     expect(AEGIS_SENTINEL.attack.delivery).toBe('MELEE');
   });
 
-  it('guard lasts eight seconds while normal attacks and other skills resume after its brief recovery', () => {
+  it('guard lasts twelve seconds while normal attacks and other skills resume after its brief recovery', () => {
     const s = duel('aegis_guard');
     s.run(8, () => hasStatus(s.boss, 'aegis_guard'));
     expect(hasStatus(s.boss, 'aegis_guard')).toBeTrue();
     expect(s.boss.shield).toBe(0);
     const appliedAt = s.e.time;
-    expect(s.boss.buffs.find(b => b.def.id === 'aegis_guard')!.remaining).toBeCloseTo(8, 1);
-    expect(STATUS_EFFECTS['aegis_guard'].modifiers.damageTakenMultiplier).toBe(.4);
+    expect(s.boss.buffs.find(b => b.def.id === 'aegis_guard')!.remaining).toBeCloseTo(12, 1);
+    expect(STATUS_EFFECTS['aegis_guard'].modifiers.damageTakenMultiplier).toBe(.2);
     s.run(3);
     expect(hasStatus(s.boss, 'aegis_guard')).toBeTrue();
     expect(s.events.filter(x => x.type === 'attack' && x.src === s.boss.id).length).toBeGreaterThan(0);
@@ -156,9 +156,9 @@ describe('Aegis Sentinel integration', () => {
     s.run(3, () => s.events.some(x => x.type === 'skillActivated' && x.skill === 'aegis_lance'));
     expect(s.events.some(x => x.type === 'skillActivated' && x.skill === 'aegis_lance')).toBeTrue();
     expect(hasStatus(s.boss, 'aegis_guard')).toBeTrue();
-    s.run(Math.max(0, 8.1 - (s.e.time - appliedAt)));
+    s.run(Math.max(0, 12.1 - (s.e.time - appliedAt)));
     expect(hasStatus(s.boss, 'aegis_guard')).toBeFalse();
-    expect(s.e.time - appliedAt).toBeCloseTo(8.1, 1);
+    expect(s.e.time - appliedAt).toBeCloseTo(12.1, 1);
   });
 
   it('S2 applies one semantic release and unique recipients, without moving the caster', () => {
