@@ -1,5 +1,6 @@
 # Guardian forward art and Aegis beam recoil — 1 November 2026
 
+> Later visual correction: Judgement impact is now4.2×2.8 visual cells, centred on the physical spear-contact point. Logical warning/damage cells are unchanged. See [AEGIS_JUDGEMENT_IMPACT.md](AEGIS_JUDGEMENT_IMPACT.md).
 User correction after viewing the 4×2 Judgement impact: bring both Aegis and Jade one cell forward; recoil Aegis art two cells on beam release, hold during firing, then walk back without moving its logical target. Follow-up: increase firing duration to read as an ultimate.
 
 ## Implemented presentation

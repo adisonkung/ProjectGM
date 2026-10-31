@@ -65,7 +65,7 @@ describe('BattleComponent', () => {
     tick(2000);component.ngOnDestroy();discardPeriodicTasks();
   }));
 
-  it('keeps a large guardian forward telegraph and ground impact on the same body-front cells',fakeAsync(()=>{
+  it('keeps logical ground warnings separate from the native spear-centred impact',fakeAsync(()=>{
     component.start();component.openMenu();
     const host=component as unknown as{engine:BattleEngine;handleEvents(events:BattleEvent[]):void};
     const boss=host.engine.units.find(u=>u.side==='enemy')!;
@@ -75,7 +75,7 @@ describe('BattleComponent', () => {
     const zone=component.zones().find(z=>z.kind==='telegraph')!;
     expect(zone.c).toBe(6+host.engine.formation.originPosition-host.engine.cameraX);expect(zone.w).toBe(3);
     host.handleEvents([{type:'skillActivated',src:boss.id,skill:'aegis_judgement',name:'S2',targets:[]}]);
-    const wave=component.fx().find(f=>f.name==='ae-s3-wave')!;expect(wave.c).toBe(7+host.engine.formation.originPosition-host.engine.cameraX);
+    const wave=component.fx().find(f=>f.name==='ae-s3-wave')!;expect(wave.c).toBe(10+host.engine.formation.originPosition-host.engine.cameraX);expect(wave.offset).toEqual([188,.5]);
     tick(2000);component.ngOnDestroy();discardPeriodicTasks();
   }));
 

@@ -1,5 +1,6 @@
 # Guardian 4×2 layout — 1 November 2026
 
+> Later visual correction: Judgement impact is now4.2×2.8 visual cells, centred on the physical spear-contact point. Logical warning/damage cells are unchanged. See [AEGIS_JUDGEMENT_IMPACT.md](AEGIS_JUDGEMENT_IMPACT.md).
 > Follow-up: actor art now sits one cell forward; Aegis S3 has a two-cell visual recoil and 2.4s firing phase. See [GUARDIAN_RECOIL_REVIEW.md](GUARDIAN_RECOIL_REVIEW.md). Logical 4×2 anchors remain unchanged.
 User-requested logical footprints, all three ascension tiers:
 

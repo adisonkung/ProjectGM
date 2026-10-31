@@ -1,8 +1,9 @@
+import { unitGeometry } from '../render/unit-geometry';
 import { AEGIS_SENTINEL, AEGIS_SKILLS } from '../../core/data/aegis-sentinel';
 import { ascensionDuel } from '../../core/data/economy';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { MONSTERS, castTimeline } from '../../core/data/monsters';
-import { SHEETS, FX } from '../../core/data/sprites';
+import { SHEETS, FX, fxOffset } from '../../core/data/sprites';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { UnitSpec } from '../../core/models/unit';
 import { heroStats } from '../../core/rules/stats';
@@ -58,26 +59,22 @@ describe('Aegis Sentinel integration', () => {
     expect(s.boss.casting).toBeNull();
   });
 
-  it('charge centres on the feet while the forward impact meets the bottom cell edge', () => {
-    const body = { r: 2,c: 11 },cell = 50;
-    for (const name of ['ae-s3-ground-charge','ae-s3-wave']) {
-      const d = FX[name],point = groundFxCell(d,body,body,true);
-      expect(point).toEqual(name === 'ae-s3-wave' ? { r: 2,c: 9 } : body);
-      for (let frame = 0; frame < d.frames; frame++) {
-        const at = fxPlacement(d,cell,point.c*cell,point.r*cell,true,0);
-        const pivot = fxPivot(d,frame);
-        const top = at.y-pivot[1]*at.height;
-        if (name === 'ae-s3-wave') {
-          expect(top+d.ground![frame]/d.h*at.height).toBeCloseTo(3*cell,6);
-          expect(d.layer).toBe('under'); // dust stays behind the boss and spear.
-        } else {
-          expect(top+204/320*at.height).toBeCloseTo((2+.5+.2725)*cell,6);
-        }
-        if (name === 'ae-s3-wave') {
-          expect(at.x-at.width/2).toBeCloseTo(7.7*cell,6);
-          expect(at.x+at.width/2).toBeCloseTo(11.3*cell,6);
-        }
-      }
+  it('keeps charge on the feet and centres the enlarged impact on the contact-frame spear tip', () => {
+    const body={r:2,c:11},cell=50,d=FX['ae-s3-ground-charge'];
+    const point=groundFxCell(d,body,body,true);
+    for(let frame=0;frame<d.frames;frame++){
+      const at=fxPlacement(d,cell,point.c*cell,point.r*cell,true,0);
+      const top=at.y-fxPivot(d,frame)[1]*at.height;
+      expect(top+204/320*at.height).toBeCloseTo((2+.5+.2725)*cell,6);
+    }
+    const impact=FX['ae-s3-wave'],sprite='enemy-aegis-sentinel.png',g=unitGeometry(SHEETS[sprite],cell);
+    // Authored release frame12: atlas point264,252. Test both facing directions at both viewport scales.
+    for(const left of [true,false]){
+      const at=fxPlacement(impact,cell,10*cell,2*cell,left,0,fxOffset('ae-s3-wave',sprite));
+      expect(at.x).toBeCloseTo(10.5*cell+(264-170)*g.k*(left?-1:1),6);
+      expect(at.y).toBeCloseTo(2*cell+g.bottomY+(252-280)*g.k,6);
+      expect(at.width).toBeCloseTo(4.2*cell);expect(at.height).toBeCloseTo(2.8*cell);
+      expect(impact.layer).toBe('under');expect(impact.attach).toBeFalse();
     }
     const sheet = SHEETS['enemy-aegis-sentinel.png'];
     const binding = sheet.monsterFx!['judgement'];

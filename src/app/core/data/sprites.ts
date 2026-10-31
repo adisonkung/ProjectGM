@@ -8,7 +8,7 @@ import { SOLAR_FX, SOLAR_PRESENTATION } from './solar-presentation';
 
 import { JADECREST_FX, JADECREST_PRESENTATION } from './jadecrest-presentation';
 import type { FxTrack } from '../models/fx';
-import { AEGIS_S3_IMPACT_BOTTOMS, AEGIS_S3_TIP_ANCHOR, AEGIS_S3_TIP_MOTION } from './aegis-s3-presentation';
+import { AEGIS_S3_TIP_ANCHOR, AEGIS_S3_TIP_MOTION } from './aegis-s3-presentation';
 import type { ParticleRef } from './particles';
 import { AnimationConfig, SemanticEvent } from '../models/monster';
 import { MONSTERS, PROJECTILES } from './monsters';
@@ -1130,7 +1130,7 @@ const AEGIS_VISUAL_SCALE=1.6;
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
   displayScale:AEGIS_VISUAL_SCALE,pixelated: true, hitFlashStrength: .35,
   attackFx: ['ae-attack-thrust'], preloadFx: ['ae-s2-impact', 'ae-s3-impact'],
-  anchors: { weaponTip: bossPoint([186,-110],AEGIS_VISUAL_SCALE), judgementTip: bossPoint(AEGIS_S3_TIP_ANCHOR,AEGIS_VISUAL_SCALE), shieldCore: bossPoint([0,-44],AEGIS_VISUAL_SCALE) },
+  anchors: { weaponTip: bossPoint([186,-110],AEGIS_VISUAL_SCALE), judgementTip: bossPoint(AEGIS_S3_TIP_ANCHOR,AEGIS_VISUAL_SCALE), judgementImpact: bossPoint([117.5,11],AEGIS_VISUAL_SCALE), shieldCore: bossPoint([0,-44],AEGIS_VISUAL_SCALE) },
   statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' }, aegis_exposed: {loop:'ae-core'} },
   damageFx: { aegis_guard: 'ae-s1-hit' }, deathFx: 'ae-death',
   monsterFx: {
@@ -1176,8 +1176,8 @@ export const FX: Record<string, FxDef> = {
     at: 'self', fitCells: 4.4, pivot: [.5,204/320], dy: 27.25,
     attach: true, layer: 'under' },
   'ae-s3-wave': { file: 'fx-aegis-s3-slam.png', frames: 8, w: 360, h: 240, frameMs: 50,
-    at: 'self', groundArea: 'FRONT_RECT_3X2', groundFromBodyFront:true, fitCells: 3.6, fitRows: 2.4,
-    ground: AEGIS_S3_IMPACT_BOTTOMS, pivot: [.5,1], dy: 50, attach: false, layer: 'under' },
+    at: 'self', anchor: 'judgementImpact', fitCells: 4.2, fitRows: 2.8,
+    pivot: [.5,.76], attach: false, layer: 'under' },
   'ae-s3-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
     at: 'target', fitCells: .85, dy: -20 },
   'ae-core': { file: 'fx-aegis-core.png', frames: 75, w: 320, h: 260, frameMs: 40,

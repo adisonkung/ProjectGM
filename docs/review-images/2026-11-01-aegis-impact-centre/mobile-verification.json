@@ -1,0 +1,283 @@
+{
+  "errors": [],
+  "viewport": {
+    "width": 932,
+    "height": 430
+  },
+  "shots": [
+    {
+      "name": "aegis-standing",
+      "grid": false,
+      "time": 4.099999999999993,
+      "origin": 0,
+      "camera": 0,
+      "units": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "hero": "bailong",
+          "boss": false,
+          "pos": {
+            "r": 1,
+            "c": 8
+          },
+          "x": 8,
+          "y": 1
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "hero": "yuezheng",
+          "boss": false,
+          "pos": {
+            "r": 0,
+            "c": 8
+          },
+          "x": 8,
+          "y": 0.5
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "hero": "moye",
+          "boss": false,
+          "pos": {
+            "r": 2,
+            "c": 8
+          },
+          "x": 7.999999999999991,
+          "y": 2
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "hero": "tangxun",
+          "boss": false,
+          "pos": {
+            "r": 1,
+            "c": 3
+          },
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "hero": "linxue",
+          "boss": false,
+          "pos": {
+            "r": 0,
+            "c": 5
+          },
+          "x": 5,
+          "y": 0
+        },
+        {
+          "id": 6,
+          "name": "ผู้พิทักษ์ตราปฐม",
+          "boss": true,
+          "pos": {
+            "r": 2,
+            "c": 11
+          },
+          "x": 11,
+          "y": 2,
+          "footprint": {
+            "cols": 4,
+            "rows": 2,
+            "anchorC": 2,
+            "anchorR": 1
+          }
+        }
+      ],
+      "events": []
+    },
+    {
+      "name": "aegis-s2-raised",
+      "grid": false,
+      "time": 4.94999999999999,
+      "origin": 0,
+      "camera": 0,
+      "units": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "hero": "bailong",
+          "boss": false,
+          "pos": {
+            "r": 1,
+            "c": 8
+          },
+          "x": 8,
+          "y": 1
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "hero": "yuezheng",
+          "boss": false,
+          "pos": {
+            "r": 0,
+            "c": 8
+          },
+          "x": 8,
+          "y": 0.5
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "hero": "moye",
+          "boss": false,
+          "pos": {
+            "r": 2,
+            "c": 8
+          },
+          "x": 7.999999999999991,
+          "y": 2
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "hero": "tangxun",
+          "boss": false,
+          "pos": {
+            "r": 1,
+            "c": 3
+          },
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "hero": "linxue",
+          "boss": false,
+          "pos": {
+            "r": 0,
+            "c": 5
+          },
+          "x": 5,
+          "y": 0
+        },
+        {
+          "id": 6,
+          "name": "ผู้พิทักษ์ตราปฐม",
+          "boss": true,
+          "pos": {
+            "r": 2,
+            "c": 11
+          },
+          "x": 11,
+          "y": 2,
+          "footprint": {
+            "cols": 4,
+            "rows": 2,
+            "anchorC": 2,
+            "anchorR": 1
+          },
+          "cast": "aegis_judgement"
+        }
+      ],
+      "events": []
+    },
+    {
+      "name": "aegis-s2-impact",
+      "grid": false,
+      "time": 6.499999999999985,
+      "origin": 0,
+      "camera": 0,
+      "units": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "hero": "bailong",
+          "boss": false,
+          "pos": {
+            "r": 1,
+            "c": 8
+          },
+          "x": 8,
+          "y": 1
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "hero": "yuezheng",
+          "boss": false,
+          "pos": {
+            "r": 0,
+            "c": 8
+          },
+          "x": 8,
+          "y": 0.5
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "hero": "moye",
+          "boss": false,
+          "pos": {
+            "r": 2,
+            "c": 8
+          },
+          "x": 7.999999999999991,
+          "y": 2
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "hero": "tangxun",
+          "boss": false,
+          "pos": {
+            "r": 1,
+            "c": 3
+          },
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "hero": "linxue",
+          "boss": false,
+          "pos": {
+            "r": 0,
+            "c": 5
+          },
+          "x": 5,
+          "y": 0
+        },
+        {
+          "id": 6,
+          "name": "ผู้พิทักษ์ตราปฐม",
+          "boss": true,
+          "pos": {
+            "r": 2,
+            "c": 11
+          },
+          "x": 11,
+          "y": 2,
+          "footprint": {
+            "cols": 4,
+            "rows": 2,
+            "anchorC": 2,
+            "anchorR": 1
+          }
+        }
+      ],
+      "events": [
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "aegis_judgement",
+          "name": "คำพิพากษาแห่งประตู",
+          "targets": [
+            1,
+            3
+          ]
+        }
+      ]
+    }
+  ],
+  "fixture": "Actual game, HP5000/low ATK/manual hero skills/selected boss cooldowns. Jade target placed at r2,c7 via real engine method for clear landing view. Diagnostic DOM/SVG overlay added only for requested grid screenshots; not product UI."
+}
