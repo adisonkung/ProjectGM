@@ -1,0 +1,41 @@
+{
+  "sourceBase": "a2a1a19a2e8c58a8b2cc595357faf9a558c5377d",
+  "appTypecheck": "PASS",
+  "specTypecheck": "PASS",
+  "productionBuild": "PASS",
+  "karma": {
+    "total": 936,
+    "passed": 936,
+    "failed": 0
+  },
+  "targetedBattles": 360,
+  "screenshots": 32,
+  "browserErrors": 0,
+  "video": {
+    "duration": 9.033333,
+    "framesCaptured": 156,
+    "logicalBossCells": [
+      [
+        2,
+        11
+      ]
+    ],
+    "worldX": [
+      11,
+      11
+    ],
+    "actorC": [
+      10,
+      12
+    ],
+    "fullBeamSeconds": 2.4,
+    "fadeSeconds": 0.15,
+    "returnWalkSeconds": 0.7
+  },
+  "sourceSha256": {
+    "src/app/battle/render/guardian-motion.ts": "fcb5857cd7c643cc6a19d24ec3400889897728d6a31342d9326b6669423f8ef9",
+    "src/app/pages/battle/battle.component.ts": "ffe1da5d9e81c0901317dc1ccb5f61593381a4079d2ab01061b1396bd9ca376b",
+    "src/app/core/data/aegis-sentinel.ts": "fd85f0ca1aaa1ab5908cc44659872cebc4d14ee07a72a47c32c4bfff6cca09dc",
+    "src/app/core/data/sprites.ts": "b2cc41a2eb83e74c321e6c9615bd7806f4cc878cfdc58c1677dd1b9124b04e45"
+  }
+}

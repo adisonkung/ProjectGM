@@ -113,7 +113,7 @@ describe('Aegis Sentinel integration', () => {
     for (const left of [true,false]) for (const cell of [40,80]) {
       const at = fxPlacement(def,cell,11*cell,2*cell,left,0,offset,1,edgeBeamStretch(def,11,left,offset));
       expect(at.x + (left ? -at.width : at.width)).toBeCloseTo(left ? 0 : 16*cell,6);
-      expect(at.height).toBe(4.5*cell);
+      expect(at.height).toBe(5*cell);
       expect(at.rotation).toBe(0);
     }
   });

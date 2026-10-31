@@ -15,7 +15,7 @@ export const AEGIS_SKILLS: Record<string, MonsterSkillDefinition> = {
     brokenStatus:'aegis_exposed',onStopped:{removeStatuses:['aegis_guard']},range:16,
     clip: 'lance', target: { type: 'CURRENT_TARGET' },
     effects: [{ type: 'DAMAGE', mul: 1.5, area: 'FRONT_BEAM_3', center: 'SELF', damageType: 'MAGIC' }],
-    conditions: [{ type: 'ENEMY_WITHIN', range: 16 }], recovery: .96, interruptRecovery: .4,
+    conditions: [{ type: 'ENEMY_WITHIN', range: 16 }], recovery: 3.25, interruptRecovery: .4,
     mockFx: { color: '#5ddfff', area: 'FRONT_BEAM_3' }, hitFx: 'ae-s2-impact',
   },
   aegis_judgement: {

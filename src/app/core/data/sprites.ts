@@ -1141,6 +1141,8 @@ Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
     } },
   },
 } satisfies Partial<SheetDef>);
+// Release pose held for the full beam; returning walk is presentation-only.
+SHEETS['enemy-aegis-sentinel.png'].casts!['lance_firing']={row:6,frames:13,ms:2550,castStart:12,activate:12};
 // The supplied death settles in place: fade with the shutdown VFX rather than leaving a standing corpse.
 Object.assign(SHEETS['enemy-aegis-sentinel.png'].anims.die!, {
   seq: Array.from({ length: 20 }, (_, i) => i), steps: Array(20).fill(70),
@@ -1161,11 +1163,11 @@ export const FX: Record<string, FxDef> = {
     at: 'self', fitCells: 1.65, dy: bossPoint([0,-65],1.6)[1], dx: 120, attach: true, blend: 'add' },
   'ae-s2-charge': { file: 'fx-aegis-s2-charge.png', frames: 32, w: 180, h: 180, frameMs: 200/3,
     at: 'self', anchor: 'weaponTip', delayMs: 1250, fitCells: 2.1, attach: true, repeat: 2, blend: 'add' },
-  'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 8, w: 256, h: 256, frameMs: 90,
-    at: 'self', anchor: 'weaponTip', fitCells: 4.6, pivot: [1-356/444,222/444], attach: false, fadeOutMs: 120 },
-  'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 219, frameMs: 45,
-    at: 'self', anchor: 'weaponTip', fitCells: 1, fitRows: 4.5, pivot: [0,.5], toBoardEdge: true,
-    orient: 'flip', attach: false, repeat: 2, fadeOutMs: 120, blend: 'add' },
+  'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 8, w: 256, h: 256, frameMs: 100, repeat: 3,
+    at: 'self', anchor: 'weaponTip', fitCells: 5, pivot: [1-356/444,222/444], attach: true, fadeOutMs: 150 },
+  'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 219, frameMs: 50,
+    at: 'self', anchor: 'weaponTip', fitCells: 1, fitRows: 5, pivot: [0,.5], toBoardEdge: true,
+    orient: 'flip', attach: true, repeat: 6, fadeOutMs: 150, blend: 'add' },
   'ae-s2-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
     at: 'target', fitCells: 1.05, dy: -20 },
   'ae-s3-charge': { file: 'fx-aegis-s3-tip-charge.png', frames: 75, w: 160, h: 160, frameMs: 24,

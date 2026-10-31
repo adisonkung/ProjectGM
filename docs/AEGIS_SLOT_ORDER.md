@@ -1,5 +1,6 @@
 # Aegis slot correction and board-cell review — 1 November 2026
 
+> Follow-up: actor art now sits one cell forward; Aegis S3 has a two-cell visual recoil and 2.4s firing phase. See [GUARDIAN_RECOIL_REVIEW.md](GUARDIAN_RECOIL_REVIEW.md). Logical 4×2 anchors remain unchanged.
 > Layout update, 1 November 2026: Aegis and Jade now use asymmetric **4×2** footprints. Earlier 3×2 descriptions/screenshots below are historical. See [GUARDIAN_4X2_LAYOUT.md](GUARDIAN_4X2_LAYOUT.md) for current anchors, skill origins and upper room.
 The user expected the discussed S2/S3 swap to be implemented. It is now applied to the actual skill registry, every tier's ordered kit, priority, charge timing and Break ownership.
 
@@ -11,7 +12,7 @@ The user expected the discussed S2/S3 swap to be implemented. It is now applied 
 
 Stable IDs remain `aegis_judgement` for the ground slam and `aegis_lance` for the beam. `skills` now orders Guard→Judgement→Lance and priority is Lance→Guard→Judgement. Cast labels explicitly display S1/S2/S3. Existing saves, sources and tier variants remain compatible.
 
-The slam's75-frame ground/tip charge and tip-motion track are retimed from3s to1.8s; the beam's charge delay/frames are retimed from1.8s to3s. Release recovery still follows each action's existing authored clip (.78s slam/.96s beam). The beam's glow height is4.5 visual cells around the enlarged spear-tip origin, so it extends into decorative scenery; damage is still exactly the three playable lanes. No additional combat rows, HP/ATK/DEF changes or new hero tuning.
+The slam's75-frame ground/tip charge and tip-motion track are retimed from3s to1.8s; the beam's charge delay/frames are retimed from1.8s to3s. The slam retains .78s recovery; the later recoil revision extends beam recovery to3.25s (2.4s firing +.15s fade +.7s return). The beam's glow height is now5 visual cells around the enlarged spear-tip origin, so it extends into decorative scenery; damage is still exactly the three playable lanes. No additional combat rows, HP/ATK/DEF changes or new hero tuning.
 
 Legacy artwork keys `ae-s2-*` (beam) and `ae-s3-*` (slam) retain their filenames. They are asset IDs, not the current slot order. Native PNGs are unchanged; no atlas optimizer is required.
 

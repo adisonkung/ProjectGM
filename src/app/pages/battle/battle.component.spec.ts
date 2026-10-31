@@ -79,6 +79,28 @@ describe('BattleComponent', () => {
     tick(2000);component.ngOnDestroy();discardPeriodicTasks();
   }));
 
+  it('recoils Aegis art without moving its grid body or heroes and follows the tip with the beam',fakeAsync(()=>{
+    component.start();component.openMenu();
+    const host=component as unknown as{engine:BattleEngine;handleEvents(events:BattleEvent[]):void;snapshot():void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!;
+    boss.sprite='enemy-aegis-sentinel.png';boss.pos={r:2,c:11};boss.x=host.engine.formation.originPosition+11;boss.y=2;
+    boss.actionFacing={left:true};const x=boss.x,cell={...boss.pos},t=host.engine.time;
+    const heroCells=host.engine.units.filter(u=>u.side==='ally').map(u=>({...u.pos}));
+    host.snapshot();const front=component.views().find(u=>u.id===boss.id)!.c;
+    host.handleEvents([{type:'skillActivated',src:boss.id,skill:'aegis_lance',name:'S3',targets:[]}]);
+    host.engine.time=t+.4;host.snapshot();
+    expect(component.views().find(u=>u.id===boss.id)!.c-front).toBeCloseTo(2);
+    const beam=component.fx().find(f=>f.name==='ae-s2-beam')!;
+    expect(beam.follow).toBe(boss.id);const width=beam.stretch!;
+    expect(component.anims()[boss.id].castClip).toBe('lance_firing');
+    host.engine.time=t+2.9;host.snapshot();expect(component.anims()[boss.id].anim).toBe('walk');
+    expect(component.fx().find(f=>f.id===beam.id)!.stretch!).toBeLessThan(width);
+    host.engine.time=t+3.3;host.snapshot();expect(component.views().find(u=>u.id===boss.id)!.c).toBeCloseTo(front);
+    expect(boss.x).toBe(x);expect(boss.pos).toEqual(cell);
+    expect(host.engine.units.filter(u=>u.side==='ally').map(u=>u.pos)).toEqual(heroCells);
+    tick(4000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
+
   it('shows the placement board before the battle starts', () => {
     expect(component).toBeTruthy();
     const el: HTMLElement = fixture.nativeElement;
