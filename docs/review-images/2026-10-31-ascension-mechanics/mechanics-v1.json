@@ -1,0 +1,7157 @@
+{
+  "runs": 3600,
+  "teams": {
+    "starter": [
+      "bailong",
+      "yuezheng",
+      "moye",
+      "tangxun",
+      "linxue"
+    ],
+    "break": [
+      "garrick",
+      "kael",
+      "tangxun",
+      "mirelle",
+      "linxue"
+    ],
+    "ranged": [
+      "yuezheng",
+      "mirelle",
+      "sylvara",
+      "sylas",
+      "elira"
+    ],
+    "sustain": [
+      "draeven",
+      "bailong",
+      "sylas",
+      "elira",
+      "linxue"
+    ],
+    "burst": [
+      "garrick",
+      "kael",
+      "moye",
+      "vaelric",
+      "lucien"
+    ]
+  },
+  "profiles": [
+    "B",
+    "D",
+    "G",
+    "G6"
+  ],
+  "notes": [
+    "Current shipped roster; no legacy-roster override",
+    "No full-ultimate dev switch; engine production start gauge",
+    "AUTO default formation; TACTICAL existing bot, not a boss-specific or movement-dodge AI",
+    "B: Lv5 Basic ranks1/2/1; D: Lv8 Mid ranks2/3/2; G: Lv10 NearMax ranks5/5/5; G6 uses OwnedHero.star=6",
+    "Audit does not mutate gameplay definitions; results are the specialist V1 mechanics"
+  ],
+  "rows": [
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 52.465,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 56.565,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 72.585,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 58,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 73.82,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 67.165,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 63.185,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 68.865,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 31,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 88.21,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "ตั้งโล่พิทักษ์": 20,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 119.77,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 90,
+        "คำรามพิทักษ์หยก": 80,
+        "กระโดดตะปบหยก": 80
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 96.31,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 70,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 60
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 38.55,
+      "survivors": 0,
+      "bossHp": 0.625,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 85.46,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 82.475,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 4,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 102.86,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 60,
+        "ตั้งโล่พิทักษ์": 20,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 142.45,
+      "survivors": 0,
+      "bossHp": 0.06,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 110,
+        "คำรามพิทักษ์หยก": 100,
+        "กระโดดตะปบหยก": 100
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 154.95,
+      "survivors": 0,
+      "bossHp": 0.382,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 110,
+        "คำรามพิทักษ์หยก": 110,
+        "กระโดดตะปบหยก": 110
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 36.9,
+      "survivors": 0,
+      "bossHp": 0.759,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 36.8,
+      "survivors": 0,
+      "bossHp": 0.784,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 53.57,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 76.42,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "ตั้งโล่พิทักษ์": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 73.35,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 75.8,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 77.09,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 76.76,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 72.415,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 4,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 100.305,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 5,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "ตั้งโล่พิทักษ์": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 103.59,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 103.15,
+      "survivors": 0,
+      "bossHp": 0.083,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 150.6,
+      "survivors": 0,
+      "bossHp": 0.391,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 80,
+        "กวาดวงแหวน": 80,
+        "สุริยคราสพิพากษา": 80
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 101.69,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 5,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 85.7,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 4,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 120.76,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 6,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 61,
+        "ตั้งโล่พิทักษ์": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 97.6,
+      "survivors": 0,
+      "bossHp": 0.417,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 70,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 154.15,
+      "survivors": 0,
+      "bossHp": 0.536,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 110,
+        "คำรามพิทักษ์หยก": 110,
+        "กระโดดตะปบหยก": 100
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 27.6,
+      "survivors": 0,
+      "bossHp": 0.829,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 152.95,
+      "survivors": 0,
+      "bossHp": 0.085,
+      "breaks": 5,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 80,
+        "กวาดวงแหวน": 80,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 139.6,
+      "survivors": 0,
+      "bossHp": 0.153,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 110,
+        "คำพิพากษาแห่งประตู": 30,
+        "ตั้งโล่พิทักษ์": 60
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 72.6,
+      "survivors": 0,
+      "bossHp": 0.498,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 60,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 69.835,
+      "survivors": 4.5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 45
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 149,
+      "survivors": 0,
+      "bossHp": 0.119,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 90,
+        "คำรามพิทักษ์หยก": 80,
+        "กระโดดตะปบหยก": 110
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 52.1,
+      "survivors": 0,
+      "bossHp": 0.677,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 50.35,
+      "survivors": 0,
+      "bossHp": 0.72,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 47.45,
+      "survivors": 0,
+      "bossHp": 0.598,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 46.1,
+      "survivors": 0,
+      "bossHp": 0.75,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "ตั้งโล่พิทักษ์": 20,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 50.25,
+      "survivors": 0,
+      "bossHp": 0.521,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 66.25,
+      "survivors": 0,
+      "bossHp": 0.44,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 37.55,
+      "survivors": 0,
+      "bossHp": 0.808,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 37.55,
+      "survivors": 0,
+      "bossHp": 0.832,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 47.45,
+      "survivors": 0,
+      "bossHp": 0.678,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 38.3,
+      "survivors": 0,
+      "bossHp": 0.847,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 20,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 95.9,
+      "survivors": 0,
+      "bossHp": 0.636,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 42.1,
+      "survivors": 0,
+      "bossHp": 0.734,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 30,
+        "คำรามพิทักษ์หยก": 20,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 33.1,
+      "survivors": 0,
+      "bossHp": 0.855,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 33.1,
+      "survivors": 0,
+      "bossHp": 0.874,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 152.16,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 90,
+        "ตั้งโล่พิทักษ์": 77,
+        "คำพิพากษาแห่งประตู": 72
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 9,
+      "time": 173.5,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 101,
+        "ตั้งโล่พิทักษ์": 86,
+        "คำพิพากษาแห่งประตู": 84
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 96.99,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 71,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 64
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 108.68,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 80,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 91.485,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 98.7,
+      "survivors": 2.8,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 52,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 9,
+      "time": 209.315,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 120,
+        "ตั้งโล่พิทักษ์": 100,
+        "คำพิพากษาแห่งประตู": 100
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 210,
+      "survivors": 5,
+      "bossHp": 0.088,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 120,
+        "ตั้งโล่พิทักษ์": 100,
+        "คำพิพากษาแห่งประตู": 100
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 138.7,
+      "survivors": 0,
+      "bossHp": 0.273,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 100,
+        "คำรามพิทักษ์หยก": 100,
+        "กระโดดตะปบหยก": 90
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 138.745,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 101,
+        "คำรามพิทักษ์หยก": 98,
+        "กระโดดตะปบหยก": 92
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 119.63,
+      "survivors": 0,
+      "bossHp": 0.113,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 70,
+        "กวาดวงแหวน": 61,
+        "สุริยคราสพิพากษา": 60
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 61.55,
+      "survivors": 0,
+      "bossHp": 0.598,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 240,
+      "survivors": 3.7,
+      "bossHp": 0.11,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 141,
+        "ตั้งโล่พิทักษ์": 120,
+        "คำพิพากษาแห่งประตู": 119
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 236.29,
+      "survivors": 2,
+      "bossHp": 0.277,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 148,
+        "ตั้งโล่พิทักษ์": 118,
+        "คำพิพากษาแห่งประตู": 115
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 128.3,
+      "survivors": 0,
+      "bossHp": 0.417,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 94,
+        "คำรามพิทักษ์หยก": 92,
+        "กระโดดตะปบหยก": 92
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 74.1,
+      "survivors": 0,
+      "bossHp": 0.642,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 75.1,
+      "survivors": 0,
+      "bossHp": 0.66,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 38.45,
+      "survivors": 0,
+      "bossHp": 0.803,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 106.925,
+      "survivors": 1.6,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 74,
+        "คำพิพากษาแห่งประตู": 50,
+        "ตั้งโล่พิทักษ์": 42
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 80.335,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 41,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 3
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 56.7,
+      "survivors": 0,
+      "bossHp": 0.34,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 56.7,
+      "survivors": 0,
+      "bossHp": 0.34,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 46.6,
+      "survivors": 0,
+      "bossHp": 0.575,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 62.94,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 210,
+      "survivors": 1,
+      "bossHp": 0.499,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 160,
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 90
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 92.55,
+      "survivors": 0,
+      "bossHp": 0.312,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 60,
+        "ตั้งโล่พิทักษ์": 50,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 44.85,
+      "survivors": 0,
+      "bossHp": 0.619,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 44.85,
+      "survivors": 0,
+      "bossHp": 0.619,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 33.2,
+      "survivors": 0,
+      "bossHp": 0.782,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 44.1,
+      "survivors": 0,
+      "bossHp": 0.616,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 240,
+      "survivors": 1,
+      "bossHp": 0.58,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 180,
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 110
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 81.95,
+      "survivors": 0,
+      "bossHp": 0.494,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 35.1,
+      "survivors": 0,
+      "bossHp": 0.75,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 30,
+        "คำรามพิทักษ์หยก": 20,
+        "กระโดดตะปบหยก": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 35.1,
+      "survivors": 0,
+      "bossHp": 0.75,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 30,
+        "คำรามพิทักษ์หยก": 20,
+        "กระโดดตะปบหยก": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 27.6,
+      "survivors": 0,
+      "bossHp": 0.851,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "burst",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 38.45,
+      "survivors": 0,
+      "bossHp": 0.754,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 47.9,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 51.35,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1.9,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 67.7,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 45
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 63.555,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 57.035,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 56.565,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 61.475,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 66.725,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "ตั้งโล่พิทักษ์": 10,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 90.3,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 70,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 60
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 86.73,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 68,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 60
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 82.175,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 49,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 74.695,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 38,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 72.345,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 4,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 93.115,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2.5,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 59,
+        "ตั้งโล่พิทักษ์": 20,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 106.55,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 71,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 104.275,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 128.825,
+      "survivors": 3,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 70,
+        "กวาดวงแหวน": 70,
+        "สุริยคราสพิพากษา": 60
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 90.12,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 50
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 48.615,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 63.995,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 31,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 63.73,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 41,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 66.19,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 44,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 66.525,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 67.5,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 38
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 63.445,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 87.64,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "ตั้งโล่พิทักษ์": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 88.345,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 70,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 60
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 87.19,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 64,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 60
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 91.565,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 45,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 89.38,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 49
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 75.765,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 4,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 105.255,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 5,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 54,
+        "ตั้งโล่พิทักษ์": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 108.515,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 77,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 106.15,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 131.4,
+      "survivors": 0,
+      "bossHp": 0.101,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 70,
+        "กวาดวงแหวน": 70,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 106.575,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 5,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 51
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 84.28,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 60,
+        "คำพิพากษาแห่งประตู": 40,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 104.645,
+      "survivors": 2.2,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 79,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 49
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 62.11,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 62.985,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 69.55,
+      "survivors": 0,
+      "bossHp": 0.476,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 65.4,
+      "survivors": 0,
+      "bossHp": 0.521,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 210,
+      "survivors": 1,
+      "bossHp": 0.287,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 150,
+        "คำพิพากษาแห่งประตู": 60,
+        "ตั้งโล่พิทักษ์": 80
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 62.85,
+      "survivors": 0,
+      "bossHp": 0.642,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "ตั้งโล่พิทักษ์": 30,
+        "คำพิพากษาแห่งประตู": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 72.9,
+      "survivors": 0,
+      "bossHp": 0.183,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 88.2,
+      "survivors": 0,
+      "bossHp": 0.383,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 70,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 60
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 52.1,
+      "survivors": 0,
+      "bossHp": 0.712,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 52.1,
+      "survivors": 0,
+      "bossHp": 0.741,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 60.45,
+      "survivors": 0,
+      "bossHp": 0.603,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 46.1,
+      "survivors": 0,
+      "bossHp": 0.79,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "ตั้งโล่พิทักษ์": 20,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 65.15,
+      "survivors": 0,
+      "bossHp": 0.518,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 56.15,
+      "survivors": 0,
+      "bossHp": 0.511,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 37.55,
+      "survivors": 0,
+      "bossHp": 0.821,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 37.55,
+      "survivors": 0,
+      "bossHp": 0.845,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 134.36,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 82,
+        "ตั้งโล่พิทักษ์": 69,
+        "คำพิพากษาแห่งประตู": 66
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 151.62,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 91,
+        "ตั้งโล่พิทักษ์": 73,
+        "คำพิพากษาแห่งประตู": 71
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 83.02,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 61,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 59
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 95.505,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 71,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 62
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 80.41,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 45,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 87.355,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 185.625,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 110,
+        "ตั้งโล่พิทักษ์": 90,
+        "คำพิพากษาแห่งประตู": 90
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 207.43,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 120,
+        "ตั้งโล่พิทักษ์": 100,
+        "คำพิพากษาแห่งประตู": 100
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 113.01,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 86,
+        "คำรามพิทักษ์หยก": 80,
+        "กระโดดตะปบหยก": 80
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 122.85,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 90,
+        "คำรามพิทักษ์หยก": 90,
+        "กระโดดตะปบหยก": 80
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 110.11,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 60,
+        "กวาดวงแหวน": 60,
+        "สุริยคราสพิพากษา": 50
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 116.27,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 60,
+        "กวาดวงแหวน": 60,
+        "สุริยคราสพิพากษา": 60
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 225.95,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 130,
+        "ตั้งโล่พิทักษ์": 110,
+        "คำพิพากษาแห่งประตู": 110
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 240,
+      "survivors": 5,
+      "bossHp": 0.04,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 140,
+        "ตั้งโล่พิทักษ์": 120,
+        "คำพิพากษาแห่งประตู": 120
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 138.25,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 100,
+        "คำรามพิทักษ์หยก": 100,
+        "กระโดดตะปบหยก": 93
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 148.6,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 110,
+        "คำรามพิทักษ์หยก": 107,
+        "กระโดดตะปบหยก": 100
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 137.975,
+      "survivors": 2.9,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 72,
+        "กวาดวงแหวน": 71,
+        "สุริยคราสพิพากษา": 70
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 55.9,
+      "survivors": 0,
+      "bossHp": 0.715,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 70.21,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "คำพิพากษาแห่งประตู": 30,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 75.965,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 47,
+        "ตั้งโล่พิทักษ์": 39,
+        "คำพิพากษาแห่งประตู": 12
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 66.975,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 68.07,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 56.55,
+      "survivors": 0,
+      "bossHp": 0.465,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 55.89,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 210,
+      "survivors": 1,
+      "bossHp": 0.129,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 150,
+        "คำพิพากษาแห่งประตู": 50,
+        "ตั้งโล่พิทักษ์": 90
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 185.635,
+      "survivors": 1,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 126,
+        "ตั้งโล่พิทักษ์": 89,
+        "คำพิพากษาแห่งประตู": 40
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 138.45,
+      "survivors": 0,
+      "bossHp": 0.417,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 110
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 124.75,
+      "survivors": 0,
+      "bossHp": 0.432,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 80,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 90
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 38.45,
+      "survivors": 0,
+      "bossHp": 0.698,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 93.31,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 43,
+        "กวาดวงแหวน": 50
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 240,
+      "survivors": 1,
+      "bossHp": 0.513,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 180,
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 110
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 88.2,
+      "survivors": 0,
+      "bossHp": 0.354,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 60,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 44.85,
+      "survivors": 0,
+      "bossHp": 0.633,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 44.85,
+      "survivors": 0,
+      "bossHp": 0.633,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 33.2,
+      "survivors": 0,
+      "bossHp": 0.792,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "burst",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 44,
+      "survivors": 0,
+      "bossHp": 0.659,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 36.26,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 40.475,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 50.085,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 34,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 50.765,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 44.455,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 27,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 44.27,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 28
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 47.53,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 52.65,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 69.53,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 52,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 67.05,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 49,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 59.565,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 19
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 58.91,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 55.41,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 63.54,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 38,
+        "ตั้งโล่พิทักษ์": 10,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 83.725,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 62,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 54
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 82.105,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 61,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 51
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 71.19,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 39,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 70.215,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 39.09,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 49.855,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1.9,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 48.98,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 51.09,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 31,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 49.58,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 54.085,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 52.215,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 62.13,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 67.65,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 68.31,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 66.685,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 71.075,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 62.54,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "คำพิพากษาแห่งประตู": 4
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 80.525,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 80.8,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 81.875,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 59,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 81.43,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 84.64,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 68.66,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "คำพิพากษาแห่งประตู": 30,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 92.065,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0.4,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 60,
+        "ตั้งโล่พิทักษ์": 46,
+        "คำพิพากษาแห่งประตู": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 51.2,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 31,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 52.31,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 135.965,
+      "survivors": 2,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 74,
+        "กวาดวงแหวน": 71,
+        "สุริยคราสพิพากษา": 69
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 85.025,
+      "survivors": 3,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 47,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 104.01,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 70,
+        "คำพิพากษาแห่งประตู": 50,
+        "ตั้งโล่พิทักษ์": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 94.045,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 60,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 67.905,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 68.475,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 41
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 46.4,
+      "survivors": 0,
+      "bossHp": 0.623,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 46.5,
+      "survivors": 0,
+      "bossHp": 0.658,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 169.29,
+      "survivors": 2,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 126,
+        "คำพิพากษาแห่งประตู": 40,
+        "ตั้งโล่พิทักษ์": 70
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 151.85,
+      "survivors": 0,
+      "bossHp": 0.101,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 120,
+        "ตั้งโล่พิทักษ์": 80,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 83.84,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 53
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 103.725,
+      "survivors": 3,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 78,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 90,
+      "survivors": 0,
+      "bossHp": 0.68,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 89.9,
+      "survivors": 0,
+      "bossHp": 0.716,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 109.35,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 70,
+        "ตั้งโล่พิทักษ์": 50,
+        "คำพิพากษาแห่งประตู": 50
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 126.08,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 80,
+        "ตั้งโล่พิทักษ์": 60,
+        "คำพิพากษาแห่งประตู": 60
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 70.96,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 54,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 76.79,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 66.905,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 73.335,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 149.625,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 90,
+        "ตั้งโล่พิทักษ์": 71,
+        "คำพิพากษาแห่งประตู": 70
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 168.435,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 100,
+        "ตั้งโล่พิทักษ์": 80,
+        "คำพิพากษาแห่งประตู": 80
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 96.565,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 70,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 61
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 100.02,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 76,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 88.3,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 96.04,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 50
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 185.055,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 110,
+        "ตั้งโล่พิทักษ์": 90,
+        "คำพิพากษาแห่งประตู": 90
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 205.185,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 120,
+        "ตั้งโล่พิทักษ์": 100,
+        "คำพิพากษาแห่งประตู": 100
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 113.91,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 89,
+        "คำรามพิทักษ์หยก": 80,
+        "กระโดดตะปบหยก": 80
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 120,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 90,
+        "คำรามพิทักษ์หยก": 80,
+        "กระโดดตะปบหยก": 80
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 108.26,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 60,
+        "กวาดวงแหวน": 60,
+        "สุริยคราสพิพากษา": 50
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 115.2,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 60,
+        "กวาดวงแหวน": 60,
+        "สุริยคราสพิพากษา": 59
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 42.025,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 55.25,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 28
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 51.995,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 39,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 52.915,
+      "survivors": 3,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 31
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 58.01,
+      "survivors": 3,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 44.685,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 21
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 53.4,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 69.04,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 38,
+        "ตั้งโล่พิทักษ์": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 69.005,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 44
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 68.325,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 49,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 55.9,
+      "survivors": 0,
+      "bossHp": 0.44,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 71.24,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 31,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 62.615,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 90.845,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 58.65,
+      "survivors": 0,
+      "bossHp": 0.507,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 44.8,
+      "survivors": 0,
+      "bossHp": 0.565,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 42.45,
+      "survivors": 0,
+      "bossHp": 0.65,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 69.325,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 29.045,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 1
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 35.83,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1.7,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 43.46,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 32,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 42.75,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 31,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 36.96,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 37.6,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 49.915,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 44.945,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 24,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 55.54,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 37
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 60.095,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 48.235,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 49.135,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 57.615,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 10,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 58.14,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 69.71,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 52,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 44
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 71.635,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 57,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 49
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 57.805,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 58.365,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 32.055,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 42.595,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 41.06,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 30,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 43.43,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 32,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 42.345,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 46.235,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 29
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 45.91,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 60.62,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 55.175,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 36
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 57.775,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 40,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 39
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 57.145,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 15
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 60.1,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 53.94,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 77.46,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3.9,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "ตั้งโล่พิทักษ์": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 67.05,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 68.37,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 68.52,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 72.22,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 39,
+        "กวาดวงแหวน": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 37.58,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0.7,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 73.97,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1.4,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 50,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 42.875,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 30,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 43.545,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 30,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 45.595,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 24,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 45.17,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 28,
+        "สุริยคราสพิพากษา": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 49.39,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 86.61,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 58,
+        "ตั้งโล่พิทักษ์": 40,
+        "คำพิพากษาแห่งประตู": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 57.935,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 48,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 56.85,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 41,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 37
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 94.45,
+      "survivors": 0,
+      "bossHp": 0.3,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 50
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 98.93,
+      "survivors": 3,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 23
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 69.67,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 3,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 40,
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 107.535,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 70,
+        "ตั้งโล่พิทักษ์": 50,
+        "คำพิพากษาแห่งประตู": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 68.81,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 49
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 68.065,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 42
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 52.2,
+      "survivors": 0,
+      "bossHp": 0.613,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "ranged",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 52.1,
+      "survivors": 0,
+      "bossHp": 0.648,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 99.72,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 70,
+        "ตั้งโล่พิทักษ์": 50,
+        "คำพิพากษาแห่งประตู": 50
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 106.845,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 70,
+        "ตั้งโล่พิทักษ์": 50,
+        "คำพิพากษาแห่งประตู": 50
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 59.275,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 49,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 63.83,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 43,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 55.195,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 23
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 61.425,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 34,
+        "กวาดวงแหวน": 30,
+        "สุริยคราสพิพากษา": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 127.375,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 80,
+        "ตั้งโล่พิทักษ์": 60,
+        "คำพิพากษาแห่งประตู": 60
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 144.86,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 90,
+        "ตั้งโล่พิทักษ์": 70,
+        "คำพิพากษาแห่งประตู": 70
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 76.69,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 50,
+        "กระโดดตะปบหยก": 50
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 82.815,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 52
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 74.385,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 40,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 32
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 80.335,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 44,
+        "กวาดวงแหวน": 40,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 153.48,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 92,
+        "ตั้งโล่พิทักษ์": 76,
+        "คำพิพากษาแห่งประตู": 74
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 168.82,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 100,
+        "ตั้งโล่พิทักษ์": 80,
+        "คำพิพากษาแห่งประตู": 80
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 94.13,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 70,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 60
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 100.155,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 77,
+        "คำรามพิทักษ์หยก": 70,
+        "กระโดดตะปบหยก": 70
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 88.66,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "sustain",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 96.24,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 50,
+        "กวาดวงแหวน": 50,
+        "สุริยคราสพิพากษา": 50
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 30.105,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 1
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 43.48,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 43.645,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 32,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 43.625,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 33,
+        "คำรามพิทักษ์หยก": 30,
+        "กระโดดตะปบหยก": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 37.065,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1.3,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 1,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 37.045,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1.7,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 45.06,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 59.475,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 0,
+      "time": 62.8,
+      "survivors": 0,
+      "bossHp": 0.17,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 0,
+      "time": 62.8,
+      "survivors": 0,
+      "bossHp": 0.17,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 50,
+        "คำรามพิทักษ์หยก": 40,
+        "กระโดดตะปบหยก": 40
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 48.275,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 2,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 48.995,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 20,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 59.76,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2.8,
+      "interrupts": 1,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 66.285,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 0,
+      "casts": {
+        "ทวนแสงทะลวงแนว": 30,
+        "ตั้งโล่พิทักษ์": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 84.42,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 65,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 57
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "jadecrest_guardian",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 82.6,
+      "survivors": 4,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 0,
+      "casts": {
+        "อุ้งเท้าสะเทือนปฐพี": 60,
+        "คำรามพิทักษ์หยก": 60,
+        "กระโดดตะปบหยก": 53
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "AUTO",
+      "n": 10,
+      "wins": 10,
+      "time": 57.95,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "burst",
+      "tier": 3,
+      "boss": "solar_oculus",
+      "mode": "TACTICAL",
+      "n": 10,
+      "wins": 10,
+      "time": 58.035,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2.9,
+      "interrupts": 0,
+      "casts": {
+        "ตราประทับแสง": 30,
+        "กวาดวงแหวน": 30
+      }
+    }
+  ],
+  "baselineCommit": "fef69f1807b24a0297ac7f84d7fac2a0054190ce",
+  "mechanicsCommit": "0da23aa",
+  "presentationNote": "Final follow-up removes the redundant Jade mock rectangle only; combat and simulation semantics are unchanged."
+}

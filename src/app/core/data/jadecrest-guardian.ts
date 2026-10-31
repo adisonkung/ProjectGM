@@ -16,7 +16,7 @@ export const JADECREST_SKILLS: Record<string, MonsterSkillDefinition> = {
     clip: 'pounce', target: { type: 'HIGHEST_ATK_HERO', preferBackRow:true }, targetWarningFx:'jc-pounce-warning',
     effects: [{ type: 'LEAP_BEHIND' }, { type: 'DAMAGE', mul: 1.3, area: 'RADIUS_2', center: 'SELF' }],
     conditions: [{ type: 'ENEMY_WITHIN', range: 10 }], recovery: .8, interruptRecovery: .3,
-    mockFx: { color: '#a6ffe0', area: 'RADIUS_2' }, hitFx: 'jc-contact',
+    hitFx: 'jc-contact', // Native target/landing warnings replace the old target-centred mock rectangle.
   },
   jadecrest_roar: {
     id: 'jadecrest_roar', name: 'คำรามพิทักษ์หยก', label: 'JADE GUARDIAN ROAR', type: 'ATTACK',

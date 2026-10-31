@@ -234,7 +234,7 @@
     },
     {
       "name": "jade-target",
-      "time": 5.749999999999988,
+      "time": 5.799999999999987,
       "boss": {
         "pos": {
           "r": 2,
@@ -330,7 +330,7 @@
     },
     {
       "name": "jade-leap",
-      "time": 6.8999999999999835,
+      "time": 6.649999999999984,
       "boss": {
         "pos": {
           "r": 1,
@@ -346,7 +346,7 @@
           "name": "ไป๋หลง",
           "pos": {
             "r": 1,
-            "c": 8
+            "c": 9
           }
         },
         {
@@ -354,7 +354,7 @@
           "name": "เยว่เจิ้ง",
           "pos": {
             "r": 0,
-            "c": 8
+            "c": 9
           }
         },
         {
@@ -362,7 +362,7 @@
           "name": "โม่เย่",
           "pos": {
             "r": 2,
-            "c": 8
+            "c": 9
           }
         },
         {
@@ -383,6 +383,22 @@
         }
       ],
       "fx": [
+        {
+          "name": "jc-pounce-warning",
+          "follow": 4,
+          "r": 1,
+          "c": 4
+        },
+        {
+          "name": "jc-charge-under",
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-charge-front",
+          "r": 2,
+          "c": 11
+        },
         {
           "name": "jc-s2-trail",
           "follow": 6,
@@ -1059,5 +1075,6 @@
       ]
     }
   ],
-  "fixture": "Actual game; hero HP and ATK adjusted only for sustained visual review; skills manual; cooldowns selected and Aegis Break injected using real engine methods. No compositing."
+  "fixture": "Actual game; hero HP and ATK adjusted only for sustained visual review; skills manual; cooldowns selected and Aegis Break injected using real engine methods. No compositing.",
+  "jadeReview": "Recaptured after removing the redundant target-centred mock rectangle"
 }

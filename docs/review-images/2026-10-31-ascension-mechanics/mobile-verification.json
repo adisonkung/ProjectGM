@@ -160,7 +160,7 @@
     },
     {
       "name": "jade-roar",
-      "time": 3.2499999999999964,
+      "time": 3.1999999999999966,
       "boss": {
         "pos": {
           "r": 2,
@@ -234,7 +234,7 @@
     },
     {
       "name": "jade-target",
-      "time": 6.0499999999999865,
+      "time": 5.949999999999987,
       "boss": {
         "pos": {
           "r": 2,
@@ -330,7 +330,7 @@
     },
     {
       "name": "jade-leap",
-      "time": 6.949999999999983,
+      "time": 6.649999999999984,
       "boss": {
         "pos": {
           "r": 1,
@@ -346,7 +346,7 @@
           "name": "ไป๋หลง",
           "pos": {
             "r": 1,
-            "c": 8
+            "c": 9
           }
         },
         {
@@ -354,7 +354,7 @@
           "name": "เยว่เจิ้ง",
           "pos": {
             "r": 0,
-            "c": 8
+            "c": 9
           }
         },
         {
@@ -362,7 +362,7 @@
           "name": "โม่เย่",
           "pos": {
             "r": 2,
-            "c": 8
+            "c": 9
           }
         },
         {
@@ -1059,5 +1059,6 @@
       ]
     }
   ],
-  "fixture": "Actual game; hero HP and ATK adjusted only for sustained visual review; skills manual; cooldowns selected and Aegis Break injected using real engine methods. No compositing."
+  "fixture": "Actual game; hero HP and ATK adjusted only for sustained visual review; skills manual; cooldowns selected and Aegis Break injected using real engine methods. No compositing.",
+  "jadeReview": "Recaptured after removing the redundant target-centred mock rectangle"
 }

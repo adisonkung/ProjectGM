@@ -15,5 +15,11 @@
       "pageErrors": [],
       "shots": 9
     }
+  },
+  "simulation": {
+    "baselineBattles": 3600,
+    "v1Battles": 3600,
+    "combinationsPerRevision": 360,
+    "seedsPerCombination": 10
   }
 }

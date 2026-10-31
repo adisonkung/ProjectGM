@@ -38,3 +38,7 @@ Native PNGs are unchanged; presentation definitions reuse existing green warning
 This is the requested provisional mechanics pass, not a final roster balance. Distinct teams/builds should gain an advantage near progression limits; a versatile party may still succeed with good commands. Strong developed teams should retain automatic farming. There are no level-based automatic losses, named-hero locks or permanent damage immunities. Final thresholds need the complete roster and real player feedback.
 
 Reproduction: `tools/dev/ascension-mechanics-audit.cjs` after `npx tsc -p tsconfig.sim.json`. It compares the current roster across five fixed teams, four power profiles, three tiers, three guardians, AUTO/TACTICAL and ten seeds per combination. Neither side uses the battle page's development-only full-ultimate flag. Baseline/current results and real screenshots are under `docs/review-images/2026-10-31-ascension-mechanics/`.
+
+## Verified outcome
+
+Both typechecks, production build, 922/922 Karma specs and real desktop/mobile review passed. The before/after audit contains 3,600 battles on each revision. The developed starter party retains AUTO clears; low-level Jade/Solar Tier III are no longer automatic starter clears. Lv8 Mid starter still clears all three, so mandatory roster differentiation at every new unlock remains a balance target, not a proven result. See [simulation report](review-images/2026-10-31-ascension-mechanics/simulation-report.md) for exact counts and limits.
