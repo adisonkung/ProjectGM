@@ -9,7 +9,7 @@ import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec, UnitFootprint } from '../../core/models/unit';
-import { occupiesCell, unitDistance } from './footprint';
+import { bodyFrontCell, occupiesCell, unitDistance } from './footprint';
 import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
@@ -91,7 +91,10 @@ export type BattleEvent =
     }
   /** CAST_PROGRESS: every 25% of the cast */
   | { type: 'castProgress'; src: number; skill: string; pct: number }
-  /** SKILL_ACTIVATED: the cast reached its activation point (effects applied now) */
+  /** Event-owned fixed ground warnings/releases; no sprite-frame gameplay checks. */
+  | { type: 'monsterGround'; src: number; skill: string; cells: Cell[]; fx: string; durationMs?: number; warning?: boolean; followTarget?: number }
+  | { type: 'monsterBeam'; src: number; skill: string; lane: number; fx: string; emitterFx: string; durationMs: number }
+  /** SKILL_ACTIVATED: the cast reached its activation point (effects applied now). */
   | { type: 'skillActivated'; src: number; skill: string; name: string; targets: number[] }
   /** ร่ายสำเร็จ สกิลออกผล (CAST_COMPLETED) */
   | { type: 'castDone'; src: number; skill: string }
@@ -225,6 +228,9 @@ export interface BattleUnit {
     def: CastSkillDef; left: number; target: number | null; token: number; nextProgress: number;
     /** Break Gauge filled so far (breakable casts) */
     breakDamage: number;
+    /** Opt-in LEAP_BEHIND destination was committed at takeoff; never reselect it on landing. */
+    leapStarted?: boolean;
+    groundCells?: Cell[];
     /** interrupt / break commitments of heroes whose skills are on the way (InterruptReservation) */
     commits?: { by: number; breakPower: number; until: number }[];
   } | null;
@@ -1354,6 +1360,32 @@ export class BattleEngine {
     u.casting = { def, left: def.castTime, target: target?.id ?? null, token, nextProgress: CAST_PROGRESS_STEP, breakDamage: 0 };
     if (!isPlayerUnit(u) && canStopCast(def)) this.metrics.interruptOpportunities++;
     if (u.monster) this.metrics.cast(def.id, 'started');
+    if (mdef?.groundTargets) {
+      u.casting.groundCells = [];
+      const pattern = mdef.groundTargets;
+      this.later(pattern.lockAfter, u, () => {
+        if (u.casting?.token !== token) return;
+        const cells: Cell[] = [];
+        const marks = u.monster ? (u.monster.groundMarks ??= {}) : {};
+        const pool = this.units.filter(t => this.isValidTarget(u,t));
+        pool.sort(pattern.selection === 'ROTATING_THREAT'
+          ? (a,b) => (marks[a.id]??0)-(marks[b.id]??0) || effectiveAttack(b)-effectiveAttack(a) || a.pos.r-b.pos.r || a.pos.c-b.pos.c || a.id-b.id
+          : (a,b) => a.id-b.id);
+        for (const enemy of pool) {
+          if (cells.some(c=>c.r===enemy.pos.r&&c.c===enemy.pos.c)) continue;
+          cells.push({...enemy.pos});
+          if (pattern.selection === 'ROTATING_THREAT') marks[enemy.id]=(marks[enemy.id]??0)+1;
+          if (cells.length >= pattern.count) break;
+        }
+        u.casting.groundCells = cells;
+        this.events.push({type:'monsterGround',src:u.id,skill:def.id,cells:cells.map(c=>({...c})),fx:pattern.markFx,
+          durationMs:Math.max(0,u.casting.left*1000),warning:true});
+      });
+    }
+    if (mdef?.targetWarningFx && target) {
+      this.events.push({type:'monsterGround',src:u.id,skill:def.id,cells:[{...target.pos}],
+        fx:mdef.targetWarningFx,durationMs:(def.castTime-(mdef.leapTravel??0))*1000,warning:true,followTarget:target.id});
+    }
     // Mist Form: the caster turns to mist for the whole cast (no cast bar)
     const hidden = !!mdef?.untargetableWhileCasting;
     if (hidden) this.applyStatus(u, 'untargetable', u, def.castTime + 0.05);
@@ -1381,6 +1413,18 @@ export class BattleEngine {
     while (c.nextProgress < 1 - 1e-9 && pct >= c.nextProgress - 1e-9) {
       this.events.push({ type: 'castProgress', src: u.id, skill: c.def.id, pct: c.nextProgress });
       c.nextProgress += CAST_PROGRESS_STEP;
+    }
+    if (isMonsterSkill(c.def) && c.def.leapTravel && !c.leapStarted && c.left <= c.def.leapTravel + 1e-9) {
+      c.leapStarted = true;
+      const aim = this.units.find(t => t.id === c.target && this.isValidTarget(u,t));
+      if (aim && c.def.effects.some(e => e.type === 'LEAP_BEHIND')) {
+        const cell = this.freeCellNear(aim.pos,u.pos,u);
+        if (cell) {
+          this.relocate(u,cell,'dash',Math.max(dt,c.left / modifier(u,'castSpeedMultiplier')));
+          if(c.def.targetWarningFx)this.events.push({type:'monsterGround',src:u.id,skill:c.def.id,cells:[{...cell}],
+            fx:c.def.targetWarningFx,durationMs:c.left*1000,warning:true});
+        }
+      }
     }
     if (c.left <= 1e-9) this.finishCast(u);
   }
@@ -1415,12 +1459,13 @@ export class BattleEngine {
     }
   }
 
-  private activateMonsterSkill(u: BattleUnit, def: MonsterSkillDefinition, aimedId: number | null): void {
+  private activateMonsterSkill(u: BattleUnit, def: MonsterSkillDefinition, aimedId: number | null, leaped = false, groundCells?: Cell[]): void {
     const aimedUnit = aimedId != null ? this.units.find(x => x.id === aimedId) ?? null : null;
     // an aimed hero must still be a valid target; an aimed ally must still be alive
     let aim: BattleUnit | null = null;
     if (aimedUnit) aim = aimedUnit.side === u.side ? (aimedUnit.alive ? aimedUnit : null) : this.isValidTarget(u, aimedUnit) ? aimedUnit : null;
     const targets = this.monsterAI.skillTargets(u, def, aim);
+
     // exposure: how often a status-hunting skill (Mist Strike vs bleed) lands on a marked target
     for (const eff of def.effects) {
       if (eff.type !== 'DAMAGE' || !eff.bonusVsStatus || !aim) continue;
@@ -1447,11 +1492,47 @@ export class BattleEngine {
         case 'DAMAGE': {
           const pool = foes();
           const single = eff.area === 'SINGLE';
-          if (eff.center === 'TARGET' && !aim) {
+          if (eff.center === 'TARGET' && !aim && !def.groundTargets && !def.laneSweep) {
             hits = [];
             break;
           }
-          const list = eff.area === 'ALL_ENEMIES' ? pool : resolveArea({ pattern: eff.area, caster: u, primary: aim, center: eff.center, candidates: pool });
+          if (def.laneSweep) {
+            const sequence=def.laneSweep;
+            const counts=u.monster ? (u.monster.sequenceCasts??={}) : {};
+            const turn=counts[def.id]??0; counts[def.id]=turn+1;
+            const order=sequence.reverseAlternate && turn%2 ? [2,1,0] : [0,1,2];
+            if (sequence.repeatFirst) order.push(order[0]);
+            const wave=this.flow.waveIndex;
+            order.forEach((lane,index)=>this.later(Math.max(.001,index*sequence.interval),u,()=>{
+              if (this.flow.waveIndex!==wave || this.result) return;
+              const struck=this.units.filter(t=>this.isValidTarget(u,t)&&occupiesCell(t,{r:lane,c:t.pos.c}));
+              for(const t of struck){
+                const res=DamageResolver.resolve({attacker:u,target:t,multiplier:eff.mul,damageType:eff.damageType??'MAGIC',sourceId:def.id});
+                this.applyDamage(t,res.amount,false,false,u);
+              }
+              this.events.push({type:'monsterBeam',src:u.id,skill:def.id,lane,fx:sequence.beamFx,emitterFx:sequence.emitterFx,durationMs:sequence.durationMs});
+            }));
+            hits=[];break;
+          }
+          if (def.damagePulses) {
+            const pulses=def.damagePulses,wave=this.flow.waveIndex;
+            for(let index=0;index<pulses.count;index++)this.later(Math.max(.001,index*pulses.interval),u,()=>{
+              if(this.flow.waveIndex!==wave||this.result)return;
+              const recipients=this.units.filter(t=>this.isValidTarget(u,t));
+              for(const t of recipients){
+                const res=DamageResolver.resolve({attacker:u,target:t,multiplier:eff.mul,damageType:eff.damageType??'MAGIC',sourceId:def.id});
+                this.applyDamage(t,res.amount,false,false,u);
+              }
+              this.events.push({type:'monsterGround',src:u.id,skill:def.id,cells:recipients.map(t=>({...t.pos})),fx:pulses.impactFx});
+            });
+            hits=[];break;
+          }
+          const areaCaster=eff.center==='BODY_FRONT'
+            ? {...u,pos:bodyFrontCell(u,u.actionFacing?.left??u.side==='enemy'),footprint:undefined} : u;
+          const bodyRadius=eff.center==='BODY'?(eff.area==='RADIUS_3'?3:2):null;
+          const list = bodyRadius!=null ? pool.filter(t=>unitDistance(u,t)<=bodyRadius)
+            : def.groundTargets ? pool.filter(t=>(groundCells??[]).some(c=>occupiesCell(t,c)))
+            : eff.area === 'ALL_ENEMIES' ? pool : resolveArea({ pattern: eff.area, caster: areaCaster, primary: aim, center: eff.center==='BODY_FRONT'||eff.center==='BODY'?'SELF':eff.center, candidates: pool });
           hits = [];
           for (const t of list) {
             if (single && this.dodged(u, t)) continue;
@@ -1485,7 +1566,7 @@ export class BattleEngine {
         case 'LEAP_BEHIND': {
           if (!aim) break;
           // never overlap: land on a free cell next to the target, on its far side from the caster
-          const cell = this.freeCellNear(aim.pos, u.pos);
+          const cell = leaped ? null : this.freeCellNear(aim.pos, u.pos, u);
           if (cell) this.relocate(u, cell, 'dash');
           if (u.monster) {
             u.monster.currentTargetId = aim.id;
@@ -1552,6 +1633,11 @@ export class BattleEngine {
       // A missed damage area has no contact recipients; a SELF aim must not create an impact on its caster.
       targets: (def.effects.some(e => e.type === 'DAMAGE') ? hits : targets).map(t => t.id),
     });
+    if (def.followUp) {
+      const next=u.castSkills.find(cs=>cs.def.id===def.followUp!.skill);
+      if(next && next.cd!==Infinity) next.cd=Math.min(next.cd,def.followUp.delay);
+    }
+    if (def.groundTargets) this.events.push({type:'monsterGround',src:u.id,skill:def.id,cells:groundCells??[],fx:def.groundTargets.impactFx});
   }
 
   /** a summoned add died: its summoner loses a `grantWhileAlive` status once none of that skill's adds remain */
@@ -1630,7 +1716,7 @@ export class BattleEngine {
       // CHALLENGE strikes: only casts the heroes could have stopped (interruptible or breakable)
       if (!isPlayerUnit(u) && canStopCast(c.def)) this.flow.onEnemyCastCompleted(c.def.id);
       if (c.def.untargetableWhileCasting) this.removeStatus(u, 'untargetable');
-      this.activateMonsterSkill(u, c.def, c.target);
+      this.activateMonsterSkill(u, c.def, c.target, c.leapStarted, c.groundCells);
       this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
       if (u.monster) this.monsterAI.onCastEnd(u, 'completed');
       return;
@@ -1694,6 +1780,7 @@ export class BattleEngine {
     if (isMonsterSkill(c.def) && c.def.fx) this.events.push({ type: 'fxStop', src: dst.id, name: c.def.fx.id });
     if (dst.monster) this.monsterAI.onCastEnd(dst, 'interrupted');
     else dst.castLock = CAST_LOCK;
+    if (isMonsterSkill(c.def)) this.stoppedSkill(dst,c.def,src);
   }
 
   /**
@@ -1718,6 +1805,12 @@ export class BattleEngine {
     if (def.fx) this.events.push({ type: 'fxStop', src: dst.id, name: def.fx.id });
     if (dst.monster) this.monsterAI.onCastEnd(dst, 'interrupted');
     this.applyStatus(dst, def.brokenStatus ?? 'broken', src);
+    this.stoppedSkill(dst,def,src);
+  }
+
+  private stoppedSkill(dst:BattleUnit,def:MonsterSkillDefinition,src:BattleUnit):void {
+    for(const id of def.onStopped?.removeStatuses??[]) this.removeStatus(dst,id);
+    if(def.onStopped?.status) this.applyStatus(dst,def.onStopped.status,src);
   }
 
   /** player / tactical setting: AI use mode of one hero slot (skill / skill2 / ult) */
@@ -2007,12 +2100,21 @@ export class BattleEngine {
   }
 
   /** ช่องว่างรอบ ๆ ตำแหน่ง ที่อยู่ไกลจาก `from` ที่สุด (= ด้านหลังเป้าหมาย) */
-  private freeCellNear(at: Cell, from: Cell): Cell | null {
+  private freeCellNear(at: Cell, from: Cell, owner?: BattleUnit): Cell | null {
     const body = this.units.find(b => b.alive && b.footprint && b.pos.r === at.r && b.pos.c === at.c);
-    const radius = body ? Math.max(body.footprint!.cols,body.footprint!.rows) : 1;
+    const radius = Math.max(body?.footprint?.cols ?? 1,body?.footprint?.rows ?? 1,owner?.footprint?.cols ?? 1,owner?.footprint?.rows ?? 1);
     const free: Cell[] = [];
     for (let r = at.r-radius; r <= at.r+radius; r++) for (let c = at.c-radius; c <= at.c+radius; c++) {
       const cell = { r,c };
+      const fp = owner?.footprint;
+      if (fp) {
+        let fits = true;
+        for (let rr=r-fp.anchorR; rr<r-fp.anchorR+fp.rows; rr++) for (let cc=c-fp.anchorC; cc<c-fp.anchorC+fp.cols; cc++) {
+          const part={r:rr,c:cc};
+          if (!Grid.inBounds(part) || this.grid.occupants(part).some(id=>id!==owner!.id) || this.reservedBodyCell(part,owner)) fits=false;
+        }
+        if (!fits || unitDistance({ pos: cell, footprint: fp }, { pos: at }) !== 1) continue;
+      }
       if ((r !== at.r || c !== at.c) && this.grid.isFree(cell) && !this.reservedBodyCell(cell) &&
         (!body || unitDistance({ pos: cell },body) === 1)) free.push(cell);
     }

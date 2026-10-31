@@ -1,0 +1,231 @@
+{
+  "errors": [],
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "shots": [
+    {
+      "name": "jade-landing-damage",
+      "grid": true,
+      "time": 6.549999999999985,
+      "origin": 0,
+      "camera": 0,
+      "units": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "hero": "bailong",
+          "boss": false,
+          "pos": {
+            "r": 1,
+            "c": 7
+          },
+          "x": 7,
+          "y": 1
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "hero": "yuezheng",
+          "boss": false,
+          "pos": {
+            "r": 0,
+            "c": 7
+          },
+          "x": 7,
+          "y": 0.5
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "hero": "moye",
+          "boss": false,
+          "pos": {
+            "r": 2,
+            "c": 7
+          },
+          "x": 6.999999999999994,
+          "y": 2
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "hero": "tangxun",
+          "boss": false,
+          "pos": {
+            "r": 2,
+            "c": 7
+          },
+          "x": 7,
+          "y": 2
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "hero": "linxue",
+          "boss": false,
+          "pos": {
+            "r": 0,
+            "c": 4
+          },
+          "x": 4,
+          "y": 0
+        },
+        {
+          "id": 6,
+          "name": "พยัคฆ์พิทักษ์หยก",
+          "boss": true,
+          "pos": {
+            "r": 2,
+            "c": 6
+          },
+          "x": 6,
+          "y": 2,
+          "footprint": {
+            "cols": 4,
+            "rows": 2,
+            "anchorC": 3,
+            "anchorR": 1
+          }
+        }
+      ],
+      "events": [
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "name": "กระโดดตะปบหยก",
+          "targets": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "damage": [
+        {
+          "r": 0,
+          "c": 1
+        },
+        {
+          "r": 0,
+          "c": 2
+        },
+        {
+          "r": 0,
+          "c": 3
+        },
+        {
+          "r": 0,
+          "c": 4
+        },
+        {
+          "r": 0,
+          "c": 5
+        },
+        {
+          "r": 0,
+          "c": 6
+        },
+        {
+          "r": 0,
+          "c": 7
+        },
+        {
+          "r": 0,
+          "c": 8
+        },
+        {
+          "r": 1,
+          "c": 1
+        },
+        {
+          "r": 1,
+          "c": 2
+        },
+        {
+          "r": 1,
+          "c": 3
+        },
+        {
+          "r": 1,
+          "c": 4
+        },
+        {
+          "r": 1,
+          "c": 5
+        },
+        {
+          "r": 1,
+          "c": 6
+        },
+        {
+          "r": 1,
+          "c": 7
+        },
+        {
+          "r": 1,
+          "c": 8
+        },
+        {
+          "r": 2,
+          "c": 1
+        },
+        {
+          "r": 2,
+          "c": 2
+        },
+        {
+          "r": 2,
+          "c": 3
+        },
+        {
+          "r": 2,
+          "c": 4
+        },
+        {
+          "r": 2,
+          "c": 5
+        },
+        {
+          "r": 2,
+          "c": 6
+        },
+        {
+          "r": 2,
+          "c": 7
+        },
+        {
+          "r": 2,
+          "c": 8
+        }
+      ],
+      "landing": {
+        "anchor": {
+          "r": 2,
+          "c": 6
+        },
+        "body": {
+          "r0": 1,
+          "r1": 2,
+          "c0": 3,
+          "c1": 6
+        },
+        "committed": [
+          {
+            "r": 2,
+            "c": 6
+          }
+        ]
+      },
+      "start": {
+        "r": 2,
+        "c": 11
+      }
+    }
+  ],
+  "fixture": "Actual game, HP5000/low ATK/manual hero skills/selected boss cooldowns. Jade target placed at r2,c7 via real engine method for clear landing view. Diagnostic DOM/SVG overlay added only for requested grid screenshots; not product UI."
+}

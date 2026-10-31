@@ -1,0 +1,94 @@
+[
+  {
+    "file": "character/2222-attack1.png",
+    "sha256": "c526ea37cc9e2349245ae231e73ea3711f9f8f151c9d172346b351b3ecc9cdc1"
+  },
+  {
+    "file": "character/2222-attack2 (3).png",
+    "sha256": "349fcbe37ed77d1c45e165d5efbf9a45d342fbb5770871f8734e6ef64ff4efc0"
+  },
+  {
+    "file": "fx/solar-beam-body.png",
+    "sha256": "c4d0d05047f3c56f1c2a7d001c25fbbbf0523c3ae987ad7e61fd648aa9dc54c5"
+  },
+  {
+    "file": "fx/solar-beam-emitter.png",
+    "sha256": "36d532f98f4fad1d1f3702eaf7ac5897ba4133014f3e792955263221a0fa1f3c"
+  },
+  {
+    "file": "fx/solar-bolt.png",
+    "sha256": "b44c4d8641052c5d8685c55c14add388d23f11c9acb3f292ef7e4effd0805a1a"
+  },
+  {
+    "file": "fx/solar-death-dissolve.png",
+    "sha256": "4444af3a816f648eb63b6254420b187b56222256490a870e959273f51421f677"
+  },
+  {
+    "file": "fx/solar-eye-charge-held.png",
+    "sha256": "44bb8dcfcbe19448d506e9f9fb647ad0c462fff32905bade5dfbe2a8a1236780"
+  },
+  {
+    "file": "fx/solar-eye-charge-in.png",
+    "sha256": "5915ca8f3d5326ded2a2c33083b890d09df444683ec0a91567d0e6d08bb3555d"
+  },
+  {
+    "file": "fx/solar-ground-charge-held.png",
+    "sha256": "2e5ecfa7da696e983b4a963271534a0b868de2e793b47b92b7909eeb91e62b55"
+  },
+  {
+    "file": "fx/solar-ground-charge-in.png",
+    "sha256": "61300ad093f92f811f29dda97964dbcce1703febcbb7c3df0c0d9ce413bbfc88"
+  },
+  {
+    "file": "fx/solar-hit-impact.png",
+    "sha256": "42d9c6a616c9323a9cf6bddc38abffcad1db977c65801119d5cae968e1862327"
+  },
+  {
+    "file": "fx/solar-judgement-impact.png",
+    "sha256": "a372dbe1645e4081c68119b3546c75e7018f7fec3d48a624a3bafe6bc8e1deec"
+  },
+  {
+    "file": "fx/solar-seal-held.png",
+    "sha256": "52dc64e144f6295e347726c4c4a7c41b9863285deae7d399565dc879ec4ce370"
+  },
+  {
+    "file": "fx/solar-seal-impact.png",
+    "sha256": "ff5b27c5f51371438dab0d978d00e46bfed05bba7fd751ca724fa08f4f083f04"
+  },
+  {
+    "file": "fx/solar-seal-in.png",
+    "sha256": "3fd83dcb1b8b99ccd85fcacfb504a51e887597eaae2eb46190245189ba35e773"
+  },
+  {
+    "file": "halo/halo-bottom-tip.png",
+    "sha256": "c8cf11afc5e1f339a4ddc498b7f0c31c6abb327efb51b3f35dfa246e15b9bede"
+  },
+  {
+    "file": "halo/halo-left.png",
+    "sha256": "3f0b545b9a5415251d2c32456083943fed603eba2a1bb3cd5aff3a95510e79e2"
+  },
+  {
+    "file": "halo/halo-lower-left.png",
+    "sha256": "280275186d60f4152c489a45b6ba30382daffecc9e62e7fd4fa805dd2454f5f1"
+  },
+  {
+    "file": "halo/halo-lower-right.png",
+    "sha256": "6b30f5a118d74aa946dd96fcdd1d4e6c00bf2e890f21fda8441cac2d18a027a5"
+  },
+  {
+    "file": "halo/halo-right.png",
+    "sha256": "cded812fb7eddd43225802b3ef7a63f8303a2922f3b19f942bd4dfcb1ff37ae0"
+  },
+  {
+    "file": "halo/halo-top-tip.png",
+    "sha256": "9cae24220923926b66e5dbe776e7ee1fff0ea6807cca2a16a2d528e6119051d3"
+  },
+  {
+    "file": "halo/halo-upper-left.png",
+    "sha256": "b53d2c3635c37b478e30cad9cc75f1202736b2c0f1e07f5f53426d7906e75c44"
+  },
+  {
+    "file": "halo/halo-upper-right.png",
+    "sha256": "38707e95a68bbdff0768f308a6619e91cd217b0f257aad5b40fed013bd45d34f"
+  }
+]

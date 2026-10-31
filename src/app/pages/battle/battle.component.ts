@@ -1,3 +1,5 @@
+import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
+import { bodyFrontCell } from '../../battle/engine/footprint';
 import { battleViewport } from './battle-viewport';
 import { BattleEmblemComponent } from './battle-emblem.component';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
@@ -120,9 +122,14 @@ export class BattleComponent implements OnDestroy {
   readonly stages = STAGES;
   readonly floor = signal(1);
   readonly viewport = signal({ width: typeof window === 'undefined' ? 1280 : window.innerWidth, height: typeof window === 'undefined' ? 900 : window.innerHeight });
-  readonly fieldLayout = computed(() => battleViewport(this.viewport().width,this.viewport().height,this.mode() === 'lab' ? 0 : .8));
+  readonly fieldLayout = computed(() => {
+    const lab=this.mode()==='lab',bg=this.background();
+    return battleViewport(this.viewport().width,this.viewport().height,lab ? 0 : (bg?.groundRows ?? .8),lab ? 0 : (bg?.skyRows ?? 0));
+  });
   readonly sceneryExtraRows = computed(() => {
     if (this.mode() === 'lab') return 0;
+    // Fixed arena images cover the full field, so extra sky does not expose an empty tiled band.
+    if (this.background()?.arena) return this.fieldLayout().extraRows;
     const requested = this.placing() ? (this.viewport().width >= 900 ? .65 : 0) : this.fieldLayout().extraRows;
     // Reveal only pixels already cropped above the map; never expose an empty image band.
     return Math.min(requested, Math.max(0, ((this.background()?.zoom ?? 1) - 1) * 5));
@@ -191,6 +198,7 @@ export class BattleComponent implements OnDestroy {
   /** running cast FX per unit (removed on fxStop) */
   private castFx = new Map<number, number>();
   private guardHitAt = new Map<number, number>();
+  private beamReleases = new Map<number, {at:number;left:boolean}>();
   /** Target cell at cast start, for ground visuals when an aimed unit dies before activation. */
   private castAim = new Map<number, { id: number; at: { r: number; c: number } }>();
   /** ground footprint of the current cast per caster: every ground FX layer of one cast (spawn → loop → burst) lands
@@ -455,6 +463,7 @@ export class BattleComponent implements OnDestroy {
     this.paces.clear();
     this.hits.clear();
     this.guardHitAt.clear();
+    this.beamReleases.clear();
     this.selectedId.set(null);
     this.focusId.set(null);
     this.facing.clear();
@@ -712,16 +721,33 @@ export class BattleComponent implements OnDestroy {
     return { r: u.y, c: u.x - this.engine.cameraX };
   }
 
+  /** Actor art and attached effects only; screenOf remains the logical warning/grid origin. */
+  private actorPose(u: BattleUnit) {
+    const release=this.beamReleases.get(u.id);
+    const age=release ? this.engine.time-release.at : undefined;
+    const active=age!=null && age<AEGIS_BEAM_MOTION.returnUntil && u.alive && !hasFlag(u,'broken');
+    return {...guardianPose(u.sprite,active?age:undefined),left:active?release!.left:(u.actionFacing?.left??this.facing.get(u.id)??u.side==='enemy')};
+  }
+  private actorScreenOf(u: BattleUnit): {r:number;c:number} {
+    const p=this.screenOf(u),pose=this.actorPose(u);
+    return {r:p.r,c:p.c+pose.forward*(pose.left?-1:1)};
+  }
+
   private snapshot(): void {
     const e = this.engine;
     this.fieldVisuals.advance(e.time);
+    // The shaft follows recoil while its far end stays on the board edge.
+    this.fx.update(list=>list.map(f=>{
+      const d=FX[f.name],u=f.follow!=null?e.units.find(u=>u.id===f.follow):undefined;
+      return d?.toBoardEdge&&u ? {...f,stretch:edgeBeamStretch(d,this.actorScreenOf(u).c,!!f.flip,f.offset??[0,0])}:f;
+    }));
     const fieldPositions = this.fieldVisuals.positions(e.cameraX);
     if (fieldPositions.size) this.fx.update(l => l.map(f => fieldPositions.has(f.id) ? { ...f, ...fieldPositions.get(f.id)! } : f));
     this.specialCharge.set(e.specialCharge);
     this.specialReady.set(this.running() && e.canUseSpecial());
     const byId = new Map(e.units.map(u => [u.id, u]));
     this.statusVisuals.sync(e.units.filter(u => u.alive && u.visible).flatMap(u => u.buffs.filter(b => b.remaining > 0).map(b => ({
-      target: u.id, source: b.sourceId, status: b.def.id, sprite: SHEETS[u.sprite ?? '']?.statusFx?.[b.def.id] ? u.sprite : byId.get(b.sourceId)?.sprite, at: this.screenOf(u),
+      target: u.id, source: b.sourceId, status: b.def.id, sprite: SHEETS[u.sprite ?? '']?.statusFx?.[b.def.id] ? u.sprite : byId.get(b.sourceId)?.sprite, at: this.actorScreenOf(u),
     }))), e.time);
     const combat = e.phase === BattlePhase.COMBAT;
     for (const u of e.units) {
@@ -740,6 +766,14 @@ export class BattleComponent implements OnDestroy {
     this.focusSafe.set(!focus || e.units.some(h => isPlayerUnit(h) && h.alive && e.canEngage(h, focus)));
     this.stageDebug.set(dbg);
     this.worldDebug.set(this.debug() ? this.buildWorldDebug() : null);
+    const returning=e.units.filter(u=>this.actorPose(u).walking);
+    const returned=e.units.filter(u=>{const r=this.beamReleases.get(u.id),a=this.anims()[u.id];return r&&e.time-r.at>=AEGIS_BEAM_MOTION.returnUntil&&a?.anim==='walk'&&a.key===r.at;});
+    if (returning.length || returned.length) this.anims.update(anims=>{
+      const next={...anims};
+      for (const u of returning) next[u.id]={anim:'walk',key:this.beamReleases.get(u.id)!.at};
+      for (const u of returned) next[u.id]={anim:'idle',key:++this.animKey};
+      return next;
+    });
     const heroDbg = new Map(dbg?.heroes.map(h => [h.id, h.lines]) ?? []);
     this.views.set(
       // only what is physically on the battlefield: DEAD_HIDDEN heroes and old waves' corpses are not rendered
@@ -748,7 +782,7 @@ export class BattleComponent implements OnDestroy {
         side: u.side,
         name: u.name,
         cls: u.cls,
-        ...this.screenOf(u),
+        ...this.actorScreenOf(u),
         hpPct: (u.hp / u.maxHp) * 100,
         manaPct: u.maxMana > 0 ? (u.mana / u.maxMana) * 100 : 0,
         shieldPct: (u.shield / u.maxHp) * 100,
@@ -759,7 +793,7 @@ export class BattleComponent implements OnDestroy {
         level: u.level,
         sprite: u.sprite,
         boss: u.boss,
-        flip: this.facing.get(u.id),
+        flip: this.actorPose(u).left,
         blink: (this.blinkUntil.get(u.id) ?? 0) > this.engine.time,
         blinkFade: !this.ownFade.has(u.id),
         queued: u.ultQueued,
@@ -774,7 +808,7 @@ export class BattleComponent implements OnDestroy {
         onFocus: isPlayerUnit(u) && e.focusTargetId != null && u.targetId === e.focusTargetId,
         elite: u.elite,
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
-        moving: this.isMoving(u),
+        moving: this.actorPose(u).walking || this.isMoving(u),
         pace: this.paces.get(u.id),
         hit: this.hits.get(u.id),
         buffed: u.buffs.some(b => (b.def.modifiers.attackMultiplier ?? 1) > 1),
@@ -886,6 +920,11 @@ export class BattleComponent implements OnDestroy {
       const left = caster.actionFacing?.left ?? !!this.facing.get(caster.id);
       return { r: 0, c: left ? 0 : q.c + .5, w: Math.max(0, left ? q.c + .5 : BOARD_COLS - q.c - .5), h: 3 };
     }
+    if (area === 'FRONT_RECT_2X3') {
+      const q=this.screenOf(caster),left=caster.actionFacing?.left??!!this.facing.get(caster.id);
+      const r=Math.max(0,q.r-1);
+      return {r,c:q.c+(left?-2:1),w:2,h:Math.min(3,q.r+2)-r};
+    }
     if (area === 'FRONT_RECT_3X2') {
       const q = this.screenOf(caster),left = caster.actionFacing?.left ?? !!this.facing.get(caster.id);
       return { r: q.r-1,c: q.c+(left ? -3 : 1),w: 3,h: 2 };
@@ -904,7 +943,10 @@ export class BattleComponent implements OnDestroy {
     const sk = u ? this.skillByName(u, skillName) : undefined;
     if (!u || !sk?.mockFx) return;
     const center = dst != null ? this.engine.units.find(x => x.id === dst) ?? u : sk.target.type === 'ALL_HEROES' ? this.engine.alive(PLAYER_TEAM)[0] ?? u : u;
-    const z: ZoneView = { id: ++this.floatId, ...this.areaRect(sk.mockFx.area, center, u), color: sk.mockFx.color, kind: 'telegraph', sec: castTime / this.speed() };
+    const left=u.actionFacing?.left??!!this.facing.get(u.id);
+    const front=sk.effects.some(e=>e.type==='DAMAGE'&&e.center==='BODY_FRONT')?bodyFrontCell(u,left):u.pos;
+    const caster={...u,pos:front,x:u.x+front.c-u.pos.c};
+    const z: ZoneView = { id: ++this.floatId, ...this.areaRect(sk.mockFx.area, center, caster), color: sk.mockFx.color, kind: 'telegraph', sec: castTime / this.speed() };
     this.zones.update(l => [...l, z]);
     this.zoneOwner.set(src, [...(this.zoneOwner.get(src) ?? []), z.id]);
   }
@@ -942,7 +984,7 @@ export class BattleComponent implements OnDestroy {
     const floats: FloatText[] = [];
     const fx: FxView[] = [];
     const unitOf = (id: number) => this.engine.units.find(u => u.id === id)!;
-    const posOf = (id: number) => this.screenOf(unitOf(id));
+    const posOf = (id: number) => this.actorScreenOf(unitOf(id));
     const set = (id: number, anim: AnimState['anim'], extra: Partial<AnimState> = {}) => (anims[id] = { anim, key: ++this.animKey, ...extra });
     /** FX layers of this skill that start on this trigger (data: FxDef.on / event / hitIndex / perHit / anchor / layer) */
     const addFx = (src: number, dst: number | undefined, kind: SkillKind, trig: FxTrigger, hits?: number[], bonus?: number[]) => {
@@ -971,7 +1013,7 @@ export class BattleComponent implements OnDestroy {
         for (const id of at) {
           const q = id === src ? p : posOf(id);
           if (def.span && q === p) continue; // a tether to himself (no ally to link) draws nothing
-          const areaCell = (def.groundArea && this.groundLock.get(src)) || groundFxCell(def, unitOf(src).pos, aim?.at ?? unitOf(id).pos,
+          const areaCell = (def.groundArea && this.groundLock.get(src)) || groundFxCell(def, def.groundFromBodyFront?bodyFrontCell(unitOf(src),unitOf(src).actionFacing?.left??!!this.facing.get(src)):unitOf(src).pos, aim?.at ?? unitOf(id).pos,
             unitOf(src).actionFacing?.left ?? this.facing.get(src));
           if (def.groundArea && !this.groundLock.has(src)) this.groundLock.set(src, areaCell);
           const cell = def.groundArea
@@ -1007,8 +1049,9 @@ export class BattleComponent implements OnDestroy {
         const flip = u.actionFacing?.left ?? !!this.facing.get(src);
         const offset = fxOffset(name, u.sprite);
         // An edge beam is horizontal and starts at the weapon tip; only its separate shaft changes length.
-        const p = posOf(src);
-        const at = d.groundArea ? groundFxCell(d,u.pos,u.pos,flip) : u.pos;
+        const p = d.groundFromBodyFront?this.screenOf(u):posOf(src);
+        const origin=d.groundFromBodyFront?bodyFrontCell(u,flip):u.pos;
+        const at = d.groundArea ? groundFxCell(d,origin,origin,flip) : origin;
         const position = { r: p.r+at.r-u.pos.r,c: p.c+at.c-u.pos.c };
         const stretch = d.toBoardEdge ? edgeBeamStretch(d, position.c, flip, offset) : undefined;
         const angle = d.at === 'self' && d.orient === 'rotate'
@@ -1079,7 +1122,7 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'move':
-          if (anims[e.src]?.anim !== 'die') set(e.src, 'walk');
+          if (!unitOf(e.src)?.casting && anims[e.src]?.anim !== 'die') set(e.src, 'walk');
           break;
         case 'cast': {
           this.groundLock.delete(e.src);
@@ -1217,7 +1260,8 @@ export class BattleComponent implements OnDestroy {
           const p = posOf(e.dst);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: 'BREAK!!', kind: 'break' });
           this.dropZones(e.dst);
-          this.showBanner('💥 BREAK! บอสเสียหลัก 3 วิ — รับดาเมจ +25%', 1600);
+          const exposed=unitOf(e.dst).buffs.find(b=>b.def.flags?.includes('broken'));
+          this.showBanner(`💥 BREAK! ${exposed?.def.name??'บอสเสียหลัก'} ${Math.ceil(exposed?.remaining??3)} วิ — รับดาเมจ +${Math.round(((exposed?.def.modifiers.damageTakenMultiplier??1.25)-1)*100)}%`,1600);
           const sh = SHEETS[unitOf(e.dst).sprite ?? ''];
           if (sh?.casts?.['broken']) set(e.dst, 'cast', { castTime: 0, castClip: 'broken', force: true });
           else set(e.dst, 'hurt', { force: true });
@@ -1268,11 +1312,39 @@ export class BattleComponent implements OnDestroy {
           this.castFx.delete(e.src);
           break;
         }
+        case 'monsterGround': {
+          const d=FX[e.fx];
+          if(!d)break;
+          for(const cell of e.cells){
+            const duration=e.durationMs??fxDuration(e.fx),target=e.followTarget!=null?posOf(e.followTarget):null;
+            fx.push({id:++this.floatId,r:target?.r??cell.r,c:target?.c??cell.c+this.engine.formation.originPosition-this.engine.cameraX,name:e.fx,angle:0,follow:e.followTarget,
+              offset:fxOffset(e.fx),under:d.layer==='under',owner:e.src,managed:true,
+              track:{durationMs:duration,alpha:[[0,1],[Math.max(0,duration-90),1],[duration,0]]}});
+          }
+          break;
+        }
+        case 'monsterBeam': {
+          const u=unitOf(e.src),p=posOf(e.src),left=u.actionFacing?.left??true;
+          const offset=fxOffset(e.fx,u.sprite);
+          const x=p.c+.5+offset[0]/100*(left?-1:1),y=p.r+.5+offset[1]/100;
+          // Aim through this lane, extending beyond the visible edge. Emitter and shaft share one origin.
+          const tx=left?-1.5:17.5,ty=e.lane+.2;
+          const angle=Math.atan2(ty-y,tx-x)*180/Math.PI;
+          const duration=e.durationMs,track={durationMs:duration,alpha:[[0,0],[70,1],[440,1],[duration,0]] as [number,number][]};
+          fx.push({id:++this.floatId,r:y-.5,c:x-.5,name:e.fx,angle,flip:false,offset:[0,0],
+            stretch:Math.hypot(tx-x,ty-y)/fxWidthCells(FX[e.fx]),owner:e.src,managed:true,track});
+          fx.push({id:++this.floatId,r:y-.5,c:x-.5,name:e.emitterFx,angle,flip:false,offset:[0,0],owner:e.src,managed:true,track});
+          break;
+        }
         case 'skillActivated': {
+          if(unitOf(e.src).sprite==='enemy-aegis-sentinel.png' && this.skillByName(unitOf(e.src),e.skill)?.clip==='lance')
+            this.beamReleases.set(e.src,{at:this.engine.time,left:unitOf(e.src).actionFacing?.left??!!this.facing.get(e.src)});
           this.fx.update(list => list.filter(f => f.owner !== e.src));
           fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.src));
           monsterFx(e.src, this.skillByName(unitOf(e.src), e.skill)?.clip, 'activate');
           this.flash(e.src, e.skill);
+          if(unitOf(e.src).sprite==='enemy-aegis-sentinel.png' && this.skillByName(unitOf(e.src),e.skill)?.clip==='lance')
+            set(e.src,'cast',{castTime:0,castClip:'lance_firing',force:true});
           // sprite FX on every unit the skill landed on (Starfall, Devour, Arcane Seal …)
           const hitFx = this.skillByName(unitOf(e.src), e.skill)?.hitFx;
           if (hitFx && FX[hitFx]) {
@@ -1288,6 +1360,8 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'buff': {
+          if(unitOf(e.dst).buffs.some(b=>b.def.id===e.buff && b.def.flags?.includes('broken')) && SHEETS[unitOf(e.dst).sprite??'']?.casts?.['broken'])
+            set(e.dst,'cast',{castTime:0,castClip:'broken',force:true});
           const p = posOf(e.dst);
           const name = appliedStatusFx(unitOf(e.src).sprite, e.buff);
           if (name) fx.push({ id: ++this.floatId, r: p.r, c: p.c, name, angle: 0,
@@ -1344,7 +1418,7 @@ export class BattleComponent implements OnDestroy {
         case 'death': {
           const name = SHEETS[unitOf(e.dst).sprite ?? '']?.deathFx;
           if (name && FX[name]) fx.push({ id: ++this.floatId, ...posOf(e.dst), name, angle: 0,
-            offset: fxOffset(name), flip: !!this.facing.get(e.dst) });
+            offset: fxOffset(name, unitOf(e.dst).sprite), flip: !!this.facing.get(e.dst) });
           this.fx.update(list => list.filter(f => f.owner !== e.dst));
           fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.dst));
           this.dropZones(e.dst);

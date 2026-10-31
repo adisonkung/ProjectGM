@@ -1,0 +1,12 @@
+{
+  "appTypecheck": "passed",
+  "specTypecheck": "passed",
+  "tests": {
+    "passed": 908,
+    "failed": 0
+  },
+  "spriteOptimizer": "passed",
+  "productionBuild": "passed",
+  "desktop": [],
+  "mobile": []
+}

@@ -1,0 +1,806 @@
+{
+  "viewport": {
+    "width": 932,
+    "height": 430
+  },
+  "errors": [],
+  "shots": [
+    {
+      "name": "s1-charge",
+      "time": 6.949999999999983,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "hp": 14971,
+        "cast": "solar_seals",
+        "left": 1.1000000000000019,
+        "state": "CASTING"
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "so-charge",
+          "r": 2,
+          "c": 11,
+          "angle": 0,
+          "offset": [
+            11.9,
+            -181.4
+          ]
+        },
+        {
+          "name": "so-s1-seal",
+          "r": 1,
+          "c": 9,
+          "angle": 0,
+          "offset": [
+            0,
+            27.25
+          ]
+        },
+        {
+          "name": "so-s1-seal",
+          "r": 0,
+          "c": 9,
+          "angle": 0,
+          "offset": [
+            0,
+            27.25
+          ]
+        }
+      ],
+      "renderer": "pixi",
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-seal",
+          "durationMs": 1950.0000000000027,
+          "warning": true
+        }
+      ]
+    },
+    {
+      "name": "s1-impact",
+      "time": 8.399999999999984,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "hp": 14963,
+        "state": "RECOVERING"
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "so-s1-impact",
+          "r": 1,
+          "c": 9,
+          "angle": 0,
+          "offset": [
+            0,
+            27.25
+          ]
+        },
+        {
+          "name": "so-s1-impact",
+          "r": 0,
+          "c": 9,
+          "angle": 0,
+          "offset": [
+            0,
+            27.25
+          ]
+        }
+      ],
+      "renderer": "pixi",
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-seal",
+          "durationMs": 1950.0000000000027,
+          "warning": true
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_seals",
+          "name": "ตราประทับแสง",
+          "targets": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-impact"
+        }
+      ]
+    },
+    {
+      "name": "s2-charge",
+      "time": 10.650000000000016,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "hp": 14949,
+        "cast": "solar_sweep",
+        "left": 0.5999999999999988,
+        "state": "CASTING"
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "so-charge",
+          "r": 2,
+          "c": 11,
+          "angle": 0,
+          "offset": [
+            11.9,
+            -181.4
+          ]
+        }
+      ],
+      "renderer": "pixi",
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-seal",
+          "durationMs": 1950.0000000000027,
+          "warning": true
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_seals",
+          "name": "ตราประทับแสง",
+          "targets": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-impact"
+        }
+      ]
+    },
+    {
+      "name": "s2-beam",
+      "time": 11.65000000000003,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "hp": 14942,
+        "state": "RECOVERING"
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "so-s2-beam",
+          "r": 0.18599999999999994,
+          "c": 10.881,
+          "angle": -177.83925573899467,
+          "offset": [
+            0,
+            0
+          ],
+          "stretch": 1.289016512694853
+        },
+        {
+          "name": "so-s2-emitter",
+          "r": 0.18599999999999994,
+          "c": 10.881,
+          "angle": -177.83925573899467,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      ],
+      "renderer": "pixi",
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-seal",
+          "durationMs": 1950.0000000000027,
+          "warning": true
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_seals",
+          "name": "ตราประทับแสง",
+          "targets": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-impact"
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_sweep",
+          "name": "กวาดวงแหวน",
+          "targets": []
+        },
+        {
+          "type": "monsterBeam",
+          "src": 6,
+          "skill": "solar_sweep",
+          "lane": 0,
+          "fx": "so-s2-beam",
+          "emitterFx": "so-s2-emitter",
+          "durationMs": 650
+        }
+      ]
+    },
+    {
+      "name": "s3-charge",
+      "time": 16.150000000000095,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "hp": 14917,
+        "cast": "solar_eclipse",
+        "left": 0.9000000000000026,
+        "state": "CASTING"
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "so-charge",
+          "r": 2,
+          "c": 11,
+          "angle": 0,
+          "offset": [
+            11.9,
+            -181.4
+          ]
+        },
+        {
+          "name": "so-s3-ground",
+          "r": 2,
+          "c": 11,
+          "angle": 0,
+          "offset": [
+            0,
+            27.25
+          ]
+        }
+      ],
+      "renderer": "pixi",
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-seal",
+          "durationMs": 1950.0000000000027,
+          "warning": true
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_seals",
+          "name": "ตราประทับแสง",
+          "targets": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-impact"
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_sweep",
+          "name": "กวาดวงแหวน",
+          "targets": []
+        },
+        {
+          "type": "monsterBeam",
+          "src": 6,
+          "skill": "solar_sweep",
+          "lane": 0,
+          "fx": "so-s2-beam",
+          "emitterFx": "so-s2-emitter",
+          "durationMs": 650
+        },
+        {
+          "type": "monsterBeam",
+          "src": 6,
+          "skill": "solar_sweep",
+          "lane": 1,
+          "fx": "so-s2-beam",
+          "emitterFx": "so-s2-emitter",
+          "durationMs": 650
+        },
+        {
+          "type": "monsterBeam",
+          "src": 6,
+          "skill": "solar_sweep",
+          "lane": 2,
+          "fx": "so-s2-beam",
+          "emitterFx": "so-s2-emitter",
+          "durationMs": 650
+        }
+      ]
+    },
+    {
+      "name": "s3-impact",
+      "time": 17.400000000000112,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "hp": 14909,
+        "state": "RECOVERING"
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "so-s3-impact",
+          "r": 1,
+          "c": 9,
+          "angle": 0
+        },
+        {
+          "name": "so-s3-impact",
+          "r": 0.5,
+          "c": 9,
+          "angle": 0
+        },
+        {
+          "name": "so-s3-impact",
+          "r": 2,
+          "c": 8.99999999999999,
+          "angle": 0
+        },
+        {
+          "name": "so-s3-impact",
+          "r": 1,
+          "c": 4,
+          "angle": 0
+        },
+        {
+          "name": "so-s3-impact",
+          "r": 0,
+          "c": 6,
+          "angle": 0
+        }
+      ],
+      "renderer": "pixi",
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-seal",
+          "durationMs": 1950.0000000000027,
+          "warning": true
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_seals",
+          "name": "ตราประทับแสง",
+          "targets": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "solar_seals",
+          "cells": [
+            {
+              "r": 1,
+              "c": 9
+            },
+            {
+              "r": 0,
+              "c": 9
+            }
+          ],
+          "fx": "so-s1-impact"
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_sweep",
+          "name": "กวาดวงแหวน",
+          "targets": []
+        },
+        {
+          "type": "monsterBeam",
+          "src": 6,
+          "skill": "solar_sweep",
+          "lane": 0,
+          "fx": "so-s2-beam",
+          "emitterFx": "so-s2-emitter",
+          "durationMs": 650
+        },
+        {
+          "type": "monsterBeam",
+          "src": 6,
+          "skill": "solar_sweep",
+          "lane": 1,
+          "fx": "so-s2-beam",
+          "emitterFx": "so-s2-emitter",
+          "durationMs": 650
+        },
+        {
+          "type": "monsterBeam",
+          "src": 6,
+          "skill": "solar_sweep",
+          "lane": 2,
+          "fx": "so-s2-beam",
+          "emitterFx": "so-s2-emitter",
+          "durationMs": 650
+        },
+        {
+          "type": "skillActivated",
+          "src": 6,
+          "skill": "solar_eclipse",
+          "name": "สุริยคราสพิพากษา",
+          "targets": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ]
+    }
+  ],
+  "fixture": "Actual running game. Fixture changes hero HP/ATK and cooldowns only. Break and death injected through real engine methods for visual review; no compositing."
+}

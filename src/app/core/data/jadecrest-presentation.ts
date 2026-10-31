@@ -1,0 +1,55 @@
+import { bossPoint } from './boss-presentation-scale';
+import type { FxDef, SheetDef } from './sprites';
+
+const ground = ['jc-charge-under', 'jc-charge-front'];
+const tracks = (durationMs: number) => Object.fromEntries(ground.map(n => [n, {
+  durationMs, alpha: [[0,0],[120,1],[durationMs-90,1],[durationMs,0]] as [number,number][],
+}]));
+export const JADECREST_PRESENTATION: Partial<SheetDef> = {
+  displayScale: 1.8, pixelated: true, hitFlashStrength: .3, preloadFx: ['jc-contact'],
+  anchors: { mouth: bossPoint([165,-196.8125],1.44), roarCharge: bossPoint([131.25,-150.5625],1.44), jadeCore: bossPoint([-12.5,-150.5625],1.44) },
+  statusFx: { broken: { loop: 'jc-core' } }, deathFx: 'jc-death', attackFx: ['jc-claw'],
+  monsterFx: {
+    stomp: { cast: ground, activate: ['jc-s1-paw','jc-s1-front'], tracks: tracks(1300) },
+    pounce: { cast: [...ground,'jc-s2-trail'], activate: ['jc-s2-land','jc-s2-rim','jc-s2-ripple'], tracks: {
+      ...tracks(1200), 'jc-s2-trail': { durationMs: 1800, alpha: [[0,0],[1200,0],[1260,.85],[1720,.85],[1800,0]],
+        frames: Array.from({length:8},(_,i)=>[1200+i*75,i] as [number,number]),
+        motion: Array.from({length:9},(_,i)=>[1200+i*75,0,-450*(i/8)*(1-i/8)] as [number,number,number]),
+      },
+    } },
+    roar: { cast: [...ground,'jc-s3-charge'], activate: ['jc-s3-wave'], tracks: tracks(1600) },
+  },
+};
+export const JADECREST_FX: Record<string,FxDef> = {
+  'jc-pounce-warning': {file:'fx-jadecrest-s2-ripple.png',frames:24,w:400,h:180,frameMs:50,repeat:2,
+    at:'target',fitCells:2.6,pivot:[.5,.5],dy:27.25,attach:false,layer:'under'},
+  'jc-charge-under': { file: 'fx-jadecrest-charge-under.png',frames: 60,w: 360,h: 270,frameMs: 30,
+    at: 'self',fitCells: 5.8,pivot: [.5,260/384],dy: 27.25,attach: false,layer: 'under' },
+  'jc-charge-front': { file: 'fx-jadecrest-charge-front.png',frames: 60,w: 360,h: 270,frameMs: 30,
+    at: 'self',fitCells: 5.8,pivot: [.5,260/384],dy: 27.25,attach: false },
+  // Original right-facing S1 art on a left-facing enemy. dx follows the actor; mirror only reverses the texture.
+  'jc-s1-paw': { file: 'fx-jadecrest-s1-paw.png',frames: 1,w: 180,h: 180,frameMs: 100,fadeOutMs: 140,
+    at: 'self',groundFromBodyFront:true,dx: 100,dy: 40,fitCells: 2.3,pivot: [.5,.78],attach: false },
+  'jc-s1-front': { file: 'fx-jadecrest-s1-front.png',frames: 5,w: 384,h: 308,frameMs: 160,
+    at: 'self',groundFromBodyFront:true,dx: 100,dy: 43,fitCells: 5.8,pivot: [110/640,410/512],mirror: true,attach: false },
+  'jc-s2-trail': { file: 'fx-jadecrest-s2-trail.png',frames: 8,w: 280,h: 170,frameMs: 75,
+    at: 'self',fitCells: 2.8,pivot: [.85,.5],dy: bossPoint([0,-113.0625],1.44)[1],attach: true,blend: 'add' },
+  'jc-s2-land': { file: 'fx-jadecrest-s2-land.png',frames: 8,w: 480,h: 360,frameMs: 100,
+    at: 'self',fitCells: 6.8,pivot: [.5,430/600],dy: 35,attach: false,layer: 'under' },
+  'jc-s2-rim': { file: 'fx-jadecrest-s2-rim.png',frames: 8,w: 480,h: 360,frameMs: 100,
+    at: 'self',fitCells: 6.8,pivot: [.5,430/600],dy: 35,attach: false },
+  'jc-s2-ripple': { file: 'fx-jadecrest-s2-ripple.png',frames: 24,w: 400,h: 180,frameMs: 100/3,
+    at: 'self',fitCells: 5.8,pivot: [.5,.5],dy: 35,attach: false,blend: 'add' },
+  'jc-s3-charge': { file: 'fx-jadecrest-s3-charge.png',frames: 8,w: 180,h: 180,frameMs: 200,
+    at: 'self',anchor: 'roarCharge',fitCells: 2.1,attach: true },
+  'jc-s3-wave': { file: 'fx-jadecrest-s3-wave.png',frames: 36,w: 600,h: 300,frameMs: 30,
+    at: 'self',anchor: 'mouth',fitCells: 5.2,pivot: [.1,.5],attach: false },
+  'jc-contact': { file: 'fx-jadecrest-hit.png',frames: 8,w: 110,h: 110,frameMs: 40,
+    at: 'target',fitCells: 1,dy: -30,blend: 'add' },
+  'jc-claw': { file: 'fx-jadecrest-hit.png',frames: 8,w: 110,h: 110,frameMs: 35,
+    at: 'self',dx: 198,dy: bossPoint([0,-25.5625],1.44)[1],delayMs: 380,fitCells: .65,blend: 'add' },
+  'jc-core': { file: 'fx-jadecrest-break.png',frames: 8,w: 160,h: 160,frameMs: 100,
+    at: 'self',anchor: 'jadeCore',fitCells: 1.6,attach: true,blend: 'add' },
+  'jc-death': { file: 'fx-jadecrest-death.png',frames: 8,w: 240,h: 260,frameMs: 130,
+    at: 'self',dy: bossPoint([0,-63.0625],1.44)[1],delayMs: 950,fitCells: 2.4,attach: true },
+};

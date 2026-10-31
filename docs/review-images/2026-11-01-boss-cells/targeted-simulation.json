@@ -1,0 +1,749 @@
+{
+  "runs": 180,
+  "teams": {
+    "starter": [
+      "bailong",
+      "yuezheng",
+      "moye",
+      "tangxun",
+      "linxue"
+    ],
+    "break": [
+      "garrick",
+      "kael",
+      "tangxun",
+      "mirelle",
+      "linxue"
+    ],
+    "ranged": [
+      "yuezheng",
+      "mirelle",
+      "sylvara",
+      "sylas",
+      "elira"
+    ],
+    "sustain": [
+      "draeven",
+      "bailong",
+      "sylas",
+      "elira",
+      "linxue"
+    ],
+    "burst": [
+      "garrick",
+      "kael",
+      "moye",
+      "vaelric",
+      "lucien"
+    ]
+  },
+  "profiles": [
+    "B",
+    "D",
+    "G6"
+  ],
+  "notes": [
+    "Current roster, native timing, engine start gauge; visual/development full-gauge flag not used",
+    "Targeted smoke test, not a new full-roster balance certificate"
+  ],
+  "rows": [
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 52.52,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 3,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ทวนแสงทะลวงแนว": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 55.83,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ตั้งโล่พิทักษ์": 5
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 71.16,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 4,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 20,
+        "ทวนแสงทะลวงแนว": 15
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 87.49,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 25,
+        "ตั้งโล่พิทักษ์": 10,
+        "ทวนแสงทะลวงแนว": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 86.08,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 4,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 25,
+        "ทวนแสงทะลวงแนว": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 101.29,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 3,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 30,
+        "ตั้งโล่พิทักษ์": 10,
+        "ทวนแสงทะลวงแนว": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 53.5,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 3,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 80.59,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 15
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 73.49,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 4,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 20,
+        "ทวนแสงทะลวงแนว": 5
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 107.08,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 5,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 25,
+        "ตั้งโล่พิทักษ์": 20
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 88.95,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 4,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 25,
+        "ทวนแสงทะลวงแนว": 10
+      }
+    },
+    {
+      "profile": "B",
+      "level": 5,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 128.83,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 6,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 35,
+        "ตั้งโล่พิทักษ์": 25
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 48.17,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ทวนแสงทะลวงแนว": 10,
+        "ตั้งโล่พิทักษ์": 1
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 51.22,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1.8,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ตั้งโล่พิทักษ์": 5
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 72.76,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 3,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 25,
+        "ทวนแสงทะลวงแนว": 15,
+        "ตั้งโล่พิทักษ์": 5
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 66.47,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 5,
+        "ทวนแสงทะลวงแนว": 5
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 86.4,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 0,
+      "interrupts": 3,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 30,
+        "ทวนแสงทะลวงแนว": 20,
+        "ตั้งโล่พิทักษ์": 5
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 91.65,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2.2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 27,
+        "ตั้งโล่พิทักษ์": 10,
+        "ทวนแสงทะลวงแนว": 10
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 46.63,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 66.72,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 62.64,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 3,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ทวนแสงทะลวงแนว": 2
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 93.1,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 4,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 25,
+        "ตั้งโล่พิทักษ์": 18
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 76.03,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 4,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 20,
+        "ทวนแสงทะลวงแนว": 5
+      }
+    },
+    {
+      "profile": "D",
+      "level": 8,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 113.28,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 5,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 30,
+        "ตั้งโล่พิทักษ์": 22
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 28.04,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 33.25,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1.4,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 10,
+        "ตั้งโล่พิทักษ์": 3
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 36.84,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 43.69,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 10,
+        "ตั้งโล่พิทักษ์": 5
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 46.81,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ทวนแสงทะลวงแนว": 5
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "starter",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 56.37,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 31.61,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 1,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 42.63,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 2,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 10,
+        "ตั้งโล่พิทักษ์": 5
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 45.16,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 2,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ทวนแสงทะลวงแนว": 5
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 2,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 58.77,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ตั้งโล่พิทักษ์": 10
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "AUTO",
+      "n": 5,
+      "wins": 5,
+      "time": 52.83,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 1,
+      "interrupts": 3,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 15,
+        "ทวนแสงทะลวงแนว": 5
+      }
+    },
+    {
+      "profile": "G6",
+      "level": 10,
+      "team": "break",
+      "tier": 3,
+      "boss": "aegis_sentinel",
+      "mode": "TACTICAL",
+      "n": 5,
+      "wins": 5,
+      "time": 70.49,
+      "survivors": 5,
+      "bossHp": 0,
+      "breaks": 3,
+      "interrupts": 1,
+      "casts": {
+        "คำพิพากษาแห่งประตู": 20,
+        "ตั้งโล่พิทักษ์": 12
+      }
+    }
+  ],
+  "sourceBase": "e6d255a1cc9fec53eeb1c2de0c4bf0f43a081397",
+  "change": "Aegis current S2 ground slam / S3 charged Breakable beam",
+  "testedProfiles": [
+    "B",
+    "D",
+    "G6"
+  ],
+  "testedTeams": [
+    "starter",
+    "break"
+  ],
+  "seedsPerCombination": 5
+}

@@ -9,7 +9,7 @@ export interface Cell {
   c: number;
 }
 
-/** Logical occupied cells; anchor offsets are measured from the rectangle's top-left cell. */
+/** Integral logical occupied cells (fractional contact geometry must be separate); anchor offsets are measured from the rectangle's top-left cell. */
 export interface UnitFootprint {
   cols: number;
   rows: number;

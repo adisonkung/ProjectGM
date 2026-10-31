@@ -1,7 +1,10 @@
+import { By } from '@angular/platform-browser';
+import { BoardComponent } from '../../battle/board/board.component';
 import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
 
 import { provideRouter } from '@angular/router';
 import { applyBuff } from '../../battle/engine/buffs';
+import { JADECREST_SKILLS } from '../../core/data/jadecrest-guardian';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { BattleComponent } from './battle.component';
 import { BattleEngine, BattleEvent } from '../../battle/engine/battle-engine';
@@ -33,9 +36,71 @@ describe('BattleComponent', () => {
     expect(component.anims()[boss.id].castClip).toBe('broken');
     host.handleEvents([hit]);expect(component.anims()[boss.id].key).toBe(key);
     host.snapshot();const core=component.fx().find(f=>f.name==='ae-core')!;
-    expect(core.offset).toEqual([0,-44]);expect(core.flip).toBeTrue();
+    expect(core.offset).toEqual([0,-87.5]);expect(core.flip).toBeTrue();
     tick(2000);component.ngOnDestroy();discardPeriodicTasks();
   }));
+  it('keeps a monster cast pose when its committed leap emits movement', fakeAsync(() => {
+    component.start();component.openMenu();
+    const host=component as unknown as {engine:BattleEngine;handleEvents(events:BattleEvent[]):void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!;
+    boss.sprite='enemy-jadecrest-guardian.png';
+    const def=JADECREST_SKILLS['jadecrest_pounce'];boss.castSkills=[{def,cd:0}];
+    boss.casting={def,left:1.8,target:null,token:1,nextProgress:.1,breakDamage:0};
+    host.handleEvents([{type:'castStart',src:boss.id,skill:def.name,label:def.label,castTime:1.8,interruptible:false}]);
+    const key=component.anims()[boss.id].key;
+    host.handleEvents([{type:'move',src:boss.id}]);
+    expect(component.anims()[boss.id].anim).toBe('cast');expect(component.anims()[boss.id].key).toBe(key);
+    tick(2000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
+
+  it('pins a landing warning to its committed world cell while the caster is still travelling',fakeAsync(()=>{
+    component.start();component.openMenu();
+    const host=component as unknown as {engine:BattleEngine;handleEvents(events:BattleEvent[]):void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!;
+    boss.pos={r:2,c:4};boss.x=host.engine.formation.originPosition+11;boss.y=1;
+    host.handleEvents([{type:'monsterGround',src:boss.id,skill:'jadecrest_pounce',cells:[{r:2,c:4}],fx:'jc-pounce-warning',durationMs:600,warning:true}]);
+    const ring=component.fx().find(f=>f.name==='jc-pounce-warning')!;
+    expect(ring.r).toBe(2);expect(ring.c).toBe(host.engine.formation.originPosition+4-host.engine.cameraX);
+    expect(ring.follow).toBeUndefined();
+    tick(2000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
+
+  it('keeps logical ground warnings separate from the native spear-centred impact',fakeAsync(()=>{
+    component.start();component.openMenu();
+    const host=component as unknown as{engine:BattleEngine;handleEvents(events:BattleEvent[]):void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!;
+    boss.sprite='enemy-aegis-sentinel.png';boss.pos={r:2,c:11};boss.x=host.engine.formation.originPosition+11;boss.y=2;
+    boss.footprint={cols:4,rows:2,anchorC:2,anchorR:1};boss.actionFacing={left:true};
+    host.handleEvents([{type:'castStart',src:boss.id,skill:'aegis_judgement',label:'S2',castTime:1.8,interruptible:false}]);
+    const zone=component.zones().find(z=>z.kind==='telegraph')!;
+    expect(zone.c).toBe(6+host.engine.formation.originPosition-host.engine.cameraX);expect(zone.w).toBe(3);
+    host.handleEvents([{type:'skillActivated',src:boss.id,skill:'aegis_judgement',name:'S2',targets:[]}]);
+    const wave=component.fx().find(f=>f.name==='ae-s3-wave')!;expect(wave.c).toBe(10+host.engine.formation.originPosition-host.engine.cameraX);expect(wave.offset).toEqual([188,.5]);
+    tick(2000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
+
+  it('recoils Aegis art without moving its grid body or heroes and follows the tip with the beam',fakeAsync(()=>{
+    component.start();component.openMenu();
+    const host=component as unknown as{engine:BattleEngine;handleEvents(events:BattleEvent[]):void;snapshot():void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!;
+    boss.sprite='enemy-aegis-sentinel.png';boss.pos={r:2,c:11};boss.x=host.engine.formation.originPosition+11;boss.y=2;
+    boss.actionFacing={left:true};const x=boss.x,cell={...boss.pos},t=host.engine.time;
+    const heroCells=host.engine.units.filter(u=>u.side==='ally').map(u=>({...u.pos}));
+    host.snapshot();const front=component.views().find(u=>u.id===boss.id)!.c;
+    host.handleEvents([{type:'skillActivated',src:boss.id,skill:'aegis_lance',name:'S3',targets:[]}]);
+    host.engine.time=t+.4;host.snapshot();
+    expect(component.views().find(u=>u.id===boss.id)!.c-front).toBeCloseTo(2);
+    const beam=component.fx().find(f=>f.name==='ae-s2-beam')!;
+    expect(beam.follow).toBe(boss.id);const width=beam.stretch!;
+    expect(component.anims()[boss.id].castClip).toBe('lance_firing');
+    host.engine.time=t+2.9;host.snapshot();expect(component.anims()[boss.id].anim).toBe('walk');
+    expect(component.fx().find(f=>f.id===beam.id)!.stretch!).toBeLessThan(width);
+    host.engine.time=t+3.3;host.snapshot();expect(component.views().find(u=>u.id===boss.id)!.c).toBeCloseTo(front);
+    expect(boss.x).toBe(x);expect(boss.pos).toEqual(cell);
+    expect(host.engine.units.filter(u=>u.side==='ally').map(u=>u.pos)).toEqual(heroCells);
+    tick(4000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
+
   it('shows the placement board before the battle starts', () => {
     expect(component).toBeTruthy();
     const el: HTMLElement = fixture.nativeElement;
@@ -111,6 +176,9 @@ describe('BattleComponent', () => {
     expect(component.outcome()).not.toBeNull(); // rewards already granted
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.overlay')).toBeNull();
+    // Combat is over: death clips must finish instead of freezing on the final simulation snapshot.
+    const board=fixture.debugElement.query(By.directive(BoardComponent)).componentInstance as BoardComponent;
+    expect(board.gameTime()).toBeUndefined();
     tick(BattleComponent.OUTRO_MS + 10);
     fixture.detectChanges();
     expect(component.ending()).toBeFalse();

@@ -1,3 +1,4 @@
+import { unitGeometry } from '../render/unit-geometry';
 import { spriteUrl } from '../../core/data/sprite-files';
 import { Component, ElementRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
 import { ANIM_FALLBACK, FRAME_MS, IDLE_FRAME_MS, SHEETS, SheetDef, SpriteAnim } from '../../core/data/sprites';
@@ -62,6 +63,7 @@ export class UnitSpriteComponent {
   readonly rarity = computed(() => `var(--r${this.star() ?? 1})`);
   readonly def = computed<SheetDef | undefined>(() => SHEETS[this.sprite() ?? '']);
   /** the optimised file the game serves (core/data/sprite-files.ts) */
+  readonly geometry = computed(() => unitGeometry(this.def() ?? {}));
   readonly url = computed(() => spriteUrl(this.sprite() ?? ''));
   readonly bgSize = computed(() => {
     const d = this.def();

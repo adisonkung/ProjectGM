@@ -34,6 +34,10 @@ export interface MonsterCombatState {
   /** bumps on every attack start / cancel — a scheduled hit with an old token is ignored */
   attackToken: number;
   currentSkillId: string | null;
+  /** Completed opt-in lane sequences, per skill (per battle, never on static definitions). */
+  sequenceCasts?: Record<string, number>;
+  /** Fair ground targeting: counts belong to this live encounter, never to static definitions. */
+  groundMarks?: Record<number, number>;
   castTimer: number;
   hurtTimer: number;
   recoverTimer: number;
@@ -189,10 +193,10 @@ export class MonsterController {
         if (s.stateTime >= (def.ai.spawnDuration ?? 0)) this.setState(s, 'SEARCHING', 'idle');
         return;
       case 'HURT':
-        if ((s.hurtTimer -= dt) <= 0) this.setState(s, 'SEARCHING', 'idle');
+        if ((s.hurtTimer -= dt) <= 0) { delete u.actionFacing; this.setState(s, 'SEARCHING', 'idle'); }
         return;
       case 'RECOVERING':
-        if ((s.recoverTimer -= dt) <= 0) this.setState(s, 'SEARCHING', 'idle');
+        if ((s.recoverTimer -= dt) <= 0) { delete u.actionFacing; this.setState(s, 'SEARCHING', 'idle'); }
         return;
       case 'ATTACKING':
         if ((s.attackTimer -= dt) <= 0) {
@@ -516,8 +520,10 @@ export class MonsterController {
         const pool = back.length ? back : heroes; // backRowOnly: back row first, then anyone in range
         return [...pool].sort((a, b) => rank(a) - rank(b) || pct(a) - pct(b) || near(a, b))[0] ?? null;
       }
-      case 'HIGHEST_ATK_HERO':
-        return [...heroes].sort((a, b) => effectiveAttack(b) - effectiveAttack(a) || near(a, b))[0] ?? null;
+      case 'HIGHEST_ATK_HERO': {
+        const back = sel.preferBackRow ? heroes.filter(h => h.line === 'back') : [];
+        return [...(back.length ? back : heroes)].sort((a, b) => effectiveAttack(b) - effectiveAttack(a) || near(a, b))[0] ?? null;
+      }
     }
   }
 
@@ -543,7 +549,7 @@ export class MonsterController {
 
   /** Called by the cast system when a cast ends */
   onCastEnd(u: BattleUnit, result: 'completed' | 'interrupted' | 'cancelled'): void {
-    delete u.actionFacing;
+    if (result !== 'completed') delete u.actionFacing;
     const s = u.monster!;
     const skill = s.currentSkillId ? this.skills[s.currentSkillId] : undefined;
     s.currentSkillId = null;

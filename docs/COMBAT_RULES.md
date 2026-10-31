@@ -132,3 +132,13 @@ Constants are in `core/data/classes.ts`. Logic is in `battle-engine.ts`.
 | Variance and crit for monsters | Monsters: no variance and no crit (deterministic) | ±10 % and 10 % crit stated generally | Documented as: heroes roll, monsters are deterministic. |
 | Crit chance | 10 % base + gear crit (cap +20 %) + 6★ perk +3 % | 10 % | Consistent. Additive sources are documented. |
 | Gameplay timing tied to clips | Event times derived from clip data | "Avoid gameplay tied to frame numbers" | Uses events, so it complies in form. Clip length still drives DPS (hero-sim: F5 0 % with sprites vs 100 % with `--nosprite`). Open design question, deferred to the balance pass. |
+
+## Ascension specialist mechanics V1 — user update 2026-10-31
+
+The user authorized the proposed three-guardian mechanics pass. Aegis uses a boss-specific 4 s Exposed Core (+75% incoming damage) after interrupting Guard or breaking Light Lance (S3 after the 1 November swap); Guard is removed on that Break. Generic BROKEN stays 3 s/+25% for other skills. Jadecrest Roar is unbreakable, and Pounce explicitly marks the strongest backliner before committing its landing. Solar rotates ground marks fairly and uses four lane pulses / three Eclipse team hits. Details and provisional values: [ASCENSION_MECHANICS_V1.md](ASCENSION_MECHANICS_V1.md). This authorizes these scoped mechanics values, without opening a general hero/gear rebalance.
+
+User correction1 November2026: Aegis S2/S3 swap is applied. S2 Judgement is the1.8s physical forward3×2 slam; S3 Light Lance is the3s magic three-lane beam with Break100→Guard removal→4s exposed core/+75%. Full details: [AEGIS_SLOT_ORDER.md](AEGIS_SLOT_ORDER.md). Existing physical footprints and other guardian mechanics are unchanged.
+
+User correction, 1 November 2026: Aegis reserves 4×2 with lower third-column O (anchor 2,1); Jade reserves 4×2 with lower fourth-column O (anchor 3,1). Solar remains 3×2. Their forward ground skills originate at the leading occupied column; Jade pounce radius measures distance from its full body. Fractional 4×1.5 contact is a discussed future option, not implemented. Details: [GUARDIAN_4X2_LAYOUT.md](GUARDIAN_4X2_LAYOUT.md).
+
+User follow-up, 1 November2026: Aegis S3 firing visuals last2.4s +0.15s fade, with two-cell presentation-only recoil and0.7s return. Its recovery is3.25s to cover that sequence; damage remains one1.5× hit at release, charge3s and cooldown18s. Aegis/Jade actor art sits one cell forward without changing occupancy or targeting. See [GUARDIAN_RECOIL_REVIEW.md](GUARDIAN_RECOIL_REVIEW.md).

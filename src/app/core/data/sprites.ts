@@ -1,11 +1,14 @@
+import { bossPoint } from './boss-presentation-scale';
+import { SOLAR_FX, SOLAR_PRESENTATION } from './solar-presentation';
 /**
  * ข้อมูลแผ่น sprite และเอฟเฟกต์สกิล
  * ทุกแผ่นใช้ช่องกว้าง 132 px สูง 100 px (หรือ cellH), เท้าอยู่ 14 px เหนือขอบล่างช่อง, ตัวละครอยู่กลาง x=66 และหันขวา
  * เอฟเฟกต์ใช้สเกลพิกเซลเดียวกับตัวละคร (1 px ต้นฉบับ = 1.25% ของความกว้างช่องกระดาน)
  */
 
+import { JADECREST_FX, JADECREST_PRESENTATION } from './jadecrest-presentation';
 import type { FxTrack } from '../models/fx';
-import { AEGIS_S3_IMPACT_BOTTOMS, AEGIS_S3_TIP_ANCHOR, AEGIS_S3_TIP_MOTION } from './aegis-s3-presentation';
+import { AEGIS_S3_TIP_ANCHOR, AEGIS_S3_TIP_MOTION } from './aegis-s3-presentation';
 import type { ParticleRef } from './particles';
 import { AnimationConfig, SemanticEvent } from '../models/monster';
 import { MONSTERS, PROJECTILES } from './monsters';
@@ -97,6 +100,8 @@ export interface SequenceFxCue {
 }
 
 export interface SheetDef {
+  /** Visual size multiplier around the feet; never changes logical range or collision. */
+  displayScale?: number;
   /** Monster clip presentation; combat events own cast cancellation and activation, never PNG frame checks. */
   monsterFx?: Record<string, { cast?: string[]; activate?: string[]; tracks?: Record<string,FxTrack> }>;
   /** Contact sparks while the holder actually has a guarding status (rate-limited by the view). */
@@ -164,6 +169,8 @@ export interface FxDef {
   at: 'self' | 'target' | 'allies';
   /** Place a ground effect at the logical footprint centre, independent of its PNG dimensions. */
   groundArea?: 'SQUARE_2' | 'FRONT_RECT_2X3' | 'FRONT_RECT_3X2';
+  /** Forward ground shape begins at the leading occupied column, not the authored anchor. */
+  groundFromBodyFront?: boolean;
   /** เลื่อนจากกลางช่อง เป็น % ของช่อง (+x ขวา, +y ลง) */
   dx?: number;
   dy?: number;
@@ -1110,21 +1117,32 @@ for (const m of Object.values(MONSTERS)) {
   SHEETS[sheet] = monsterSheet(m.animation, m.attack.event, proj);
 }
 
+Object.assign(SHEETS['enemy-jadecrest-guardian.png'], JADECREST_PRESENTATION);
+Object.assign(SHEETS['enemy-solar-oculus.png'], SOLAR_PRESENTATION);
+SHEETS['enemy-solar-oculus.png'].anims.idle!.ms=125;
+// Floating physical body sits lower; source pixels and the 3x2 logical body are unchanged.
+for (const clip of new Set([...Object.values(SHEETS['enemy-solar-oculus.png'].anims), ...Object.values(SHEETS['enemy-solar-oculus.png'].casts ?? {})])) {
+  if (clip) clip.root=[[0,0,16]];
+}
+
+const AEGIS_VISUAL_SCALE=1.6;
 // Aegis: all tiers share one source-pixel sheet, status-owned barrier and core effects.
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
-  pixelated: true, hitFlashStrength: .35,
+  displayScale:AEGIS_VISUAL_SCALE,pixelated: true, hitFlashStrength: .35,
   attackFx: ['ae-attack-thrust'], preloadFx: ['ae-s2-impact', 'ae-s3-impact'],
-  anchors: { weaponTip: [186, -110], judgementTip: AEGIS_S3_TIP_ANCHOR, shieldCore: [0,-44] },
-  statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' } },
+  anchors: { weaponTip: bossPoint([186,-110],AEGIS_VISUAL_SCALE), judgementTip: bossPoint(AEGIS_S3_TIP_ANCHOR,AEGIS_VISUAL_SCALE), judgementImpact: bossPoint([117.5,11],AEGIS_VISUAL_SCALE), shieldCore: bossPoint([0,-44],AEGIS_VISUAL_SCALE) },
+  statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' }, aegis_exposed: {loop:'ae-core'} },
   damageFx: { aegis_guard: 'ae-s1-hit' }, deathFx: 'ae-death',
   monsterFx: {
     lance: { cast: ['ae-s2-charge'], activate: ['ae-s2-muzzle', 'ae-s2-beam'] },
     judgement: { cast: ['ae-s3-ground-charge','ae-s3-charge'], activate: ['ae-s3-wave'], tracks: {
-      'ae-s3-charge': { durationMs: 3000, alpha: [[0,0],[120,.8],[1000,1],[3000,1]], motion: AEGIS_S3_TIP_MOTION },
-      'ae-s3-ground-charge': { durationMs: 3000, alpha: [[0,0],[180,1],[3000,1]] },
+      'ae-s3-charge': { durationMs: 1800, alpha: [[0,0],[72,.8],[600,1],[1800,1]], motion: AEGIS_S3_TIP_MOTION.map(([t,x,y])=>[t*.6,x*AEGIS_VISUAL_SCALE,y*AEGIS_VISUAL_SCALE] as [number,number,number]) },
+      'ae-s3-ground-charge': { durationMs: 1800, alpha: [[0,0],[108,1],[1800,1]] },
     } },
   },
 } satisfies Partial<SheetDef>);
+// Release pose held for the full beam; returning walk is presentation-only.
+SHEETS['enemy-aegis-sentinel.png'].casts!['lance_firing']={row:6,frames:13,ms:2550,castStart:12,activate:12};
 // The supplied death settles in place: fade with the shutdown VFX rather than leaving a standing corpse.
 Object.assign(SHEETS['enemy-aegis-sentinel.png'].anims.die!, {
   seq: Array.from({ length: 20 }, (_, i) => i), steps: Array(20).fill(70),
@@ -1133,35 +1151,37 @@ Object.assign(SHEETS['enemy-aegis-sentinel.png'].anims.die!, {
 
 
 export const FX: Record<string, FxDef> = {
+  ...SOLAR_FX,
+  ...JADECREST_FX,
   'ae-attack-thrust': { file: 'fx-aegis-thrust.png', frames: 6, w: 120, h: 48, frameMs: 35,
     at: 'self', anchor: 'weaponTip', delayMs: 270, scale: .55, pivot: [.15,.5], attach: true, blend: 'add' },
   'ae-s1-in': { file: 'fx-aegis-barrier-in.png', frames: 5, w: 300, h: 250, frameMs: 70,
-    at: 'self', fitCells: 4.06, pivot: [.5,.84], dy: 35, attach: true },
+    at: 'self', fitCells: 6.496, pivot: [.5,.84], dy: 35, attach: true },
   'ae-s1-loop': { file: 'fx-aegis-barrier-loop.png', frames: 64, w: 340, h: 280, frameMs: 40,
-    at: 'self', fitCells: 4.6, pivot: [.5,.77], dy: 35, delayMs: 350, attach: true },
+    at: 'self', fitCells: 7.36, pivot: [.5,.77], dy: 35, delayMs: 350, attach: true },
   'ae-s1-hit': { file: 'fx-aegis-barrier-hit.png', frames: 8, w: 128, h: 128, frameMs: 40,
-    at: 'self', fitCells: .85, dy: -65, dx: 75, attach: true, blend: 'add' },
-  'ae-s2-charge': { file: 'fx-aegis-s2-charge.png', frames: 32, w: 180, h: 180, frameMs: 40,
-    at: 'self', anchor: 'weaponTip', delayMs: 750, fitCells: 2.1, attach: true, repeat: 2, blend: 'add' },
-  'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 8, w: 256, h: 256, frameMs: 90,
-    at: 'self', anchor: 'weaponTip', fitCells: 3.2, pivot: [1-356/444,222/444], attach: false, fadeOutMs: 120 },
-  'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 219, frameMs: 45,
-    at: 'self', anchor: 'weaponTip', fitCells: 1, fitRows: 3, pivot: [0,.5], toBoardEdge: true,
-    orient: 'flip', attach: false, repeat: 2, fadeOutMs: 120, blend: 'add' },
+    at: 'self', fitCells: 1.65, dy: bossPoint([0,-65],1.6)[1], dx: 120, attach: true, blend: 'add' },
+  'ae-s2-charge': { file: 'fx-aegis-s2-charge.png', frames: 32, w: 180, h: 180, frameMs: 200/3,
+    at: 'self', anchor: 'weaponTip', delayMs: 1250, fitCells: 2.1, attach: true, repeat: 2, blend: 'add' },
+  'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 8, w: 256, h: 256, frameMs: 100, repeat: 3,
+    at: 'self', anchor: 'weaponTip', fitCells: 5, pivot: [1-356/444,222/444], attach: true, fadeOutMs: 150 },
+  'ae-s2-beam': { file: 'fx-aegis-beam.png', frames: 8, w: 384, h: 219, frameMs: 50,
+    at: 'self', anchor: 'weaponTip', fitCells: 1, fitRows: 5, pivot: [0,.5], toBoardEdge: true,
+    orient: 'flip', attach: true, repeat: 6, fadeOutMs: 150, blend: 'add' },
   'ae-s2-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
-    at: 'target', fitCells: .8, dy: -20 },
-  'ae-s3-charge': { file: 'fx-aegis-s3-tip-charge.png', frames: 75, w: 160, h: 160, frameMs: 40,
+    at: 'target', fitCells: 1.05, dy: -20 },
+  'ae-s3-charge': { file: 'fx-aegis-s3-tip-charge.png', frames: 75, w: 160, h: 160, frameMs: 24,
     at: 'self', anchor: 'judgementTip', fitCells: 1.7, attach: true, blend: 'add' },
-  'ae-s3-ground-charge': { file: 'fx-aegis-s3-ground-charge.png', frames: 75, w: 360, h: 320, frameMs: 40,
-    at: 'self', fitCells: 3.4, pivot: [.5,204/320], dy: 27.25,
+  'ae-s3-ground-charge': { file: 'fx-aegis-s3-ground-charge.png', frames: 75, w: 360, h: 320, frameMs: 24,
+    at: 'self', fitCells: 4.4, pivot: [.5,204/320], dy: 27.25,
     attach: true, layer: 'under' },
   'ae-s3-wave': { file: 'fx-aegis-s3-slam.png', frames: 8, w: 360, h: 240, frameMs: 50,
-    at: 'self', groundArea: 'FRONT_RECT_3X2', fitCells: 3, fitRows: 2,
-    ground: AEGIS_S3_IMPACT_BOTTOMS, pivot: [.5,1], dy: 50, attach: false, layer: 'under' },
+    at: 'self', anchor: 'judgementImpact', fitCells: 4.2, fitRows: 2.8,
+    pivot: [.5,.76], attach: false, layer: 'under' },
   'ae-s3-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
-    at: 'target', fitCells: .65, dy: -20 },
+    at: 'target', fitCells: .85, dy: -20 },
   'ae-core': { file: 'fx-aegis-core.png', frames: 75, w: 320, h: 260, frameMs: 40,
-    at: 'self', anchor: 'shieldCore', fitCells: 2.4, attach: true, blend: 'add' },
+    at: 'self', anchor: 'shieldCore', fitCells: 3.2, attach: true, blend: 'add' },
   'ae-death': { file: 'fx-aegis-death.png', frames: 10, w: 210, h: 180, frameMs: 65,
     at: 'self', fitCells: 1.6, dy: -75, delayMs: 350 },
 

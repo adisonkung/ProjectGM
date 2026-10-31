@@ -1,0 +1,25 @@
+{
+  "typecheck_app": "passed",
+  "typecheck_spec": "passed",
+  "production_build": "passed",
+  "karma": {
+    "passed": 922,
+    "total": 922
+  },
+  "viewports": {
+    "desktop": {
+      "pageErrors": [],
+      "shots": 9
+    },
+    "mobile": {
+      "pageErrors": [],
+      "shots": 9
+    }
+  },
+  "simulation": {
+    "baselineBattles": 3600,
+    "v1Battles": 3600,
+    "combinationsPerRevision": 360,
+    "seedsPerCombination": 10
+  }
+}

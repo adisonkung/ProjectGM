@@ -194,8 +194,12 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
   // ---- farm-dungeon bosses (monsters-farm.ts) + BOSS DUEL enrage
   // Aegis S1: damage reduction only, not shield HP or invulnerability.
   aegis_guard: {
-    id: 'aegis_guard', name: 'ตั้งโล่พิทักษ์', duration: 8, stackPolicy: 'REFRESH_DURATION', buff: true,
-    modifiers: { damageTakenMultiplier: .4 },
+    id: 'aegis_guard', name: 'ตั้งโล่พิทักษ์', duration: 12, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: .2 },
+  },
+  aegis_exposed: {
+    id:'aegis_exposed',name:'แกนพิทักษ์เปิดเผย',duration:4,stackPolicy:'REFRESH_DURATION',bossValid:true,buff:false,
+    modifiers:{damageTakenMultiplier:1.75},flags:['broken'],
   },
   stone_skin: {
     id: 'stone_skin', name: 'ผิวศิลา', duration: 8, stackPolicy: 'REFRESH_DURATION', buff: true,

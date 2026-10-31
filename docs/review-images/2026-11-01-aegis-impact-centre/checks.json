@@ -1,0 +1,19 @@
+{
+  "sourceBase": "2db8ac1c5be6ed9c08ab9643e2e3e7a204eaa03e",
+  "appTypecheck": "PASS",
+  "specTypecheck": "PASS",
+  "karma": {
+    "passed": 936,
+    "total": 936,
+    "failed": 0
+  },
+  "productionBuild": "PASS",
+  "screenshots": 6,
+  "browserErrors": 0,
+  "combatLogicChanged": false,
+  "sourceSha256": {
+    "src/app/core/data/sprites.ts": "6474c3ef273aaa5b2d9aed581b1b4f0244852d762fabf76ef0a196581d4fbb08",
+    "src/app/battle/engine/aegis-sentinel.spec.ts": "08087cc41edd1a61bac7602ec7fe922828a8526a07413a7c44a7a3980372174e",
+    "src/app/pages/battle/battle.component.spec.ts": "ffd8b29d42b7dff34c81ec97562414648298f2b134a000bc3d82a3ca5b4dac54"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "appTypecheck": "passed",
+  "specTypecheck": "passed",
+  "karma": {
+    "passed": 909,
+    "failed": 0
+  },
+  "desktop": "passed",
+  "mobile": "passed",
+  "displayScale": 1.25,
+  "feetAnchored": true
+}

@@ -1,3 +1,4 @@
+import { unitGeometry } from './unit-geometry';
 import { FxTrack } from '../../core/models/fx';
 import type { Application, ColorMatrixFilter, Container, Graphics, Sprite, Texture } from 'pixi.js';
 import { particleDef, ParticleShape } from '../../core/data/particles';
@@ -463,12 +464,12 @@ export class PixiUnitLayer {
         continue;
       }
       // same geometry as the DOM sheet: 165 % × cellW / 132 of a cell wide, feet 4 % above the cell bottom
-      const k = (cell * 1.65) / 132;
+      const geometry = unitGeometry(def, cell), k = geometry.k;
       const sx = u.flip ? -1 : 1;
       const sp = s.sprite;
       sp.texture = this.frame(u.sheet, def, base, pose.row, pose.col);
       sp.scale.set(k * sx, k);
-      sp.position.set(u.x + cell / 2 + pose.dx * k * sx, u.y + cell * 0.96 + pose.dy * k);
+      sp.position.set(u.x + cell / 2 + pose.dx * k * sx, u.y + geometry.bottomY + pose.dy * k);
       sp.alpha = u.alpha * pose.opacity;
       sp.zIndex = u.z;
       sp.visible = sp.alpha > 0.001;

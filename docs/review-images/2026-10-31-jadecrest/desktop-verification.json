@@ -1,0 +1,3415 @@
+{
+  "errors": [],
+  "charge": true,
+  "impact": true,
+  "travel": true,
+  "land": true,
+  "roarCharge": true,
+  "roar": true,
+  "states": [
+    {
+      "time": 0,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 0.1,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 0.1,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 0.1,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 0.49999999999999994,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 0.5499999999999999,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 0.6,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.3,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0,
+        "jc-charge-front": 0
+      }
+    },
+    {
+      "time": 0.8000000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0999999999999999,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.1832999999999999,
+        "jc-charge-front": 0.1832999999999999
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 0.8500000000000002,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 1.0499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.23329999999999995,
+        "jc-charge-front": 0.23329999999999995
+      }
+    },
+    {
+      "time": 1.0500000000000003,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 0.8499999999999996,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.4332999999999999,
+        "jc-charge-front": 0.4332999999999999
+      }
+    },
+    {
+      "time": 1.2500000000000004,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 0.6499999999999995,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.6333000000000001,
+        "jc-charge-front": 0.6333000000000001
+      }
+    },
+    {
+      "time": 1.4500000000000006,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 0.4499999999999994,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.8333000000000003,
+        "jc-charge-front": 0.8333000000000003
+      }
+    },
+    {
+      "time": 1.6000000000000008,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 0.29999999999999943,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 1.0000000000000004,
+        "jc-charge-front": 1.0000000000000004
+      }
+    },
+    {
+      "time": 1.800000000000001,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_stomp",
+      "left": 0.09999999999999946,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 1.2000000000000006,
+        "jc-charge-front": 1.2000000000000006
+      }
+    },
+    {
+      "time": 1.950000000000001,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-s1-paw",
+          "offset": [
+            200,
+            40
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s1-front",
+          "offset": [
+            200,
+            43
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        }
+      ],
+      "ages": {
+        "jc-s1-paw": 0,
+        "jc-s1-front": 0,
+        "jc-contact": 0
+      }
+    },
+    {
+      "time": 2.1500000000000004,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-s1-paw",
+          "offset": [
+            200,
+            40
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s1-front",
+          "offset": [
+            200,
+            43
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        }
+      ],
+      "ages": {
+        "jc-s1-paw": 0.19999999999999907,
+        "jc-s1-front": 0.19999999999999907,
+        "jc-contact": 0.19999999999999907
+      }
+    },
+    {
+      "time": 2.4499999999999993,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-s1-front",
+          "offset": [
+            200,
+            43
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s1-front": 0.5000999999999969
+      }
+    },
+    {
+      "time": 2.5999999999999988,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-s1-front",
+          "offset": [
+            200,
+            43
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s1-front": 0.666799999999997
+      }
+    },
+    {
+      "time": 2.6999999999999984,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 7,
+        "castTime": 1.3,
+        "castClip": "stomp"
+      },
+      "fx": [
+        {
+          "name": "jc-s1-front",
+          "offset": [
+            200,
+            43
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s1-front": 0.7834999999999972
+      }
+    },
+    {
+      "time": 2.799999999999998,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "hurt",
+        "key": 26
+      },
+      "fx": [],
+      "ages": {
+        "jc-s1-front": 0.8667999999999962
+      }
+    },
+    {
+      "time": 2.8999999999999977,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0
+      }
+    },
+    {
+      "time": 2.9499999999999975,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.06670000000000043
+      }
+    },
+    {
+      "time": 3.049999999999997,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.14999999999999947
+      }
+    },
+    {
+      "time": 3.099999999999997,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.23330000000000028
+      }
+    },
+    {
+      "time": 3.1999999999999966,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.33329999999999993
+      }
+    },
+    {
+      "time": 3.2999999999999963,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.4332999999999996
+      }
+    },
+    {
+      "time": 3.4499999999999957,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.5665999999999984
+      }
+    },
+    {
+      "time": 3.4999999999999956,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.6333999999999991
+      }
+    },
+    {
+      "time": 3.4999999999999956,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [],
+      "ages": {
+        "jc-claw": 0.6333999999999991
+      }
+    },
+    {
+      "time": 3.699999999999995,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 3.7999999999999945,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 28
+      },
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 3.899999999999994,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 1.8,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0,
+        "jc-charge-front": 0,
+        "jc-s2-trail": 0
+      }
+    },
+    {
+      "time": 3.999999999999994,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 1.7,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.09999999999999964,
+        "jc-charge-front": 0.09999999999999964,
+        "jc-s2-trail": 0.09999999999999964
+      }
+    },
+    {
+      "time": 4.099999999999993,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 1.5999999999999999,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.21659999999999924,
+        "jc-charge-front": 0.21659999999999924,
+        "jc-s2-trail": 0.21659999999999924
+      }
+    },
+    {
+      "time": 4.099999999999993,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 1.5999999999999999,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.21659999999999924,
+        "jc-charge-front": 0.21659999999999924,
+        "jc-s2-trail": 0.21659999999999924
+      }
+    },
+    {
+      "time": 4.299999999999993,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 1.3999999999999997,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.39999999999999813,
+        "jc-charge-front": 0.39999999999999813,
+        "jc-s2-trail": 0.39999999999999813
+      }
+    },
+    {
+      "time": 4.399999999999992,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 1.2999999999999996,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.5165999999999982,
+        "jc-charge-front": 0.5165999999999982,
+        "jc-s2-trail": 0.5165999999999982
+      }
+    },
+    {
+      "time": 4.499999999999992,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 1.1999999999999995,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.6165999999999978,
+        "jc-charge-front": 0.6165999999999978,
+        "jc-s2-trail": 0.6165999999999978
+      }
+    },
+    {
+      "time": 4.599999999999992,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 1.0999999999999994,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.7166999999999981,
+        "jc-charge-front": 0.7166999999999981,
+        "jc-s2-trail": 0.7166999999999981
+      }
+    },
+    {
+      "time": 4.699999999999991,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.9999999999999993,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.8165999999999971,
+        "jc-charge-front": 0.8165999999999971,
+        "jc-s2-trail": 0.8165999999999971
+      }
+    },
+    {
+      "time": 4.799999999999991,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.8999999999999992,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.9165999999999968,
+        "jc-charge-front": 0.9165999999999968,
+        "jc-s2-trail": 0.9165999999999968
+      }
+    },
+    {
+      "time": 4.899999999999991,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.7999999999999992,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 1.0332999999999974,
+        "jc-charge-front": 1.0332999999999974,
+        "jc-s2-trail": 1.0332999999999974
+      }
+    },
+    {
+      "time": 4.99999999999999,
+      "pos": {
+        "r": 2,
+        "c": 11
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.6999999999999991,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 1.116599999999996,
+        "jc-charge-front": 1.116599999999996,
+        "jc-s2-trail": 1.116599999999996
+      }
+    },
+    {
+      "time": 5.09999999999999,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 11,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.599999999999999,
+      "flight": true,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 1.2332999999999967,
+        "jc-charge-front": 1.2332999999999967,
+        "jc-s2-trail": 1.2332999999999967
+      }
+    },
+    {
+      "time": 5.299999999999989,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 9.66666666666667,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.39999999999999897,
+      "flight": true,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-trail": 1.3999999999999946
+      }
+    },
+    {
+      "time": 5.399999999999989,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 9.000000000000004,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.299999999999999,
+      "flight": true,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-trail": 1.5333999999999945
+      }
+    },
+    {
+      "time": 5.4999999999999885,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 8.33333333333334,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.199999999999999,
+      "flight": true,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-trail": 1.5999999999999939
+      }
+    },
+    {
+      "time": 5.599999999999988,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7.666666666666673,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.09999999999999902,
+      "flight": true,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-trail": 1.6999999999999935
+      }
+    },
+    {
+      "time": 5.649999999999988,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7.33333333333334,
+      "y": 2,
+      "cast": "jadecrest_pounce",
+      "left": 0.04999999999999902,
+      "flight": true,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-trail",
+          "offset": [
+            0,
+            -85
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-trail": 1.7665999999999937
+      }
+    },
+    {
+      "time": 5.749999999999988,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-s2-rim",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-ripple",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        }
+      ],
+      "ages": {
+        "jc-s2-land": 0,
+        "jc-s2-rim": 0,
+        "jc-s2-ripple": 0,
+        "jc-contact": 0
+      }
+    },
+    {
+      "time": 5.949999999999987,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-s2-rim",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-ripple",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        },
+        {
+          "name": "jc-contact",
+          "flip": true
+        }
+      ],
+      "ages": {
+        "jc-s2-land": 0.1999999999999993,
+        "jc-s2-rim": 0.1999999999999993,
+        "jc-s2-ripple": 0.1999999999999993,
+        "jc-contact": 0.1999999999999993
+      }
+    },
+    {
+      "time": 6.099999999999986,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-s2-rim",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-ripple",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-land": 0.3166999999999991,
+        "jc-s2-rim": 0.3166999999999991,
+        "jc-s2-ripple": 0.3166999999999991,
+        "jc-contact": 0.3166999999999991
+      }
+    },
+    {
+      "time": 6.199999999999986,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-s2-rim",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-ripple",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-land": 0.41669999999999874,
+        "jc-s2-rim": 0.41669999999999874,
+        "jc-s2-ripple": 0.41669999999999874
+      }
+    },
+    {
+      "time": 6.299999999999986,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-s2-rim",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-ripple",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-land": 0.549999999999998,
+        "jc-s2-rim": 0.549999999999998,
+        "jc-s2-ripple": 0.549999999999998
+      }
+    },
+    {
+      "time": 6.399999999999985,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-s2-rim",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-ripple",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-land": 0.6500999999999966,
+        "jc-s2-rim": 0.6500999999999966,
+        "jc-s2-ripple": 0.6500999999999966
+      }
+    },
+    {
+      "time": 6.499999999999985,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 35,
+        "castTime": 1.8,
+        "castClip": "pounce"
+      },
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": true
+        },
+        {
+          "name": "jc-s2-rim",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        },
+        {
+          "name": "jc-s2-ripple",
+          "offset": [
+            0,
+            35
+          ],
+          "flip": true,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-land": 0.7332999999999963,
+        "jc-s2-rim": 0.7332999999999963,
+        "jc-s2-ripple": 0.7332999999999963
+      }
+    },
+    {
+      "time": 6.649999999999984,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-s2-land": 0.8833999999999946,
+        "jc-s2-rim": 0.8833999999999946,
+        "jc-s2-ripple": 0.8833999999999946,
+        "jc-claw": 0
+      }
+    },
+    {
+      "time": 6.749999999999984,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.08330000000000215
+      }
+    },
+    {
+      "time": 6.799999999999984,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.1499000000000006
+      }
+    },
+    {
+      "time": 6.8999999999999835,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.24990000000000023
+      }
+    },
+    {
+      "time": 6.949999999999983,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.3166000000000011
+      }
+    },
+    {
+      "time": 7.049999999999983,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.41660000000000075
+      }
+    },
+    {
+      "time": 7.149999999999983,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.4999999999999982
+      }
+    },
+    {
+      "time": 7.249999999999982,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.5999999999999979
+      }
+    },
+    {
+      "time": 7.299999999999982,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [
+        {
+          "name": "jc-claw",
+          "offset": [
+            110,
+            -15
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-claw": 0.6665999999999999
+      }
+    },
+    {
+      "time": 7.399999999999982,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 7.4499999999999815,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 7.549999999999981,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 7.649999999999981,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "attack",
+        "key": 60
+      },
+      "fx": [],
+      "ages": {}
+    },
+    {
+      "time": 7.7499999999999805,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 1,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0,
+        "jc-charge-front": 0,
+        "jc-s3-charge": 0
+      }
+    },
+    {
+      "time": 7.84999999999998,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 0.8999999999999999,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.13340000000000085,
+        "jc-charge-front": 0.13340000000000085,
+        "jc-s3-charge": 0.13340000000000085
+      }
+    },
+    {
+      "time": 7.99999999999998,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 0.7499999999999998,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.2499999999999991,
+        "jc-charge-front": 0.2499999999999991,
+        "jc-s3-charge": 0.2499999999999991
+      }
+    },
+    {
+      "time": 8.04999999999998,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 0.6999999999999997,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.3166999999999991,
+        "jc-charge-front": 0.3166999999999991,
+        "jc-s3-charge": 0.3166999999999991
+      }
+    },
+    {
+      "time": 8.14999999999998,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 0.5999999999999996,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.4167000000000005,
+        "jc-charge-front": 0.4167000000000005,
+        "jc-s3-charge": 0.4167000000000005
+      }
+    },
+    {
+      "time": 8.249999999999982,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 0.4999999999999996,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.5167000000000019,
+        "jc-charge-front": 0.5167000000000019,
+        "jc-s3-charge": 0.5167000000000019
+      }
+    },
+    {
+      "time": 8.349999999999984,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 0.39999999999999963,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.6167000000000034,
+        "jc-charge-front": 0.6167000000000034,
+        "jc-s3-charge": 0.6167000000000034
+      }
+    },
+    {
+      "time": 8.449999999999985,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 0.29999999999999966,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.7333000000000034,
+        "jc-charge-front": 0.7333000000000034,
+        "jc-s3-charge": 0.7333000000000034
+      }
+    },
+    {
+      "time": 8.699999999999989,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "cast": "jadecrest_roar",
+      "left": 0.049999999999999684,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": true
+        },
+        {
+          "name": "jc-charge-front",
+          "offset": [
+            0,
+            27.25
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-s3-charge",
+          "offset": [
+            105,
+            -115
+          ],
+          "flip": false,
+          "under": false
+        }
+      ],
+      "ages": {
+        "jc-charge-under": 0.983300000000007,
+        "jc-charge-front": 0.983300000000007,
+        "jc-s3-charge": 0.983300000000007
+      }
+    },
+    {
+      "time": 8.79999999999999,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-s3-wave",
+          "offset": [
+            132,
+            -152
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": false
+        }
+      ],
+      "ages": {
+        "jc-s3-wave": 0,
+        "jc-contact": 0
+      }
+    },
+    {
+      "time": 8.999999999999993,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-s3-wave",
+          "offset": [
+            132,
+            -152
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": false
+        }
+      ],
+      "ages": {
+        "jc-s3-wave": 0.18320000000000292,
+        "jc-contact": 0.18320000000000292
+      }
+    },
+    {
+      "time": 8.999999999999993,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-s3-wave",
+          "offset": [
+            132,
+            -152
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": false
+        }
+      ],
+      "ages": {
+        "jc-s3-wave": 0.18320000000000292,
+        "jc-contact": 0.18320000000000292
+      }
+    },
+    {
+      "time": 9.149999999999995,
+      "pos": {
+        "r": 2,
+        "c": 7
+      },
+      "x": 7,
+      "y": 2,
+      "flight": false,
+      "clip": {
+        "anim": "cast",
+        "key": 68,
+        "castTime": 1.05,
+        "castClip": "roar"
+      },
+      "fx": [
+        {
+          "name": "jc-s3-wave",
+          "offset": [
+            132,
+            -152
+          ],
+          "flip": false,
+          "under": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": false
+        },
+        {
+          "name": "jc-contact",
+          "flip": false
+        }
+      ],
+      "ages": {
+        "jc-s3-wave": 0.3166000000000082,
+        "jc-contact": 0.3166000000000082
+      }
+    }
+  ]
+}

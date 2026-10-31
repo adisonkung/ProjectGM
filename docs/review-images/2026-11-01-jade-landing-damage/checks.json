@@ -1,0 +1,9 @@
+{
+  "sourceBase": "36e5adc2f637ffc21a3497b0cbf18ae6569f4225",
+  "productCodeChanged": false,
+  "actualGameCaptures": 2,
+  "browserErrors": 0,
+  "landingAnchorMatchesTakeoffCommit": true,
+  "damageRule": "Chebyshev distance <=2 from full occupied4x2 body; same as BODY/RADIUS_2 in engine",
+  "fixture": "Existing heroes, highHP/manualskills, archer placedR2C7 for clear review"
+}

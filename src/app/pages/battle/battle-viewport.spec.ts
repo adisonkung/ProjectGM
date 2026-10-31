@@ -27,6 +27,23 @@ describe('battle viewport presentation', () => {
       expect(v.height).toBeLessThanOrEqual(h-(h<=500?8:112));
     }
   });
+  it('moves spare floor to sky in Solar without shrinking cells, heroes or the large boss',()=>{
+    for(const [w,h] of [[1440,900],[932,430],[844,390]]){
+      const previous=battleViewport(w,h,.8),solar=battleViewport(w,h,.45,.35);
+      expect(solar.cell).toBeCloseTo(previous.cell,8);
+      expect(solar.extraRows).toBeCloseTo(previous.extraRows+.35,8);
+      expect(solar.height).toBeCloseTo(previous.height,8);
+      expect(solar.height).toBeLessThanOrEqual(h-(h<=500?8:112));
+    }
+  });
+  it('fits raised Aegis spear effects while preserving the decorative floor margin',()=>{
+    for(const [w,h]of [[1440,900],[932,430],[844,390]]){
+      const view=battleViewport(w,h,.8,1.4);
+      expect(view.extraRows).toBeGreaterThanOrEqual(1.4);
+      expect(view.height).toBeLessThanOrEqual(h-(h<=500?8:112));
+      expect(view.groundRows).toBe(.8);
+    }
+  });
   it('does not expand the scene behind the portrait rotation prompt', () => {
     const v = battleViewport(390,844);
     expect(v.extraRows).toBe(0);

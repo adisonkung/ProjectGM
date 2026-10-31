@@ -1,0 +1,25 @@
+{
+  "sourceBase": "82ca646bdfa92b81abcbc2c982f8b9cd9c7093f3",
+  "appTypecheck": "PASS",
+  "specTypecheck": "PASS",
+  "karma": {
+    "passed": 932,
+    "total": 932,
+    "failed": 0
+  },
+  "productionBuild": "PASS",
+  "targetedBattles": 360,
+  "matrixRows": 72,
+  "screenshots": 26,
+  "browserErrors": 0,
+  "fractionalFootprintImplemented": false,
+  "sourceSha256": {
+    "src/app/battle/engine/battle-engine.ts": "6b40be9446aba143184628012146f03cc3b0278fa7847d2bc11d51aa3cccce41",
+    "src/app/core/data/aegis-sentinel.ts": "49a03c17c2f9e340a64a076329b8c95563727657e5dc35eb72eaab93a8d51dcd",
+    "src/app/core/data/jadecrest-guardian.ts": "f350dd1e29211e6adea5daba4deb38b5f64e381a4d3a5f60d8864bf7227effe7",
+    "src/app/core/data/jadecrest-presentation.ts": "f57accb66dd5914e04617dfad307955ebb963847f30cd7c9ef751746aec48ce9",
+    "src/app/core/data/sprites.ts": "892e2bac1dd7f63ce4d4b545dbd9f31301bb5eba7459bcd378b18c2ed4a7ab2a",
+    "src/app/core/data/backgrounds.ts": "fcd318ffd0b7fc71fa47f944462dd1a099c44ec8e1adbd404353e0452fbf4596",
+    "src/app/pages/battle/battle.component.ts": "07aec11628b612cfabc41f55e7797aff21868f887479cf86aa061525af6fa2e7"
+  }
+}
