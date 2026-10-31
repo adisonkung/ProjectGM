@@ -2,7 +2,9 @@
 
 User-authorized follow-up to the three-boss audit (2026-10-31). This branch builds on the reviewed Solar/Aegis/Jade integration at `fef69f1`. The shared 3×2 bodies, arenas, large sprites, base HP/ATK/DEF, tier multipliers, rewards, unlocks and free-choice schedule remain as before. No hero kit or equipment balance changes.
 
-## Aegis — interrupt protection, then burst
+## Aegis — original specialist V1 (S2/S3 order superseded)
+
+Current slot order is S1 Guard → S2 ground Judgement → S3 Light Lance; Break/exposure moved to the beam. See [AEGIS_SLOT_ORDER.md](AEGIS_SLOT_ORDER.md). The following records the pre-swap V1.
 
 - Guard still has a 2.5-second interruptible setup. If it completes, it reduces incoming damage by **80% for 12 seconds**, while the boss resumes fighting. It is finite protection, not immunity or shield HP.
 - Interrupting Guard gives **Exposed Core for 4 seconds**: the boss cannot act and takes **75% more damage**. Existing core VFX and break pose communicate that window.
@@ -43,4 +45,4 @@ Reproduction: `tools/dev/ascension-mechanics-audit.cjs` after `npx tsc -p tsconf
 
 Both typechecks, production build, 922/922 Karma specs and real desktop/mobile review passed. The before/after audit contains 3,600 battles on each revision. The developed starter party retains AUTO clears; low-level Jade/Solar Tier III are no longer automatic starter clears. Lv8 Mid starter still clears all three, so mandatory roster differentiation at every new unlock remains a balance target, not a proven result. See [simulation report](review-images/2026-10-31-ascension-mechanics/simulation-report.md) for exact counts and limits.
 
-Presentation size follow-up: Aegis now uses displayScale1.6 and Jadecrest1.8, with corresponding physical FX anchors and larger Jade charge/landing circles. Bodies and gameplay are unchanged; see [GUARDIAN_SIZE_REVIEW.md](GUARDIAN_SIZE_REVIEW.md). The proposed Aegis S2/S3 swap is not applied.
+Presentation size follow-up: Aegis now uses displayScale1.6 and Jadecrest1.8, with corresponding physical FX anchors and larger Jade charge/landing circles. Bodies and gameplay are unchanged; see [GUARDIAN_SIZE_REVIEW.md](GUARDIAN_SIZE_REVIEW.md). The subsequent user correction applies the S2/S3 swap; see AEGIS_SLOT_ORDER.md.

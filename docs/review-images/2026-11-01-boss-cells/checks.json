@@ -1,0 +1,15 @@
+{
+  "appTypecheck": "passed",
+  "specTypecheck": "passed",
+  "karma": {
+    "passed": 926,
+    "total": 926
+  },
+  "productionBuild": "passed",
+  "targetedBattles": 180,
+  "actualScreenshots": 20,
+  "pageErrors": [],
+  "bossFootprint": "3x2",
+  "heroFootprint": "1x1",
+  "S3actualRecipients": 5
+}

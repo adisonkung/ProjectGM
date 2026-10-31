@@ -31,7 +31,7 @@ function duel(skill: string) {
 }
 
 describe('Aegis Sentinel integration', () => {
-  it('S3 covers exactly the six cells directly ahead of the lower O anchor, including stacked targets once', () => {
+  it('S2 covers exactly the six cells directly ahead of the lower O anchor, including stacked targets once', () => {
     for (const left of [true,false]) {
       const caster = { id: 1,pos: { r: 2,c: 7 },actionFacing: { left } };
       const dir = left ? -1 : 1;
@@ -44,7 +44,7 @@ describe('Aegis Sentinel integration', () => {
     }
   });
 
-  it('S3 keeps its committed forward area if its only opponent moves behind during charge', () => {
+  it('S2 keeps its committed forward area if its only opponent moves behind during charge', () => {
     const s = duel('aegis_judgement');
     s.run(4,() => s.boss.casting?.def.id === 'aegis_judgement');
     expect(s.boss.actionFacing?.left).toBeTrue();
@@ -83,15 +83,16 @@ describe('Aegis Sentinel integration', () => {
     const binding = sheet.monsterFx!['judgement'];
     for (const name of binding.cast!) {
       const track = binding.tracks![name];
-      expect(fxPoseAt(FX[name],2.95,false,track).visible).toBeTrue();
-      expect(fxPoseAt(FX[name],3,false,track).done).toBeTrue();
+      expect(fxPoseAt(FX[name],1.75,false,track).visible).toBeTrue();
+      expect(fxPoseAt(FX[name],1.8,false,track).done).toBeTrue();
     }
     const track = binding.tracks!['ae-s3-charge'];
-    const upright = fxPoseAt(FX['ae-s3-charge'],.2,false,track),raised = fxPoseAt(FX['ae-s3-charge'],1.9,false,track);
+    const upright = fxPoseAt(FX['ae-s3-charge'],.1,false,track),raised = fxPoseAt(FX['ae-s3-charge'],1.14,false,track);
     expect(upright.dx).toBe(0);
     expect(raised.dx).toBeLessThan(-150); // follows the spear raised behind the boss, not its old fixed position.
-    expect(AEGIS_SKILLS['aegis_judgement'].breakRequired).toBe(100);
-    expect(AEGIS_SKILLS['aegis_judgement'].castTime).toBe(3);
+    expect(AEGIS_SKILLS['aegis_judgement'].breakRequired).toBeUndefined();
+    expect(AEGIS_SKILLS['aegis_lance'].breakRequired).toBe(100);
+    expect(AEGIS_SKILLS['aegis_judgement'].castTime).toBe(1.8);
   });
   it('the straight beam hits all three lanes ahead to the edge, once per unit, never behind the committed facing', () => {
     const caster = { id: 1, pos: { r: 2, c: 11 }, actionFacing: { left: true } };
@@ -112,7 +113,7 @@ describe('Aegis Sentinel integration', () => {
     for (const left of [true,false]) for (const cell of [40,80]) {
       const at = fxPlacement(def,cell,11*cell,2*cell,left,0,offset,1,edgeBeamStretch(def,11,left,offset));
       expect(at.x + (left ? -at.width : at.width)).toBeCloseTo(left ? 0 : 16*cell,6);
-      expect(at.height).toBe(3*cell);
+      expect(at.height).toBe(4.5*cell);
       expect(at.rotation).toBe(0);
     }
   });
@@ -129,12 +130,21 @@ describe('Aegis Sentinel integration', () => {
     const start = { ...s.boss.pos };
     s.run(15);
     expect(s.boss.pos).toEqual(start);
-    expect(castTimeline(AEGIS_SKILLS['aegis_lance'],AEGIS_SENTINEL.animation).activation).toBe(1.8);
+    expect(castTimeline(AEGIS_SKILLS['aegis_lance'],AEGIS_SENTINEL.animation).activation).toBe(3);
+  });
+  it('maps S2 to the short ground slam and S3 to the charged Breakable beam',()=>{
+    const [guard,slam,beam]=AEGIS_SENTINEL.skills.map(id=>AEGIS_SKILLS[id]);
+    expect(guard.id).toBe('aegis_guard');expect(slam.id).toBe('aegis_judgement');expect(beam.id).toBe('aegis_lance');
+    expect(slam.castTime).toBe(1.8);expect(slam.breakRequired).toBeUndefined();
+    expect(beam.castTime).toBe(3);expect(beam.breakRequired).toBe(100);
+    expect(beam.onStopped?.removeStatuses).toContain('aegis_guard');expect(beam.brokenStatus).toBe('aegis_exposed');
+    expect(fxPoseAt(FX['ae-s2-charge'],1.1).visible).toBeFalse();
+    expect(fxPoseAt(FX['ae-s2-charge'],1.7).visible).toBeTrue();
   });
   it('all tiers share the three-skill kit and original guardian base stat progression', () => {
     for (const tier of [1,2,3]) {
       const d = MONSTERS[`aegis_sentinel@${tier}`];
-      expect(d.skills).toEqual(['aegis_guard','aegis_lance','aegis_judgement']);
+      expect(d.skills).toEqual(['aegis_guard','aegis_judgement','aegis_lance']);
       expect(d.animation.sheet).toBe('enemy-aegis-sentinel.png');
     }
     expect(AEGIS_SENTINEL.stats.maxHp).toBe(20000);
@@ -153,7 +163,7 @@ describe('Aegis Sentinel integration', () => {
     expect(hasStatus(s.boss, 'aegis_guard')).toBeTrue();
     expect(s.events.filter(x => x.type === 'attack' && x.src === s.boss.id).length).toBeGreaterThan(0);
     s.boss.castSkills.find(cs => cs.def.id === 'aegis_lance')!.cd = 0;
-    s.run(3, () => s.events.some(x => x.type === 'skillActivated' && x.skill === 'aegis_lance'));
+    s.run(4, () => s.events.some(x => x.type === 'skillActivated' && x.skill === 'aegis_lance'));
     expect(s.events.some(x => x.type === 'skillActivated' && x.skill === 'aegis_lance')).toBeTrue();
     expect(hasStatus(s.boss, 'aegis_guard')).toBeTrue();
     s.run(Math.max(0, 12.1 - (s.e.time - appliedAt)));
@@ -161,7 +171,7 @@ describe('Aegis Sentinel integration', () => {
     expect(s.e.time - appliedAt).toBeCloseTo(12.1, 1);
   });
 
-  it('S2 applies one semantic release and unique recipients, without moving the caster', () => {
+  it('S3 beam applies one semantic release and unique recipients, without moving the caster', () => {
     const s = duel('aegis_lance');
     s.run(10, () => s.boss.casting?.def.id === 'aegis_lance');
     const start = { ...s.boss.pos };
@@ -193,7 +203,7 @@ describe('Aegis Sentinel integration', () => {
     const tl = clipTimeline(sh.casts!['guard'], 'cast', { anim: 'cast', castClip: 'guard', castTime: 2.5 });
     expect(tl.duration).toBeCloseTo(2.8, 6);
     expect(tl.duration).toBeLessThan(2.5 + STATUS_EFFECTS['aegis_guard'].duration);
-    expect(castTimeline(AEGIS_SKILLS['aegis_judgement'], AEGIS_SENTINEL.animation).activation).toBe(3);
+    expect(castTimeline(AEGIS_SKILLS['aegis_judgement'], AEGIS_SENTINEL.animation).activation).toBe(1.8);
     let next = 0;
     const shown = new Map<number,string>();
     const playback = new StatusFxPlayback({ spawn: name => { shown.set(++next,name); return next; }, remove: ids => ids.forEach(id => shown.delete(id)) });

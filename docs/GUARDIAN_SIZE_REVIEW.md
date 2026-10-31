@@ -12,7 +12,7 @@ User feedback on the full-size game captures: both bosses were still too small. 
 
 Actual unretouched runtime screenshots and verification JSON: `docs/review-images/2026-10-31-guardian-size/`. Reference screenshots: `../2026-10-31-ascension-mechanics/` within review-images. Captures of the landing impact wait for its real FX age, rather than assuming wall-clock time equals simulation time.
 
-The user's question about swapping Aegis S2/S3 was answered as a recommendation: Guard → ground Judgement → charged beam, with the Break/exposure check on the beam. **That swap is not part of this size change and has not been applied.**
+The user's question about swapping Aegis S2/S3 was answered as a recommendation: Guard → ground Judgement → charged beam, with the Break/exposure check on the beam. **That swap was not applied in the size-only review. It is now applied by the subsequent user correction; see [AEGIS_SLOT_ORDER.md](AEGIS_SLOT_ORDER.md).**
 
 Known boundary limit: enlarged Jade can overhang the left field mask after a legal corner pounce. Corner captures are retained explicitly. The separately controlled bottom-row landing fits the lower floor margin; this does not claim every possible corner effect is unclipped. No combat destination restriction or collision change was introduced just to conceal the overhang.
 

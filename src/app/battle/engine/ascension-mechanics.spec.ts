@@ -40,13 +40,13 @@ describe('Ascension specialist mechanics V1',()=>{
   expect(hasStatus(s.boss,'aegis_exposed')).toBeTrue();expect(modifier(s.boss,'damageTakenMultiplier')).toBe(1.75);
   s.run(4.1);expect(hasStatus(s.boss,'aegis_exposed')).toBeFalse();
  });
- it('removes existing protection when Judgement is broken; one partial Break is insufficient',()=>{
-  const s=arena('aegis_sentinel');s.api.applyStatus(s.boss,'aegis_guard',s.boss);s.cast('aegis_judgement');
+ it('removes existing protection when S3 Light Lance is broken; one partial Break is insufficient',()=>{
+  const s=arena('aegis_sentinel');s.api.applyStatus(s.boss,'aegis_guard',s.boss);s.cast('aegis_lance');
   s.api.tryInterrupt(s.heroes[0],s.boss,60);expect(hasStatus(s.boss,'aegis_guard')).toBeTrue();
   s.api.tryInterrupt(s.heroes[1],s.boss,40);
   expect(s.boss.casting).toBeNull();expect(hasStatus(s.boss,'aegis_guard')).toBeFalse();
   expect(modifier(s.boss,'damageTakenMultiplier')).toBe(1.75);
-  s.run(3.2);expect(s.events.some(e=>e.type==='skillActivated'&&e.skill==='aegis_judgement')).toBeFalse();
+  s.run(3.2);expect(s.events.some(e=>e.type==='skillActivated'&&e.skill==='aegis_lance')).toBeFalse();
  });
  it('pounces on the strongest backliner instead of the taunted frontline, with a target warning then a fixed landing',()=>{
   const s=arena('jadecrest_guardian'),def=MONSTER_SKILLS['jadecrest_pounce'];
