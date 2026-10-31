@@ -1,7 +1,7 @@
 import type { FxDef, SheetDef } from './sprites';
 const charge=(durationMs:number)=>({durationMs,alpha:[[0,0],[120,1],[durationMs-80,1],[durationMs,0]] as [number,number][]});
 export const SOLAR_PRESENTATION:Partial<SheetDef>={
- displayScale:1.25,pixelated:true,hitFlashStrength:.25,anchors:{eye:[11.9,-206.4]},
+ displayScale:1.25,pixelated:true,hitFlashStrength:.25,anchors:{eye:[11.9,-181.4]},
  attackFx:['so-charge-short'],preloadFx:['so-contact','so-s1-impact','so-s2-beam','so-s3-impact'],
  statusFx:{broken:{loop:'so-core'}},deathFx:'so-death',
  monsterFx:{
@@ -20,7 +20,7 @@ export const SOLAR_FX:Record<string,FxDef>={
  'so-contact':{file:'fx-solar-hit.png',frames:8,w:160,h:160,frameMs:60,at:'target',fitCells:1.2,dy:-30,attach:false},
  'so-s2-beam':{file:'fx-solar-beam.png',frames:8,w:768,h:120,frameMs:45,repeat:2,at:'self',anchor:'eye',fitCells:10,fitRows:.8,pivot:[0,.5],attach:false},
  'so-s2-emitter':{file:'fx-solar-emitter.png',frames:1,w:256,h:256,frameMs:650,at:'self',anchor:'eye',fitCells:3.25,attach:false},
- 'so-bolt':{file:'fx-solar-bolt.png',frames:2,w:256,h:128,frameMs:50,at:'target',scale:.7,angle0:0,muzzle:[11.9,-198.4],hitFx:'so-contact'},
+ 'so-bolt':{file:'fx-solar-bolt.png',frames:2,w:256,h:128,frameMs:50,at:'target',scale:.7,angle0:0,muzzle:[11.9,-173.4],hitFx:'so-contact'},
  'so-core':{file:'fx-solar-break.png',frames:4,w:160,h:160,frameMs:160,at:'self',anchor:'eye',fitCells:1.6,attach:true},
  'so-death':{file:'fx-solar-death.png',frames:8,w:320,h:320,frameMs:150,delayMs:350,fadeOutMs:150,at:'self',anchor:'eye',fitCells:5.2,attach:true},
 };

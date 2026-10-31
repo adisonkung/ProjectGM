@@ -37,3 +37,13 @@ The combat simulation stops at victory. Previously the board retained that final
 The standalone preview used placeholder target markers; actual screenshots use the real game heroes and board. The approved pose/VFX direction is preserved, with runtime scale, cell placement, UI, tight death spread and encounter timing adapted to the game. This is not a claim of pixel-identical screenshot composition.
 
 Validation: app/spec typechecks, 916/916 Karma specs, production build, sprite optimizer, native-source SHA256 checks and real Pixi screenshots on desktop/mobile passed. Calendar free-choice remains in its existing development setting; stage selection/data changes do not enable the schedule flag.
+
+## Arena room follow-up
+
+The combat grid remains 16×3; Solar still occupies 3×2 cells at lower-centre anchor (r2,c11), with stationary ranged AI. Its physical pose now uses a constant +16 source-pixel root offset in every clip; eye and muzzle anchors move by the corresponding +25% of a cell. Its 1.25 display scale is retained.
+
+Solar allocates 0.35 decorative rows above and 0.45 below the grid, replacing the former 0.8 below. This preserves square-cell size, actor size and viewport fit. Fixed arenas can also use the existing bounded spare desktop scenery space (up to 0.65 rows), which was previously suppressed by the parallax crop limit. Ordinary tiled maps and lab layout retain their prior path. No playable lanes, melee contact rules or balance values change. Melee units can still approach the upper edge of the boss footprint; they do not move toward its painted eye.
+
+Actual game evidence: `docs/review-images/2026-10-31-solar-arena-room/`. The optional grid screenshot is a diagnostic overlay on the actual running game, not production UI.
+
+Follow-up validation: both typechecks, 917/917 Karma specs and production build passed. Actual desktop/mobile Pixi action captures report zero page errors.

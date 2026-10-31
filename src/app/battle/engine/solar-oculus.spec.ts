@@ -75,7 +75,7 @@ describe('Solar Oculus integration',()=>{
  });
  it('registers the approved eye anchor and fade-only beam without a height-collapse track',()=>{
   const sh=SHEETS['enemy-solar-oculus.png'];expect(sh.displayScale).toBe(1.25);
-  const geometry=unitGeometry(sh,100),sourceEyeY=198+(249-255)*(260/336)*.5;
+  const geometry=unitGeometry(sh,100),sourceEyeY=198+(249-255)*(260/336)*.5+16;
   expect(sh.anchors!['eye'][1]).toBeCloseTo(geometry.bottomY+(sourceEyeY-360)*geometry.k-50,0);
   for(const id of SOLAR_OCULUS.skills)expect(castTimeline(SOLAR_SKILLS[id],SOLAR_OCULUS.animation).activation).toBeCloseTo(SOLAR_SKILLS[id].castTime,5);
   expect(FX['so-s2-beam'].fitRows).toBe(.8);expect(FX['so-s3-ground'].pivot).toEqual(FX['so-s1-seal'].pivot);

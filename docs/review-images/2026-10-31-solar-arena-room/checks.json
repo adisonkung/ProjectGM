@@ -1,0 +1,21 @@
+{
+  "typecheck_app": "passed",
+  "typecheck_spec": "passed",
+  "karma": {
+    "passed": 917,
+    "total": 917
+  },
+  "production_build": "passed",
+  "viewports": {
+    "desktop": {
+      "errors": [],
+      "screenshots": 8,
+      "renderer": "pixi"
+    },
+    "mobile": {
+      "errors": [],
+      "screenshots": 6,
+      "renderer": "pixi"
+    }
+  }
+}

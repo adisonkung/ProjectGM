@@ -120,9 +120,14 @@ export class BattleComponent implements OnDestroy {
   readonly stages = STAGES;
   readonly floor = signal(1);
   readonly viewport = signal({ width: typeof window === 'undefined' ? 1280 : window.innerWidth, height: typeof window === 'undefined' ? 900 : window.innerHeight });
-  readonly fieldLayout = computed(() => battleViewport(this.viewport().width,this.viewport().height,this.mode() === 'lab' ? 0 : .8));
+  readonly fieldLayout = computed(() => {
+    const lab=this.mode()==='lab',bg=this.background();
+    return battleViewport(this.viewport().width,this.viewport().height,lab ? 0 : (bg?.groundRows ?? .8),lab ? 0 : (bg?.skyRows ?? 0));
+  });
   readonly sceneryExtraRows = computed(() => {
     if (this.mode() === 'lab') return 0;
+    // Fixed arena images cover the full field, so extra sky does not expose an empty tiled band.
+    if (this.background()?.arena) return this.fieldLayout().extraRows;
     const requested = this.placing() ? (this.viewport().width >= 900 ? .65 : 0) : this.fieldLayout().extraRows;
     // Reveal only pixels already cropped above the map; never expose an empty image band.
     return Math.min(requested, Math.max(0, ((this.background()?.zoom ?? 1) - 1) * 5));

@@ -1117,6 +1117,10 @@ for (const m of Object.values(MONSTERS)) {
 Object.assign(SHEETS['enemy-jadecrest-guardian.png'], JADECREST_PRESENTATION);
 Object.assign(SHEETS['enemy-solar-oculus.png'], SOLAR_PRESENTATION);
 SHEETS['enemy-solar-oculus.png'].anims.idle!.ms=125;
+// Floating physical body sits lower; source pixels and the 3x2 logical body are unchanged.
+for (const clip of new Set([...Object.values(SHEETS['enemy-solar-oculus.png'].anims), ...Object.values(SHEETS['enemy-solar-oculus.png'].casts ?? {})])) {
+  if (clip) clip.root=[[0,0,16]];
+}
 
 // Aegis: all tiers share one source-pixel sheet, status-owned barrier and core effects.
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
