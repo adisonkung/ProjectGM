@@ -177,7 +177,7 @@ describe('Aegis Sentinel integration', () => {
 
   it('Break core follows a shield anchor and expires with the status rather than leaving a body-centre aura', () => {
     const sheet=SHEETS['enemy-aegis-sentinel.png'];
-    expect(sheet.anchors!['shieldCore']).toEqual([0,-44]);
+    expect(sheet.anchors!['shieldCore']).toEqual([0,-87.5]);
     expect(FX['ae-core'].anchor).toBe('shieldCore');
     expect(FX['ae-core'].frames*FX['ae-core'].frameMs).toBe(3000);
     const shown=new Map<number,string>();let next=0;let ownerSprite: string|undefined;

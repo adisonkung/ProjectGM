@@ -1,0 +1,765 @@
+{
+  "viewport": {
+    "width": 932,
+    "height": 430
+  },
+  "errors": [],
+  "shots": [
+    {
+      "name": "aegis-guard",
+      "time": 5.349999999999989,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "buffs": [
+          {
+            "id": "aegis_guard",
+            "left": 11.149999999999988,
+            "mods": {
+              "damageTakenMultiplier": 0.2
+            }
+          }
+        ]
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "ae-s1-loop",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "ae-s1-hit",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "ae-s1-hit",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        }
+      ],
+      "events": []
+    },
+    {
+      "name": "aegis-exposed",
+      "time": 7.149999999999983,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "buffs": [
+          {
+            "id": "aegis_exposed",
+            "left": 3.8000000000000007,
+            "mods": {
+              "damageTakenMultiplier": 1.75
+            }
+          }
+        ]
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "ae-core",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        }
+      ],
+      "events": [
+        {
+          "type": "broken",
+          "src": 1,
+          "dst": 6,
+          "skill": "aegis_judgement"
+        }
+      ]
+    },
+    {
+      "name": "aegis-s3-charge",
+      "time": 16.000000000000092,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "cast": "aegis_judgement",
+        "target": null,
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "ae-s3-ground-charge",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "ae-s3-charge",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        }
+      ],
+      "events": [
+        {
+          "type": "broken",
+          "src": 1,
+          "dst": 6,
+          "skill": "aegis_judgement"
+        }
+      ]
+    },
+    {
+      "name": "aegis-s3-impact",
+      "time": 18.100000000000122,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "ae-s3-wave",
+          "r": 2,
+          "c": 9
+        },
+        {
+          "name": "ae-s3-impact",
+          "r": 1,
+          "c": 9
+        },
+        {
+          "name": "ae-s3-impact",
+          "r": 2,
+          "c": 8.99999999999999
+        }
+      ],
+      "events": [
+        {
+          "type": "broken",
+          "src": 1,
+          "dst": 6,
+          "skill": "aegis_judgement"
+        }
+      ]
+    },
+    {
+      "name": "aegis-s2-charge",
+      "time": 19.850000000000147,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "cast": "aegis_lance",
+        "target": 3,
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "ae-s2-charge",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        }
+      ],
+      "events": [
+        {
+          "type": "broken",
+          "src": 1,
+          "dst": 6,
+          "skill": "aegis_judgement"
+        }
+      ]
+    },
+    {
+      "name": "jade-roar",
+      "time": 3.049999999999997,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "cast": "jadecrest_roar",
+        "target": 1,
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "jc-charge-under",
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-charge-front",
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-s3-charge",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        }
+      ],
+      "events": []
+    },
+    {
+      "name": "jade-target",
+      "time": 5.799999999999987,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "cast": "jadecrest_pounce",
+        "target": 4,
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "jc-pounce-warning",
+          "follow": 4,
+          "r": 1,
+          "c": 4
+        },
+        {
+          "name": "jc-charge-under",
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-charge-front",
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-s2-trail",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        }
+      ],
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 1,
+              "c": 4
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 1200.0000000000002,
+          "warning": true,
+          "followTarget": 4
+        }
+      ]
+    },
+    {
+      "name": "jade-leap",
+      "time": 6.649999999999984,
+      "boss": {
+        "pos": {
+          "r": 1,
+          "c": 2
+        },
+        "cast": "jadecrest_pounce",
+        "target": 4,
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "jc-s2-trail",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-pounce-warning",
+          "r": 1,
+          "c": 2
+        }
+      ],
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 1,
+              "c": 4
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 1200.0000000000002,
+          "warning": true,
+          "followTarget": 4
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 1,
+              "c": 2
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 599.999999999999,
+          "warning": true
+        }
+      ]
+    },
+    {
+      "name": "jade-land",
+      "time": 7.649999999999981,
+      "boss": {
+        "pos": {
+          "r": 1,
+          "c": 2
+        },
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 7
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 7
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 7
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 1,
+            "c": 4
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "r": 1.0000000000000018,
+          "c": 2.0000000000000178
+        },
+        {
+          "name": "jc-s2-rim",
+          "r": 1.0000000000000018,
+          "c": 2.0000000000000178
+        },
+        {
+          "name": "jc-s2-ripple",
+          "r": 1.0000000000000018,
+          "c": 2.0000000000000178
+        }
+      ],
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 1,
+              "c": 4
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 1200.0000000000002,
+          "warning": true,
+          "followTarget": 4
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 1,
+              "c": 2
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 599.999999999999,
+          "warning": true
+        }
+      ]
+    }
+  ],
+  "fixture": "Actual game; hero HP and ATK adjusted only for sustained visual review; skills manual; cooldowns selected and Aegis Break injected using real engine methods. No compositing."
+}

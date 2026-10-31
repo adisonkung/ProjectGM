@@ -36,7 +36,7 @@ describe('BattleComponent', () => {
     expect(component.anims()[boss.id].castClip).toBe('broken');
     host.handleEvents([hit]);expect(component.anims()[boss.id].key).toBe(key);
     host.snapshot();const core=component.fx().find(f=>f.name==='ae-core')!;
-    expect(core.offset).toEqual([0,-44]);expect(core.flip).toBeTrue();
+    expect(core.offset).toEqual([0,-87.5]);expect(core.flip).toBeTrue();
     tick(2000);component.ngOnDestroy();discardPeriodicTasks();
   }));
   it('keeps a monster cast pose when its committed leap emits movement', fakeAsync(() => {
@@ -50,6 +50,18 @@ describe('BattleComponent', () => {
     const key=component.anims()[boss.id].key;
     host.handleEvents([{type:'move',src:boss.id}]);
     expect(component.anims()[boss.id].anim).toBe('cast');expect(component.anims()[boss.id].key).toBe(key);
+    tick(2000);component.ngOnDestroy();discardPeriodicTasks();
+  }));
+
+  it('pins a landing warning to its committed world cell while the caster is still travelling',fakeAsync(()=>{
+    component.start();component.openMenu();
+    const host=component as unknown as {engine:BattleEngine;handleEvents(events:BattleEvent[]):void};
+    const boss=host.engine.units.find(u=>u.side==='enemy')!;
+    boss.pos={r:2,c:4};boss.x=host.engine.formation.originPosition+11;boss.y=1;
+    host.handleEvents([{type:'monsterGround',src:boss.id,skill:'jadecrest_pounce',cells:[{r:2,c:4}],fx:'jc-pounce-warning',durationMs:600,warning:true}]);
+    const ring=component.fx().find(f=>f.name==='jc-pounce-warning')!;
+    expect(ring.r).toBe(2);expect(ring.c).toBe(host.engine.formation.originPosition+4-host.engine.cameraX);
+    expect(ring.follow).toBeUndefined();
     tick(2000);component.ngOnDestroy();discardPeriodicTasks();
   }));
 

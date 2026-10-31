@@ -1,0 +1,306 @@
+{
+  "viewport": {
+    "width": 932,
+    "height": 430
+  },
+  "errors": [],
+  "shots": [
+    {
+      "name": "jade-bottom-target",
+      "time": 2.3999999999999995,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 11
+        },
+        "cast": "jadecrest_pounce",
+        "target": 4,
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 9
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 9
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 9
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 2,
+            "c": 7
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "jc-pounce-warning",
+          "follow": 4,
+          "r": 2,
+          "c": 7
+        },
+        {
+          "name": "jc-charge-under",
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-charge-front",
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-s2-trail",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        }
+      ],
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 2,
+              "c": 7
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 1200.0000000000002,
+          "warning": true,
+          "followTarget": 4
+        }
+      ]
+    },
+    {
+      "name": "jade-bottom-leap",
+      "time": 3.349999999999996,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 5
+        },
+        "cast": "jadecrest_pounce",
+        "target": 4,
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 8
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 8
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 8
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 2,
+            "c": 7
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 6
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "jc-s2-trail",
+          "follow": 6,
+          "r": 2,
+          "c": 11
+        },
+        {
+          "name": "jc-pounce-warning",
+          "r": 2,
+          "c": 5
+        }
+      ],
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 2,
+              "c": 7
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 1200.0000000000002,
+          "warning": true,
+          "followTarget": 4
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 2,
+              "c": 5
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 599.999999999999,
+          "warning": true
+        }
+      ]
+    },
+    {
+      "name": "jade-bottom-land",
+      "time": 4.249999999999993,
+      "boss": {
+        "pos": {
+          "r": 2,
+          "c": 5
+        },
+        "buffs": []
+      },
+      "heroes": [
+        {
+          "id": 1,
+          "name": "ไป๋หลง",
+          "pos": {
+            "r": 1,
+            "c": 7
+          }
+        },
+        {
+          "id": 2,
+          "name": "เยว่เจิ้ง",
+          "pos": {
+            "r": 0,
+            "c": 7
+          }
+        },
+        {
+          "id": 3,
+          "name": "โม่เย่",
+          "pos": {
+            "r": 2,
+            "c": 7
+          }
+        },
+        {
+          "id": 4,
+          "name": "ถังซวิ่น",
+          "pos": {
+            "r": 2,
+            "c": 7
+          }
+        },
+        {
+          "id": 5,
+          "name": "หลินเสวี่ย",
+          "pos": {
+            "r": 0,
+            "c": 5
+          }
+        }
+      ],
+      "fx": [
+        {
+          "name": "jc-s2-land",
+          "r": 2,
+          "c": 5.000000000000011
+        },
+        {
+          "name": "jc-s2-rim",
+          "r": 2,
+          "c": 5.000000000000011
+        },
+        {
+          "name": "jc-s2-ripple",
+          "r": 2,
+          "c": 5.000000000000011
+        }
+      ],
+      "events": [
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 2,
+              "c": 7
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 1200.0000000000002,
+          "warning": true,
+          "followTarget": 4
+        },
+        {
+          "type": "monsterGround",
+          "src": 6,
+          "skill": "jadecrest_pounce",
+          "cells": [
+            {
+              "r": 2,
+              "c": 5
+            }
+          ],
+          "fx": "jc-pounce-warning",
+          "durationMs": 599.999999999999,
+          "warning": true
+        }
+      ]
+    }
+  ],
+  "fixture": "Actual game; hero HP and ATK adjusted only for sustained visual review; skills manual; cooldowns selected and Aegis Break injected using real engine methods. No compositing."
+}

@@ -1,3 +1,4 @@
+import { bossPoint } from './boss-presentation-scale';
 import { SOLAR_FX, SOLAR_PRESENTATION } from './solar-presentation';
 /**
  * ข้อมูลแผ่น sprite และเอฟเฟกต์สกิล
@@ -1122,17 +1123,18 @@ for (const clip of new Set([...Object.values(SHEETS['enemy-solar-oculus.png'].an
   if (clip) clip.root=[[0,0,16]];
 }
 
+const AEGIS_VISUAL_SCALE=1.6;
 // Aegis: all tiers share one source-pixel sheet, status-owned barrier and core effects.
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
-  pixelated: true, hitFlashStrength: .35,
+  displayScale:AEGIS_VISUAL_SCALE,pixelated: true, hitFlashStrength: .35,
   attackFx: ['ae-attack-thrust'], preloadFx: ['ae-s2-impact', 'ae-s3-impact'],
-  anchors: { weaponTip: [186, -110], judgementTip: AEGIS_S3_TIP_ANCHOR, shieldCore: [0,-44] },
+  anchors: { weaponTip: bossPoint([186,-110],AEGIS_VISUAL_SCALE), judgementTip: bossPoint(AEGIS_S3_TIP_ANCHOR,AEGIS_VISUAL_SCALE), shieldCore: bossPoint([0,-44],AEGIS_VISUAL_SCALE) },
   statusFx: { aegis_guard: { start: 'ae-s1-in', loop: 'ae-s1-loop' }, broken: { loop: 'ae-core' }, aegis_exposed: {loop:'ae-core'} },
   damageFx: { aegis_guard: 'ae-s1-hit' }, deathFx: 'ae-death',
   monsterFx: {
     lance: { cast: ['ae-s2-charge'], activate: ['ae-s2-muzzle', 'ae-s2-beam'] },
     judgement: { cast: ['ae-s3-ground-charge','ae-s3-charge'], activate: ['ae-s3-wave'], tracks: {
-      'ae-s3-charge': { durationMs: 3000, alpha: [[0,0],[120,.8],[1000,1],[3000,1]], motion: AEGIS_S3_TIP_MOTION },
+      'ae-s3-charge': { durationMs: 3000, alpha: [[0,0],[120,.8],[1000,1],[3000,1]], motion: AEGIS_S3_TIP_MOTION.map(([t,x,y])=>[t,x*AEGIS_VISUAL_SCALE,y*AEGIS_VISUAL_SCALE] as [number,number,number]) },
       'ae-s3-ground-charge': { durationMs: 3000, alpha: [[0,0],[180,1],[3000,1]] },
     } },
   },
@@ -1150,11 +1152,11 @@ export const FX: Record<string, FxDef> = {
   'ae-attack-thrust': { file: 'fx-aegis-thrust.png', frames: 6, w: 120, h: 48, frameMs: 35,
     at: 'self', anchor: 'weaponTip', delayMs: 270, scale: .55, pivot: [.15,.5], attach: true, blend: 'add' },
   'ae-s1-in': { file: 'fx-aegis-barrier-in.png', frames: 5, w: 300, h: 250, frameMs: 70,
-    at: 'self', fitCells: 4.06, pivot: [.5,.84], dy: 35, attach: true },
+    at: 'self', fitCells: 6.496, pivot: [.5,.84], dy: 35, attach: true },
   'ae-s1-loop': { file: 'fx-aegis-barrier-loop.png', frames: 64, w: 340, h: 280, frameMs: 40,
-    at: 'self', fitCells: 4.6, pivot: [.5,.77], dy: 35, delayMs: 350, attach: true },
+    at: 'self', fitCells: 7.36, pivot: [.5,.77], dy: 35, delayMs: 350, attach: true },
   'ae-s1-hit': { file: 'fx-aegis-barrier-hit.png', frames: 8, w: 128, h: 128, frameMs: 40,
-    at: 'self', fitCells: .85, dy: -65, dx: 75, attach: true, blend: 'add' },
+    at: 'self', fitCells: 1.36, dy: bossPoint([0,-65],1.6)[1], dx: 120, attach: true, blend: 'add' },
   'ae-s2-charge': { file: 'fx-aegis-s2-charge.png', frames: 32, w: 180, h: 180, frameMs: 40,
     at: 'self', anchor: 'weaponTip', delayMs: 750, fitCells: 2.1, attach: true, repeat: 2, blend: 'add' },
   'ae-s2-muzzle': { file: 'fx-aegis-beam-muzzle.png', frames: 8, w: 256, h: 256, frameMs: 90,
@@ -1167,7 +1169,7 @@ export const FX: Record<string, FxDef> = {
   'ae-s3-charge': { file: 'fx-aegis-s3-tip-charge.png', frames: 75, w: 160, h: 160, frameMs: 40,
     at: 'self', anchor: 'judgementTip', fitCells: 1.7, attach: true, blend: 'add' },
   'ae-s3-ground-charge': { file: 'fx-aegis-s3-ground-charge.png', frames: 75, w: 360, h: 320, frameMs: 40,
-    at: 'self', fitCells: 3.4, pivot: [.5,204/320], dy: 27.25,
+    at: 'self', fitCells: 4.4, pivot: [.5,204/320], dy: 27.25,
     attach: true, layer: 'under' },
   'ae-s3-wave': { file: 'fx-aegis-s3-slam.png', frames: 8, w: 360, h: 240, frameMs: 50,
     at: 'self', groundArea: 'FRONT_RECT_3X2', fitCells: 3, fitRows: 2,
@@ -1175,7 +1177,7 @@ export const FX: Record<string, FxDef> = {
   'ae-s3-impact': { file: 'fx-aegis-impact.png', frames: 8, w: 160, h: 128, frameMs: 40,
     at: 'target', fitCells: .65, dy: -20 },
   'ae-core': { file: 'fx-aegis-core.png', frames: 75, w: 320, h: 260, frameMs: 40,
-    at: 'self', anchor: 'shieldCore', fitCells: 2.4, attach: true, blend: 'add' },
+    at: 'self', anchor: 'shieldCore', fitCells: 3.2, attach: true, blend: 'add' },
   'ae-death': { file: 'fx-aegis-death.png', frames: 10, w: 210, h: 180, frameMs: 65,
     at: 'self', fitCells: 1.6, dy: -75, delayMs: 350 },
 

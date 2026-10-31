@@ -1,0 +1,14 @@
+{
+  "typecheckApp": "passed",
+  "typecheckSpec": "passed",
+  "productionBuild": "passed",
+  "karma": {
+    "passed": 925,
+    "total": 925
+  },
+  "actualScreenshots": 30,
+  "pageErrors": [],
+  "logicalBodies": "3x2 unchanged",
+  "knownLimit": "Jade corner pounces can overhang the left field mask; retained in corner captures",
+  "aegisSkillSwap": "not applied"
+}

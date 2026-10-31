@@ -42,3 +42,5 @@ Reproduction: `tools/dev/ascension-mechanics-audit.cjs` after `npx tsc -p tsconf
 ## Verified outcome
 
 Both typechecks, production build, 922/922 Karma specs and real desktop/mobile review passed. The before/after audit contains 3,600 battles on each revision. The developed starter party retains AUTO clears; low-level Jade/Solar Tier III are no longer automatic starter clears. Lv8 Mid starter still clears all three, so mandatory roster differentiation at every new unlock remains a balance target, not a proven result. See [simulation report](review-images/2026-10-31-ascension-mechanics/simulation-report.md) for exact counts and limits.
+
+Presentation size follow-up: Aegis now uses displayScale1.6 and Jadecrest1.8, with corresponding physical FX anchors and larger Jade charge/landing circles. Bodies and gameplay are unchanged; see [GUARDIAN_SIZE_REVIEW.md](GUARDIAN_SIZE_REVIEW.md). The proposed Aegis S2/S3 swap is not applied.

@@ -1275,11 +1275,11 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'monsterGround': {
-          const u=unitOf(e.src),p=posOf(e.src),d=FX[e.fx];
+          const d=FX[e.fx];
           if(!d)break;
           for(const cell of e.cells){
             const duration=e.durationMs??fxDuration(e.fx),target=e.followTarget!=null?posOf(e.followTarget):null;
-            fx.push({id:++this.floatId,r:target?.r??p.r+cell.r-u.pos.r,c:target?.c??p.c+cell.c-u.pos.c,name:e.fx,angle:0,follow:e.followTarget,
+            fx.push({id:++this.floatId,r:target?.r??cell.r,c:target?.c??cell.c+this.engine.formation.originPosition-this.engine.cameraX,name:e.fx,angle:0,follow:e.followTarget,
               offset:fxOffset(e.fx),under:d.layer==='under',owner:e.src,managed:true,
               track:{durationMs:duration,alpha:[[0,1],[Math.max(0,duration-90),1],[duration,0]]}});
           }
