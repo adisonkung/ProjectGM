@@ -1,0 +1,1179 @@
+{
+  "character": {
+    "file": "enemy-solar-oculus.png",
+    "cols": 48,
+    "cell": [
+      336,
+      360
+    ],
+    "root": [
+      168,
+      346
+    ],
+    "rows": [
+      {
+        "clip": "idle",
+        "row": 1,
+        "samples": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0,
+          1.125,
+          1.25,
+          1.375,
+          1.5,
+          1.625,
+          1.75,
+          1.875,
+          2.0,
+          2.125,
+          2.25,
+          2.375,
+          2.5,
+          2.625,
+          2.75,
+          2.875,
+          3.0,
+          3.125,
+          3.25,
+          3.375,
+          3.5,
+          3.625,
+          3.75,
+          3.875,
+          4.0,
+          4.125,
+          4.25,
+          4.375,
+          4.5,
+          4.625,
+          4.75,
+          4.875,
+          5.0,
+          5.125,
+          5.25,
+          5.375,
+          5.5,
+          5.625,
+          5.75,
+          5.875
+        ]
+      },
+      {
+        "clip": "move",
+        "row": 2,
+        "samples": [
+          0.0,
+          0.25,
+          0.5,
+          0.75,
+          1.0,
+          1.25,
+          1.5,
+          1.75,
+          2.0,
+          2.25,
+          2.5,
+          2.75,
+          3.0,
+          3.25,
+          3.5,
+          3.75,
+          4.0,
+          4.25,
+          4.5,
+          4.75,
+          5.0,
+          5.25,
+          5.5,
+          5.75
+        ]
+      },
+      {
+        "clip": "hurt",
+        "row": 3,
+        "samples": [
+          0.8,
+          0.8400000000000001,
+          0.88,
+          0.92,
+          0.9600000000000001,
+          1.0
+        ]
+      },
+      {
+        "clip": "death",
+        "row": 4,
+        "samples": [
+          0.65,
+          0.87,
+          1.09,
+          1.31,
+          1.53,
+          1.75,
+          1.9700000000000002,
+          2.19,
+          2.41,
+          2.63,
+          2.85,
+          3.07,
+          3.29,
+          3.51,
+          3.73,
+          3.9499999999999997,
+          4.17,
+          4.390000000000001,
+          4.61,
+          4.83
+        ]
+      },
+      {
+        "clip": "attack",
+        "row": 5,
+        "samples": [
+          0.65,
+          0.7000000000000001,
+          0.75,
+          0.8,
+          0.8500000000000001,
+          0.9,
+          0.9500000000000001,
+          1.0,
+          1.05,
+          1.1,
+          1.15,
+          1.2000000000000002,
+          1.25,
+          1.3,
+          1.35,
+          1.4,
+          1.4500000000000002,
+          1.5,
+          1.55,
+          1.6,
+          1.65,
+          1.7000000000000002,
+          1.75,
+          1.8000000000000003,
+          1.85,
+          1.9,
+          1.9500000000000002,
+          2.0
+        ]
+      },
+      {
+        "clip": "seals",
+        "row": 6,
+        "samples": [
+          0.65,
+          0.74,
+          0.8300000000000001,
+          0.9200000000000002,
+          1.01,
+          1.1,
+          1.1900000000000002,
+          1.2800000000000002,
+          1.37,
+          1.46,
+          1.55,
+          1.6400000000000001,
+          1.7300000000000004,
+          1.8200000000000003,
+          1.9100000000000001,
+          2.0,
+          2.0900000000000003,
+          2.18,
+          2.27,
+          2.3600000000000003,
+          2.45,
+          2.54,
+          2.6300000000000003,
+          2.7199999999999998,
+          2.8100000000000005,
+          2.9,
+          2.99,
+          3.08,
+          3.1700000000000004,
+          3.2600000000000002,
+          3.35,
+          3.41,
+          3.47,
+          3.5300000000000002,
+          3.59,
+          3.65,
+          3.71,
+          3.77,
+          3.83,
+          3.89,
+          3.95,
+          4.01,
+          4.07,
+          4.13,
+          4.19,
+          4.25,
+          4.3100000000000005,
+          4.37
+        ]
+      },
+      {
+        "clip": "sweep",
+        "row": 7,
+        "samples": [
+          0.65,
+          0.7333333333333334,
+          0.8166666666666667,
+          0.9,
+          0.9833333333333334,
+          1.0666666666666667,
+          1.15,
+          1.2333333333333334,
+          1.3166666666666667,
+          1.4,
+          1.4833333333333334,
+          1.5666666666666667,
+          1.65,
+          1.7333333333333334,
+          1.8166666666666669,
+          1.9,
+          1.9833333333333334,
+          2.066666666666667,
+          2.15,
+          2.2333333333333334,
+          2.316666666666667,
+          2.4,
+          2.4833333333333334,
+          2.566666666666667,
+          2.65,
+          2.76,
+          2.87,
+          2.98,
+          3.09,
+          3.2,
+          3.31,
+          3.42,
+          3.53,
+          3.6399999999999997,
+          3.75,
+          3.86,
+          3.9699999999999998,
+          4.08,
+          4.1899999999999995,
+          4.3,
+          4.41,
+          4.52,
+          4.63,
+          4.74,
+          4.85,
+          4.96,
+          5.07,
+          5.18
+        ]
+      },
+      {
+        "clip": "eclipse",
+        "row": 8,
+        "samples": [
+          0.65,
+          0.75,
+          0.8500000000000001,
+          0.95,
+          1.05,
+          1.15,
+          1.25,
+          1.35,
+          1.4500000000000002,
+          1.55,
+          1.65,
+          1.75,
+          1.85,
+          1.9500000000000002,
+          2.05,
+          2.15,
+          2.25,
+          2.35,
+          2.45,
+          2.55,
+          2.65,
+          2.75,
+          2.85,
+          2.9499999999999997,
+          3.05,
+          3.15,
+          3.25,
+          3.35,
+          3.4499999999999997,
+          3.55,
+          3.65,
+          3.73,
+          3.81,
+          3.8899999999999997,
+          3.9699999999999998,
+          4.05,
+          4.13,
+          4.21,
+          4.29,
+          4.37,
+          4.45,
+          4.53,
+          4.609999999999999,
+          4.6899999999999995,
+          4.77,
+          4.85,
+          4.93,
+          5.01
+        ]
+      },
+      {
+        "clip": "broken",
+        "row": 9,
+        "samples": [
+          0.75,
+          0.85,
+          0.95,
+          1.05,
+          1.15,
+          1.305,
+          1.46,
+          1.615,
+          1.77,
+          1.9249999999999998,
+          2.08,
+          2.235,
+          2.3899999999999997,
+          2.545,
+          2.7,
+          2.855,
+          3.01,
+          3.165,
+          3.32,
+          3.475,
+          3.63,
+          3.785,
+          3.94,
+          4.095,
+          4.25,
+          4.35,
+          4.45,
+          4.55,
+          4.65,
+          4.75
+        ]
+      }
+    ]
+  },
+  "fx": {
+    "charge": {
+      "file": "fx-solar-charge.png",
+      "frames": 60,
+      "w": 256,
+      "h": 256
+    },
+    "charge-short": {
+      "file": "fx-solar-charge-short.png",
+      "frames": 19,
+      "w": 256,
+      "h": 256
+    },
+    "seal": {
+      "file": "fx-solar-seal.png",
+      "frames": 40,
+      "w": 256,
+      "h": 256
+    },
+    "ground-charge": {
+      "file": "fx-solar-ground-charge.png",
+      "frames": 60,
+      "w": 360,
+      "h": 360
+    },
+    "seal-impact": {
+      "file": "fx-solar-seal-impact.png",
+      "frames": 8,
+      "w": 320,
+      "h": 320
+    },
+    "judgement-impact": {
+      "file": "fx-solar-judgement-impact.png",
+      "frames": 8,
+      "w": 360,
+      "h": 360
+    },
+    "hit": {
+      "file": "fx-solar-hit.png",
+      "frames": 8,
+      "w": 160,
+      "h": 160
+    },
+    "death": {
+      "file": "fx-solar-death.png",
+      "frames": 8,
+      "w": 320,
+      "h": 320
+    },
+    "emitter": {
+      "file": "fx-solar-emitter.png",
+      "frames": 1,
+      "w": 256,
+      "h": 256
+    },
+    "beam": {
+      "file": "fx-solar-beam.png",
+      "frames": 8,
+      "w": 768,
+      "h": 120
+    },
+    "bolt": {
+      "file": "fx-solar-bolt.png",
+      "frames": 2,
+      "w": 256,
+      "h": 128
+    },
+    "break": {
+      "file": "fx-solar-break.png",
+      "frames": 4,
+      "w": 160,
+      "h": 160
+    }
+  },
+  "nativeFx": {
+    "solar-beam-body": {
+      "source": "solar-beam-body.png",
+      "sha256": "c4d0d05047f3c56f1c2a7d001c25fbbbf0523c3ae987ad7e61fd648aa9dc54c5",
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "frames": 8,
+      "sourceGrid": [
+        4,
+        2
+      ],
+      "preparedCell": [
+        512,
+        160
+      ],
+      "pivot": [
+        256,
+        80
+      ],
+      "sourceAnchors": [
+        [
+          271.5,
+          185.0
+        ],
+        [
+          271.5,
+          185.0
+        ],
+        [
+          271.5,
+          185.0
+        ],
+        [
+          271.5,
+          185.0
+        ],
+        [
+          271.5,
+          186.0
+        ],
+        [
+          271.5,
+          186.0
+        ],
+        [
+          271.5,
+          186.0
+        ],
+        [
+          271.5,
+          186.0
+        ]
+      ],
+      "scale": [
+        1,
+        1
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-beam-emitter": {
+      "source": "solar-beam-emitter.png",
+      "sha256": "36d532f98f4fad1d1f3702eaf7ac5897ba4133014f3e792955263221a0fa1f3c",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "frames": 1,
+      "sourceGrid": null,
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        256
+      ],
+      "sourceAnchors": [
+        [
+          717.335328687863,
+          621.186238517692
+        ]
+      ],
+      "scale": [
+        0.3576158940397351,
+        0.3576158940397351
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-bolt": {
+      "source": "solar-bolt.png",
+      "sha256": "b44c4d8641052c5d8685c55c14add388d23f11c9acb3f292ef7e4effd0805a1a",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": 1,
+      "sourceGrid": null,
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        128,
+        256
+      ],
+      "sourceAnchors": [
+        [
+          330,
+          443
+        ]
+      ],
+      "scale": [
+        0.28,
+        0.28
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-death-dissolve": {
+      "source": "solar-death-dissolve.png",
+      "sha256": "4444af3a816f648eb63b6254420b187b56222256490a870e959273f51421f677",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": 8,
+      "sourceGrid": [
+        4,
+        2
+      ],
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        256
+      ],
+      "sourceAnchors": [
+        [
+          222.0,
+          222.0
+        ],
+        [
+          221.5,
+          222.0
+        ],
+        [
+          221.5,
+          222.0
+        ],
+        [
+          222.0,
+          222.0
+        ],
+        [
+          222.0,
+          221.5
+        ],
+        [
+          221.5,
+          221.5
+        ],
+        [
+          221.5,
+          221.5
+        ],
+        [
+          222.0,
+          221.5
+        ]
+      ],
+      "scale": [
+        0.9644670050761421,
+        0.9644670050761421
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-eye-charge-held": {
+      "source": "solar-eye-charge-held.png",
+      "sha256": "44bb8dcfcbe19448d506e9f9fb647ad0c462fff32905bade5dfbe2a8a1236780",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "frames": 1,
+      "sourceGrid": null,
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        256
+      ],
+      "sourceAnchors": [
+        [
+          621.9782490885278,
+          617.641915619404
+        ]
+      ],
+      "scale": [
+        0.42065009560229444,
+        0.42065009560229444
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-eye-charge-in": {
+      "source": "solar-eye-charge-in.png",
+      "sha256": "5915ca8f3d5326ded2a2c33083b890d09df444683ec0a91567d0e6d08bb3555d",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": 8,
+      "sourceGrid": [
+        4,
+        2
+      ],
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        256
+      ],
+      "sourceAnchors": [
+        [
+          226.0,
+          245.0
+        ],
+        [
+          227.5,
+          235.5
+        ],
+        [
+          207.0,
+          226.0
+        ],
+        [
+          206.0,
+          227.5
+        ],
+        [
+          233.0,
+          216.5
+        ],
+        [
+          223.5,
+          220.0
+        ],
+        [
+          218.5,
+          214.0
+        ],
+        [
+          216.0,
+          215.0
+        ]
+      ],
+      "scale": [
+        0.7534246575342466,
+        0.7534246575342466
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-ground-charge-held": {
+      "source": "solar-ground-charge-held.png",
+      "sha256": "2e5ecfa7da696e983b4a963271534a0b868de2e793b47b92b7909eeb91e62b55",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "frames": 1,
+      "sourceGrid": null,
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        380
+      ],
+      "sourceAnchors": [
+        [
+          626.5,
+          901.0
+        ]
+      ],
+      "scale": [
+        0.3292181069958848,
+        [
+          0.38,
+          0.20242914979757085
+        ]
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-ground-charge-in": {
+      "source": "solar-ground-charge-in.png",
+      "sha256": "61300ad093f92f811f29dda97964dbcce1703febcbb7c3df0c0d9ce413bbfc88",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": 8,
+      "sourceGrid": [
+        4,
+        2
+      ],
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        380
+      ],
+      "sourceAnchors": [
+        [
+          218.5,
+          344.0
+        ],
+        [
+          222.5,
+          348.0
+        ],
+        [
+          221.5,
+          350.0
+        ],
+        [
+          220.5,
+          352.0
+        ],
+        [
+          223.0,
+          278.0
+        ],
+        [
+          220.5,
+          278.0
+        ],
+        [
+          223.0,
+          279.0
+        ],
+        [
+          222.0,
+          279.0
+        ]
+      ],
+      "scale": [
+        0.966183574879227,
+        [
+          0.6985294117647058,
+          0.49504950495049505
+        ]
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-hit-impact": {
+      "source": "solar-hit-impact.png",
+      "sha256": "42d9c6a616c9323a9cf6bddc38abffcad1db977c65801119d5cae968e1862327",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": 8,
+      "sourceGrid": [
+        4,
+        2
+      ],
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        256
+      ],
+      "sourceAnchors": [
+        [
+          222.0,
+          222.0
+        ],
+        [
+          221.5,
+          222.0
+        ],
+        [
+          221.5,
+          222.0
+        ],
+        [
+          222.0,
+          222.0
+        ],
+        [
+          222.0,
+          221.5
+        ],
+        [
+          221.5,
+          221.5
+        ],
+        [
+          221.5,
+          221.5
+        ],
+        [
+          222.0,
+          221.5
+        ]
+      ],
+      "scale": [
+        0.9536784741144414,
+        0.9536784741144414
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-judgement-impact": {
+      "source": "solar-judgement-impact.png",
+      "sha256": "a372dbe1645e4081c68119b3546c75e7018f7fec3d48a624a3bafe6bc8e1deec",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": 8,
+      "sourceGrid": [
+        4,
+        2
+      ],
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        380
+      ],
+      "sourceAnchors": [
+        [
+          222.0,
+          363
+        ],
+        [
+          221.5,
+          363
+        ],
+        [
+          221.5,
+          363
+        ],
+        [
+          222.0,
+          363
+        ],
+        [
+          222.0,
+          341
+        ],
+        [
+          221.5,
+          341
+        ],
+        [
+          221.5,
+          341
+        ],
+        [
+          222.0,
+          341
+        ]
+      ],
+      "scale": [
+        0.9237875288683602,
+        0.8498845265588915
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-seal-held": {
+      "source": "solar-seal-held.png",
+      "sha256": "52dc64e144f6295e347726c4c4a7c41b9863285deae7d399565dc879ec4ce370",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "frames": 1,
+      "sourceGrid": null,
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        380
+      ],
+      "sourceAnchors": [
+        [
+          622.0,
+          988.0
+        ]
+      ],
+      "scale": [
+        0.39215686274509803,
+        [
+          0.4025423728813559,
+          0.22727272727272727
+        ]
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-seal-impact": {
+      "source": "solar-seal-impact.png",
+      "sha256": "ff5b27c5f51371438dab0d978d00e46bfed05bba7fd751ca724fa08f4f083f04",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": 8,
+      "sourceGrid": [
+        4,
+        2
+      ],
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        380
+      ],
+      "sourceAnchors": [
+        [
+          222.0,
+          339
+        ],
+        [
+          221.5,
+          317
+        ],
+        [
+          221.5,
+          317
+        ],
+        [
+          222.0,
+          321
+        ],
+        [
+          222.0,
+          331
+        ],
+        [
+          221.5,
+          319
+        ],
+        [
+          221.5,
+          317
+        ],
+        [
+          222.0,
+          317
+        ]
+      ],
+      "scale": [
+        0.9174311926605505,
+        0.8440366972477065
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    },
+    "solar-seal-in": {
+      "source": "solar-seal-in.png",
+      "sha256": "3fd83dcb1b8b99ccd85fcacfb504a51e887597eaae2eb46190245189ba35e773",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "frames": 8,
+      "sourceGrid": [
+        4,
+        2
+      ],
+      "preparedCell": [
+        512,
+        512
+      ],
+      "pivot": [
+        256,
+        380
+      ],
+      "sourceAnchors": [
+        [
+          223.0,
+          318.0
+        ],
+        [
+          225.0,
+          331.0
+        ],
+        [
+          228.5,
+          321.0
+        ],
+        [
+          226.5,
+          321.0
+        ],
+        [
+          222.5,
+          246.0
+        ],
+        [
+          221.5,
+          246.0
+        ],
+        [
+          221.0,
+          246.0
+        ],
+        [
+          221.5,
+          246.0
+        ]
+      ],
+      "scale": [
+        0.954653937947494,
+        [
+          0.8482142857142857,
+          0.42016806722689076
+        ]
+      ],
+      "alphaCleanup": "soft low-alpha matte suppression (12..72) and 7px cell edge feather"
+    }
+  },
+  "sources": [
+    {
+      "file": "character/2222-attack1.png",
+      "sha256": "c526ea37cc9e2349245ae231e73ea3711f9f8f151c9d172346b351b3ecc9cdc1"
+    },
+    {
+      "file": "character/2222-attack2 (3).png",
+      "sha256": "349fcbe37ed77d1c45e165d5efbf9a45d342fbb5770871f8734e6ef64ff4efc0"
+    },
+    {
+      "file": "fx/solar-beam-body.png",
+      "sha256": "c4d0d05047f3c56f1c2a7d001c25fbbbf0523c3ae987ad7e61fd648aa9dc54c5"
+    },
+    {
+      "file": "fx/solar-beam-emitter.png",
+      "sha256": "36d532f98f4fad1d1f3702eaf7ac5897ba4133014f3e792955263221a0fa1f3c"
+    },
+    {
+      "file": "fx/solar-bolt.png",
+      "sha256": "b44c4d8641052c5d8685c55c14add388d23f11c9acb3f292ef7e4effd0805a1a"
+    },
+    {
+      "file": "fx/solar-death-dissolve.png",
+      "sha256": "4444af3a816f648eb63b6254420b187b56222256490a870e959273f51421f677"
+    },
+    {
+      "file": "fx/solar-eye-charge-held.png",
+      "sha256": "44bb8dcfcbe19448d506e9f9fb647ad0c462fff32905bade5dfbe2a8a1236780"
+    },
+    {
+      "file": "fx/solar-eye-charge-in.png",
+      "sha256": "5915ca8f3d5326ded2a2c33083b890d09df444683ec0a91567d0e6d08bb3555d"
+    },
+    {
+      "file": "fx/solar-ground-charge-held.png",
+      "sha256": "2e5ecfa7da696e983b4a963271534a0b868de2e793b47b92b7909eeb91e62b55"
+    },
+    {
+      "file": "fx/solar-ground-charge-in.png",
+      "sha256": "61300ad093f92f811f29dda97964dbcce1703febcbb7c3df0c0d9ce413bbfc88"
+    },
+    {
+      "file": "fx/solar-hit-impact.png",
+      "sha256": "42d9c6a616c9323a9cf6bddc38abffcad1db977c65801119d5cae968e1862327"
+    },
+    {
+      "file": "fx/solar-judgement-impact.png",
+      "sha256": "a372dbe1645e4081c68119b3546c75e7018f7fec3d48a624a3bafe6bc8e1deec"
+    },
+    {
+      "file": "fx/solar-seal-held.png",
+      "sha256": "52dc64e144f6295e347726c4c4a7c41b9863285deae7d399565dc879ec4ce370"
+    },
+    {
+      "file": "fx/solar-seal-impact.png",
+      "sha256": "ff5b27c5f51371438dab0d978d00e46bfed05bba7fd751ca724fa08f4f083f04"
+    },
+    {
+      "file": "fx/solar-seal-in.png",
+      "sha256": "3fd83dcb1b8b99ccd85fcacfb504a51e887597eaae2eb46190245189ba35e773"
+    },
+    {
+      "file": "halo/halo-bottom-tip.png",
+      "sha256": "c8cf11afc5e1f339a4ddc498b7f0c31c6abb327efb51b3f35dfa246e15b9bede"
+    },
+    {
+      "file": "halo/halo-left.png",
+      "sha256": "3f0b545b9a5415251d2c32456083943fed603eba2a1bb3cd5aff3a95510e79e2"
+    },
+    {
+      "file": "halo/halo-lower-left.png",
+      "sha256": "280275186d60f4152c489a45b6ba30382daffecc9e62e7fd4fa805dd2454f5f1"
+    },
+    {
+      "file": "halo/halo-lower-right.png",
+      "sha256": "6b30f5a118d74aa946dd96fcdd1d4e6c00bf2e890f21fda8441cac2d18a027a5"
+    },
+    {
+      "file": "halo/halo-right.png",
+      "sha256": "cded812fb7eddd43225802b3ef7a63f8303a2922f3b19f942bd4dfcb1ff37ae0"
+    },
+    {
+      "file": "halo/halo-top-tip.png",
+      "sha256": "9cae24220923926b66e5dbe776e7ee1fff0ea6807cca2a16a2d528e6119051d3"
+    },
+    {
+      "file": "halo/halo-upper-left.png",
+      "sha256": "b53d2c3635c37b478e30cad9cc75f1202736b2c0f1e07f5f53426d7906e75c44"
+    },
+    {
+      "file": "halo/halo-upper-right.png",
+      "sha256": "38707e95a68bbdff0768f308a6619e91cd217b0f257aad5b40fed013bd45d34f"
+    }
+  ],
+  "reference": "Solar V2 charge + fade-only offscreen beam",
+  "death": "compact physical-part shutdown to keep visible parts inside the runtime cell"
+}

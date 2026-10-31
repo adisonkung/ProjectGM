@@ -1268,6 +1268,30 @@ export class BattleComponent implements OnDestroy {
           this.castFx.delete(e.src);
           break;
         }
+        case 'monsterGround': {
+          const u=unitOf(e.src),p=posOf(e.src),d=FX[e.fx];
+          if(!d)break;
+          for(const cell of e.cells){
+            const duration=e.durationMs??fxDuration(e.fx);
+            fx.push({id:++this.floatId,r:p.r+cell.r-u.pos.r,c:p.c+cell.c-u.pos.c,name:e.fx,angle:0,
+              offset:fxOffset(e.fx),under:d.layer==='under',owner:e.src,managed:true,
+              track:{durationMs:duration,alpha:[[0,1],[Math.max(0,duration-90),1],[duration,0]]}});
+          }
+          break;
+        }
+        case 'monsterBeam': {
+          const u=unitOf(e.src),p=posOf(e.src),left=u.actionFacing?.left??true;
+          const offset=fxOffset(e.fx,u.sprite);
+          const x=p.c+.5+offset[0]/100*(left?-1:1),y=p.r+.5+offset[1]/100;
+          // Aim through this lane, extending beyond the visible edge. Emitter and shaft share one origin.
+          const tx=left?-1.5:17.5,ty=e.lane+.2;
+          const angle=Math.atan2(ty-y,tx-x)*180/Math.PI;
+          const duration=e.durationMs,track={durationMs:duration,alpha:[[0,0],[70,1],[440,1],[duration,0]] as [number,number][]};
+          fx.push({id:++this.floatId,r:y-.5,c:x-.5,name:e.fx,angle,flip:false,offset:[0,0],
+            stretch:Math.hypot(tx-x,ty-y)/fxWidthCells(FX[e.fx]),owner:e.src,managed:true,track});
+          fx.push({id:++this.floatId,r:y-.5,c:x-.5,name:e.emitterFx,angle,flip:false,offset:[0,0],owner:e.src,managed:true,track});
+          break;
+        }
         case 'skillActivated': {
           this.fx.update(list => list.filter(f => f.owner !== e.src));
           fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.src));
@@ -1344,7 +1368,7 @@ export class BattleComponent implements OnDestroy {
         case 'death': {
           const name = SHEETS[unitOf(e.dst).sprite ?? '']?.deathFx;
           if (name && FX[name]) fx.push({ id: ++this.floatId, ...posOf(e.dst), name, angle: 0,
-            offset: fxOffset(name), flip: !!this.facing.get(e.dst) });
+            offset: fxOffset(name, unitOf(e.dst).sprite), flip: !!this.facing.get(e.dst) });
           this.fx.update(list => list.filter(f => f.owner !== e.dst));
           fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.dst));
           this.dropZones(e.dst);

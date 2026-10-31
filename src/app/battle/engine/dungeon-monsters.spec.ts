@@ -91,7 +91,7 @@ describe('Special-dungeon monsters: data', () => {
     expect([0, 1, 2, 3, 4, 5, 6].map(d => ascensionBossFor(day(d)))).toEqual([
       'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel', 'aegis_sentinel',
     ]);
-    for (const boss of ['aegis_sentinel', 'jadecrest_guardian', 'astral_seraph'] as const) {
+    for (const boss of ['aegis_sentinel', 'jadecrest_guardian', 'solar_oculus'] as const) {
       for (const t of [1, 2, 3]) {
         const st = ascensionDuel(t, boss);
         for (let d = 0; d < 7; d++) expect(ascensionSelection(t, boss, day(d)).enemies[0].enemy).toBe(`${boss}@${t}`);

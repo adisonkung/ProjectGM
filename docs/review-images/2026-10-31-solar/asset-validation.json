@@ -1,0 +1,13 @@
+{
+  "nativeFx": 13,
+  "sourceFiles": 23,
+  "sha256": "all matched",
+  "characterRows": 9,
+  "runtimeFxStrips": 12,
+  "displayScale": 1.25,
+  "logicalFootprint": [
+    3,
+    2
+  ],
+  "actualScreenshotErrors": []
+}

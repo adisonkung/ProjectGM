@@ -1,3 +1,5 @@
+import { By } from '@angular/platform-browser';
+import { BoardComponent } from '../../battle/board/board.component';
 import { ComponentFixture, TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
 
 import { provideRouter } from '@angular/router';
@@ -126,6 +128,9 @@ describe('BattleComponent', () => {
     expect(component.outcome()).not.toBeNull(); // rewards already granted
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.overlay')).toBeNull();
+    // Combat is over: death clips must finish instead of freezing on the final simulation snapshot.
+    const board=fixture.debugElement.query(By.directive(BoardComponent)).componentInstance as BoardComponent;
+    expect(board.gameTime()).toBeUndefined();
     tick(BattleComponent.OUTRO_MS + 10);
     fixture.detectChanges();
     expect(component.ending()).toBeFalse();

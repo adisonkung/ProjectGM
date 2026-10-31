@@ -13,6 +13,9 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
 @Component({
   selector: 'app-field',
   template: `
+    @if (bg()?.arena) {
+      <div class="arena" [style.background-image]="'url(' + bg()!.file + ')'"></div>
+    } @else {
     @if (img(); as g) {
       <div class="layers" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + sceneryExtraRows() + ')' : null" [style.height]="sceneryExtraRows() ? 'calc(var(--cell) * ' + baseRows + ')' : null" [style.--shift]="live() ? null : shift()" [style.--dur]="live() ? '0ms' : duration() + 'ms'">
         <div class="img" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + -sceneryExtraRows() + ')' : null" [style.height]="'calc(var(--cell) * ' + (g.cut * baseRows + sceneryExtraRows()) + ')'" [style.background-image]="g.url" [style.background-size]="g.size"
@@ -37,9 +40,11 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
     <div class="ground-margin plain"></div>
     <div class="foot plain"></div>
     }
+    }
   `,
   styles: `
     :host { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .arena {position:absolute;inset:0;bottom:var(--foot,0px);background-size:cover;background-position:center 60%;background-repeat:no-repeat;}
     .layers { position: absolute; left: 0; right: 0; top: 0; bottom: calc(var(--foot, 0px) + var(--ground-extra, 0px)); --screen: var(--cell); }
     .ground-margin { position:absolute;left:0;right:0;bottom:var(--foot,0px);height:var(--ground-extra,0px);
       background-repeat:repeat-x;image-rendering:pixelated;transition:background-position var(--dur,0ms) linear; }

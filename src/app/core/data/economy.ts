@@ -362,12 +362,12 @@ const ascensionDef = (n: number, unlockFloor: number, levels: [number, number]):
 
 /**
  * Future calendar (currently suspended by user): Mon–Tue Aegis · Wed–Thu Jadecrest
- * Guardian · Fri–Sun Astral Seraph. Tier I–III = that guardian's stat step (`<boss>@<tier>`), enrage / hard limit per tier.
+ * Guardian · Fri–Sun Solar Oculus. Tier I–III = that guardian's stat step (`<boss>@<tier>`), enrage / hard limit per tier.
  */
 export const ASCENSION_SCHEDULE: Record<number, (typeof ASCENSION_BOSSES)[number]> = {
-  1: 'aegis_sentinel', 2: 'aegis_sentinel', 3: 'jadecrest_guardian', 4: 'jadecrest_guardian', 5: 'astral_seraph', 6: 'astral_seraph', 0: 'astral_seraph',
+  1: 'aegis_sentinel', 2: 'aegis_sentinel', 3: 'jadecrest_guardian', 4: 'jadecrest_guardian', 5: 'solar_oculus', 6: 'solar_oculus', 0: 'solar_oculus',
 };
-export const ASCENSION_DAY_LABEL: Record<string, string> = { aegis_sentinel: 'จ.–อ.', jadecrest_guardian: 'พ.–พฤ.', astral_seraph: 'ศ.–อา.' };
+export const ASCENSION_DAY_LABEL: Record<string, string> = { aegis_sentinel: 'จ.–อ.', jadecrest_guardian: 'พ.–พฤ.', solar_oculus: 'ศ.–อา.' };
 /** Default guardian: Aegis during free choice, calendar guardian when the temporary flag is disabled. */
 export const ascensionBossFor = (date: Date = new Date()): (typeof ASCENSION_BOSSES)[number] => DEV_FLAGS.ascensionFreeChoice ? ASCENSION_BOSSES[0] : ASCENSION_SCHEDULE[date.getDay()];
 /** Validate external guardian choices; calendar restriction is suspended until all three new bosses ship. */
@@ -377,13 +377,13 @@ export function ascensionSelection(tier: number, requested: string | null, date 
   return ascensionDuel(tier, boss);
 }
 const ASCENSION_LIMITS: [number, number][] = [[90, 180], [110, 210], [130, 240]];
-const ASCENSION_BG = ['twilight-1', 'twilight-1', 'misty-1'];
+const ASCENSION_BG: Record<string,string> = {aegis_sentinel:'ascension-aegis',jadecrest_guardian:'ascension-jadecrest',solar_oculus:'ascension-solar'};
 export function ascensionDuel(tier: number, boss: (typeof ASCENSION_BOSSES)[number]): StageDef {
   const [enrageAt, limit] = ASCENSION_LIMITS[tier - 1];
   const name = `Ascension ${['I', 'II', 'III'][tier - 1]} · ${DUNGEON_MONSTERS[boss].name}`;
-  const stage = bossDuel(`ascension_${tier}`, name, `${boss}@${tier}`, enrageAt, limit, ASCENSION_BG[tier - 1]);
+  const stage = bossDuel(`ascension_${tier}`, name, `${boss}@${tier}`, enrageAt, limit, ASCENSION_BG[boss]);
   // Large guardians use the bottom anchor, leaving the upper lane clear. Keep the logical grid integral.
-  if (boss !== 'aegis_sentinel' && boss !== 'jadecrest_guardian') return stage;
+
   return { ...stage, enemies: [{ enemy: `${boss}@${tier}`, r: 1, c: 2 }],
     waveDefs: [{ spawns: [{ monsterId: `${boss}@${tier}`, formationSlot: { depth: 1, lane: 2 } }] }] };
 }

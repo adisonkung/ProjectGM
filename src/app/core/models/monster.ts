@@ -254,6 +254,10 @@ export interface MonsterSkillDefinition {
   castTime: number;
   /** LEAP_BEHIND: seconds of committed travel before activation; other skills keep instant relocation. */
   leapTravel?: number;
+  /** Opt-in ground warning: lock distinct enemy cells during wind-up; activation hits occupants of those cells. */
+  groundTargets?: { count: number; lockAfter: number; markFx: string; impactFx: string };
+  /** Opt-in recovery sequence: one lane at a time, reversing order on alternate completed casts. */
+  laneSweep?: { interval: number; reverseAlternate?: boolean; beamFx: string; emitterFx: string; durationMs: number };
   cooldown: number;
   /** cooldown after being interrupted (defaults to cooldown) */
   interruptedCooldown?: number;

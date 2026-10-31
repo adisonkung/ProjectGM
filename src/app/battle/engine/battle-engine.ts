@@ -91,7 +91,10 @@ export type BattleEvent =
     }
   /** CAST_PROGRESS: every 25% of the cast */
   | { type: 'castProgress'; src: number; skill: string; pct: number }
-  /** SKILL_ACTIVATED: the cast reached its activation point (effects applied now) */
+  /** Event-owned fixed ground warnings/releases; no sprite-frame gameplay checks. */
+  | { type: 'monsterGround'; src: number; skill: string; cells: Cell[]; fx: string; durationMs?: number; warning?: boolean }
+  | { type: 'monsterBeam'; src: number; skill: string; lane: number; fx: string; emitterFx: string; durationMs: number }
+  /** SKILL_ACTIVATED: the cast reached its activation point (effects applied now). */
   | { type: 'skillActivated'; src: number; skill: string; name: string; targets: number[] }
   /** ร่ายสำเร็จ สกิลออกผล (CAST_COMPLETED) */
   | { type: 'castDone'; src: number; skill: string }
@@ -227,6 +230,7 @@ export interface BattleUnit {
     breakDamage: number;
     /** Opt-in LEAP_BEHIND destination was committed at takeoff; never reselect it on landing. */
     leapStarted?: boolean;
+    groundCells?: Cell[];
     /** interrupt / break commitments of heroes whose skills are on the way (InterruptReservation) */
     commits?: { by: number; breakPower: number; until: number }[];
   } | null;
@@ -1356,6 +1360,22 @@ export class BattleEngine {
     u.casting = { def, left: def.castTime, target: target?.id ?? null, token, nextProgress: CAST_PROGRESS_STEP, breakDamage: 0 };
     if (!isPlayerUnit(u) && canStopCast(def)) this.metrics.interruptOpportunities++;
     if (u.monster) this.metrics.cast(def.id, 'started');
+    if (mdef?.groundTargets) {
+      u.casting.groundCells = [];
+      const pattern = mdef.groundTargets;
+      this.later(pattern.lockAfter, u, () => {
+        if (u.casting?.token !== token) return;
+        const cells: Cell[] = [];
+        for (const enemy of this.units.filter(t => this.isValidTarget(u,t)).sort((a,b)=>a.id-b.id)) {
+          if (cells.some(c=>c.r===enemy.pos.r&&c.c===enemy.pos.c)) continue;
+          cells.push({...enemy.pos});
+          if (cells.length >= pattern.count) break;
+        }
+        u.casting.groundCells = cells;
+        this.events.push({type:'monsterGround',src:u.id,skill:def.id,cells:cells.map(c=>({...c})),fx:pattern.markFx,
+          durationMs:Math.max(0,u.casting.left*1000),warning:true});
+      });
+    }
     // Mist Form: the caster turns to mist for the whole cast (no cast bar)
     const hidden = !!mdef?.untargetableWhileCasting;
     if (hidden) this.applyStatus(u, 'untargetable', u, def.castTime + 0.05);
@@ -1425,12 +1445,13 @@ export class BattleEngine {
     }
   }
 
-  private activateMonsterSkill(u: BattleUnit, def: MonsterSkillDefinition, aimedId: number | null, leaped = false): void {
+  private activateMonsterSkill(u: BattleUnit, def: MonsterSkillDefinition, aimedId: number | null, leaped = false, groundCells?: Cell[]): void {
     const aimedUnit = aimedId != null ? this.units.find(x => x.id === aimedId) ?? null : null;
     // an aimed hero must still be a valid target; an aimed ally must still be alive
     let aim: BattleUnit | null = null;
     if (aimedUnit) aim = aimedUnit.side === u.side ? (aimedUnit.alive ? aimedUnit : null) : this.isValidTarget(u, aimedUnit) ? aimedUnit : null;
     const targets = this.monsterAI.skillTargets(u, def, aim);
+
     // exposure: how often a status-hunting skill (Mist Strike vs bleed) lands on a marked target
     for (const eff of def.effects) {
       if (eff.type !== 'DAMAGE' || !eff.bonusVsStatus || !aim) continue;
@@ -1457,11 +1478,29 @@ export class BattleEngine {
         case 'DAMAGE': {
           const pool = foes();
           const single = eff.area === 'SINGLE';
-          if (eff.center === 'TARGET' && !aim) {
+          if (eff.center === 'TARGET' && !aim && !def.groundTargets && !def.laneSweep) {
             hits = [];
             break;
           }
-          const list = eff.area === 'ALL_ENEMIES' ? pool : resolveArea({ pattern: eff.area, caster: u, primary: aim, center: eff.center, candidates: pool });
+          if (def.laneSweep) {
+            const sequence=def.laneSweep;
+            const counts=u.monster ? (u.monster.sequenceCasts??={}) : {};
+            const turn=counts[def.id]??0; counts[def.id]=turn+1;
+            const order=sequence.reverseAlternate && turn%2 ? [2,1,0] : [0,1,2];
+            const wave=this.flow.waveIndex;
+            order.forEach((lane,index)=>this.later(Math.max(.001,index*sequence.interval),u,()=>{
+              if (this.flow.waveIndex!==wave || this.result) return;
+              const struck=this.units.filter(t=>this.isValidTarget(u,t)&&occupiesCell(t,{r:lane,c:t.pos.c}));
+              for(const t of struck){
+                const res=DamageResolver.resolve({attacker:u,target:t,multiplier:eff.mul,damageType:eff.damageType??'MAGIC',sourceId:def.id});
+                this.applyDamage(t,res.amount,false,false,u);
+              }
+              this.events.push({type:'monsterBeam',src:u.id,skill:def.id,lane,fx:sequence.beamFx,emitterFx:sequence.emitterFx,durationMs:sequence.durationMs});
+            }));
+            hits=[];break;
+          }
+          const list = def.groundTargets ? pool.filter(t=>(groundCells??[]).some(c=>occupiesCell(t,c)))
+            : eff.area === 'ALL_ENEMIES' ? pool : resolveArea({ pattern: eff.area, caster: u, primary: aim, center: eff.center, candidates: pool });
           hits = [];
           for (const t of list) {
             if (single && this.dodged(u, t)) continue;
@@ -1562,6 +1601,7 @@ export class BattleEngine {
       // A missed damage area has no contact recipients; a SELF aim must not create an impact on its caster.
       targets: (def.effects.some(e => e.type === 'DAMAGE') ? hits : targets).map(t => t.id),
     });
+    if (def.groundTargets) this.events.push({type:'monsterGround',src:u.id,skill:def.id,cells:groundCells??[],fx:def.groundTargets.impactFx});
   }
 
   /** a summoned add died: its summoner loses a `grantWhileAlive` status once none of that skill's adds remain */
@@ -1640,7 +1680,7 @@ export class BattleEngine {
       // CHALLENGE strikes: only casts the heroes could have stopped (interruptible or breakable)
       if (!isPlayerUnit(u) && canStopCast(c.def)) this.flow.onEnemyCastCompleted(c.def.id);
       if (c.def.untargetableWhileCasting) this.removeStatus(u, 'untargetable');
-      this.activateMonsterSkill(u, c.def, c.target, c.leapStarted);
+      this.activateMonsterSkill(u, c.def, c.target, c.leapStarted, c.groundCells);
       this.events.push({ type: 'castDone', src: u.id, skill: c.def.name });
       if (u.monster) this.monsterAI.onCastEnd(u, 'completed');
       return;

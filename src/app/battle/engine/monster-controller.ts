@@ -34,6 +34,8 @@ export interface MonsterCombatState {
   /** bumps on every attack start / cancel — a scheduled hit with an old token is ignored */
   attackToken: number;
   currentSkillId: string | null;
+  /** Completed opt-in lane sequences, per skill (per battle, never on static definitions). */
+  sequenceCasts?: Record<string, number>;
   castTimer: number;
   hurtTimer: number;
   recoverTimer: number;

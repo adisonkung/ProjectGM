@@ -1,3 +1,4 @@
+import { SOLAR_FX, SOLAR_PRESENTATION } from './solar-presentation';
 /**
  * ข้อมูลแผ่น sprite และเอฟเฟกต์สกิล
  * ทุกแผ่นใช้ช่องกว้าง 132 px สูง 100 px (หรือ cellH), เท้าอยู่ 14 px เหนือขอบล่างช่อง, ตัวละครอยู่กลาง x=66 และหันขวา
@@ -1114,6 +1115,8 @@ for (const m of Object.values(MONSTERS)) {
 }
 
 Object.assign(SHEETS['enemy-jadecrest-guardian.png'], JADECREST_PRESENTATION);
+Object.assign(SHEETS['enemy-solar-oculus.png'], SOLAR_PRESENTATION);
+SHEETS['enemy-solar-oculus.png'].anims.idle!.ms=125;
 
 // Aegis: all tiers share one source-pixel sheet, status-owned barrier and core effects.
 Object.assign(SHEETS['enemy-aegis-sentinel.png'], {
@@ -1138,6 +1141,7 @@ Object.assign(SHEETS['enemy-aegis-sentinel.png'].anims.die!, {
 
 
 export const FX: Record<string, FxDef> = {
+  ...SOLAR_FX,
   ...JADECREST_FX,
   'ae-attack-thrust': { file: 'fx-aegis-thrust.png', frames: 6, w: 120, h: 48, frameMs: 35,
     at: 'self', anchor: 'weaponTip', delayMs: 270, scale: .55, pivot: [.15,.5], attach: true, blend: 'add' },

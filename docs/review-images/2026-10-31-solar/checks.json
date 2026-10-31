@@ -1,0 +1,25 @@
+{
+  "appTypecheck": "passed",
+  "specTypecheck": "passed",
+  "karma": {
+    "passed": 916,
+    "failed": 0
+  },
+  "productionBuild": "passed",
+  "spriteOptimizer": "passed",
+  "visualReview": {
+    "desktop": [
+      1440,
+      900
+    ],
+    "mobile": [
+      932,
+      430
+    ],
+    "renderer": "Pixi",
+    "pageErrors": 0,
+    "bossDisplayScale": 1.25
+  },
+  "masterMerge": false,
+  "deployment": false
+}

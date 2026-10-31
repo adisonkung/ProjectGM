@@ -5,6 +5,8 @@
  */
 export interface BackgroundDef {
   file: string;
+  /** Single fixed arena image; no repeating/parallax split during a stationary duel. */
+  arena?: boolean;
   /** ขนาดภาพ (px) ใช้คำนวณสัดส่วน */
   w: number;
   h: number;
@@ -15,6 +17,9 @@ export interface BackgroundDef {
 }
 
 export const BACKGROUNDS: Record<string, BackgroundDef> = {
+  'ascension-aegis': {file:'backgrounds/ascension-aegis.webp',w:1672,h:941,cut:.5,zoom:1,arena:true},
+  'ascension-jadecrest': {file:'backgrounds/ascension-jadecrest.webp',w:1672,h:941,cut:.48,zoom:1,arena:true},
+  'ascension-solar': {file:'backgrounds/ascension-solar.webp',w:1672,h:941,cut:.52,zoom:1,arena:true},
   /** ป่าดอกซากุระกลางวัน (ชั้น 1-5) */
   'forest-1': { file: 'backgrounds/forest-1.webp', w: 1894, h: 809, cut: 0.569, zoom: 1.19 },
   /** ป่าสนธยา พระจันทร์ เห็ดเรืองแสง ตะเกียง (ชั้น 6-8) — ขอบหญ้าอยู่ 48% อยู่แล้ว ไม่ต้องขยาย */
