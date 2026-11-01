@@ -84,3 +84,9 @@ html body .app app-battle .reference-lab .lab-simulation{min-width:0;max-width:1
  app-battle .reference-lab app-placement .battle-layout .battle-actions{grid-template-columns:repeat(2,minmax(0,1fr));.lab-start{grid-column:1/-1;grid-row:1;min-height:51px;font-size:18px;}.battle-auto{grid-column:1;grid-row:2;}.lab-simulate{grid-column:2;grid-row:2;}button{min-width:0;font-size:12px;padding:9px 14px;}}
  app-sprite-lab .reference-sprite-lab .sprite-heading{min-width:0;max-width:100%;>div{min-width:0;flex:1;}h1{white-space:normal;}.hero-picker{flex-basis:100%;min-width:0;max-width:100%;select{width:0;min-width:0;flex:1;}}}
 }}
+
+// Expanded animation review room: visual margins do not add combat lanes.
+html body .app app-sprite-lab .reference-sprite-lab{max-width:1500px;--lab-cell:min(90px,calc((100cqw - 24px)/16));.stage{margin:0 auto;}.hero-picker select{width:300px;}.action-tabs button{font-size:14px;}}
+
+html body .app.fantasy:has(app-sprite-lab){max-width:1560px;padding-inline:18px;}
+html body .app app-sprite-lab .reference-sprite-lab .controls.action-tabs{grid-template-columns:repeat(auto-fit,minmax(125px,1fr));}

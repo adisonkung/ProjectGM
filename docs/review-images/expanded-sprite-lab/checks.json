@@ -1,0 +1,35 @@
+{
+  "sourceBase": "fc54843e3e53b49edab355517275f600a2fbffd5",
+  "appTypecheck": "PASS",
+  "specTypecheck": "PASS",
+  "karma": {
+    "passed": 944,
+    "total": 944,
+    "failed": 0
+  },
+  "productionBuild": "PASS",
+  "nativeSpritesChanged": false,
+  "gameplayStatsChanged": false,
+  "saveWritesAdded": false,
+  "browserErrors": {
+    "desktop": [],
+    "mobile": []
+  },
+  "stagePixels": {
+    "desktop": [
+      1380,
+      648
+    ],
+    "mobile": [
+      872,
+      410
+    ]
+  },
+  "sourceSha256": {
+    "src/app/battle/engine/battle-engine.ts": "e8494610f8c8b6e7f37d804d37ca9e12d59ea4c72adf66e8d3a2883947e39820",
+    "src/app/pages/sprite-lab/monster-review.ts": "5f6e5dc0376adf8fb8b48f33f1def9c35c84f9822406a6c750e07513faacf9f1",
+    "src/app/pages/sprite-lab/sprite-lab.component.ts": "dacbdbfb22d9c978fa9bb0f21f6a8b57f4de0b16c19cef2aa3023f5b5eed0f28",
+    "src/app/pages/sprite-lab/sprite-lab.component.html": "63d365f3082cff327a3bd32e931acd9fd1ce0211a445c8e4810d4b662a5fc028",
+    "src/app/shared/_labs-reference.scss": "3e88bd592e971e9f306150f23b23ddaeaeae9e27e06c4f13f418ecfcc9e44f23"
+  }
+}
