@@ -194,8 +194,14 @@ export type SkillEffect =
       /** extra multiplier against a unit carrying `status` (e.g. Mist Strike ×1.2 vs bleeding heroes) */
       bonusVsStatus?: { status: string; mul: number };
     }
-  /** status on the units just hit / the aimed unit / every hero / self */
-  | { type: 'APPLY_STATUS'; status: string; to: 'HIT' | 'TARGET' | 'ALL_HEROES' | 'SELF'; duration?: number }
+  /**
+   * status on the units just hit / the aimed unit / every hero / self ·
+   * `AREA`: every hero inside `area` around the aim (`center` TARGET) or the caster (SELF) — no damage needed (zones)
+   */
+  | {
+      type: 'APPLY_STATUS'; status: string; to: 'HIT' | 'TARGET' | 'ALL_HEROES' | 'SELF' | 'AREA'; duration?: number;
+      area?: import('./combat').AreaPattern; center?: 'TARGET' | 'SELF';
+    }
   /** heal: `pct` of each recipient's max HP (`excludeSummons`: summoned / non-combat units are skipped) */
   | { type: 'HEAL_PCT'; pct: number; to: 'TARGET' | 'ALL_ALLIES'; excludeSummons?: boolean }
   /** land on the nearest free cell behind the aimed hero (never overlapping a unit) */
@@ -353,6 +359,8 @@ export interface AnimationConfig {
   cellH?: number;
   /** sheet cell width in px (default 132) — big bosses use wider cells; drawn at the same px scale */
   cellW?: number;
+  /** presentation scale around the feet (→ `SheetDef.displayScale`; never changes the combat cell) */
+  displayScale?: number;
   /** token icon when there is no sheet (defaults to the display class icon) */
   tokenIcon?: string;
   clips: Record<string, AnimClip>;

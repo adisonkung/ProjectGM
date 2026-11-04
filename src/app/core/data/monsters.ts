@@ -8,13 +8,16 @@ import {
   SemanticEvent,
 } from '../models/monster';
 import { STATUS_EFFECTS } from './status-effects';
-import { STAGE4_10_MONSTERS, STAGE4_10_SKILLS } from './monsters-stage4-10';
+import { FOREST_ARC_MONSTERS, FOREST_ARC_SKILLS } from './monsters-forest-arc';
+import { LEGACY_TOWER_MONSTERS } from './legacy-tower-monsters';
 import { TRIAL_MONSTERS, TRIAL_SKILLS } from './monsters-trials';
 import { FARM_MONSTERS, FARM_SKILLS } from './monsters-farm';
 import { DUNGEON_MONSTERS, DUNGEON_PROJECTILES, DUNGEON_SKILLS, dungeonVariants } from './monsters-dungeon';
 
 /**
- * Data-driven monsters — Normal Forest, Stage 1–3.
+ * Data-driven monsters. Tower Stages 1–10 = the Forest Arc roster (monsters-forest-arc.ts, spec
+ * claude/eldervane-monster-spec-s1-10.md) + Forest Slime below (existing art, spec LOCKED). The pre-spec tower roster
+ * lives in legacy-tower-monsters.ts (dungeon stat sources + test fixture only, never registered here).
  * The combat systems (MonsterController, targeting, DamageResolver, projectiles, casting, buffs) read these
  * definitions; nothing here is monster-specific code. New monsters = new entries.
  *
@@ -31,6 +34,8 @@ const death = (row: number, frames: number) => clip(row, frames, [{ frame: frame
 /** monster buffs are entries of the shared status-effect table */
 export const BUFFS: Record<string, BuffDefinition> = {
   alpha_howl_buff: STATUS_EFFECTS['alpha_howl_buff'],
+  alpha_pack_command: STATUS_EFFECTS['alpha_pack_command'],
+  dark_chant_buff: STATUS_EFFECTS['dark_chant_buff'],
   rally_haste: STATUS_EFFECTS['rally_haste'],
 };
 
@@ -57,30 +62,7 @@ export const PROJECTILES: Record<string, ProjectileDefinition> = {
 // ------------------------------------------------------------------ monster skills (cast system)
 
 export const MONSTER_SKILLS: Record<string, MonsterSkillDefinition> = {
-  alpha_howl: {
-    id: 'alpha_howl',
-    name: 'เสียงหอนจ่าฝูง',
-    label: 'ALPHA HOWL',
-    type: 'BUFF',
-    castTime: 2,
-    cooldown: 12,
-    interruptedCooldown: 12,
-    interruptible: true, interruptPriority: 'HIGH',
-    // counted from the start of combat of its wave (tutorial timing 2.25 s)
-    firstCastDelay: 2.25,
-    clip: 'howl',
-    fx: { id: 'alpha-howl', activationFrame: 5, frameMs: 90 },
-    target: { type: 'ALLIES_WITH_TAG', tag: 'wolf', includeSelf: true },
-    effects: [{ type: 'APPLY_BUFF', buffId: 'alpha_howl_buff' }],
-    // at least one NORMAL Forest Wolf alive (Alpha itself doesn't count) — kill the pack and the Howl stops
-    conditions: [
-      { type: 'ALLY_DEFINITION_ALIVE', monsterId: 'forest_wolf', min: 1 },
-      { type: 'TARGETS_NEED_BUFF', buffId: 'alpha_howl_buff', refreshBelow: 2 },
-    ],
-    recovery: 0.35,
-    interruptRecovery: 0.6,
-  },
-  ...STAGE4_10_SKILLS,
+  ...FOREST_ARC_SKILLS,
   ...TRIAL_SKILLS,
   ...FARM_SKILLS,
   ...DUNGEON_SKILLS,
@@ -107,6 +89,8 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
     skills: [],
     animation: {
       sheet: 'enemy-slime.png',
+      // Forest Arc spec (LOCKED): the existing slime, drawn smaller. 0.8 = PROVISIONAL (exact multiplier TBD)
+      displayScale: 0.8,
       clips: {
         idle: clip(1, 4, [], 150),
         move: clip(2, 6),
@@ -117,143 +101,8 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
     },
   },
 
-  goblin_fighter: {
-    id: 'goblin_fighter',
-    name: 'ก็อบลินนักรบ',
-    rank: 'COMMON',
-    role: 'FRONTLINE_MELEE',
-    tags: ['goblin'],
-    displayClass: 'fighter',
-    stats: {
-      maxHp: 140, attack: 22, defense: 10, moveSpeed: 2.4,
-      attackRange: 1.3, preferredRange: 1.1, attackCooldown: 1.5,
-      attackWindup: 0.255, attackRecovery: 0.25, targetThinkInterval: 0.35,
-      hitReactionDuration: 0.2, minHitReactionInterval: 0.8, collisionRadius: 0.4,
-    },
-    ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.2 }, movement: 'MELEE_CHASE' },
-    attack: { id: 'goblin_sword_slash', damageType: 'PHYSICAL', damageMultiplier: 1, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.25 },
-    skills: [],
-    animation: {
-      sheet: 'enemy-goblin-fighter.png',
-      clips: {
-        idle: clip(1, 4, [], 150),
-        move: clip(2, 6),
-        hurt: clip(3, 3),
-        death: death(4, 6),
-        attack: clip(5, 6, [{ frame: 4, event: 'DAMAGE', name: 'SWORD_DAMAGE' }]),
-      },
-    },
-  },
-
-  goblin_archer: {
-    id: 'goblin_archer',
-    name: 'ก็อบลินพลธนู',
-    rank: 'COMMON',
-    role: 'RANGED_DPS',
-    tags: ['goblin'],
-    displayClass: 'archer',
-    stats: {
-      maxHp: 90, attack: 20, defense: 4, moveSpeed: 2.2,
-      attackRange: 7.0, preferredRange: 6.0, minComfortableRange: 3.0, rangeTolerance: 0.5,
-      attackCooldown: 1.8, attackWindup: 0.34, attackRecovery: 0.3, targetThinkInterval: 0.35,
-      hitReactionDuration: 0.2, minHitReactionInterval: 0.8, collisionRadius: 0.35,
-    },
-    ai: {
-      targeting: { strategy: 'LOWEST_HP_PCT', targetLockDuration: 1.0, similarHpTolerance: 0.05 },
-      movement: 'RANGED_HOLD',
-      maxRetreatSteps: 1,
-    },
-    attack: {
-      id: 'goblin_arrow_shot', damageType: 'PHYSICAL', damageMultiplier: 1, delivery: 'PROJECTILE',
-      projectileId: 'goblin_arrow', clip: 'attack', event: 'PROJECTILE_SPAWN', hitTolerance: 0,
-    },
-    skills: [],
-    animation: {
-      sheet: 'enemy-goblin-archer.png',
-      clips: {
-        idle: clip(1, 4, [], 150),
-        move: clip(2, 6),
-        hurt: clip(3, 3),
-        death: death(4, 6),
-        // 6 frames on the sheet; frame 5 = RELEASE (the arrow is cut out of it and flies as the projectile)
-        attack: clip(5, 6, [{ frame: 5, event: 'PROJECTILE_SPAWN', name: 'PROJECTILE_SPAWN' }]),
-      },
-    },
-  },
-
-  forest_wolf: {
-    id: 'forest_wolf',
-    name: 'หมาป่าป่าลึก',
-    rank: 'COMMON',
-    role: 'FAST_MELEE_DPS',
-    tags: ['wolf'],
-    displayClass: 'fighter',
-    stats: {
-      maxHp: 110, attack: 24, defense: 6, moveSpeed: 4.2,
-      attackRange: 1.2, preferredRange: 1.0, attackCooldown: 1.15,
-      attackWindup: 0.255, attackRecovery: 0.15, targetThinkInterval: 0.25,
-      hitReactionDuration: 0.2, minHitReactionInterval: 0.8, collisionRadius: 0.4,
-    },
-    ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.0 }, movement: 'MELEE_CHASE' },
-    attack: { id: 'forest_wolf_bite', damageType: 'PHYSICAL', damageMultiplier: 1, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.4 },
-    skills: [],
-    animation: {
-      sheet: 'enemy-wolf.png',
-      tokenIcon: 'wolf',
-      clips: {
-        idle: clip(1, 4, [], 150),
-        move: clip(2, 6),
-        hurt: clip(3, 3),
-        death: death(4, 6),
-        attack: clip(5, 6, [{ frame: 4, event: 'DAMAGE', name: 'BITE_DAMAGE' }]),
-      },
-    },
-  },
-
-  alpha_wolf: {
-    id: 'alpha_wolf',
-    name: 'จ่าฝูงหมาป่า',
-    rank: 'ELITE',
-    role: 'ELITE_MELEE_SUPPORT',
-    tags: ['wolf'],
-    displayClass: 'fighter',
-    stats: {
-      maxHp: 450, attack: 32, defense: 15, moveSpeed: 3.5,
-      attackRange: 1.4, preferredRange: 1.2, attackCooldown: 1.35,
-      attackWindup: 0.255, attackRecovery: 0.2, targetThinkInterval: 0.25,
-      // elite: shorter and rarer flinch
-      hitReactionDuration: 0.1, minHitReactionInterval: 2.0, collisionRadius: 0.5,
-    },
-    ai: {
-      targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.0 },
-      movement: 'MELEE_CHASE',
-      skillPriority: ['alpha_howl'],
-    },
-    attack: { id: 'alpha_savage_bite', damageType: 'PHYSICAL', damageMultiplier: 1.25, delivery: 'MELEE', clip: 'attack', event: 'DAMAGE', hitTolerance: 0.4 },
-    skills: ['alpha_howl'],
-    animation: {
-      sheet: 'enemy-alpha-wolf.png',
-      cellH: 120,
-      tokenIcon: 'wolf',
-      clips: {
-        idle: clip(1, 4, [], 150),
-        move: clip(2, 6),
-        hurt: clip(3, 3),
-        death: death(4, 7), // 7 frames on the sheet (… RESIST, FALL, COLLAPSE …)
-        attack: clip(5, 6, [{ frame: 4, event: 'DAMAGE', name: 'SAVAGE_BITE_DAMAGE' }]),
-        howl: {
-          row: 6, frames: 8, frameMs: 90, castDriven: true,
-          events: [
-            { frame: 2, event: 'CAST_START', name: 'HOWL_CAST_START' },
-            { frame: 5, event: 'SKILL_ACTIVATE', name: 'ALPHA_HOWL_ACTIVATED' },
-          ],
-        },
-      },
-    },
-  },
-
-  // ---- Stage 4–10 (mock visuals, data in monsters-stage4-10.ts)
-  ...STAGE4_10_MONSTERS,
+  // ---- Forest Arc, tower Stages 1–10 (round mocks until art arrives)
+  ...FOREST_ARC_MONSTERS,
   // ---- Skill Trial only (monsters-trials.ts)
   ...TRIAL_MONSTERS,
   ...FARM_MONSTERS,
@@ -261,7 +110,8 @@ export const MONSTERS: Record<string, MonsterDefinition> = {
   ...DUNGEON_MONSTERS,
 };
 // role / tier variants of the dungeon monsters (same art + skills, the power of the monster they replace)
-Object.assign(MONSTERS, dungeonVariants(MONSTERS));
+// stat sources = the legacy tower roster (user 2026-11-05: dungeons keep their old power) + everything registered
+Object.assign(MONSTERS, dungeonVariants(MONSTERS, { ...MONSTERS, ...LEGACY_TOWER_MONSTERS }));
 
 // ------------------------------------------------------------------ helpers (pure)
 

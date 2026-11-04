@@ -4,7 +4,7 @@ import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { attackWindupOf, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
 import { FX, SHEETS } from '../../core/data/sprites';
-import { STAGES } from '../../core/data/stages';
+import { LEGACY_TOWER as STAGES } from '../../../testing/legacy-monsters';
 import { newGameState } from '../../core/data/starter';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyPlacement, StageDef } from '../../core/models/stage';
@@ -63,9 +63,10 @@ const targetSwitches = (seq: (number | null)[]) => seq.filter((v, i) => i > 0 &&
 
 describe('Forest monster data', () => {
   it('defines the Stage 1–3 roster with static, reusable definitions', () => {
-    const stage13 = ['forest_slime', 'goblin_fighter', 'goblin_archer', 'forest_wolf', 'alpha_wolf'];
-    expect(Object.keys(MONSTERS).slice(0, 5)).toEqual(stage13);
-    expect(MONSTERS['alpha_wolf'].rank).toBe('ELITE');
+    // legacy Stage 1–3 roster (test fixture) + the Forest Slime the Forest Arc keeps
+    const stage13 = ['forest_slime', 'goblin_fighter', 'legacy_goblin_archer', 'legacy_forest_wolf', 'legacy_alpha_wolf'];
+    for (const id of stage13) expect(MONSTERS[id]).withContext(id).toBeDefined();
+    expect(MONSTERS['legacy_alpha_wolf'].rank).toBe('ELITE');
     for (const m of stage13.map(id => MONSTERS[id])) {
       // stat windup must match the semantic animation event (single source of truth for timing)
       expect(attackWindupOf(m)).toBeCloseTo(m.stats.attackWindup, 5);
@@ -147,11 +148,11 @@ describe('Stage 1–3 monsters', () => {
   });
 
   it('5. Goblin Archer can select a Back Row hero', () => {
-    const b = battle([hero('Tank', 'tank', 0, 1), hero('Healer', 'healer', 4, 1)], [mon('goblin_fighter', 0, 1), mon('goblin_archer', 3, 1)]);
+    const b = battle([hero('Tank', 'tank', 0, 1), hero('Healer', 'healer', 4, 1)], [mon('goblin_fighter', 0, 1), mon('legacy_goblin_archer', 3, 1)]);
     b.freeze();
     b.hero('Healer').hp = b.hero('Healer').maxHp * 0.5;
     b.run(7);
-    const a = b.monsters('goblin_archer')[0];
+    const a = b.monsters('legacy_goblin_archer')[0];
     expect(a.monster!.currentTargetId).toBe(b.hero('Healer').id);
     expect(b.of('projectileHit').some(h => h.dst === b.hero('Healer').id)).toBeTrue();
   });
@@ -159,20 +160,20 @@ describe('Stage 1–3 monsters', () => {
   it('6. Archer prioritizes lowest HP percentage (not raw HP)', () => {
     const b = battle(
       [hero('Big', 'tank', 0, 0, { hp: 1000 }), hero('Small', 'archer', 3, 2, { hp: 200 })],
-      [mon('goblin_archer', 2, 1)],
+      [mon('legacy_goblin_archer', 2, 1)],
     );
     b.freeze();
     b.hero('Big').hp = 400; // 40%, raw 400
     b.hero('Small').hp = 150; // 75%, raw 150
     b.run(0.5);
-    expect(b.monsters('goblin_archer')[0].monster!.currentTargetId).toBe(b.hero('Big').id);
+    expect(b.monsters('legacy_goblin_archer')[0].monster!.currentTargetId).toBe(b.hero('Big').id);
   });
 
   it('7. Archer does not target-flicker when two heroes trade 1% HP back and forth', () => {
-    const b = battle([hero('A', 'fighter', 0, 0, { hp: 1000 }), hero('B', 'fighter', 0, 2, { hp: 1000 })], [mon('goblin_archer', 2, 1)]);
+    const b = battle([hero('A', 'fighter', 0, 0, { hp: 1000 }), hero('B', 'fighter', 0, 2, { hp: 1000 })], [mon('legacy_goblin_archer', 2, 1)]);
     b.freeze();
     const [A, B] = [b.hero('A'), b.hero('B')];
-    const arch = b.monsters('goblin_archer')[0];
+    const arch = b.monsters('legacy_goblin_archer')[0];
     const seq: (number | null)[] = [];
     let flip = false;
     b.run(4, () => {
@@ -185,7 +186,7 @@ describe('Stage 1–3 monsters', () => {
   });
 
   it('8. Arrow damage happens on collision, not at PROJECTILE_SPAWN', () => {
-    const b = battle([hero('Healer', 'healer', 4, 1)], [mon('goblin_archer', 0, 1)]);
+    const b = battle([hero('Healer', 'healer', 4, 1)], [mon('legacy_goblin_archer', 0, 1)]);
     b.freeze();
     const h = b.hero('Healer');
     let hpAtSpawn = -1;
@@ -206,7 +207,7 @@ describe('Stage 1–3 monsters', () => {
   });
 
   it('9. An arrow damages one hero and disappears (a hero in the way is not hit)', () => {
-    const b = battle([hero('Tank', 'tank', 0, 1), hero('Healer', 'healer', 5, 1)], [mon('goblin_archer', 1, 1)]);
+    const b = battle([hero('Tank', 'tank', 0, 1), hero('Healer', 'healer', 5, 1)], [mon('legacy_goblin_archer', 1, 1)]);
     b.freeze();
     b.hero('Healer').hp = 1000;
     let firstHitAt = -1;
@@ -230,11 +231,11 @@ describe('Stage 1–3 monsters', () => {
       b.run(10);
       return b.of('attack')[0].t;
     };
-    expect(firstAttack('forest_wolf')).toBeLessThan(firstAttack('goblin_fighter') * 0.7);
+    expect(firstAttack('legacy_forest_wolf')).toBeLessThan(firstAttack('goblin_fighter') * 0.7);
   });
 
   it('11. Wolf Bite damages only on its DAMAGE event', () => {
-    const b = battle([hero('Tank', 'tank', 0, 1)], [mon('forest_wolf', 0, 1)]);
+    const b = battle([hero('Tank', 'tank', 0, 1)], [mon('legacy_forest_wolf', 0, 1)]);
     b.freeze();
     b.run(4);
     const atk = b.of('attack')[0];
@@ -247,10 +248,10 @@ describe('Stage 1–3 monsters', () => {
   // ---- Alpha Wolf / cast / interrupt / buff
 
   const pack = () => {
-    const b = battle([hero('Tank', 'tank', 5, 1), hero('Archer', 'archer', 5, 0)], [mon('alpha_wolf', 1, 1), mon('forest_wolf', 0, 0), mon('forest_wolf', 0, 2)]);
+    const b = battle([hero('Tank', 'tank', 5, 1), hero('Archer', 'archer', 5, 0)], [mon('legacy_alpha_wolf', 1, 1), mon('legacy_forest_wolf', 0, 0), mon('legacy_forest_wolf', 0, 2)]);
     b.freeze();
-    const alpha = b.monsters('alpha_wolf')[0];
-    const wolves = b.monsters('forest_wolf');
+    const alpha = b.monsters('legacy_alpha_wolf')[0];
+    const wolves = b.monsters('legacy_forest_wolf');
     return { ...b, alpha, wolves };
   };
   const runUntil = (b: ReturnType<typeof pack>, cond: () => boolean, max = 10) => {
@@ -266,7 +267,7 @@ describe('Stage 1–3 monsters', () => {
     expect(start.castTime).toBe(2);
     expect(start.t).toBeGreaterThanOrEqual(2 - 1e-6);
     expect(b.alpha.monster!.state).toBe('CASTING');
-    expect(b.alpha.casting!.def.id).toBe('alpha_howl');
+    expect(b.alpha.casting!.def.id).toBe('legacy_alpha_howl');
   });
 
   it('14. Normal damage does not interrupt Howl', () => {
@@ -431,9 +432,9 @@ describe('Stage 1–3 monsters', () => {
   });
 
   it('27. Melee monsters do not flicker between equally good targets', () => {
-    const b = battle([hero('A', 'fighter', 0, 0), hero('B', 'fighter', 0, 2)], [mon('forest_slime', 0, 1), mon('forest_wolf', 1, 1)]);
+    const b = battle([hero('A', 'fighter', 0, 0), hero('B', 'fighter', 0, 2)], [mon('forest_slime', 0, 1), mon('legacy_forest_wolf', 1, 1)]);
     b.freeze();
-    const seqs = [b.monsters('forest_slime')[0], b.monsters('forest_wolf')[0]].map(m => {
+    const seqs = [b.monsters('forest_slime')[0], b.monsters('legacy_forest_wolf')[0]].map(m => {
       const seq: (number | null)[] = [];
       return { m, seq };
     });
@@ -442,7 +443,7 @@ describe('Stage 1–3 monsters', () => {
   });
 
   it('28. No movement jitter at attack / preferred range', () => {
-    const b = battle([hero('Tank', 'tank', 0, 1), hero('Healer', 'healer', 4, 1)], [mon('goblin_archer', 5, 1), mon('goblin_fighter', 5, 0)]);
+    const b = battle([hero('Tank', 'tank', 0, 1), hero('Healer', 'healer', 4, 1)], [mon('legacy_goblin_archer', 5, 1), mon('goblin_fighter', 5, 0)]);
     b.freeze();
     const cols = new Map<number, number[]>();
     b.run(8, () => b.e.units.filter(u => u.monster).forEach(u => cols.set(u.id, [...(cols.get(u.id) ?? []), u.pos.c])));
@@ -454,8 +455,8 @@ describe('Stage 1–3 monsters', () => {
   });
 
   it('29. Alpha Howl character animation and FX line up at activation', () => {
-    const skill = MONSTER_SKILLS['alpha_howl'];
-    const tl = castTimeline(skill, MONSTERS['alpha_wolf'].animation);
+    const skill = MONSTER_SKILLS['legacy_alpha_howl'];
+    const tl = castTimeline(skill, MONSTERS['legacy_alpha_wolf'].animation);
     expect(tl.startFrame).toBe(2);
     expect(tl.activateFrame).toBe(5);
     expect(tl.characterActivation).toBeCloseTo(skill.castTime, 6);
@@ -481,7 +482,7 @@ describe('Stage 1–3 monsters', () => {
   });
 
   it('hit reactions are rate-limited (no stun-lock) and elites flinch less', () => {
-    const b = battle([hero('Tank', 'tank', 5, 1)], [mon('goblin_fighter', 5, 1), mon('alpha_wolf', 5, 0)]);
+    const b = battle([hero('Tank', 'tank', 5, 1)], [mon('goblin_fighter', 5, 1), mon('legacy_alpha_wolf', 5, 0)]);
     b.freeze();
     b.run(0.3);
     const g = b.monsters('goblin_fighter')[0];
@@ -492,12 +493,12 @@ describe('Stage 1–3 monsters', () => {
     }
     const reactions = b.of('damage').filter(d => d.dst === g.id && d.hurt).length;
     expect(reactions).toBeLessThanOrEqual(1);
-    expect(MONSTERS['alpha_wolf'].stats.minHitReactionInterval).toBeGreaterThan(MONSTERS['goblin_fighter'].stats.minHitReactionInterval);
+    expect(MONSTERS['legacy_alpha_wolf'].stats.minHitReactionInterval).toBeGreaterThan(MONSTERS['goblin_fighter'].stats.minHitReactionInterval);
   });
 });
 
 describe('Forest monster sprite sheets', () => {
-  const sheeted = ['forest_slime', 'goblin_fighter', 'goblin_archer', 'forest_wolf', 'alpha_wolf'];
+  const sheeted = ['forest_slime', 'goblin_fighter', 'legacy_goblin_archer', 'legacy_forest_wolf', 'legacy_alpha_wolf'];
 
   it('every Stage 1–3 monster has a generated sheet whose rows/frames come from its clips', () => {
     for (const id of sheeted) {
@@ -516,8 +517,8 @@ describe('Forest monster sprite sheets', () => {
   });
 
   it('frame counts match the art sheets (archer shot 6, alpha death 7, howl 8)', () => {
-    expect(MONSTERS['goblin_archer'].animation.clips['attack'].frames).toBe(6);
-    expect(MONSTERS['alpha_wolf'].animation.clips['death'].frames).toBe(7);
+    expect(MONSTERS['legacy_goblin_archer'].animation.clips['attack'].frames).toBe(6);
+    expect(MONSTERS['legacy_alpha_wolf'].animation.clips['death'].frames).toBe(7);
     const cast = SHEETS['enemy-alpha-wolf.png'].anims.cast!;
     expect(cast).toEqual(jasmine.objectContaining({ row: 5, frames: 8, castStart: 1, activate: 4 }));
     expect(SHEETS['enemy-alpha-wolf.png'].cellH).toBe(120);
@@ -527,7 +528,7 @@ describe('Forest monster sprite sheets', () => {
     const arrow = PROJECTILES['goblin_arrow'].fx;
     expect(SHEETS['enemy-goblin-archer.png'].projectile?.attack).toBe(arrow);
     expect(FX[arrow]).toBeDefined();
-    const howl = MONSTER_SKILLS['alpha_howl'].fx!;
+    const howl = MONSTER_SKILLS['legacy_alpha_howl'].fx!;
     expect(FX[howl.id].frames).toBe(8);
     expect(FX[howl.id].frameMs).toBe(howl.frameMs);
     expect(howl.activationFrame).toBe(5);

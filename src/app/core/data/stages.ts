@@ -1,127 +1,89 @@
 import { StageDef } from '../models/stage';
 
 /**
- * ตำแหน่งศัตรูเป็นพิกัดในฝั่งศัตรู (ลึก 6 x 3 เลน)
- * r = ความลึก: 0 คือหน้าสุด (ติดเส้นกลาง), 5 คือหลังสุด · c = เลน 0 (บน) - 2 (ล่าง)
- * ด่านกำจัดมี 3 เวฟ: enemies = เวฟ 1, rounds = เวฟ 2-3 (เวฟสุดท้ายหนักสุด/มีบอส)
- * เวลาจำกัดนับเฉพาะช่วงต่อสู้ (ไม่นับช่วงเดินไปเวฟถัดไป)
+ * Tower Stages 1–10 — Forest Arc (claude/eldervane-monster-spec-s1-10.md §3, 2026-11-05).
+ * Wave compositions = the spec's PROPOSED table (not locked). Floor level / time limit / `monsterTuning` /
+ * background kept from the previous tower so progression and rewards are unchanged — difficulty is PROVISIONAL
+ * until a balance pass (`npm run balance`). The previous floors are in legacy-tower-stages.ts (test fixture only).
+ *
+ * Enemy positions are enemy-side coordinates: r = depth 0 (front, next to the middle zone) … 5 (back), c = lane 0–2.
+ * Melee at depth 0–1, archers / casters at depth 3, wraiths at depth 2, bosses at depth 1 centre lane.
+ * Enemy waves: `enemies` = wave 1, `rounds` = waves 2–3. Time limits count combat only.
  */
+type Spawn = { enemy: string; r: number; c: number };
+const at = (enemy: string, r: number, ...lanes: number[]): Spawn[] => lanes.map(c => ({ enemy, r, c }));
+
 export const STAGES: StageDef[] = [
-  // ---- Normal Forest (data-driven monsters, core/data/monsters.ts) — encounter data lives here, not in the monsters
-  // Stage 1 teaches basic combat: targeting, movement, attack, damage, death, formation contact (no casts)
-  { floor: 1, recommendedLevel: 1, name: 'Normal Forest — Forest Entrance', background: 'forest-1', mode: 'eliminate', timeLimit: 90, enemies: [
-    { enemy: 'forest_slime', r: 0, c: 0 }, { enemy: 'forest_slime', r: 0, c: 1 }, { enemy: 'forest_slime', r: 0, c: 2 },
-  ], rounds: [
-    [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 1 }, { enemy: 'goblin_fighter', r: 0, c: 2 }],
-    [{ enemy: 'forest_slime', r: 0, c: 0 }, { enemy: 'forest_slime', r: 0, c: 1 }, { enemy: 'forest_slime', r: 0, c: 2 },
-      { enemy: 'goblin_fighter', r: 1, c: 0 }, { enemy: 'goblin_fighter', r: 1, c: 2 }],
-  ] },
-  // Stage 2 teaches frontline vs backline, projectiles, target priority (archers hunt the lowest HP%) → Focus Target
-  { floor: 2, recommendedLevel: 1, name: "Normal Forest — Hunter's Path", background: 'forest-1', mode: 'eliminate', timeLimit: 100, enemies: [
-    { enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 2 }, { enemy: 'goblin_archer', r: 3, c: 1 },
-  ], rounds: [
-    [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 2 },
-      { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
-    [{ enemy: 'goblin_fighter', r: 0, c: 0 }, { enemy: 'goblin_fighter', r: 0, c: 1 }, { enemy: 'goblin_fighter', r: 0, c: 2 },
-      { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
-  ] },
-  // Stage 3 teaches fast melee pressure, the first elite, cast bars and Interrupt (Alpha Howl)
-  { floor: 3, recommendedLevel: 2, name: 'Normal Forest — Wolf Territory', background: 'forest-1', mode: 'eliminate', timeLimit: 110, enemies: [
-    { enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 1 }, { enemy: 'forest_wolf', r: 0, c: 2 },
-  ], rounds: [
-    [{ enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 1 }, { enemy: 'forest_wolf', r: 0, c: 2 },
-      { enemy: 'forest_wolf', r: 1, c: 0 }, { enemy: 'forest_wolf', r: 1, c: 2 }],
-    // Alpha centred just behind the pack (first Howl no sooner than 2 s: MONSTER_SKILLS.alpha_howl.firstCastDelay)
-    [{ enemy: 'forest_wolf', r: 0, c: 0 }, { enemy: 'forest_wolf', r: 0, c: 2 }, { enemy: 'alpha_wolf', r: 1, c: 1 },
-      { enemy: 'forest_wolf', r: 1, c: 0 }, { enemy: 'forest_wolf', r: 1, c: 2 }],
-  ] },
-
-  // ---- Stage 4–10 (core/data/monsters-stage4-10.ts) — mock visuals until art exists.
-  // Monster definitions keep their authored stats — difficulty comes from composition, casts, phases and decisions.
-  // Only small `monsterTuning` is allowed (clamped by the engine). `recommendedLevel` drives `npm run balance`.
-  // Every stage adds ONE new problem; boss waves hold only the boss (its adds come from its own skills / phases).
-
-  // Stage 4 — Enchanted Grove: poison + magic AoE (mushrooms midline, spirits backline) — punishes a tightly stacked party
-  { floor: 4, recommendedLevel: 3, name: 'Enchanted Grove', background: 'twilight-1', mode: 'eliminate', timeLimit: 110, enemies: [
-    { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
-    { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 },
-  ], rounds: [
-    [{ enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
-      { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
-    [{ enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 1 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
-      { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
-  ] },
-  // Stage 5 — Twilight Hunters: backline dive + formation (Shadow Panthers leap onto healers / mages / archers)
-  { floor: 5, recommendedLevel: 5, monsterTuning: { hp: 1.2, atk: 1.1, def: 1.1 }, name: 'Twilight Hunters', background: 'twilight-1', mode: 'eliminate', timeLimit: 110, enemies: [
-    { enemy: 'shadow_panther', r: 0, c: 1 },
-    { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 },
-  ], rounds: [
-    [{ enemy: 'shadow_panther', r: 0, c: 0 }, { enemy: 'shadow_panther', r: 0, c: 2 },
-      { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 }],
-    [{ enemy: 'shadow_panther', r: 0, c: 0 }, { enemy: 'shadow_panther', r: 0, c: 2 },
-      { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
-      { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
-  ] },
-  // Stage 6 — Corrupted Tribe: enemy healing + priority target (Goblin Guards shield the Shaman; Focus / Interrupt it)
-  { floor: 6, recommendedLevel: 6, monsterTuning: { hp: 1.12, atk: 1.05, def: 1.05 }, name: 'Corrupted Tribe', background: 'twilight-1', mode: 'eliminate', timeLimit: 120, enemies: [
-    { enemy: 'goblin_guard', r: 0, c: 0 }, { enemy: 'goblin_guard', r: 0, c: 2 }, { enemy: 'goblin_shaman', r: 4, c: 1 },
-    { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 },
-  ], rounds: [
-    // final Level pass: F6 is the last transition floor, not a wall — one shaman per wave (no double Healing Ritual)
-    [{ enemy: 'goblin_guard', r: 0, c: 0 }, { enemy: 'goblin_guard', r: 0, c: 1 }, { enemy: 'goblin_guard', r: 0, c: 2 },
-      { enemy: 'goblin_shaman', r: 4, c: 1 }, { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
-    [{ enemy: 'goblin_guard', r: 0, c: 0 }, { enemy: 'goblin_guard', r: 0, c: 2 },
-      { enemy: 'goblin_shaman', r: 4, c: 1 },
-      { enemy: 'goblin_archer', r: 3, c: 0 }, { enemy: 'goblin_archer', r: 3, c: 2 }],
-  ] },
-  // Stage 7 — Guardian of Twilight: first boss (Root Slam: survive · Entangling Roots: situational · Call of the Forest: interrupt)
-  { floor: 7, recommendedLevel: 8, monsterTuning: { hp: 1.3, atk: 1.12, def: 1.12 }, name: 'Guardian of Twilight', background: 'twilight-1', mode: 'eliminate', timeLimit: 150, enemies: [
-    // lighter opening waves (final Level pass): the boss is the exam, not the attrition before it
-    { enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
-    { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 2 },
-  ], rounds: [
-    [{ enemy: 'magic_mushroom', r: 2, c: 0 }, { enemy: 'magic_mushroom', r: 2, c: 2 },
-      { enemy: 'forest_spirit', r: 4, c: 0 }, { enemy: 'forest_spirit', r: 4, c: 1 }, { enemy: 'forest_spirit', r: 4, c: 2 }],
-    // no starting adds: the boss summons them
-    [{ enemy: 'elder_treant', r: 1, c: 1 }],
-  ] },
-  // Stage 8 — Into the Mist: untargetable hunters, body blocking, bleed attrition
-  { floor: 8, recommendedLevel: 8, monsterTuning: { hp: 1.25, atk: 1.15, def: 1.1 }, name: 'Into the Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 120, enemies: [
-    { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-    { enemy: 'corrupted_wolf', r: 1, c: 1 },
-    // wolves open wounds, the wraith hunts the bleeding hero (final Level pass: wolf → bleed → wraith synergy)
-    { enemy: 'mist_wraith', r: 2, c: 1 },
-  ], rounds: [
-    [{ enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-      { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }],
-    [{ enemy: 'corrupted_treant', r: 0, c: 0 }, { enemy: 'corrupted_treant', r: 0, c: 2 },
-      { enemy: 'corrupted_wolf', r: 1, c: 0 }, { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'corrupted_wolf', r: 1, c: 2 },
-      { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }, { enemy: 'mist_witch', r: 3, c: 1 }],
-  ] },
-  // Stage 9 — Death Mist: target-priority puzzle (Treant blocks · Shaman heals / links · Witch controls · Wolves press · Wraith hunts)
-  { floor: 9, recommendedLevel: 10, monsterTuning: { hp: 1.3, atk: 1.18, def: 1.18 }, name: 'Death Mist', background: 'misty-1', mode: 'eliminate', timeLimit: 140, enemies: [
-    // encounter pass (claude/patch1-encounter-rebalance-f9-f10-spec.md): tactical resource management — more stoppable
-    // casts than interrupts every wave (Dark Heal / Nightmare HIGH, Soul Link, Dark Fog unstoppable), casters at depth 3
-    { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-    { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'dark_shaman', r: 3, c: 0 }, { enemy: 'mist_witch', r: 3, c: 2 },
-  ], rounds: [
-    [{ enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-      { enemy: 'mist_witch', r: 3, c: 0 }, { enemy: 'dark_shaman', r: 3, c: 1 }, { enemy: 'dark_shaman', r: 3, c: 2 }],
-    [{ enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-      { enemy: 'mist_wraith', r: 2, c: 1 }, { enemy: 'dark_shaman', r: 3, c: 0 }, { enemy: 'mist_witch', r: 3, c: 1 }, { enemy: 'mist_witch', r: 3, c: 2 }],
-    [{ enemy: 'corrupted_treant', r: 0, c: 0 }, { enemy: 'corrupted_treant', r: 0, c: 2 }, { enemy: 'corrupted_wolf', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 1, c: 1 },
-      { enemy: 'mist_wraith', r: 2, c: 0 }, { enemy: 'mist_wraith', r: 2, c: 2 }, { enemy: 'dark_shaman', r: 3, c: 1 }, { enemy: 'mist_witch', r: 3, c: 0 }, { enemy: 'mist_witch', r: 3, c: 2 }],
-  ] },
-  // Stage 10 — Heart of the Dark Forest: the full system exam (seal + wraiths 70%, Sacrifice 40%, enrage + Forest Oblivion 15%)
-  { floor: 10, recommendedLevel: 10, monsterTuning: { hp: 1.4, atk: 1.22, def: 1.25 }, name: 'Heart of the Dark Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 210, enemies: [
-    { enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-    // encounter pass (claude/patch1-encounter-rebalance-f9-f10-spec.md): one Wraith — wave 1 = bleed / survival pressure
-    { enemy: 'corrupted_wolf', r: 1, c: 1 }, { enemy: 'mist_wraith', r: 2, c: 1 },
-  ], rounds: [
-    // wave 2 = caster priority + backline threat (the second Wraith moved here)
-    [{ enemy: 'corrupted_treant', r: 0, c: 1 }, { enemy: 'corrupted_wolf', r: 0, c: 0 }, { enemy: 'corrupted_wolf', r: 0, c: 2 },
-      { enemy: 'mist_wraith', r: 2, c: 1 }, { enemy: 'dark_shaman', r: 4, c: 0 }, { enemy: 'mist_witch', r: 4, c: 2 }],
-    // the boss alone: its phases create the adds
-    [{ enemy: 'fallen_forest_guardian', r: 1, c: 1 }],
-  ] },
+  // S1 Forest Entrance — basic combat, formation, targeting (Forest Slime = existing art, smaller)
+  { floor: 1, recommendedLevel: 1, name: 'Forest Entrance', background: 'forest-1', mode: 'eliminate', timeLimit: 90,
+    enemies: at('forest_slime', 0, 0, 2),
+    rounds: [
+      [...at('forest_goblin', 0, 0, 2), ...at('forest_slime', 1, 1)],
+      [...at('forest_goblin', 0, 0, 2), ...at('forest_slime', 1, 0, 2)],
+    ] },
+  // S2 Goblin Trail — ranged threat and Focus Target
+  { floor: 2, recommendedLevel: 1, name: 'Goblin Trail', background: 'forest-1', mode: 'eliminate', timeLimit: 100,
+    enemies: at('forest_goblin', 0, 0, 2),
+    rounds: [
+      [...at('forest_goblin', 0, 0, 2), ...at('goblin_archer', 3, 1)],
+      [...at('forest_wolf', 0, 1), ...at('forest_goblin', 0, 0), ...at('goblin_archer', 3, 0, 2)],
+    ] },
+  // S3 Alpha Territory — first Interrupt lesson (Alpha Wolf first appears here: spec LOCKED)
+  { floor: 3, recommendedLevel: 2, name: 'Alpha Territory', background: 'forest-1', mode: 'eliminate', timeLimit: 110,
+    enemies: at('forest_wolf', 0, 0, 2),
+    rounds: [
+      [...at('forest_wolf', 0, 0, 2), ...at('goblin_archer', 3, 1)],
+      // Alpha centred just behind its pack — the Howl (2 s, interruptible) is the lesson
+      [...at('forest_wolf', 0, 0, 2), ...at('alpha_wolf', 1, 1)],
+    ] },
+  // S4 Fungal Grove — slower, sturdier enemies
+  { floor: 4, recommendedLevel: 3, name: 'Fungal Grove', background: 'twilight-1', mode: 'eliminate', timeLimit: 110,
+    enemies: [...at('mushroom_creature', 0, 0, 2), ...at('forest_slime', 1, 1)],
+    rounds: [
+      at('mushroom_creature', 0, 0, 1, 2),
+      [...at('mushroom_creature', 0, 0, 2), ...at('goblin_archer', 3, 0, 2)],
+    ] },
+  // S5 Thornwood — defensive silhouettes
+  { floor: 5, recommendedLevel: 5, monsterTuning: { hp: 1.2, atk: 1.1, def: 1.1 }, name: 'Thornwood', background: 'twilight-1', mode: 'eliminate', timeLimit: 110,
+    enemies: at('thorn_slime', 0, 0, 2),
+    rounds: [
+      [...at('thorn_slime', 0, 0, 2), ...at('forest_wolf', 1, 0, 2)],
+      [...at('thorn_slime', 0, 0, 2), ...at('mushroom_creature', 1, 0, 2)],
+    ] },
+  // S6 Mist Border — flying harassment; Young Treant introduces the family before S7
+  { floor: 6, recommendedLevel: 6, monsterTuning: { hp: 1.12, atk: 1.05, def: 1.05 }, name: 'Mist Border', background: 'twilight-1', mode: 'eliminate', timeLimit: 120,
+    enemies: [...at('mist_bat', 0, 0, 2), ...at('forest_wolf', 1, 0, 2)],
+    rounds: [
+      [...at('mist_bat', 0, 0, 1, 2), ...at('goblin_archer', 3, 1)],
+      [...at('young_treant', 0, 1), ...at('mist_bat', 1, 0, 2), ...at('goblin_archer', 3, 1)],
+    ] },
+  // S7 Ancient Grove — first boss check: Elder Treant (Tank / Summoner); its adds come from Call of the Forest
+  { floor: 7, recommendedLevel: 8, monsterTuning: { hp: 1.3, atk: 1.12, def: 1.12 }, name: 'Ancient Grove', background: 'twilight-1', mode: 'eliminate', timeLimit: 150,
+    enemies: [...at('young_treant', 0, 1), ...at('forest_slime', 0, 0, 2)],
+    rounds: [
+      [...at('young_treant', 0, 1), ...at('mist_bat', 1, 0, 2)],
+      at('elder_treant', 1, 1),
+    ] },
+  // S8 Twilight Forest — evasive attacker, cast interruption under pressure
+  { floor: 8, recommendedLevel: 8, monsterTuning: { hp: 1.25, atk: 1.15, def: 1.1 }, name: 'Twilight Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 120,
+    enemies: [...at('corrupted_wolf', 0, 0, 2), ...at('mist_bat', 1, 1)],
+    rounds: [
+      [...at('young_treant', 0, 1), ...at('mist_wraith', 2, 1)],
+      [...at('corrupted_wolf', 0, 0, 2), ...at('mist_wraith', 2, 1), ...at('dark_shaman', 3, 1)],
+    ] },
+  // S9 Dark Misty Forest — combined support / control (Witch controls space, Shaman empowers / weakens)
+  { floor: 9, recommendedLevel: 10, monsterTuning: { hp: 1.3, atk: 1.18, def: 1.18 }, name: 'Dark Misty Forest', background: 'misty-1', mode: 'eliminate', timeLimit: 140,
+    enemies: [...at('corrupted_treant', 0, 1), ...at('corrupted_wolf', 0, 0, 2)],
+    rounds: [
+      [...at('corrupted_wolf', 0, 0, 2), ...at('mist_wraith', 2, 1), ...at('dark_shaman', 3, 1)],
+      [...at('corrupted_treant', 0, 1), ...at('mist_wraith', 2, 0), ...at('mist_witch', 3, 2)],
+    ] },
+  // S10 Dark Mist Gate — Forest Arc boss: Forest Oblivion, fixed anchor (never moves), protected / exposed core + Break
+  { floor: 10, recommendedLevel: 10, monsterTuning: { hp: 1.4, atk: 1.22, def: 1.25 }, name: 'Dark Mist Gate', background: 'misty-1', mode: 'eliminate', timeLimit: 210,
+    enemies: [...at('corrupted_treant', 0, 1), ...at('corrupted_wolf', 0, 0, 2), ...at('corrupted_wolf', 1, 1), ...at('mist_wraith', 2, 1)],
+    rounds: [
+      [...at('corrupted_treant', 0, 1), ...at('corrupted_wolf', 0, 0, 2), ...at('mist_wraith', 2, 1),
+        ...at('dark_shaman', 3, 0), ...at('mist_witch', 3, 2)],
+      at('forest_oblivion', 1, 1),
+    ] },
 ];

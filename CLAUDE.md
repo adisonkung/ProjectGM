@@ -16,6 +16,16 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Forest Arc monsters — tower Stages 1–10 (2026-11-05, Claude)
+
+branch `wip/claude-forest-arc-monsters` (ฐาน origin/master 9f76c2e, ยังไม่ merge — รอรีวิว) · สเปก = project doc `claude/eldervane-monster-spec-s1-10.md` · ผู้ใช้: เอามอนหอคอยเดิมออก เหลือ Forest Slime, สร้างมอนตามเอกสารเป็นวงกลม mock · ดันเจี้ยนคงค่าพลังเดิม · ค่าพลังใหม่ยืมจากมอนเก่าที่ใกล้สุด · สกิลตัวหลักทำเลยค่าชั่วคราว
+- roster `core/data/monsters-forest-arc.ts` (15 ตัว + slime ใน monsters.ts) · mock `visuals.ts mock_fa_*` วงกลมทั้งหมด · tag `forest_arc` · ด่าน `stages.ts` ตามตาราง §3 (เลเวล/เวลา/tuning/ฉากเดิม) · slime `animation.displayScale` 0.8 (ชั่วคราว)
+- กฎ LOCKED: Alpha Wolf เจอครั้งแรกชั้น 3 · Elder Treant บอสชั้น 7 · Forest Oblivion บอสชั้น 10 ไม่ขยับเลย (`holdArena` leash 0 + immune KNOCKBACK/TAUNT/ROOT/STUN, ไม่มีสกิลเคลื่อนที่) · Young Treant ไม่ใช่บอส
+- สกิล (ค่าชั่วคราว): Alpha Howl/Charge-Claw · Mist Shift/Spectral Slash · Weakening Hex/Dark Chant · Black Fog/Veil Curse · Treant: Heavy Root Slam/Entangling Roots/Call of the Forest/Bark Guard/Enraged Forest 50 % · Oblivion: slam/branch sweep/root eruption/dark mist/Core Surge (Break 150 → `exposed_core`) · สถานะใหม่ alpha_pack_command, weakened, dark_chant_buff, black_fog, veil_curse, bark_guard, enraged_forest, exposed_core, oblivion_mist
+- ทั่วไปใหม่: `APPLY_STATUS.to 'AREA'` (area + center, ไม่ต้องมีดาเมจ) · `AnimationConfig.displayScale` · `dungeonVariants(all, sources)`
+- มอนเก่า → `legacy-tower-monsters.ts` + `legacy-tower-stages.ts` (ไม่อยู่ใน MONSTERS — แหล่งค่าพลังดันเจี้ยน + fixture) · เทสต์ใช้ `src/testing/legacy-monsters.ts` (`legacy_` เฉพาะ id ที่ชนกับ Forest Arc, `LEGACY_TOWER`) · เทสต์ใหม่ `forest-arc.spec.ts` · Karma 961/961
+- บาลานซ์ยังไม่ปรับ: F1–F9 ชนะ 100 %, F10 TACTICAL ~10 % (sim 30 รอบ)
+
 ## Lucien Valthorne — The Black Saint · Healer / Support · Phase A (2026-10-28, Claude)
 
 branch `wip/claude-hero-lucien` (ฐาน origin/master ecf539b, ยังไม่ merge — รอรีวิว) · ฮีโร่ #15 `lucien` / ลูเซียน วัลธอร์น · คลาส **healer** เดิม · 3★ ชั่วคราว · ไม่แจก starter/bench · identity = ฮีลเลอร์ที่รับภาระแทนเพื่อน (ไม่ใช่ฮีลธรรมดา) · Sylas (#14) อยู่อีก branch → รายการ roster ในเทสต์จะชนกันตอน merge (เก็บทั้งคู่)

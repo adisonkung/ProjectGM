@@ -4,7 +4,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { HERO_DEFINITIONS, kitOf } from '../../core/data/hero-skills';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
-import { STAGES } from '../../core/data/stages';
+import { LEGACY_TOWER as STAGES } from '../../../testing/legacy-monsters';
 import { newGameState } from '../../core/data/starter';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { SkillSlot } from '../../core/models/combat';
@@ -230,25 +230,25 @@ describe('Ultimate gauge', () => {
 
 describe('Tank (Aurel / Morgan)', () => {
   it('(1) Taunt: RADIUS_2 enemies must hit the tank for 3 s, tank takes ×0.60 — then it wears off', () => {
-    const b = battle([H('aurel', 0, 1, { hp: 99999 }), H('lumina', 4, 1, { hp: 99999 })], [mon('forest_wolf', 0, 1), mon('forest_wolf', 0, 0), mon('forest_wolf', 5, 2)]);
+    const b = battle([H('aurel', 0, 1, { hp: 99999 }), H('lumina', 4, 1, { hp: 99999 })], [mon('legacy_forest_wolf', 0, 1), mon('legacy_forest_wolf', 0, 0), mon('legacy_forest_wolf', 5, 2)]);
     const tank = b.hero('aurel');
     b.freeze();
-    b.until(() => b.monsters('forest_wolf').filter(w => distance(w.pos, tank.pos) <= 2).length >= 2);
-    b.use(tank, 'skill', b.monsters('forest_wolf')[0]);
+    b.until(() => b.monsters('legacy_forest_wolf').filter(w => distance(w.pos, tank.pos) <= 2).length >= 2);
+    b.use(tank, 'skill', b.monsters('legacy_forest_wolf')[0]);
     b.run(0.6);
-    const near = b.monsters('forest_wolf').filter(w => hasFlag(w, 'taunted'));
+    const near = b.monsters('legacy_forest_wolf').filter(w => hasFlag(w, 'taunted'));
     expect(near.length).toBeGreaterThanOrEqual(2);
     for (const w of near) expect(w.monster!.currentTargetId).toBe(tank.id);
     expect(modifier(tank, 'damageTakenMultiplier')).toBeCloseTo(0.6, 6);
     b.run(3);
-    expect(b.monsters('forest_wolf').some(w => hasFlag(w, 'taunted'))).toBeFalse();
+    expect(b.monsters('legacy_forest_wolf').some(w => hasFlag(w, 'taunted'))).toBeFalse();
     expect(modifier(tank, 'damageTakenMultiplier')).toBe(1);
   });
 
   it('(2) Shield Charge interrupts Alpha Howl: interrupt → 150% → knockback → 0.8 s stun; full 12 s cooldown', () => {
-    const b = battle([H('aurel', 0, 1, { hp: 99999 })], [mon('alpha_wolf', 1, 1), mon('forest_wolf', 5, 0)]);
+    const b = battle([H('aurel', 0, 1, { hp: 99999 })], [mon('legacy_alpha_wolf', 1, 1), mon('legacy_forest_wolf', 5, 0)]);
     const tank = b.hero('aurel');
-    const alpha = b.monsters('alpha_wolf')[0];
+    const alpha = b.monsters('legacy_alpha_wolf')[0];
     b.root(alpha);
     b.put(tank, alpha.pos.c - 2, alpha.pos.r);
     b.e.setSkillMode(tank.id, 'skill2', 'RESERVE'); // kept for casts (AUTO would spend it on damage)
@@ -256,7 +256,7 @@ describe('Tank (Aurel / Morgan)', () => {
     b.until(() => b.of('CAST_INTERRUPTED').length > 0, 8);
     const ci = b.of('CAST_INTERRUPTED')[0];
     expect(ci.src).toBe(tank.id);
-    expect(ci.skill).toBe('alpha_howl');
+    expect(ci.skill).toBe('legacy_alpha_howl');
     expect(alpha.casting).toBeNull();
     expect(alpha.castSkills[0].cd).toBeGreaterThan(11.5);
     expect(b.of('buff').some(x => x.buff === 'stun' && x.dst === alpha.id)).toBeTrue();
@@ -267,10 +267,10 @@ describe('Tank (Aurel / Morgan)', () => {
   });
 
   it('(3) Tank ultimate interrupts only casters inside RADIUS_2', () => {
-    const b = battle([H('aurel', 0, 1, { hp: 99999 })], [mon('alpha_wolf', 0, 1), mon('alpha_wolf', 5, 1), mon('forest_wolf', 5, 0)]);
+    const b = battle([H('aurel', 0, 1, { hp: 99999 })], [mon('legacy_alpha_wolf', 0, 1), mon('legacy_alpha_wolf', 5, 1), mon('legacy_forest_wolf', 5, 0)]);
     const tank = b.hero('aurel');
-    const [near, far] = b.monsters('alpha_wolf');
-    b.monsters('alpha_wolf').concat(b.monsters('forest_wolf')).forEach(b.root);
+    const [near, far] = b.monsters('legacy_alpha_wolf');
+    b.monsters('legacy_alpha_wolf').concat(b.monsters('legacy_forest_wolf')).forEach(b.root);
     b.put(tank, near.pos.c - 1, near.pos.r);
     b.freeze();
     b.until(() => !!near.casting && !!far.casting, 8);
@@ -343,10 +343,10 @@ describe('Fighters (Jin / Ragnar)', () => {
 
 describe('Assassins (Shade / Nox)', () => {
   it('(7) Shade Shadow Assault goes for the player Focus; otherwise the lowest HP% enemy', () => {
-    const b = battle([H('shade', 0, 1, { hp: 99999 })], [mon('forest_slime', 0, 1), mon('goblin_archer', 4, 2)]);
+    const b = battle([H('shade', 0, 1, { hp: 99999 })], [mon('forest_slime', 0, 1), mon('legacy_goblin_archer', 4, 2)]);
     const shade = b.hero('shade');
     const [slime] = b.monsters('forest_slime');
-    const archer = b.monsters('goblin_archer')[0];
+    const archer = b.monsters('legacy_goblin_archer')[0];
     const s1 = kitOf('shade', 'assassin').skill;
     slime.hp = slime.maxHp * 0.2;
     expect(b.e.skills.pickTarget(shade, s1, slime)).toBe(slime);
@@ -402,10 +402,10 @@ describe('Assassins (Shade / Nox)', () => {
   });
 
   it('(10) Nox dives the back row; Shade takes the lowest HP% (front-liner here); Nox gains 30% dodge', () => {
-    const b = battle([H('shade', 0, 1, { hp: 99999 }), H('nox', 0, 0, { hp: 99999 })], [mon('forest_slime', 0, 1), mon('goblin_archer', 5, 1)]);
+    const b = battle([H('shade', 0, 1, { hp: 99999 }), H('nox', 0, 0, { hp: 99999 })], [mon('forest_slime', 0, 1), mon('legacy_goblin_archer', 5, 1)]);
     const [shade, nox] = [b.hero('shade'), b.hero('nox')];
     const slime = b.monsters('forest_slime')[0];
-    const archer = b.monsters('goblin_archer')[0];
+    const archer = b.monsters('legacy_goblin_archer')[0];
     slime.hp = Math.round(slime.maxHp * 0.5);
     expect(b.e.skills.pickTarget(shade, kitOf('shade', 'assassin').skill, slime)).toBe(slime);
     expect(b.e.skills.pickTarget(nox, kitOf('nox', 'assassin').skill, slime)).toBe(archer);
@@ -474,10 +474,10 @@ describe('Archer (Sylvie)', () => {
   });
 
   const casters = () => {
-    const b = battle([H('sylvie', 3, 1, { hp: 99999 })], [mon('alpha_wolf', 0, 1), mon('alpha_wolf', 5, 0), mon('forest_wolf', 5, 2)]);
+    const b = battle([H('sylvie', 3, 1, { hp: 99999 })], [mon('legacy_alpha_wolf', 0, 1), mon('legacy_alpha_wolf', 5, 0), mon('legacy_forest_wolf', 5, 2)]);
     const s = b.hero('sylvie');
-    const [near, far] = b.monsters('alpha_wolf');
-    [near, far, ...b.monsters('forest_wolf')].forEach(b.root);
+    const [near, far] = b.monsters('legacy_alpha_wolf');
+    [near, far, ...b.monsters('legacy_forest_wolf')].forEach(b.root);
     b.put(s, near.pos.c - 5, 1);
     b.freeze();
     b.until(() => !!near.casting && !!far.casting, 8);
@@ -487,7 +487,7 @@ describe('Archer (Sylvie)', () => {
   it('(13) Arrow Rain automatically prioritizes a valid caster', () => {
     const { b, s, near } = casters();
     s.cd2 = 0;
-    const pick = b.e.skills.chooseInterrupt(s, b.monsters('forest_wolf')[0]);
+    const pick = b.e.skills.chooseInterrupt(s, b.monsters('legacy_forest_wolf')[0]);
     expect(pick?.skill.id).toBe('arrow_rain');
     expect(pick?.target).toBe(near);
   });
@@ -512,10 +512,10 @@ describe('Archer (Sylvie)', () => {
 
 describe('Mage (Velma)', () => {
   it('(16) Bone Hand roots but does NOT interrupt Alpha Howl', () => {
-    const b = battle([H('velma', 3, 1, { hp: 99999 })], [mon('alpha_wolf', 1, 1), mon('forest_wolf', 5, 0)]);
+    const b = battle([H('velma', 3, 1, { hp: 99999 })], [mon('legacy_alpha_wolf', 1, 1), mon('legacy_forest_wolf', 5, 0)]);
     const v = b.hero('velma');
-    const alpha = b.monsters('alpha_wolf')[0];
-    b.monsters('forest_wolf').forEach(b.root);
+    const alpha = b.monsters('legacy_alpha_wolf')[0];
+    b.monsters('legacy_forest_wolf').forEach(b.root);
     b.freeze();
     b.until(() => !!alpha.casting, 8);
     b.put(v, alpha.pos.c - 4, alpha.pos.r);
@@ -666,9 +666,9 @@ describe('Healers (Lumina / Corvin) and resurrection', () => {
 
 describe('Stage 1–3 monster rules', () => {
   const pack = () => {
-    const b = battle([H('aurel', 0, 1, { hp: 99999 }), H('lumina', 4, 1, { hp: 99999 })], [mon('alpha_wolf', 1, 1), mon('forest_wolf', 0, 0), mon('forest_wolf', 0, 2)]);
+    const b = battle([H('aurel', 0, 1, { hp: 99999 }), H('lumina', 4, 1, { hp: 99999 })], [mon('legacy_alpha_wolf', 1, 1), mon('legacy_forest_wolf', 0, 0), mon('legacy_forest_wolf', 0, 2)]);
     b.freeze();
-    return { b, alpha: b.monsters('alpha_wolf')[0], wolves: b.monsters('forest_wolf') };
+    return { b, alpha: b.monsters('legacy_alpha_wolf')[0], wolves: b.monsters('legacy_forest_wolf') };
   };
 
   it('(25) Alpha Howl never deals direct damage', () => {
@@ -677,7 +677,7 @@ describe('Stage 1–3 monster rules', () => {
     b.until(() => b.of('castDone').length > 0, 10);
     expect(b.of('skillActivated')[0].targets.length).toBe(3);
     expect(b.of('damage').filter(d => b.e.units.find(u => u.id === d.dst)!.side === 'ally').length).toBe(0);
-    expect(MONSTER_SKILLS['alpha_howl'].effects.every(x => x.type === 'APPLY_BUFF')).toBeTrue();
+    expect(MONSTER_SKILLS['legacy_alpha_howl'].effects.every(x => x.type === 'APPLY_BUFF')).toBeTrue();
   });
 
   it('(26) Alpha cannot Howl when no normal Forest Wolf remains', () => {
@@ -718,16 +718,16 @@ describe('Stage 1–3 monster rules', () => {
     applyBuff(alpha, STATUS_EFFECTS['stun'], 0);
     b.step();
     expect(alpha.monster!.state).toBe('HURT');
-    expect(MONSTERS['alpha_wolf'].stats.minHitReactionInterval).toBe(2);
-    expect(MONSTERS['alpha_wolf'].attack.damageMultiplier).toBe(1.25);
+    expect(MONSTERS['legacy_alpha_wolf'].stats.minHitReactionInterval).toBe(2);
+    expect(MONSTERS['legacy_alpha_wolf'].attack.damageMultiplier).toBe(1.25);
   });
 
   it('(31) Forest Wolf stays simple: no skills, frontline targeting, 110/24/6, 4.2 speed, 1.15 s', () => {
-    const w = MONSTERS['forest_wolf'];
+    const w = MONSTERS['legacy_forest_wolf'];
     expect(w.skills).toEqual([]);
     expect(w.ai.targeting.strategy).toBe('NEAREST_REACHABLE_FRONT');
     expect([w.stats.maxHp, w.stats.attack, w.stats.defense, w.stats.moveSpeed, w.stats.attackRange, w.stats.attackCooldown]).toEqual([110, 24, 6, 4.2, 1.2, 1.15]);
-    const a = MONSTERS['alpha_wolf'];
+    const a = MONSTERS['legacy_alpha_wolf'];
     expect([a.stats.maxHp, a.stats.attack, a.stats.defense, a.stats.moveSpeed, a.stats.attackRange, a.stats.attackCooldown]).toEqual([450, 32, 15, 3.5, 1.4, 1.35]);
   });
 

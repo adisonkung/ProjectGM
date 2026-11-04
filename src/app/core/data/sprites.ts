@@ -1106,6 +1106,7 @@ export function monsterSheet(anim: AnimationConfig, attackEvent?: string, projec
   }
   return {
     cols, rows, anims, ...(anim.cellH ? { cellH: anim.cellH } : {}), ...(anim.cellW ? { cellW: anim.cellW } : {}),
+    ...(anim.displayScale ? { displayScale: anim.displayScale } : {}),
     ...(Object.keys(casts).length > 1 ? { casts } : {}), ...(projectile ? { projectile: { attack: projectile } } : {}),
   };
 }

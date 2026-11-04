@@ -3,7 +3,7 @@ import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { kitOf } from '../../core/data/hero-skills';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
-import { STAGES } from '../../core/data/stages';
+import { LEGACY_TOWER as STAGES } from '../../../testing/legacy-monsters';
 import { newGameState } from '../../core/data/starter';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { POWER_PROFILES } from '../../core/data/progression';
@@ -60,7 +60,7 @@ describe('Encounter pass — Floor 9', () => {
 
   it('casters stand at depth 3 and every wave has more stoppable HIGH casts than a team has interrupts ready at once', () => {
     for (const w of wavesOf(f9)) {
-      const casters = w.spawns.filter(s => ['dark_shaman', 'mist_witch'].includes(s.monsterId));
+      const casters = w.spawns.filter(s => ['legacy_dark_shaman', 'legacy_mist_witch'].includes(s.monsterId));
       expect(casters.length).toBeGreaterThanOrEqual(2);
       expect(casters.every(c => c.formationSlot.depth === 3)).toBeTrue();
     }
@@ -71,7 +71,7 @@ describe('Encounter pass — Floor 9', () => {
   });
 
   it('casters hold inside an archer’s reach (preferred range 3.5 < attack range 6, still behind their melee)', () => {
-    for (const id of ['dark_shaman', 'dark_shaman_ritual', 'mist_witch']) {
+    for (const id of ['legacy_dark_shaman', 'dark_shaman_ritual', 'legacy_mist_witch']) {
       const st = MONSTERS[id].stats;
       expect(st.preferredRange).withContext(id).toBe(3.5);
       expect(st.attackRange).toBe(6);
@@ -80,10 +80,10 @@ describe('Encounter pass — Floor 9', () => {
   });
 
   it('interrupt urgency: a Nightmare on a hero below 50 % outranks a Dark Heal on a healthy enemy', () => {
-    const b = battle([H('sylvie', 3, 1, { hp: 99999 }), H('aurel', 0, 1)], [mon('dark_shaman', 3, 0), mon('mist_witch', 3, 2), mon('corrupted_wolf', 0, 1)]);
-    const [shaman] = b.monsters('dark_shaman');
-    const [witch] = b.monsters('mist_witch');
-    const wolf = b.monsters('corrupted_wolf')[0];
+    const b = battle([H('sylvie', 3, 1, { hp: 99999 }), H('aurel', 0, 1)], [mon('legacy_dark_shaman', 3, 0), mon('legacy_mist_witch', 3, 2), mon('legacy_corrupted_wolf', 0, 1)]);
+    const [shaman] = b.monsters('legacy_dark_shaman');
+    const [witch] = b.monsters('legacy_mist_witch');
+    const wolf = b.monsters('legacy_corrupted_wolf')[0];
     const tank = b.hero('aurel');
     tank.hp = tank.maxHp * 0.3;
     wolf.hp = wolf.maxHp * 0.9;
@@ -101,8 +101,8 @@ describe('Encounter pass — Floor 10', () => {
 
   it('wave 1 = Treant 1 · Corrupted Wolf 3 · Mist Wraith 1; wave 2 = Treant 1 · Dark Shaman · Mist Witch · Wolf 2 · Wraith 1; wave 3 = the Guardian', () => {
     const w = wavesOf(f10);
-    expect(count(ids(w[0]))).toEqual({ corrupted_treant: 1, corrupted_wolf: 3, mist_wraith: 1 });
-    expect(count(ids(w[1]))).toEqual({ corrupted_treant: 1, corrupted_wolf: 2, dark_shaman: 1, mist_witch: 1, mist_wraith: 1 });
+    expect(count(ids(w[0]))).toEqual({ legacy_corrupted_treant: 1, legacy_corrupted_wolf: 3, legacy_mist_wraith: 1 });
+    expect(count(ids(w[1]))).toEqual({ legacy_corrupted_treant: 1, legacy_corrupted_wolf: 2, legacy_dark_shaman: 1, legacy_mist_witch: 1, legacy_mist_wraith: 1 });
     expect(ids(w[2])).toEqual(['fallen_forest_guardian']);
     // wave ATK tuning not cut
     expect(f10.monsterTuning!.atk).toBe(1.22);
@@ -162,10 +162,10 @@ describe('Encounter pass — Floor 10', () => {
 
 describe('Encounter pass — assassin AI (Shade)', () => {
   it('before contact, without a dive, the assassin never steps past the allied frontline into a threat zone', () => {
-    const b = battle([H('aurel', 0, 1), H('shade', 0, 2)], [mon('corrupted_wolf', 3, 2)]);
+    const b = battle([H('aurel', 0, 1), H('shade', 0, 2)], [mon('legacy_corrupted_wolf', 3, 2)]);
     const tank = b.hero('aurel');
     const shade = b.hero('shade');
-    const wolf = b.monsters('corrupted_wolf')[0];
+    const wolf = b.monsters('legacy_corrupted_wolf')[0];
     b.put(tank, 3, 1);
     b.put(shade, 3, 2);
     b.put(wolf, 5, 2);
@@ -180,11 +180,11 @@ describe('Encounter pass — assassin AI (Shade)', () => {
   });
 
   it('the AI does not blink into a pack (more than one melee threat around the landing spot) unless it is a kill', () => {
-    const b = battle([H('shade', 0, 1)], [mon('dark_shaman', 4, 1), mon('corrupted_wolf', 3, 0), mon('corrupted_wolf', 3, 2), mon('corrupted_wolf', 4, 0)]);
+    const b = battle([H('shade', 0, 1)], [mon('legacy_dark_shaman', 4, 1), mon('legacy_corrupted_wolf', 3, 0), mon('legacy_corrupted_wolf', 3, 2), mon('legacy_corrupted_wolf', 4, 0)]);
     const host = b.x.skillHost();
-    const shaman = b.monsters('dark_shaman')[0];
+    const shaman = b.monsters('legacy_dark_shaman')[0];
     const shade = b.hero('shade');
-    for (const w of b.monsters('corrupted_wolf')) b.put(w, shaman.pos.c + (w === b.monsters('corrupted_wolf')[0] ? 0 : 1), w === b.monsters('corrupted_wolf')[2] ? shaman.pos.r : (shaman.pos.r + 1) % 3);
+    for (const w of b.monsters('legacy_corrupted_wolf')) b.put(w, shaman.pos.c + (w === b.monsters('legacy_corrupted_wolf')[0] ? 0 : 1), w === b.monsters('legacy_corrupted_wolf')[2] ? shaman.pos.r : (shaman.pos.r + 1) % 3);
     const s = kitOf('shade', 'assassin').skill;
     expect(host.blinkAllowed(shade, s, shaman)).toBeFalse();
     expect(b.e.metrics.unsafeBlinksSkipped).toBe(1);
@@ -193,10 +193,10 @@ describe('Encounter pass — assassin AI (Shade)', () => {
   });
 
   it('after a dive into danger (no kill) the dive ends and the assassin falls back; badly hurt it steps out of the pile', () => {
-    const b = battle([H('aurel', 0, 1), H('shade', 0, 0)], [mon('dark_shaman', 4, 1), mon('corrupted_wolf', 3, 0), mon('corrupted_wolf', 3, 2)]);
+    const b = battle([H('aurel', 0, 1), H('shade', 0, 0)], [mon('legacy_dark_shaman', 4, 1), mon('legacy_corrupted_wolf', 3, 0), mon('legacy_corrupted_wolf', 3, 2)]);
     const shade = b.hero('shade');
-    const shaman = b.monsters('dark_shaman')[0];
-    const wolves = b.monsters('corrupted_wolf');
+    const shaman = b.monsters('legacy_dark_shaman')[0];
+    const wolves = b.monsters('legacy_corrupted_wolf');
     b.put(shade, shaman.pos.c - 1, shaman.pos.r);
     b.put(wolves[0], shade.pos.c, (shade.pos.r + 1) % 3);
     b.put(wolves[1], shade.pos.c - 1, shade.pos.r);

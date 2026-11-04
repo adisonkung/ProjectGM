@@ -37,7 +37,8 @@ describe('TeamBuilderComponent', () => {
     const f = TestBed.createComponent(PlacementComponent);
     f.componentRef.setInput('stage', STAGES[0]);
     f.detectChanges();
-    expect(f.nativeElement.querySelectorAll('.unit.foe').length).toBe(3);
+    // Forest Arc floor 1 wave 1 = Forest Slime × 2
+    expect(f.nativeElement.querySelectorAll('.unit.foe').length).toBe(2);
     expect(f.nativeElement.querySelectorAll('.neutral').length).toBe(1);
     expect(f.nativeElement.querySelectorAll('.place-mark').length).toBe(0);
     f.destroy();

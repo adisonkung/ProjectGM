@@ -7,7 +7,7 @@ import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import {
   BREAKTHROUGH_GATES, FLOOR_BANDS, PATCH_1, POWER_PROFILES,
 } from '../../core/data/progression';
-import { STAGES } from '../../core/data/stages';
+import { LEGACY_TOWER as STAGES } from '../../../testing/legacy-monsters';
 import { newGameState } from '../../core/data/starter';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { OwnedHero } from '../../core/models/hero';
@@ -215,8 +215,8 @@ describe('Patch 1 progression — stats and combat modifiers', () => {
     expect(left(warded, 'root')).toBeCloseTo(left(plain, 'root') * 0.8, 5);
     // bleed: same duration, ticks × 0.8
     const bleedDamage = (h: OwnedHero) => {
-      const b = battle([spec('jin', h, 0, 1)], [{ enemy: 'corrupted_wolf', r: 5, c: 1 }]);
-      const w = b.monsters('corrupted_wolf')[0];
+      const b = battle([spec('jin', h, 0, 1)], [{ enemy: 'legacy_corrupted_wolf', r: 5, c: 1 }]);
+      const w = b.monsters('legacy_corrupted_wolf')[0];
       b.statue(w);
       const jin = b.heroU('jin');
       jin.castLock = 1e9;

@@ -125,7 +125,7 @@ export const FARM_MONSTERS: Record<string, MonsterDefinition> = {
       // ≤ 60 %: sealed behind two spirits (untargetable, pulses) until they fall
       {
         id: 'spirit_seal', label: 'ผนึกวิญญาณ', hpBelow: 0.6, interruptSelf: true, transition: 1,
-        summon: [{ id: 'forest_spirit', count: 2 }], seal: { pulseEvery: 3, pulseAtkPct: 0.35, pulseName: 'SEAL PULSE' },
+        summon: [{ id: 'mist_bat', count: 2 }], seal: { pulseEvery: 3, pulseAtkPct: 0.35, pulseName: 'SEAL PULSE' },
       },
       { id: 'last_stand', label: 'ยืนหยัดสุดท้าย', hpBelow: 0.25, transition: 1, statuses: ['sentinel_fury'], cooldownOverride: { colossal_ruin: 12 } },
     ],
