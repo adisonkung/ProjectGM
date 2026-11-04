@@ -13,7 +13,7 @@ describe('expanded sprite lab actors and placement',()=>{
  it('selects a real boss caster and exposes its named skill slots',()=>{
   const f=open(),lab=f.componentInstance;lab.selectActor('monster:aegis_sentinel');
   expect(lab.units()[0].sprite).toBe('enemy-aegis-sentinel.png');expect(lab.units()[0].boss).toBeTrue();
-  expect(lab.actions().filter(a=>['skill','skill2','ult'].includes(a.id)).map(a=>a.label)).toEqual(['ตั้งโล่พิทักษ์','คำพิพากษาแห่งประตู','ทวนแสงทะลวงแนว']);
+  expect(lab.actions().filter(a=>/^m\d+$/.test(a.id)).map(a=>a.label)).toEqual(['ตั้งโล่พิทักษ์','คำพิพากษาแห่งประตู','ทวนแสงทะลวงแนว']);
   f.destroy();
  });
  it('places both sides by cell and rejects a partial off-board boss footprint',()=>{
@@ -31,9 +31,27 @@ describe('expanded sprite lab actors and placement',()=>{
   f.destroy();
  });
  it('uses native Aegis release effects and cancels pending events when changing actors',fakeAsync(()=>{
-  const f=open(),lab=f.componentInstance;lab.selectActor('monster:aegis_sentinel');lab.play('skill2');tick(1900);
+  const f=open(),lab=f.componentInstance;lab.selectActor('monster:aegis_sentinel');lab.play('m1');tick(1900);
   expect(lab.fx().some(f=>f.name==='ae-s3-wave')).toBeTrue();expect(lab.anims()[1]?.castTime).toBe(0);lab.selectActor('bailong');tick(16000);
   expect(lab.fx()).toEqual([]);expect(lab.floats()).toEqual([]);f.destroy();
+ }));
+ it('gives every boss skill a button (Elder Treant has 4)',()=>{
+  const f=open(),lab=f.componentInstance;lab.selectActor('monster:elder_treant');
+  expect(lab.actions().filter(a=>/^m\d+$/.test(a.id)).length).toBe(MONSTERS['elder_treant'].skills.length);f.destroy();
+ });
+ it('brings out-of-range dummies in front of a melee skill and still casts it',fakeAsync(()=>{
+  const f=open(),lab=f.componentInstance;lab.selectActor('monster:alpha_wolf');
+  const slot=MONSTERS['alpha_wolf'].skills.indexOf('charge_claw');lab.play(`m${slot}` as never);
+  expect(Math.abs(lab.logicalCell(2).c-lab.logicalCell(1).c)).toBeLessThanOrEqual(2);
+  expect(lab.log().some(l=>l.text.includes('ออกสกิลจริง'))).toBeFalse();tick(1200);
+  expect(lab.log().some(l=>l.text.includes('ออกสกิลจริง'))).toBeTrue();lab.reset();f.destroy();
+ }));
+ it('shows the cast FX and the units Call of the Forest summons',fakeAsync(()=>{
+  const f=open(),lab=f.componentInstance;lab.selectActor('monster:elder_treant');
+  lab.play(`m${MONSTERS['elder_treant'].skills.indexOf('call_of_the_forest')}` as never);tick(400);
+  expect(lab.fx().some(x=>x.name==='fa-call-charge')).toBeTrue();tick(3200);
+  expect(lab.units().filter(u=>u.id>=200).map(u=>u.sprite).sort()).toEqual([MONSTERS['forest_wolf'].animation.sheet,MONSTERS['mushroom_creature'].animation.sheet].sort());
+  expect(lab.placeable().every(u=>u.id<200)).toBeTrue();lab.reset();expect(lab.units().some(u=>u.id>=200)).toBeFalse();f.destroy();
  }));
  it('does not enable monster tools for a player through direct calls',()=>{
   const f=open(false),lab=f.componentInstance;lab.selectActor('monster:aegis_sentinel');expect(lab.actorMonster()).toBeUndefined();

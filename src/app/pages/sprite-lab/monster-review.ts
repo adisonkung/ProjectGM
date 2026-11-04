@@ -20,10 +20,13 @@ export function monsterReview(monsterId:string,skillId:string,at:Cell,targets:{i
  const ids=new Map([[caster.id,1],...allies.map((u,i)=>[u.id,targets[i].id] as [number,number])]);
  caster.castSkills=definition.skills.map(id=>({def:MONSTER_SKILLS[id],cd:id===skillId?0:Infinity}));engine.drainEvents();
  const started=engine.time,samples:ReviewSample[]=[];
- const snap=()=>samples.push({t:engine.time-started,events:engine.drainEvents(),positions:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,{r:u.y,c:u.x,flip:u===caster?left:!left}])),vitals:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,{hpPct:u.hp/u.maxHp*100,shieldPct:u.shield/u.maxHp*100}])),statuses:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,u.buffs.map(b=>({id:b.def.id,left:b.remaining,sourceId:ids.get(b.sourceId)??b.sourceId}))]))});
+ const extras=new Map<number,string>();
+ // summoned units (Call of the Forest …) join the review under lab ids 200+
+ const track=()=>{for(const u of engine.units)if(u.monster&&!ids.has(u.id)){const lab=200+extras.size;ids.set(u.id,lab);extras.set(lab,u.monster.definitionId);}};
+ const snap=()=>{track();samples.push({t:engine.time-started,events:engine.drainEvents(),positions:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,{r:u.y,c:u.x,flip:u===caster||u.monster?left:!left}])),vitals:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,{hpPct:u.hp/u.maxHp*100,shieldPct:u.shield/u.maxHp*100}])),statuses:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,u.buffs.map(b=>({id:b.def.id,left:b.remaining,sourceId:ids.get(b.sourceId)??b.sourceId}))]))});};
  const ok=engine.requestMonsterSkill(caster.id,skillId);snap();
  const statusDuration=Math.max(0,...skill.effects.filter(e=>e.type==='APPLY_STATUS').map(e=>e.duration??STATUS_EFFECTS[e.status]?.duration??0));
  const seconds=skill.castTime+Math.max((skill.recovery??1)+4,statusDuration+1);
  if(ok)for(let i=0;i<Math.ceil(seconds/.05);i++){freeze();engine.step(.05);snap();}
- return {ids,samples,ok};
+ return {ids,samples,ok,extras};
 }

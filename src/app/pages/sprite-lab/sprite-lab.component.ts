@@ -34,7 +34,13 @@ import { MotionFxPlayback } from '../../battle/render/motion-fx';
 import { skillReview } from './skill-review';
 import { SkillDefinition } from '../../core/models/combat';
 
-type Action = 'broken' | 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind;
+/** `m<i>` = the monster actor's i-th skill (every skill gets a button — bosses have 4–5) */
+type MonsterSkillAction = `m${number}`;
+type Action = 'broken' | 'idle' | 'walk' | 'attack' | 'hurt' | 'die' | SkillKind | MonsterSkillAction;
+/** monster skill index of an action (-1 = not a monster skill button) */
+const monsterSlot = (a: Action): number => /^m\d+$/.test(a) ? +a.slice(1) : -1;
+/** scenery rows added above the lanes so tall boss casts / summon FX are not cut by the board's top edge */
+export const LAB_SCENERY_EXTRA_ROWS = 3;
 
 const HERO_ID = 1;
 const DUMMY_IDS = [2, 3];
@@ -55,14 +61,14 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
     header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     h1 { font-size: 18px; margin: 0; flex: 1; }
     .comparison { margin: 0; text-align: center; font-size: 13px; color: #b9cee2; }
-    .stage { position: relative; --cell: min(56px, 6.25cqw); width: calc(16 * var(--cell)); max-width: 100%; margin: 0 auto; }
+    .stage { position: relative; --cell: min(56px, 6.25cqw);  width: calc(16 * var(--cell)); max-width: 100%; margin: 0 auto; }
     .stage app-board { --cell: min(56px, 6.25cqw); }
     .lab-setup {position:relative;isolation:isolate;padding:16px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
     .lab-setup label {display:flex;align-items:center;gap:8px;font-size:14px;min-width:0;}
     .lab-setup select,.position-row input {background:#101922;color:#f4e1bb;border:1px solid #b89653;padding:8px;max-width:100%;min-width:0;}
     .position-settings {width:100%;}.position-settings p{font-size:13px;color:#cdbb94;margin:6px 0;}
     .position-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;}.position-row button{min-width:180px;text-align:left;max-width:100%;}.position-row button.selected{border-color:#ffcc75;background:#503819;}.position-row input{width:65px;}.placement-error{color:#ffb6a0!important;}
-    .placement-grid{position:absolute;left:0;top:calc(var(--cell)*3.5);width:calc(var(--cell)*16);height:calc(var(--cell)*3);display:grid;grid-template-columns:repeat(16,1fr);grid-template-rows:repeat(3,1fr);z-index:80;}
+    .placement-grid{position:absolute;left:0;top:calc(var(--cell)*(2 + var(--lab-extra)));width:calc(var(--cell)*16);height:calc(var(--cell)*3);display:grid;grid-template-columns:repeat(16,1fr);grid-template-rows:repeat(3,1fr);z-index:80;}
     .placement-grid button{position:relative;border:1px solid #ffe6aa44;border-radius:0;padding:0;background:transparent;color:#ffe6b4;min-width:0;overflow:hidden;}.placement-grid button.occupied{background:#c88d1b20;border-color:#f1c97588;}.placement-grid small{position:absolute;top:2px;left:2px;font:10px monospace;text-shadow:0 1px 3px #000;}.placement-grid span{font:9px sans-serif;text-shadow:0 1px 3px #000;}
     .mark { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; z-index: 300; pointer-events: none; }
     .mark.root { background: #ff3b3b; box-shadow: 0 0 0 2px #fff; }
@@ -76,6 +82,7 @@ const DUMMY_SPRITE = 'enemy-straw-recruit.png';
 })
 export class SpriteLabComponent implements OnDestroy {
   readonly access = inject(GameAccessService);
+  readonly sceneryExtraRows = LAB_SCENERY_EXTRA_ROWS;
   readonly spriteHeroes = HEROES.filter(h => h.sprite && SHEETS[h.sprite]);
   onFxFinished(ids: number[]): void {
     const done = new Set(ids);
@@ -121,6 +128,8 @@ export class SpriteLabComponent implements OnDestroy {
     remove: ids => this.fx.update(l => l.filter(f => !ids.includes(f.id))),
   });
   private readonly reviewStatuses = signal<Record<number, { id: string; left: number }[]>>({});
+  /** units a monster review spawned (Call of the Forest summons …): lab id → monster definition id */
+  private readonly reviewExtras = signal<Map<number, string>>(new Map());
   readonly heroId = signal(this.qp.get('hero') ?? 'bailong');
   readonly hero = computed(() => this.spriteHeroes.find(h => h.id === this.heroId()) ?? this.spriteHeroes[0]);
   readonly heroName = computed(() => this.actorMonster()?.name ?? this.hero()?.name ?? '');
@@ -128,7 +137,7 @@ export class SpriteLabComponent implements OnDestroy {
   readonly actionLabels: Record<Action, string> = { broken:'Break', idle: 'Idle', walk: 'Walk', attack: 'Attack', hurt: 'Hurt', die: 'Die', skill: 'S1', skill2: 'S2', ult: 'ULT' };
   readonly animationInfo = computed(() => {
     const sheet = this.sheet();
-    const m=this.actorMonster(),sk=m?.skills[['skill','skill2','ult'].indexOf(this.last())];
+    const m=this.actorMonster(),sk=m?.skills[monsterSlot(this.last())];
     const clip = m ? (sk?this.sheet()?.casts?.[MONSTER_SKILLS[sk]?.clip??'']:(this.last()==='broken'?this.sheet()?.casts?.['broken']:this.sheet()?.anims[this.last() as SpriteAnim])) : animOf(this.hero()?.sprite, this.last() as SpriteAnim);
     if (!sheet || !clip) return null;
     const clock = clipClock(this.last() === 'idle' ? { ...clip, ms: clip.ms ?? IDLE_FRAME_MS } : clip);
@@ -148,8 +157,8 @@ export class SpriteLabComponent implements OnDestroy {
   readonly last = signal<Action>('idle');
   readonly activeEngineReview = computed(() => {
     const action = this.last();
+    if(this.actorMonster())return monsterSlot(action)>=0;
     if (action !== 'skill' && action !== 'skill2' && action !== 'ult') return false;
-    if(this.actorMonster())return true;
     const h = this.hero();
     return this.enginePlayback(kitOf(h.id, h.cls)[action]);
   });
@@ -203,7 +212,12 @@ export class SpriteLabComponent implements OnDestroy {
     this.reset();
   }
   setTargetCount(value:number):void {
-    const requested=Math.max(1,Math.min(6,Math.round(value)||1)),fp=this.targetMonster()?.stats.footprint;
+    const requested=Math.max(1,Math.min(6,Math.round(value)||1)),positions=this.nearestTargetCells(requested);
+    this.targetCount.set(positions.length);this.cells.set({1:this.logicalCell(1),...Object.fromEntries(positions.map((p,i)=>[i+2,p]))});this.selectedUnit.set(1);this.placementMessage.set(positions.length<requested?'พื้นที่สนามวางเป้าขนาดนี้ได้ '+positions.length+' ตัว':'');this.reset();
+  }
+  /** the `requested` free cells nearest in front of the actor (footprints respected) */
+  private nearestTargetCells(requested:number):Cell[] {
+    const fp=this.targetMonster()?.stats.footprint;
     const actor=this.logicalCell(1),a=footprintBounds({pos:actor,footprint:this.actorMonster()?.stats.footprint}),positions:Cell[]=[];
     const overlaps=(b:ReturnType<typeof footprintBounds>,q:ReturnType<typeof footprintBounds>)=>b.r0<=q.r1&&b.r1>=q.r0&&b.c0<=q.c1&&b.c1>=q.c0;
     const direction=this.faceLeft()?-1:1;
@@ -214,7 +228,14 @@ export class SpriteLabComponent implements OnDestroy {
       const p={r,c},b=footprintBounds({pos:p,footprint:fp});if(b.r0<0||b.r1>2||b.c0<0||b.c1>15||overlaps(b,a)||positions.some(q=>overlaps(b,footprintBounds({pos:q,footprint:fp}))))continue;
       if(positions.length<requested)positions.push(p);
     }
-    this.targetCount.set(positions.length);this.cells.set({1:actor,...Object.fromEntries(positions.map((p,i)=>[i+2,p]))});this.selectedUnit.set(1);this.placementMessage.set(positions.length<requested?'พื้นที่สนามวางเป้าขนาดนี้ได้ '+positions.length+' ตัว':'');this.reset();
+    return positions;
+  }
+  /** move the current dummies next to the actor (monster skills out of range) · false = already there / no room */
+  private targetsInFront(count:number):boolean {
+    const positions=this.nearestTargetCells(count);
+    if(positions.length<count||positions.every((p,i)=>{const c=this.logicalCell(i+2);return c.r===p.r&&c.c===p.c;}))return false;
+    this.cells.update(c=>({...c,...Object.fromEntries(positions.map((p,i)=>[i+2,p]))}));
+    return true;
   }
   logicalCell(id:number):Cell {const u=this.units().find(u=>u.id===id);return this.cells()[id]??{r:Math.round(u?.r??1),c:Math.round(u?.c??5)};}
   setCell(id:number,axis:'r'|'c',human:number):void {
@@ -225,7 +246,7 @@ export class SpriteLabComponent implements OnDestroy {
     const def=id===1?this.actorMonster():this.targetMonster(),fp=def?.stats.footprint;
     const b=footprintBounds({pos:at,footprint:fp});
     if(b.r0<0||b.r1>2||b.c0<0||b.c1>15){this.placementMessage.set('พื้นที่ยืนของตัวนี้ต้องอยู่ในสนามครบทุกช่อง');return;}
-    for(const u of this.units().filter(u=>u.id!==id)){
+    for(const u of this.placeable().filter(u=>u.id!==id)){
       const other=u.id===1?this.actorMonster():this.targetMonster(),of=other?.stats.footprint;
       if(!fp&&!of)continue;
       const q=footprintBounds({pos:this.logicalCell(u.id),footprint:of});
@@ -234,7 +255,7 @@ export class SpriteLabComponent implements OnDestroy {
     this.cells.update(c=>({...c,[id]:{...at}}));this.placementMessage.set('');this.reset();
   }
   cellOwner(cell:Cell):string {
-    return this.units().filter(u=>{const d=u.id===1?this.actorMonster():this.targetMonster(),b=footprintBounds({pos:this.reviewLogicalPositions()[u.id]??this.logicalCell(u.id),footprint:d?.stats.footprint});return cell.r>=b.r0&&cell.r<=b.r1&&cell.c>=b.c0&&cell.c<=b.c1;}).map(u=>u.id===1?'ตัวทดสอบ':'เป้า '+(u.id-1)).join(' / ');
+    return this.placeable().filter(u=>{const d=u.id===1?this.actorMonster():this.targetMonster(),b=footprintBounds({pos:this.reviewLogicalPositions()[u.id]??this.logicalCell(u.id),footprint:d?.stats.footprint});return cell.r>=b.r0&&cell.r<=b.r1&&cell.c>=b.c0&&cell.c<=b.c1;}).map(u=>u.id===1?'ตัวทดสอบ':'เป้า '+(u.id-1)).join(' / ');
   }
 
   setRenderer(r: BoardRenderer): void {
@@ -262,7 +283,7 @@ export class SpriteLabComponent implements OnDestroy {
     const base = { hpPct: 100, manaPct: 0, shieldPct: 0, alive: true, taunt: false };
     const hc = fieldSupport ? (left ? 12 : 3) : left ? 8 : 5;
     const b = this.blinked();
-    return [
+    const main: UnitView[] = [
       { ...base, id: HERO_ID, side: 'ally' as const, name: h.name, cls: h.cls, r: 1, c: hc + (b ? b.dc * (left ? -1 : 1) : 0), sprite: h.sprite, star: h.star, heroId: h.id, flip: left, ...(this.reviewVitals()[HERO_ID] ?? {}),
         blink: !!b, blinkFade: !b?.ownFade, ...(this.reviewPositions()[HERO_ID] ?? {}),
         statuses: (this.reviewStatuses()[HERO_ID] ?? []).filter(s => STATUS_ICONS[s.id]).map(s => ({ ...s, icon: STATUS_ICONS[s.id] })), },
@@ -286,11 +307,26 @@ export class SpriteLabComponent implements OnDestroy {
       if(u.id===1&&this.actorMonster()&&!this.reviewPositions()[1])result.c+=guardianPose(result.sprite).forward*(left?-1:1);
       return result;
     });
+    return [...main, ...this.extraUnits()];
   });
+  /** units the placement grid / row-column inputs move (review summons are engine-placed) */
+  readonly placeable = computed(() => this.units().filter(u => u.id < 200));
+  /** summoned units of a monster review — drawn only once the engine has placed them */
+  private extraUnits(): UnitView[] {
+    const out: UnitView[] = [];
+    for (const [id, monsterId] of this.reviewExtras()) {
+      const at = this.reviewPositions()[id], def = MONSTERS[monsterId];
+      if (!at || !def) continue;
+      out.push({ id, side: 'enemy', name: def.name, cls: def.displayClass ?? 'tank', r: at.r, c: at.c, flip: at.flip ?? this.faceLeft(),
+        sprite: def.animation.sheet, hpPct: this.reviewVitals()[id]?.hpPct ?? 100, manaPct: 0, shieldPct: this.reviewVitals()[id]?.shieldPct ?? 0,
+        alive: true, taunt: false, boss: isBossRank(def.rank) });
+    }
+    return out;
+  }
 
   readonly actions = computed(() => {
     const monster=this.actorMonster();
-    if(monster){const basic: {id:Action;label:string}[]=[{id:'idle',label:'Idle'},{id:'walk',label:'Walk'},{id:'attack',label:'Attack'},{id:'hurt',label:'Hurt'},{id:'die',label:'Die'}];if(this.sheet()?.casts?.['broken'])basic.push({id:'broken',label:'Break'});return this.access.isGm()?[...basic.filter(a=>a.id==='broken'||!!this.sheet()?.anims[a.id as SpriteAnim]),...monster.skills.slice(0,3).map((id,i)=>({id:['skill','skill2','ult'][i] as Action,label:MONSTER_SKILLS[id]?.name??id}))]:[];}
+    if(monster){const basic: {id:Action;label:string}[]=[{id:'idle',label:'Idle'},{id:'walk',label:'Walk'},{id:'attack',label:'Attack'},{id:'hurt',label:'Hurt'},{id:'die',label:'Die'}];if(this.sheet()?.casts?.['broken'])basic.push({id:'broken',label:'Break'});return this.access.isGm()?[...basic.filter(a=>a.id==='broken'||!!this.sheet()?.anims[a.id as SpriteAnim]),...monster.skills.map((id,i)=>({id:`m${i}` as Action,label:MONSTER_SKILLS[id]?.name??id}))]:[];}
     const h = this.hero();
     const kit = kitOf(h.id, h.cls);
     const skills: { id: Action; label: string }[] = [
@@ -309,10 +345,10 @@ export class SpriteLabComponent implements OnDestroy {
   readonly mark = computed(() => {
     const u = this.units()[0];
     const cell = (k: number) => `calc(var(--cell) * ${k})`;
-    const root = { x: cell(u.c + 0.5), y: cell(u.r + SCENERY_ROWS + 1.5 + 0.7725) };
+    const root = { x: cell(u.c + 0.5), y: cell(u.r + SCENERY_ROWS + LAB_SCENERY_EXTRA_ROWS + 0.7725) };
     const anchors = Object.entries(this.sheet()?.anchors ?? {})
       .filter(([n]) => n !== 'feet')
-      .map(([name, [dx, dy]]) => ({ name, x: cell(u.c + 0.5 + (dx / 100) * (u.flip ? -1 : 1)), y: cell(u.r + SCENERY_ROWS + 1.5 + 0.5 + dy / 100) }));
+      .map(([name, [dx, dy]]) => ({ name, x: cell(u.c + 0.5 + (dx / 100) * (u.flip ? -1 : 1)), y: cell(u.r + SCENERY_ROWS + LAB_SCENERY_EXTRA_ROWS + 0.5 + dy / 100) }));
     return { root, anchors };
   });
 
@@ -330,7 +366,7 @@ export class SpriteLabComponent implements OnDestroy {
 
   play(a: Action): void {
     if(!this.actions().some(x=>x.id===a))return;
-    if (!this.access.isGm() && a !== 'skill' && a !== 'skill2' && a !== 'ult') return;
+    if (!this.access.isGm() && a !== 'skill' && a !== 'skill2' && a !== 'ult' && monsterSlot(a) < 0) return;
     if(this.actorMonster()){if(this.access.isGm())this.playMonster(a);return;}
     this.clear();
     this.last.set(a);
@@ -413,7 +449,7 @@ export class SpriteLabComponent implements OnDestroy {
   private playMonster(action:Action):void {
     this.clear();this.last.set(action);this.log.set([]);
     const m=this.actorMonster()!,sheet=this.sheet(),me=this.units()[0],targets=this.units().filter(u=>this.dummyIds.includes(u.id));
-    const slot=['skill','skill2','ult'].indexOf(action),skillId=m.skills[slot],def=MONSTER_SKILLS[skillId];
+    const slot=monsterSlot(action),skillId=m.skills[slot],def=MONSTER_SKILLS[skillId];
     if(slot<0){
       if(action==='broken'){this.set(1,'cast',{castTime:0,castClip:'broken',force:true});const name=sheet?.statusFx?.['broken']?.loop;if(name)this.monsterEffect(name,me,1);}else this.set(1,action as SpriteAnim,{force:true});
       const clip=sheet?.anims[action as SpriteAnim],duration=clip?clipClock(clip).total:1;
@@ -433,8 +469,12 @@ export class SpriteLabComponent implements OnDestroy {
       if(this.loop()&&action!=='idle')this.at(duration+.6,()=>this.play(action));return;
     }
     if(!def)return;
-    const review=monsterReview(m.id,skillId,this.logicalCell(1),targets.map(u=>({id:u.id,pos:{r:u.r,c:u.c}})),this.faceLeft(),this.targetId());
+    const runReview=()=>monsterReview(m.id,skillId,this.logicalCell(1),this.units().filter(u=>this.dummyIds.includes(u.id)).map(u=>({id:u.id,pos:{r:u.r,c:u.c}})),this.faceLeft(),this.targetId());
+    let review=runReview();
+    // out of range (melee claw / slam …): bring the dummies to the nearest cells in front of the caster and try again
+    if(!review.ok){const moved=this.targetsInFront(this.dummyIds.length);if(moved){review=runReview();if(review.ok)this.note(0,'ย้ายเป้ามาอยู่หน้าตัวทดสอบให้อยู่ในระยะสกิล');}}
     if(!review.ok){this.note(0,'ยังไม่มีเป้าที่ตรงเงื่อนไขหรืออยู่ในระยะ ลองขยับช่องเป้าหมาย');return;}
+    this.reviewExtras.set(review.extras);
     const id=(n:number)=>review.ids.get(n),binding=sheet?.monsterFx?.[def.clip??''];let released:number|undefined;
     for(const sample of review.samples)this.at(sample.t,()=>{
       this.reviewLogicalPositions.set(sample.positions);
@@ -462,6 +502,11 @@ export class SpriteLabComponent implements OnDestroy {
           }
           for(const target of e.targets){const u=this.units().find(u=>u.id===id(target));if(u&&def.hitFx)this.monsterEffect(def.hitFx,u);}
           this.note(sample.t,def.name+' · ออกสกิลจริง');
+        }else if(e.type==='fx'&&id(e.src)===1){
+          // cast FX (Alpha Howl, Mist Shift, Call of the Forest charge …) — the engine starts it so its activation frame lands on SKILL_ACTIVATE
+          this.monsterEffect(e.name,current,1);
+        }else if(e.type==='summon'){
+          this.note(sample.t,'อัญเชิญ '+(MONSTERS[this.reviewExtras().get(id(e.dst)??-1)??'']?.name??'มอนสเตอร์'));
         }else if(e.type==='monsterGround'){
           for(const at of e.cells){const follow=e.followTarget!=null?id(e.followTarget):undefined;const point=follow!=null?pos[follow]:at,duration=e.durationMs??fxDuration(e.fx);
             this.monsterEffect(e.fx,point??at,undefined,{durationMs:duration,alpha:[[0,1],[Math.max(0,duration-90),1],[duration,0]]});
@@ -651,5 +696,6 @@ export class SpriteLabComponent implements OnDestroy {
     this.reviewVitals.set({});
     this.reviewPositions.set({});
     this.reviewLogicalPositions.set({});
+    this.reviewExtras.set(new Map());
   }
 }

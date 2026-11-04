@@ -9,7 +9,7 @@
           <label>ฉาก<select aria-label="ฉากทดสอบ" [value]="backgroundId()" (change)="backgroundId.set($any($event.target).value)">@for(bg of backgrounds;track bg){<option [value]="bg">{{bg}}</option>}</select></label>
           <label><input type="checkbox" [checked]="showGrid()" (change)="showGrid.set($any($event.target).checked)" />แสดงช่อง</label>
           <div class="position-settings"><p>ตำแหน่งตั้งต้น · แถว 1–3 / คอลัมน์ 1–16 · เลือกตัวแล้วกดช่องบนสนามได้</p>
-            @for(u of units();track u.id){<div class="position-row"><button type="button" [class.selected]="selectedUnit() === u.id" (click)="selectedUnit.set(u.id)">{{u.id === 1 ? 'ตัวทดสอบ' : 'เป้า ' + (u.id-1)}} · {{u.name}}</button><label>แถว<input type="number" min="1" max="3" [attr.aria-label]="'แถว ' + u.id" [value]="logicalCell(u.id).r + 1" (change)="setCell(u.id,'r',+$any($event.target).value); $any($event.target).value = logicalCell(u.id).r + 1" /></label><label>คอลัมน์<input type="number" min="1" max="16" [attr.aria-label]="'คอลัมน์ ' + u.id" [value]="logicalCell(u.id).c + 1" (change)="setCell(u.id,'c',+$any($event.target).value); $any($event.target).value = logicalCell(u.id).c + 1" /></label></div>}
+            @for(u of placeable();track u.id){<div class="position-row"><button type="button" [class.selected]="selectedUnit() === u.id" (click)="selectedUnit.set(u.id)">{{u.id === 1 ? 'ตัวทดสอบ' : 'เป้า ' + (u.id-1)}} · {{u.name}}</button><label>แถว<input type="number" min="1" max="3" [attr.aria-label]="'แถว ' + u.id" [value]="logicalCell(u.id).r + 1" (change)="setCell(u.id,'r',+$any($event.target).value); $any($event.target).value = logicalCell(u.id).r + 1" /></label><label>คอลัมน์<input type="number" min="1" max="16" [attr.aria-label]="'คอลัมน์ ' + u.id" [value]="logicalCell(u.id).c + 1" (change)="setCell(u.id,'c',+$any($event.target).value); $any($event.target).value = logicalCell(u.id).c + 1" /></label></div>}
             @if(placementMessage()){<p class="placement-error" role="status">{{placementMessage()}}</p>}
           </div>
         </section>
@@ -20,8 +20,8 @@
       @if (activeEngineReview() && access.isGm()) {
         <p class="comparison">ทดสอบหนึ่งครั้งด้วยระบบต่อสู้ · เป้าแรก{{ initialStatus ? ' มี ' + initialStatus + ' ก่อนร่าย' : ' ยังไม่มีสถานะก่อนร่าย' }} · จังหวะสำหรับรีวิว</p>
       }
-      <div class="sprite-stage-shell"><app-tower-ornament [grooved]="true" [ornate]="true" /><div class="stage" [class.anchors]="showAnchors() && access.isGm()">
-        <app-board #board (finishedFx)="onFxFinished($event)" [background]="previewBackground()" [sceneryExtraRows]="1.5" [groundExtraRows]="1" [units]="units()" [fx]="fx()" [projectiles]="projectiles()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
+      <div class="sprite-stage-shell"><app-tower-ornament [grooved]="true" [ornate]="true" /><div class="stage" [style.--lab-extra]="sceneryExtraRows" [class.anchors]="showAnchors() && access.isGm()">
+        <app-board #board (finishedFx)="onFxFinished($event)" [background]="previewBackground()" [sceneryExtraRows]="sceneryExtraRows" [groundExtraRows]="1" [units]="units()" [fx]="fx()" [projectiles]="projectiles()" [floats]="floats()" [anims]="anims()" [speed]="speed()" [renderer]="renderer()" [frozen]="frozen" />
         @if(showGrid() && access.isGm()) {<div class="placement-grid" aria-label="ช่องสนามทดสอบ">@for(cell of gridCells;track $index){<button type="button" [class.occupied]="!!cellOwner(cell)" [attr.aria-label]="'วางที่แถว ' + (cell.r+1) + ' คอลัมน์ ' + (cell.c+1)" [title]="cellOwner(cell)" (click)="place(selectedUnit(),cell)"><small>{{cell.r+1}}:{{cell.c+1}}</small><span>{{cellOwner(cell)}}</span></button>}</div>}
         @if (showAnchors() && access.isGm()) {
           <i class="mark root" [style.left]="mark().root.x" [style.top]="mark().root.y" title="root (feet)"></i>
