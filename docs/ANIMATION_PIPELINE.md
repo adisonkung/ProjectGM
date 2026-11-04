@@ -154,3 +154,6 @@ Documentation only — do not implement these as part of unrelated work; each ne
 - Painted VFX are unmixed alpha, not pixelated. Pixel-art sheets set `pixelated: true`.
 - The user reviews one skill at a time (preview + sync sheet) before the next skill.
 - Approved assets are never silently replaced by older versions.
+
+
+User-requested melee arrival correction: BattleComponent marks a settled basic melee windup as planted. BoardComponent uses its exact current position (including current stack offset) for that snapshot rather than continued movement interpolation. DOM and Pixi share this exception; normal walking and authored root-motion inside the sheet are unchanged. See [MELEE_STOP_BEFORE_ATTACK.md](MELEE_STOP_BEFORE_ATTACK.md).

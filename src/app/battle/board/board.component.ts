@@ -41,6 +41,8 @@ export interface UnitView {
   boss?: boolean;
   /** หันซ้าย */
   flip?: boolean;
+  /** A settled basic melee windup: use the exact contact snapshot instead of trailing interpolation. */
+  planted?: boolean;
   /** เพิ่งวาร์ป: ย้ายทันทีไม่ต้องเลื่อน แล้วค่อย ๆ ปรากฏ */
   blink?: boolean;
   /** false = the clip fades the unit itself (AnimDef.opacity): no blink-in fade from the board */
@@ -489,7 +491,7 @@ export class BoardComponent {
       if (!this.spawnAt.has(u.id)) this.spawnAt.set(u.id, `translate(${t[0] + ox}%, ${t[1] + oy}%)`);
       const s = this.st.get(u.id);
       // blink / teleport / first sight: jump
-      if (!s || u.blink || Math.abs(t[0] - s.draw[0]) > 250 || Math.abs(t[1] - s.draw[1]) > 250) {
+      if (!s || u.blink || u.planted || Math.abs(t[0] - s.draw[0]) > 250 || Math.abs(t[1] - s.draw[1]) > 250) {
         this.st.set(u.id, { prev: t, cur: t, draw: t, t0: now, from: t });
         this.off.get(u.id)!.cur = [ox, oy];
         continue;

@@ -1,3 +1,4 @@
+import { isMeleeRange } from '../../battle/engine/melee-contact';
 import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
 import { bodyFrontCell } from '../../battle/engine/footprint';
 import { battleViewport } from './battle-viewport';
@@ -330,6 +331,11 @@ export class BattleComponent implements OnDestroy {
         if (v <= 6) this.paces.set(u.id, p == null ? v : p + (v - p) * 0.35);
       }
     }
+  }
+  private planted(u:BattleUnit):boolean {
+    if(u.dashMotion)return false;
+    return u.monster ? MONSTERS[u.monster.definitionId]?.attack.delivery==='MELEE' && u.monster.state==='ATTACKING'
+      : isMeleeRange(u.range) && u.castLock>0 && this.anims()[u.id]?.anim==='attack';
   }
   private isMoving(u: BattleUnit): boolean {
     return u.alive && (this.movingUntil.get(u.id) ?? 0) > this.tickNo;
@@ -808,7 +814,8 @@ export class BattleComponent implements OnDestroy {
         onFocus: isPlayerUnit(u) && e.focusTargetId != null && u.targetId === e.focusTargetId,
         elite: u.elite,
         moveSec: u.monster ? Math.min(0.6, 1 / u.moveSpeed) : undefined,
-        moving: this.actorPose(u).walking || this.isMoving(u),
+        planted: this.planted(u),
+        moving: this.actorPose(u).walking || (!this.planted(u) && this.isMoving(u)),
         pace: this.paces.get(u.id),
         hit: this.hits.get(u.id),
         buffed: u.buffs.some(b => (b.def.modifiers.attackMultiplier ?? 1) > 1),

@@ -121,3 +121,32 @@ describe('Melee contact during real combat', () => {
     expect(b.events.some(e => e.type === 'miss' && e.src === b.f.id)).toBeTrue();
   });
 });
+
+
+describe('Melee arrival before basic windup',()=>{
+ it('does not start a hero swing while already in reach but still sliding into its column',()=>{
+  const b=encounter(1,1);b.stop(b.f,'stun');b.h.range=1.5;b.h.x=5.75;
+  let first:{x:number;y:number}|undefined;
+  const off=b.e.subscribe(e=>{if(e.type==='attack'&&e.src===b.h.id&&!first)first={x:b.h.x,y:b.h.y};});
+  b.run(20);off();expect(first).toBeDefined();expect(first!.x).toBeCloseTo(6,8);expect(first!.y).toBe(1);
+ });
+ it('also plants a moving melee monster before emitting its attack event',()=>{
+  const b=encounter(1,1);b.h.castLock=999;b.f.x=7.15;
+  let first:number|undefined;const off=b.e.subscribe(e=>{if(e.type==='attack'&&e.src===b.f.id&&first==null)first=b.f.x;});
+  b.run(20);off();expect(first).toBeDefined();expect(first!).toBeCloseTo(7,8);
+ });
+ it('finishes exact-duration dash displacement before starting a normal melee swing',()=>{
+  const b=encounter(1,1);b.stop(b.f,'stun');b.h.range=1.5;b.h.x=5.6;const start=b.e.time;
+  b.h.dashMotion={fromX:5,fromY:1,toX:6,toY:1,start,duration:.5};
+  let first:number|undefined;const off=b.e.subscribe(e=>{if(e.type==='attack'&&e.src===b.h.id&&first==null)first=b.e.time;});
+  b.run(25);off();expect(first).toBeDefined();expect(first!).toBeGreaterThanOrEqual(start+.5-1e-8);
+ });
+ it('does not swing if planting the last fraction would leave the target outside real reach',()=>{
+  const b=encounter(1,1);b.h.range=1;b.h.x=6.04;b.f.x=7.04;
+  expect(b.e.skills.basic(b.h,b.f)).toBeFalse();
+ });
+ it('keeps ranged basic actions available while the shooter is repositioning',()=>{
+  const b=encounter(1,1);b.h.range=5;b.h.x=5.6;b.stop(b.f,'stun');
+  expect(b.e.skills.basic(b.h,b.f)).toBeTrue();
+ });
+});

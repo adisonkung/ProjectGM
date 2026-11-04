@@ -81,4 +81,12 @@ describe('BoardComponent', () => {
     expect(el.querySelectorAll('.fx-wrap').length).toBe(0);
   });
 
+  it('plants an arriving melee unit on its contact snapshot before drawing its windup',()=>{
+    const unit:UnitView={id:9,name:'Melee',cls:'fighter',side:'ally',r:1,c:5.7,hpPct:100,manaPct:0,shieldPct:0,alive:true,taunt:false};
+    fixture.componentRef.setInput('units',[unit]);fixture.detectChanges();
+    fixture.componentRef.setInput('units',[{...unit,c:6,planted:true}]);fixture.detectChanges();
+    const board=component as unknown as{st:Map<number,{draw:[number,number];prev:[number,number];cur:[number,number]}>};
+    const state=board.st.get(9)!;expect(state.draw[0]).toBe(600);expect(state.prev).toEqual(state.cur);
+  });
+
 });

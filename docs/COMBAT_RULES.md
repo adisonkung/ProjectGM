@@ -11,6 +11,7 @@
 - Zones: our zone is columns 0–5, the neutral zone is 6–9 (no placement), the enemy zone is 10–15.
 - Square cells, 8-direction logical range (a diagonal step = 1 cell).
 - User update 2026-10-29: basic melee (range ≤1.5) also requires real body contact: at most ½ lane apart vertically, with a small 0.01-cell sampling tolerance. Units close within their current cell (up to ½ lane each, typically ¼ each when both approach) before attacking across lanes. Recheck contact at the hit event; roots/stuns prevent the approach. Grid occupancy, skill areas, ranged reach and authored attack timings stay unchanged.
+- User follow-up: an ordinary melee basic must finish horizontal approach and exact-duration displacement before starting its windup. Plant the final sampling remainder, retain valid fractional vertical contact, and recheck reach after planting and at impact. Ranged/heal actions and authored skill movement are unchanged. See [MELEE_STOP_BEFORE_ATTACK.md](MELEE_STOP_BEFORE_ATTACK.md).
 - Units may share a cell during combat.
 
 ## Stars

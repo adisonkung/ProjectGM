@@ -39,6 +39,8 @@ export interface SkillHost {
   /** arrival-based projectile: `onArrive` runs when it lands (even if the shooter died meanwhile) */
   /** `index` = the shot of a multi-shot skill (repeat hit i) — lets the view pick that shot's projectile art */
   shoot(u: BattleUnit, t: BattleUnit, slot: SkillSlot, sky: boolean, onArrive: () => void, index?: number, speed?: number): void;
+  /** Finish an ordinary melee approach before spending the attack cooldown or emitting its windup. */
+  prepareMeleeAttack?(u:BattleUnit,target:BattleUnit):boolean;
   /** one hit through DamageResolver (+ dodge); false = missed / target gone */
   hit(src: BattleUnit, dst: BattleUnit, mul: number, o: { crit?: boolean; damageType?: DamageKind; sourceId: string; slot?: SkillSlot }): boolean;
   heal(dst: BattleUnit, amount: number, src: BattleUnit): void;
@@ -514,6 +516,7 @@ export class SkillSystem {
       }
     }
     if (!enemy || !inBasicAttackRange(u, enemy, u.range)) return false;
+    if (isMeleeRange(u.range) && this.h.prepareMeleeAttack?.(u,enemy) === false) return false;
     this.use(u, 'attack', kit.attack, enemy);
     return true;
   }

@@ -23,3 +23,6 @@ Validation:
 These are two moments from the same running implementation, not a fabricated before/after code comparison. Source screenshots are unretouched; the comparison only crops and arranges their battlefield region. Reference for behavior is the user's quarter/half-cell instruction, not a supplied UI design.
 
 Branch `fix/combat-melee-lane-contact` starts at freshly fetched master f85731d. Earlier UI commits remain on `fix/lobby-profile-customization`. No merge/deploy/push; previous GitHub export approval is still pending. Confirmed canonical-local sync base is unchanged.
+
+
+Follow-up: basic melee now plants its approached column before windup; the renderer also stops trailing that planted snapshot. Existing half-lane contact is retained. See [MELEE_STOP_BEFORE_ATTACK.md](MELEE_STOP_BEFORE_ATTACK.md).

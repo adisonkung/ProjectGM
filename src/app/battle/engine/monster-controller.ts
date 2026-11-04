@@ -86,6 +86,8 @@ export interface CombatContext {
   stepAway(u: BattleUnit, threat: Cell, keep: Cell, range: number): boolean;
   /** run `fn` after `delay` seconds unless `u` dies first */
   later(delay: number, u: BattleUnit, fn: () => void): void;
+  /** Melee windups wait for the body to finish its ordinary approach; projectiles do not. */
+  prepareMeleeAttack?(u:BattleUnit,target:BattleUnit):boolean;
   meleeHit(u: BattleUnit, t: BattleUnit, attack: AttackDefinition): void;
   fireProjectile(u: BattleUnit, t: BattleUnit, attack: AttackDefinition): void;
   /** generic cast system: CAST_STARTED … SKILL_ACTIVATED / CAST_INTERRUPTED (`target` = aimed unit) */
@@ -372,6 +374,7 @@ export class MonsterController {
   // ------------------------------------------------------------------ attack pipeline
 
   private startAttack(u: BattleUnit, s: MonsterCombatState, def: MonsterDefinition, t: BattleUnit): void {
+    if(def.attack.delivery==='MELEE' && this.ctx.prepareMeleeAttack?.(u,t)===false)return;
     const token = ++s.attackToken;
     const windup = attackWindupOf(def);
     this.setState(s, 'ATTACKING', 'attack');

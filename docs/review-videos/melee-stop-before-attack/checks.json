@@ -1,0 +1,29 @@
+{
+  "sourceBase": "f6fa3d9a95b7c9a6f24abaa20ff33e928f2e9968",
+  "baselineNewRegressionFailures": 4,
+  "targeted": {
+    "passed": 23,
+    "total": 23
+  },
+  "fullKarma": {
+    "passed": 950,
+    "total": 950,
+    "failed": 0
+  },
+  "appTypecheck": "PASS",
+  "specTypecheck": "PASS",
+  "productionBuild": "PASS",
+  "shippedRosterBattles": 60,
+  "nativePixiActive": true,
+  "plantedRenderFrames": 30,
+  "plantedDrawResidualMax": 0,
+  "browserErrors": [],
+  "statsRangeCooldownOrClipTimingChanged": false,
+  "sourceSha256": {
+    "src/app/battle/engine/battle-engine.ts": "67968590dab7db13449d06eded19f1f157cff7e4a8036617d320b7af57be2188",
+    "src/app/battle/engine/skill-system.ts": "1b0d1d4dbcb107e80bda15245dedfd54a837e6e5b2541408ddaaaf87be6c8ef2",
+    "src/app/battle/engine/monster-controller.ts": "70b475d01bc28a4dcc53ffacbade1e7ef905f4862c7f662b437ffc841cc07660",
+    "src/app/battle/board/board.component.ts": "30411f8063c38f735155a8b30b6697860612fa7f38cc02e2cb67a14bfc2e79d8",
+    "src/app/pages/battle/battle.component.ts": "6485d73c656f339a750e3c7cd9a3046753b406800f6e2e97ee99d17b86d7ff85"
+  }
+}

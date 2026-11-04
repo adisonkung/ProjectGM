@@ -1,4 +1,4 @@
-import { isMeleeRange, meleeStandY } from './melee-contact';
+import { inBasicAttackRange, isMeleeRange, meleeStandY } from './melee-contact';
 import { BLADE_TRACE, SlashTraceDefinition } from '../../core/data/special-skills';
 import { CombatModifiers, ResistableStatus } from '../../core/models/progression';
 import { MANA_PER_ATTACK, MANA_PER_HIT, RECEIVE_GAUGE_ICD, START_CD } from '../../core/data/classes';
@@ -563,6 +563,17 @@ export class BattleEngine {
     if (u.dashMotion) return false;
     const tx = this.flow.formation.originPosition + u.pos.c;
     return Math.hypot(tx - u.x, this.glideTargetY(u) - u.y) > SETTLE_EPS;
+  }
+
+  /** Plant the feet at the approached stance before an ordinary melee windup. No grid move or extra reach. */
+  private prepareMeleeAttack(u:BattleUnit,target:BattleUnit):boolean {
+    if(u.dashMotion)return false;
+    const tx=this.flow.formation.originPosition+u.pos.c;
+    if(Math.abs(tx-u.x)>SETTLE_EPS)return false;
+    // Remove the tiny sampling remainder, so glide() cannot move the body after attack has been emitted.
+    // Vertical contact already defines a valid stop. Do not chase a moving opponent's new stance after contact.
+    u.x=tx;
+    return inBasicAttackRange(u,target,u.range);
   }
 
   /** Physical positions follow cell/stance destinations continuously; melee contact uses these same positions. */
@@ -2161,6 +2172,7 @@ export class BattleEngine {
         return self.time;
       },
       rng: () => self.rng(),
+      prepareMeleeAttack: (u,t) => self.prepareMeleeAttack(u,t),
       emit: e => self.events.push(e),
       foes: u => (self.flow.phase === BattlePhase.COMBAT || self.flow.phase === BattlePhase.WAVE_CLEAR ? foesOf(u) : []),
       allies: u => self.units.filter(a => a.alive && a.side === u.side && a.visible && (a.wave < 0 || a.wave === self.flow.waveIndex)),
@@ -2478,6 +2490,7 @@ export class BattleEngine {
       opponentsOf: u => self.units.filter(t => self.isValidTarget(u, t)),
       alliesOf: u => self.units.filter(a => a.alive && a.side === u.side && (a.wave < 0 || a.wave === self.flow.waveIndex)),
       isValidTarget: (u, t) => self.isValidTarget(u, t),
+      prepareMeleeAttack: (u,t) => self.prepareMeleeAttack(u,t),
       stepToward: (u, target, goal) => {
         const blocked = self.bodyBlocked(u);
         const step = laneStep(self.grid, u.pos, target, blocked) ?? nextStep(self.grid, u.pos, goal, blocked) ?? greedyStep(self.grid, u.pos, target, blocked);
