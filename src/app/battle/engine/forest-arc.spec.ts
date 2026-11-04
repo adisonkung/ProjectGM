@@ -4,7 +4,8 @@ import { HERO_BY_ID } from '../../core/data/heroes';
 import { LEGACY_TOWER_MONSTERS } from '../../core/data/legacy-tower-monsters';
 import { BUFFS, MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import { FOREST_ARC_MONSTERS, FOREST_ARC_SKILLS } from '../../core/data/monsters-forest-arc';
-import { SHEETS } from '../../core/data/sprites';
+import { FX, SHEETS } from '../../core/data/sprites';
+import { attackWindupOf } from '../../core/data/monsters';
 import { STAGES } from '../../core/data/stages';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { mockVisualOf } from '../../core/data/visuals';
@@ -92,6 +93,30 @@ describe('Forest Arc — roster and stages (claude/eldervane-monster-spec-s1-10.
     // special skills only on the six principal enemies (spec §2.5)
     const withSkills = Object.values(FOREST_ARC_MONSTERS).filter(m => m.skills.length).map(m => m.id).sort();
     expect(withSkills).toEqual(['alpha_wolf', 'dark_shaman', 'elder_treant', 'forest_oblivion', 'mist_witch', 'mist_wraith']);
+  });
+
+  it('art (user monster1–4.zip): every Forest Arc monster but Forest Oblivion has a sheet with the five base clips; skill clips and VFX are wired', () => {
+    for (const m of Object.values(FOREST_ARC_MONSTERS)) {
+      if (m.id === 'forest_oblivion') { expect(m.animation.sheet).toBeUndefined(); continue; }
+      expect(m.animation.sheet).withContext(m.id).toBe(`enemy-fa-${m.id.replace(/_/g, '-')}.png`);
+      expect(SHEETS[m.animation.sheet!]).withContext(m.id).toBeDefined();
+      for (const c of ['idle', 'move', 'hurt', 'death', 'attack']) expect(m.animation.clips[c]).withContext(`${m.id}.${c}`).toBeDefined();
+      expect(m.animation.clips['attack'].events!.some(e => e.event === m.attack.event)).withContext(m.id).toBeTrue();
+      expect(m.animation.clips['death'].events!.some(e => e.event === 'DEATH_COMPLETE')).toBeTrue();
+      // the gameplay wind-up comes from the sheet now — kept within 0.2 s of the stat
+      expect(Math.abs(attackWindupOf(m) - m.stats.attackWindup)).withContext(m.id).toBeLessThan(0.2);
+      for (const id of m.skills) {
+        const sk = FOREST_ARC_SKILLS[id];
+        if (sk.clip) {
+          const c = m.animation.clips[sk.clip];
+          expect(c?.castDriven).withContext(`${m.id}.${sk.clip}`).toBeTrue();
+          expect(c.events!.map(e => e.event)).toEqual(jasmine.arrayContaining(['CAST_START', 'SKILL_ACTIVATE']));
+        }
+        if (sk.fx) expect(FX[sk.fx.id]).withContext(sk.fx.id).toBeDefined();
+        if (sk.hitFx) expect(FX[sk.hitFx]).withContext(sk.hitFx).toBeDefined();
+      }
+    }
+    expect(SHEETS['enemy-fa-elder-treant.png'].appliedStatusFx?.['enraged_forest']).toBe('fa-enraged');
   });
 
   it('Forest Slime keeps its existing sheet and stats, drawn smaller (displayScale 0.8, feet unchanged)', () => {

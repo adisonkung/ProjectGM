@@ -1,4 +1,5 @@
-import { MonsterDefinition, MonsterSkillDefinition, MonsterStats } from '../models/monster';
+import { AnimationConfig, MonsterDefinition, MonsterSkillDefinition, MonsterStats } from '../models/monster';
+import { FOREST_ARC_ANIMATIONS } from './forest-arc-art.generated';
 
 /**
  * Forest Arc roster — tower Stages 1–10 (claude/eldervane-monster-spec-s1-10.md, 2026-11-05).
@@ -7,7 +8,8 @@ import { MonsterDefinition, MonsterSkillDefinition, MonsterStats } from '../mode
  * (legacy-tower-monsters.ts) and skills use provisional values inside the spec's suggested ranges. Every value here is
  * PROVISIONAL until a balance pass; the source of each borrow is noted per monster.
  *
- * Art: every monster except Forest Slime is a round mock (`visuals.ts` `mock_fa_*`, shape circle) until sheets arrive.
+ * Art (user monster1–4.zip, 2026-11-05 → tools/sprites/forest_arc/art.py → forest-arc-art.generated.ts): every monster
+ * has its sheet except Forest Oblivion (round mock `mock_fa_forest_oblivion` until its animations / VFX arrive).
  * Forest Slime keeps its existing sheet (spec LOCKED) — it lives in monsters.ts, drawn smaller (`AnimationConfig.scale`).
  *
  * Scope (spec §2.5): dedicated skills only for Alpha Wolf, Mist Wraith, Dark Shaman, Mist Witch, Elder Treant and
@@ -15,6 +17,8 @@ import { MonsterDefinition, MonsterSkillDefinition, MonsterStats } from '../mode
  */
 
 const mock = { clips: {} };
+/** the generated sheet when one exists, else the round mock */
+const art = (id: string): AnimationConfig => FOREST_ARC_ANIMATIONS[id] ?? mock;
 
 /** generic timings of a mock monster (same defaults as the legacy Stage 4–10 roster) */
 const base = (o: Partial<MonsterStats> & Pick<MonsterStats, 'maxHp' | 'attack' | 'defense' | 'moveSpeed' | 'attackRange' | 'attackCooldown'>): MonsterStats => ({
@@ -41,6 +45,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   /** readable 2 s pack-command cast; completed = wolves ATK +25 % / attack speed +20 % (spec proposed) */
   alpha_howl: {
     id: 'alpha_howl', name: 'เสียงหอนจ่าฝูง', label: 'ALPHA HOWL', type: 'BUFF',
+    clip: 'howl', fx: { id: 'fa-howl', activationFrame: 1, frameMs: 70 },
     castTime: 2, cooldown: 12, interruptedCooldown: 12, interruptible: true, interruptPriority: 'HIGH',
     firstCastDelay: 2.25,
     target: { type: 'ALLIES_WITH_TAG', tag: 'wolf', includeSelf: true },
@@ -56,6 +61,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   /** telegraphed strong claw (interrupt eligibility TBD → not interruptible, the Howl stays the lesson) */
   charge_claw: {
     id: 'charge_claw', name: 'ตะปบพุ่ง', label: 'CHARGE-CLAW', type: 'ATTACK',
+    clip: 'claw', hitFx: 'fa-claw',
     castTime: 0.8, cooldown: 9, interruptible: false, range: 2, firstCastDelay: 5,
     target: { type: 'CURRENT_TARGET' },
     effects: [{ type: 'DAMAGE', mul: 1.8, area: 'SINGLE', center: 'TARGET' }],
@@ -66,6 +72,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   // ---- Mist Wraith (spec §5): Phase / Mist Shift → Spectral Slash. Defense rule chosen: UNTARGETABLE (one rule only)
   mist_shift: {
     id: 'mist_shift', name: 'ร่างหมอกเคลื่อน', label: 'MIST SHIFT', type: 'MOVEMENT',
+    fx: { id: 'fa-phase', activationFrame: 8, frameMs: 100 },
     castTime: 0.8, cooldown: 10, interruptible: false, untargetableWhileCasting: true, firstCastDelay: 3,
     target: { type: 'HERO_PRIORITY', classes: ['healer', 'mage', 'archer'], backRowOnly: true },
     effects: [{ type: 'LEAP_BEHIND' }],
@@ -75,6 +82,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   spectral_slash: {
     id: 'spectral_slash', name: 'ฟันวิญญาณ', label: 'SPECTRAL SLASH', type: 'ATTACK',
+    clip: 'slash', hitFx: 'fa-x-slash',
     castTime: 0.6, cooldown: 7, interruptible: false, range: 2,
     target: { type: 'CURRENT_TARGET' },
     effects: [{ type: 'DAMAGE', mul: 1.8, area: 'SINGLE', center: 'TARGET' }],
@@ -85,6 +93,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   // ---- Dark Shaman (spec §5): two interruptible casts — effects only on completion
   weakening_hex: {
     id: 'weakening_hex', name: 'คำสาปอ่อนแรง', label: 'WEAKENING HEX', type: 'ATTACK',
+    clip: 'hex', hitFx: 'fa-curse',
     castTime: 1.8, cooldown: 11, interruptible: true, interruptPriority: 'HIGH', firstCastDelay: 3,
     // the shaman shoots the nearest frontline hero — that is who it curses
     target: { type: 'CURRENT_TARGET' },
@@ -94,6 +103,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   dark_chant: {
     id: 'dark_chant', name: 'บทสวดมืด', label: 'DARK CHANT', type: 'BUFF',
+    clip: 'chant', hitFx: 'fa-dark-chant',
     castTime: 2, cooldown: 14, interruptible: true, interruptPriority: 'HIGH', firstCastDelay: 5,
     // whole wave (local vs wave = TBD)
     target: { type: 'ALL_ALLIES' },
@@ -108,6 +118,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   /** zone: Slow + attack speed ↓ on the heroes inside a 2 × 2 at cast time (persistent zone = later) */
   black_fog: {
     id: 'black_fog', name: 'หมอกดำ', label: 'BLACK FOG', type: 'ATTACK',
+    clip: 'fog', hitFx: 'fa-black-fog',
     castTime: 1.5, cooldown: 12, interruptible: true, interruptPriority: 'MEDIUM', firstCastDelay: 3,
     target: { type: 'HERO_CLUSTER', area: 'SQUARE_2', min: 1 },
     effects: [{ type: 'APPLY_STATUS', status: 'black_fog', to: 'AREA', area: 'SQUARE_2', center: 'TARGET' }],
@@ -116,6 +127,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   veil_curse: {
     id: 'veil_curse', name: 'คำสาปม่านหมอก', label: 'VEIL CURSE', type: 'ATTACK',
+    clip: 'veil', hitFx: 'fa-veil-curse',
     castTime: 2.2, cooldown: 13, interruptible: true, interruptPriority: 'HIGH', firstCastDelay: 6,
     target: { type: 'HIGHEST_ATK_HERO' },
     effects: [{ type: 'APPLY_STATUS', status: 'veil_curse', to: 'TARGET' }],
@@ -126,6 +138,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   // ---- Elder Treant — Stage 7 boss (spec §6)
   heavy_root_slam: {
     id: 'heavy_root_slam', name: 'รากกระแทกหนัก', label: 'HEAVY ROOT SLAM', type: 'ATTACK',
+    clip: 'slam', fx: { id: 'fa-root-slam', activationFrame: 1, frameMs: 70 }, hitFx: 'fa-root-slam-hit',
     castTime: 1.5, cooldown: 8, interruptible: false, range: 2,
     target: { type: 'CURRENT_TARGET' },
     effects: [{ type: 'DAMAGE', mul: 1.7, area: 'FRONT_ARC', center: 'SELF' }],
@@ -134,6 +147,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   entangling_roots: {
     id: 'entangling_roots', name: 'รากพันธนาการ', label: 'ENTANGLING ROOTS', type: 'ATTACK',
+    clip: 'roots', hitFx: 'fa-roots',
     castTime: 2, cooldown: 10, interruptible: true, interruptPriority: 'MEDIUM',
     target: { type: 'HERO_PRIORITY', classes: ['healer', 'mage', 'archer'], backRowOnly: true },
     effects: [
@@ -146,6 +160,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   /** summon pool (spec candidates): Forest Wolf + Mushroom Creature, at most 2 alive */
   call_of_the_forest: {
     id: 'call_of_the_forest', name: 'เสียงเรียกแห่งพงไพร', label: 'CALL OF THE FOREST', type: 'SUMMON',
+    clip: 'call', fx: { id: 'fa-call-charge', activationFrame: 33, frameMs: 94 }, hitFx: 'fa-call-summon',
     castTime: 3, cooldown: 12, interruptible: true, interruptPriority: 'CRITICAL', firstCastDelay: 5,
     target: { type: 'SELF' },
     effects: [{ type: 'SUMMON', monsters: [{ id: 'forest_wolf', count: 1 }, { id: 'mushroom_creature', count: 1 }], maxActive: 2 }],
@@ -154,6 +169,7 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   },
   bark_guard: {
     id: 'bark_guard', name: 'เกราะเปลือกไม้', label: 'BARK GUARD', type: 'BUFF',
+    clip: 'bark', hitFx: 'fa-bark-guard',
     castTime: 1, cooldown: 15, interruptible: false,
     target: { type: 'SELF' },
     effects: [{ type: 'APPLY_STATUS', status: 'bark_guard', to: 'SELF' }],
@@ -227,7 +243,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'fighter', visual: 'mock_fa_forest_goblin',
     stats: base({ maxHp: 140, attack: 22, defense: 10, moveSpeed: 2.4, attackRange: 1.3, preferredRange: 1.1, attackCooldown: 1.5, attackWindup: 0.255, targetThinkInterval: 0.35 }),
     ai: { targeting: FRONT, movement: 'MELEE_CHASE' },
-    attack: melee('goblin_strike', 1, 0.25), skills: [], animation: mock,
+    attack: melee('goblin_strike', 1, 0.25), skills: [], animation: art('forest_goblin'),
   },
   // stats ← legacy goblin_archer
   goblin_archer: {
@@ -238,7 +254,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
       attackCooldown: 1.8, attackWindup: 0.34, targetThinkInterval: 0.35, collisionRadius: 0.35,
     }),
     ai: { targeting: { strategy: 'LOWEST_HP_PCT', targetLockDuration: 1.0, similarHpTolerance: 0.05 }, movement: 'RANGED_HOLD', maxRetreatSteps: 1 },
-    attack: bolt('goblin_arrow_shot', 'goblin_arrow', 1, 'PHYSICAL'), skills: [], animation: mock,
+    attack: bolt('goblin_arrow_shot', 'goblin_arrow', 1, 'PHYSICAL'), skills: [], animation: art('goblin_archer'),
   },
   // stats ← legacy forest_wolf
   forest_wolf: {
@@ -246,7 +262,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'fighter', visual: 'mock_fa_forest_wolf',
     stats: base({ maxHp: 110, attack: 24, defense: 6, moveSpeed: 4.2, attackRange: 1.2, preferredRange: 1.0, attackCooldown: 1.15, attackWindup: 0.255, attackRecovery: 0.15, targetThinkInterval: 0.25 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.0 }, movement: 'MELEE_CHASE' },
-    attack: melee('forest_wolf_bite', 1, 0.4), skills: [], animation: mock,
+    attack: melee('forest_wolf_bite', 1, 0.4), skills: [], animation: art('forest_wolf'),
   },
   // stats ← legacy alpha_wolf
   alpha_wolf: {
@@ -257,7 +273,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
       attackWindup: 0.255, attackRecovery: 0.2, targetThinkInterval: 0.25, hitReactionDuration: 0.1, minHitReactionInterval: 2.0, collisionRadius: 0.5,
     }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.0 }, movement: 'MELEE_CHASE', skillPriority: ['alpha_howl', 'charge_claw'] },
-    attack: melee('alpha_savage_bite', 1.25, 0.4), skills: ['alpha_howl', 'charge_claw'], animation: mock,
+    attack: melee('alpha_savage_bite', 1.25, 0.4), skills: ['alpha_howl', 'charge_claw'], animation: art('alpha_wolf'),
   },
   // stats ← legacy magic_mushroom (HP / ATK / DEF), fought up close (spec: body bash, no poison / spores)
   mushroom_creature: {
@@ -265,7 +281,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'tank', visual: 'mock_fa_mushroom_creature',
     stats: base({ maxHp: 220, attack: 48, defense: 12, moveSpeed: 1.4, attackRange: 1.2, attackCooldown: 1.8, attackWindup: 0.35 }),
     ai: { targeting: FRONT, movement: 'MELEE_CHASE' },
-    attack: melee('mushroom_bash', 0.9), skills: [], animation: mock,
+    attack: melee('mushroom_bash', 0.9), skills: [], animation: art('mushroom_creature'),
   },
   // stats ← legacy goblin_guard (defensive silhouette, slime pace)
   thorn_slime: {
@@ -273,7 +289,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'tank', visual: 'mock_fa_thorn_slime',
     stats: base({ maxHp: 520, attack: 70, defense: 40, moveSpeed: 1.6, attackRange: 1.2, attackCooldown: 1.6 }),
     ai: { targeting: FRONT, movement: 'MELEE_CHASE' },
-    attack: melee('thorn_body_slam', 1.1), skills: [], animation: mock,
+    attack: melee('thorn_body_slam', 1.1), skills: [], animation: art('thorn_slime'),
   },
   // stats ← legacy forest_spirit (fragile harasser), as a fast biter
   mist_bat: {
@@ -281,7 +297,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'assassin', visual: 'mock_fa_mist_bat',
     stats: base({ maxHp: 170, attack: 60, defense: 6, moveSpeed: 3.6, attackRange: 1.2, attackCooldown: 1.6, attackWindup: 0.25, targetThinkInterval: 0.25 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.0 }, movement: 'MELEE_CHASE' },
-    attack: melee('mist_bat_bite', 1, 0.4), skills: [], animation: mock,
+    attack: melee('mist_bat_bite', 1, 0.4), skills: [], animation: art('mist_bat'),
   },
   // stats ← legacy corrupted_treant × 0.7 HP / × 0.85 ATK / DEF 40 (a younger tree, not a body blocker)
   young_treant: {
@@ -289,7 +305,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'tank', visual: 'mock_fa_young_treant',
     stats: base({ maxHp: 525, attack: 54, defense: 40, moveSpeed: 1.0, attackRange: 1.5, attackCooldown: 2.1, attackWindup: 0.45, collisionRadius: 0.55, minHitReactionInterval: 1.5 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.5 }, movement: 'MELEE_CHASE' },
-    attack: melee('branch_strike', 1.3, 0.4), skills: [], animation: mock,
+    attack: melee('branch_strike', 1.3, 0.4), skills: [], animation: art('young_treant'),
   },
   // stats ← legacy mist_wraith
   mist_wraith: {
@@ -297,7 +313,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'assassin', visual: 'mock_fa_mist_wraith',
     stats: base({ maxHp: 190, attack: 74, defense: 5, moveSpeed: 3.0, attackRange: 1.3, attackCooldown: 1.4 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.5 }, movement: 'MELEE_CHASE', skillPriority: ['mist_shift', 'spectral_slash'] },
-    attack: melee('mist_claw', 1, 0.4), skills: ['mist_shift', 'spectral_slash'], animation: mock,
+    attack: melee('mist_claw', 1, 0.4), skills: ['mist_shift', 'spectral_slash'], animation: art('mist_wraith'),
   },
   // stats ← legacy corrupted_wolf (bleed dropped: not a current mechanic)
   corrupted_wolf: {
@@ -305,7 +321,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'fighter', visual: 'mock_fa_corrupted_wolf',
     stats: base({ maxHp: 260, attack: 62, defense: 10, moveSpeed: 4.4, attackRange: 1.2, attackCooldown: 1.1, attackWindup: 0.25, targetThinkInterval: 0.25 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.0 }, movement: 'MELEE_CHASE' },
-    attack: melee('corrupted_bite', 1, 0.4), skills: [], animation: mock,
+    attack: melee('corrupted_bite', 1, 0.4), skills: [], animation: art('corrupted_wolf'),
   },
   // stats ← legacy corrupted_treant
   corrupted_treant: {
@@ -313,7 +329,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'tank', visual: 'mock_fa_corrupted_treant',
     stats: base({ maxHp: 750, attack: 64, defense: 48, moveSpeed: 0.9, attackRange: 1.5, attackCooldown: 2.1, attackWindup: 0.45, bodyBlock: true, collisionRadius: 0.6, minHitReactionInterval: 1.5 }),
     ai: { targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 1.5 }, movement: 'MELEE_CHASE' },
-    attack: melee('heavy_branch', 1.3, 0.4), skills: [], animation: mock,
+    attack: melee('heavy_branch', 1.3, 0.4), skills: [], animation: art('corrupted_treant'),
   },
   // stats ← legacy dark_shaman (Dark Heal / Soul Link dropped)
   dark_shaman: {
@@ -321,7 +337,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'healer', visual: 'mock_fa_dark_shaman',
     stats: base({ maxHp: 290, attack: 62, defense: 14, moveSpeed: 1.7, attackRange: 6, preferredRange: 3.5, attackCooldown: 1.8, minComfortableRange: 3, rangeTolerance: 0.5 }),
     ai: { targeting: FRONT, movement: 'RANGED_HOLD', maxRetreatSteps: 1, skillPriority: ['dark_chant', 'weakening_hex'] },
-    attack: bolt('dark_bolt', 'dark_bolt'), skills: ['weakening_hex', 'dark_chant'], animation: mock,
+    attack: bolt('dark_bolt', 'dark_bolt'), skills: ['weakening_hex', 'dark_chant'], animation: art('dark_shaman'),
   },
   // stats ← legacy mist_witch (Nightmare / Dark Fog replaced)
   mist_witch: {
@@ -329,7 +345,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
     displayClass: 'mage', visual: 'mock_fa_mist_witch',
     stats: base({ maxHp: 240, attack: 76, defense: 9, moveSpeed: 1.8, attackRange: 6, preferredRange: 3.5, attackCooldown: 1.9, minComfortableRange: 3, rangeTolerance: 0.5 }),
     ai: { targeting: FRONT, movement: 'RANGED_HOLD', maxRetreatSteps: 1, skillPriority: ['veil_curse', 'black_fog'] },
-    attack: bolt('mist_bolt', 'dark_bolt'), skills: ['black_fog', 'veil_curse'], animation: mock,
+    attack: bolt('mist_bolt', 'dark_bolt'), skills: ['black_fog', 'veil_curse'], animation: art('mist_witch'),
   },
   // stats ← legacy elder_treant (Stage 7 boss)
   elder_treant: {
@@ -341,7 +357,7 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
       skillPriority: ['call_of_the_forest', 'bark_guard', 'entangling_roots', 'heavy_root_slam'],
     },
     attack: melee('rooted_smash', 1.1, 0.5),
-    skills: ['call_of_the_forest', 'bark_guard', 'entangling_roots', 'heavy_root_slam'], animation: mock,
+    skills: ['call_of_the_forest', 'bark_guard', 'entangling_roots', 'heavy_root_slam'], animation: art('elder_treant'),
     phases: [
       // Enraged Forest (spec suggested ~50 %): faster attacks + every skill cooldown × 0.8, one-time setup window
       { id: 'enraged_forest', label: 'ENRAGED FOREST', hpBelow: 0.5, transition: 1, statuses: ['enraged_forest'], cooldownScale: 0.8 },
@@ -360,6 +376,6 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
       skillPriority: ['core_surge', 'root_eruption', 'dark_mist_pressure', 'branch_sweep', 'oblivion_slam'],
     },
     attack: melee('oblivion_claw', 1.2, 0.5),
-    skills: ['core_surge', 'root_eruption', 'dark_mist_pressure', 'branch_sweep', 'oblivion_slam'], animation: mock,
+    skills: ['core_surge', 'root_eruption', 'dark_mist_pressure', 'branch_sweep', 'oblivion_slam'], animation: art('forest_oblivion'),
   },
 };
