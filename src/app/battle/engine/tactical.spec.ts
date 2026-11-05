@@ -2,7 +2,7 @@ import '../../../testing/legacy-roster';
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
-import { STAGES } from '../../core/data/stages';
+import { LEGACY_TOWER as STAGES } from '../../../testing/legacy-monsters';
 import { newGameState } from '../../core/data/starter';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { ROLE_BEHAVIOR } from '../../core/data/classes';
@@ -100,15 +100,15 @@ describe('Tactical difficulty — stats', () => {
   });
 
   it('mechanic exposure metrics: per-skill casts, boss lifetime, phases', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
-    const boss = b.monsters('elder_treant')[0];
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
+    const boss = b.monsters('legacy_elder_treant')[0];
     b.statue(boss);
-    b.cast(boss, 'call_of_the_forest');
+    b.cast(boss, 'legacy_call_of_the_forest');
     b.run(3.5);
     const m = b.e.metrics;
     expect(m.bossSpawnedAt).not.toBeNull();
-    expect(m.skillStats['call_of_the_forest'].started).toBe(1);
-    expect(m.skillStats['call_of_the_forest'].completed).toBe(1);
+    expect(m.skillStats['legacy_call_of_the_forest'].started).toBe(1);
+    expect(m.skillStats['legacy_call_of_the_forest'].completed).toBe(1);
     expect(m.statusApplied['ancient_protection']).toBe(1);
     boss.hp = 1;
     (b.e as any).applyDamage(boss, 99999, false);
@@ -134,9 +134,9 @@ describe('Tactical difficulty — positioning', () => {
   });
 
   it('hostile melee threat zones raise the DangerScore; ranged heroes avoid them', () => {
-    const b = battle([H('sylvie', 3, 1, TOUGH)], [mon('corrupted_wolf', 0, 1)]);
+    const b = battle([H('sylvie', 3, 1, TOUGH)], [mon('legacy_corrupted_wolf', 0, 1)]);
     const sy = b.hero('sylvie');
-    const wolf = b.monsters('corrupted_wolf')[0];
+    const wolf = b.monsters('legacy_corrupted_wolf')[0];
     b.statue(wolf);
     const P = b.e.positioning;
     expect(P.danger(sy, wolf.pos)).toBeGreaterThanOrEqual(SAFE_DANGER);
@@ -147,10 +147,10 @@ describe('Tactical difficulty — positioning', () => {
 
   it('49. SAFE FOCUS: Sylvie never runs into the Treant for a Dark Shaman 8 cells away; Focus stays; she switches once it is safe', () => {
     const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 1, TOUGH)],
-      [mon('corrupted_treant', 0, 1), mon('dark_shaman', 4, 1), mon('corrupted_wolf', 0, 0)]);
+      [mon('legacy_corrupted_treant', 0, 1), mon('legacy_dark_shaman', 4, 1), mon('legacy_corrupted_wolf', 0, 0)]);
     const sy = b.hero('sylvie');
-    const [treant] = b.monsters('corrupted_treant');
-    const shaman = b.monsters('dark_shaman')[0];
+    const [treant] = b.monsters('legacy_corrupted_treant');
+    const shaman = b.monsters('legacy_dark_shaman')[0];
     b.statue(treant);
     b.statue(shaman);
     b.e.setFocus(shaman.id);
@@ -173,8 +173,8 @@ describe('Tactical difficulty — positioning', () => {
   });
 
   it('Focus is not cleared while the target is temporarily untargetable / out of range', () => {
-    const b = battle([H('sylvie', 4, 1, TOUGH)], [mon('mist_wraith', 5, 1), mon('goblin_guard', 0, 1)]);
-    const w = b.monsters('mist_wraith')[0];
+    const b = battle([H('sylvie', 4, 1, TOUGH)], [mon('legacy_mist_wraith', 5, 1), mon('goblin_guard', 0, 1)]);
+    const w = b.monsters('legacy_mist_wraith')[0];
     b.e.setFocus(w.id);
     applyBuff(w, STATUS_EFFECTS['untargetable'], w.id, { duration: 1 });
     b.run(1.5);
@@ -239,9 +239,9 @@ describe('Tactical difficulty — skill use modes & interrupt reservation', () =
   });
 
   it('50. INTERRUPT RESERVATION: Arrow Rain waits (no damage use) and goes on Call of the Forest', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
     const sy = b.hero('sylvie'), a = b.hero('aurel');
-    const t = b.monsters('elder_treant')[0];
+    const t = b.monsters('legacy_elder_treant')[0];
     b.statue(t);
     b.e.setSkillMode(sy.id, 'skill2', 'RESERVE');
     b.e.setSkillMode(a.id, 'skill2', 'MANUAL');
@@ -250,24 +250,24 @@ describe('Tactical difficulty — skill use modes & interrupt reservation', () =
     b.run(3);
     expect(sy.cd2).toBeLessThanOrEqual(0); // no dangerous cast → kept
     b.put(t, sy.pos.c + 5, sy.pos.r);
-    b.cast(t, 'call_of_the_forest');
+    b.cast(t, 'legacy_call_of_the_forest');
     b.until(() => b.of('CAST_INTERRUPTED').length > 0, 3);
     const ci = b.of('CAST_INTERRUPTED')[0];
     expect(ci.src).toBe(sy.id);
-    expect(ci.skill).toBe('call_of_the_forest');
+    expect(ci.skill).toBe('legacy_call_of_the_forest');
     expect(b.e.metrics.reservedSkillHits).toBe(1);
   });
 
   it('51. MULTIPLE INTERRUPTERS: the tank commits on Alpha Howl, Sylvie keeps Arrow Rain ready', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 1, TOUGH)], [mon('alpha_wolf', 0, 1), mon('forest_wolf', 5, 0)]);
+    const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 1, TOUGH)], [mon('legacy_alpha_wolf', 0, 1), mon('legacy_forest_wolf', 5, 0)]);
     const a = b.hero('aurel'), sy = b.hero('sylvie');
-    const alpha = b.monsters('alpha_wolf')[0];
+    const alpha = b.monsters('legacy_alpha_wolf')[0];
     b.statue(alpha);
     b.put(alpha, a.pos.c + 2, a.pos.r);
     for (const h of [a, sy]) b.e.setSkillMode(h.id, 'skill2', 'RESERVE');
     a.cd2 = 0;
     sy.cd2 = 0;
-    b.cast(alpha, 'alpha_howl');
+    b.cast(alpha, 'legacy_alpha_howl');
     b.until(() => b.of('CAST_INTERRUPTED').length > 0, 3);
     expect(b.of('CAST_INTERRUPTED')[0].src).toBe(a.id);
     expect(sy.cd2).toBeLessThanOrEqual(0);
@@ -301,15 +301,15 @@ describe('Tactical difficulty — skill use modes & interrupt reservation', () =
   });
 
   it('interrupt priority: a reserved interrupt ignores casts below the hero minimum', () => {
-    const b = battle([H('sylvie', 4, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('sylvie', 4, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
     const sy = b.hero('sylvie');
-    const t = b.monsters('elder_treant')[0];
+    const t = b.monsters('legacy_elder_treant')[0];
     b.statue(t);
     b.put(t, sy.pos.c + 5, sy.pos.r);
     b.e.setSkillMode(sy.id, 'skill2', 'RESERVE');
     b.e.setInterruptMinPriority(sy.id, 'CRITICAL');
     sy.cd2 = 0;
-    b.cast(t, 'entangling_roots', sy); // MEDIUM
+    b.cast(t, 'legacy_entangling_roots', sy); // MEDIUM
     b.run(2.2);
     expect(b.of('CAST_INTERRUPTED').length).toBe(0);
     expect(sy.cd2).toBeLessThanOrEqual(0);
@@ -334,17 +334,17 @@ describe('Tactical difficulty — skill use modes & interrupt reservation', () =
 
 describe('Tactical difficulty — Stage 7', () => {
   it('Call of the Forest: cast 3 s, cooldown 12 s, first cast 5 s into the boss wave, CRITICAL', () => {
-    const c = MONSTER_SKILLS['call_of_the_forest'];
+    const c = MONSTER_SKILLS['legacy_call_of_the_forest'];
     expect([c.castTime, c.cooldown, c.firstCastDelay, c.interruptPriority, c.interruptible]).toEqual([3, 12, 5, 'CRITICAL', true]);
     expect(MONSTER_SKILLS['root_slam'].interruptible).toBeFalse();
-    expect(MONSTER_SKILLS['entangling_roots'].interruptPriority).toBe('MEDIUM');
+    expect(MONSTER_SKILLS['legacy_entangling_roots'].interruptPriority).toBe('MEDIUM');
   });
 
   it('Ancient Protection: ×0.85 damage taken while any Call add lives, never stacks, ends with the last add', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
-    const t = b.monsters('elder_treant')[0];
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
+    const t = b.monsters('legacy_elder_treant')[0];
     b.statue(t);
-    b.cast(t, 'call_of_the_forest');
+    b.cast(t, 'legacy_call_of_the_forest');
     b.until(() => !t.casting, 4);
     expect(hasStatus(t, 'ancient_protection')).toBeTrue();
     expect(modifier(t, 'damageTakenMultiplier')).toBeCloseTo(0.85, 5);
@@ -379,7 +379,7 @@ describe('Tactical difficulty — Stage 7', () => {
         });
         e.subscribe(ev => {
           if (ev.type === 'castStart' && ev.label === 'CALL OF THE FOREST') out.started++;
-          if (ev.type === 'skillActivated' && ev.skill === 'call_of_the_forest') out.completed++;
+          if (ev.type === 'skillActivated' && ev.skill === 'legacy_call_of_the_forest') out.completed++;
         });
         while (!e.result && e.time < 60) {
           bot?.tick(e);

@@ -351,7 +351,8 @@ export class BoardComponent {
     const host = document.createElement('div');
     host.className = 'pixi-host';
     // created at runtime (no encapsulation attribute): inline styles · above the 'under' FX (z 5), below DOM FX / bars
-    host.style.cssText = 'position:absolute;inset:0;z-index:6;pointer-events:none;';
+    // expanded scenery: reach up to the board top so tall FX above the lanes are not cut at the camera layer's edge
+    host.style.cssText = 'position:absolute;inset:0;top:calc(-1 * var(--scenery-extra, 0px));z-index:6;pointer-events:none;';
     (board.querySelector<HTMLElement>(':scope > .cam') ?? board).appendChild(host);
     this.pixiHost = host;
     // chunk load failure (offline / stale deploy) = stay DOM, like a device without WebGL
@@ -435,6 +436,8 @@ export class BoardComponent {
       };
     });
     const bolts: PixiBolt[] = this.projectiles().map(p => ({ id: p.id, name: p.name, from: p.from, to: p.to, flight: p.flight }));
+    // expanded scenery (sprite lab): the canvas starts at the board top, the camera layer `--scenery-extra` lower
+    this.pixi.setOriginY(this.sceneryExtraRows() * cell);
     const out = this.pixi.draw(list, cell, this.vclock, this.idleClock, fx, bolts);
     const drawn = out.units;
     this.hideDrawn(out.fx, this.fxPxOn, id => `.fx-wrap[data-fx="${id}"]`);

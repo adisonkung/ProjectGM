@@ -1565,7 +1565,11 @@ export class BattleEngine {
           break;
         case 'APPLY_STATUS': {
           const to =
-            eff.to === 'HIT' ? hits : eff.to === 'TARGET' ? (aim ? [aim] : []) : eff.to === 'SELF' ? [u] : foes();
+            eff.to === 'HIT' ? hits : eff.to === 'TARGET' ? (aim ? [aim] : []) : eff.to === 'SELF' ? [u]
+            : eff.to === 'AREA' ? (eff.center === 'SELF' || aim
+              ? resolveArea({ pattern: eff.area ?? 'SINGLE', caster: u, primary: aim, center: eff.center ?? 'TARGET', candidates: foes() })
+              : [])
+            : foes();
           for (const t of to) if (t.alive) this.applyStatus(t, eff.status, u, eff.duration);
           break;
         }

@@ -297,4 +297,51 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     id: 'berserk', name: 'คลั่ง', duration: 8, stackPolicy: 'REFRESH_DURATION', buff: true,
     modifiers: { attackMultiplier: 1.5, attackSpeedMultiplier: 1.5 },
   },
+  // ---- Forest Arc (claude/eldervane-monster-spec-s1-10.md, 2026-11-05) — PROVISIONAL magnitudes (spec: TBD / proposed)
+  /** Alpha Howl (spec §5 proposed): ATK +25 % · attack speed +20 % */
+  alpha_pack_command: {
+    id: 'alpha_pack_command', name: 'คำสั่งจ่าฝูง', duration: 8, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { attackMultiplier: 1.25, attackSpeedMultiplier: 1.2 },
+  },
+  /** Dark Shaman Weakening Hex (spec §5): DEF ↓ + ATK ↓ on one hero, 7 s */
+  weakened: {
+    id: 'weakened', name: 'คำสาปอ่อนแรง', duration: 7, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { defenseMultiplier: 0.85, attackMultiplier: 0.85 },
+  },
+  /** Dark Shaman Dark Chant (spec §5 suggested): ATK +15 % · attack speed +10 %, ~6 s */
+  dark_chant_buff: {
+    id: 'dark_chant_buff', name: 'บทสวดมืด', duration: 6, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { attackMultiplier: 1.15, attackSpeedMultiplier: 1.1 },
+  },
+  /** Mist Witch Black Fog (spec §5): Slow + attack speed ↓ (zone simplified to a 5 s debuff on the heroes inside) */
+  black_fog: {
+    id: 'black_fog', name: 'หมอกดำ', duration: 5, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { moveSpeedMultiplier: 0.6, attackSpeedMultiplier: 0.8 },
+  },
+  /** Mist Witch Veil Curse (spec §5): action speed ↓ + healing received ↓ */
+  veil_curse: {
+    id: 'veil_curse', name: 'คำสาปม่านหมอก', duration: 6, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { attackSpeedMultiplier: 0.8, castSpeedMultiplier: 0.8, healingReceivedMultiplier: 0.7 },
+  },
+  /** Elder Treant Bark Guard (spec §6: damage reduction chosen, not DEF) */
+  bark_guard: {
+    id: 'bark_guard', name: 'เกราะเปลือกไม้', duration: 5, stackPolicy: 'REFRESH_DURATION', buff: true,
+    modifiers: { damageTakenMultiplier: 0.75 },
+  },
+  /** Elder Treant Enraged Forest — phase 2 (≤ 50 % HP) */
+  enraged_forest: {
+    id: 'enraged_forest', name: 'พงไพรพิโรธ', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.2 },
+  },
+  /** Forest Oblivion: BREAK result — the core is exposed (cannot act, takes +50 %) */
+  exposed_core: {
+    id: 'exposed_core', name: 'แกนกลางเปิด', duration: 5, stackPolicy: 'REFRESH_DURATION', bossValid: true,
+    modifiers: { damageTakenMultiplier: 1.5 }, flags: ['broken'],
+  },
+  /** Forest Oblivion Dark Mist Pressure: where the mist lands the formation slows */
+  oblivion_mist: {
+    id: 'oblivion_mist', name: 'หมอกสูญสิ้น', duration: 5, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { moveSpeedMultiplier: 0.6, attackSpeedMultiplier: 0.85 },
+  },
+
 };

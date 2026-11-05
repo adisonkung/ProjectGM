@@ -3,11 +3,13 @@ import { FxSpriteComponent } from '../../battle/fx-sprite/fx-sprite.component';
 import { SPRITE_ATLAS } from './sprite-atlas';
 import { gridCell, gridPosition, spriteUrl, stripGrid } from './sprite-files';
 import { FX, SHEETS } from './sprites';
+import { LEGACY_SHEETS } from '../../../testing/legacy-monsters';
 
 /** optimised sprite files (tools/sprites/optimize.py → sprite-atlas.ts) */
 describe('sprite files (optimised atlas)', () => {
   it('every sheet and FX file has an optimised entry (re-run `npm run sprites:optimize` after a bake)', () => {
-    const files = new Set([...Object.keys(SHEETS), ...Object.values(FX).map(d => d.file)]);
+    // legacy tower sheets exist only through the test fixture (not shipped, not optimised)
+    const files = new Set([...Object.keys(SHEETS).filter(f => !LEGACY_SHEETS.has(f)), ...Object.values(FX).map(d => d.file)]);
     for (const f of files) expect(SPRITE_ATLAS[f]).withContext(f).toBeDefined();
     expect(spriteUrl('hero-kael.png')).toMatch(/^sprites\/opt\/hero-kael\.(webp|png)$/);
     expect(spriteUrl('not-optimised.png')).toBe('sprites/not-optimised.png');

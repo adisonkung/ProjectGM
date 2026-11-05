@@ -183,6 +183,11 @@ export class PixiUnitLayer {
     }
   }
 
+  /** board px between the canvas top and the camera layer's top (expanded scenery) — every layer shifts with it */
+  setOriginY(px: number): void {
+    if (this.stage.y !== px) this.stage.y = px;
+  }
+
   resize(width: number, height: number): void {
     if (width > 0 && height > 0) {
       this.app.renderer.resize(width, height);

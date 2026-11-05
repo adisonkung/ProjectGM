@@ -18,7 +18,7 @@ import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
     } @else {
     @if (img(); as g) {
       <div class="layers" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + sceneryExtraRows() + ')' : null" [style.height]="sceneryExtraRows() ? 'calc(var(--cell) * ' + baseRows + ')' : null" [style.--shift]="live() ? null : shift()" [style.--dur]="live() ? '0ms' : duration() + 'ms'">
-        <div class="img" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + -sceneryExtraRows() + ')' : null" [style.height]="'calc(var(--cell) * ' + (g.cut * baseRows + sceneryExtraRows()) + ')'" [style.background-image]="g.url" [style.background-size]="g.size"
+        <div class="img" [style.top]="sceneryExtraRows() ? 'calc(var(--cell) * ' + -sceneryExtraRows() + ')' : null" [style.height]="'calc(var(--cell) * ' + (g.cut * baseRows + sceneryExtraRows()) + ')'" [style.background-image]="g.url" [style.background-size]="g.upperSize"
              [style.background-position]="'calc(var(--shift) * var(--screen) * -0.4) ' + g.yUpper"></div>
         <div class="img" [style.top.%]="g.cut * 100" [style.bottom]="'calc(-1 * var(--ground-extra, 0px))'" [style.background-image]="g.url" [style.background-size]="g.groundSize"
              [style.background-position]="'calc(var(--shift) * var(--screen) * -1) ' + g.yGround"></div>
@@ -142,10 +142,14 @@ export class FieldComponent {
     // Extend only the terrain below the horizon. Sky/trees retain their original projection.
     const groundH = imgH + this.groundExtraRows() / (1-b.cut);
     const cells = (n: number) => `calc(var(--cell) * ${n.toFixed(4)})`;
+    // Sky extension (sprite lab): enlarge the upper picture until it fills the extra rows, horizon kept on the cut line
+    const extra = this.sceneryExtraRows(), horizon = extra + top + b.cut * imgH;
+    const upperH = extra > 0 ? Math.max(imgH, horizon / b.cut) : imgH;
     return {
       url: `url(${b.file})`,
       size: `auto ${cells(imgH)}`,
-      yUpper: cells(top + this.sceneryExtraRows()),
+      upperSize: `auto ${cells(upperH)}`,
+      yUpper: cells(horizon - b.cut * upperH),
       groundSize: `${cells(imgH*b.w/b.h)} ${cells(groundH)}`,
       yGround: cells(-b.cut*groundH),
       cut,

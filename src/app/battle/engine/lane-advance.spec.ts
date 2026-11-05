@@ -1,3 +1,4 @@
+import '../../../testing/legacy-monsters';
 import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { OwnedHero } from '../../core/models/hero';
@@ -26,7 +27,7 @@ describe('Lane-first advance', () => {
     const h: OwnedHero = { uid: 1, templateId: 'garrick', level: 10, potential: 'B', breakthroughTier: 0 };
     const spec: UnitSpec = { name: t.name, cls: t.cls, heroId: 'garrick', heroUid: 1, sprite: t.sprite,
       stats: { ...heroStats(t, h), hp: 9999 }, mods: combatModifiers(h), skillRanks: skillRanksOf(h), pos: { r: 0, c: 0 } };
-    const stage: StageDef = { floor: 1, mode: 'eliminate', timeLimit: 999, enemies: [{ enemy: 'forest_wolf', r: 0, c: 2 }] };
+    const stage: StageDef = { floor: 1, mode: 'eliminate', timeLimit: 999, enemies: [{ enemy: 'legacy_forest_wolf', r: 0, c: 2 }] };
     const e = new BattleEngine({ allies: [spec], stage, enemyTemplates: ENEMIES, seed: 5 });
     const hero = e.units.find(u => u.heroId === 'garrick')!;
     const foe = e.units.find(u => u.side !== 'ally')!;

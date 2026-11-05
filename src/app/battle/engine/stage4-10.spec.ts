@@ -3,13 +3,13 @@ import { ENEMIES } from '../../core/data/enemies';
 import { HERO_BY_ID } from '../../core/data/heroes';
 import { kitOf } from '../../core/data/hero-skills';
 import { MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
-import { STAGE4_10_MONSTERS, STAGE4_10_SKILLS } from '../../core/data/monsters-stage4-10';
-import { STAGES } from '../../core/data/stages';
+import { LEGACY_TOWER_MONSTERS as STAGE4_10_MONSTERS_RAW, LEGACY_TOWER_SKILLS as STAGE4_10_SKILLS } from '../../core/data/legacy-tower-monsters';
+import { L, LEGACY_TOWER as STAGES } from '../../../testing/legacy-monsters';
 import { newGameState } from '../../core/data/starter';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
 import { VISUALS } from '../../core/data/visuals';
 import { SkillSlot } from '../../core/models/combat';
-import { MonsterSkillDefinition } from '../../core/models/monster';
+import { MonsterDefinition, MonsterSkillDefinition } from '../../core/models/monster';
 import { EnemyPlacement, StageDef, wavesOf } from '../../core/models/stage';
 import { UnitSpec } from '../../core/models/unit';
 import { heroStats } from '../../core/rules/stats';
@@ -23,6 +23,11 @@ import { DamageResolver } from './damage-resolver';
 import { distance, Grid } from './grid';
 import { nextStep } from './pathfinding';
 import { selectTarget, TARGET_STRATEGIES } from './targeting';
+
+/** the legacy Stage 4–10 roster as registered by the fixture (old S1–3 monsters excluded) */
+const OLD_S13 = ['goblin_fighter', 'goblin_archer', 'forest_wolf', 'alpha_wolf'];
+const STAGE4_10_MONSTERS: Record<string, MonsterDefinition> = Object.fromEntries(
+  Object.keys(STAGE4_10_MONSTERS_RAW).filter(id => !OLD_S13.includes(id)).map(id => [id, MONSTERS[L(id)]]));
 
 // ------------------------------------------------------------------ harness
 
@@ -94,22 +99,22 @@ const pct = (u: BattleUnit) => u.hp / u.maxHp;
 
 describe('Stage 4–10 data', () => {
   it('extra 1 — defines the 12 new monsters (+ the Sacrifice variant) with the design stats', () => {
-    const ids = ['magic_mushroom', 'forest_spirit', 'shadow_panther', 'goblin_guard', 'goblin_shaman', 'elder_treant', 'corrupted_wolf',
-      'mist_wraith', 'corrupted_treant', 'dark_shaman', 'mist_witch', 'fallen_forest_guardian'];
+    const ids = ['magic_mushroom', 'forest_spirit', 'shadow_panther', 'goblin_guard', 'goblin_shaman', 'legacy_elder_treant', 'legacy_corrupted_wolf',
+      'legacy_mist_wraith', 'legacy_corrupted_treant', 'legacy_dark_shaman', 'legacy_mist_witch', 'fallen_forest_guardian'];
     for (const id of ids) expect(MONSTERS[id]).withContext(id).toBeDefined();
     expect(Object.keys(STAGE4_10_MONSTERS).length).toBe(13);
     const s = (id: string) => MONSTERS[id].stats;
     // Patch 1 re-authored stats (tower progression content; the spec's first values were for a Lv1–5 slice)
     expect([s('magic_mushroom').maxHp, s('magic_mushroom').attack, s('magic_mushroom').defense]).toEqual([220, 48, 12]);
     expect([s('fallen_forest_guardian').maxHp, s('fallen_forest_guardian').attack, s('fallen_forest_guardian').defense]).toEqual([12000, 125, 60]);
-    expect([s('elder_treant').maxHp, s('elder_treant').attack]).toEqual([7000, 145]);
+    expect([s('legacy_elder_treant').maxHp, s('legacy_elder_treant').attack]).toEqual([7000, 145]);
     // roles stay readable: the body blocker is the tankiest common, the Wraith fragile but hard-hitting
-    expect(s('corrupted_treant').maxHp).toBeGreaterThan(s('corrupted_wolf').maxHp * 2);
-    expect(s('mist_wraith').maxHp).toBeLessThan(s('corrupted_wolf').maxHp);
-    expect(s('mist_wraith').attack).toBeGreaterThan(s('corrupted_wolf').attack);
+    expect(s('legacy_corrupted_treant').maxHp).toBeGreaterThan(s('legacy_corrupted_wolf').maxHp * 2);
+    expect(s('legacy_mist_wraith').maxHp).toBeLessThan(s('legacy_corrupted_wolf').maxHp);
+    expect(s('legacy_mist_wraith').attack).toBeGreaterThan(s('legacy_corrupted_wolf').attack);
     expect(s('forest_spirit').defenseIgnore).toBe(0.2);
-    expect(s('corrupted_treant').bodyBlock).toBeTrue();
-    expect(MONSTERS['elder_treant'].rank).toBe('BOSS');
+    expect(s('legacy_corrupted_treant').bodyBlock).toBeTrue();
+    expect(MONSTERS['legacy_elder_treant'].rank).toBe('BOSS');
     expect(MONSTERS['fallen_forest_guardian'].rank).toBe('FINAL_BOSS');
   });
 
@@ -147,7 +152,7 @@ describe('Stage 4–10 data', () => {
       expect(w.length).withContext(`F${st.floor}`).toBe(st.floor === 9 ? 4 : 3);
       for (const sp of w.flatMap(x => x.spawns)) expect(MONSTERS[sp.monsterId]).withContext(sp.monsterId).toBeDefined();
     }
-    expect(wavesOf(STAGES[6])[2].spawns.map(s => s.monsterId)).toEqual(['elder_treant']);
+    expect(wavesOf(STAGES[6])[2].spawns.map(s => s.monsterId)).toEqual(['legacy_elder_treant']);
     expect(wavesOf(STAGES[9])[2].spawns.map(s => s.monsterId)).toEqual(['fallen_forest_guardian']);
   });
 
@@ -184,8 +189,8 @@ describe('Stage 4–10 statuses', () => {
   });
 
   it('extra 8 — Nightmare stuns the highest-ATK hero for 3 s (no actions)', () => {
-    const b = battle([H('aurel', 0, 0, TOUGH), H('jin', 0, 1, TOUGH), H('lumina', 4, 1, TOUGH)], [mon('mist_witch', 3, 1)]);
-    const w = b.monsters('mist_witch')[0];
+    const b = battle([H('aurel', 0, 0, TOUGH), H('jin', 0, 1, TOUGH), H('lumina', 4, 1, TOUGH)], [mon('legacy_mist_witch', 3, 1)]);
+    const w = b.monsters('legacy_mist_witch')[0];
     b.cast(w, 'nightmare', w.monster ? b.hero('jin') : null);
     expect((b.e as any).monsterAI.aimTarget(w, MONSTER_SKILLS['nightmare']).heroId).toBe('jin');
     b.until(() => !w.casting, 4);
@@ -206,10 +211,10 @@ describe('Stage 4–10 statuses', () => {
   });
 
   it('extra 10 — Corrupted Wolf: every 3rd successful bite on the same target applies BLEED (counter resets on a new target)', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('corrupted_wolf', 0, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_corrupted_wolf', 0, 1)]);
     b.freeze('heroes');
     const a = b.hero('aurel');
-    const w = b.monsters('corrupted_wolf')[0];
+    const w = b.monsters('legacy_corrupted_wolf')[0];
     const bites = () => b.of('damage').filter(d => d.dst === a.id && !d.poison).length;
     b.until(() => bites() === 2, 20);
     expect(hasStatus(a, 'bleed')).toBeFalse();
@@ -221,10 +226,10 @@ describe('Stage 4–10 statuses', () => {
   });
 
   it('extra 11 — BLEED ticks 15% of the source ATK per second for 5 s', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('corrupted_wolf', 5, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_corrupted_wolf', 5, 1)]);
     b.freeze('all');
     const a = b.hero('aurel');
-    const w = b.monsters('corrupted_wolf')[0];
+    const w = b.monsters('legacy_corrupted_wolf')[0];
     b.status(a, 'bleed', w);
     const t0 = b.e.time;
     b.run(5.2);
@@ -256,10 +261,10 @@ describe('Stage 4–10 statuses', () => {
   });
 
   it('extra 13 — SOUL LINK: 70% of the shaman\'s damage goes to the linked treant; the link ends when the treant dies', () => {
-    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('corrupted_treant', 0, 1), mon('dark_shaman', 4, 1)]);
+    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('legacy_corrupted_treant', 0, 1), mon('legacy_dark_shaman', 4, 1)]);
     b.freeze('all');
-    const t = b.monsters('corrupted_treant')[0];
-    const s = b.monsters('dark_shaman')[0];
+    const t = b.monsters('legacy_corrupted_treant')[0];
+    const s = b.monsters('legacy_dark_shaman')[0];
     b.cast(s, 'soul_link', t);
     b.until(() => hasStatus(s, 'soul_link'), 4);
     const sh0 = s.hp, tr0 = t.hp;
@@ -274,10 +279,10 @@ describe('Stage 4–10 statuses', () => {
   });
 
   it('extra 14 — SOUL LINK transfer never crits, never chains and triggers no on-hit', () => {
-    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('corrupted_treant', 0, 1), mon('dark_shaman', 4, 1)]);
+    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('legacy_corrupted_treant', 0, 1), mon('legacy_dark_shaman', 4, 1)]);
     b.freeze('all');
-    const t = b.monsters('corrupted_treant')[0];
-    const s = b.monsters('dark_shaman')[0];
+    const t = b.monsters('legacy_corrupted_treant')[0];
+    const s = b.monsters('legacy_dark_shaman')[0];
     applyBuff(s, STATUS_EFFECTS['soul_link'], t.id);
     applyBuff(t, STATUS_EFFECTS['soul_link'], s.id); // a (bogus) reverse link must not ping-pong
     (b.e as any).applyDamage(s, 100, true);
@@ -289,8 +294,8 @@ describe('Stage 4–10 statuses', () => {
   });
 
   it('extra 15 — UNTARGETABLE (Mist Form): not selectable, projectiles pass, Focus stays but is temporarily invalid', () => {
-    const b = battle([H('sylvie', 4, 1, TOUGH), H('aurel', 0, 1, TOUGH)], [mon('mist_wraith', 1, 1)]);
-    const w = b.monsters('mist_wraith')[0];
+    const b = battle([H('sylvie', 4, 1, TOUGH), H('aurel', 0, 1, TOUGH)], [mon('legacy_mist_wraith', 1, 1)]);
+    const w = b.monsters('legacy_mist_wraith')[0];
     b.e.setFocus(w.id);
     b.cast(w, 'mist_form', b.hero('sylvie'));
     expect(hasFlag(w, 'untargetable')).toBeTrue();
@@ -303,9 +308,9 @@ describe('Stage 4–10 statuses', () => {
   });
 
   it('extra 16 — an untargetable unit takes no DoT damage', () => {
-    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('mist_wraith', 3, 1)]);
+    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('legacy_mist_wraith', 3, 1)]);
     b.freeze('all');
-    const w = b.monsters('mist_wraith')[0];
+    const w = b.monsters('legacy_mist_wraith')[0];
     b.status(w, 'poison', b.hero('lumina'));
     b.status(w, 'untargetable', w, 5);
     const hp = w.hp;
@@ -370,8 +375,8 @@ describe('Stage 4–10 monsters', () => {
   });
 
   it('extra 23 — Corrupted Treant body-blocks hero movement (paths go around its cell)', () => {
-    const b = battle([H('jin', 0, 1, TOUGH)], [mon('corrupted_treant', 0, 1)]);
-    const t = b.monsters('corrupted_treant')[0];
+    const b = battle([H('jin', 0, 1, TOUGH)], [mon('legacy_corrupted_treant', 0, 1)]);
+    const t = b.monsters('legacy_corrupted_treant')[0];
     const jin = b.hero('jin');
     const blocked = (b.e as any).bodyBlocked(jin);
     expect(blocked(t.pos)).toBeTrue();
@@ -381,10 +386,10 @@ describe('Stage 4–10 monsters', () => {
   });
 
   it('extra 24 — Dark Heal prefers a boss / elite ally below 60%, else the lowest HP% ally', () => {
-    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('dark_shaman', 4, 0), mon('dark_shaman', 4, 2), mon('corrupted_wolf', 0, 1)]);
+    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('legacy_dark_shaman', 4, 0), mon('legacy_dark_shaman', 4, 2), mon('legacy_corrupted_wolf', 0, 1)]);
     b.freeze('all');
-    const [s1, s2] = b.monsters('dark_shaman');
-    const wolf = b.monsters('corrupted_wolf')[0];
+    const [s1, s2] = b.monsters('legacy_dark_shaman');
+    const wolf = b.monsters('legacy_corrupted_wolf')[0];
     wolf.hp = Math.round(wolf.maxHp * 0.2);
     s2.hp = Math.round(s2.maxHp * 0.55);
     const ai = (b.e as any).monsterAI;
@@ -398,9 +403,9 @@ describe('Stage 4–10 monsters', () => {
 
 describe('Stage 4–10 bosses', () => {
   it('extra 25 — Elder Treant ignores stun and knockback; BROKEN (boss-valid) still lands', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
     b.freeze('all');
-    const t = b.monsters('elder_treant')[0];
+    const t = b.monsters('legacy_elder_treant')[0];
     t.buffs = [];
     b.status(t, 'stun', b.hero('aurel'), 1);
     expect(hasFlag(t, 'stun')).toBeFalse();
@@ -413,23 +418,23 @@ describe('Stage 4–10 bosses', () => {
   });
 
   it('extra 26 — Elder Treant at 50%: ANCIENT RAGE (attack speed ×1.15, Call cooldown 12 → 10) enables Thorn Pulse', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
     b.freeze('all');
-    const t = b.monsters('elder_treant')[0];
+    const t = b.monsters('legacy_elder_treant')[0];
     expect(t.castSkills!.some(c => c.def.id === 'thorn_pulse')).toBeFalse();
     b.dmg(t, Math.ceil(t.maxHp * 0.51));
     expect(b.of('bossPhase').map(p => p.phase)).toEqual(['ancient_rage']);
     expect(modifier(t, 'attackSpeedMultiplier')).toBeCloseTo(1.15, 5);
-    expect((b.e as any).monsterAI.cooldownOf(t, MONSTER_SKILLS['call_of_the_forest'])).toBe(10);
+    expect((b.e as any).monsterAI.cooldownOf(t, MONSTER_SKILLS['legacy_call_of_the_forest'])).toBe(10);
     expect(t.castSkills!.some(c => c.def.id === 'thorn_pulse')).toBeTrue();
   });
 
   it('final pass — Thorn Pulse: every 8 s, not interruptible, moderate damage to every hero (no one-shot)', () => {
     const tp = MONSTER_SKILLS['thorn_pulse'];
     expect([tp.cooldown, tp.interruptible, tp.target.type]).toEqual([8, false, 'ALL_HEROES']);
-    const b = battle([H('aurel', 0, 1), H('lumina', 4, 1), H('sylvie', 4, 0)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('aurel', 0, 1), H('lumina', 4, 1), H('sylvie', 4, 0)], [mon('legacy_elder_treant', 1, 1)]);
     b.freeze('all');
-    const t = b.monsters('elder_treant')[0];
+    const t = b.monsters('legacy_elder_treant')[0];
     b.cast(t, 'thorn_pulse');
     expect(b.of('castStart').at(-1)!.interruptible).toBeFalse();
     b.until(() => !t.casting, 3);
@@ -445,39 +450,39 @@ describe('Stage 4–10 bosses', () => {
   });
 
   it('extra 27 — Call of the Forest summons 1 Forest Spirit + 1 Magic Mushroom, never more than 2 alive', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
     b.freeze('all');
-    const t = b.monsters('elder_treant')[0];
-    b.cast(t, 'call_of_the_forest');
+    const t = b.monsters('legacy_elder_treant')[0];
+    b.cast(t, 'legacy_call_of_the_forest');
     b.until(() => !t.casting, 4);
     expect(b.monsters('forest_spirit').length).toBe(1);
     expect(b.monsters('magic_mushroom').length).toBe(1);
-    const cond = MONSTER_SKILLS['call_of_the_forest'].conditions;
-    expect(cond.every(c => (b.e as any).monsterAI.conditionHolds(t, MONSTER_SKILLS['call_of_the_forest'], c))).toBeFalse();
+    const cond = MONSTER_SKILLS['legacy_call_of_the_forest'].conditions;
+    expect(cond.every(c => (b.e as any).monsterAI.conditionHolds(t, MONSTER_SKILLS['legacy_call_of_the_forest'], c))).toBeFalse();
     b.kill(b.monsters('forest_spirit')[0]);
-    (b.e as any).summon(t, 'call_of_the_forest', [{ id: 'forest_spirit', count: 2 }], 2);
+    (b.e as any).summon(t, 'legacy_call_of_the_forest', [{ id: 'forest_spirit', count: 2 }], 2);
     expect(b.monsters('forest_spirit').filter(u => u.alive).length).toBe(1);
   });
 
   it('final pass — F8 synergy: wolves bleed, the Mist Wraith hunts the bleeding hero, Mist Strike +20 % vs bleed', () => {
-    expect(MONSTERS['corrupted_wolf'].attack.onHitEveryN).toEqual({ n: 3, status: 'bleed' });
-    expect(MONSTERS['mist_wraith'].ai.targeting.preferStatus).toBe('bleed');
+    expect(MONSTERS['legacy_corrupted_wolf'].attack.onHitEveryN).toEqual({ n: 3, status: 'bleed' });
+    expect(MONSTERS['legacy_mist_wraith'].ai.targeting.preferStatus).toBe('bleed');
     const strike = MONSTER_SKILLS['mist_form'].effects.find(e => e.type === 'DAMAGE') as { bonusVsStatus?: { status: string; mul: number } };
     expect(strike.bonusVsStatus).toEqual({ status: 'bleed', mul: 1.2 });
     // targeting: a bleeding front-row hero beats a lower-HP back-row hero
     const h = (id: number, line: 'front' | 'back', hp: number, bleeding: boolean) => ({
       id, pos: { r: 1, c: 2 }, hp, maxHp: 100, line, buffs: bleeding ? [{ def: { id: 'bleed' } }] : [],
     });
-    const cfg = MONSTERS['mist_wraith'].ai.targeting;
+    const cfg = MONSTERS['legacy_mist_wraith'].ai.targeting;
     const pick = TARGET_STRATEGIES.LOWEST_HP_PCT({ from: { r: 1, c: 12 }, candidates: [h(1, 'front', 90, true), h(2, 'back', 30, false)], attackRange: 1.3, cfg });
     expect(pick!.id).toBe(1);
     const none = TARGET_STRATEGIES.LOWEST_HP_PCT({ from: { r: 1, c: 12 }, candidates: [h(1, 'front', 90, false), h(2, 'back', 30, false)], attackRange: 1.3, cfg });
     expect(none!.id).toBe(2);
     // damage: the same strike deals 1.2× to a bleeding hero
     const hit = (bleeding: boolean) => {
-      const b = battle([H('lumina', 4, 1, TOUGH), H('aurel', 0, 1, TOUGH)], [mon('mist_wraith', 1, 1)]);
+      const b = battle([H('lumina', 4, 1, TOUGH), H('aurel', 0, 1, TOUGH)], [mon('legacy_mist_wraith', 1, 1)]);
       b.freeze('all');
-      const w = b.monsters('mist_wraith')[0];
+      const w = b.monsters('legacy_mist_wraith')[0];
       const l = b.hero('lumina');
       if (bleeding) b.status(l, 'bleed', w, 60);
       const before = l.hp;
@@ -496,10 +501,10 @@ describe('Stage 4–10 bosses', () => {
     const waves = (f: number) => wavesOf(STAGES[f - 1]);
     for (const w of waves(6)) expect(w.spawns.filter(sp => sp.monsterId === 'goblin_shaman').length).toBe(1);
     expect(waves(7)[0].spawns.length).toBe(4);
-    expect(waves(8)[0].spawns.map(sp => sp.monsterId)).toContain('mist_wraith');
+    expect(waves(8)[0].spawns.map(sp => sp.monsterId)).toContain('legacy_mist_wraith');
     // first-clear pass: F8 is a real wall for the D profile (TACTICAL ~80 %) — tuning + a Mist Witch in the last wave
     expect(STAGES[7].monsterTuning).toEqual({ hp: 1.25, atk: 1.15, def: 1.1 });
-    expect(waves(8)[2].spawns.map(sp => sp.monsterId)).toContain('mist_witch');
+    expect(waves(8)[2].spawns.map(sp => sp.monsterId)).toContain('legacy_mist_witch');
   });
 
   it('extra 28 — phases are never skipped: a huge hit stops at the next threshold', () => {
@@ -518,7 +523,7 @@ describe('Stage 4–10 bosses', () => {
     const g = b.monsters('fallen_forest_guardian')[0];
     b.dmg(g, Math.ceil(g.maxHp * 0.31));
     expect(hasFlag(g, 'untargetable')).toBeTrue();
-    const wraiths = b.monsters('mist_wraith');
+    const wraiths = b.monsters('legacy_mist_wraith');
     expect(wraiths.length).toBe(2);
     wraiths.forEach(w => b.status(w, 'stun', g, 99));
     b.run(6.2);
@@ -666,10 +671,10 @@ describe('Stage 4–10 bosses', () => {
   });
 
   it('extra 39 — a fallen boss takes its summons with it', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
     b.freeze('all');
-    const t = b.monsters('elder_treant')[0];
-    (b.e as any).summon(t, 'call_of_the_forest', [{ id: 'forest_spirit', count: 2 }], 3);
+    const t = b.monsters('legacy_elder_treant')[0];
+    (b.e as any).summon(t, 'legacy_call_of_the_forest', [{ id: 'forest_spirit', count: 2 }], 3);
     t.monster!.phaseIndex = 99; // (phases would stop a one-shot at 50%)
     b.kill(t);
     expect(b.monsters('forest_spirit').every(s => !s.alive)).toBeTrue();
@@ -798,9 +803,9 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('8. Elder Treant Root Slam cannot be interrupted', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 0, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 0, 1)]);
     b.freeze('heroes');
-    const t = b.monsters('elder_treant')[0];
+    const t = b.monsters('legacy_elder_treant')[0];
     b.cast(t, 'root_slam', b.hero('aurel'));
     (b.e as any).tryInterrupt(b.hero('aurel'), t, 0);
     expect(t.casting?.def.id).toBe('root_slam');
@@ -808,10 +813,10 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('9. Entangling Roots can be interrupted', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH), H('lumina', 4, 1, TOUGH)], [mon('elder_treant', 0, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH), H('lumina', 4, 1, TOUGH)], [mon('legacy_elder_treant', 0, 1)]);
     b.freeze('heroes');
-    const t = b.monsters('elder_treant')[0];
-    b.cast(t, 'entangling_roots', b.hero('lumina'));
+    const t = b.monsters('legacy_elder_treant')[0];
+    b.cast(t, 'legacy_entangling_roots', b.hero('lumina'));
     (b.e as any).tryInterrupt(b.hero('aurel'), t);
     expect(t.casting).toBeNull();
     b.run(2.5);
@@ -819,10 +824,10 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('10. Call of the Forest summons the correct units', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
     b.freeze('all');
-    const t = b.monsters('elder_treant')[0];
-    b.cast(t, 'call_of_the_forest');
+    const t = b.monsters('legacy_elder_treant')[0];
+    b.cast(t, 'legacy_call_of_the_forest');
     b.until(() => !t.casting, 4);
     expect(b.monsters('forest_spirit').length).toBe(1);
     expect(b.monsters('magic_mushroom').length).toBe(1);
@@ -830,9 +835,9 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('11. Elder Treant Phase 2 triggers once', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('elder_treant', 1, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_elder_treant', 1, 1)]);
     b.freeze('all');
-    const t = b.monsters('elder_treant')[0];
+    const t = b.monsters('legacy_elder_treant')[0];
     b.dmg(t, Math.ceil(t.maxHp * 0.55));
     b.dmg(t, 50);
     (b.e as any).heal(t, t.maxHp); // back above 50% …
@@ -842,7 +847,7 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('12. Corrupted Wolf applies Bleed every third successful hit', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('corrupted_wolf', 0, 1)]);
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('legacy_corrupted_wolf', 0, 1)]);
     b.freeze('heroes');
     const a = b.hero('aurel');
     const bites = () => b.of('damage').filter(d => d.dst === a.id && !d.poison).length;
@@ -858,9 +863,9 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('13. Wraith becomes truly Untargetable', () => {
-    const b = battle([H('sylvie', 4, 1, TOUGH), H('jin', 0, 1, TOUGH)], [mon('mist_wraith', 1, 1)]);
+    const b = battle([H('sylvie', 4, 1, TOUGH), H('jin', 0, 1, TOUGH)], [mon('legacy_mist_wraith', 1, 1)]);
     b.freeze('heroes');
-    const w = b.monsters('mist_wraith')[0];
+    const w = b.monsters('legacy_mist_wraith')[0];
     const sy = b.hero('sylvie');
     // an arrow already flying at it
     (b.e as any).skillHost().shoot(sy, w, 'attack', false, () => undefined);
@@ -878,8 +883,8 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('14. Focus Target safely handles an Untargetable Wraith', () => {
-    const b = battle([H('sylvie', 4, 1, TOUGH), H('aurel', 0, 1, TOUGH)], [mon('mist_wraith', 1, 1), mon('goblin_guard', 0, 0)]);
-    const w = b.monsters('mist_wraith')[0];
+    const b = battle([H('sylvie', 4, 1, TOUGH), H('aurel', 0, 1, TOUGH)], [mon('legacy_mist_wraith', 1, 1), mon('goblin_guard', 0, 0)]);
+    const w = b.monsters('legacy_mist_wraith')[0];
     b.e.setFocus(w.id);
     b.status(w, 'untargetable', w, 1.5);
     b.run(0.6);
@@ -892,11 +897,11 @@ describe('Stage 4–10 required tests', () => {
 
   it('15. Corrupted Treant physically blocks melee movement', () => {
     // Jin must reach the shaman in lane 1 behind the treant; he may go around, never through its cell
-    const b = battle([H('jin', 0, 1, TOUGH)], [mon('corrupted_treant', 0, 1), mon('dark_shaman', 3, 1)]);
-    const t = b.monsters('corrupted_treant')[0];
+    const b = battle([H('jin', 0, 1, TOUGH)], [mon('legacy_corrupted_treant', 0, 1), mon('legacy_dark_shaman', 3, 1)]);
+    const t = b.monsters('legacy_corrupted_treant')[0];
     const jin = b.hero('jin');
     t.monster!.state = 'DEAD'; // a statue: keep it in place
-    b.e.setFocus(b.monsters('dark_shaman')[0].id);
+    b.e.setFocus(b.monsters('legacy_dark_shaman')[0].id);
     let through = false;
     for (let i = 0; i < 160; i++) {
       b.step();
@@ -906,10 +911,10 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('16. Dark Shaman damage transfer is exactly 70%', () => {
-    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('corrupted_treant', 0, 1), mon('dark_shaman', 4, 1)]);
+    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('legacy_corrupted_treant', 0, 1), mon('legacy_dark_shaman', 4, 1)]);
     b.freeze('all');
-    const t = b.monsters('corrupted_treant')[0];
-    const s = b.monsters('dark_shaman')[0];
+    const t = b.monsters('legacy_corrupted_treant')[0];
+    const s = b.monsters('legacy_dark_shaman')[0];
     applyBuff(s, STATUS_EFFECTS['soul_link'], t.id);
     const s0 = s.hp, t0 = t.hp;
     b.dmg(s, 100);
@@ -917,18 +922,18 @@ describe('Stage 4–10 required tests', () => {
   });
 
   it('17. Soul Link ends when the protector dies', () => {
-    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('corrupted_treant', 0, 1), mon('dark_shaman', 4, 1)]);
+    const b = battle([H('lumina', 5, 1, TOUGH)], [mon('legacy_corrupted_treant', 0, 1), mon('legacy_dark_shaman', 4, 1)]);
     b.freeze('all');
-    const t = b.monsters('corrupted_treant')[0];
-    const s = b.monsters('dark_shaman')[0];
+    const t = b.monsters('legacy_corrupted_treant')[0];
+    const s = b.monsters('legacy_dark_shaman')[0];
     applyBuff(s, STATUS_EFFECTS['soul_link'], t.id);
     b.kill(t);
     expect(hasStatus(s, 'soul_link')).toBeFalse();
   });
 
   it('18. Mist Witch Nightmare selects the highest-ATK Hero', () => {
-    const b = battle([H('aurel', 0, 1, TOUGH), H('velma', 4, 0, TOUGH), H('lumina', 4, 1, TOUGH)], [mon('mist_witch', 3, 1)]);
-    const w = b.monsters('mist_witch')[0];
+    const b = battle([H('aurel', 0, 1, TOUGH), H('velma', 4, 0, TOUGH), H('lumina', 4, 1, TOUGH)], [mon('legacy_mist_witch', 3, 1)]);
+    const w = b.monsters('legacy_mist_witch')[0];
     expect((b.e as any).monsterAI.aimTarget(w, MONSTER_SKILLS['nightmare']).heroId).toBe('velma');
   });
 
@@ -960,12 +965,12 @@ describe('Stage 4–10 required tests', () => {
     b.freeze('all');
     const g = b.monsters('fallen_forest_guardian')[0];
     b.dmg(g, Math.ceil(g.maxHp * 0.35));
-    for (const w of b.monsters('mist_wraith')) b.kill(w);
+    for (const w of b.monsters('legacy_mist_wraith')) b.kill(w);
     b.step();
     (b.e as any).heal(g, g.maxHp);
     b.dmg(g, Math.ceil(g.maxHp * 0.35));
     expect(b.of('bossPhase').filter(p => p.phase === 'dark_mist_dominion').length).toBe(1);
-    expect(b.monsters('mist_wraith').length).toBe(2);
+    expect(b.monsters('legacy_mist_wraith').length).toBe(2);
   });
 
   it('22. Boss stays Untargetable until both Wraiths die', () => {
@@ -973,7 +978,7 @@ describe('Stage 4–10 required tests', () => {
     b.freeze('all');
     const g = b.monsters('fallen_forest_guardian')[0];
     b.dmg(g, Math.ceil(g.maxHp * 0.31));
-    const [w1, w2] = b.monsters('mist_wraith');
+    const [w1, w2] = b.monsters('legacy_mist_wraith');
     b.run(20);
     expect(hasFlag(g, 'untargetable')).toBeTrue(); // no time limit
     b.kill(w1);
@@ -989,11 +994,11 @@ describe('Stage 4–10 required tests', () => {
     b.freeze('heroes');
     const g = b.monsters('fallen_forest_guardian')[0];
     b.dmg(g, Math.ceil(g.maxHp * 0.31));
-    b.monsters('mist_wraith').forEach(w => b.status(w, 'stun', g, 99));
+    b.monsters('legacy_mist_wraith').forEach(w => b.status(w, 'stun', g, 99));
     b.run(6.2);
     const pulses = b.of('pulse').length;
     expect(pulses).toBe(2);
-    b.monsters('mist_wraith').forEach(w => b.kill(w));
+    b.monsters('legacy_mist_wraith').forEach(w => b.kill(w));
     b.run(9);
     expect(b.of('pulse').length).toBe(pulses);
   });

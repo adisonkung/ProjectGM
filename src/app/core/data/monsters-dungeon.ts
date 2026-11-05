@@ -414,12 +414,15 @@ export function tierVariant(base: MonsterDefinition, tier: number): MonsterDefin
   };
 }
 
-/** every generated variant, built from the full registry (called once by monsters.ts) */
-export function dungeonVariants(all: Record<string, MonsterDefinition>): Record<string, MonsterDefinition> {
+/**
+ * every generated variant, built from the full registry (called once by monsters.ts) · `sources` = where the replaced
+ * monster's power is read from (the legacy tower roster: the variant ids keep the legacy names, `straw_recruit@goblin_fighter`)
+ */
+export function dungeonVariants(all: Record<string, MonsterDefinition>, sources: Record<string, MonsterDefinition> = all): Record<string, MonsterDefinition> {
   const out: Record<string, MonsterDefinition> = {};
   for (const map of Object.values(DUNGEON_ROLE_MAP)) {
     for (const [from, sw] of Object.entries(map)) {
-      const base = all[sw.to], src = all[from];
+      const base = all[sw.to], src = sources[from];
       if (!base || !src) continue;
       const v = roleVariant(base, src, sw.skills);
       out[v.id] = v;

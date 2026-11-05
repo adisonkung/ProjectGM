@@ -1,0 +1,1548 @@
+{
+  "forest_goblin": {
+    "sheet": "enemy-fa-forest-goblin.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "goblin_idle.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          3,
+          2,
+          1
+        ],
+        "rule": "ping-pong",
+        "K": 0.2125
+      },
+      "move": {
+        "source": "goblin_walk.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.2125
+      },
+      "hurt": {
+        "source": "goblin_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          2,
+          3,
+          4,
+          4,
+          3,
+          1
+        ],
+        "rule": "reviewed",
+        "K": 0.2125
+      },
+      "death": {
+        "source": "goblin_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          6,
+          8,
+          7
+        ],
+        "rule": "reviewed",
+        "K": 0.2125
+      },
+      "attack": {
+        "source": "goblin_attack.png",
+        "cell": 256,
+        "srcFrames": 13,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          9,
+          10,
+          10,
+          11,
+          12
+        ],
+        "rule": "reviewed",
+        "K": 0.2125
+      }
+    }
+  },
+  "goblin_archer": {
+    "sheet": "enemy-fa-goblin-archer.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "goblin_archer_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.2589
+      },
+      "move": {
+        "source": "goblin_archer_walk.png",
+        "cell": 256,
+        "srcFrames": 13,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "rule": "loop",
+        "K": 0.2589
+      },
+      "hurt": {
+        "source": "goblin_archer_hurt.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.2589
+      },
+      "death": {
+        "source": "goblin_archer_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.2589
+      },
+      "attack": {
+        "source": "goblin_archer_attack.png",
+        "cell": 256,
+        "srcFrames": 13,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "rule": "reviewed",
+        "K": 0.2589
+      }
+    }
+  },
+  "mist_bat": {
+    "sheet": "enemy-fa-mist-bat.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "mist_bat_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.2939
+      },
+      "move": {
+        "source": "mist_bat_fly.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.2939
+      },
+      "hurt": {
+        "source": "mist_bat_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.2939
+      },
+      "death": {
+        "source": "mist_bat_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.2939
+      },
+      "attack": {
+        "source": "mist_bat_attack.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          3,
+          4,
+          5,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.2939
+      }
+    }
+  },
+  "forest_wolf": {
+    "sheet": "enemy-fa-forest-wolf.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "forest_wolf_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.384
+      },
+      "move": {
+        "source": "forest_wolf_walk.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.384
+      },
+      "hurt": {
+        "source": "forest_wolf_hurt.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.384
+      },
+      "death": {
+        "source": "forest_wolf_death.png",
+        "cell": 256,
+        "srcFrames": 13,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "rule": "starts on F2",
+        "K": 0.384
+      },
+      "attack": {
+        "source": "forest_wolf_attack.png",
+        "cell": 256,
+        "srcFrames": 13,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "rule": "reviewed",
+        "K": 0.384
+      }
+    }
+  },
+  "alpha_wolf": {
+    "sheet": "enemy-fa-alpha-wolf.png",
+    "cell": [
+      136,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "alpha_wolf_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.4203
+      },
+      "move": {
+        "source": "alpha_wolf_walk.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "loop",
+        "K": 0.4203
+      },
+      "hurt": {
+        "source": "alpha_wolf_hurt.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.4203
+      },
+      "death": {
+        "source": "alpha_wolf_death.png",
+        "cell": 256,
+        "srcFrames": 13,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "rule": "starts on F2",
+        "K": 0.4203
+      },
+      "attack": {
+        "source": "pixellab-Create-a-fast-5-frame-ATTACK-a-1793804933508.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.4203
+      },
+      "howl": {
+        "source": "alpha_wolf_howling.png",
+        "cell": 256,
+        "srcFrames": 17,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "rule": "reviewed",
+        "K": 0.4203
+      },
+      "claw": {
+        "source": "alpha_wolf_charge_claw.png",
+        "cell": 256,
+        "srcFrames": 17,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "rule": "reviewed",
+        "K": 0.4203
+      }
+    }
+  },
+  "corrupted_wolf": {
+    "sheet": "enemy-fa-corrupted-wolf.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "wolf-idle-clean.png",
+        "cell": 418,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "loop",
+        "K": 0.2673
+      },
+      "move": {
+        "source": "wolf-run-clean.png",
+        "cell": 418,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.266
+      },
+      "hurt": {
+        "source": "wolf-hurt-clean.png",
+        "cell": 418,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.2559
+      },
+      "death": {
+        "source": "wolf-death-clean.png",
+        "cell": 418,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.2673
+      },
+      "attack": {
+        "source": "wolf-attack-clean.png",
+        "cell": 418,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.27
+      }
+    }
+  },
+  "mushroom_creature": {
+    "sheet": "enemy-fa-mushroom-creature.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "mushroom_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.2941
+      },
+      "move": {
+        "source": "mushroom_walk.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "loop",
+        "K": 0.2941
+      },
+      "hurt": {
+        "source": "mushroom_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.2941
+      },
+      "death": {
+        "source": "mushroom_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.2941
+      },
+      "attack": {
+        "source": "mushroom_attack.png",
+        "cell": 256,
+        "srcFrames": 17,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "rule": "reviewed",
+        "K": 0.2941
+      }
+    }
+  },
+  "thorn_slime": {
+    "sheet": "enemy-fa-thorn-slime.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "thorn_slime_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.3359
+      },
+      "move": {
+        "source": "thorn_slime_walk.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "rule": "dup end dropped",
+        "K": 0.3359
+      },
+      "hurt": {
+        "source": "thorn_slime_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.3359
+      },
+      "death": {
+        "source": "thorn_slime_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.3359
+      },
+      "attack": {
+        "source": "thorn_slime_attack.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.3359
+      }
+    }
+  },
+  "young_treant": {
+    "sheet": "enemy-fa-young-treant.png",
+    "cell": [
+      132,
+      111
+    ],
+    "clips": {
+      "idle": {
+        "source": "young_treant_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.4171
+      },
+      "move": {
+        "source": "young_treant_walk.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.4171
+      },
+      "hurt": {
+        "source": "young_treant_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.4171
+      },
+      "death": {
+        "source": "young_treant_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.4171
+      },
+      "attack": {
+        "source": "young_treant_attack.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          0,
+          0,
+          1,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.4171
+      }
+    }
+  },
+  "corrupted_treant": {
+    "sheet": "enemy-fa-corrupted-treant.png",
+    "cell": [
+      132,
+      122
+    ],
+    "clips": {
+      "idle": {
+        "source": "corrupted-treant-idle.png",
+        "cell": 418,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "loop",
+        "K": 0.2632
+      },
+      "move": {
+        "source": "corrupted-treant-walk.png",
+        "cell": 418,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.2625
+      },
+      "hurt": {
+        "source": "corrupted-treant-hurt.png",
+        "cell": 512,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.2151
+      },
+      "death": {
+        "source": "corrupted-treant-death.png",
+        "cell": 418,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.2639
+      },
+      "attack": {
+        "source": "corrupted-treant-attack.png",
+        "cell": 418,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.2611
+      }
+    }
+  },
+  "dark_shaman": {
+    "sheet": "enemy-fa-dark-shaman.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "dark_shaman_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.2911
+      },
+      "move": {
+        "source": "dark_shaman_walk.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.2911
+      },
+      "hurt": {
+        "source": "dark_shaman_hurt.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.2911
+      },
+      "death": {
+        "source": "dark_shaman_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.2911
+      },
+      "attack": {
+        "source": "dark_shaman_attack.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.2911
+      },
+      "hex": {
+        "source": "dark_shaman_curese.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.2911
+      },
+      "chant": {
+        "source": "dark_shaman_buff.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.2911
+      }
+    }
+  },
+  "mist_witch": {
+    "sheet": "enemy-fa-mist-witch.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "mist_witch_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.3071
+      },
+      "move": {
+        "source": "mist_witch_walk.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.3071
+      },
+      "hurt": {
+        "source": "mist_witch_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.3071
+      },
+      "death": {
+        "source": "mist_witch_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.3071
+      },
+      "attack": {
+        "source": "mist_witch_attack.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.3071
+      },
+      "fog": {
+        "source": "mist_witch_black_fog.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.3071
+      },
+      "veil": {
+        "source": "mist_witch_veil_curese.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.3071
+      }
+    }
+  },
+  "mist_wraith": {
+    "sheet": "enemy-fa-mist-wraith.png",
+    "cell": [
+      132,
+      100
+    ],
+    "clips": {
+      "idle": {
+        "source": "mist_wraith_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.3043
+      },
+      "move": {
+        "source": "mist_wraith_floa.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.3043
+      },
+      "hurt": {
+        "source": "mist_wraith_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.3043
+      },
+      "death": {
+        "source": "mist_wraith_death.png",
+        "cell": 256,
+        "srcFrames": 8,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "starts on F2",
+        "K": 0.3043
+      },
+      "attack": {
+        "source": "mist_wraith_attack.png",
+        "cell": 256,
+        "srcFrames": 17,
+        "seq": [
+          0,
+          1,
+          2,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.3043
+      },
+      "slash": {
+        "source": "mist_wraith_spectral_X-slash.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.3043
+      }
+    }
+  },
+  "elder_treant": {
+    "sheet": "enemy-fa-elder-treant.png",
+    "cell": [
+      180,
+      183
+    ],
+    "clips": {
+      "idle": {
+        "source": "elder_treant_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.7955
+      },
+      "move": {
+        "source": "elder_treant_walk.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.7955
+      },
+      "hurt": {
+        "source": "elder_treant_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "rule": "starts on F2",
+        "K": 0.7955
+      },
+      "death": {
+        "source": "elder_treant_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "starts on F2",
+        "K": 0.7955
+      },
+      "attack": {
+        "source": "elder_treant_attack.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7955
+      },
+      "slam": {
+        "source": "elder_treant_heavy_root_slam.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7955
+      },
+      "roots": {
+        "source": "elder_treant_entangling_roots.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7955
+      },
+      "call": {
+        "source": "elder_treant_call_of_the_forest.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7955
+      },
+      "bark": {
+        "source": "elder_treant_bark_guard.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7955
+      }
+    }
+  }
+}

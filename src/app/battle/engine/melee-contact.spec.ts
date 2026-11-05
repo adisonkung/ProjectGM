@@ -1,3 +1,4 @@
+import '../../../testing/legacy-monsters';
 import { CLASS_BASE } from '../../core/data/classes';
 import { ENEMIES } from '../../core/data/enemies';
 import { STATUS_EFFECTS } from '../../core/data/status-effects';
@@ -52,7 +53,7 @@ describe('Fractional melee contact geometry', () => {
 });
 
 function encounter(heroLane = 1, foeLane = 2) {
-  const stage: StageDef = { floor: 1, mode: 'eliminate', timeLimit: 999, enemies: [{ enemy: 'forest_wolf', r: 0, c: 1 }] };
+  const stage: StageDef = { floor: 1, mode: 'eliminate', timeLimit: 999, enemies: [{ enemy: 'legacy_forest_wolf', r: 0, c: 1 }] };
   const e = new BattleEngine({ allies: [{ name: 'Melee', cls: 'fighter', heroId: 'bailong',
     stats: { ...CLASS_BASE.fighter, hp: 99999 }, pos: { r: 0, c: 1 } }], stage, enemyTemplates: ENEMIES, seed: 7 });
   e.step(.05);

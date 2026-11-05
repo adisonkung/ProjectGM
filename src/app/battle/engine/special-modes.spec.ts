@@ -1,3 +1,4 @@
+import '../../../testing/legacy-monsters';
 import '../../../testing/legacy-roster';
 import { FARM_BY_ID, FARM_DUNGEONS } from '../../core/data/economy';
 import { HERO_BY_ID } from '../../core/data/heroes';
@@ -105,8 +106,8 @@ describe('Special stage modes (farm dungeons)', () => {
 
   it('CHALLENGE CAST_LIMIT: completed stoppable casts are strikes; one over the limit fails the stage with the rule label', () => {
     const stage = stageWith(
-      { kind: 'CHALLENGE', goal: 'test', challenge: [{ type: 'CAST_LIMIT', max: 1, skills: ['alpha_howl'], label: 'HOWL x2' }] },
-      [mon('alpha_wolf', 1, 1), mon('forest_wolf', 0, 0), mon('forest_wolf', 0, 2)],
+      { kind: 'CHALLENGE', goal: 'test', challenge: [{ type: 'CAST_LIMIT', max: 1, skills: ['legacy_alpha_howl'], label: 'HOWL x2' }] },
+      [mon('legacy_alpha_wolf', 1, 1), mon('legacy_forest_wolf', 0, 0), mon('legacy_forest_wolf', 0, 2)],
     );
     const s = session(stage, [H('lumina', 5, 1, { hp: 99999, atk: 1 })]);
     s.run(40);
