@@ -2,7 +2,19 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Forest Arc monster roster, tower Stages 1–10 (Claude, 2026-11-05)
+## Latest task — Forest Oblivion, Stage 10 boss (Claude, 2026-11-08)
+
+Branch `wip/claude-forest-oblivion` from origin/master 09da627. User supplied `forest_oblivion.zip` (body sheets + 14 VFX) and the full gameplay/VFX spec: stationary, attacks right→left, 4 skills, Break → Core Exposed, Phase 2 at ~50 %, death in place, persistent VFX must not hide telegraphs.
+
+- Sources tracked unchanged in `assets/monsters/forest-arc/oblivion/`. `tools/sprites/forest_arc/art.py` adds the boss (target 170 px, castDriven crush/eruption/mist/pulse, SEQ) + `unmix_white` for white-page VFX, auto 4×2/3×2 grids, `bakeAlpha` for long loops → `enemy-fa-forest-oblivion.png` + 14 `fx-fo-*.png`. `npm run sprites:optimize` run.
+- Skills (provisional numbers): Oblivion Root Crush (FRONT_RECT_2X3 190 % + knockback 1) · Corrupted Root Eruption (`groundTargets` 2 warned cells, 120 % + slow + root 1 s; interruptible MEDIUM) · Dark Mist Collapse (monster FIELD RECT_3X2 7 s: move ×0.6, AS ×0.8, healing ×0.7 by occupancy) · Oblivion Pulse (4 s charge with no damage, Break 150 → `exposed_core` ×1.5 5 s; wave = 150 % to all heroes + `oblivion_corrosion` DEF ×0.85). Old Oblivion skills removed.
+- Phase 2 `oblivion_awakening` at 50 %: AS ×1.15, cooldown ×0.8, eruption 3 cells, mist 10 s (new generic `BossPhase.replaceSkills`). Death FX in place; mist ends SOURCE_DIED.
+- Generic engine additions: `MonsterSkillEffect { type: 'FIELD' }` (FieldSystem with the monster side) · `BossPhase.replaceSkills`. Sprite lab draws monster fields.
+- Visual wiring in `sprites.ts`: anchor `core`, statusFx (exposed_core, oblivion_awakening — under layer so Core Exposed stays visible), damageFx, deathFx, monsterFx, fieldFx, preloadFx. Checked in the sprite lab (Pixi) via Playwright.
+- Validation: app/spec typecheck, Karma 971/971. Balance (not tuned) `npm run balance -- 30 rec 10`: AUTO 7 % · TACTICAL 43 %.
+- Open: Root Hold Loop not supplied · mist loop reads very dark · Phase 2 `interruptSelf` cancels a Pulse in progress · values provisional. Not merged; awaiting review.
+
+## Previous task — Forest Arc monster roster, tower Stages 1–10 (Claude, 2026-11-05)
 
 Branch `wip/claude-forest-arc-monsters` from origin/master 9f76c2e. User: "pull ล่าสุด, อิงเอกสารเป็นหลัก, เอามอนเดิมออกจากเกม เหลือ slime, สร้างมอนตามเอกสารเป็น object กลม ๆ". Spec = project doc `claude/eldervane-monster-spec-s1-10.md` (16 monsters, LOCKED: existing Slime smaller · Alpha Wolf first on S3 · Forest Oblivion S10 never moves · Elder Treant S7 boss). User answers 2026-11-05: dungeons keep the legacy stats; new stats borrowed from the closest legacy monster; principal skills implemented now with provisional values.
 

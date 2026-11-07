@@ -220,7 +220,13 @@ export type SkillEffect =
   /** jump `cells` columns toward the caster's escape edge (treasure carrier Smoke Pouch) */
   | { type: 'BLINK_AWAY'; cells: number }
   /** push every hero hit by the previous DAMAGE `cells` cells away from the caster (KNOCKBACK-immune units stay) */
-  | { type: 'KNOCKBACK'; cells: number };
+  | { type: 'KNOCKBACK'; cells: number }
+  /**
+   * Persistent zone on the aimed hero's cell (Forest Oblivion Dark Mist): the shared FieldSystem, anchored at the cast
+   * target. Monster fields are occupancy auras (`aura.team: 'ENEMY'` = the heroes standing inside) — `effects` must be
+   * empty; the zone ends with its duration or when the caster dies.
+   */
+  | { type: 'FIELD'; field: import('./combat').FieldDefinition };
 
 /** Conditions a monster checks before starting a skill (all must pass) */
 export type SkillCondition =
@@ -332,6 +338,8 @@ export interface BossPhase {
   interruptSelf?: boolean;
   /** short phase-setup window (s, ~0.75–1.25): the boss takes no damage while the phase initialises (`phase_shift`) */
   transition?: number;
+  /** skill id → its stronger version from this phase on (same cooldown slot; e.g. more Root Eruption cells) */
+  replaceSkills?: Record<string, string>;
 }
 
 export interface AnimEventMark {

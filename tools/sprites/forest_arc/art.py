@@ -148,6 +148,17 @@ MONSTERS = {
         call=C('elder_treant_call_of_the_forest.png', None, 90, {'CAST_START': 1, 'SKILL_ACTIVATE': 'auto'}, cast=True),
         bark=C('elder_treant_bark_guard.png', None, 90, {'CAST_START': 1, 'SKILL_ACTIVATE': 'auto'}, cast=True),
     )),
+    # Stage 10 boss (user forest_oblivion.zip, 2026-11-08): stationary — no move clip; ~2.2 × hero height
+    'forest_oblivion': dict(windup=0.5, dir='oblivion', target=170, clips=dict(
+        idle=C('forest_oblivion_idle.png', None, 150),
+        hurt=C('forest_oblivion_hurt.png', None, 70),
+        death=C('forest_oblivion_death.png', None, 110),
+        attack=C('forest_oblivion_attack.png', None, 80),
+        crush=C('forest_oblivion_root_crush.png', None, 90, cast=True),
+        eruption=C('forest_oblivion_root_eruption.png', None, 90, cast=True),
+        mist=C('forest_oblivion_dark_mist.png', None, 90, cast=True),
+        pulse=C('forest_oblivion_oblivion_pulse.png', None, 90, cast=True),
+    )),
 }
 
 
@@ -231,6 +242,20 @@ SEQ = {
     ('elder_treant', 'roots'): dict(seq=list(range(9)), ev={'CAST_START': 2, 'SKILL_ACTIVATE': 5}),
     ('elder_treant', 'call'): dict(seq=list(range(9)), ev={'CAST_START': 2, 'SKILL_ACTIVATE': 5}),
     ('elder_treant', 'bark'): dict(seq=list(range(9)), ev={'CAST_START': 2, 'SKILL_ACTIVATE': 4}),
+    # Forest Oblivion — attack F4 is a broken smear frame (giant arc + white blob): cut; F7 = the arm swept low (hit)
+    ('forest_oblivion', 'attack'): dict(seq=[0, 1, 2, 4, 5, 6, 6, 7, 8], ev={'DAMAGE': 6}),
+    # hurt: recoil and back (F1 is the idle pose)
+    ('forest_oblivion', 'hurt'): dict(seq=[1, 2, 3, 4, 3, 2]),
+    # death collapses in place: start on the first stagger, hold the final heap
+    ('forest_oblivion', 'death'): dict(seq=[1, 2, 3, 4, 5, 6, 7, 8, 8]),
+    # Root Crush: arms raised wide F4, roots driven down F5 = activation (the Main Ground Impact starts there)
+    ('forest_oblivion', 'crush'): dict(seq=list(range(9)), ev={'CAST_START': 2, 'SKILL_ACTIVATE': 5}),
+    # Root Eruption: the arm rises over the warning, slams down F8 = the roots erupt
+    ('forest_oblivion', 'eruption'): dict(seq=list(range(9)), ev={'CAST_START': 3, 'SKILL_ACTIVATE': 8}),
+    # Dark Mist: hands gather the mist at the chest, released F7
+    ('forest_oblivion', 'mist'): dict(seq=list(range(9)), ev={'CAST_START': 3, 'SKILL_ACTIVATE': 7}),
+    # Oblivion Pulse: arms close over the Core through the whole charge (stretched), open F9 = the wave
+    ('forest_oblivion', 'pulse'): dict(seq=list(range(9)), ev={'CAST_START': 3, 'SKILL_ACTIVATE': 9}),
 }
 
 
@@ -371,20 +396,60 @@ VFX = {
     'fa-call-summon':  ('monster1', 'call_of_the_forest_summon_vfx.png', 120, 'ground', dict(at='target', dx=70, dy=MON_FEET, frameMs=80)),
     'fa-bark-guard':   ('monster1', 'bark_guard_vfx.png', 170, 'center', dict(at='target', dy=-58, frameMs=70)),
     'fa-enraged':      ('monster1', 'ENRAGED FOREST ACTIVATION VFX.png', 200, 'ground', dict(at='target', dy=MON_FEET, frameMs=80)),
+    # ---- Forest Oblivion (user forest_oblivion.zip 2026-11-08). Sheets on a white page (except Root Crush Main) are
+    # unmixed from white; 1774 × 887 = 4 × 2 (8 frames), 1536 × 1024 = 3 × 2 (6 frames, the loops).
+    # 1 board cell ≈ 80 atlas px. The boss faces the heroes: dx > 0 = toward them.
+    'fo-crush':        ('oblivion', 'Root Crush Main_VFX.png', 230, 'ground', dict(at='self', dx=150, dy=MON_FEET, frameMs=70)),
+    'fo-crush-hit':    ('oblivion', 'Root Crush Impact_VFX.png', 92, 'ground', dict(at='target', dy=HERO_FEET, frameMs=60)),
+    'fo-erupt-warn':   ('oblivion', 'Root Eruption Warning_VFX.png', 96, 'ground', dict(at='target', dy=HERO_FEET + 2, frameMs=150, layer='under')),
+    'fo-erupt':        ('oblivion', 'Root Eruption Main_VFX.png', 104, 'ground', dict(at='target', dy=HERO_FEET, frameMs=70)),
+    'fo-mist-form':    ('oblivion', 'Dark Mist Formation_VFX.png', 250, 'ground', dict(at='target', dy=HERO_FEET + 4, frameMs=80, layer='under')),
+    'fo-mist-loop':    ('oblivion', 'Dark Mist Loop_VFX.png', 250, 'ground', dict(at='target', dy=HERO_FEET + 4, frameMs=130, layer='under', bakeAlpha=0.85)),
+    'fo-pulse-charge': ('oblivion', 'Oblivion Pulse Charge_VFX.png', 120, 'center', dict(at='self', anchor='core', frameMs=100, repeat=5, attach=True)),
+    'fo-pulse-wave':   ('oblivion', 'Oblivion Pulse Wave_VFX.png', 300, 'center', dict(at='self', dx=190, dy=-25, frameMs=60)),
+    'fo-core-open':    ('oblivion', 'Core Opening_Break_VFX.png', 130, 'center', dict(at='self', anchor='core', frameMs=70, attach=True)),
+    'fo-core-loop':    ('oblivion', 'Core Exposed Loop_VFX.png', 96, 'center', dict(at='self', anchor='core', frameMs=100, attach=True)),
+    'fo-core-hit':     ('oblivion', 'Core Hit Impact_VFX.png', 76, 'center', dict(at='self', anchor='core', frameMs=45, attach=True, blend='add')),
+    'fo-p2-activate':  ('oblivion', 'Phase 2 Activation_VFX.png', 240, 'ground', dict(at='self', dy=MON_FEET, frameMs=90)),
+    'fo-p2-loop':      ('oblivion', 'Phase 2 Small Loop_VFX.png', 200, 'ground', dict(at='self', dy=MON_FEET, frameMs=140, layer='under', attach=True, bakeAlpha=0.55)),
+    'fo-death':        ('oblivion', 'Death DissolutionOblivion Root Crush_VFX.png', 230, 'ground', dict(at='self', dy=MON_FEET, frameMs=120)),
 }
 FX_BAKE = 2              # strips baked at 2 × the display size → FxDef scale 1/3 (display px = w × scale × 1.5)
 
 
+def unmix_white(a):
+    """white page → alpha: the darkest channel's distance from white is the coverage, colour recovered from the mix
+    (paper noise ≤ 6 % dropped; light glows keep their hue at a lower alpha)"""
+    rgb = a[..., :3].astype(float)
+    cov = (255 - rgb.min(axis=2)) / 255
+    alpha = np.clip((cov - 0.06) / 0.94, 0, 1)
+    safe = np.maximum(alpha, 1e-3)[..., None]
+    col = np.clip((rgb - (1 - safe) * 255) / safe, 0, 255)
+    alpha = np.clip(alpha * 1.35, 0, 1)      # soft painted edges read thin on the dark battlefield — firm them up
+    out = np.zeros_like(a)
+    out[..., :3] = np.where(alpha[..., None] > 0, col, 0).astype(np.uint8)
+    out[..., 3] = (alpha * 255).astype(np.uint8)
+    return out
+
+
 def bake_vfx(name, cfg):
     d, file, width, pivot, extra = cfg[:5]
+    extra = dict(extra)
+    fade = extra.pop('bakeAlpha', 1)        # persistent state loops are baked fainter than the skill telegraphs
     floor = cfg[5] if len(cfg) > 5 else 10
     a = np.array(Image.open(SRC / d / file).convert('RGBA'))
+    if a[..., 3].min() == 255:
+        a = unmix_white(a)                   # painted on a white page (no alpha)
+    if fade != 1:
+        a[..., 3] = (a[..., 3].astype(float) * fade).astype(np.uint8)
     al = a[..., 3].astype(float)
     a[..., 3] = np.where(al < floor, 0, np.clip((al - floor) * 255 / (255 - floor), 0, 255)).astype(np.uint8) if floor > 10 \
         else np.where(al < floor, 0, al).astype(np.uint8)
     H, W = a.shape[:2]
-    cw, ch = W / 4, H / 2
-    frames = [a[int(r * ch):int((r + 1) * ch), int(c * cw):int((c + 1) * cw)] for r in range(2) for c in range(4)]
+    gc, gr = (4, 2) if W >= 1.6 * H else (3, 2)
+    n = gc * gr
+    cw, ch = W / gc, H / gr
+    frames = [a[int(r * ch):int((r + 1) * ch), int(c * cw):int((c + 1) * cw)] for r in range(gr) for c in range(gc)]
     h0 = min(f.shape[0] for f in frames); w0 = min(f.shape[1] for f in frames)
     frames = [f[:h0, :w0] for f in frames]
     union = np.zeros((h0, w0), bool)
@@ -394,13 +459,13 @@ def bake_vfx(name, cfg):
     x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
     k = width * FX_BAKE / (x1 - x0)
     fw, fh = max(1, round((x1 - x0) * k)), max(1, round((y1 - y0) * k))
-    strip = Image.new('RGBA', (fw * 8, fh))
+    strip = Image.new('RGBA', (fw * n, fh))
     for i, f in enumerate(frames):
         im = Image.fromarray(np.ascontiguousarray(f[y0:y1, x0:x1])).resize((fw, fh), Image.LANCZOS)
         strip.alpha_composite(im.transpose(Image.FLIP_LEFT_RIGHT), (i * fw, 0))   # authored facing left → right
     out = f'fx-{name}.png'
     strip.save(OUT / out, optimize=True)
-    fx = dict(file=out, frames=8, w=fw, h=fh, scale=round(1 / (1.5 * FX_BAKE), 6), pivot=[0.5, 1 if pivot == 'ground' else 0.5], **extra)
+    fx = dict(file=out, frames=n, w=fw, h=fh, scale=round(1 / (1.5 * FX_BAKE), 6), pivot=[0.5, 1 if pivot == 'ground' else 0.5], **extra)
     return fx
 
 

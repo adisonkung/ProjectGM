@@ -887,6 +887,121 @@ export const FOREST_ARC_ANIMATIONS: Record<string, AnimationConfig> = {
         "castDriven": true
       }
     }
+  },
+  "forest_oblivion": {
+    "sheet": "enemy-fa-forest-oblivion.png",
+    "cellW": 200,
+    "cellH": 198,
+    "clips": {
+      "idle": {
+        "row": 1,
+        "frames": 8,
+        "frameMs": 150,
+        "events": []
+      },
+      "hurt": {
+        "row": 2,
+        "frames": 6,
+        "frameMs": 70,
+        "events": []
+      },
+      "death": {
+        "row": 3,
+        "frames": 9,
+        "frameMs": 110,
+        "events": [
+          {
+            "frame": 9,
+            "event": "DEATH_COMPLETE",
+            "name": "DEATH_COMPLETE"
+          }
+        ]
+      },
+      "attack": {
+        "row": 4,
+        "frames": 9,
+        "frameMs": 100,
+        "events": [
+          {
+            "frame": 6,
+            "event": "DAMAGE",
+            "name": "FOREST_OBLIVION_DAMAGE"
+          }
+        ]
+      },
+      "crush": {
+        "row": 5,
+        "frames": 9,
+        "frameMs": 90,
+        "events": [
+          {
+            "frame": 2,
+            "event": "CAST_START",
+            "name": "CAST_START"
+          },
+          {
+            "frame": 5,
+            "event": "SKILL_ACTIVATE",
+            "name": "SKILL_ACTIVATE"
+          }
+        ],
+        "castDriven": true
+      },
+      "eruption": {
+        "row": 6,
+        "frames": 9,
+        "frameMs": 90,
+        "events": [
+          {
+            "frame": 3,
+            "event": "CAST_START",
+            "name": "CAST_START"
+          },
+          {
+            "frame": 8,
+            "event": "SKILL_ACTIVATE",
+            "name": "SKILL_ACTIVATE"
+          }
+        ],
+        "castDriven": true
+      },
+      "mist": {
+        "row": 7,
+        "frames": 9,
+        "frameMs": 90,
+        "events": [
+          {
+            "frame": 3,
+            "event": "CAST_START",
+            "name": "CAST_START"
+          },
+          {
+            "frame": 7,
+            "event": "SKILL_ACTIVATE",
+            "name": "SKILL_ACTIVATE"
+          }
+        ],
+        "castDriven": true
+      },
+      "pulse": {
+        "row": 8,
+        "frames": 9,
+        "frameMs": 90,
+        "events": [
+          {
+            "frame": 3,
+            "event": "CAST_START",
+            "name": "CAST_START"
+          },
+          {
+            "frame": 9,
+            "event": "SKILL_ACTIVATE",
+            "name": "SKILL_ACTIVATE"
+          }
+        ],
+        "castDriven": true
+      }
+    }
   }
 };
 
@@ -1107,5 +1222,214 @@ export const FOREST_ARC_FX: Record<string, FxDef> = {
     "at": "target",
     "dy": 28.5,
     "frameMs": 80
+  },
+  "fo-crush": {
+    "file": "fx-fo-crush.png",
+    "frames": 8,
+    "w": 460,
+    "h": 308,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "self",
+    "dx": 150,
+    "dy": 28.5,
+    "frameMs": 70
+  },
+  "fo-crush-hit": {
+    "file": "fx-fo-crush-hit.png",
+    "frames": 8,
+    "w": 184,
+    "h": 132,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "target",
+    "dy": 27.25,
+    "frameMs": 60
+  },
+  "fo-erupt-warn": {
+    "file": "fx-fo-erupt-warn.png",
+    "frames": 8,
+    "w": 192,
+    "h": 104,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "target",
+    "dy": 29.25,
+    "frameMs": 150,
+    "layer": "under"
+  },
+  "fo-erupt": {
+    "file": "fx-fo-erupt.png",
+    "frames": 8,
+    "w": 208,
+    "h": 167,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "target",
+    "dy": 27.25,
+    "frameMs": 70
+  },
+  "fo-mist-form": {
+    "file": "fx-fo-mist-form.png",
+    "frames": 8,
+    "w": 500,
+    "h": 292,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "target",
+    "dy": 31.25,
+    "frameMs": 80,
+    "layer": "under"
+  },
+  "fo-mist-loop": {
+    "file": "fx-fo-mist-loop.png",
+    "frames": 6,
+    "w": 500,
+    "h": 271,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "target",
+    "dy": 31.25,
+    "frameMs": 130,
+    "layer": "under"
+  },
+  "fo-pulse-charge": {
+    "file": "fx-fo-pulse-charge.png",
+    "frames": 8,
+    "w": 240,
+    "h": 204,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "at": "self",
+    "anchor": "core",
+    "frameMs": 100,
+    "repeat": 5,
+    "attach": true
+  },
+  "fo-pulse-wave": {
+    "file": "fx-fo-pulse-wave.png",
+    "frames": 8,
+    "w": 600,
+    "h": 465,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "at": "self",
+    "dx": 190,
+    "dy": -25,
+    "frameMs": 60
+  },
+  "fo-core-open": {
+    "file": "fx-fo-core-open.png",
+    "frames": 8,
+    "w": 260,
+    "h": 195,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "at": "self",
+    "anchor": "core",
+    "frameMs": 70,
+    "attach": true
+  },
+  "fo-core-loop": {
+    "file": "fx-fo-core-loop.png",
+    "frames": 6,
+    "w": 192,
+    "h": 131,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "at": "self",
+    "anchor": "core",
+    "frameMs": 100,
+    "attach": true
+  },
+  "fo-core-hit": {
+    "file": "fx-fo-core-hit.png",
+    "frames": 8,
+    "w": 152,
+    "h": 130,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "at": "self",
+    "anchor": "core",
+    "frameMs": 45,
+    "attach": true,
+    "blend": "add"
+  },
+  "fo-p2-activate": {
+    "file": "fx-fo-p2-activate.png",
+    "frames": 8,
+    "w": 480,
+    "h": 400,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "self",
+    "dy": 28.5,
+    "frameMs": 90
+  },
+  "fo-p2-loop": {
+    "file": "fx-fo-p2-loop.png",
+    "frames": 6,
+    "w": 400,
+    "h": 319,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "self",
+    "dy": 28.5,
+    "frameMs": 140,
+    "layer": "under",
+    "attach": true
+  },
+  "fo-death": {
+    "file": "fx-fo-death.png",
+    "frames": 8,
+    "w": 460,
+    "h": 408,
+    "scale": 0.333333,
+    "pivot": [
+      0.5,
+      1
+    ],
+    "at": "self",
+    "dy": 28.5,
+    "frameMs": 120
   }
 };

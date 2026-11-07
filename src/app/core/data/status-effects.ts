@@ -338,10 +338,15 @@ export const STATUS_EFFECTS: Record<string, StatusEffectDefinition> = {
     id: 'exposed_core', name: 'แกนกลางเปิด', duration: 5, stackPolicy: 'REFRESH_DURATION', bossValid: true,
     modifiers: { damageTakenMultiplier: 1.5 }, flags: ['broken'],
   },
-  /** Forest Oblivion Dark Mist Pressure: where the mist lands the formation slows */
-  oblivion_mist: {
-    id: 'oblivion_mist', name: 'หมอกสูญสิ้น', duration: 5, stackPolicy: 'REFRESH_DURATION',
-    modifiers: { moveSpeedMultiplier: 0.6, attackSpeedMultiplier: 0.85 },
+  /** Forest Oblivion phase 2 marker (Oblivion Awakening): permanent, faster attacks — carries the phase loop VFX */
+  oblivion_awakening: {
+    id: 'oblivion_awakening', name: 'พงไพรสูญสิ้นตื่น', duration: Infinity, stackPolicy: 'NONE', buff: true,
+    modifiers: { attackSpeedMultiplier: 1.15 },
+  },
+  /** Forest Oblivion Pulse: the pressure wave corrodes armour (DEF ↓ 15 %, 6 s) */
+  oblivion_corrosion: {
+    id: 'oblivion_corrosion', name: 'เกราะผุกร่อน', duration: 6, stackPolicy: 'REFRESH_DURATION',
+    modifiers: { defenseMultiplier: 0.85 },
   },
 
 };

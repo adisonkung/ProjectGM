@@ -17,7 +17,7 @@ import { resolveArea } from './area';
 import { ActiveBuff, applyBuff, dodgeChance, effectiveMoveSpeed, hasFlag, hasStatus, modifier, tauntSource, tickStatuses } from './buffs';
 import { breakRequiredOf, canStopCast, priorityOf, rankOf, SkillHost, SkillSystem, StatusApplyOptions } from './skill-system';
 import type { AreaPattern, DamageKind, InterruptPriority, SkillSlot, SkillUseMode } from '../../core/models/combat';
-import { FieldLifecycleEvent, FieldSystem } from './fields';
+import { fieldAnchor, FieldLifecycleEvent, FieldSystem } from './fields';
 import { BattleMetrics } from './metrics';
 import { isRanged, Positioning, SAFE_DANGER } from './positioning';
 import { FormationRuntime } from './stage/formation';
@@ -1563,6 +1563,12 @@ export class BattleEngine {
         case 'KNOCKBACK':
           for (const t of hits) if (t.alive) this.knockback(u, t, eff.cells);
           break;
+        case 'FIELD': {
+          // monster zone: occupancy aura on the aimed cell; no pulse effects (see MonsterSkillEffect FIELD)
+          const at = aim?.pos ?? u.pos;
+          this.fields.add(u.id, fieldAnchor(u.side, eff.field, at), eff.field, () => undefined, () => u.alive, u.side);
+          break;
+        }
         case 'APPLY_STATUS': {
           const to =
             eff.to === 'HIT' ? hits : eff.to === 'TARGET' ? (aim ? [aim] : []) : eff.to === 'SELF' ? [u]
@@ -2091,6 +2097,10 @@ export class BattleEngine {
       s.cooldownOverride[id] = cd;
       const cs = u.castSkills.find(c => c.def.id === id);
       if (cs) cs.cd = Math.min(cs.cd, cd);
+    }
+    for (const [from, to] of Object.entries(ph.replaceSkills ?? {})) {
+      const cs = u.castSkills.find(c => c.def.id === from), sk = MONSTER_SKILLS[to];
+      if (cs && sk) cs.def = sk;
     }
     for (const e of ph.enableSkills ?? []) {
       const sk = MONSTER_SKILLS[e.id];
