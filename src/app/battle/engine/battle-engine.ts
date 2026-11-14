@@ -512,8 +512,27 @@ export class BattleEngine {
     return this.units.filter(u => isPlayerUnit(u) && !u.alive && u.life !== 'REVIVING' && u.heroUid != null).map(u => u.heroUid!);
   }
 
+  private released = false;
+  get disposed(): boolean { return this.released; }
+
+  /** Release a finished/replaced session after its result presentation; never persist runtime enemies. */
+  dispose(): void {
+    if (this.released) return;
+    this.released = true;
+    this.listeners = [];
+    this.pending = [];
+    this.fields.clear();
+    this.skills.dispose();
+    this.projectiles.length = 0;
+    for (const u of this.units) this.grid.remove(u.id, u.pos);
+    this.units.length = 0;
+    this.echoSources.clear();
+    this.statusVariants.clear();
+    this.events.drain();
+  }
+
   step(dt: number): void {
-    if (this.result) return;
+    if (this.released || this.result) return;
     this.time += dt;
     this.flow.update(dt);
     if (this.flow.stageResult) this.flow.stageResult.battleDuration = this.time;

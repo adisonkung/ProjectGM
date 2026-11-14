@@ -145,6 +145,86 @@ describe('Echo Trial', () => {
     expect(source.effects.length).toBe(3);
   });
 
+  it('heals, shields and cleanses actual Echo allies while leaving player effects untouched', () => {
+    const e = engine([spec(0), spec(4), spec(1)]), u = e.units.find(v => v.echo && v.cls === 'healer')!;
+    advance(e, .7);
+    const friends = e.units.filter(v => v.echo), foes = e.units.filter(v => !v.echo);
+    for (const v of e.units) {
+      v.hp = v.maxHp - 200;
+      (e as any).applyStatus(v, 'stun', v, 10);
+      v.atkCd = v.cd1 = v.cd2 = 999;
+    }
+    const effect = { ...u.kit!.skill, effects: [
+      { type: 'HEAL' as const, area: 'ALL_ALLIES' as const, atk: 0, maxHpPct: .1 },
+      { type: 'SHIELD' as const, selfPct: .1, allyPct: .1, duration: 4 },
+      { type: 'CLEANSE' as const, to: 'ALL_ALLIES' as const },
+      { type: 'APPLY_STATUS' as const, to: 'AREA' as const, area: 'ALL_ALLIES' as const, team: 'ALLY' as const, status: 'taunt_guard', duration: 5 },
+    ] };
+    const before = new Map(e.units.map(v => [v.id, v.hp]));
+    e.skills.applyEffects(u, effect, 'skill', u, u.pos);
+    for (const v of friends) {
+      expect(v.hp - before.get(v.id)!).toBe(Math.round(v.maxHp * .1 * .6));
+      expect(v.shield).toBe(Math.round(Math.round(u.maxHp * .1) * .7));
+      expect(v.buffs.some(b => b.def.id === 'stun')).toBeFalse();
+      expect(v.buffs.some(b => b.def.id === 'taunt_guard')).toBeTrue();
+    }
+    for (const v of foes) {
+      expect(v.hp).toBe(before.get(v.id)!);
+      expect(v.shield).toBe(0);
+      expect(v.buffs.some(b => b.def.id === 'taunt_guard')).toBeFalse();
+      expect(v.buffs.some(b => b.def.id === 'stun')).toBeTrue();
+    }
+  });
+
+  it('resolves AoE damage/debuffs and lowest-HP ally targets relative to the Echo faction', () => {
+    const e = engine([spec(0), spec(1), spec(4)]);
+    advance(e, .7);
+    const src = e.units.find(v => v.echo)!, friends = e.units.filter(v => v.echo), foes = e.units.filter(v => !v.echo);
+    friends[1].hp = 1;
+    expect(e.skills.pickTarget(src, { ...src.kit!.skill, target: 'LOWEST_HP_ALLY', range: 999 }, foes[0])).toBe(friends[1]);
+    expect(e.skills.pickTarget(src, { ...src.kit!.skill, target: 'NEAREST_ENEMY', range: 999 }, friends[1])!.side).toBe('ally');
+    const before = new Map(e.units.map(v => [v.id, v.hp]));
+    e.skills.applyEffects(src, { ...src.kit!.skill, effects: [
+      { type: 'DAMAGE', area: 'ALL_ENEMIES', primary: .1, secondary: .1 },
+      { type: 'APPLY_STATUS', to: 'AREA', area: 'ALL_ENEMIES', team: 'ENEMY', status: 'stun', duration: 99 },
+    ] }, 'skill', foes[0], foes[0].pos);
+    friends.forEach(v => expect(v.hp).toBe(before.get(v.id)!));
+    foes.forEach(v => {
+      expect(v.hp).toBeLessThan(before.get(v.id)!);
+      expect(v.buffs.find(b => b.def.id === 'stun')!.remaining).toBe(3);
+    });
+  });
+
+  it('disposes scheduled effects and runtime Echoes idempotently before a new session', () => {
+    const e = engine([spec(0), spec(4)]);
+    let fired = false;
+    e.later(1, e.units[0], () => fired = true);
+    e.dispose(); e.dispose();
+    e.step(5);
+    expect(e.disposed).toBeTrue();
+    expect(e.units).toEqual([]);
+    expect(e.projectiles).toEqual([]);
+    expect(e.drainEvents()).toEqual([]);
+    expect(fired).toBeFalse();
+    const next = engine([spec(1)]);
+    expect(next.disposed).toBeFalse();
+    expect(next.units.filter(v => v.echo).length).toBe(1);
+  });
+
+  it('honors independent tier stat and cooldown overrides', () => {
+    const source = spec(0), stage = FARM_BY_ID['trial_1'].stage;
+    const e = new BattleEngine({ allies: [source], enemyTemplates: {}, seed: 2,
+      stage: { ...stage, special: { ...stage.special!, echo: {
+        ...stage.special!.echo!, hpMultiplier: 2, attackMultiplier: .75, defenseMultiplier: 1.5, cooldownMultiplier: .5,
+      } } } });
+    const normal = engine([source]).units.find(u => u.echo)!, tuned = e.units.find(u => u.echo)!;
+    expect(Math.abs(tuned.maxHp - normal.maxHp * 2)).toBeLessThanOrEqual(1);
+    expect(tuned.atk).toBeCloseTo(normal.atk * .75, -1);
+    expect(tuned.def).toBeCloseTo(normal.def * 1.5, -1);
+    expect(tuned.kit!.skill.cooldown).toBe(normal.kit!.skill.cooldown! * .5);
+    expect(tuned.kit!.skill2.cooldown).toBe(normal.kit!.skill2.cooldown! * .5);
+  });
+
   it('keeps the other dungeon families and skill material rewards', () => {
     for (const d of FARM_DUNGEONS) {
       expect(!!d.stage.special?.echo).toBe(d.type === 'SKILL');

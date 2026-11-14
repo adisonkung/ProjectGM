@@ -147,6 +147,13 @@ export class SkillSystem {
 
   constructor(private readonly h: SkillHost) {}
 
+  /** Drop cached impact recipients when the battle session is replaced or destroyed. */
+  dispose(): void {
+    this.supported = [];
+    this.bonused = [];
+    this.travelled = false;
+  }
+
   kit(u: BattleUnit): HeroKit {
     return u.kit ?? kitOf(u.heroId, u.cls);
   }

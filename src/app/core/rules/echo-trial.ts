@@ -12,7 +12,7 @@ export function echoSpec(source: UnitSpec, p: EchoCombatProfile): UnitSpec {
     sprite: source.sprite, level: source.level, pos: { ...source.pos },
     stats: { ...base,
       hp: Math.round(base.hp * (1 + lv * LEVEL_GROWTH.hp) * p.hpMultiplier),
-      atk: Math.round(base.atk * (1 + lv * LEVEL_GROWTH.atk) * p.damageMultiplier),
+      atk: Math.round(base.atk * (1 + lv * LEVEL_GROWTH.atk) * p.attackMultiplier),
       def: Math.round(base.def * (1 + lv * LEVEL_GROWTH.def) * p.defenseMultiplier),
       maxMana: 0,
     },

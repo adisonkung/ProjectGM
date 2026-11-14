@@ -1,3 +1,4 @@
+import { DecimalPipe } from '@angular/common';
 import { isMeleeRange } from '../../battle/engine/melee-contact';
 import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
 import { bodyFrontCell } from '../../battle/engine/footprint';
@@ -62,7 +63,7 @@ const TICK = 0.05;
  */
 @Component({
   selector: 'app-battle',
-  imports: [BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
+  imports: [DecimalPipe, BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -381,6 +382,7 @@ export class BattleComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopLoop();
+    this.engine?.dispose();
     this.endTimers.forEach(clearTimeout);
     this.portraitMq?.removeEventListener('change', this.onOrientation);
     this.releaseLandscape();
@@ -451,6 +453,7 @@ export class BattleComponent implements OnDestroy {
     this.bossPhase.set(null);
     this.projectiles.set([]);
     this.anims.set({});
+    this.engine?.dispose();
     this.engine = createBattle({ allies: this.team.units(), stage: this.stage(), autoUlt: this.autoUlt() });
     // testing a new hero: ultimate ready from the first second (core/data/dev-flags.ts)
     if (DEV_FLAGS.fullUltAtStart) for (const u of this.engine.units) if (isPlayerUnit(u)) u.mana = u.maxMana;

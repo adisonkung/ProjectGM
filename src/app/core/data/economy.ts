@@ -1,4 +1,4 @@
-import { ECHO_GOAL, ECHO_PROFILE } from './echo-trial';
+import { EchoCombatProfile, ECHO_GOAL, ECHO_PROFILE } from './echo-trial';
 /**
  * Patch 1 economy configuration (spec: claude/patch1-hero-level-spec.md) — every number here is tuning data,
  * never read directly by combat code. Level curve, breakthroughs, items, tower EXP, farm dungeons, daily bonus.
@@ -556,7 +556,7 @@ const TRIAL_STAGES: StageDef[] = [1, 2, 3, 4].map(n => ({
 const TRIAL_TARGET_TIME = [90, 105, 128, 150];
 
 /** Skill Trial reward per clear (BASE: daily bonus ×1.5 for 2 runs, repeat ×0.6); fractional tomes → fragments */
-interface TrialTier { n: number; unlockFloor: number; levels: [number, number]; gold: number; tomes: [string, number][]; bonus: string; first: [string, number][] }
+interface TrialTier { n: number; unlockFloor: number; levels: [number, number]; gold: number; tomes: [string, number][]; bonus: string; first: [string, number][]; echo?: Partial<EchoCombatProfile> }
 /** chance of +1 tome of the Trial's main tier per clear (× the bonus / repeat multiplier like every item) */
 export const TRIAL_BONUS_CHANCE = 0.08;
 
@@ -576,7 +576,7 @@ const trialDef = (t: TrialTier): FarmDungeonDefinition => ({
   firstClearBonus: { items: t.first.map(([itemId, count]) => ({ itemId, count })) },
   dailyBonusPool: 'SKILL', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: TRIAL_TARGET_TIME[t.n - 1],
   stage: { ...stageOf(TRIAL_STAGES, `trial_${t.n}`), enemies: [], rounds: undefined, waveDefs: [{ spawns: [] }],
-    special: { kind: 'STORY', goal: ECHO_GOAL, echo: { ...ECHO_PROFILE, level: t.levels[1] } } },
+    special: { kind: 'STORY', goal: ECHO_GOAL, echo: { ...ECHO_PROFILE, level: t.levels[1], ...t.echo } } },
 });
 
 export const FARM_DUNGEONS: FarmDungeonDefinition[] = [
