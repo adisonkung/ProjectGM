@@ -14,7 +14,7 @@ import { UnitSpriteComponent, SpriteAnim } from '../../battle/unit-sprite/unit-s
     <main>@for (h of heroes; track h.id) {
       <article [attr.data-hero]="h.id"><h2>{{ h.name }} <small>{{ h.cls }}</small></h2><div class="pair">
         <section><div class="actor"><app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [anim]="anim()" [animKey]="key()" /></div><span>Original</span><div class="hp player"></div></section>
-        <section class="spectral"><div class="actor"><app-unit-sprite class="echo-actor" [cls]="h.cls" [sprite]="h.sprite" side="enemy" [flip]="true" [anim]="anim()" [animKey]="key()" /></div><span>◇ Echo</span><div class="hp enemy"></div></section>
+        <section class="spectral"><div class="actor"><span class="echo-smoke" aria-hidden="true"></span><app-unit-sprite class="echo-actor" [cls]="h.cls" [sprite]="h.sprite" side="enemy" [flip]="true" [anim]="anim()" [animKey]="key()" /></div><span>◇ Echo</span><div class="hp enemy"></div></section>
       </div></article>
     }</main>`,
   styles: [`
@@ -25,7 +25,7 @@ import { UnitSpriteComponent, SpriteAnim } from '../../battle/unit-sprite/unit-s
     article { border:1px solid #81704c; background:linear-gradient(#253139,#121e27); padding:12px; }
     h2 { font-size:16px; text-align:center; margin:4px; } small { display:block; font-size:11px; color:#a5adb0; }
     .pair { display:grid; grid-template-columns:1fr 1fr; } section { text-align:center; position:relative; }
-    .actor { position:relative; width:100px; height:130px; margin:12px auto 0; }
+    .actor { isolation:isolate; position:relative; width:100px; height:130px; margin:12px auto 0; }
     .spectral .actor::after { content:''; position:absolute; width:72px; height:15px; bottom:0; left:14px; border:1px solid #a58ade55; border-radius:50%; background:radial-gradient(ellipse,#59407835,transparent 70%); box-shadow:0 -5px 8px #4b31651a; }
     section span { display:block; font-size:12px; color:#c9c4b9; margin:10px; } .spectral span { color:#b49bdc; }
     .hp { height:4px; width:64px; margin:0 auto 8px; } .player { background:#6eaf72; } .enemy { background:#cd5d67; }

@@ -273,3 +273,5 @@ app-projectile.px { visibility: hidden; }
 .unit.px.echo::before, .unit.px.echo::after { display: none; }
 @keyframes echo-fragments { from { translate: 0 0; opacity: .6; } to { translate: 0 -18px; opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .unit.echo::after { animation: none !important; } }
+
+.unit.px .echo-smoke { display:none; }

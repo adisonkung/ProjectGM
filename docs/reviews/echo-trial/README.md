@@ -26,3 +26,7 @@ Design references (read before changes): [Skill Trial](../../design/eldervane-ui
 Visual revision: user rejected the initial green/cyan cast and requested Shadow Violet. Current gallery and combat evidence use the revised palette. Per-character eye masking remains unsupported; the shared treatment colors the existing eye pixels, without adding inaccurate face effects.
 
 Mobile portrait combat retains the existing compact whole-board layout; it has no horizontal overflow, but actors/HUD remain small. The roster gallery uses readable stacked cards. This task does not redesign other battle layouts.
+
+Shadow Violet aura follow-up (15 November 2026): the user approved the palette and requested stronger smoke/clone presence. Added looping violet wisps behind every living Echo. Pixi uses one shared 64×96 procedural alpha texture and three owned sprites per clone, released on removal/destroy; DOM battle and all-15 gallery share CSS wisps. No gameplay/stat/skill changes. Static reduced-motion treatment, no extra sprite blur or per-frame texture generation. Updated before/after gallery, live combat, mobile and motion evidence in `docs/reviews/echo-trial/`. App/spec typecheck, 981 Karma tests and browser 5v5 victory/rewards passed; no browser errors or mobile overflow.
+
+Motion preview: `shadow-violet-aura.mp4` (live browser frame capture). Before/after uses the user-approved Shadow Violet snapshot from commit 3522712, preserved as `roster-before-aura.png`; current `roster-desktop.png` includes the wisps.

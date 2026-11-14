@@ -129,3 +129,12 @@ html body .app app-hero-detail .detail.reference-overview .show.has-banner {
 /* Echo profile: shared by combat's DOM fallback and the roster preview. */
 .echo-actor { filter: grayscale(.55) brightness(.66) sepia(.5) hue-rotate(215deg) saturate(.95) drop-shadow(1px 0 0 #a58ade70) drop-shadow(-1px 0 0 #7361b550); }
 .echo-prebattle { font-size: 12px; color: #bca9e4; max-width: 450px; margin: 4px 10px; }
+
+/* Shared Shadow Violet wisps for the DOM battlefield and live roster preview. */
+.echo-smoke { position:absolute; inset:-25% -16% -3%; pointer-events:none; z-index:-1; }
+.echo-smoke::before, .echo-smoke::after { content:''; position:absolute; inset:30% 6% 0; opacity:0;
+  background:radial-gradient(ellipse at 40% 72%, #a77bdd55, transparent 52%), radial-gradient(ellipse at 62% 49%, #69489660, transparent 53%), radial-gradient(ellipse at 44% 23%, #bb91e53b, transparent 48%);
+  transform-origin:50% 90%; animation:echo-smoke-rise 3.6s linear infinite; }
+.echo-smoke::after { animation-delay:-1.8s; scale:-1 1; }
+@keyframes echo-smoke-rise { 0% { opacity:0; transform:translate(-6%,8%) scale(.65,.7); } 28% { opacity:.75; } 65% { opacity:.55; } 100% { opacity:0; transform:translate(9%,-48%) scale(1.12,1.2); } }
+@media(prefers-reduced-motion:reduce) { .echo-smoke::before,.echo-smoke::after { animation:none; opacity:.35; } }

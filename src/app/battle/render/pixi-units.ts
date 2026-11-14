@@ -77,6 +77,7 @@ interface UnitGfx {
   lastHit?: number;
   flashAt?: number;
   filterKey?: string;
+  smoke?: Sprite[];
   rings?: Graphics;
   ringKey?: string;
 }
@@ -115,6 +116,7 @@ export class PixiUnitLayer {
   private readonly echoOutline?: import('pixi-filters').OutlineFilter;
   private readonly partLayer: Container;
   private readonly partSprites: Sprite[] = [];
+  private echoSmokeTexture?: Texture;
   private readonly partTex = new Map<ParticleShape, Texture>();
   private readonly emitters: Emitter[] = [];
   private readonly rng = particleRng(0x5eed);
@@ -204,6 +206,7 @@ export class PixiUnitLayer {
     this.fxPool.length = 0;
     this.app.destroy(true, { children: true });
     this.echoOutline?.destroy();
+    this.echoSmokeTexture?.destroy(true);
     for (const texture of this.crispTextures.values()) texture.destroy(true);
     this.crispTextures.clear();
     for (const t of this.chunks.values()) t.destroy(true);
@@ -468,6 +471,7 @@ export class PixiUnitLayer {
       s.clip.request(u.req, u.key, now, u.moving);
       const pose = s.clip.pose(now, idleNow, u.moving, u.pace);
       if (!base) {
+        s.smoke?.forEach(p => p.visible = false);
         s.sprite.visible = false;
         continue;
       }
@@ -500,6 +504,7 @@ export class PixiUnitLayer {
   private dropUnit(s: UnitGfx): void {
     s.sprite.destroy();
     s.rings?.destroy();
+    s.smoke?.forEach(p => p.destroy());
   }
 
   /** one white texture per particle shape (tinted per particle) */
@@ -567,8 +572,42 @@ export class PixiUnitLayer {
     for (let i = n; i < this.partSprites.length; i++) this.partSprites[i].visible = false;
   }
 
+  /** One shared procedural texture, three low-opacity wisps per clone; no per-frame textures or blur filters. */
+  private drawEchoSmoke(s: UnitGfx, u: PixiUnit, cell: number, idleNow: number): void {
+    const active = !!u.look?.echo && !!u.look.rings?.includes('echo');
+    if (!active) { s.smoke?.forEach(p => p.visible = false); return; }
+    if (!this.echoSmokeTexture) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64; canvas.height = 96;
+      const ctx = canvas.getContext('2d')!;
+      for (const [x, y, radius] of [[29, 69, 28], [37, 47, 23], [25, 28, 18]]) {
+        const fog = ctx.createRadialGradient(x, y, 1, x, y, radius);
+        fog.addColorStop(0, 'rgba(255,255,255,.65)');
+        fog.addColorStop(.45, 'rgba(255,255,255,.30)');
+        fog.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = fog; ctx.fillRect(0, 0, 64, 96);
+      }
+      this.echoSmokeTexture = this.pixi.Texture.from(canvas);
+    }
+    if (!s.smoke) s.smoke = Array.from({ length: 3 }, () => {
+      const p = new this.pixi.Sprite(this.echoSmokeTexture);
+      p.anchor.set(.5, 1); p.tint = 0xa77bdd;
+      this.stage.addChild(p); return p;
+    });
+    s.smoke.forEach((p, i) => {
+      const progress = this.reduced ? .45 : (idleNow / 3.6 + i / 3 + u.id * .137) % 1;
+      const drift = Math.sin(progress * Math.PI * 1.5 + i * 2.1);
+      p.position.set(u.x + cell * (.5 + (i - 1) * .22 + drift * .13), u.y + cell * (.96 - progress * .8));
+      p.width = cell * (.55 + progress * .32);
+      p.height = cell * (.65 + progress * .5);
+      p.alpha = Math.sin(progress * Math.PI) * .34 * u.alpha;
+      p.zIndex = u.z - .03; p.visible = p.alpha > .001;
+    });
+  }
+
   /** the CSS state looks of the DOM `.unit`, drawn on the canvas (render/unit-look.ts) */
   private applyLook(s: UnitGfx, u: PixiUnit, cell: number, idleNow: number): void {
+    this.drawEchoSmoke(s, u, cell, idleNow);
     const look = u.look;
     const sp = s.sprite;
     const px = cell / 56; // CSS px at the reference cell size (56 px)
