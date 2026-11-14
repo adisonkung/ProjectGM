@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="128" viewBox="0 0 64 128">
+  <defs>
+    <linearGradient id="shadow" x1="18" y1="118" x2="37" y2="8" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#251c40" stop-opacity="0"/>
+      <stop offset=".2" stop-color="#483064" stop-opacity=".5"/>
+      <stop offset=".55" stop-color="#775399" stop-opacity=".6"/>
+      <stop offset=".85" stop-color="#ae8acb" stop-opacity=".48"/>
+      <stop offset="1" stop-color="#d8b7ea" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="21" y1="105" x2="30" y2="19" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9972bb" stop-opacity="0"/>
+      <stop offset=".4" stop-color="#ae88d1" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#d2a7e5" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Tapered curling shadow, with open space through its centre. No blur/glow filter. -->
+  <path fill="url(#shadow)" d="M26 126C4 109 8 96 23 81C37 67 33 58 21 47C7 33 17 15 36 2C23 20 23 31 34 40C54 56 46 74 32 88C19 101 18 112 26 126Z"/>
+  <path fill="url(#rim)" d="M17 112C9 99 22 88 31 76C42 60 34 51 25 43C16 35 18 25 24 18C20 30 23 35 31 42C46 55 43 67 33 80C23 93 15 99 17 112Z"/>
+  <path fill="url(#shadow)" opacity=".65" d="M41 113C30 105 36 95 44 88C52 80 51 70 47 64C57 73 58 84 49 94C42 102 39 106 41 113Z"/>
+  <path fill="#b18acb" opacity=".35" d="M24 21L28 15L26 24Z M40 56L42 51L42 58Z M17 95L18 90L20 92Z"/>
+</svg>

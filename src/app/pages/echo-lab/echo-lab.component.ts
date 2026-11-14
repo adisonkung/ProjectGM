@@ -14,7 +14,7 @@ import { UnitSpriteComponent, SpriteAnim } from '../../battle/unit-sprite/unit-s
     <main>@for (h of heroes; track h.id) {
       <article [attr.data-hero]="h.id"><h2>{{ h.name }} <small>{{ h.cls }}</small></h2><div class="pair">
         <section><div class="actor"><app-unit-sprite [cls]="h.cls" [sprite]="h.sprite" [anim]="anim()" [animKey]="key()" /></div><span>Original</span><div class="hp player"></div></section>
-        <section class="spectral"><div class="actor"><span class="echo-smoke" aria-hidden="true"></span><app-unit-sprite class="echo-actor" [cls]="h.cls" [sprite]="h.sprite" side="enemy" [flip]="true" [anim]="anim()" [animKey]="key()" /></div><span>◇ Echo</span><div class="hp enemy"></div></section>
+        <section class="spectral" [style.--echo-phase]="($index * -.37) + 's'"><div class="actor"><span class="echo-smoke" aria-hidden="true"></span><app-unit-sprite class="echo-actor" [cls]="h.cls" [sprite]="h.sprite" side="enemy" [flip]="true" [anim]="anim()" [animKey]="key()" /></div><span>◇ Echo</span><div class="hp enemy"></div></section>
       </div></article>
     }</main>`,
   styles: [`
