@@ -1,3 +1,4 @@
+import { FieldDefinition } from '../models/combat';
 import { AnimationConfig, MonsterDefinition, MonsterSkillDefinition, MonsterStats } from '../models/monster';
 import { FOREST_ARC_ANIMATIONS } from './forest-arc-art.generated';
 
@@ -39,6 +40,12 @@ const bolt = (id: string, projectileId: string, mul = 1, damageType: 'MAGIC' | '
   ({ id, damageType, damageMultiplier: mul, delivery: 'PROJECTILE', projectileId, clip: 'attack', event: 'PROJECTILE_SPAWN', hitTolerance: 0 } as const);
 
 // ------------------------------------------------------------------ skills (PROVISIONAL values)
+
+/** Forest Oblivion Dark Mist: occupancy aura on a 3 × 2 zone (heroes inside only — leaving ends it at once) */
+const OBLIVION_MIST = (duration: number): FieldDefinition => ({
+  area: 'RECT_3X2', duration, interval: duration, effects: [],
+  aura: { team: 'ENEMY', modifiers: { moveSpeedMultiplier: 0.6, attackSpeedMultiplier: 0.8, healingReceivedMultiplier: 0.7 } },
+});
 
 export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
   // ---- Alpha Wolf (Stage 3 Interrupt lesson, spec §5 LOCKED objective)
@@ -177,55 +184,86 @@ export const FOREST_ARC_SKILLS: Record<string, MonsterSkillDefinition> = {
     conditions: [{ type: 'SELF_BELOW', pct: 0.85 }, { type: 'SELF_LACKS_STATUS', status: 'bark_guard' }], recovery: 0.3, interruptRecovery: 0,
   },
 
-  // ---- Forest Oblivion — Stage 10 stationary boss (spec §7 PROPOSED set). Every attack originates at its anchor.
-  oblivion_slam: {
-    id: 'oblivion_slam', name: 'ทุบรากสูญสิ้น', label: 'HEAVY ROOT SLAM', type: 'ATTACK',
-    castTime: 1.6, cooldown: 8, interruptible: false, range: 2,
+  // ---- Forest Oblivion — Stage 10 stationary boss (user gameplay + VFX spec 2026-11-08, values PROVISIONAL).
+  // Every attack comes from its fixed anchor and travels right → left; the Pulse charge is the Break window that opens
+  // the chest Core (exposed_core). Phase 2 (Oblivion Awakening, 50 %) swaps in the stronger Eruption / Mist versions.
+  /** heavy frontal ground punish: 2 × 3 cells in front, knocks the heroes hit back one cell */
+  oblivion_root_crush: {
+    id: 'oblivion_root_crush', name: 'รากสูญสิ้นบดขยี้', label: 'OBLIVION ROOT CRUSH', type: 'ATTACK',
+    clip: 'crush', hitFx: 'fo-crush-hit',
+    castTime: 1.4, cooldown: 8, interruptible: false, range: 3, firstCastDelay: 3,
     target: { type: 'CURRENT_TARGET' },
-    effects: [{ type: 'DAMAGE', mul: 1.9, area: 'FRONT_ARC', center: 'SELF' }],
-    mockFx: { color: '#8b1a1a', area: 'FRONT_ARC' },
-    conditions: [{ type: 'ENEMY_WITHIN', range: 2 }], recovery: 0.4, interruptRecovery: 0.6,
+    effects: [
+      { type: 'DAMAGE', mul: 1.9, area: 'FRONT_RECT_2X3', center: 'SELF' },
+      { type: 'KNOCKBACK', cells: 1 },
+    ],
+    mockFx: { color: '#8b1a1a', area: 'FRONT_RECT_2X3' },
+    conditions: [{ type: 'ENEMY_WITHIN', range: 3 }], recovery: 0.5, interruptRecovery: 0.6,
   },
-  branch_sweep: {
-    id: 'branch_sweep', name: 'กวาดกิ่งพิฆาต', label: 'WIDE BRANCH SWEEP', type: 'ATTACK',
-    castTime: 1.4, cooldown: 10, interruptible: false, firstCastDelay: 4,
-    target: { type: 'SELF' },
-    effects: [{ type: 'DAMAGE', mul: 1.2, area: 'RADIUS_2', center: 'SELF' }],
-    mockFx: { color: '#6b2a3a', area: 'RADIUS_2' },
-    conditions: [{ type: 'ENEMY_WITHIN', range: 2 }], recovery: 0.4, interruptRecovery: 0.6,
-  },
-  root_eruption: {
-    id: 'root_eruption', name: 'รากวิปลาสปะทุ', label: 'CORRUPTED ROOT ERUPTION', type: 'ATTACK',
+  /** warned cells (locked 0.5 s into the cast) → roots erupt: damage + Slow + a short Root on whoever stands there */
+  oblivion_root_eruption: {
+    id: 'oblivion_root_eruption', name: 'รากวิปลาสปะทุ', label: 'CORRUPTED ROOT ERUPTION', type: 'ATTACK',
+    clip: 'eruption',
     castTime: 2, cooldown: 11, interruptible: true, interruptPriority: 'MEDIUM', firstCastDelay: 6,
-    target: { type: 'HERO_PRIORITY', classes: ['healer', 'mage', 'archer'], backRowOnly: true },
+    groundTargets: { count: 2, lockAfter: 0.5, markFx: 'fo-erupt-warn', impactFx: 'fo-erupt' },
+    target: { type: 'HERO_PRIORITY', classes: ['healer', 'mage', 'archer'], backRowOnly: false },
     effects: [
       { type: 'DAMAGE', mul: 1.2, area: 'SINGLE', center: 'TARGET', damageType: 'MAGIC' },
-      { type: 'APPLY_STATUS', status: 'root', to: 'TARGET', duration: 2 },
+      { type: 'APPLY_STATUS', status: 'slow', to: 'HIT', duration: 3 },
+      { type: 'APPLY_STATUS', status: 'root', to: 'HIT', duration: 1 },
     ],
     mockFx: { color: '#5a1a3a', area: 'SINGLE' },
     conditions: [], recovery: 0.3, interruptRecovery: 0.6,
   },
-  dark_mist_pressure: {
-    id: 'dark_mist_pressure', name: 'หมอกมืดบีบ', label: 'DARK MIST PRESSURE', type: 'ATTACK',
-    castTime: 1.5, cooldown: 16, interruptible: false, firstCastDelay: 10,
-    target: { type: 'HERO_CLUSTER', area: 'SQUARE_2', min: 2 },
-    effects: [{ type: 'APPLY_STATUS', status: 'oblivion_mist', to: 'AREA', area: 'SQUARE_2', center: 'TARGET' }],
-    mockFx: { color: '#4b3a6b', area: 'SQUARE_2' },
+  /** Phase 2: three cells */
+  oblivion_root_eruption_awakened: {
+    id: 'oblivion_root_eruption_awakened', name: 'รากวิปลาสปะทุ', label: 'CORRUPTED ROOT ERUPTION', type: 'ATTACK',
+    clip: 'eruption',
+    castTime: 2, cooldown: 11, interruptible: true, interruptPriority: 'MEDIUM',
+    groundTargets: { count: 3, lockAfter: 0.5, markFx: 'fo-erupt-warn', impactFx: 'fo-erupt' },
+    target: { type: 'HERO_PRIORITY', classes: ['healer', 'mage', 'archer'], backRowOnly: false },
+    effects: [
+      { type: 'DAMAGE', mul: 1.2, area: 'SINGLE', center: 'TARGET', damageType: 'MAGIC' },
+      { type: 'APPLY_STATUS', status: 'slow', to: 'HIT', duration: 3 },
+      { type: 'APPLY_STATUS', status: 'root', to: 'HIT', duration: 1 },
+    ],
+    mockFx: { color: '#5a1a3a', area: 'SINGLE' },
+    conditions: [], recovery: 0.3, interruptRecovery: 0.6,
+  },
+  /** persistent 3 × 2 zone on the hero cluster: inside = slower, slower attacks, less healing (no lingering debuff) */
+  oblivion_dark_mist: {
+    id: 'oblivion_dark_mist', name: 'หมอกมืดถล่ม', label: 'DARK MIST COLLAPSE', type: 'ATTACK',
+    clip: 'mist',
+    castTime: 1.5, cooldown: 16, interruptible: false, firstCastDelay: 9,
+    target: { type: 'HERO_CLUSTER', area: 'RECT_3X2', min: 2 },
+    effects: [{ type: 'FIELD', field: OBLIVION_MIST(7) }],
+    mockFx: { color: '#4b3a6b', area: 'RECT_3X2' },
+    conditions: [], recovery: 0.3, interruptRecovery: 0,
+  },
+  /** Phase 2: longer-lasting mist, any cluster of one */
+  oblivion_dark_mist_awakened: {
+    id: 'oblivion_dark_mist_awakened', name: 'หมอกมืดถล่ม', label: 'DARK MIST COLLAPSE', type: 'ATTACK',
+    clip: 'mist',
+    castTime: 1.5, cooldown: 16, interruptible: false,
+    target: { type: 'HERO_CLUSTER', area: 'RECT_3X2', min: 1 },
+    effects: [{ type: 'FIELD', field: OBLIVION_MIST(10) }],
+    mockFx: { color: '#4b3a6b', area: 'RECT_3X2' },
     conditions: [], recovery: 0.3, interruptRecovery: 0,
   },
   /**
-   * Protected core → Break → exposed core → recovery (spec §7 suggested minimum loop).
-   * A 5 s charge that can't be interrupted, only BROKEN (150 = needs more than one breaker). Broken = `exposed_core`
-   * (5 s, +50 % damage taken, no actions) then the core closes again. Not broken = party-wide burst + healing ↓.
+   * The Core charges (4 s readable cast) then releases a party-wide pressure wave + DEF ↓. Never interruptible —
+   * only BREAK 150 stops it (needs more than one breaker): the Core opens (`exposed_core`, 5 s, ×1.5 damage taken,
+   * no actions). No damage during the charge.
    */
-  core_surge: {
-    id: 'core_surge', name: 'แกนกลางปะทุ', label: 'CORE SURGE', type: 'ATTACK',
-    castTime: 5, cooldown: 16, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 150, brokenStatus: 'exposed_core',
+  oblivion_pulse: {
+    id: 'oblivion_pulse', name: 'คลื่นสูญสิ้น', label: 'OBLIVION PULSE', type: 'ATTACK',
+    clip: 'pulse',
+    castTime: 4, cooldown: 16, interruptible: false, interruptPriority: 'CRITICAL', breakRequired: 150, brokenStatus: 'exposed_core',
     firstCastDelay: 8,
     target: { type: 'ALL_HEROES' },
     effects: [
-      { type: 'DAMAGE', mul: 1.7, area: 'ALL_ENEMIES', center: 'SELF' },
-      { type: 'APPLY_STATUS', status: 'healing_reduction', to: 'HIT', duration: 6 },
+      { type: 'DAMAGE', mul: 1.5, area: 'ALL_ENEMIES', center: 'SELF', damageType: 'MAGIC' },
+      { type: 'APPLY_STATUS', status: 'oblivion_corrosion', to: 'HIT' },
     ],
     mockFx: { color: '#7fe8ff', area: 'ALL_ENEMIES' },
     conditions: [], recovery: 0.5, interruptRecovery: 0,
@@ -370,12 +408,19 @@ export const FOREST_ARC_MONSTERS: Record<string, MonsterDefinition> = {
   forest_oblivion: {
     id: 'forest_oblivion', name: 'พงไพรสูญสิ้น', rank: 'FINAL_BOSS', role: 'STATIONARY BOSS / CORE / BREAK', tags: TAGS('boss', 'corrupted'),
     displayClass: 'tank', visual: 'mock_fa_forest_oblivion', immune: ['KNOCKBACK', 'TAUNT', 'ROOT', 'STUN'],
-    stats: base({ maxHp: 12000, attack: 125, defense: 60, moveSpeed: 1, attackRange: 2, attackCooldown: 1.65, attackWindup: 0.45, hitReactionDuration: 0.1, minHitReactionInterval: 4, collisionRadius: 0.8 }),
+    stats: base({ maxHp: 12000, attack: 125, defense: 60, moveSpeed: 1, attackRange: 2, attackCooldown: 1.65, attackWindup: 0.5, hitReactionDuration: 0.1, minHitReactionInterval: 4, collisionRadius: 0.8 }),
     ai: {
       targeting: { strategy: 'NEAREST_REACHABLE_FRONT', targetLockDuration: 3 }, movement: 'MELEE_CHASE', holdArena: { leash: 0, returnAfter: 0 },
-      skillPriority: ['core_surge', 'root_eruption', 'dark_mist_pressure', 'branch_sweep', 'oblivion_slam'],
+      skillPriority: ['oblivion_pulse', 'oblivion_root_eruption', 'oblivion_root_eruption_awakened', 'oblivion_dark_mist',
+        'oblivion_dark_mist_awakened', 'oblivion_root_crush'],
     },
     attack: melee('oblivion_claw', 1.2, 0.5),
-    skills: ['core_surge', 'root_eruption', 'dark_mist_pressure', 'branch_sweep', 'oblivion_slam'], animation: art('forest_oblivion'),
+    skills: ['oblivion_pulse', 'oblivion_root_eruption', 'oblivion_dark_mist', 'oblivion_root_crush'], animation: art('forest_oblivion'),
+    phases: [
+      // Oblivion Awakening (spec recommended 50 %): permanent escalation — faster cadence, 3 eruption cells, longer mist
+      { id: 'oblivion_awakening', label: 'OBLIVION AWAKENING', hpBelow: 0.5, transition: 1, interruptSelf: true,
+        statuses: ['oblivion_awakening'], cooldownScale: 0.8,
+        replaceSkills: { oblivion_root_eruption: 'oblivion_root_eruption_awakened', oblivion_dark_mist: 'oblivion_dark_mist_awakened' } },
+    ],
   },
 };

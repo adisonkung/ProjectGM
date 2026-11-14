@@ -87,5 +87,5 @@ export const STATUS_ICONS: Record<string, string> = {
   guardian_empowered: '🩸', ancient_protection: '🛡', guardian_enrage: '🔥', stone_skin: '🪨', sentinel_fury: '💢', pack_fury: '🐺',
   lord_frenzy: '🌕', duel_enrage: '🔥', taunted: '❗', alpha_howl_buff: '🐺', blood_rage: '😡',
   alpha_pack_command: '🐺', weakened: '⬇', dark_chant_buff: '☽', black_fog: '🌫', veil_curse: '🕸', bark_guard: '🪵',
-  enraged_forest: '😡', exposed_core: '💥', oblivion_mist: '🌫',
+  enraged_forest: '😡', exposed_core: '💥', oblivion_awakening: '🌑', oblivion_corrosion: '🛡',
 };

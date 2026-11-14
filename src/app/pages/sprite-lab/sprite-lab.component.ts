@@ -478,6 +478,7 @@ export class SpriteLabComponent implements OnDestroy {
     const id=(n:number)=>review.ids.get(n),binding=sheet?.monsterFx?.[def.clip??''];let released:number|undefined;
     for(const sample of review.samples)this.at(sample.t,()=>{
       this.reviewLogicalPositions.set(sample.positions);
+      this.fieldVisuals.advance(sample.t);
       const actor=sample.positions[1],pose=guardianPose(m.animation.sheet,released==null?undefined:sample.t-released);
       const pos={...sample.positions};if(actor)pos[1]={...actor,c:actor.c+pose.forward*(this.faceLeft()?-1:1)};
       this.reviewPositions.set(pos);this.reviewVitals.set(sample.vitals);this.reviewStatuses.set(sample.statuses);
@@ -502,6 +503,10 @@ export class SpriteLabComponent implements OnDestroy {
           }
           for(const target of e.targets){const u=this.units().find(u=>u.id===id(target));if(u&&def.hitFx)this.monsterEffect(def.hitFx,u);}
           this.note(sample.t,def.name+' · ออกสกิลจริง');
+        }else if(e.type==='FIELD_STARTED'||e.type==='FIELD_ENDED'||e.type==='FIELD_PULSED'){
+          // monster zones (Forest Oblivion Dark Mist): the same FieldFxPlayback as hero fields, keyed by the caster's sheet
+          if(id(e.src)===1)this.fieldVisuals.handle(e,m.animation.sheet,0,sample.t);
+          if(e.type!=='FIELD_PULSED')this.note(sample.t,e.type);
         }else if(e.type==='fx'&&id(e.src)===1){
           // cast FX (Alpha Howl, Mist Shift, Call of the Forest charge …) — the engine starts it so its activation frame lands on SKILL_ACTIVATE
           this.monsterEffect(e.name,current,1);

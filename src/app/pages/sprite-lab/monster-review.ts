@@ -26,7 +26,8 @@ export function monsterReview(monsterId:string,skillId:string,at:Cell,targets:{i
  const snap=()=>{track();samples.push({t:engine.time-started,events:engine.drainEvents(),positions:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,{r:u.y,c:u.x,flip:u===caster||u.monster?left:!left}])),vitals:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,{hpPct:u.hp/u.maxHp*100,shieldPct:u.shield/u.maxHp*100}])),statuses:Object.fromEntries(engine.units.filter(u=>ids.has(u.id)).map(u=>[ids.get(u.id)!,u.buffs.map(b=>({id:b.def.id,left:b.remaining,sourceId:ids.get(b.sourceId)??b.sourceId}))]))});};
  const ok=engine.requestMonsterSkill(caster.id,skillId);snap();
  const statusDuration=Math.max(0,...skill.effects.filter(e=>e.type==='APPLY_STATUS').map(e=>e.duration??STATUS_EFFECTS[e.status]?.duration??0));
- const seconds=skill.castTime+Math.max((skill.recovery??1)+4,statusDuration+1);
+ const fieldDuration=Math.max(0,...skill.effects.map(e=>e.type==='FIELD'?e.field.duration:0));
+ const seconds=skill.castTime+Math.max((skill.recovery??1)+4,statusDuration+1,fieldDuration+1);
  if(ok)for(let i=0;i<Math.ceil(seconds/.05);i++){freeze();engine.step(.05);snap();}
  return {ids,samples,ok,extras};
 }

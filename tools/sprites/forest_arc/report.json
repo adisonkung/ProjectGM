@@ -1544,5 +1544,154 @@
         "K": 0.7955
       }
     }
+  },
+  "forest_oblivion": {
+    "sheet": "enemy-fa-forest-oblivion.png",
+    "cell": [
+      200,
+      198
+    ],
+    "clips": {
+      "idle": {
+        "source": "forest_oblivion_idle.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "rule": "dup end dropped",
+        "K": 0.7456
+      },
+      "hurt": {
+        "source": "forest_oblivion_hurt.png",
+        "cell": 256,
+        "srcFrames": 5,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          3,
+          2
+        ],
+        "rule": "reviewed",
+        "K": 0.7456
+      },
+      "death": {
+        "source": "forest_oblivion_death.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7456
+      },
+      "attack": {
+        "source": "forest_oblivion_attack.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          4,
+          5,
+          6,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7456
+      },
+      "crush": {
+        "source": "forest_oblivion_root_crush.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7456
+      },
+      "eruption": {
+        "source": "forest_oblivion_root_eruption.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7456
+      },
+      "mist": {
+        "source": "forest_oblivion_dark_mist.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7456
+      },
+      "pulse": {
+        "source": "forest_oblivion_oblivion_pulse.png",
+        "cell": 256,
+        "srcFrames": 9,
+        "seq": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rule": "reviewed",
+        "K": 0.7456
+      }
+    }
   }
 }

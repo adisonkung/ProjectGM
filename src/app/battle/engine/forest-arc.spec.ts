@@ -95,12 +95,13 @@ describe('Forest Arc — roster and stages (claude/eldervane-monster-spec-s1-10.
     expect(withSkills).toEqual(['alpha_wolf', 'dark_shaman', 'elder_treant', 'forest_oblivion', 'mist_witch', 'mist_wraith']);
   });
 
-  it('art (user monster1–4.zip): every Forest Arc monster but Forest Oblivion has a sheet with the five base clips; skill clips and VFX are wired', () => {
+  it('art (user monster1–4.zip + forest_oblivion.zip): every Forest Arc monster has a sheet with its base clips; skill clips and VFX are wired', () => {
     for (const m of Object.values(FOREST_ARC_MONSTERS)) {
-      if (m.id === 'forest_oblivion') { expect(m.animation.sheet).toBeUndefined(); continue; }
       expect(m.animation.sheet).withContext(m.id).toBe(`enemy-fa-${m.id.replace(/_/g, '-')}.png`);
       expect(SHEETS[m.animation.sheet!]).withContext(m.id).toBeDefined();
-      for (const c of ['idle', 'move', 'hurt', 'death', 'attack']) expect(m.animation.clips[c]).withContext(`${m.id}.${c}`).toBeDefined();
+      // the stationary boss (holdArena leash 0) has no move clip
+      const stationary = m.ai.holdArena?.leash === 0;
+      for (const c of ['idle', ...(stationary ? [] : ['move']), 'hurt', 'death', 'attack']) expect(m.animation.clips[c]).withContext(`${m.id}.${c}`).toBeDefined();
       expect(m.animation.clips['attack'].events!.some(e => e.event === m.attack.event)).withContext(m.id).toBeTrue();
       expect(m.animation.clips['death'].events!.some(e => e.event === 'DEATH_COMPLETE')).toBeTrue();
       // the gameplay wind-up comes from the sheet now — kept within 0.2 s of the stat
@@ -117,6 +118,24 @@ describe('Forest Arc — roster and stages (claude/eldervane-monster-spec-s1-10.
       }
     }
     expect(SHEETS['enemy-fa-elder-treant.png'].appliedStatusFx?.['enraged_forest']).toBe('fa-enraged');
+  });
+
+  it('Forest Oblivion: the 14 spec VFX are wired to their gameplay hooks', () => {
+    const def = SHEETS['enemy-fa-forest-oblivion.png'];
+    const used = [
+      ...def.monsterFx!['crush'].activate!, MONSTER_SKILLS['oblivion_root_crush'].hitFx!,
+      MONSTER_SKILLS['oblivion_root_eruption'].groundTargets!.markFx, MONSTER_SKILLS['oblivion_root_eruption'].groundTargets!.impactFx,
+      def.fieldFx!.start!, def.fieldFx!.loop,
+      ...def.monsterFx!['pulse'].cast!, ...def.monsterFx!['pulse'].activate!,
+      def.statusFx!['exposed_core'].start!, def.statusFx!['exposed_core'].loop, def.damageFx!['exposed_core'],
+      def.statusFx!['oblivion_awakening'].start!, def.statusFx!['oblivion_awakening'].loop, def.deathFx!,
+    ];
+    expect(new Set(used).size).toBe(14);
+    for (const n of used) expect(FX[n]).withContext(n).toBeDefined();
+    // persistent loops never cover the telegraphs: the phase loop is drawn under the units, the mist zone too
+    expect(FX['fo-p2-loop'].layer).toBe('under');
+    expect(FX['fo-mist-loop'].layer).toBe('under');
+    expect(def.anchors?.['core']).toBeDefined();
   });
 
   it('Forest Slime keeps its existing sheet and stats, drawn smaller (displayScale 0.8, feet unchanged)', () => {
@@ -154,18 +173,110 @@ describe('Forest Arc — mechanics', () => {
     expect(boss.y).toBeCloseTo(y0, 5);
   });
 
-  it('Core Surge: not interruptible, BREAK 150 opens the core (exposed_core: no actions, +50 % damage taken)', () => {
+  it('Oblivion Pulse: not interruptible, BREAK 150 opens the Core (exposed_core: no actions, +50 % damage taken)', () => {
     const b = battle([H('aurel', 0, 1, TOUGH)], [mon('forest_oblivion', 1, 1)]);
     b.lockHeroes();
     const boss = b.monsters('forest_oblivion')[0];
-    b.cast(boss, 'core_surge');
+    b.cast(boss, 'oblivion_pulse');
     (b.e as any).tryInterrupt(b.hero('aurel'), boss);
-    expect(boss.casting?.def.id).toBe('core_surge');
+    expect(boss.casting?.def.id).toBe('oblivion_pulse');
     (b.e as any).tryInterrupt(b.hero('aurel'), boss, 100);
-    expect(boss.casting?.def.id).toBe('core_surge');
+    expect(boss.casting?.def.id).toBe('oblivion_pulse');
     (b.e as any).tryInterrupt(b.hero('aurel'), boss, 60);
     expect(boss.casting).toBeNull();
     expect(hasStatus(boss, 'exposed_core')).toBeTrue();
+  });
+
+  it('Oblivion Pulse: no damage during the 4 s Core charge — the wave hits every hero on release + corrodes DEF', () => {
+    const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 0, TOUGH)], [mon('forest_oblivion', 5, 1)]);
+    b.lockHeroes();
+    const boss = b.monsters('forest_oblivion')[0], heroes = [b.hero('aurel'), b.hero('sylvie')];
+    boss.monster!.attackCooldownRemaining = 1e9;
+    b.cast(boss, 'oblivion_pulse');
+    const hp = heroes.map(h => h.hp);
+    b.run(3.9);
+    expect(heroes.map(h => h.hp)).toEqual(hp);
+    b.run(0.3);
+    for (const h of heroes) {
+      expect(h.hp).withContext(h.name).toBeLessThan(hp[heroes.indexOf(h)]);
+      expect(hasStatus(h, 'oblivion_corrosion')).withContext(h.name).toBeTrue();
+    }
+  });
+
+  it('Oblivion Root Crush: hits the 2 × 3 cells in front only and knocks those heroes back — the boss itself stays', () => {
+    const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 5, 0, TOUGH)], [mon('forest_oblivion', 0, 1)]);
+    b.lockHeroes();
+    const boss = b.monsters('forest_oblivion')[0], tank = b.hero('aurel'), far = b.hero('sylvie');
+    // the boss never comes to the heroes: put the tank in the cell right in front of it
+    const front = { r: boss.pos.r, c: boss.pos.c - 1 };
+    b.e.grid.move(tank.id, tank.pos, front); tank.pos = { ...front }; tank.x = front.c; tank.y = front.r;
+    const home = { ...boss.pos }, c0 = tank.pos.c, farHp = far.hp, tankHp = tank.hp;
+    b.cast(boss, 'oblivion_root_crush', tank);
+    b.run(1.5);
+    expect(tank.hp).toBeLessThan(tankHp);
+    expect(Math.abs(tank.pos.c - boss.pos.c)).toBeGreaterThan(Math.abs(c0 - boss.pos.c));
+    expect(far.hp).toBe(farHp);
+    expect(boss.pos).toEqual(home);
+  });
+
+  it('Root Eruption: warns the locked cells first, then hits only whoever stands there (Slow + short Root)', () => {
+    const b = battle([H('aurel', 0, 1, TOUGH), H('sylvie', 4, 0, TOUGH)], [mon('forest_oblivion', 3, 1)]);
+    b.lockHeroes();
+    const boss = b.monsters('forest_oblivion')[0];
+    boss.monster!.attackCooldownRemaining = 1e9;
+    b.cast(boss, 'oblivion_root_eruption', b.hero('sylvie'));
+    b.run(0.6);
+    const warn = b.log.find(ev => ev.type === 'monsterGround' && ev.warning);
+    expect(warn).toBeDefined();
+    const hp = b.e.units.filter(u => u.side === 'ally').map(u => u.hp);
+    b.run(1.2);
+    expect(b.e.units.filter(u => u.side === 'ally').map(u => u.hp)).toEqual(hp);   // nothing before the eruption
+    b.run(0.4);
+    const hit = b.e.units.filter(u => u.side === 'ally' && hasStatus(u, 'slow'));
+    expect(hit.length).toBeGreaterThan(0);
+    for (const u of hit) expect((warn as any).cells.some((c: { r: number; c: number }) => c.r === u.pos.r && c.c === u.pos.c)).toBeTrue();
+    expect(b.log.some(ev => ev.type === 'monsterGround' && !ev.warning && ev.fx === 'fo-erupt')).toBeTrue();
+  });
+
+  it('Dark Mist Collapse: a persistent 3 × 2 zone — slows only the heroes standing inside, ends with its duration and with the boss', () => {
+    // a second enemy keeps the wave going after the boss falls
+    const b = battle([H('aurel', 0, 1, TOUGH), H('bron', 0, 2, TOUGH), H('sylvie', 5, 0, TOUGH)], [mon('forest_oblivion', 5, 1), mon('forest_slime', 5, 2)]);
+    b.lockHeroes();
+    const boss = b.monsters('forest_oblivion')[0], tank = b.hero('aurel'), far = b.hero('sylvie');
+    for (const m of b.e.units.filter(u => u.monster)) { m.monster!.attackCooldownRemaining = 1e9; m.moveCd = 1e9; }
+    for (const cs of boss.castSkills) cs.cd = 1e9;
+    b.cast(boss, 'oblivion_dark_mist', tank);
+    b.run(1.6);
+    expect(b.log.some(ev => ev.type === 'FIELD_STARTED')).toBeTrue();
+    const m = (u: BattleUnit) => u.auraModifiers?.().map(x => x.moveSpeedMultiplier ?? 1).reduce((a, x) => a * x, 1) ?? 1;
+    expect(m(tank)).toBeCloseTo(0.6, 5);
+    expect(m(far)).toBe(1);
+    b.run(7.2);
+    expect(b.log.some(ev => ev.type === 'FIELD_ENDED' && ev.reason === 'EXPIRED')).toBeTrue();
+    expect(m(tank)).toBe(1);
+    // a new zone dies with the boss
+    b.cast(boss, 'oblivion_dark_mist', tank);
+    b.run(1.6);
+    boss.monster!.phaseIndex = MONSTERS['forest_oblivion'].phases!.length;   // past Phase 2 — a phase threshold can't be skipped
+    (b.e as any).applyDamage(boss, boss.hp + 1, false, false, tank);
+    b.run(0.2);
+    expect(boss.alive).toBeFalse();
+    expect(b.log.some(ev => ev.type === 'FIELD_ENDED' && ev.reason === 'SOURCE_DIED')).toBeTrue();
+  });
+
+  it('Phase 2 — Oblivion Awakening at 50 %: permanent marker, faster cadence, the stronger Eruption / Mist replace the base ones', () => {
+    const b = battle([H('aurel', 0, 1, TOUGH)], [mon('forest_oblivion', 3, 1)]);
+    b.lockHeroes();
+    const boss = b.monsters('forest_oblivion')[0];
+    (b.e as any).applyDamage(boss, boss.maxHp * 0.55, false, false, b.hero('aurel'));
+    b.run(0.1);
+    expect(hasStatus(boss, 'oblivion_awakening')).toBeTrue();
+    const ids = boss.castSkills.map(c => c.def.id);
+    expect(ids).toContain('oblivion_root_eruption_awakened');
+    expect(ids).toContain('oblivion_dark_mist_awakened');
+    expect(ids).not.toContain('oblivion_root_eruption');
+    expect(boss.monster!.cooldownScale).toBe(0.8);
+    expect((MONSTER_SKILLS['oblivion_root_eruption_awakened'].groundTargets!.count)).toBeGreaterThan(MONSTER_SKILLS['oblivion_root_eruption'].groundTargets!.count);
   });
 
   it('Weakening Hex applies only on completion — an interrupted hex leaves nothing', () => {

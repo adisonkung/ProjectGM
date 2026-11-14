@@ -1122,6 +1122,25 @@ for (const m of Object.values(MONSTERS)) {
 Object.assign(SHEETS['enemy-jadecrest-guardian.png'], JADECREST_PRESENTATION);
 // Forest Arc (tools/sprites/forest_arc/art.py): the Elder Treant phase burst on Enraged Forest (VFX strips: after FX)
 SHEETS['enemy-fa-elder-treant.png'].appliedStatusFx = { enraged_forest: 'fa-enraged' };
+// Forest Oblivion (user forest_oblivion.zip 2026-11-08): the Core / phase / death states own their VFX; skill casts bind
+// theirs through monsterFx (Pulse charge on the Core during the cast → wave on release; Root Crush ground impact on
+// release). Root Eruption warning / roots come from `groundTargets`, the Dark Mist zone from `fieldFx` (Formation, then
+// the loop for the zone's life). Core = the chest crystal of the idle pose (atlas 106,103 in a 200 × 198 cell, feet 184).
+Object.assign(SHEETS['enemy-fa-forest-oblivion.png'], {
+  anchors: { core: [7.5, -72.75] },
+  statusFx: {
+    exposed_core: { start: 'fo-core-open', loop: 'fo-core-loop' },
+    oblivion_awakening: { start: 'fo-p2-activate', loop: 'fo-p2-loop' },
+  },
+  damageFx: { exposed_core: 'fo-core-hit' },
+  deathFx: 'fo-death',
+  monsterFx: {
+    crush: { activate: ['fo-crush'] },
+    pulse: { cast: ['fo-pulse-charge'], activate: ['fo-pulse-wave'] },
+  },
+  fieldFx: { start: 'fo-mist-form', loop: 'fo-mist-loop', loopAfterStart: true },
+  preloadFx: ['fo-crush-hit', 'fo-erupt-warn', 'fo-erupt'],
+} satisfies Partial<SheetDef>);
 Object.assign(SHEETS['enemy-solar-oculus.png'], SOLAR_PRESENTATION);
 SHEETS['enemy-solar-oculus.png'].anims.idle!.ms=125;
 // Floating physical body sits lower; source pixels and the 3x2 logical body are unchanged.
