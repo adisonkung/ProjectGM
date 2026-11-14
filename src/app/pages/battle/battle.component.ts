@@ -787,6 +787,7 @@ export class BattleComponent implements OnDestroy {
         id: u.id,
         side: u.side,
         name: u.name,
+        echo: !!u.echo,
         cls: u.cls,
         ...this.actorScreenOf(u),
         hpPct: (u.hp / u.maxHp) * 100,

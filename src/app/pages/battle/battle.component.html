@@ -7,6 +7,7 @@
   } @else if (placing()) {
     <header class="run-head gm-panel citadel-surface"><app-citadel-frame shape="chapter" [cut]="22" />
       <a class="reference-back" [routerLink]="backLink()"><app-citadel-icon name="tower" [size]="45" /><h1>{{ mode() === 'farm' ? 'กลับดันเจี้ยน' : 'กลับหอคอย' }}</h1></a>
+      @if (stage().special?.echo) { <p class="echo-prebattle">{{ stage().special?.goal }}</p> }
       <div class="run-title" [attr.title]="runTitle()"><b>{{ mode() === 'farm' ? runTitle() : 'ชั้นที่ ' + floor() }}</b><small>{{ stage().mode === 'eliminate' ? totalWaves() + ' เวฟ' : 'เอาตัวรอด' }} · {{ stage().timeLimit }} วิ</small></div>
       <div class="power"><app-citadel-icon name="armory" [size]="24" /><span>พลังทีม</span><b>{{ teamPower() }}</b></div>
     </header>

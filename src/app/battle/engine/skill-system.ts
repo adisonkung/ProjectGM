@@ -303,7 +303,7 @@ export class SkillSystem {
     const fx = def.effects ?? [];
     if (tgt && tgt.side !== f.side && hpPct(tgt) < 0.5 && fx.some(e => e.type === 'APPLY_STATUS' && e.status === 'stun')) return base + 1;
     if (tgt && tgt.side === f.side && hpPct(tgt) < 0.35 && fx.some(e => e.type === 'HEAL_PCT')) return base + 1;
-    if (fx.some(e => e.type === 'SOUL_LINK') && this.h.foes(f).some(h => h.mana >= h.maxMana)) return base + 1;
+    if (fx.some(e => e.type === 'SOUL_LINK') && this.h.foes(f).some(h => !h.echo && h.mana >= h.maxMana)) return base + 1;
     return base;
   }
 
@@ -523,13 +523,14 @@ export class SkillSystem {
 
   /** start a skill: cooldown, animation lock, movement and the hit (or projectile) at the animation's hit frame */
   use(u: BattleUnit, slot: SkillSlot, s: SkillDefinition, target: BattleUnit): void {
+    if (u.echo && slot === 'ult') return;
     this.commit(u, s, target);
     this.h.onSkillUse?.(u, slot, s, target);
     // skill rank + gear cooldown reduction
     if (slot === 'skill' || slot === 'skill2') {
       // ranked cooldown × gear CDR, never below the authored cooldown × (1 − total CDR cap)
       const authored = kitOf(u.heroId, u.cls)[slot].cooldown ?? s.cooldown ?? 0;
-      const cd = Math.max((s.cooldown ?? 0) * (u.mods?.cooldown[slot] ?? 1), authored * (1 - SKILL_RANK_LIMITS.maxTotalCdr));
+      const cd = u.echo ? (s.cooldown ?? 0) : Math.max((s.cooldown ?? 0) * (u.mods?.cooldown[slot] ?? 1), authored * (1 - SKILL_RANK_LIMITS.maxTotalCdr));
       if (slot === 'skill') u.cd1 = cd;
       else u.cd2 = cd;
     }

@@ -1,3 +1,4 @@
+import { ECHO_GOAL, ECHO_PROFILE } from './echo-trial';
 /**
  * Patch 1 economy configuration (spec: claude/patch1-hero-level-spec.md) — every number here is tuning data,
  * never read directly by combat code. Level curve, breakthroughs, items, tower EXP, farm dungeons, daily bonus.
@@ -545,91 +546,12 @@ export const CARRIER_DROP_SCALE = 0.5;
 
 // ------------------------------------------------------------------ Skill Trial (Skill Upgrade spec)
 
-/**
- * Skill Trial I–IV: the Skill Tome farm. Each teaches one tactical skill: I interrupts (Poison Cloud / Alpha Howl) ·
- * II support healers (Goblin Shaman Healing Ritual every wave) · III several casts at once (shaman + mushrooms + howl) ·
- * IV Break coordination (Trial Warden: WARDEN SEAL breakable only, 100 Break = two breakers). Reinforced waves, HP +40 %.
- * Target active clear: I 75–105 s · II 90–120 · III 105–150 · IV 120–180. Unlock F4 / F6 / F7 / F8.
- */
-const TRIAL_STAGES: StageDef[] = [
-  farmStage('trial_1', 'Skill Trial I', [
-    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('goblin_fighter', 0, [0, 2]).concat(row('magic_mushroom', 1, [0, 2])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [1]))),
-    wave(row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2]), row('goblin_archer', 3, [1])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_wolf', 1, [1]))),
-    wave(row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2]), row('magic_mushroom', 1, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2]))),
-  ], 'twilight-1'),
-  farmStage('trial_2', 'Skill Trial II', [
-    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_shaman', 4, [1])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
-    wave(row('goblin_guard', 0, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_shaman', 4, [1])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
-    wave(row('goblin_guard', 0, [0, 2]).concat(row('goblin_fighter', 0, [1]), row('goblin_shaman', 4, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
-  ], 'twilight-1'),
-  farmStage('trial_3', 'Skill Trial III', [
-    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [0, 2]), row('goblin_shaman', 4, [1])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2]))),
-    wave(row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2]), row('magic_mushroom', 1, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_shaman', 4, [1])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2])),
-      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1]))),
-    wave(row('goblin_guard', 0, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_shaman', 4, [0, 2]), row('magic_mushroom', 1, [1])),
-      row('alpha_wolf', 1, [1]).concat(row('forest_wolf', 0, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 1, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
-    wave(row('goblin_guard', 0, [0, 2]).concat(row('goblin_fighter', 0, [1]), row('goblin_shaman', 4, [1]), row('magic_mushroom', 1, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
-  ], 'misty-1'),
-  farmStage('trial_4', 'Skill Trial IV', [
-    wave(row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_shaman', 4, [1]), row('goblin_archer', 3, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_slime', 1, [0, 2])),
-      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
-    wave(row('trial_warden', 1, [1]).concat(row('goblin_fighter', 0, [0, 2]), row('goblin_archer', 3, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('magic_mushroom', 1, [1])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2]))),
-    wave(row('corrupted_treant', 0, [1]).concat(row('forest_wolf', 0, [0, 2]), row('goblin_shaman', 4, [1])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_slime', 0, [0, 1, 2]).concat(row('goblin_fighter', 1, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1])),
-      row('corrupted_wolf', 0, [0, 2]).concat(row('goblin_fighter', 1, [1]))),
-    wave(row('trial_warden', 1, [1]).concat(row('goblin_guard', 0, [0, 2]), row('goblin_shaman', 4, [1])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('forest_spirit', 3, [1])),
-      row('corrupted_wolf', 0, [0, 1, 2]),
-      row('goblin_fighter', 0, [0, 1, 2]).concat(row('goblin_archer', 3, [0, 2])),
-      row('forest_wolf', 0, [0, 1, 2]).concat(row('forest_slime', 1, [1]))),
-  ], 'misty-1'),
-];
+/** Echo templates are filled dynamically by BattleEngine from deployed hero instances. */
+const TRIAL_STAGES: StageDef[] = [1, 2, 3, 4].map(n => ({
+  id: `trial_${n}`, floor: n, name: `Hall of Reflection ${n}`, mode: 'eliminate',
+  enemies: [], waveDefs: [{ spawns: [] }], timeLimit: 180, background: 'misty-1',
+  rules: { firstWaveStartDuration: .65 },
+}));
 
 const TRIAL_TARGET_TIME = [90, 105, 128, 150];
 
@@ -653,16 +575,9 @@ const trialDef = (t: TrialTier): FarmDungeonDefinition => ({
   },
   firstClearBonus: { items: t.first.map(([itemId, count]) => ({ itemId, count })) },
   dailyBonusPool: 'SKILL', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: TRIAL_TARGET_TIME[t.n - 1],
-  stage: toChallenge(reskin(stageOf(TRIAL_STAGES, `trial_${t.n}`), 'trial'), ...TRIAL_RULES[t.n - 1]),
+  stage: { ...stageOf(TRIAL_STAGES, `trial_${t.n}`), enemies: [], rounds: undefined, waveDefs: [{ spawns: [] }],
+    special: { kind: 'STORY', goal: ECHO_GOAL, echo: { ...ECHO_PROFILE, level: t.levels[1] } } },
 });
-
-/** CHALLENGE rules per Skill Trial tier (the tier's lesson) */
-const TRIAL_RULES: [ChallengeRule[], string][] = [
-  [[{ type: 'CAST_LIMIT', max: 3, skills: ['rune_bolt'], label: 'RUNE BOLT สำเร็จเกิน 3 ครั้ง' }], 'ตัดร่าย! ห้ามปล่อยให้ภูตรูนหัวหน้ายิง RUNE BOLT สำเร็จเกิน 3 ครั้ง'],
-  [[{ type: 'KILL_BEFORE', monsterId: 'grimoire_familiar', seconds: 30, label: 'ตำราเวทรอดเกิน 30 วินาที' }], 'ล่าตำรา! ตำราเวทมีชีวิตทุกเล่มต้องล้มภายใน 30 วินาทีหลังโผล่'],
-  [[{ type: 'CAST_LIMIT', max: 5, skills: ['page_barrier', 'rune_bolt'], label: 'PAGE BARRIER / RUNE BOLT สำเร็จเกิน 5 ครั้ง' }], 'ร่ายซ้อน! ห้ามปล่อยให้ PAGE BARRIER / RUNE BOLT สำเร็จรวมเกิน 5 ครั้ง'],
-  [[{ type: 'CAST_LIMIT', max: 1, skills: ['arcane_seal'], label: 'ARCANE SEAL สำเร็จ 2 ครั้ง' }], 'Break! ห้ามปล่อยให้ผู้คุมสอบร่าย ARCANE SEAL สำเร็จเกิน 1 ครั้ง'],
-];
 
 export const FARM_DUNGEONS: FarmDungeonDefinition[] = [
   trainingDef(1, 0, [1, 2], 60, 'exp_potion_s', 1),

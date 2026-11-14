@@ -261,3 +261,15 @@ app-projectile.px { visibility: hidden; }
   height: calc(var(--rows) * var(--cell) + var(--foot, 0px) + var(--scenery-extra) + var(--ground-extra));
   >.cam { top: var(--scenery-extra); >app-field { top: calc(-1 * var(--scenery-extra)); } }
 }
+
+.unit.echo:not(.dead) { animation: echo-materialize .6s ease-out; }
+.unit.echo::before { content: ''; position: absolute; width: 72%; height: 20%; left: 14%; bottom: 1%; border: 1px solid #a58ade55; border-radius: 50%; background: radial-gradient(ellipse, #49306626, transparent 72%); pointer-events: none; }
+.unit.echo.dead { animation: echo-dissolve .6s ease-out forwards; pointer-events: none; }
+@keyframes echo-materialize { from { opacity: 0; } to { opacity: 1; } }
+@keyframes echo-dissolve { 0% { opacity: .8; } 35% { opacity: .5; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .unit.echo { animation-duration: .01s !important; } }
+
+.unit.echo:not(.dead)::after { content: ''; position: absolute; left: 38%; bottom: 12%; width: 2px; height: 2px; background: #9b7ed455; box-shadow: 9px -12px #9b7ed455, -8px -22px #9b7ed455; pointer-events: none; animation: echo-fragments 2.8s linear infinite; }
+.unit.px.echo::before, .unit.px.echo::after { display: none; }
+@keyframes echo-fragments { from { translate: 0 0; opacity: .6; } to { translate: 0 -18px; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .unit.echo::after { animation: none !important; } }

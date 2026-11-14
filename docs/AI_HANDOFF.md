@@ -2,6 +2,10 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Echo Trial rework — Codex, 15 November 2026
+
+Branch `wip/codex-echo-trial`, based on freshly fetched `origin/master` 41a3bc3. Only Skill Trial changes: single dynamic mirrored hero encounter; normalized tier/class stats; Basic/S1/S2 AI; no ultimate/gauge/revive; Echo healing .60, shields .70, CC cap 3s; short spectral spawn/death presentation on DOM/Pixi. User follow-up changed the cyan/green treatment to Shadow Violet (dark purple/indigo, faint shadow mist); eye pixels receive the shared tint, with no inaccurate per-face mask. Existing reward pipeline and other daily dungeons retained. Profile: `core/data/echo-trial.ts`; runtime copies: `core/rules/echo-trial.ts`. `/echo-lab` previews all 15 shipped heroes side by side. Spec and visual evidence: `docs/ECHO_TRIAL_SPEC.md`, `docs/reviews/echo-trial/README.md`. Player definitions/art are unchanged; no generic hero-summon effect exists, and eye masking is skipped per spec. Balance values are provisional, not a roster rebalance. Validation: app/spec typecheck, 981/981 Karma, production build, 20 shipped-roster simulation battles; browser 5v5 victory/reward flow plus mobile DOM (no overflow/errors) passed. Local untracked `karma.ci.cjs` was preserved and is excluded from commits. No merge/deploy. Last confirmed local/cloud sync metadata below is unchanged.
+
 ## Latest task — Forest Oblivion, Stage 10 boss (Claude, 2026-11-08)
 
 Branch `wip/claude-forest-oblivion` from origin/master 09da627. User supplied `forest_oblivion.zip` (body sheets + 14 VFX) and the full gameplay/VFX spec: stationary, attacks right→left, 4 skills, Break → Core Exposed, Phase 2 at ~50 %, death in place, persistent VFX must not hide telegraphs.

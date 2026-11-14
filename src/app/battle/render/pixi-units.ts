@@ -112,6 +112,7 @@ export class PixiUnitLayer {
   private readonly fxPool: Sprite[] = [];
   private readonly crispTextures = new Map<string, Texture>();
   private readonly bloom?: AdvancedBloomFilter;
+  private readonly echoOutline?: import('pixi-filters').OutlineFilter;
   private readonly partLayer: Container;
   private readonly partSprites: Sprite[] = [];
   private readonly partTex = new Map<ParticleShape, Texture>();
@@ -133,6 +134,7 @@ export class PixiUnitLayer {
     this.overFx.sortableChildren = true;
     this.overFx.zIndex = Z_OVER;
     if (filters) {
+      this.echoOutline = new filters.OutlineFilter({ thickness: 1, color: 0xa58ade, alpha: .45, quality: .1 });
       this.bloom = new filters.AdvancedBloomFilter({ threshold: 0.55, bloomScale: 0.9, brightness: 1, blur: 6, quality: 4 });
       this.overFx.filters = [this.bloom];
     }
@@ -201,6 +203,7 @@ export class PixiUnitLayer {
     for (const sprite of this.fxPool) sprite.destroy();
     this.fxPool.length = 0;
     this.app.destroy(true, { children: true });
+    this.echoOutline?.destroy();
     for (const texture of this.crispTextures.values()) texture.destroy(true);
     this.crispTextures.clear();
     for (const t of this.chunks.values()) t.destroy(true);
@@ -571,12 +574,16 @@ export class PixiUnitLayer {
     const px = cell / 56; // CSS px at the reference cell size (56 px)
     // broken: darkened sepia (brightness .6 sepia .6 hue −20°) + 2 px jitter every 0.2 s · untargetable: partly grey
     let tone: ColorMatrixFilter | undefined;
-    if (look?.broken || look?.gray) {
+    if (look?.echo || look?.broken || look?.gray) {
       tone = s.tone ??= new this.pixi.ColorMatrixFilter();
-      const want = look.broken ? 'broken' : 'gray';
+      const want = look.echo ? 'echo' : look.broken ? 'broken' : 'gray';
       if (s.filterKey?.split('|')[0] !== want) {
         tone.reset();
-        if (look.broken) {
+        if (look.echo) {
+          tone.saturate(-.55, false);
+          tone.brightness(.66, true);
+          tone.tint(0xb5a1eb, true);
+        } else if (look.broken) {
           tone.brightness(0.6, false);
           tone.sepia(true);
         } else {
@@ -606,9 +613,9 @@ export class PixiUnitLayer {
       const pulse = look.glowPulse && !this.reduced ? Math.abs(((idleNow / 0.9) % 2) - 1) : 1;
       glow.outerStrength = 1.4 + 1.6 * pulse;
     }
-    const key = `${tone ? (look!.broken ? 'broken' : 'gray') : ''}|${flash ? 'f' : ''}|${glow ? 'g' : ''}`;
+    const key = `${tone ? (look!.echo ? 'echo' : look!.broken ? 'broken' : 'gray') : ''}|${flash ? 'f' : ''}|${glow ? 'g' : ''}`;
     if (key !== s.filterKey) {
-      const list = [tone, flash, glow].filter((x): x is NonNullable<typeof x> => !!x);
+      const list = [tone, flash, glow, ...(look?.echo ? [this.echoOutline] : [])].filter((x): x is NonNullable<typeof x> => !!x);
       sp.filters = list.length ? list : null;
       s.filterKey = key;
     }
@@ -620,7 +627,7 @@ export class PixiUnitLayer {
     }
     if (s.rings) {
       const g = s.rings;
-      if (s.ringKey !== rkey) {
+      if (s.ringKey !== rkey || look?.echo) {
         g.clear();
         for (const r of look?.rings ?? []) {
           const b = RING_BOX[r];
@@ -633,9 +640,18 @@ export class PixiUnitLayer {
             g.ellipse(0, cy, rx, ry).fill({ color: col, alpha: 0.35 });
             g.ellipse(0, cy, rx, ry).stroke({ color: r === 'aura6' ? LOOK_COLORS.aura6Rim : LOOK_COLORS.aura5Rim, width: 2 * px, alpha: 1 });
           } else {
-            const col = r === 'elite' ? LOOK_COLORS.r5 : LOOK_COLORS.gold;
-            g.ellipse(0, cy, rx + 3 * px, ry + 3 * px).stroke({ color: col, width: 4 * px, alpha: 0.25 });
-            g.ellipse(0, cy, rx, ry).stroke({ color: col, width: 2 * px, alpha: 1 });
+            const col = r === 'echo' ? 0xa58ade : r === 'elite' ? LOOK_COLORS.r5 : LOOK_COLORS.gold;
+            if (r === 'echo') {
+              for (let i = 0; i < 3; i++) {
+                const rise = this.reduced ? .4 : (idleNow * .35 + i * .31 + u.id * .17) % 1;
+                g.rect((i - 1) * rx * .6, cy - rise * cell * .7, 1.5 * px, 2 * px).fill({ color: col, alpha: .4 * (1 - rise) });
+              }
+              g.ellipse(0, cy, rx * 1.15, ry * 1.4).fill({ color: 0x4c3478, alpha: .13 });
+              g.ellipse(0, cy, rx, ry).stroke({ color: col, width: px, alpha: .30 });
+            } else {
+              g.ellipse(0, cy, rx + 3 * px, ry + 3 * px).stroke({ color: col, width: 4 * px, alpha: 0.25 });
+              g.ellipse(0, cy, rx, ry).stroke({ color: col, width: 2 * px, alpha: 1 });
+            }
           }
         }
         s.ringKey = rkey;

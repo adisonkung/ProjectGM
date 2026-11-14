@@ -51,6 +51,7 @@ export function outcomeOf(e: BattleEngine): BattleOutcome {
 /** short live status of a special stage mode (HUD line) — null for story stages */
 export function modeStatus(e: BattleEngine): { goal: string; line: string } | null {
   const sp = e.flow.special;
+  if (sp.echo) return { goal: sp.goal, line: `Echo เหลือ ${e.units.filter(u => u.echo && u.alive).length} ตัว · 1 เวฟ` };
   if (sp.kind === 'STORY') return null;
   const s = e.flow.score;
   switch (sp.kind) {

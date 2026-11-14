@@ -49,9 +49,9 @@ export const DUNGEON_TYPES: DungeonType[] = [
     reward: 'อุปกรณ์ + Ore + เศษอุปกรณ์',
   },
   {
-    id: 'trial', pool: 'SKILL', name: 'Skill Trial', label: 'บททดสอบสกิล', mode: 'ภารกิจทดสอบ', icon: 'skillhall', tone: 'challenge',
-    blurb: 'ด่านมีกฎเฉพาะ เช่น ห้ามปล่อยให้ศัตรูร่ายสำเร็จ หรือต้องล้มหมอผีให้ทัน — พลาดกฎ = ล้มเหลว',
-    rules: ['อ่านเป้าหมายของแต่ละด่านก่อนลง', 'ใช้ท่าตัดร่าย / Break / โฟกัส', 'ดาวตามจำนวนครั้งที่พลาด'],
+    id: 'trial', pool: 'SKILL', name: 'Skill Trial', label: 'บททดสอบสกิล', mode: 'Echo Trial', icon: 'skillhall', tone: 'challenge',
+    blurb: 'Hall of Reflection — เผชิญ Echo ของทีมที่จัดลงสนามในห้องเดียว เพื่อรับวัตถุดิบอัปเกรดสกิล',
+    rules: ['Echo สะท้อนฮีโร่และตำแหน่งของทีมคุณ', 'ใช้โจมตีปกติ + สกิล 1/2 แต่ไม่มีอัลติเมต', 'ล้ม Echo ทั้งทีมในหนึ่งเวฟเพื่อรับ Skill Tome'],
     reward: 'Skill Tome',
   },
 ];
