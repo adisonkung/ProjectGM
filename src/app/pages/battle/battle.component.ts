@@ -334,6 +334,8 @@ export class BattleComponent implements OnDestroy {
   }
   private planted(u:BattleUnit):boolean {
     if(u.dashMotion)return false;
+    // the engine holds the body for an action clip (attack / skill / cast): no walk cycle on the spot
+    if(u.plant && !u.plant.off)return true;
     return u.monster ? MONSTERS[u.monster.definitionId]?.attack.delivery==='MELEE' && u.monster.state==='ATTACKING'
       : isMeleeRange(u.range) && u.castLock>0 && this.anims()[u.id]?.anim==='attack';
   }

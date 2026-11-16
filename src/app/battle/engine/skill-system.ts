@@ -41,6 +41,8 @@ export interface SkillHost {
   shoot(u: BattleUnit, t: BattleUnit, slot: SkillSlot, sky: boolean, onArrive: () => void, index?: number, speed?: number): void;
   /** Finish an ordinary melee approach before spending the attack cooldown or emitting its windup. */
   prepareMeleeAttack?(u:BattleUnit,target:BattleUnit):boolean;
+  /** an action clip starts: the body stands still for `seconds` (presentation — the logic is not held) */
+  plant?(u: BattleUnit, seconds: number): void;
   /** one hit through DamageResolver (+ dodge); false = missed / target gone */
   hit(src: BattleUnit, dst: BattleUnit, mul: number, o: { crit?: boolean; damageType?: DamageKind; sourceId: string; slot?: SkillSlot }): boolean;
   heal(dst: BattleUnit, amount: number, src: BattleUnit): void;
@@ -501,6 +503,12 @@ export class SkillSystem {
    * Basic action: the kit's attack, or — for healers while an ally is below healBolt.allyHpBelow — a Heal Bolt
    * on the lowest HP% ally in range. Either way it is one normal action (one +3 gauge when it lands).
    */
+  /** a basic action (heal bolt / attack) could start right now — range only, before the settle / contact checks */
+  basicReady(u: BattleUnit, enemy: BattleUnit | null): boolean {
+    if (this.kit(u).healBolt && this.healBoltTarget(u)) return true;
+    return !!enemy && inBasicAttackRange(u, enemy, u.range);
+  }
+
   basic(u: BattleUnit, enemy: BattleUnit | null): boolean {
     const kit = this.kit(u);
     if (kit.healBolt) {
@@ -536,12 +544,15 @@ export class SkillSystem {
     const kind = slot as 'attack' | SkillKind;
     const tm = animTiming(u.sprite, kind);
     if (slot === 'attack') {
-      // basic attack: stand still during the wind-up only
+      // basic attack: no other action during the wind-up; the body stays planted for the clip. A step taken after the
+      // hit (same timing as before) frees it — the view then drops the recovery frames for the walk cycle
       this.h.emit({ type: 'attack', src: u.id, dst: target.id });
       u.castLock = Math.max(u.castLock, tm.hit);
+      this.h.plant?.(u, tm.total);
     } else {
       this.h.emit({ type: 'cast', src: u.id, skill: s.name, kind: kind as SkillKind, dst: target.id });
       u.castLock = Math.max(u.castLock, tm.total, SKILL_LOCK);
+      this.h.plant?.(u, Math.max(tm.total, SKILL_LOCK));
     }
     if (s.movement?.type === 'DASH_PATH' && slot !== 'attack') {
       this.pathDash(u, slot, s, target, tm);

@@ -1,4 +1,4 @@
-import { AnimDef, ANIM_FALLBACK, FRAME_MS, IDLE_FRAME_MS, SheetDef, SpriteAnim } from '../../core/data/sprites';
+import { AnimDef, ANIM_FALLBACK, attackRecoveryAt, FRAME_MS, IDLE_FRAME_MS, SheetDef, SpriteAnim } from '../../core/data/sprites';
 
 /**
  * The character animation of one unit as a pure function of ONE clock — the same rules the DOM `app-unit-sprite`
@@ -64,6 +64,8 @@ export interface ClipTimeline {
   duration: number;
   /** stays on its last frame (die) */
   hold: boolean;
+  /** basic attack: from here on (s) a unit that starts walking drops the rest of the clip (see UnitClip.pose) */
+  recoverAt?: number;
   frameAt(t: number): number;
   rootAt(t: number): [number, number];
   opacityAt(t: number): number;
@@ -113,7 +115,7 @@ export function clipTimeline(a: AnimDef, name: SpriteAnim, req: ClipRequest): Cl
     duration = a.frames * ms;
     frameAt = s => Math.min(a.frames - 1, Math.max(0, Math.floor(s / ms)));
   }
-  return { def: a, duration, hold, frameAt, rootAt: root, opacityAt: opacity };
+  return { def: a, duration, hold, recoverAt: name === 'attack' ? attackRecoveryAt(a) : undefined, frameAt, rootAt: root, opacityAt: opacity };
 }
 
 /**
@@ -180,6 +182,13 @@ export class UnitClip {
     if (moving !== undefined) {
       if (moving && this.name === 'idle') this.play('walk', now, moving);
       else if (!moving && this.name === 'walk' && !this.timeline) this.play('idle', now, moving);
+      // walking on after the hit of a basic attack: the recovery frames give way to the walk cycle at once —
+      // an attack pose never slides across the ground (before the hit the body is planted, so it cannot be moving)
+      else if (moving && this.name === 'attack' && this.timeline?.recoverAt != null && now - this.start >= this.timeline.recoverAt) {
+        this.timeline = undefined;
+        this.name = 'idle';
+        this.play('walk', now, moving);
+      }
     }
     // a finished action clip falls back to what the unit is doing now
     if (this.timeline && !this.timeline.hold && now - this.start >= this.timeline.duration) {

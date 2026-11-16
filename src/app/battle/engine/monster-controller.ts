@@ -88,6 +88,8 @@ export interface CombatContext {
   later(delay: number, u: BattleUnit, fn: () => void): void;
   /** Melee windups wait for the body to finish its ordinary approach; projectiles do not. */
   prepareMeleeAttack?(u:BattleUnit,target:BattleUnit):boolean;
+  /** an action clip starts: the body stands still for `seconds` */
+  plant?(u: BattleUnit, seconds: number): void;
   meleeHit(u: BattleUnit, t: BattleUnit, attack: AttackDefinition): void;
   fireProjectile(u: BattleUnit, t: BattleUnit, attack: AttackDefinition): void;
   /** generic cast system: CAST_STARTED … SKILL_ACTIVATED / CAST_INTERRUPTED (`target` = aimed unit) */
@@ -380,6 +382,9 @@ export class MonsterController {
     this.setState(s, 'ATTACKING', 'attack');
     s.attackCooldownRemaining = def.stats.attackCooldown;
     s.attackTimer = Math.max(clipDuration(def.animation, def.attack.clip), windup + 0.01);
+    // the body stops where it is for the swing / shot (walk → stop → act); it finishes its way to the cell afterwards.
+    // Monsters do not wait for the arrival: their action timing is the encounter's balance (casts, volleys)
+    this.ctx.plant?.(u, s.attackTimer);
     this.ctx.emit({ type: 'attack', src: u.id, dst: t.id });
     // nothing happens now — the hit / projectile waits for the animation event
     this.ctx.later(windup, u, () => this.onAttackEvent(u, token, t.id));

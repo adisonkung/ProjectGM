@@ -2216,6 +2216,17 @@ export function animTiming(sprite: string | undefined, anim: 'attack' | SkillKin
 }
 
 /**
+ * When the recovery of a basic attack clip begins (s, speed ×1) = its last hit. A unit that walks on after that point
+ * drops the rest of the clip for its walk cycle (the follow-through never plays on a travelling body).
+ */
+export function attackRecoveryAt(a: AnimDef): number {
+  const clk = clipClock(a);
+  const dmg = a.events?.DAMAGE;
+  const hits = dmg == null ? [a.hit ?? Math.floor(clk.count / 2)] : Array.isArray(dmg) ? dmg : [dmg];
+  return clk.at(Math.max(...hits));
+}
+
+/**
  * clock of an action clip: start time (s, speed ×1) of each step — authored choreography (`seq` + `steps` ms)
  * or one sheet frame per step at `ms`. `art(step)` = the sheet frame shown (for logs).
  */

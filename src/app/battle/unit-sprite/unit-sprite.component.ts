@@ -1,7 +1,7 @@
 import { unitGeometry } from '../render/unit-geometry';
 import { spriteUrl } from '../../core/data/sprite-files';
 import { Component, ElementRef, computed, effect, inject, input, untracked, viewChild } from '@angular/core';
-import { ANIM_FALLBACK, FRAME_MS, IDLE_FRAME_MS, SHEETS, SheetDef, SpriteAnim } from '../../core/data/sprites';
+import { ANIM_FALLBACK, attackRecoveryAt, FRAME_MS, IDLE_FRAME_MS, SHEETS, SheetDef, SpriteAnim } from '../../core/data/sprites';
 import { MockVisual } from '../../core/data/visuals';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
@@ -105,6 +105,15 @@ export class UnitSpriteComponent {
       untracked(() => {
         if (m === undefined || !el || !def) return;
         if (m && this.currentName === 'idle') this.play(el, def, 'walk');
+        // walking on after the hit of a basic attack: drop the recovery frames for the walk cycle (no sliding attack pose)
+        else if (m && this.currentName === 'attack' && this.current && def.anims.attack
+          && (Number(this.current.currentTime ?? 0) * this.speed()) / 1000 >= attackRecoveryAt(def.anims.attack)) {
+          this.current.onfinish = null;
+          this.current.cancel();
+          this.lift?.cancel();
+          this.currentName = 'idle';
+          this.play(el, def, 'walk');
+        }
         else if (!m && this.currentName === 'walk') this.play(el, def, 'idle');
         if (m && !def.anims.walk) this.bob(true);
         else if (!m) this.bob(false);

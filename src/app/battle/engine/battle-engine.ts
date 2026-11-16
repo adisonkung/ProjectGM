@@ -14,7 +14,7 @@ import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../.
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
 import { resolveArea } from './area';
-import { ActiveBuff, applyBuff, dodgeChance, effectiveMoveSpeed, hasFlag, hasStatus, modifier, tauntSource, tickStatuses } from './buffs';
+import { ActiveBuff, applyBuff, dodgeChance, effectiveMoveSpeed, hasFlag, hasStatus, modifier, tauntSource, tickStatuses, walkCadence } from './buffs';
 import { breakRequiredOf, canStopCast, priorityOf, rankOf, SkillHost, SkillSystem, StatusApplyOptions } from './skill-system';
 import type { AreaPattern, DamageKind, InterruptPriority, SkillSlot, SkillUseMode } from '../../core/models/combat';
 import { fieldAnchor, FieldLifecycleEvent, FieldSystem } from './fields';
@@ -248,6 +248,13 @@ export interface BattleUnit {
   dashUntil: number;
   /** Exact-duration visual motion; combat contact waits for its destination. */
   dashMotion?: { fromX: number; fromY: number; toX: number; toY: number; start: number; duration: number };
+  /**
+   * feet planted for an action clip (attack / skill / cast): the body does not travel until `until` — unless its
+   * logical cell changes meanwhile (the skill's own movement, a knockback), which is shown at once.
+   */
+  plant?: { until: number; c: number; r: number; cast?: boolean; off?: boolean };
+  /** speed of the walk glide last tick (cells / s) — a walk starts with a short ramp instead of at full speed */
+  glideSpeed?: number;
   /** A committed action keeps its facing through the final recovery frame. */
   actionFacing?: { left: boolean; kind?: SkillKind; motion?: boolean };
   /** Identity also serves as the cancellation token for an opt-in stationary hero action. */
@@ -324,6 +331,13 @@ const THINK = 0.25;
 const TARGET_LOCK = 0.6;
 /** a unit counts as arrived in its cell when the glide is within this distance (cells) — skills wait for it */
 const SETTLE_EPS = 0.05;
+/**
+ * a walk reaches its full speed after this long (s). The body then trails the logical step by about half a tick of
+ * travel (< SETTLE_EPS at normal walking speeds): still moving when the next step arrives, yet "arrived" on time.
+ */
+const GLIDE_RAMP = 0.1;
+/** distance (cells) the body may trail its cell before it hurries (keeps that small lag instead of closing it) */
+const GLIDE_SLACK = 0.05;
 /**
  * Assassin post-dive safety (encounter spec §22): after a blink the hero may stay on its dive target for the skill
  * lock + DIVE_WINDOW (one follow-up hit); more than ASSASSIN_SAFE_THREAT hostile melee threat zones on its cell
@@ -565,6 +579,36 @@ export class BattleEngine {
     return Math.hypot(tx - u.x, this.glideTargetY(u) - u.y) > SETTLE_EPS;
   }
 
+  /**
+   * An action clip starts: the feet stay where they are for `seconds` (walk → stop → act → walk).
+   * Presentation only — the logic is never held: a unit may take its next step once the hit of a basic attack is out
+   * (as before); that step frees the body (walkStep) and the view drops the recovery frames for the walk cycle.
+   * Forced / skill movement (charge, blink, knockback) changes the logical cell and is shown at once.
+   */
+  private plantFor(u: BattleUnit, seconds: number): void {
+    u.plant = { until: this.time + seconds, c: u.pos.c, r: u.pos.r };
+    u.glideSpeed = 0;
+  }
+
+  /** one voluntary step on the grid (walking) — ends the stand of a clip that is past its hit */
+  private walkStep(u: BattleUnit, cell: Cell): void {
+    this.grid.move(u.id, u.pos, cell);
+    u.pos = cell;
+    if (u.plant && !u.plant.cast) delete u.plant;
+    this.events.push({ type: 'move', src: u.id });
+  }
+
+  /** feet planted by an action clip / a cast in progress (see `plantFor`) */
+  private planted(u: BattleUnit): boolean {
+    let p = u.plant;
+    if (p && (p.cast ? !u.casting : this.time >= p.until - 1e-9)) p = u.plant = undefined;
+    // a cast bar (hero channel / monster cast): stand still where the cast began, for as long as it runs
+    if (!p && u.casting) p = u.plant = { until: Infinity, c: u.pos.c, r: u.pos.r, cast: true };
+    if (!p) return false;
+    if (u.pos.c !== p.c || u.pos.r !== p.r) p.off = true;
+    return !p.off;
+  }
+
   /** Plant the feet at the approached stance before an ordinary melee windup. No grid move or extra reach. */
   private prepareMeleeAttack(u:BattleUnit,target:BattleUnit):boolean {
     if(u.dashMotion)return false;
@@ -587,16 +631,23 @@ export class BattleEngine {
         const m = u.dashMotion, t = Math.min(1, Math.max(0, (this.time - m.start) / m.duration));
         u.x = m.fromX + (m.toX - m.fromX) * t; u.y = m.fromY + (m.toY - m.fromY) * t;
         if (t >= 1) delete u.dashMotion;
+        u.glideSpeed = 0;
         continue;
       }
+      // an action clip is playing: the body stands still (no sliding attack / skill)
+      if (this.planted(u)) { u.glideSpeed = 0; continue; }
       const tx = origin + u.pos.c;
       const ty = ys.get(u.id)!;
       const d = Math.hypot(tx - u.x, ty - u.y);
-      if (d < 1e-4) continue;
-      // cruise at the unit's own step rate (one cell per step interval) so the body is still travelling when the next
-      // logical step arrives — the old ×1.15 got there early and stood still for a moment every cell (stop-and-go).
-      // Falls behind by more than a cell (diagonals, knock-ups) → catches up proportionally.
-      const step = Math.min(d, (modifier(u, 'moveSpeedMultiplier') !== 1 ? effectiveMoveSpeed(u) : Math.max(u.moveSpeed, 1)) * Math.max(1, d) * dt);
+      if (d < 1e-4) { u.glideSpeed = 0; continue; }
+      // Cruise at the unit's real step cadence (one cell per step, steps are counted in whole ticks). A walk ramps up
+      // over GLIDE_RAMP, so the body trails the logical step a little and is still travelling when the next step
+      // arrives — one steady speed across cell borders instead of stop-and-go. Further behind than GLIDE_SLACK
+      // (diagonals, knock-backs) → catches up proportionally. A unit that never walks is pushed at 1 cell / s.
+      const base = u.moveSpeed > 0 ? walkCadence(effectiveMoveSpeed(u), dt) : 1;
+      const speed = Math.min(base * Math.max(1, d - GLIDE_SLACK), (u.glideSpeed ?? 0) + (base * dt) / GLIDE_RAMP);
+      u.glideSpeed = speed;
+      const step = Math.min(d, speed * dt);
       u.x += ((tx - u.x) / d) * step;
       u.y += ((ty - u.y) / d) * step;
     }
@@ -979,6 +1030,9 @@ export class BattleEngine {
         u.atkCd = Math.max(u.atkCd, 0) + 1 / aspd;
         return;
       }
+      // ARRIVE BEFORE SHOOTING: a ranged basic action (shot / heal bolt) that is ready while the body still travels
+      // into its cell waits there — no new step meanwhile (melee plants its feet in prepareMeleeAttack)
+      if (settling && !isMeleeRange(u.range) && this.skills.basicReady(u, current)) return;
       if (this.skills.basic(u, current)) {
         u.atkCd = Math.max(u.atkCd, 0) + 1 / aspd;
         return;
@@ -1007,11 +1061,7 @@ export class BattleEngine {
         u.moveCd = 1 / effectiveMoveSpeed(u);
         return;
       }
-      if (step) {
-        this.grid.move(u.id, u.pos, step);
-        u.pos = step;
-        this.events.push({ type: 'move', src: u.id });
-      }
+      if (step) this.walkStep(u, step);
       u.moveCd = 1 / effectiveMoveSpeed(u);
     }
   }
@@ -1154,10 +1204,8 @@ export class BattleEngine {
       .filter(x => x.t < here)
       .sort((a, b) => a.t - b.t || a.c.c - b.c.c)[0];
     if (!step) return false;
-    this.grid.move(u.id, u.pos, step.c);
-    u.pos = step.c;
+    this.walkStep(u, step.c);
     u.moveCd = 1 / effectiveMoveSpeed(u);
-    this.events.push({ type: 'move', src: u.id });
     this.metrics.assassinRetreats++;
     return true;
   }
@@ -1284,10 +1332,8 @@ export class BattleEngine {
       if (cell.r === u.pos.r && cell.c === u.pos.c) return;
       const step = nextStep(this.grid, u.pos, c => c.r === cell.r && c.c === cell.c, avoid) ?? greedyStep(this.grid, u.pos, cell, avoid);
       if (!step) return;
-      this.grid.move(u.id, u.pos, step);
-      u.pos = step;
+      this.walkStep(u, step);
       u.moveCd = 1 / effectiveMoveSpeed(u);
-      this.events.push({ type: 'move', src: u.id });
       if (u.intent === 'focus' && here < SAFE_DANGER && P.threatCount(step, zones) > 0) this.metrics.unsafeFocusChaseCount++;
     };
     if (goal && unitDistance(u, goal) <= u.range) {
@@ -1324,10 +1370,8 @@ export class BattleEngine {
       .filter(c => this.grid.canEnter(c) && !this.bodyBlocked(u)?.(c) && Math.sign(c.c - u.pos.c) !== -back && unitDistance({ pos: c },target) <= u.range)
       .sort((a, b) => nearest(b) - nearest(a) || Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r))[0];
     if (!step || nearest(step) <= nearest(u.pos)) return;
-    this.grid.move(u.id, u.pos, step);
-    u.pos = step;
+    this.walkStep(u, step);
     u.moveCd = 1 / effectiveMoveSpeed(u);
-    this.events.push({ type: 'move', src: u.id });
   }
 
   // ---------------------------------------------------------------- casting / interrupt (STEP 7)
@@ -2187,6 +2231,7 @@ export class BattleEngine {
       },
       rng: () => self.rng(),
       prepareMeleeAttack: (u,t) => self.prepareMeleeAttack(u,t),
+      plant: (u, seconds) => self.plantFor(u, seconds),
       emit: e => self.events.push(e),
       foes: u => (self.flow.phase === BattlePhase.COMBAT || self.flow.phase === BattlePhase.WAVE_CLEAR ? foesOf(u) : []),
       allies: u => self.units.filter(a => a.alive && a.side === u.side && a.visible && (a.wave < 0 || a.wave === self.flow.waveIndex)),
@@ -2505,13 +2550,12 @@ export class BattleEngine {
       alliesOf: u => self.units.filter(a => a.alive && a.side === u.side && (a.wave < 0 || a.wave === self.flow.waveIndex)),
       isValidTarget: (u, t) => self.isValidTarget(u, t),
       prepareMeleeAttack: (u,t) => self.prepareMeleeAttack(u,t),
+      plant: (u, seconds) => self.plantFor(u, seconds),
       stepToward: (u, target, goal) => {
         const blocked = self.bodyBlocked(u);
         const step = laneStep(self.grid, u.pos, target, blocked) ?? nextStep(self.grid, u.pos, goal, blocked) ?? greedyStep(self.grid, u.pos, target, blocked);
         if (!step) return false;
-        self.grid.move(u.id, u.pos, step);
-        u.pos = step;
-        self.events.push({ type: 'move', src: u.id });
+        self.walkStep(u, step);
         return true;
       },
       stepAway: (u, threat, keep, range) => {
@@ -2520,9 +2564,7 @@ export class BattleEngine {
           .filter(c => self.grid.canEnter(c) && !self.bodyBlocked(u)?.(c) && Math.sign(c.c - u.pos.c) === back && distance(c, threat) > distance(u.pos, threat) && distance(c, keep) <= range)
           .sort((a, b) => Math.abs(a.r - u.pos.r) - Math.abs(b.r - u.pos.r))[0];
         if (!step) return false;
-        self.grid.move(u.id, u.pos, step);
-        u.pos = step;
-        self.events.push({ type: 'move', src: u.id });
+        self.walkStep(u, step);
         return true;
       },
       later: (delay, u, fn) => self.later(delay, u, fn),
