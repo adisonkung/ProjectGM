@@ -12,7 +12,7 @@ Branch `fix/claude-combat-motion-smooth` from origin/master 41a3bc3. User: "เ�
 - Result: clips that slid 24 % → 0 % (heroes), 7 % → 0 % (monsters) · walking speed jumps 5 % → 0.4 % of ticks · on-screen (lab F5, 120 ms windows) walking speed within ~±10 % of its median.
 - Balance (not tuned, measured before / after): `hero-sim 40` shipped starter team — win rates identical on F1–F10, clear time +0–2 s · `balance 150 rec 10` legacy — AUTO 11 → 13 %, TACTICAL 26 → 28 % · F1–F9 legacy 100 % both.
 - Tests: new `battle/engine/combat-motion.spec.ts` (steady walk heroes + monsters, ranged arrive-then-shoot, melee stands for the swing, wind-up holds the body, real fights F1/F3/F6 without a travelling clip) + `render/unit-clip.spec.ts` (recovery cut). App/spec typecheck, Karma 978/978. Checked in the real game (`/lab?floor=3`, `?floor=5`, Pixi, no console errors).
-- Open: a melee unit whose target leans half a lane away toward another opponent can stand without contact until the target turns back (existing melee-contact rule, not changed) · monsters that stop mid-cell to shoot finish their walk after the clip · DOM renderer recovery cut is untested in a browser (Pixi is the default). Not merged; awaiting review.
+- Open: a melee unit whose target leans half a lane away toward another opponent can stand without contact until the target turns back (existing melee-contact rule, not changed) · monsters that stop mid-cell to shoot finish their walk after the clip · DOM renderer recovery cut is untested in a browser (Pixi is the default). Merged into master 2026-11-17 on the user's instruction.
 
 ## Previous task — Forest Oblivion, Stage 10 boss (Claude, 2026-11-08)
 
