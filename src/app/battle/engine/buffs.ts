@@ -140,6 +140,24 @@ export const tauntSource = (u: Buffable): number | null => {
 export const effectiveMoveSpeed = (u: Buffable & { moveSpeed: number }): number =>
   Math.max(0.01, u.moveSpeed * modifier(u, 'moveSpeedMultiplier'));
 
+const cadences = new Map<string, number>();
+/**
+ * Ground speed (cells / s) a walking body really has: the step timer (1 / speed) is counted down in whole ticks, so a
+ * unit takes one step every ⌈(1 / speed) / tick⌉ ticks. The drawn body cruises at exactly that rate — at the nominal
+ * speed it reached every cell a little early and stood still for a moment at each border (stop-and-go).
+ */
+export function walkCadence(speed: number, tick: number): number {
+  const key = `${speed}|${tick}`;
+  let v = cadences.get(key);
+  if (v == null) {
+    // the same countdown the engine runs (same float steps): moveCd = 1 / speed, −tick per tick, step when ≤ 0
+    let ticks = 0;
+    for (let cd = 1 / speed; cd > 0 && ticks < 10000; cd -= tick) ticks++;
+    cadences.set(key, (v = 1 / (Math.max(1, ticks) * tick)));
+  }
+  return v;
+}
+
 /** Monster controller preserves its legacy haste behavior; only negative status factors slow its cooldown clock. */
 export const attackSpeedReduction = (u: Buffable): number =>
   u.buffs.reduce((m, b) => m * Math.pow(Math.min(1, b.def.modifiers.attackSpeedMultiplier ?? 1), b.stacks), 1);

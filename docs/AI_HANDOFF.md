@@ -2,7 +2,19 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Forest Oblivion, Stage 10 boss (Claude, 2026-11-08)
+## Latest task — combat motion: steady walk, no sliding attacks / skills (Claude, 2026-11-16)
+
+Branch `fix/claude-combat-motion-smooth` from origin/master 41a3bc3. User: "เดินกระตุก ๆ ไม่ลื่นไหล และยังเดินไปตีไป … เดินถึงเป้าค่อยตี หรือเดินให้ถึงระยะตีก่อนค่อยตีหรือสกิล … ขอสมูท ๆ".
+
+- Root causes (measured with the new `npm run motion-audit -- [floors] [seeds] [--verbose]`, real battles of the starter team): (1) the step timer is counted in whole ticks (1.5 cells/s → a step every 14 ticks) while the body glided at the nominal speed → it arrived early and dipped to ~0.2 cells/s at every cell border; (2) ranged basics / heal bolts started while the body was still travelling (slid ~0.8–1 cell during the shot); (3) the body kept gliding (cell remainder, melee stance) while attack / skill / cast clips played; (4) after the hit frame a unit walked on with the attack clip still playing.
+- Fix (generic, no hero ids): `walkCadence()` (buffs.ts) = real ground speed of the step cadence → `glide()` cruises at it with a 0.1 s ramp (`GLIDE_RAMP`, `GLIDE_SLACK`) · `BattleUnit.plant` + `plantFor()` / `planted()` — the body stands for the whole attack / skill / monster swing / any cast bar (forced or skill movement = logical cell changes = shown at once) · `walkStep()` = every voluntary step (frees a plant past its hit) · heroes: a ready ranged basic waits for the arrival (`SkillSystem.basicReady`) · view: `attackRecoveryAt()` (sprites.ts) — a unit that walks on after the hit drops the recovery frames for the walk cycle (`UnitClip.pose` + DOM `app-unit-sprite`), battle `planted()` honours the engine plant.
+- Deliberately NOT changed (each was tried and measured): carrying the tick remainder into the step timer (units 5 % faster → legacy F9 9/12 → 0/12) · holding the next step until the attack clip ends (shipped F7 AUTO 98 → 55 %) · monsters waiting for the arrival before a shot / cast (legacy F10 TACTICAL 31 → 15 %). Monsters act on the same ticks as before and simply stop where they are.
+- Result: clips that slid 24 % → 0 % (heroes), 7 % → 0 % (monsters) · walking speed jumps 5 % → 0.4 % of ticks · on-screen (lab F5, 120 ms windows) walking speed within ~±10 % of its median.
+- Balance (not tuned, measured before / after): `hero-sim 40` shipped starter team — win rates identical on F1–F10, clear time +0–2 s · `balance 150 rec 10` legacy — AUTO 11 → 13 %, TACTICAL 26 → 28 % · F1–F9 legacy 100 % both.
+- Tests: new `battle/engine/combat-motion.spec.ts` (steady walk heroes + monsters, ranged arrive-then-shoot, melee stands for the swing, wind-up holds the body, real fights F1/F3/F6 without a travelling clip) + `render/unit-clip.spec.ts` (recovery cut). App/spec typecheck, Karma 978/978. Checked in the real game (`/lab?floor=3`, `?floor=5`, Pixi, no console errors).
+- Open: a melee unit whose target leans half a lane away toward another opponent can stand without contact until the target turns back (existing melee-contact rule, not changed) · monsters that stop mid-cell to shoot finish their walk after the clip · DOM renderer recovery cut is untested in a browser (Pixi is the default). Merged into master 2026-11-17 on the user's instruction.
+
+## Previous task — Forest Oblivion, Stage 10 boss (Claude, 2026-11-08)
 
 Branch `wip/claude-forest-oblivion` from origin/master 09da627. User supplied `forest_oblivion.zip` (body sheets + 14 VFX) and the full gameplay/VFX spec: stationary, attacks right→left, 4 skills, Break → Core Exposed, Phase 2 at ~50 %, death in place, persistent VFX must not hide telegraphs.
 

@@ -1,4 +1,4 @@
-import { SHEETS, SheetDef } from '../../core/data/sprites';
+import { attackRecoveryAt, SHEETS, SheetDef } from '../../core/data/sprites';
 import { clipTimeline, UnitClip } from './unit-clip';
 
 /** the Pixi renderer's clip logic: one clock in, a pose out — the same rules as the DOM unit sprite */
@@ -27,6 +27,27 @@ describe('UnitClip (one-clock character animation)', () => {
     c.request({ anim: 'attack' }, 2, 20, true);
     c.pose(20 + a.attack!.frames * ms + 0.001, 0, true);
     expect(c.name).toBe('walk');
+  });
+
+  it('walking on after the hit of a basic attack drops the recovery frames for the walk cycle (no sliding attack pose)', () => {
+    const hit = attackRecoveryAt(a.attack!);
+    const c = new UnitClip(kael, 0);
+    c.request({ anim: 'attack' }, 1, 10, false);
+    // the wind-up is never cut (the engine plants the body until the hit; a grace-period `moving` must not cancel it)
+    c.pose(10 + hit * 0.5, 0, true);
+    expect(c.name).toBe('attack');
+    // standing still: the whole clip plays, recovery included
+    c.pose(10 + hit + 0.05, 0, false);
+    expect(c.name).toBe('attack');
+    // the unit steps away after the hit → walk at once
+    const p = c.pose(10 + hit + 0.1, 0, true);
+    expect(c.name).toBe('walk');
+    expect(p.row).toBe(a.walk!.row);
+    // skills are never cut by movement (their own dashes / charges are part of the clip)
+    const s = new UnitClip(kael, 0);
+    s.request({ anim: 'skill' }, 1, 0, false);
+    s.pose(0.6, 0, true);
+    expect(s.name).toBe('skill');
   });
 
   it('hurt never cuts an attack or a skill, unless forced (interrupted cast); death holds its last frame', () => {

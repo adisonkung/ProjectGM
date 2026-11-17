@@ -15,6 +15,7 @@
     "vaelric-s2-sync": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/vaelric-s2-sync.js > dist/vaelric-s2-runtime.json && python3 tools/sprites/vaelric_s2_sync.py dist/vaelric-s2-runtime.json",
     "vaelric-ult-sync": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/vaelric-ult-sync.js",
     "hero-sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/hero-sim.js",
+    "motion-audit": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/motion-audit.js",
     "bailong-ult-sim": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/bailong-ult-sim.js",
     "economy": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/economy.js",
     "gear-economy": "tsc -p tsconfig.sim.json && node dist/sim/tools/dev/gear-economy.js",
