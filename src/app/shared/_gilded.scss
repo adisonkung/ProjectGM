@@ -1,0 +1,97 @@
+// Gilded Ember — the approved Eldervane UI direction (2026-11-17).
+// Warm ink + champagne gold + burgundy; one ornament motif (four-point sparkle + gold metal ring).
+// Pages use these tokens/mixins; add a colour here, never per page.
+// Locked rules: I art first (no big opaque boxes) · II one motif (sparkle + gold ring) · III no new colours
+// (no purple/blue) · IV selected = larger + gold ring + glow · V phones are landscape-only — design every page
+// for short landscape screens (~360–430 px tall); portrait phones get a rotate prompt.
+
+$ink: #0f0b09;
+$ember-dark: #1e140e;
+$ember-glow: #3a2416;
+$text: #fff8e6;
+$text-body: #e6dccb;
+$text-2: #cfc4b2;
+$text-3: #9a8e7c;
+$gold-line: #e6c88a;
+$gold-bright: #f3dca4;
+$gold-pale: #fff1cf;
+$gold-deep: #8c622a;
+$burgundy: #8e2a2f;
+
+$font-display: 'Cinzel Decorative', 'Cinzel', serif;
+$font-label: 'Cinzel', serif;
+$font-body: 'IBM Plex Sans Thai', system-ui, sans-serif;
+
+$spark-shape: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%);
+$gold-ring: conic-gradient(from 200deg, #6e4a1e, #fff8e6, #b98a45, #f3dca4, #6e4a1e);
+
+@mixin foil {
+  background: linear-gradient(180deg, #fff8e6 0%, #f3dca4 30%, #c99a52 58%, #8c622a 72%, #e9cc8c 88%, #fff1cf 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+@mixin spark($size, $color: $gold-pale) {
+  width: $size; height: $size; background: $color; clip-path: $spark-shape;
+}
+
+@mixin label {
+  font: 600 12px $font-label; letter-spacing: .22em; text-transform: uppercase;
+}
+
+/** Thin gold glass — the only translucent surface. */
+@mixin glass($strength: .08) {
+  background: linear-gradient(180deg, rgba(255, 236, 200, $strength), rgba(255, 236, 200, $strength * .3));
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(243, 220, 164, .6);
+}
+
+/** Capsule button with layered gold edge, inner hairline, sparkles and a hover sheen. */
+@mixin btn-base {
+  all: unset; box-sizing: border-box; cursor: pointer; position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  min-height: 54px; padding: 0 34px; border-radius: 999px; text-align: center;
+  font: 600 16px $font-body; letter-spacing: .02em;
+  transition: box-shadow .25s, transform .15s, filter .25s;
+  &::before { content: ''; position: absolute; inset: 4px; border-radius: 999px; pointer-events: none; }
+  &::after {
+    content: ''; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%; pointer-events: none;
+    background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .5), rgba(255, 255, 255, 0));
+    transform: skewX(-20deg); transition: left .7s ease;
+  }
+  &:hover:not(:disabled)::after { left: 120%; }
+  &:active:not(:disabled) { transform: translateY(1px); }
+  &:focus-visible { outline: 2px solid $gold-pale; outline-offset: 4px; }
+  &:disabled { cursor: not-allowed; filter: saturate(.55) brightness(.72); }
+  .st { @include spark(10px); flex: none; }
+  @media (prefers-reduced-motion: reduce) { &::after { display: none; } }
+}
+
+@mixin btn-gold {
+  @include btn-base;
+  color: #3a2508;
+  background: linear-gradient(180deg, #fffbef 0%, #f6e2ae 22%, #e0b871 52%, #b98a45 82%, #d8b06a 100%);
+  box-shadow: 0 0 0 1px $gold-deep, 0 0 0 3px rgba(243, 220, 164, .25), 0 8px 26px rgba(201, 154, 82, .4),
+    inset 0 1px 0 #fff, inset 0 -2px 3px rgba(110, 74, 30, .35);
+  &::before { box-shadow: inset 0 0 0 1px rgba(110, 74, 30, .45), inset 0 0 0 2px rgba(255, 248, 230, .35); }
+  .st { background: #6e4a1e; }
+  &:hover:not(:disabled) {
+    box-shadow: 0 0 0 1px $gold-deep, 0 0 0 4px rgba(243, 220, 164, .35), 0 10px 34px rgba(243, 220, 164, .55),
+      inset 0 1px 0 #fff, inset 0 -2px 3px rgba(110, 74, 30, .35);
+  }
+}
+
+@mixin btn-glass {
+  @include btn-base;
+  color: $gold-pale;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 236, 200, .16), rgba(255, 236, 200, 0) 70%), rgba(24, 18, 13, .78);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 0 1px rgba(230, 200, 138, .75), 0 0 0 3px rgba(230, 200, 138, .12), inset 0 1px 0 rgba(255, 241, 207, .25);
+  &::before { box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .28); }
+  .st { background: $gold-line; }
+  &:hover:not(:disabled) { box-shadow: 0 0 0 1px $gold-bright, 0 0 0 4px rgba(230, 200, 138, .2), 0 0 22px rgba(243, 220, 164, .3), inset 0 1px 0 rgba(255, 241, 207, .3); }
+}
+
+/** Gold metal ring around a circular image / emblem. */
+@mixin ring($pad: 3px) {
+  border-radius: 50%; padding: $pad; box-sizing: border-box; background: $gold-ring;
+}

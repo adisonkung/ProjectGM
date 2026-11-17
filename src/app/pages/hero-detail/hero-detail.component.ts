@@ -1,5 +1,4 @@
 import { StateEmblemComponent } from '../../shared/state-emblem.component';
-import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -9,6 +8,7 @@ import { CLASS_NAME } from '../../core/data/classes';
 import { EXP_POTIONS, ITEMS, TRAINING_SLOTS } from '../../core/data/economy';
 import { FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
 import { heroArt } from '../../core/data/hero-art';
+import { GENERATED_ICONS } from '../../core/data/generated-art';
 import { kitOf } from '../../core/data/hero-skills';
 import { TOME_CONVERSION } from '../../core/data/skill-ranks';
 import { EquipmentInstance, EquipmentSlot, EquipStat, Rarity } from '../../core/models/equipment';
@@ -33,14 +33,17 @@ const UPGRADE_ERROR: Record<SkillUpgradeError, string> = {
 };
 type DetailTab = 'overview' | 'stats' | 'skills' | 'gear' | 'growth';
 
+/** Latin display line above the Thai name (two-syllable wuxia names get a space). */
+const LATIN_NAME: Record<string, string> = { bailong: 'Bai Long', yuezheng: 'Yue Zheng', moye: 'Mo Ye', tangxun: 'Tang Xun', linxue: 'Lin Xue' };
+
 const RARITY_TIER: Record<Rarity, number> = { COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5 };
 const SLOT_LABEL: Record<EquipmentSlot, string> = { WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
 const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
 
-/** Hero detail: full key art, live identity/skill shortcuts, then overview · stats · skills · equipment · growth. */
+/** Hero detail (Gilded Ember): fixed key art, vertical tabs, floating identity + panel, roster strip. */
 @Component({
   selector: 'app-hero-detail',
-  imports: [StateEmblemComponent, TowerOrnamentComponent, EquipmentArtComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
+  imports: [StateEmblemComponent, EquipmentArtComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './hero-detail.component.html',
   styleUrl: './hero-detail.component.scss',
 })
@@ -128,16 +131,38 @@ export class HeroDetailComponent {
     { id: 'growth', label: 'พัฒนา', icon: 'star' },
   ];
 
+  readonly numerals = ['I', 'II', 'III', 'IV', 'V'];
+  /** drifting embers over the key art: [left %, top %, delay s] */
+  readonly motes = [[22, 70, 0], [34, 78, 1.4], [44, 64, 2.8], [27, 58, 4.1], [48, 82, 5.3]];
+  readonly skillSel = signal(0);
+
   onTabKey(event: KeyboardEvent): void {
-    const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+    const keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
     if (!keys.includes(event.key)) return;
     event.preventDefault();
     const i = this.tabs.findIndex(t => t.id === this.tab());
+    const back = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
     const n = event.key === 'Home' ? 0 : event.key === 'End' ? this.tabs.length - 1
-      : (i + (event.key === 'ArrowRight' ? 1 : -1) + this.tabs.length) % this.tabs.length;
+      : (i + (back ? -1 : 1) + this.tabs.length) % this.tabs.length;
     this.tab.set(this.tabs[n].id);
     (event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('[role="tab"]')[n]?.focus();
   }
+
+  readonly latinName = computed(() => { const id = this.t()?.id ?? ''; return LATIN_NAME[id] ?? id.charAt(0).toUpperCase() + id.slice(1); });
+  readonly classIcon = computed(() => GENERATED_ICONS['class-' + (this.t()?.cls ?? '')]);
+  readonly expPct = computed(() => { const p = this.progress(); return !p ? 0 : p.state === 'MAX' ? 100 : this.pct(p.exp, p.expToNext); });
+
+  /** roster strip: up to 7 heroes around the current one (roster order, wraps) */
+  readonly strip = computed(() => {
+    const list = this.save.state().heroes;
+    const i = list.findIndex(h => h.uid === this.uid());
+    if (i < 0) return [];
+    const n = Math.min(7, list.length), start = i - Math.floor((n - 1) / 2);
+    return Array.from({ length: n }, (_, k) => list[(start + k + list.length * 2) % list.length]).map(h => {
+      const t = this.roster.template(h);
+      return { uid: h.uid, name: t?.name ?? '', portrait: heroArt(t?.id)?.portrait };
+    });
+  });
 
   readonly skills = computed(() => {
     const h = this.hero(), t = this.t();
@@ -158,14 +183,6 @@ export class HeroDetailComponent {
 
   readonly potions = computed(() => EXP_POTIONS.map(id => ({ id, name: ITEMS[id]?.name ?? id, n: this.inventory()[id] ?? 0 })).filter(p => p.n > 0));
   readonly conversions = TOME_CONVERSION;
-
-  /** prev / next hero in roster order */
-  readonly siblings = computed(() => {
-    const list = this.save.state().heroes;
-    const i = list.findIndex(h => h.uid === this.uid());
-    if (i < 0 || list.length < 2) return null;
-    return { prev: list[(i - 1 + list.length) % list.length].uid, next: list[(i + 1) % list.length].uid };
-  });
 
   readonly className = (c: string) => CLASS_NAME[c as keyof typeof CLASS_NAME];
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
@@ -202,5 +219,5 @@ export class HeroDetailComponent {
   }
   convert(from: string) { if (this.roster.convertTomes(from)) this.say('แลก Skill Tome แล้ว'); }
   setMain() { if (this.isl.setMainHero(this.uid())) this.say('ตั้งเป็นฮีโร่หลักบนเกาะแล้ว'); }
-  go(uid: number) { this.message.set(null); this.router.navigate(['/heroes', uid]); }
+  go(uid: number) { this.message.set(null); this.skillSel.set(0); this.router.navigate(['/heroes', uid]); }
 }

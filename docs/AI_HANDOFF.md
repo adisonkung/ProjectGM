@@ -2,7 +2,17 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — combat motion: steady walk, no sliding attacks / skills (Claude, 2026-11-16)
+## Latest task — Gilded Ember UI + hero detail page (Claude, 2026-11-17)
+
+Branch `feature/claude-gilded-hero-detail` from origin/master 3245cfa. User approved a design direction in a claude.ai canvas mockup (HSR base + Genshin-style gold accent, 4 iterations): warm ink + champagne gold + burgundy, no purple/blue, one ornament motif (four-point sparkle + gold metal ring), no scroll/corner filigree. Locked rules I–V incl. **V: phones are landscape-only** (design every page for short landscape screens; portrait gets a rotate prompt — the app-wide prompt is NOT implemented yet).
+
+- New shared tokens/mixins `src/app/shared/_gilded.scss` (colours, fonts, `foil`, `spark`, `glass`, `btn-gold`, `btn-glass`, `ring`). Future page reskins use these; add colours there, never per page.
+- `/heroes/:uid` rebuilt: fixed full-screen banner (under the 76 px app bar) + slow gold ring + embers; vertical tabs I–V (glass highlight, arrow keys up/down/left/right); right column = Latin name (Cinzel Decorative foil, `LATIN_NAME` map for two-syllable names) + Thai name, class medal from `GENERATED_ICONS['class-<cls>']`, stars, chips, level/EXP/power; scrollable panel (stats / one selected skill card + picks / gear / growth = stars + potions + BT + training slot); actions (gold "อัปเลเวล" = existing `useMax`, or Breakthrough when ready; glass "พัฒนา" → growth tab); roster strip (7 heroes around current, selected large + glowing). All previous functions kept; desktop fits one viewport, short-landscape layout at max-height 500px.
+- Removed old hero-detail-only styles: `poster-banner/reference-overview/stats-reference.scss`, `shared/_hero-detail-panels.scss`, hero rules in `styles.scss` + `_citadel-pages.scss`. Added Cinzel Decorative to `index.html`. Spec updated (`phase4-pages.spec.ts`).
+- Validation: app/spec typecheck, Karma 978/978, production build (hero-detail style 22 kB: over the 8 kB warning, under the 24 kB error). Browser checked 1440×860 (Kael, Lin Xue, all tabs) and 844×390.
+- Open: other pages still use the old Citadel look · app-wide portrait rotate prompt (rule V) not done · light banners reduce left-tab contrast slightly. Not merged; awaiting review.
+
+## Previous task — combat motion: steady walk, no sliding attacks / skills (Claude, 2026-11-16)
 
 Branch `fix/claude-combat-motion-smooth` from origin/master 41a3bc3. User: "เดินกระตุก ๆ ไม่ลื่นไหล และยังเดินไปตีไป … เดินถึงเป้าค่อยตี หรือเดินให้ถึงระยะตีก่อนค่อยตีหรือสกิล … ขอสมูท ๆ".
 

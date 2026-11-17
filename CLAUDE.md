@@ -16,6 +16,12 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Gilded Ember UI direction + hero detail (2026-11-17, Claude)
+
+branch `feature/claude-gilded-hero-detail` (ฐาน origin/master 3245cfa, ยังไม่ merge — รอรีวิว) · ผู้ใช้อนุมัติทิศทาง UI จาก mockup บน claude.ai canvas (HSR เป็นโครง + ทองแบบ Genshin เฉพาะจุด) · กติกาล็อก: I อาร์ตนำ ไม่มีกล่องทึบใหญ่ · II ลายเดียว = ดาวประกาย 4 แฉก + วงแหวนทอง (ห้ามลายม้วน/มุมสามเหลี่ยม) · III ห้ามเพิ่มสี/ห้ามม่วง-น้ำเงิน · IV ที่เลือก = ใหญ่ขึ้น + วงทอง + เรือง · **V มือถือเล่นแนวนอนเท่านั้น** (ออกแบบทุกหน้าสำหรับจอแนวนอนเตี้ย; การ์ดหมุนจอทั้งแอปยังไม่ทำ)
+- token/mixin กลาง `shared/_gilded.scss` (ดำอุ่น #0f0b09 · ทองแชมเปญ · เบอร์กันดี · foil/spark/glass/btn-gold/btn-glass/ring) — หน้าอื่นที่จะ reskin ใช้ตัวนี้
+- `/heroes/:uid` ทำใหม่: banner fixed เต็มจอ + วงทองหมุนช้า + ละอองไฟ · แท็บแนวตั้ง I–V (เลือก = กระจกเบลอ) · ชื่อละติน Cinzel Decorative ทองเปลว (`LATIN_NAME`) + ชื่อไทย · เหรียญคลาสจาก `GENERATED_ICONS['class-*']` · สกิลเลือกทีละอัน · ปุ่มทอง "อัปเลเวล" = `useMax` เดิม (BT พร้อม → Breakthrough) · แถบฮีโร่ 7 ตัวรอบตัวปัจจุบัน · ฟังก์ชันเดิมครบ · ลบสไตล์เก่าเฉพาะหน้านี้ (partials 3 ไฟล์, `_hero-detail-panels.scss`, กฎใน styles.scss/_citadel-pages.scss) · Karma 978/978
+
 ## Combat motion — เดินลื่น + ไม่สไลด์ตอนตี/สกิล (2026-11-16, Claude)
 
 branch `fix/claude-combat-motion-smooth` (ฐาน origin/master 41a3bc3, merge เข้า master แล้ว 2026-11-17 ตามที่ผู้ใช้สั่ง) · ผู้ใช้: "เดินกระตุก ๆ ไม่ลื่นไหล และยังเดินไปตีไป … เดินถึงเป้าค่อยตี หรือเดินให้ถึงระยะตีก่อนค่อยตีหรือสกิล … ขอสมูท ๆ"
