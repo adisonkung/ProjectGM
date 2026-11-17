@@ -68,6 +68,9 @@
             <header><h2>ค่าสถานะ</h2>
               @if (tab() === 'overview') { <button type="button" class="link" [attr.aria-expanded]="statBreakdown()" (click)="statBreakdown.set(!statBreakdown())">{{ statBreakdown() ? 'ย่อ' : 'รายละเอียด' }}</button> }
             </header>
+            @if (tab() === 'overview' && !statBreakdown()) {
+              <div class="stat-grid">@for (r of statRows(); track r.label) { <div><app-icon [name]="r.icon" [size]="17" /><span>{{ r.label }}</span><b>{{ r.total }}</b></div> }</div>
+            } @else {
             <table [class.breakdown]="tab() === 'stats' || statBreakdown()">
               @if (tab() === 'stats' || statBreakdown()) { <thead><tr><th scope="col">ค่าสถานะ</th><th scope="col">พื้นฐาน</th><th scope="col">อุปกรณ์</th><th scope="col">รวม</th></tr></thead> }
               <tbody>
@@ -78,12 +81,14 @@
                 }
               </tbody>
             </table>
+            }
             @if (extraStats().length) { <div class="extra">@for (x of extraStats(); track x.stat) { <span class="chip">{{ x.text }}</span> }</div> }
           </section>
         }
 
         @if (tab() === 'skills') {
           <section class="block skills">
+            <div class="skill-top">
             <div class="skill-picks" role="group" aria-label="เลือกสกิล">
               @for (v of skills(); track v.slot; let i = $index) {
                 <button type="button" class="pick" [class.on]="skillSel() === i" [attr.aria-pressed]="skillSel() === i" (click)="skillSel.set(i)" [attr.aria-label]="slotTag[v.slot] + ' ' + v.name">
@@ -91,6 +96,10 @@
                   <small>{{ v.slot === 'ult' ? 'ULT' : v.slot === 'skill' ? 'S1' : 'S2' }}</small>
                 </button>
               }
+            </div>
+            @if (attack(); as a) {
+              <article class="basic-attack"><span class="orb"><app-icon name="sword" [size]="24" /></span><div><small>โจมตีปกติ</small><b>{{ a.name }}</b></div></article>
+            }
             </div>
             <div class="skill-list">
               @for (v of skills(); track v.slot; let i = $index) {
@@ -124,9 +133,6 @@
                 }
               }
             </div>
-            @if (attack(); as a) {
-              <article class="basic-attack"><span class="orb"><app-icon name="sword" [size]="24" /></span><div><small>โจมตีปกติ</small><b>{{ a.name }}</b></div></article>
-            }
             <details class="convert"><summary>แลกตำราสกิล</summary>
               <small>แลก Skill Tome (ไม่คุ้ม — ฟาร์ม Skill Trial ดีกว่า)</small>
               @for (c of conversions; track c.from) {
@@ -158,6 +164,7 @@
         }
 
         @if (tab() === 'growth') {
+          <div class="growth-grid">
           @if (starView(); as sv) {
             <section class="block stars-block">
               <header><h2>พัฒนาดาว</h2><small>{{ star() }}★ / {{ MAX_STAR }}★ · ดาวเกิด {{ tp.star }}★</small></header>
@@ -199,6 +206,7 @@
               <a routerLink="/dungeons/ascension">วัสดุ Breakthrough · ศาลเทพ</a>
             </nav>
           </section>
+          </div>
         }
       </div>
 
