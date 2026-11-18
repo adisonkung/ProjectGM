@@ -5,11 +5,11 @@
     "reduced": false,
     "text": "ULTIMATEลำดับเก้ามังกรไป๋หลง",
     "timing": {
-      "gameTime": 2.6499999999999986,
+      "gameTime": 2.1500000000000004,
       "cutIn": false
     },
     "errors": [],
-    "clickToEndMs": 6191
+    "clickToEndMs": 5628
   },
   {
     "w": 844,
@@ -17,10 +17,10 @@
     "reduced": false,
     "text": "ULTIMATEลำดับเก้ามังกรไป๋หลง",
     "timing": {
-      "gameTime": 1.7500000000000009,
-      "cutIn": true
+      "gameTime": 1.850000000000001,
+      "cutIn": false
     },
     "errors": [],
-    "clickToEndMs": 3558
+    "clickToEndMs": 4481
   }
 ]

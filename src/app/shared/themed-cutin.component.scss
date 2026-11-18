@@ -26,13 +26,24 @@
   box-shadow: 0 0 8px var(--accent); clip-path: polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);
   opacity: 0; animation: mote-flight .65s calc(.08s + var(--i) * .025s) ease-out both; }
 .label { position: absolute; z-index: 5; left: var(--label-left); top: var(--label-top); width: var(--label-width);
-  display: grid; justify-items: center; text-align: center; gap: .4cqw; color: #fff3d4;
+  display: grid; justify-items: center; text-align: center; gap: 0; color: #fff3d4;
   animation: title-strike .25s .15s ease-out both; }
-.label small { font: 600 clamp(8px,1.5cqw,21px)/1.2 'Cinzel',serif; letter-spacing: .16em; color: #ebd195; }
-.label b { font: 700 clamp(13px,3.2cqw,42px)/1.2 'IBM Plex Sans Thai',sans-serif;
+.label small { display: flex; align-items: center; gap: .9cqw; width: 100%; font: italic 700 1.6cqw/1.3 Georgia,serif; letter-spacing: .03em; color: #f6dc99; }
+.label small::before,.label small::after { content: ''; height: 1px; flex: 1; background: linear-gradient(90deg,transparent,#edc572); }
+.label small::after { transform: scaleX(-1); }
+.label.add-stars::before,.label.add-stars::after { content: ''; position: absolute; top: 2.4cqw; width: 4cqw; height: 4cqw;
+  background: radial-gradient(#fffbe3,#f1cc70 55%,#ad7030); clip-path: polygon(50% 0,57% 39%,65% 45%,100% 50%,65% 55%,57% 61%,50% 100%,43% 61%,35% 55%,0 50%,35% 45%,43% 39%); }
+.label.add-stars::before { left: -4.5cqw; }
+.label.add-stars::after { right: -4.5cqw; }
+.label b { font: italic 700 var(--title-size)/1.35 'Eldervane Trirong',serif;
   background: linear-gradient(#fff4cb,#f1ce7d 65%,#be852f); color: transparent; background-clip: text;
-  filter: drop-shadow(0 2px 2px #000); width: 100%; overflow-wrap: anywhere; }
-.label span { font: 500 clamp(10px,1.8cqw,25px)/1.3 'IBM Plex Sans Thai',sans-serif; text-shadow: 0 1px 4px #000; }
+  filter: drop-shadow(0 2px 2px #000); white-space: nowrap; }
+.hero-name { position: absolute; z-index: 5; display: grid; place-items: center; animation: title-strike .25s .15s ease-out both; }
+.name-frame { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 3px #b36b26aa); }
+.name-fill { fill: #230606; stroke: #f1ce7a; stroke-width: 2; }
+.name-inset { fill: none; stroke: #bd8b42; stroke-width: 1; }
+.name-flourish { fill: none; stroke: #ffe5a2; stroke-width: 1.5; }
+.hero-name span { position: relative; font: italic 600 var(--name-size)/1.5 'Eldervane Trirong',serif; color: #fff1ce; white-space: nowrap; text-shadow: 0 1px 4px #000; }
 @keyframes cutin-cover { 0% { opacity: 0; } 12%,82% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes cutin-impact {
   0% { transform: translateX(-105%) scale(.9); }
@@ -51,5 +62,5 @@
   .stage { animation: none; }
   .aura { animation: none; opacity: .3; }
   .energy,.sweep,.motes { display: none; }
-  .label { animation: none; }
+  .label,.hero-name { animation: none; }
 }

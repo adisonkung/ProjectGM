@@ -123,13 +123,17 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
   it('replaces themed artwork on consecutive casts and keeps other heroes on their existing cut-in', () => {
     component.start();
     const hero = host().engine.units.find(u => isPlayerUnit(u) && u.heroId)!;
-    for (const id of ['bailong', 'garrick', 'linxue']) {
+    for (const id of ['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara', 'elira']) {
       hero.heroId = id;
       host().handleEvents([{ type: 'cast', src: hero.id, skill: 'ชื่อสกิลจริง', kind: 'ult' }]);
       fixture.detectChanges();
       const image = fixture.nativeElement.querySelector('app-themed-cutin img') as HTMLImageElement;
       expect(image.getAttribute('src')).toBe(`/ui/cutins/${id}.webp`);
       expect(fixture.nativeElement.querySelector('app-themed-cutin .label').textContent).toContain('ชื่อสกิลจริง');
+      expect(fixture.nativeElement.querySelector('app-themed-cutin .hero-name span').textContent.trim()).toBe(component.cutIn()!.name);
+      // Switching between embedded and live badges must not leave two frames behind.
+      expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .name-frame').length)
+        .toBe(['bailong', 'moye', 'linxue'].includes(id) ? 0 : 1);
       expect(fixture.nativeElement.querySelectorAll('.ult-cutin').length).toBe(1);
     }
     hero.heroId = 'vaelric';

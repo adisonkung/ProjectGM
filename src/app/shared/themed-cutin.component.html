@@ -1,5 +1,6 @@
 <div class="stage" [style.--accent]="art().accent" [style.aspect-ratio]="art().ratio"
-     [style.--label-left]="art().left" [style.--label-top]="art().top" [style.--label-width]="art().width">
+     [style.--label-left]="art().left" [style.--label-top]="art().top" [style.--label-width]="art().width"
+     [style.--title-size]="art().titleSize" [style.--name-size]="art().nameSize">
   <div class="aura" aria-hidden="true"></div>
   <img class="plate" [src]="'/' + art().file" alt="" draggable="false" />
   <div class="energy" aria-hidden="true"></div>
@@ -7,5 +8,16 @@
   <div class="motes" aria-hidden="true">
     @for (i of motes; track i) { <i [style.--i]="i"></i> }
   </div>
-  <div class="label"><small>ULTIMATE</small><b>{{ skill() }}</b><span>{{ name() }}</span></div>
+  <div class="label" [class.add-stars]="art().addTitleStars"><small>ULTIMATE</small><b>{{ skill() }}</b></div>
+  <div class="hero-name" [style.left]="art().nameLeft" [style.top]="art().nameTop"
+       [style.width]="art().nameWidth" [style.height]="art().nameHeight">
+    @if (!art().embeddedNameFrame) {
+      <svg class="name-frame" viewBox="0 0 460 80" preserveAspectRatio="none" aria-hidden="true">
+        <path class="name-fill" d="M3 40 43 3H417L457 40 417 77H43Z" />
+        <path class="name-inset" d="M14 40 47 10H413L446 40 413 70H47Z" />
+        <path class="name-flourish" d="M0 40H42M418 40H460M24 29 14 40 24 51M436 29 446 40 436 51" />
+      </svg>
+    }
+    <span>{{ name() }}</span>
+  </div>
 </div>
