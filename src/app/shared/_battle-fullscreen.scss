@@ -42,6 +42,9 @@ html body .app app-battle .lab.fighting.battle-full {
   .arena app-board .board { border: 0; border-radius: 0; box-shadow: none; }
   // board narrower than the window (very wide screens): soften its side edges into the backdrop
   .arena app-board::before, .arena app-board::after { content: none; }
+  .battle-map-art { position: absolute; inset: 0; background: center bottom / cover no-repeat; pointer-events: none; }
+  .authored-map app-board app-field { visibility: hidden; }
+  .authored-map app-board .board { background: transparent; }
 
   // ---------------------------------------------------------- floating HUD (window corners, like a landscape phone game)
   .hud-top { top: max(8px, env(safe-area-inset-top)); max-width: calc(100% - 360px); }

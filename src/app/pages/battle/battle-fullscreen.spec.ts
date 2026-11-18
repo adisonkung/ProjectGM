@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { BattleComponent } from './battle.component';
-import { fullscreenViewport } from './battle-viewport';
+import { artworkViewport, fullscreenViewport } from './battle-viewport';
+import { BACKGROUNDS } from '../../core/data/backgrounds';
 import { BattleEngine, BattleEvent } from '../../battle/engine/battle-engine';
 import { battleSpriteFiles, stageMonsterSprites } from '../../battle/render/battle-assets';
 import { isPlayerUnit } from '../../battle/engine/stage/party';
@@ -10,6 +11,22 @@ import { STAGES } from '../../core/data/stages';
 import { StageDef } from '../../core/models/stage';
 
 describe('full-screen battle viewport', () => {
+  it('fits three square-cell lanes on each authored clearing without overlapping the party dock', () => {
+    for (const id of ['forest-1', 'twilight-1', 'misty-1']) {
+      const art = BACKGROUNDS[id];
+      for (const [w, h] of [[1440, 860], [844, 390], [1920, 1080], [2560, 900]]) {
+        const v = artworkViewport(w, h, art);
+        const imageHeight = Math.max(w / art.w, h / art.h) * art.h;
+        const horizon = Math.max(0, h - imageHeight * (1 - art.battlefieldCut!));
+        const laneTop = (2 + v.extraRows) * v.cell;
+        expect(laneTop).toBeGreaterThanOrEqual(horizon - 1e-6);
+        expect(laneTop + 3 * v.cell).toBeLessThanOrEqual(h - v.dock);
+        expect(v.width).toBeLessThanOrEqual(w);
+        expect(v.foot).toBeGreaterThanOrEqual(v.dock);
+        expect(v.cell * (5 + v.extraRows) + v.foot).toBeCloseTo(h, 6);
+      }
+    }
+  });
   it('fills the window with square cells: 16 columns across, board reaches the bottom', () => {
     for (const [w, h] of [[1440, 860], [844, 390], [1920, 1080], [1280, 720]]) {
       const v = fullscreenViewport(w, h, .8, 0, .95);

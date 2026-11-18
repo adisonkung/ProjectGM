@@ -1,0 +1,32 @@
+[
+  {
+    "id": "forest-1",
+    "source": "assets/backgrounds/fullscreen-2026-11-18/forest-1.png",
+    "output": "public/backgrounds/forest-1.webp",
+    "sha256": "fcb2c5ca58485a631186235f3d3060655977f1c9912b8c12cb30af3f2aec6ffa",
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "id": "twilight-1",
+    "source": "assets/backgrounds/fullscreen-2026-11-18/twilight-1.png",
+    "output": "public/backgrounds/twilight-1.webp",
+    "sha256": "e313cacc0868f83a415a5c1c8413477beaa2370359bd191c7b491c508fb706a9",
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "id": "misty-1",
+    "source": "assets/backgrounds/fullscreen-2026-11-18/misty-1.png",
+    "output": "public/backgrounds/misty-1.webp",
+    "sha256": "214f8b8a240b2af1a508795220fd9f436cd93be79099ec485c3064c2ce1a753b",
+    "size": [
+      1672,
+      941
+    ]
+  }
+]

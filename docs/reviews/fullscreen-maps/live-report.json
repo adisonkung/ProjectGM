@@ -1,0 +1,29 @@
+{
+  "runs": [
+    {
+      "floor": 1,
+      "renderer": "pixi",
+      "time": 2.000000000000001,
+      "background": "forest-1"
+    },
+    {
+      "floor": 4,
+      "renderer": "pixi",
+      "time": 2.000000000000001,
+      "background": "twilight-1"
+    },
+    {
+      "floor": 10,
+      "renderer": "pixi",
+      "time": 2.0500000000000007,
+      "background": "misty-1"
+    },
+    {
+      "floor": 8,
+      "renderer": "dom",
+      "time": 2.000000000000001,
+      "background": "misty-1"
+    }
+  ],
+  "errors": []
+}

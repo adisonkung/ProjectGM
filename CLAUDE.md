@@ -16,6 +16,12 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Full-screen forest map import — Codex, 2026-11-18
+
+User supplied `iloveimg-compressed (16).zip` and requested trying all three maps in game. Branch `fix/fullscreen-map-art` from origin/master 9544059. Untouched PNG sources/hashes in `assets/backgrounds/fullscreen-2026-11-18`; lossless WebP replaces forest-1/twilight-1/misty-1. Current stage assignments retained. New `battlefieldCut` metadata and `artworkViewport()` fit a centered square-cell 16×3 board on the clearing above the dock; full-screen background is one cover image, bottom aligned, with no duplicate lower strip. Preparation and sprite lab use the existing arena path; Ascension maps retain their existing sizing. Source pixels are unchanged. Mobile cover crops top sky; the board stays narrower than the full artwork when needed to preserve square cells and dock clearance.
+
+Validation: app/spec typechecks, 1004/1004 Karma, production compilation with temporary font-inlining bypass (Google Fonts HTTP 403; config restored), six real browser map/viewport checks plus four live loading/combat smoke runs (Pixi floors 1/4/10 and DOM floor 8), no page errors. Paired source/game review: `docs/reviews/fullscreen-maps/comparison.html`. No gameplay/save changes. This task is a preview on the task branch; no new master merge or deployment. Existing confirmed synchronization metadata remains unchanged.
+
 ## Branch integration — user-requested master merge (2026-11-18, Codex)
 
 The user explicitly requested merging every branch still outside master. Integrated `feature/eldervane-ui-design-references`, `wip/codex-echo-trial`, `feature/claude-gilded-hero-detail`, `fix/star-ascension-aura`, and `feature/claude-battle-fullscreen` from remote master `3245cfa`, preserving their history and branch tips. Earlier pending-review/no-merge statements for these branches are historical and superseded by this request. Documentation conflicts retain both work streams; BattleComponent teardown retains engine disposal plus loader/cut-in cleanup. No gameplay values were retuned. Canonical local/cloud synchronization metadata is unchanged.

@@ -1,0 +1,191 @@
+{
+  "report": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 860
+      },
+      "id": "forest-1",
+      "background": "forest-1",
+      "layout": {
+        "cell": 75.88000000000002,
+        "extraRows": 4.460200316288875,
+        "groundRows": 0,
+        "foot": 142.15999999999997,
+        "dock": 134.16,
+        "partyCell": 68.8,
+        "width": 1214.0800000000004,
+        "height": 860
+      },
+      "board": {
+        "x": 112.953125,
+        "y": 0,
+        "w": 1214.078125,
+        "h": 860
+      },
+      "dock": {
+        "top": 755.390625,
+        "bottom": 856
+      },
+      "fieldHidden": "hidden",
+      "art": "url(\"http://127.0.0.1:4200/backgrounds/forest-1.webp\")",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 860
+      },
+      "id": "twilight-1",
+      "background": "twilight-1",
+      "layout": {
+        "cell": 77.31333333333335,
+        "extraRows": 4.284815038371991,
+        "groundRows": 0,
+        "foot": 142.15999999999997,
+        "dock": 134.16,
+        "partyCell": 68.8,
+        "width": 1237.0133333333335,
+        "height": 860
+      },
+      "board": {
+        "x": 101.5,
+        "y": 0,
+        "w": 1237,
+        "h": 860
+      },
+      "dock": {
+        "top": 755.390625,
+        "bottom": 856
+      },
+      "fieldHidden": "hidden",
+      "art": "url(\"http://127.0.0.1:4200/backgrounds/twilight-1.webp\")",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 860
+      },
+      "id": "misty-1",
+      "background": "misty-1",
+      "layout": {
+        "cell": 78.74666666666666,
+        "extraRows": 4.115814426007451,
+        "groundRows": 0,
+        "foot": 142.16000000000008,
+        "dock": 134.16,
+        "partyCell": 68.8,
+        "width": 1259.9466666666665,
+        "height": 860
+      },
+      "board": {
+        "x": 90.03125,
+        "y": 0,
+        "w": 1259.9375,
+        "h": 860
+      },
+      "dock": {
+        "top": 755.390625,
+        "bottom": 856
+      },
+      "fieldHidden": "hidden",
+      "art": "url(\"http://127.0.0.1:4200/backgrounds/misty-1.webp\")",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "id": "forest-1",
+      "background": "forest-1",
+      "layout": {
+        "cell": 46.17700956937801,
+        "extraRows": 2.022542235282474,
+        "groundRows": 0,
+        "foot": 65.71999999999997,
+        "dock": 57.72,
+        "partyCell": 31.2,
+        "width": 738.8321531100481,
+        "height": 390
+      },
+      "board": {
+        "x": 52.578125,
+        "y": 0,
+        "w": 738.828125,
+        "h": 390
+      },
+      "dock": {
+        "top": 330.28125,
+        "bottom": 388
+      },
+      "fieldHidden": "hidden",
+      "art": "url(\"http://127.0.0.1:4200/backgrounds/forest-1.webp\")",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "id": "twilight-1",
+      "background": "twilight-1",
+      "layout": {
+        "cell": 46.9686802232855,
+        "extraRows": 1.904175260160553,
+        "groundRows": 0,
+        "foot": 65.71999999999997,
+        "dock": 57.72,
+        "partyCell": 31.2,
+        "width": 751.498883572568,
+        "height": 390
+      },
+      "board": {
+        "x": 46.25,
+        "y": 0,
+        "w": 751.484375,
+        "h": 390
+      },
+      "dock": {
+        "top": 330.28125,
+        "bottom": 388
+      },
+      "fieldHidden": "hidden",
+      "art": "url(\"http://127.0.0.1:4200/backgrounds/twilight-1.webp\")",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "id": "misty-1",
+      "background": "misty-1",
+      "layout": {
+        "cell": 47.760350877192984,
+        "extraRows": 1.789732362599822,
+        "groundRows": 0,
+        "foot": 65.71999999999997,
+        "dock": 57.72,
+        "partyCell": 31.2,
+        "width": 764.1656140350877,
+        "height": 390
+      },
+      "board": {
+        "x": 39.921875,
+        "y": 0,
+        "w": 764.15625,
+        "h": 390
+      },
+      "dock": {
+        "top": 330.28125,
+        "bottom": 388
+      },
+      "fieldHidden": "hidden",
+      "art": "url(\"http://127.0.0.1:4200/backgrounds/misty-1.webp\")",
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

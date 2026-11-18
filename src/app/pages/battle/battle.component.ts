@@ -2,7 +2,7 @@ import { DecimalPipe } from '@angular/common';
 import { isMeleeRange } from '../../battle/engine/melee-contact';
 import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
 import { bodyFrontCell } from '../../battle/engine/footprint';
-import { battleViewport, fullscreenViewport } from './battle-viewport';
+import { artworkViewport, battleViewport, fullscreenViewport } from './battle-viewport';
 import { heroArt, HERO_ART } from '../../core/data/hero-art';
 import { spriteUrl } from '../../core/data/sprite-files';
 import { battleSpriteFiles, stageMonsterSprites } from '../../battle/render/battle-assets';
@@ -132,6 +132,7 @@ export class BattleComponent implements OnDestroy {
     const lab=this.mode()==='lab',bg=this.background(),{width,height}=this.viewport();
     const ground=lab ? 0 : (bg?.groundRows ?? .8),sky=lab ? 0 : (bg?.skyRows ?? 0);
     if (!this.fullscreen()) return { ...battleViewport(width,height,ground,sky), dock: 0, partyCell: 0 };
+    if (bg?.battlefieldCut != null) return artworkViewport(width, height, bg);
     // full-screen fight: extra sky only as far as the art reaches (arena images cover the whole field)
     const maxExtra=lab ? 0 : bg?.arena ? 2 : Math.max(0,((bg?.zoom ?? 1)-1)*5);
     return fullscreenViewport(width,height,ground,sky,maxExtra);

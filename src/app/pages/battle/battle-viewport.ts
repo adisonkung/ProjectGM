@@ -1,4 +1,19 @@
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../../battle/engine/grid';
+import { BackgroundDef } from '../../core/data/backgrounds';
+
+/** One unbroken cover image, bottom aligned. Keep the square-cell board on its authored clearing. */
+export function artworkViewport(width: number, height: number, art: BackgroundDef) {
+  const W = Math.max(1, width), H = Math.max(1, height);
+  const imageHeight = Math.max(W / art.w, H / art.h) * art.h;
+  const horizon = Math.max(0, H - imageHeight * (1 - art.battlefieldCut!));
+  const partyCell = Math.min(H * .08, W / BOARD_COLS, H <= 500 ? 60 : 84);
+  const dock = partyCell * (H <= 500 ? 1.85 : 1.95);
+  const cell = Math.max(1, Math.min(W / BOARD_COLS, (H - horizon - dock - 8) / BOARD_ROWS,
+    (H - dock - 8) / (SCENERY_ROWS + BOARD_ROWS)));
+  const extraRows = Math.max(0, horizon / cell - SCENERY_ROWS);
+  const foot = Math.max(0, H - cell * (SCENERY_ROWS + extraRows + BOARD_ROWS));
+  return { cell, extraRows, groundRows: 0, foot, dock, partyCell, width: cell * BOARD_COLS, height: H };
+}
 /** Reference proportions, with square combat cells and a bounded, unstretched upper crop. */
 export function battleViewport(width: number, height: number, groundRows = .8, skyRows = 0) {
   const landscapePhone = width > height && height <= 500;

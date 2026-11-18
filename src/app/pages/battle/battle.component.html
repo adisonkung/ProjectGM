@@ -36,7 +36,10 @@
     }
   } @else {
     <div class="arena" [class.paused]="paused()">
-      <div class="screen" [class.boss]="!!bossBar()">
+      <div class="screen" [class.boss]="!!bossBar()" [class.authored-map]="fullscreen() && background()?.battlefieldCut != null">
+        @if (fullscreen() && background()?.battlefieldCut != null) {
+          <div class="battle-map-art" aria-hidden="true" [style.background-image]="'url(/' + background()!.file + ')'"></div>
+        }
         @if (mode() !== 'lab') { <app-tower-ornament class="battle-field-frame" [grooved]="true" [ornate]="true" /> } @else { <app-tower-ornament class="lab-field-frame" [grooved]="true" [ornate]="true" /> }
         <app-board [groundExtraRows]="mode() === 'lab' ? 0 : fieldLayout().groundRows" [sceneryExtraRows]="sceneryExtraRows()" (finishedFx)="onFxFinished($event)" [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
                    [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [gameTime]="result() || ending() ? undefined : gameClock()" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
