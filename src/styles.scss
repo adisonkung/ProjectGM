@@ -110,3 +110,13 @@ html body .app app-account .profile-card app-profile-portrait.island-thumb {
 }
 html body .app:has(.cosmetic-dialog) .bar { z-index:0; }
 
+
+// ---------------------------------------------------------------- UI scale 75 % on desktop (user 2026-11-18)
+// html.ui-zoom is set by AppComponent for menu pages + Home. Full-screen scenes that measure the window
+// (summon cutscene, battle) keep 100 % and only shrink the top bar so the chrome matches everywhere.
+// Pages that fill the screen height divide 100dvh by --ui-zoom (zoom also scales viewport units).
+:root { --ui-zoom: 1; }
+@media (min-width: 901px) and (min-height: 501px) {
+  html.ui-zoom { zoom: .75; --ui-zoom: .75; }
+  html:not(.ui-zoom) .app:not(.bare) .bar { zoom: .75; }
+}
