@@ -1,0 +1,102 @@
+[
+  {
+    "id": "vaelric",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-final-five/vaelric.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "draeven",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-final-five/draeven.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "mordrienne",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-final-five/mordrienne.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "sylas",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-final-five/sylas.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "lucien",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-final-five/lucien.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "vaelric",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-final-five/vaelric.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "draeven",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-final-five/draeven.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "mordrienne",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-final-five/mordrienne.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "sylas",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-final-five/sylas.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "lucien",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-final-five/lucien.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  }
+]

@@ -1,0 +1,545 @@
+{
+  "report": [
+    {
+      "id": "vaelric",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/vaelric.webp",
+        "alt": "พิธีศพพันคมดาบ — เวลริค น็อกธาร์",
+        "framed": true,
+        "text": "พิธีศพพันคมดาบ — เวลริค น็อกธาร์",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "draeven",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/draeven.webp",
+        "alt": "อาณาจักรโลหิต — เดรเวน มอร์แคนต์",
+        "framed": true,
+        "text": "อาณาจักรโลหิต — เดรเวน มอร์แคนต์",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "mordrienne",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/mordrienne.webp",
+        "alt": "เรือนแห่งเถ้าธุลี — มอร์เดรียนน์ เวล",
+        "framed": true,
+        "text": "เรือนแห่งเถ้าธุลี — มอร์เดรียนน์ เวล",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "sylas",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/sylas.webp",
+        "alt": "ประหารรัตติกาล — ไซลัส เวิร์น",
+        "framed": true,
+        "text": "ประหารรัตติกาล — ไซลัส เวิร์น",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "lucien",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/lucien.webp",
+        "alt": "ปาฏิหาริย์ทมิฬ — ลูเซียน วัลธอร์น",
+        "framed": true,
+        "text": "ปาฏิหาริย์ทมิฬ — ลูเซียน วัลธอร์น",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "bailong",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "vaelric",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/vaelric.webp",
+        "alt": "พิธีศพพันคมดาบ — เวลริค น็อกธาร์",
+        "framed": true,
+        "text": "พิธีศพพันคมดาบ — เวลริค น็อกธาร์",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "draeven",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/draeven.webp",
+        "alt": "อาณาจักรโลหิต — เดรเวน มอร์แคนต์",
+        "framed": true,
+        "text": "อาณาจักรโลหิต — เดรเวน มอร์แคนต์",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "mordrienne",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/mordrienne.webp",
+        "alt": "เรือนแห่งเถ้าธุลี — มอร์เดรียนน์ เวล",
+        "framed": true,
+        "text": "เรือนแห่งเถ้าธุลี — มอร์เดรียนน์ เวล",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "sylas",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/sylas.webp",
+        "alt": "ประหารรัตติกาล — ไซลัส เวิร์น",
+        "framed": true,
+        "text": "ประหารรัตติกาล — ไซลัส เวิร์น",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "lucien",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/lucien.webp",
+        "alt": "ปาฏิหาริย์ทมิฬ — ลูเซียน วัลธอร์น",
+        "framed": true,
+        "text": "ปาฏิหาริย์ทมิฬ — ลูเซียน วัลธอร์น",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "bailong",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "vaelric",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/vaelric.webp",
+        "alt": "พิธีศพพันคมดาบ — เวลริค น็อกธาร์",
+        "framed": true,
+        "text": "พิธีศพพันคมดาบ — เวลริค น็อกธาร์",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "draeven",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/draeven.webp",
+        "alt": "อาณาจักรโลหิต — เดรเวน มอร์แคนต์",
+        "framed": true,
+        "text": "อาณาจักรโลหิต — เดรเวน มอร์แคนต์",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "mordrienne",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/mordrienne.webp",
+        "alt": "เรือนแห่งเถ้าธุลี — มอร์เดรียนน์ เวล",
+        "framed": true,
+        "text": "เรือนแห่งเถ้าธุลี — มอร์เดรียนน์ เวล",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "sylas",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/sylas.webp",
+        "alt": "ประหารรัตติกาล — ไซลัส เวิร์น",
+        "framed": true,
+        "text": "ประหารรัตติกาล — ไซลัส เวิร์น",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "lucien",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-final-five/lucien.webp",
+        "alt": "ปาฏิหาริย์ทมิฬ — ลูเซียน วัลธอร์น",
+        "framed": true,
+        "text": "ปาฏิหาริย์ทมิฬ — ลูเซียน วัลธอร์น",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "bailong",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    }
+  ],
+  "errors": []
+}
