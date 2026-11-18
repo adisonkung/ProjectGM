@@ -120,9 +120,10 @@
       </div>
 
       @if (cutIn(); as ci) {
-        <!-- ultimate cut-in: the hero's key art slides in at the top-left while the field holds still -->
+        <!-- ultimate cut-in: original hero art and a short diagonal reveal over the held field -->
         @for (k of [ci.key]; track k) {
           <div class="ult-cutin" role="status" aria-live="polite">
+            <div class="ci-shade" aria-hidden="true"></div>
             <div class="ci-band">@if (ci.art) { <img [src]="ci.art" alt="" draggable="false" /> }<i class="ci-sheen"></i></div>
             <div class="ci-text"><small>ULTIMATE</small><b>{{ ci.skill }}</b><span>{{ ci.name }}</span></div>
             <i class="ci-spark s1"></i><i class="ci-spark s2"></i>

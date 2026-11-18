@@ -130,55 +130,61 @@ html body .app app-battle .battle-loading {
   }
 }
 
-// ============================================================ ultimate cut-in (top-left)
+// ============================================================ ultimate cut-in (diagonal full-screen reveal)
 html body .app app-battle .ult-cutin {
-  --ci-h: clamp(96px, 19vh, 168px);
-  position: fixed; z-index: 1300; left: 0; top: clamp(64px, 12.5vh, 118px); width: min(42vw, 600px); height: var(--ci-h); pointer-events: none;
-  animation: ci-life 1.5s cubic-bezier(.2, .8, .2, 1) both;
-  .ci-band { position: absolute; inset: 0; overflow: hidden;
-    clip-path: polygon(0 0, 100% 0, calc(100% - var(--ci-h) * .45) 100%, 0 100%);
-    background: linear-gradient(100deg, $ember-dark, $burgundy 120%);
-    box-shadow: inset 0 2px 0 $gold-line, inset 0 -2px 0 $gold-deep; }
-  .ci-band::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-    background: linear-gradient(90deg, rgba(15, 11, 9, 0) 30%, rgba(15, 11, 9, .35) 62%, rgba(15, 11, 9, .9) 100%); }
-  // gold edges of the slanted band
-  .ci-band::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-    background: linear-gradient($gold-bright, $gold-bright) top / 100% 3px no-repeat, linear-gradient($gold-deep, $gold-line) bottom / 100% 3px no-repeat; }
-  img { position: absolute; left: 0; top: 50%; width: 100%; height: auto; min-height: 100%; transform: translateY(-38%); object-fit: cover;
-    animation: ci-pan 1.5s linear both; }
-  .ci-sheen { position: absolute; z-index: 3; top: 0; bottom: 0; left: -30%; width: 22%; transform: skewX(-24deg);
-    background: linear-gradient(90deg, rgba(255, 248, 230, 0), rgba(255, 248, 230, .55), rgba(255, 248, 230, 0)); animation: ci-sheen .9s .18s ease-out both; }
-  .ci-text { position: absolute; z-index: 4; right: calc(var(--ci-h) * .55); bottom: 12%; display: grid; justify-items: end; gap: 0; text-align: right;
-    max-width: 62%; animation: ci-text .5s .12s cubic-bezier(.2, .8, .2, 1) both; }
-  .ci-text small { @include label; font-size: 11px; color: $gold-line; text-shadow: 0 1px 3px #000; }
-  .ci-text b { font: 700 clamp(18px, 2.4vw, 30px)/1.2 'Cinzel', 'IBM Plex Sans Thai', serif; @include foil; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .9));
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-  .ci-text span { font: 500 13px 'IBM Plex Sans Thai', system-ui, sans-serif; color: $text-2; text-shadow: 0 1px 3px #000; }
-  .ci-spark { position: absolute; z-index: 5; width: 26px; height: 26px; background: $gold-pale; clip-path: $spark-shape;
-    filter: drop-shadow(0 0 6px #fff); animation: ci-spark .9s .2s ease-out both; }
-  .ci-spark.s1 { right: calc(var(--ci-h) * .42); top: -10px; }
-  .ci-spark.s2 { right: calc(var(--ci-h) * .45 + 46%); bottom: -9px; width: 16px; height: 16px; animation-delay: .32s; }
+  position: fixed; inset: 0; z-index: 1600; pointer-events: none; overflow: hidden;
+  animation: ci-life .95s linear both;
+  .ci-shade { position: absolute; inset: 0; background: rgba(8, 5, 5, .72); }
+  .ci-band { position: absolute; left: -4%; top: 28%; width: 108%; height: 42%; overflow: hidden;
+    transform: skewY(-4deg); background: linear-gradient(100deg, #2e1114, $burgundy 58%, $ink);
+    border-block: 3px solid $gold-line; box-shadow: 0 0 0 7px #0f0b09, 0 16px 50px #0009;
+    animation: ci-band-in .95s cubic-bezier(.16, .85, .25, 1) both; }
+  .ci-band::before { content: ''; position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(90deg, transparent 25%, #0f0b0933 45%, #240f13eb 68%, #0f0b09 100%); }
+  .ci-band::after { content: ''; position: absolute; inset: 0; z-index: 2;
+    background: repeating-linear-gradient(110deg, transparent 0 78px, #e6c88a18 79px 80px, transparent 81px 120px);
+    mask-image: linear-gradient(90deg, transparent 40%, #000); }
+  img { position: absolute; left: 2%; top: 0; width: 80%; height: 100%; object-fit: cover; object-position: 50% 8%;
+    transform: skewY(4deg); animation: ci-pan .95s ease-out both; }
+  .ci-sheen { position: absolute; z-index: 3; inset: 0 auto 0 -30%; width: 12%; transform: skewX(-24deg);
+    background: linear-gradient(90deg, transparent, #fff1cf66, transparent); animation: ci-sheen .65s .1s ease-out both; }
+  .ci-text { position: absolute; z-index: 4; right: 8%; top: 43%; width: 45%; display: grid; justify-items: end; gap: 10px;
+    text-align: right; animation: ci-text .3s .1s ease-out both; }
+  .ci-text small { @include label; color: $gold-line; font-size: clamp(11px, 1.2vw, 18px); letter-spacing: .45em;
+    border-bottom: 1px solid #e6c88a88; padding: 0 0 8px 48px; }
+  .ci-text b { font: 700 clamp(26px, 4.2vw, 68px)/1.35 'IBM Plex Sans Thai', serif; @include foil;
+    filter: drop-shadow(0 3px 2px #000); overflow-wrap: anywhere; max-width: 100%; }
+  .ci-text span { font: 500 clamp(13px, 1.6vw, 24px)/1.4 'IBM Plex Sans Thai', sans-serif; color: $text;
+    text-shadow: 0 2px 4px #000; letter-spacing: .12em; }
+  .ci-spark { position: absolute; z-index: 5; width: 36px; height: 36px; background: $gold-pale; clip-path: $spark-shape;
+    animation: ci-spark .7s .12s ease-out both; }
+  .ci-spark.s1 { right: 5%; top: 32%; }
+  .ci-spark.s2 { right: 52%; top: 69%; width: 20px; height: 20px; animation-delay: .22s; }
 }
-@keyframes ci-life {
-  0% { transform: translateX(-105%) skewX(-8deg); opacity: 0; }
-  14% { transform: translateX(0) skewX(0); opacity: 1; }
-  80% { transform: translateX(0); opacity: 1; }
-  100% { transform: translateX(-30%); opacity: 0; }
+@keyframes ci-life { 0% { opacity: 0; } 10%, 75% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes ci-band-in {
+  0% { transform: skewY(-4deg) translateX(-110%); }
+  22%, 78% { transform: skewY(-4deg) translateX(0); }
+  100% { transform: skewY(-4deg) translateX(110%); }
 }
-@keyframes ci-pan { from { transform: translateY(-38%) scale(1.12) translateX(3%); } to { transform: translateY(-38%) scale(1.02) translateX(-2%); } }
-@keyframes ci-sheen { to { left: 115%; } }
-@keyframes ci-text { from { opacity: 0; transform: translateX(28px); } }
-@keyframes ci-spark { 0% { transform: scale(0) rotate(0); opacity: 0; } 40% { transform: scale(1.2) rotate(45deg); opacity: 1; } 100% { transform: scale(.4) rotate(90deg); opacity: 0; } }
+@keyframes ci-pan { from { transform: skewY(4deg) scale(1.08) translateX(-4%); } to { transform: skewY(4deg) scale(1.01) translateX(2%); } }
+@keyframes ci-sheen { to { left: 120%; } }
+@keyframes ci-text { from { opacity: 0; transform: translateX(50px); } }
+@keyframes ci-spark { 0%, 100% { opacity: 0; transform: scale(.2) rotate(0); } 35% { opacity: 1; transform: scale(1) rotate(45deg); } }
 @media (orientation: landscape) and (max-height: 500px) {
-  html body .app app-battle .ult-cutin { --ci-h: 78px; top: 38px; width: min(50vw, 420px);
-    .ci-text b { font-size: 18px; } .ci-text span { font-size: 11px; } }
+  html body .app app-battle .ult-cutin {
+    .ci-band { top: 23%; height: 49%; }
+    .ci-text { top: 35%; right: 7%; width: 44%; gap: 4px; }
+    .ci-text small { padding-bottom: 4px; font-size: 9px; }
+    .ci-text b { font-size: clamp(22px, 4.2vw, 38px); }
+    .ci-text span { font-size: 12px; }
+  }
 }
 
-// reduced motion: no slides, drifts or spins — the cut-in is shown briefly in place, the loader just fades
 @media (prefers-reduced-motion: reduce) {
   html body .app app-battle .battle-loading { animation: none; transition: none;
     .bl-art, .bl-ring, .bl-ring::after { animation: none; } }
-  html body .app app-battle .ult-cutin { animation: ci-still .9s linear both;
-    img, .ci-sheen, .ci-text, .ci-spark { animation: none; } .ci-sheen, .ci-spark { display: none; } }
+  html body .app app-battle .ult-cutin { animation: ci-still .65s linear both;
+    .ci-band, img, .ci-sheen, .ci-text, .ci-spark { animation: none; } .ci-sheen, .ci-spark { display: none; } }
 }
-@keyframes ci-still { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes ci-still { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }

@@ -2,6 +2,10 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+### Ultimate cut-in prototype — user follow-up (Codex, 2026-11-18)
+
+User asked to try the suggested Persona 5 / Brown Dust 2 inspired direction. Same review branch `fix/fullscreen-map-art`. Original Eldervane hero banner art sweeps across a broad diagonal gold/burgundy band over a dimmed battlefield; larger skill/name typography. No external game artwork copied. Display lifetime 950 ms (650 ms reduced motion); existing engine/Pixi/DOM freeze remains 650/300 ms, with damage and cast timing unchanged. Reduced motion uses a stationary reveal/fade. Real manual Bai Long ult clicks checked on desktop 1440×860, phone 844×390 and reduced motion, no page errors. PNGs are unchanged frames extracted from the recorded browser videos; 5-second MP4 clips show the actual sequence. App/spec typechecks and Karma 1004/1004 pass. Review: `docs/reviews/ultimate-cutin-prototype/comparison.html`. Other hero banners may need focal-point review; this is a concept prototype awaiting user visual feedback. No master merge/deployment or synchronization-base change.
+
 ### Bottom hero cards enlarged — user follow-up (Codex, 2026-11-18)
 
 The user requested larger bottom hero card frames using the free space below the grid. Same `fix/fullscreen-map-art` review branch. Full-screen `.party-in` now spans the safe viewport width; combat `.bar.compact` overrides the generic menu 75% zoom and uses the existing dock height. Desktop cards grow from ~164×87 to ~243×126 px. Landscape phones use a portrait-left / skills-right arrangement (~148×54 px at 844×390). Combat cells/lanes/terrain geometry and control handlers are unchanged. App/spec checks and Karma 1004/1004 pass; real desktop 1440×860 and phone 844×390 screenshots/bounds checks pass with no page errors or card/viewport/lane overlap. Previous-reference / updated-game pairs: `docs/reviews/battle-dock-size/comparison.html`. No master merge/deployment; confirmed synchronization metadata unchanged.

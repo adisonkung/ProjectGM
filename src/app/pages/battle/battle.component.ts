@@ -339,7 +339,7 @@ export class BattleComponent implements OnDestroy {
   }
 
   // ---------------------------------------------------------------- ultimate cut-in
-  /** hero key art sliding in at the top-left while the field holds still for a beat (player ultimates only) */
+  /** hero key art sweeping across the field while the field holds still for a beat (player ultimates only) */
   readonly cutIn = signal<{ key: number; art: string; name: string; skill: string } | null>(null);
   private cutInTimer?: ReturnType<typeof setTimeout>;
   static readonly ULT_FREEZE_MS = 650;
@@ -353,7 +353,7 @@ export class BattleComponent implements OnDestroy {
     playImpactFeel(this.boardEl()?.nativeElement, { hitStopMs: freeze });
     this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + freeze);
     clearTimeout(this.cutInTimer);
-    this.cutInTimer = setTimeout(() => this.cutIn.set(null), reduced ? 900 : 1500);
+    this.cutInTimer = setTimeout(() => this.cutIn.set(null), reduced ? 650 : 950);
   }
   readonly teamPower = computed(() => this.team.units().reduce((a, u) => a + power(u.stats), 0));
   readonly timeLeft = computed(() => Math.max(0, Math.ceil(this.stage().timeLimit - this.time())));
