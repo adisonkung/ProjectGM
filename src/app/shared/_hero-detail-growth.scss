@@ -4,6 +4,8 @@
 // app-hero-detail, to keep the component stylesheet under the production budget. Gilded Ember tokens only.
 app-hero-detail {
   .growth { display: flex; flex-direction: column; gap: 18px; }
+  .ov-skills { .ov-picks { display: flex; gap: 22px; padding-top: 4px; .pick .sk { width: 72px; height: 72px; } .pick small { font-size: 13px; } }
+    .skill { margin-top: 4px; header b { font-size: 22px; } p { font-size: 16px; } } }
   h2.has-icon { &::before { display: none; } img { width: 34px; height: 34px; margin: -6px 0; filter: drop-shadow(0 0 6px rgba(243, 220, 164, .5)); } }
   .bt-hint img { width: 30px; height: 30px; vertical-align: -9px; margin-right: 8px; }
   .mini img.ico { width: 22px; height: 22px; margin-right: 6px; }

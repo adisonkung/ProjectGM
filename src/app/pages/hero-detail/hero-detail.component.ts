@@ -82,17 +82,19 @@ export class HeroDetailComponent {
       [[3, 80], [0, 9], [13, 3]], [[13, 3], [47, 0]], [[47, 0], [84, 4]],
       [[84, 4], [99, 12], [100, 60]], [[100, 60], [93, 97], [67, 100]], [[67, 100], [8, 95], [3, 80]],
     ];
-    const inner = ([x, y]: [number, number]): [number, number] => [C.x + (x - C.x) * .24, C.y + (y - C.y) * .24];
+
     return edges.map((perim, i) => {
-      const poly = [inner(perim[0]), ...perim, inner(perim[perim.length - 1])];
+      const poly: [number, number][] = [[C.x, C.y], ...perim];   // shards meet at the hub — no hole in the middle
       const cx = poly.reduce((a, p) => a + p[0], 0) / poly.length, cy = poly.reduce((a, p) => a + p[1], 0) / poly.length;
-      const ox = (cx - C.x) * .07, oy = (cy - C.y) * .07;   // pieces pushed outward from the hub
-      const pts = poly.map(([x, y]) => [cx + (x - cx) * .93 + ox, cy + (y - cy) * .93 + oy]);   // gutter between shards
+      const ox = (cx - C.x) * .02, oy = (cy - C.y) * .02;   // a hair apart, like cut glass
+      const pts = poly.map(([x, y]) => [cx + (x - cx) * .965 + ox, cy + (y - cy) * .965 + oy]);   // thin gutter between shards
       const n = i + 1;
       return {
         n, cx: cx + ox, cy: cy + oy, state: n <= star ? 'lit' : n === star + 1 ? 'next' : 'locked',
         clip: `polygon(${pts.map(([x, y]) => `${x.toFixed(2)}% ${y.toFixed(2)}%`).join(', ')})`,
         points: pts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' '),
+        /** outer corners (not the hub point) — glints sit here on lit / next shards */
+        corners: pts.slice(1).map(([x, y]) => ({ x, y })),
       };
     });
   });
@@ -182,6 +184,9 @@ export class HeroDetailComponent {
   /** drifting embers over the key art: [left %, top %, delay s] */
   readonly motes = [[22, 70, 0], [34, 78, 1.4], [44, 64, 2.8], [27, 58, 4.1], [48, 82, 5.3]];
   readonly skillSel = signal(0);
+  /** overview: which skill icon is open (null = none) */
+  readonly overviewSkill = signal<number | null>(null);
+  toggleOverviewSkill(i: number): void { this.overviewSkill.set(this.overviewSkill() === i ? null : i); }
 
   onTabKey(event: KeyboardEvent): void {
     const keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];

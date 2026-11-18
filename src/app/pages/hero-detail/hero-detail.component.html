@@ -37,16 +37,19 @@
           }
           <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             @for (sh of shards(); track sh.n) { <polygon [attr.points]="sh.points" [class]="sh.state" vector-effect="non-scaling-stroke" /> }
+            @for (sh of shards(); track sh.n) { @if (sh.state === 'next') { <polygon class="runner" [attr.points]="sh.points" pathLength="100" vector-effect="non-scaling-stroke" /><polygon class="runner late" [attr.points]="sh.points" pathLength="100" vector-effect="non-scaling-stroke" /> } }
           </svg>
+          @for (sh of shards(); track sh.n) {
+            @if (sh.state !== 'locked') {
+              @for (c of sh.corners; track $index) { <img [class]="'glint ' + sh.state" [src]="gild('sparkle')" alt="" aria-hidden="true" [style.left.%]="c.x" [style.top.%]="c.y" [style.animation-delay.s]="$index * .45 + sh.n * .2" /> }
+            }
+          }
           @for (sh of shards(); track sh.n) {
             <span [class]="'tag ' + sh.state" [style.left.%]="sh.cx" [style.top.%]="sh.cy" aria-hidden="true">
               @if (sh.state === 'locked') { <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 018 0v3" /></svg> }
-              @else { <img [src]="starImg(sh.n, true)" alt="" /><b>{{ sh.n }}</b> }
+              @else { @if (sh.state === 'next') { <app-sheet-fx class="ignite" [src]="gild('vfx_starup_burst')" [loop]="[3, 7]" [fps]="9" /> }<img [src]="starImg(sh.n, true)" alt="" /><b>{{ sh.n }}</b> }
             </span>
           }
-          <div class="hub" [style.left.%]="hub.x" [style.top.%]="hub.y" aria-hidden="true">
-            <img class="halo" [src]="gild('sparkle')" alt="" /><img class="core" [src]="starImg(star(), true)" alt="" /><b>{{ star() }}</b>
-          </div>
           @if (starFx(); as f) {
             @for (k of [f.key]; track k) {
               <app-sheet-fx class="fx-pillar" [src]="gild('vfx_starup_pillar')" [fps]="12" [style.left.%]="f.x" [style.top.%]="f.y" />
@@ -98,6 +101,32 @@
       @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
 
       <div id="hero-panel" class="panel" role="tabpanel" [attr.aria-labelledby]="'hero-tab-' + tab()" tabindex="0">
+        @if (tab() === 'overview') {
+          <section class="block ov-skills">
+            <header><h2>สกิล</h2><small>แตะไอคอนเพื่อดูรายละเอียด</small></header>
+            <div class="ov-picks" role="group" aria-label="สกิลของฮีโร่">
+              @for (v of skills(); track v.slot; let i = $index) {
+                <button type="button" class="pick" [class.on]="overviewSkill() === i" [attr.aria-expanded]="overviewSkill() === i" (click)="toggleOverviewSkill(i)" [attr.aria-label]="slotTag[v.slot] + ' ' + v.name">
+                  <span class="sk">@if (v.icon) { <img [src]="v.icon" alt="" /> } @else { <app-icon [name]="v.slot === 'ult' ? 'bolt' : 'star'" [size]="28" /> }</span>
+                  <small>{{ v.slot === 'ult' ? 'ULT' : v.slot === 'skill' ? 'S1' : 'S2' }} · R{{ v.rank }}</small>
+                </button>
+              }
+            </div>
+            @for (v of skills(); track v.slot; let i = $index) {
+              @if (overviewSkill() === i) {
+                <article class="skill" [class.ult]="v.slot === 'ult'">
+                  <i class="st" aria-hidden="true"></i>
+                  <header><b>{{ v.name }}</b>@if (v.def.cooldown) { <small class="cd">คูลดาวน์ {{ v.def.cooldown }} วิ</small> } @else if (v.slot === 'ult') { <small class="cd">ท่าไม้ตาย</small> }</header>
+                  <div class="rank-row"><span class="tag">{{ slotTag[v.slot] }} · ระดับ {{ v.rank }} / {{ v.maxRank }}</span>
+                    <span class="pips" aria-hidden="true">@for (n of [1, 2, 3, 4, 5].slice(0, v.maxRank); track n) { <i [class.on]="n <= v.rank"></i> }</span>
+                  </div>
+                  <p class="cur">{{ v.current.join(' · ') }}</p>
+                  <button type="button" class="link" (click)="tab.set('skills')">อัปสกิล →</button>
+                </article>
+              }
+            }
+          </section>
+        }
         @if (tab() === 'overview' || tab() === 'stats') {
           <section class="block stats">
             <header><h2>ค่าสถานะ</h2>
@@ -268,14 +297,6 @@
         }
       </div>
 
-      <div class="actions">
-        @if (p.state === 'BREAKTHROUGH_READY') {
-          <button type="button" class="btn-gold" (click)="breakthrough()"><i class="st"></i>Breakthrough<i class="st"></i></button>
-        } @else {
-          <button type="button" class="btn-gold" [disabled]="p.state === 'MAX' || !potions().length" (click)="useMax()"><i class="st"></i>อัปเลเวล<i class="st"></i></button>
-        }
-        <button type="button" class="btn-glass" (click)="tab.set('star')" aria-controls="hero-panel"><i class="st"></i>อัปดาว<i class="st"></i></button>
-      </div>
     </div>
 
     @if (strip().length > 1) {

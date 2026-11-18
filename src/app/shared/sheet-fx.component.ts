@@ -20,6 +20,8 @@ export class SheetFxComponent implements OnInit, OnDestroy {
   readonly frames = input(12);
   readonly fps = input(14);
   readonly delayMs = input(0);
+  /** loop frames [from, to] forever instead of playing once (ambient glow, e.g. a star igniting) */
+  readonly loop = input<[number, number] | null>(null);
   readonly done = output<void>();
   private readonly host = inject(ElementRef<HTMLElement>);
   private anim?: Animation;
@@ -32,6 +34,14 @@ export class SheetFxComponent implements OnInit, OnDestroy {
     el.style.backgroundImage = `url(${this.src()})`;
     el.style.backgroundSize = `${cols * 100}% ${rows * 100}%`;
     const pos = (i: number) => `${cols > 1 ? (i % cols) / (cols - 1) * 100 : 0}% ${rows > 1 ? Math.floor(i / cols) / (rows - 1) * 100 : 0}%`;
+    const lp = this.loop();
+    if (lp) {
+      const [a, b] = lp, m = b - a + 1;
+      const keys: Keyframe[] = Array.from({ length: m }, (_, i) => ({ backgroundPosition: pos(a + i), opacity: 1, offset: i / m, easing: 'steps(1, end)' }));
+      keys.push({ backgroundPosition: pos(b), opacity: 1, offset: 1 });
+      this.anim = el.animate(keys, { duration: (m / this.fps()) * 1000, delay: this.delayMs(), iterations: Infinity, fill: 'both' });
+      return;
+    }
     const keys: Keyframe[] = Array.from({ length: n }, (_, i) => ({ backgroundPosition: pos(i), opacity: 1, offset: i / n, easing: 'steps(1, end)' }));
     keys.push({ backgroundPosition: pos(n - 1), opacity: 0, offset: 1 });
     this.anim = el.animate(keys, { duration: (n / this.fps()) * 1000, delay: this.delayMs(), fill: 'both' });
