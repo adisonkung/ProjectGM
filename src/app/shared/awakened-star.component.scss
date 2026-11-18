@@ -1,0 +1,103 @@
+:host {
+  --gleam-wait: calc(.75s + var(--accent-delay, 0s));
+  position: relative;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+img {
+  display: block;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 2px #e9ab585f);
+}
+
+.aura,
+.sheen,
+.glint { position: absolute; }
+
+.aura {
+  inset: -32%;
+  background: radial-gradient(ellipse at 50% 53%, #f8d29142, #e8a45024 37%, #b6782014 52%, transparent 70%);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: radial-gradient(circle, #f6d09757, #e8ae6338 34%, transparent 67%);
+    animation: awakened-aura 4.8s ease-in-out var(--accent-delay, 0s) infinite backwards;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 3%;
+    opacity: 0;
+    background:
+      radial-gradient(circle at 22% 52%, #ffe8ae 0 1.3%, #f7cb6d80 2.3%, transparent 3.5%),
+      radial-gradient(circle at 66% 31%, #ffdda0 0 1.7%, #edb66080 2.7%, transparent 4%),
+      radial-gradient(circle at 77% 64%, #ffdc98 0 1.1%, #edb66080 2%, transparent 3.2%);
+    animation: awakened-dust 4.8s ease-in-out calc(.22s + var(--accent-delay, 0s)) infinite backwards;
+  }
+}
+
+.sheen {
+  z-index: 2;
+  inset: 0;
+  mask: url('/ui/gilded/star_lit.webp') center / contain no-repeat;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(-95%);
+    background: linear-gradient(112deg, transparent 34%, #efbf675a 45%, #ffe5a5b8 50%, #efbf675a 56%, transparent 65%);
+    // The base and delay frames stay transparent, even when the star mounts mid-navigation.
+    animation: awakened-sheen 5.4s linear var(--gleam-wait) infinite backwards;
+  }
+}
+
+.glint {
+  z-index: 3;
+  top: 8%;
+  right: 4%;
+  width: 33%;
+  aspect-ratio: 1;
+  opacity: 0;
+  background: #ffe9b7;
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  animation: awakened-glint 5.4s ease-in-out var(--gleam-wait) infinite backwards;
+}
+
+@keyframes awakened-aura {
+  0%, 100% { opacity: 0; transform: scale(.9); }
+  52% { opacity: .68; transform: scale(1.09); }
+}
+
+@keyframes awakened-dust {
+  0%, 8%, 100% { opacity: 0; transform: translateY(8%); }
+  33% { opacity: .85; }
+  65%, 89% { opacity: 0; transform: translateY(-19%); }
+}
+
+@keyframes awakened-sheen {
+  0%, 11% { opacity: 0; transform: translateX(-95%); }
+  21% { opacity: .62; }
+  33%, 100% { opacity: 0; transform: translateX(95%); }
+}
+
+@keyframes awakened-glint {
+  0%, 14%, 34%, 100% { opacity: 0; transform: scale(.42); }
+  22% { opacity: .78; transform: scale(.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aura::before, .aura::after, .sheen, .glint { display: none; }
+}

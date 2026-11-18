@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image
 
 SRC, OUT = Path('assets/ui/gilded'), Path('public/ui/gilded')
-ICONS = ['star_lit', 'star_empty', 'star_awakened', 'ring_frame', 'sparkle', 'hero_memory',
+ICONS = ['star_lit', 'star_empty', 'star_awakened', 'star_fire', 'ring_frame', 'sparkle', 'hero_memory',
          'star_up', 'level_up', 'breakthrough', 'training_slot']
 VFX = ['vfx_starup_pillar', 'vfx_starup_burst', 'vfx_levelup_ring', 'vfx_breakthrough']
 

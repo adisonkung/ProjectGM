@@ -6,6 +6,7 @@ import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
+import { HeroStarsComponent } from '../../shared/hero-stars.component';
 import { heroArt } from '../../core/data/hero-art';
 import { CLASS_NAME } from '../../core/data/classes';
 import { EquipmentArtComponent } from '../../shared/equipment-art.component';
@@ -25,7 +26,7 @@ const ERR: Record<string, string> = {
 /** Equipment: hero gear (3 slots), bag with comparison, equip / unequip / lock / sell — crafting, enhancement and salvage live in the forge */
 @Component({
   selector: 'app-armory',
-  imports: [AffixIconComponent, MaterialInventoryComponent, StateEmblemComponent, CitadelFrameComponent, HeroPortraitComponent, IconComponent, EquipmentArtComponent, RouterLink],
+  imports: [HeroStarsComponent, AffixIconComponent, MaterialInventoryComponent, StateEmblemComponent, CitadelFrameComponent, HeroPortraitComponent, IconComponent, EquipmentArtComponent, RouterLink],
   templateUrl: './armory.component.html',
   styleUrl: './armory.component.scss',
 })

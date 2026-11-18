@@ -71,7 +71,7 @@ h1 { margin: 0; display: flex; flex-direction: column;
   .st { position: absolute; left: 50%; top: -12px; margin-left: -6px; @include g.spark(12px); filter: drop-shadow(0 0 5px g.$gold-bright); } }
 .class-name { display: flex; flex-direction: column; line-height: 1.25;
   b { font: 600 17px g.$font-body; } small { @include g.foil; @include g.label; font-size: 11px; } }
-.stars { margin-left: auto; display: flex; gap: 2px; filter: drop-shadow(0 0 6px rgba(243, 220, 164, .55)); img { width: 34px; height: 34px; } }
+.stars { margin-left: auto; --hero-star-size: 34px; --hero-star-gap: 2px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { all: unset; display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; border-radius: 999px; font: 500 14px g.$font-body; color: g.$text-2;
   background: rgba(24, 18, 13, .55); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .28);
@@ -88,8 +88,13 @@ h1 { margin: 0; display: flex; flex-direction: column;
 .exp { font-size: 14px; color: g.$text-2; }
 .msg { margin: 0; padding: 10px 16px; @include g.glass(.1); color: g.$gold-pale; &.bad { color: #ffc9b8; box-shadow: inset 0 1px 0 #d06a5a; } }
 
-// ---------------------------------------------------------------- panel content (floats on the scene)
-.panel { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; outline: none; padding: 10px 10px 10px 0; margin-right: -10px;
+// ---------------------------------------------------------------- shared frame for the right column on every tab
+.panel { flex: 0 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+  padding: 16px clamp(10px, 1.5vw, 22px);
+  border: 1px solid rgba(230, 200, 138, .42); border-radius: 6px;
+  background: linear-gradient(160deg, rgba(30, 20, 14, .89), rgba(15, 11, 9, .77));
+  box-shadow: inset 0 0 0 2px rgba(230, 200, 138, .08), 0 12px 32px rgba(0, 0, 0, .3);
+  &:focus-visible { outline: 2px solid g.$gold-pale; outline-offset: 2px; }
   scrollbar-width: thin; scrollbar-color: rgba(230, 200, 138, .45) transparent; }
 .block { display: flex; flex-direction: column; gap: 8px; > .btn-glass, > .btn-gold:not(.wide) { align-self: flex-start; }
   > header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
@@ -97,6 +102,17 @@ h1 { margin: 0; display: flex; flex-direction: column;
     h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 600 18px g.$font-body; color: g.$text;
       &::before { content: ''; @include g.spark(11px, g.$gold-bright); } }
     small { color: g.$text-2; font-size: 14px; } } }
+.ascend > .asc-head {
+  justify-content: center;
+  padding-bottom: 10px;
+  border-bottom-color: rgba(230, 200, 138, .42);
+  .asc-title {
+    @include g.foil;
+    font: 700 clamp(21px, 3vw, 34px)/1.12 g.$font-display;
+    letter-spacing: .04em;
+    &::before { content: none; }
+  }
+}
 .link { all: unset; cursor: pointer; font: 500 15px g.$font-body; color: g.$gold-bright; &:hover { color: g.$gold-pale; } &:focus-visible { outline: 2px solid g.$gold-pale; } }
 .hint { margin: 0; font-size: 14px; color: g.$text-2; }
 
@@ -195,13 +211,15 @@ table { width: 100%; border-collapse: collapse; font-size: 16px;
     grid-template-areas: 'head head info' 'tabs . info' 'tabs roster info'; grid-template-rows: auto 1fr auto; }
   .show { .page-title { display: none; } }
   .back { width: 40px; height: 40px; }
-  .tabs { align-self: start; padding: 8px 0 0 8px; button { min-height: 40px; padding: 0 0 0 12px; font-size: 13px; } .no { display: none; } }
+  .tabs { align-self: start; padding: 8px 0 0 8px; button { min-height: clamp(26px, 8dvh, 40px); padding: 0 0 0 12px; font-size: 13px; } .no { display: none; } }
   .roster { gap: 8px; padding: 0 0 2px;
-    .mate .face { width: 32px; height: 32px; } .mate.on .face { width: 44px; height: 44px; } .mate.on small, .mate.on::before { display: none; }
+    .mate .face { width: 32px; height: 32px; } .mate.on .face { width: 44px; height: 44px; } .mate.on:not(.named) small, .mate.on::before { display: none; }
     .mate:not(.on):nth-child(n+6) { display: none; } }
   .info { overflow-y: auto; gap: 10px; padding: 0 10px 0 16px; margin-right: -10px;
-    background: linear-gradient(90deg, rgba(15, 11, 9, 0), rgba(15, 11, 9, .7) 14%); scrollbar-width: thin; scrollbar-color: rgba(230, 200, 138, .45) transparent; }
-  .panel { flex: none; overflow: visible; padding: 0; margin: 0; }
+    background: linear-gradient(90deg, rgba(15, 11, 9, 0), rgba(15, 11, 9, .7) 14%); scrollbar-width: thin; scrollbar-color: rgba(230, 200, 138, .45) transparent;
+    &::before { content: none; } }
+  .panel { flex: none; overflow: visible; padding: 10px; }
+  .ascend > .asc-head { padding-bottom: 6px; }
   .actions { position: sticky; bottom: 0; padding: 8px 0; background: linear-gradient(180deg, rgba(15, 11, 9, 0), rgba(15, 11, 9, .92) 40%); }
   h1 .latin { font-size: 34px; } h1 .th { font-size: 14px; }
   .identity { gap: 6px; }
@@ -216,6 +234,7 @@ table { width: 100%; border-collapse: collapse; font-size: 16px;
 // portrait fallback (rule V: phones play landscape — this keeps the page usable until rotated)
 @media (max-width: 760px) and (orientation: portrait) {
   .info, .panel { overflow: visible; } .detail { height: auto; }
+  .info::before { content: none; }
   .art { position: absolute; top: 0; height: 56vw; .ring { display: none; } }
   .detail { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'head' 'art' 'tabs' 'info' 'roster'; grid-template-rows: auto 40vw auto auto auto; }
   .tabs { flex-direction: row; overflow-x: auto; padding: 0; button { border-left: 0; border-bottom: 2px solid rgba(230, 200, 138, .18); padding: 0 12px; &.on { border-bottom-color: g.$gold-bright; } } .gem, .no { display: none; } }

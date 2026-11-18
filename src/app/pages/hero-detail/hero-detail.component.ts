@@ -23,6 +23,7 @@ import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
 import { IslandService } from '../../core/services/island.service';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
+import { AwakenedStarComponent, HeroStarsComponent } from '../../shared/hero-stars.component';
 import { IconComponent } from '../../shared/icon.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
@@ -44,7 +45,7 @@ const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shie
 /** Hero detail (Gilded Ember): fixed key art, vertical tabs, floating identity + panel, roster strip. */
 @Component({
   selector: 'app-hero-detail',
-  imports: [StateEmblemComponent, EquipmentArtComponent, SheetFxComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
+  imports: [AwakenedStarComponent, HeroStarsComponent, StateEmblemComponent, EquipmentArtComponent, SheetFxComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './hero-detail.component.html',
   styleUrl: './hero-detail.component.scss',
 })
@@ -72,14 +73,10 @@ export class HeroDetailComponent {
   });
   /** 4★ / 5★ / 6★ perks + visual evolution, reached or not */
   readonly starSteps = computed(() => [4, 5, 6].map(n => ({ n, perk: STAR_PERKS[n].label, visual: STAR_VISUAL[n].label, reached: this.star() >= n, gain: Math.round((starMultiplier(n) - 1) * 100) })));
-  /** 6★ = full: the star row blazes (shimmer + flames + embers) · rainbow stars are kept for a future 7★–9★ */
-  readonly maxed = computed(() => this.star() >= MAX_STAR);
   readonly starRow = computed(() => Array.from({ length: MAX_STAR }, (_, i) => {
     const n = i + 1, s = this.star();
     return { n, state: n <= s ? 'lit' : n === s + 1 ? 'next' : 'locked' };
   }));
-  /** rising embers over the blazing 6★ row: [left %, delay s, duration s] */
-  readonly embers: [number, number, number][] = Array.from({ length: 8 }, (_, i) => [8 + ((i * 41) % 84), (i * .55) % 4, 3.2 + ((i * 7) % 5) * .3]);
   readonly maxPerks = [4, 5, 6].map(n => STAR_PERKS[n].label).join(' · ');
   readonly ordinal = (n: number) => ['FIRST', 'SECOND', 'THIRD', 'FOURTH', 'FIFTH', 'SIXTH'][n - 1] ?? '';
   /** HP / ATK / DEF now vs after the next star */
@@ -94,15 +91,19 @@ export class HeroDetailComponent {
   /** the perk the next star unlocks (4★–6★), if any */
   readonly nextPerk = computed(() => STAR_PERKS[this.star() + 1]?.label ?? '');
   starUp(): void {
-    const s = this.star();
-    if (this.roster.starUp(this.uid())) { this.say(`อัปเป็น ${s + 1}★ แล้ว`); this.starFx.set({ key: Date.now(), n: s + 1 }); }
-    else this.say('Memory ไม่พอ', false);
+    const uid = this.uid();
+    if (this.roster.starUp(uid)) {
+      this.message.set(null);
+      this.starFx.set({ uid, n: this.star() });
+    } else {
+      this.say('Memory ไม่พอ', false);
+    }
   }
   /** Gilded Ember pack (public/ui/gilded): icons + one-shot VFX sheets */
   readonly gild = (name: string) => `ui/gilded/${name}.webp`;
   readonly starImg = (n: number, lit: boolean) => this.gild(!lit ? 'star_empty' : n > MAX_STAR ? 'star_awakened' : 'star_lit');
-  /** star-up VFX (pillar + burst) on the node that just lit · level ring / breakthrough seal on the level bar */
-  readonly starFx = signal<{ key: number; n: number } | null>(null);
+  /** Short gold shimmer centered on the newly unlocked star. */
+  readonly starFx = signal<{ uid: number; n: number } | null>(null);
   readonly levelFx = signal<{ key: number; kind: 'level' | 'breakthrough' } | null>(null);
 
   readonly inventory = computed(() => this.save.state().inventory);
@@ -226,7 +227,6 @@ export class HeroDetailComponent {
   readonly slotTag: Record<SkillKind, string> = { skill: 'สกิล 1', skill2: 'สกิล 2', ult: 'ท่าไม้ตาย' };
   readonly errorText = (e: SkillUpgradeError | null) => (e ? UPGRADE_ERROR[e] : '');
   readonly stars = (n: number) => '★'.repeat(n);
-  readonly starList = computed(() => Array.from({ length: this.star() }, (_, i) => i));
   readonly pct = (a: number, b: number) => Math.min(100, (a / Math.max(1, b)) * 100);
 
   private fmt(stat: EquipStat, v: number) {

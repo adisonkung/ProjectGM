@@ -19,6 +19,7 @@ import { CityHero, CitySim } from '../../island/city-sim';
 import { SKY_PLOTS } from '../../core/data/sky-city';
 import { IslandSim, SimHero } from '../../island/island-sim';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
+import { HeroStarsComponent } from '../../shared/hero-stars.component';
 import { IconComponent } from '../../shared/icon.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
@@ -51,7 +52,7 @@ const EVENT_TITLE: Record<IslandEvent['type'], string> = {
  */
 @Component({
   selector: 'app-island',
-  imports: [ProfilePortraitComponent, A11yModule, TowerOrnamentComponent, IslandDetailArtComponent, IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent, RouterLink],
+  imports: [HeroStarsComponent, ProfilePortraitComponent, A11yModule, TowerOrnamentComponent, IslandDetailArtComponent, IslandSceneComponent, SkyCityComponent, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent, RouterLink],
   templateUrl: './island.component.html',
   styleUrl: './island.component.scss',
 })

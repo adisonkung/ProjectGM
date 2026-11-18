@@ -16,7 +16,7 @@
       <section class="equipment-panel equipped citadel-surface" aria-label="อุปกรณ์ของฮีโร่"><app-citadel-frame shape="panel" [cut]="22" [crimson]="false" [lacquer]="false" />
         <div class="identity">
           <div class="hero-art">@if (heroBanner() || heroPortrait(); as art) { <img [src]="art" [alt]="roster.template(h).name" /> } @else { <app-hero-portrait [heroId]="h.templateId" [size]="120" /> }</div>
-          <div class="who"><span class="gm-stars">{{ '★'.repeat(roster.star(h)) }}</span><h2>{{ roster.template(h).name }}</h2><p>Lv.{{ h.level }} <span>{{ className[roster.template(h).cls] }}</span></p><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="heroPicker.focus()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />เปลี่ยนฮีโร่ ↔</button></div>
+          <div class="who"><app-hero-stars class="gm-stars" [count]="roster.star(h)" /><h2>{{ roster.template(h).name }}</h2><p>Lv.{{ h.level }} <span>{{ className[roster.template(h).cls] }}</span></p><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="heroPicker.focus()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />เปลี่ยนฮีโร่ ↔</button></div>
         </div>
         @if (stats(); as s) { <div class="stat-strip"><span>HP <b>{{ s.hp }}</b></span><span>ATK <b>{{ s.atk }}</b></span><span>DEF <b>{{ s.def }}</b></span><span>AS <b>{{ s.atkSpeed.toFixed(2) }}</b></span></div> }
         <div class="gear">

@@ -6,6 +6,7 @@ import { HeroClass } from '../../core/models/hero';
 import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
+import { HeroStarsComponent } from '../../shared/hero-stars.component';
 import { IconComponent } from '../../shared/icon.component';
 import { heroArt } from '../../core/data/hero-art';
 import { heroStar } from '../../core/rules/stars';
@@ -17,7 +18,7 @@ export type HeroSort = 'power' | 'level' | 'star' | 'name';
 /** Hero roster: portrait cards, class filter, sort, "ready" badges (breakthrough / skill rank-up / potions) */
 @Component({
   selector: 'app-heroes',
-  imports: [StateEmblemComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
+  imports: [HeroStarsComponent, StateEmblemComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './heroes.component.html',
   styleUrl: './heroes.component.scss',
 })
@@ -72,6 +73,5 @@ export class HeroesComponent {
   });
 
   readonly count = (c: HeroClass | 'all') => (c === 'all' ? this.cards().length : this.cards().filter(x => x.cls === c).length);
-  readonly stars = (n: number) => '★'.repeat(n);
   readonly classLabel = (c: HeroClass) => CLASS_NAME[c];
 }
