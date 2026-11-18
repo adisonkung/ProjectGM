@@ -2,6 +2,12 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Themed ultimate cut-ins — Codex, 2026-11-18 (in progress)
+
+User approved style 3 for ten heroes (Bai Long, Yue Zheng, Mo Ye, Tang Xun, Lin Xue, Garrick, Kael, Mirelle, Sylvara, Elira), with extra dynamic VFX/aura and a 10% size reduction. Branch `wip/codex-themed-ultimate-cutins` continues the reviewed map/card/prototype stack at be368b2. Ten isolated alpha art plates and approved references are retained under assets/ui/cutins and docs/reviews/themed-cutins; runtime exports use public/ui/cutins. Generic ThemedCutinComponent draws the plate, live localized text, per-hero aura, rays, energy sweep and motes. The stage enters with impact overshoot and settles at scale(.9), origin top left, base 70vw. Full-screen shade is 65%. Timed presentation lasts 1250 ms / 700 ms reduced motion; combat freeze remains unchanged at 650 / 300 ms. Team cut-in images preload before battle. Five unselected heroes keep the previous cut-in. No engine/stat/save changes or master merge/deployment.
+
+Checkpoint: app/spec checks and Karma complete; actual manual-cast browser checks passed all ten desktop and are continuing through mobile/reduced motion. Next: inspect all screenshots/text plaques, finish browser report/clips, production compilation, final diff and validation note. Confirmed local/cloud synchronization metadata remains unchanged.
+
 ### Ultimate cut-in prototype — user follow-up (Codex, 2026-11-18)
 
 User asked to try the suggested Persona 5 / Brown Dust 2 inspired direction. Same review branch `fix/fullscreen-map-art`. Original Eldervane hero banner art sweeps across a broad diagonal gold/burgundy band over a dimmed battlefield; larger skill/name typography. No external game artwork copied. Display lifetime 950 ms (650 ms reduced motion); existing engine/Pixi/DOM freeze remains 650/300 ms, with damage and cast timing unchanged. Reduced motion uses a stationary reveal/fade. Real manual Bai Long ult clicks checked on desktop 1440×860, phone 844×390 and reduced motion, no page errors. PNGs are unchanged frames extracted from the recorded browser videos; 5-second MP4 clips show the actual sequence. App/spec typechecks and Karma 1004/1004 pass. Review: `docs/reviews/ultimate-cutin-prototype/comparison.html`. Other hero banners may need focal-point review; this is a concept prototype awaiting user visual feedback. No master merge/deployment or synchronization-base change.

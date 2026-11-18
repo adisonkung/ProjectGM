@@ -120,6 +120,28 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
     expect(component.cutIn()).toBeNull();
   });
 
+  it('replaces themed artwork on consecutive casts and keeps other heroes on their existing cut-in', () => {
+    component.start();
+    const hero = host().engine.units.find(u => isPlayerUnit(u) && u.heroId)!;
+    for (const id of ['bailong', 'garrick', 'linxue']) {
+      hero.heroId = id;
+      host().handleEvents([{ type: 'cast', src: hero.id, skill: 'ชื่อสกิลจริง', kind: 'ult' }]);
+      fixture.detectChanges();
+      const image = fixture.nativeElement.querySelector('app-themed-cutin img') as HTMLImageElement;
+      expect(image.getAttribute('src')).toBe(`/ui/cutins/${id}.webp`);
+      expect(fixture.nativeElement.querySelector('app-themed-cutin .label').textContent).toContain('ชื่อสกิลจริง');
+      expect(fixture.nativeElement.querySelectorAll('.ult-cutin').length).toBe(1);
+    }
+    hero.heroId = 'vaelric';
+    host().handleEvents([{ type: 'cast', src: hero.id, skill: 'สกิลเดิม', kind: 'ult' }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-themed-cutin')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.ci-band')).not.toBeNull();
+    component.exitStage();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.ult-cutin')).toBeNull();
+  });
+
   it('start button: loading screen with hero art first, then the fight starts by itself', async () => {
     component.enter();
     fixture.detectChanges();

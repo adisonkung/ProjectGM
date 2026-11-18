@@ -122,11 +122,15 @@
       @if (cutIn(); as ci) {
         <!-- ultimate cut-in: original hero art and a short diagonal reveal over the held field -->
         @for (k of [ci.key]; track k) {
-          <div class="ult-cutin" role="status" aria-live="polite">
+          <div class="ult-cutin" [class.themed]="!!ci.theme" role="status" aria-live="polite">
             <div class="ci-shade" aria-hidden="true"></div>
+            @if (ci.theme; as theme) {
+              <app-themed-cutin [art]="theme" [name]="ci.name" [skill]="ci.skill" />
+            } @else {
             <div class="ci-band">@if (ci.art) { <img [src]="ci.art" alt="" draggable="false" /> }<i class="ci-sheen"></i></div>
             <div class="ci-text"><small>ULTIMATE</small><b>{{ ci.skill }}</b><span>{{ ci.name }}</span></div>
             <i class="ci-spark s1"></i><i class="ci-spark s2"></i>
+            }
           </div>
         }
       }

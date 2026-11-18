@@ -1,0 +1,55 @@
+:host { position: absolute; inset: 0; pointer-events: none; overflow: hidden; animation: cutin-cover 1.25s linear both; }
+.stage {
+  position: absolute; left: 0; top: 0;
+  // Approved layout is 70vw wide; 0.9 scales BOTH dimensions from the top-left anchor.
+  width: 70vw; max-width: 1500px; transform-origin: top left;
+  transform: scale(.9); container-type: inline-size; isolation: isolate;
+  animation: cutin-impact 1.25s cubic-bezier(.16,.8,.24,1) both;
+}
+.plate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; }
+.aura { position: absolute; inset: 8% 2% 10% 6%; z-index: 0; opacity: .5;
+  background: radial-gradient(ellipse at 48% 48%, var(--accent), transparent 68%);
+  filter: blur(15px); animation: aura-breathe .7s ease-in-out infinite alternate; }
+.energy { position: absolute; inset: 8% 2% 6% 5%; z-index: 2;
+  background: repeating-conic-gradient(from 25deg at 20% 65%, transparent 0 12deg, color-mix(in srgb, var(--accent) 42%, transparent) 12.4deg 12.7deg, transparent 13deg 20deg);
+  mask-image: radial-gradient(ellipse at center, transparent 25%, #000 65%, transparent 75%);
+  clip-path: polygon(0 0, 100% 0, 83% 70%, 0 100%); opacity: .6;
+  animation: energy-pulse .6s ease-out infinite alternate; }
+.sweep { position: absolute; inset: 6% 0 8%; z-index: 3; overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, 80% 73%, 0 100%); }
+.sweep::before { content: ''; position: absolute; top: 0; bottom: 0; left: -40%; width: 12%; transform: skewX(-30deg);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 65%, white), transparent);
+  opacity: .5; mix-blend-mode: screen; animation: energy-sweep .75s .12s ease-out both; }
+.motes { position: absolute; inset: 0; z-index: 4; }
+.motes i { position: absolute; left: calc(15% + var(--i) * 6%); top: calc(28% + mod(var(--i) * 19, 61) * 1%);
+  width: clamp(3px, .65cqw, 9px); aspect-ratio: 1; background: var(--accent);
+  box-shadow: 0 0 8px var(--accent); clip-path: polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);
+  opacity: 0; animation: mote-flight .65s calc(.08s + var(--i) * .025s) ease-out both; }
+.label { position: absolute; z-index: 5; left: var(--label-left); top: var(--label-top); width: var(--label-width);
+  display: grid; justify-items: center; text-align: center; gap: .4cqw; color: #fff3d4;
+  animation: title-strike .25s .15s ease-out both; }
+.label small { font: 600 clamp(8px,1.5cqw,21px)/1.2 'Cinzel',serif; letter-spacing: .16em; color: #ebd195; }
+.label b { font: 700 clamp(13px,3.2cqw,42px)/1.2 'IBM Plex Sans Thai',sans-serif;
+  background: linear-gradient(#fff4cb,#f1ce7d 65%,#be852f); color: transparent; background-clip: text;
+  filter: drop-shadow(0 2px 2px #000); width: 100%; overflow-wrap: anywhere; }
+.label span { font: 500 clamp(10px,1.8cqw,25px)/1.3 'IBM Plex Sans Thai',sans-serif; text-shadow: 0 1px 4px #000; }
+@keyframes cutin-cover { 0% { opacity: 0; } 12%,82% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes cutin-impact {
+  0% { transform: translateX(-105%) scale(.9); }
+  16% { transform: translateX(1%) scale(.918); }
+  21% { transform: translate(-.4%,.3%) scale(.9); }
+  26%,82% { transform: translate(0) scale(.9); }
+  100% { transform: translateX(-18%) scale(.9); }
+}
+@keyframes aura-breathe { from { opacity: .25; transform: scale(.95); } to { opacity: .65; transform: scale(1.04); } }
+@keyframes energy-pulse { from { opacity: .18; transform: translateX(-1%); } to { opacity: .6; transform: translateX(1%); } }
+@keyframes energy-sweep { to { left: 120%; } }
+@keyframes mote-flight { 0% { opacity: 0; transform: translate(-18px,12px) scale(.2); } 25% { opacity: .95; } 100% { opacity: 0; transform: translate(70px,-30px) scale(.5); } }
+@keyframes title-strike { from { opacity: 0; transform: translateX(16px) scale(1.06); } }
+@media (prefers-reduced-motion: reduce) {
+  :host { animation: cutin-cover .7s linear both; }
+  .stage { animation: none; }
+  .aura { animation: none; opacity: .3; }
+  .energy,.sweep,.motes { display: none; }
+  .label { animation: none; }
+}

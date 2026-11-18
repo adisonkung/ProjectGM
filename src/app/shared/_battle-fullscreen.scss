@@ -144,7 +144,7 @@ html body .app app-battle .ult-cutin {
   .ci-band::after { content: ''; position: absolute; inset: 0; z-index: 2;
     background: repeating-linear-gradient(110deg, transparent 0 78px, #e6c88a18 79px 80px, transparent 81px 120px);
     mask-image: linear-gradient(90deg, transparent 40%, #000); }
-  img { position: absolute; left: 2%; top: 0; width: 80%; height: 100%; object-fit: cover; object-position: 50% 8%;
+  .ci-band img { position: absolute; left: 2%; top: 0; width: 80%; height: 100%; object-fit: cover; object-position: 50% 8%;
     transform: skewY(4deg); animation: ci-pan .95s ease-out both; }
   .ci-sheen { position: absolute; z-index: 3; inset: 0 auto 0 -30%; width: 12%; transform: skewX(-24deg);
     background: linear-gradient(90deg, transparent, #fff1cf66, transparent); animation: ci-sheen .65s .1s ease-out both; }
@@ -188,3 +188,11 @@ html body .app app-battle .ult-cutin {
     .ci-band, img, .ci-sheen, .ci-text, .ci-spark { animation: none; } .ci-sheen, .ci-spark { display: none; } }
 }
 @keyframes ci-still { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
+
+html body .app app-battle .ult-cutin.themed {
+  animation: ci-life 1.25s linear both;
+  .ci-shade { background: rgba(8,5,5,.65); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .app app-battle .ult-cutin.themed { animation: ci-still .7s linear both; }
+}

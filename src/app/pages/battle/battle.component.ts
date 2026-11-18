@@ -1,4 +1,6 @@
 import { DecimalPipe } from '@angular/common';
+import { ThemedCutinComponent } from '../../shared/themed-cutin.component';
+import { ULTIMATE_CUTINS, UltimateCutinArt } from '../../core/data/ultimate-cutins';
 import { isMeleeRange } from '../../battle/engine/melee-contact';
 import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
 import { bodyFrontCell } from '../../battle/engine/footprint';
@@ -67,7 +69,7 @@ const TICK = 0.05;
  */
 @Component({
   selector: 'app-battle',
-  imports: [DecimalPipe, BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
+  imports: [ThemedCutinComponent, DecimalPipe, BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -315,7 +317,7 @@ export class BattleComponent implements OnDestroy {
     const t0 = performance.now();
     const sprites = battleSpriteFiles([...this.engine.units.map(u => u.sprite), ...stageMonsterSprites(this.stage())]).map(spriteUrl);
     // the stage art, and every team member's key art (the ultimate cut-in shows it)
-    const images = [this.background()?.file, ...team.flatMap(u => { const a = heroArt(u.heroId!); return [a?.banner, a?.portrait]; })]
+    const images = [this.background()?.file, ...team.flatMap(u => { const a = heroArt(u.heroId!); return [a?.banner, a?.portrait, ULTIMATE_CUTINS[u.heroId!]?.file]; })]
       .filter((f): f is string => !!f).map(f => '/' + f);
     void preloadBattle({ sprites, images, pixi: this.renderer() === 'pixi', token,
       onProgress: (done, total) => { if (!token.cancelled) this.loading.update(l => l && { ...l, done, total }); } }).then(() => {
@@ -340,20 +342,21 @@ export class BattleComponent implements OnDestroy {
 
   // ---------------------------------------------------------------- ultimate cut-in
   /** hero key art sweeping across the field while the field holds still for a beat (player ultimates only) */
-  readonly cutIn = signal<{ key: number; art: string; name: string; skill: string } | null>(null);
+  readonly cutIn = signal<{ key: number; art: string; name: string; skill: string; theme?: UltimateCutinArt } | null>(null);
   private cutInTimer?: ReturnType<typeof setTimeout>;
   static readonly ULT_FREEZE_MS = 650;
   private ultCutIn(u: BattleUnit, skill: string): void {
     const art = u.heroId ? heroArt(u.heroId) : undefined;
     const reduced = this.reducedMotion();
-    this.cutIn.set({ key: ++this.animKey, art: art ? '/' + (art.banner ?? art.portrait) : '', name: u.name, skill });
+    const theme = u.heroId ? ULTIMATE_CUTINS[u.heroId] : undefined;
+    this.cutIn.set({ key: ++this.animKey, art: art ? '/' + (art.banner ?? art.portrait) : '', name: u.name, skill, theme });
     // the same presentation hold as a hit-stop: engine steps, the Pixi game clock and every board animation wait —
     // game time does not move, so the cast's timing / damage are exactly what they would have been
     const freeze = reduced ? 300 : BattleComponent.ULT_FREEZE_MS;
     playImpactFeel(this.boardEl()?.nativeElement, { hitStopMs: freeze });
     this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + freeze);
     clearTimeout(this.cutInTimer);
-    this.cutInTimer = setTimeout(() => this.cutIn.set(null), reduced ? 650 : 950);
+    this.cutInTimer = setTimeout(() => this.cutIn.set(null), theme ? (reduced ? 700 : 1250) : (reduced ? 650 : 950));
   }
   readonly teamPower = computed(() => this.team.units().reduce((a, u) => a + power(u.stats), 0));
   readonly timeLeft = computed(() => Math.max(0, Math.ceil(this.stage().timeLimit - this.time())));

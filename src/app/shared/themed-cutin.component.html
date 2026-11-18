@@ -1,0 +1,11 @@
+<div class="stage" [style.--accent]="art().accent" [style.aspect-ratio]="art().ratio"
+     [style.--label-left]="art().left" [style.--label-top]="art().top" [style.--label-width]="art().width">
+  <div class="aura" aria-hidden="true"></div>
+  <img class="plate" [src]="'/' + art().file" alt="" draggable="false" />
+  <div class="energy" aria-hidden="true"></div>
+  <div class="sweep" aria-hidden="true"></div>
+  <div class="motes" aria-hidden="true">
+    @for (i of motes; track i) { <i [style.--i]="i"></i> }
+  </div>
+  <div class="label"><small>ULTIMATE</small><b>{{ skill() }}</b><span>{{ name() }}</span></div>
+</div>
