@@ -28,10 +28,10 @@ const plate = (id: string, accent: string): UltimateCutinArt => ({
   nameSize: '2.1cqw', embeddedNameFrame: false,
 });
 /** Same approved Bai Long layout/animation, with hero-specific generated art and aura. */
-const lockedPlate = (id: string, accent: string, w: number, h: number): UltimateCutinArt => ({
-  ...plate(id, accent), file: `ui/cutins/locked-five/${id}.webp`, ratio: `${w} / ${h}`,
+const lockedPlate = (id: string, accent: string, w: number, h: number, group = 'locked-five'): UltimateCutinArt => ({
+  ...plate(id, accent), file: `ui/cutins/${group}/${id}.webp`, ratio: `${w} / ${h}`,
   bakedText: true, embeddedNameFrame: true, stageWidth: '76vw', vfx: 'water',
-  layers: [`ui/cutins/locked-five/${id}-wake.webp`, `ui/cutins/locked-five/${id}-spray.webp`],
+  layers: [`ui/cutins/${group}/${id}-wake.webp`, `ui/cutins/${group}/${id}-spray.webp`],
 });
 export const ULTIMATE_CUTINS: Readonly<Record<string, UltimateCutinArt>> = {
   bailong: { ...plate('bailong', '#8edfff'), file: 'ui/cutins/bailong-aura-italic.webp', ratio: '1899 / 828',
@@ -43,19 +43,9 @@ export const ULTIMATE_CUTINS: Readonly<Record<string, UltimateCutinArt>> = {
   moye: lockedPlate('moye', '#ff5267', 1899, 828),
   tangxun: lockedPlate('tangxun', '#78e5ae', 1899, 828),
   linxue: lockedPlate('linxue', '#ffb5cf', 1899, 828),
-  garrick: { ...plate('garrick', '#e7c37a'), ratio: '1942 / 809',
-    left: '46%', top: '47.5%', width: '30%', titleSize: '4cqw',
-    nameLeft: '50%', nameTop: '63.5%', nameWidth: '22%', nameHeight: '8%' },
-  kael: { ...plate('kael', '#ff9145'), ratio: '1920 / 819',
-    left: '47%', top: '49%', width: '31%', titleSize: '3.8cqw',
-    nameLeft: '52.5%', nameTop: '67%', nameWidth: '20%', nameHeight: '8%', addTitleStars: true },
-  mirelle: { ...plate('mirelle', '#a9e8ff'), ratio: '1942 / 809',
-    left: '48%', top: '52%', width: '30%', titleSize: '3.3cqw',
-    nameLeft: '50%', nameTop: '71.5%', nameWidth: '26%', nameHeight: '8%', nameSize: '1.85cqw' },
-  sylvara: { ...plate('sylvara', '#9be66a'), ratio: '1930 / 815',
-    left: '50%', top: '52%', width: '28%', titleSize: '4cqw',
-    nameLeft: '49%', nameTop: '68%', nameWidth: '30%', nameHeight: '8%', nameSize: '1.8cqw' },
-  elira: { ...plate('elira', '#ffe0a1'), ratio: '1852 / 849',
-    left: '47.5%', top: '50%', width: '27%', titleSize: '3.6cqw',
-    nameLeft: '48.5%', nameTop: '68.5%', nameWidth: '25%', nameHeight: '8%', nameSize: '1.9cqw' },
+  garrick: lockedPlate('garrick', '#e7c37a', 1899, 828, 'locked-next-five'),
+  kael: lockedPlate('kael', '#ff9145', 1899, 828, 'locked-next-five'),
+  mirelle: lockedPlate('mirelle', '#a9e8ff', 1899, 828, 'locked-next-five'),
+  sylvara: lockedPlate('sylvara', '#9be66a', 1899, 828, 'locked-next-five'),
+  elira: lockedPlate('elira', '#ffe0a1', 1899, 828, 'locked-next-five'),
 };

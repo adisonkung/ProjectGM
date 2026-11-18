@@ -34,8 +34,10 @@ def export(row, check):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
+    parser.add_argument('--manifest', default=str(MANIFEST), help='Manifest path, relative to repository root or absolute')
     args = parser.parse_args()
-    data = json.loads(MANIFEST.read_text())
+    manifest = ROOT / args.manifest
+    data = json.loads(manifest.read_text())
     for row in data:
         export(row, args.check)
         sheet_path = ROOT / row['sheet']
@@ -49,8 +51,8 @@ def main():
             assert cropped.tobytes() == Image.open(source).convert('RGBA').tobytes(), source
             export(layer, args.check)
     if not args.check:
-        MANIFEST.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
-    print('Verified 4 cut-ins and 8 alpha textures: immutable sources, lossless RGBA exports.')
+        manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
+    print(f'Verified {len(data)} cut-ins and {sum(len(row["layers"]) for row in data)} alpha textures: immutable sources, lossless RGBA exports.')
 
 
 if __name__ == '__main__':

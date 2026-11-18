@@ -128,20 +128,14 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
       host().handleEvents([{ type: 'cast', src: hero.id, skill: 'ชื่อสกิลจริง', kind: 'ult' }]);
       fixture.detectChanges();
       const image = fixture.nativeElement.querySelector('app-themed-cutin img') as HTMLImageElement;
-      expect(image.getAttribute('src')).toBe(`/ui/cutins/${id === 'bailong' ? 'bailong-aura-italic' : ['yuezheng', 'moye', 'tangxun', 'linxue'].includes(id) ? 'locked-five/' + id : id}.webp`);
-      if (['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue'].includes(id)) {
-        expect(image.alt).toBe(`ชื่อสกิลจริง — ${component.cutIn()!.name}`);
-        expect(fixture.nativeElement.querySelector('app-themed-cutin .label')).toBeNull();
-        expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .water-layer').length).toBe(2);
-        expect(fixture.nativeElement.querySelector('app-themed-cutin .water-burst, app-themed-cutin .water-ribbons')).toBeNull();
-      } else {
-        expect(fixture.nativeElement.querySelector('app-themed-cutin .label').textContent).toContain('ชื่อสกิลจริง');
-        expect(fixture.nativeElement.querySelector('app-themed-cutin .hero-name span').textContent.trim()).toBe(component.cutIn()!.name);
-        expect(fixture.nativeElement.querySelector('app-themed-cutin .water-vfx')).toBeNull();
-      }
-      // Switching between embedded and live badges must not leave two frames behind.
-      expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .name-frame').length)
-        .toBe(['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue'].includes(id) ? 0 : 1);
+      const group = ['yuezheng', 'moye', 'tangxun', 'linxue'].includes(id) ? 'locked-five' : 'locked-next-five';
+      expect(image.getAttribute('src')).toBe(id === 'bailong' ? '/ui/cutins/bailong-aura-italic.webp' : `/ui/cutins/${group}/${id}.webp`);
+      expect(image.alt).toBe(`ชื่อสกิลจริง — ${component.cutIn()!.name}`);
+      expect(fixture.nativeElement.querySelector('app-themed-cutin .label')).toBeNull();
+      expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .water-layer').length).toBe(2);
+      expect(fixture.nativeElement.querySelector('app-themed-cutin .water-burst, app-themed-cutin .water-ribbons')).toBeNull();
+      // The baked name badge must never acquire a second live frame between casts.
+      expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .name-frame').length).toBe(0);
       expect(fixture.nativeElement.querySelectorAll('.ult-cutin').length).toBe(1);
     }
     hero.heroId = 'vaelric';

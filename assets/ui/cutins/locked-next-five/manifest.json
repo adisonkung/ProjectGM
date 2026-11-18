@@ -1,0 +1,247 @@
+[
+  {
+    "id": "garrick",
+    "name": "การ์ริก",
+    "canonical_name": "การ์ริก",
+    "skill": "ยืนหยัดเฝ้าประตู",
+    "accent": "#e7c37a",
+    "source": "assets/ui/cutins/locked-next-five/garrick.png",
+    "file": "public/ui/cutins/locked-next-five/garrick.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "fe3936176426f17ac6fae466501f156b78e6e549ca10e195b7229766cd4a6273",
+    "runtime_sha256": "6c7bc58522aaa4bd23a74458d2a47fd4298708d2be744ea062495a630e83756f",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-next-five/garrick-wake.png",
+        "file": "public/ui/cutins/locked-next-five/garrick-wake.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "aa97444c2eed1f06010bd16cf9331d5d751e445001217bd22c3b9cd45740b3d4",
+        "runtime_sha256": "fceb28905ce4019eb75363cf6c3db081d0b6dd6f7a79d7bce8c2f064715faacd",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          627
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-next-five/garrick-spray.png",
+        "file": "public/ui/cutins/locked-next-five/garrick-spray.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "cc1b3eecd41c489af193d8093df4ccde4f1004e89a9f76935ce4e90b2ff3d742",
+        "runtime_sha256": "b88194db5e68d1611a3b04680663af433fa237e7b7eb9c8433aef1205a5b8f83",
+        "crop_box": [
+          0,
+          627,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-next-five/garrick-vfx-sheet.png",
+    "sheet_sha256": "cc4c208cec295c64bf694b3d6e7b000375e4599b6dd5b6a52809de59832b0f38",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/garrick.webp",
+    "generated_plate": "exec-e7c79f9c-61cf-47e1-b58b-0bd58f8aa7f8.png",
+    "generated_sheet": "exec-0a7ec6a5-1592-4a0f-bd92-81d6b7995292.png"
+  },
+  {
+    "id": "kael",
+    "name": "เคล",
+    "canonical_name": "เคล",
+    "skill": "เถ้าธุลีแยกแผ่นดิน",
+    "accent": "#ff9145",
+    "source": "assets/ui/cutins/locked-next-five/kael.png",
+    "file": "public/ui/cutins/locked-next-five/kael.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "792f56599e1da8ac8a5ac19ade8ffa98c87f1d4b147580e7ca7faac73eba9c69",
+    "runtime_sha256": "837337b8dc4b071e67c5176ee5e5c32289fc23d53ffbadc158f6fb41bfe730af",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-next-five/kael-wake.png",
+        "file": "public/ui/cutins/locked-next-five/kael-wake.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "569025b158e0a1b0465c1ff6773ce7d8a26fdf286d3e62de1e792871e07e4f86",
+        "runtime_sha256": "377dfc0deffe53e27d7b79dd4c67d15d3a7ab2e9b2a8ced640ae2c391a82273d",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          627
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-next-five/kael-spray.png",
+        "file": "public/ui/cutins/locked-next-five/kael-spray.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "bae7aa34f9dcc7bc7bd344e1cd2074020cbb899daedc7b60d2257ed5c87e1633",
+        "runtime_sha256": "67b0c4df74d01647b1f3152fc7b019946653d566950a92caa3541c665f0ea04c",
+        "crop_box": [
+          0,
+          627,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-next-five/kael-vfx-sheet.png",
+    "sheet_sha256": "9a08a40d9d168d996c828e8a18f9101bd773edb64f821ebc84dd95aec2644ae2",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/kael.webp",
+    "generated_plate": "exec-53eb6879-9d9a-418e-a835-6ed29d5684e7.png",
+    "generated_sheet": "exec-9e8a95a1-9b1f-45e8-973a-c6ebf88e17c5.png"
+  },
+  {
+    "id": "mirelle",
+    "name": "มิเรลล์",
+    "canonical_name": "มิเรลล์ ฟรอสต์กลาส",
+    "skill": "อาณาเขตแก้วเหมันต์",
+    "accent": "#a9e8ff",
+    "source": "assets/ui/cutins/locked-next-five/mirelle.png",
+    "file": "public/ui/cutins/locked-next-five/mirelle.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "5fdb3cacc528b79e9d08e00140de825750b694afb3c1a43407b16aa327cc44c3",
+    "runtime_sha256": "ea609c4da6d3cd15a6e1dfd267a361a47044d3bb5060f47ee1f3d7e8e410fb8a",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-next-five/mirelle-wake.png",
+        "file": "public/ui/cutins/locked-next-five/mirelle-wake.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "a9e23fae2ba4f8f45be21747bc3cebcd7e80235ab7e8e0b8e02fe6c26401bcd7",
+        "runtime_sha256": "d6f3e06c570f5d7d387fa17ff7c8fe5fb619831aa81efda5d8ad613eef89807b",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          627
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-next-five/mirelle-spray.png",
+        "file": "public/ui/cutins/locked-next-five/mirelle-spray.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "cdc23f77138b541551a9b384d8279baa8519a7bcdb6f74695532c1eb3a949bcf",
+        "runtime_sha256": "f32527fcc06dce3060507005c89792b181ae7b14b362d2cb4a362e53498af18a",
+        "crop_box": [
+          0,
+          627,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-next-five/mirelle-vfx-sheet.png",
+    "sheet_sha256": "a8ac2275caa6d764387effaf4fe617ac4effca6b3bd4f5703ef8e8311d2eeb73",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/mirelle.webp",
+    "generated_plate": "exec-00dbc278-ee45-426f-a4bf-db9319b7fe2f.png",
+    "generated_sheet": "exec-98efb405-b473-420d-9728-27859b6fb52a.png"
+  },
+  {
+    "id": "sylvara",
+    "name": "ซิลวารา",
+    "canonical_name": "ซิลวารา วินด์วิสเปอร์",
+    "skill": "ฝนศรมรกต",
+    "accent": "#9be66a",
+    "source": "assets/ui/cutins/locked-next-five/sylvara.png",
+    "file": "public/ui/cutins/locked-next-five/sylvara.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "5c803e765796a628238b30efd82ecf0b919245b024e9352580adc40b359c4935",
+    "runtime_sha256": "9e0f4d3d60cac7f0d2e77fbe78b2a45b70a6c3e40c297d10df9d63f8b52c8584",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-next-five/sylvara-wake.png",
+        "file": "public/ui/cutins/locked-next-five/sylvara-wake.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "902485bf01246fd8dad515f27be7e9f5f333c58ef2d1f02967a6a188eb975ca2",
+        "runtime_sha256": "6c62cc8affe4122a14c7d3753a5b203ceefb07a01ef3124efcfe45ca99084b05",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          627
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-next-five/sylvara-spray.png",
+        "file": "public/ui/cutins/locked-next-five/sylvara-spray.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "9492333bd5ed336f776f50bdda1be6c5cdd3d993b9d65c40a799e14810472ee6",
+        "runtime_sha256": "6adec9e8fc0077a424c8904b1d789b12d00a740f981f36dc65272a726d841cde",
+        "crop_box": [
+          0,
+          627,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-next-five/sylvara-vfx-sheet.png",
+    "sheet_sha256": "40448d5d9aa52ace0458c6b51d8cee2a94180cd1709656a3927218bc9c5809a2",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/sylvara.webp",
+    "generated_plate": "exec-99b3a6d6-73ce-418a-9aa9-f825710f591c.png",
+    "generated_sheet": "exec-bc0623fb-8cf3-46b8-b121-bcc22d98e15e.png"
+  },
+  {
+    "id": "elira",
+    "name": "เอลิรา",
+    "canonical_name": "เอลิรา ดอว์นเมียร์",
+    "skill": "เขตพิทักษ์แสงอุ่น",
+    "accent": "#ffe0a1",
+    "source": "assets/ui/cutins/locked-next-five/elira.png",
+    "file": "public/ui/cutins/locked-next-five/elira.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "92777f6f4ea53d71c50572244f45ce33678775773a485a807758c7ab1d12198e",
+    "runtime_sha256": "fe44247640d3cef639eb9749e3c1c00fe56a0099800615c0725dc6081d177735",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-next-five/elira-wake.png",
+        "file": "public/ui/cutins/locked-next-five/elira-wake.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "8f8c9efa92c7ab87aaccd637d2877bde074926e6509dc02567ea2a1d77ff0d39",
+        "runtime_sha256": "ba59f32645820f2127d4621185524e675ccb3554bfd7d5dc4b379abd199b114d",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          627
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-next-five/elira-spray.png",
+        "file": "public/ui/cutins/locked-next-five/elira-spray.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "a3e410c4cfc88f09412c90e6cf65da72b6c207bae911acc0f8aa6b6603dc5327",
+        "runtime_sha256": "4fb56256ee8741402e2046433c3f216968ccf59b8f5f1f266aba72aef702bcce",
+        "crop_box": [
+          0,
+          627,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-next-five/elira-vfx-sheet.png",
+    "sheet_sha256": "d5df172070bcb30745633ad2929d07878511bb6883c9a58b59e0522aafdb3673",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/elira.webp",
+    "generated_plate": "exec-e990a455-34c0-495d-84ec-59ff9fd5d846.png",
+    "generated_sheet": "exec-414c09a9-3392-4aaa-9c50-ca832a32b60d.png"
+  }
+]

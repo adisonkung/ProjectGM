@@ -22,13 +22,25 @@ const ids = process.env.CUTIN_IDS?.split(',') || allIds;
         for (const [w, h, reduced] of [[1440, 860, false], [844, 390, false], [844, 390, true]]) {
             await p.setViewportSize({ width: w, height: h });
             await p.emulateMedia({ reducedMotion: reduced ? 'reduce' : 'no-preference' });
-            for (const id of reduced ? ids.filter(id => ['bailong','yuezheng','moye','tangxun','linxue','mirelle','elira'].includes(id)) : ids) {
+            for (const id of ids) {
                 await p.evaluate(({ seed, id }) => { const s = structuredClone(seed), starters = ['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue']; const team = [id, ...starters.filter(i => i !== id)].slice(0, 5); s.heroes = [...new Set([...team, ...starters])].map((templateId, i) => ({ ...seed.heroes[0], uid: 100 + i, templateId, level: 7 })); s.team = seed.team.map((slot, i) => ({ ...slot, uid: 100 + i })); s.cleared = 10; localStorage.setItem('projectgm-save-v1', JSON.stringify(s)); }, { seed, id });
                 await p.goto(`${process.env.CUTIN_TEST_URL || 'http://127.0.0.1:4200'}/battle?floor=1`);
                 await p.locator('app-battle').waitFor();
                 await p.getByRole('button', { name: 'เริ่มต่อสู้', exact: true }).click();
                 await p.waitForFunction(() => ng.getComponent(document.querySelector('app-battle')).running());
                 await p.waitForFunction(() => !ng.getComponent(document.querySelector('app-battle')).loading());
+                // Hold the real cast overlay as soon as Angular inserts it. A busy host
+                // can otherwise consume its entire 1250ms lifetime between protocol calls.
+                await p.evaluate(() => {
+                    const observer = new MutationObserver(() => {
+                        if (!document.querySelector('app-themed-cutin .stage')) return;
+                        const c = ng.getComponent(document.querySelector('app-battle'));
+                        clearTimeout(c.cutInTimer);
+                        c.paused.set(true);
+                        observer.disconnect();
+                    });
+                    observer.observe(document.body, {childList:true, subtree:true});
+                });
                 await p.locator('.party-in .ultk').first().click();
                 await p.locator('app-themed-cutin .stage').waitFor({ timeout: 15000 });
                 await p.evaluate(() => { const c = ng.getComponent(document.querySelector('app-battle')); clearTimeout(c.cutInTimer); c.paused.set(true); document.querySelector('.ult-cutin').getAnimations({ subtree: true }).forEach(a => { a.currentTime = 400; a.pause(); }); });
@@ -45,7 +57,8 @@ const ids = process.env.CUTIN_IDS?.split(',') || allIds;
                         text:host.querySelector('.label')?.textContent || img.alt, overflow:document.documentElement.scrollWidth > innerWidth,
                         animation:getComputedStyle(stage).animationName, water:host.querySelector('.water-vfx') ? {display:getComputedStyle(host.querySelector('.water-vfx')).display, layers:host.querySelectorAll('.water-layer').length} : null};
                 });
-                assert.equal(bounds.src, `/ui/cutins/${id === 'bailong' ? 'bailong-aura-italic' : ['yuezheng','moye','tangxun','linxue'].includes(id) ? 'locked-five/' + id : id}.webp`);
+                const group = ['garrick','kael','mirelle','sylvara','elira'].includes(id) ? 'locked-next-five' : 'locked-five';
+                assert.equal(bounds.src, id === 'bailong' ? '/ui/cutins/bailong-aura-italic.webp' : `/ui/cutins/${group}/${id}.webp`);
                 assert(Math.abs(bounds.width - bounds.expectedWidth) < 2);
                 assert(Math.abs(bounds.x) < 1 && Math.abs(bounds.y) < 1);
                 assert.equal(bounds.overflow, false);
