@@ -38,7 +38,7 @@
             <i class="st" aria-hidden="true"></i>
           </span>
           <span class="class-name"><b>{{ className(tp.cls) }}</b><small>{{ tp.cls }}</small></span>
-          <span class="stars" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">@for (n of starList(); track n) { <app-ui-symbol name="star" [size]="36" /> }</span>
+          <span class="stars" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">@for (n of starList(); track n) { <img [src]="starImg(n + 1, true)" alt="" /> }</span>
         </div>
         <div class="chips">
           @if (inTeam()) { <span class="chip">อยู่ในทีม</span> }
@@ -56,6 +56,11 @@
           <div class="bar" role="progressbar" aria-label="ประสบการณ์ฮีโร่" aria-valuemin="0" [attr.aria-valuemax]="p.expToNext || 1" [attr.aria-valuenow]="p.state === 'MAX' ? 1 : (p.exp > p.expToNext ? p.expToNext : p.exp)">
             <i [style.width.%]="expPct()"></i><b class="tip" [style.left.%]="expPct()"></b>
           </div>
+          @if (levelFx(); as f) {
+            @for (k of [f.key]; track k) {
+              <app-sheet-fx [class]="'fx-' + f.kind" [src]="gild(f.kind === 'level' ? 'vfx_levelup_ring' : 'vfx_breakthrough')" [fps]="13" (done)="levelFx.set(null)" />
+            }
+          }
           <small class="exp">{{ p.state === 'MAX' ? 'เลเวลสูงสุด' : p.state === 'BREAKTHROUGH_READY' ? 'ต้อง Breakthrough เพื่อไปต่อ' : 'EXP ' + p.exp + ' / ' + p.expToNext }}</small>
         </div>
       </div>
@@ -167,48 +172,54 @@
           <div class="growth">
           @if (starView(); as sv) {
             <section class="block stars-block">
-              <header><h2>พัฒนาดาว</h2><small class="eyebrow">CONSTELLATION OF ASCENT</small></header>
+              <header><h2 class="has-icon"><img [src]="gild('star_up')" alt="" />พัฒนาดาว</h2><small class="eyebrow">CONSTELLATION OF ASCENT</small></header>
               <div class="constellation" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                   @for (l of constellationLinks(); track $index) { <line [attr.x1]="l.x1" [attr.y1]="l.y1" [attr.x2]="l.x2" [attr.y2]="l.y2" [class.on]="l.on" vector-effect="non-scaling-stroke" /> }
                 </svg>
                 @for (c of constellation(); track c.n) {
-                  <span class="node" [class.on]="c.on" [class.next]="c.next" [style.left.%]="c.x" [style.top.%]="c.y" aria-hidden="true"><app-ui-symbol name="star" [size]="c.next ? 96 : 66" />@if (c.next) { <em>NEXT</em> }</span>
+                  <span class="node" [class.on]="c.on" [class.next]="c.next" [style.left.%]="c.x" [style.top.%]="c.y" aria-hidden="true"><img [src]="starImg(c.n, c.on || c.next)" alt="" />@if (c.next) { <em>NEXT</em> }</span>
+                }
+                @if (starFx(); as f) {
+                  @for (k of [f.key]; track k) {
+                    <app-sheet-fx class="fx-pillar" [src]="gild('vfx_starup_pillar')" [fps]="12" [style.left.%]="f.x" [style.top.%]="f.y" />
+                    <app-sheet-fx class="fx-burst" [src]="gild('vfx_starup_burst')" [fps]="14" [delayMs]="450" [style.left.%]="f.x" [style.top.%]="f.y" (done)="starFx.set(null)" />
+                  }
                 }
               </div>
-              <span class="leap">@if (sv.maxed) { <b class="to">{{ star() }}</b><app-ui-symbol name="star" [size]="58" /> } @else { <b>{{ star() }}</b><app-ui-symbol class="dim" name="star" [size]="38" /><i class="st" aria-hidden="true"></i><b class="to">{{ star() + 1 }}</b><app-ui-symbol name="star" [size]="58" /> }</span>
+              <span class="leap">@if (sv.maxed) { <b class="to">{{ star() }}</b><img class="big" [src]="starImg(star(), true)" alt="" /> } @else { <b>{{ star() }}</b><img class="small" [src]="starImg(star(), true)" alt="" /><i class="st" aria-hidden="true"></i><b class="to">{{ star() + 1 }}</b><img class="big" [src]="starImg(star() + 1, true)" alt="" /> }</span>
               @if (sv.maxed) { <p class="hint centered">ถึง 6★ แล้ว — ตัวซ้ำจะกลายเป็น Universal Memory</p> }
               @else {
                 <div class="facts">
                   <div><small>HP · ATK · DEF</small><b class="up">+{{ nextStarGain() }}%</b></div>
                   <div><small>ปลดล็อก</small><b class="perk">{{ nextPerk() || '—' }}</b></div>
-                  <div><small>ใช้ Memory</small><b>{{ sv.cost }}</b></div>
+                  <div class="mem-fact"><img [src]="gild('hero_memory')" alt="" /><small>ใช้ Memory</small><b>{{ sv.cost }}</b></div>
                 </div>
-                <div class="mem-row"><span>Memory ของ{{ tp.name }} {{ sv.heroMemory }} · Universal {{ sv.universal }}</span><b>{{ sv.spendHero + sv.spendUniversal }} <small>/ {{ sv.cost }}</small></b></div>
+                <div class="mem-row"><span><img [src]="gild('hero_memory')" alt="" />Memory ของ{{ tp.name }} {{ sv.heroMemory }} · Universal {{ sv.universal }}</span><b>{{ sv.spendHero + sv.spendUniversal }} <small>/ {{ sv.cost }}</small></b></div>
                 <div class="bar"><i [style.width.%]="pct(sv.spendHero + sv.spendUniversal, sv.cost)"></i></div>
                 <button type="button" class="btn-gold wide" [disabled]="!sv.canUp" (click)="starUp()"><i class="st"></i>{{ sv.canUp ? 'อัปดาวเป็น ' + (star() + 1) + '★' : 'Memory ไม่พอ · ขาดอีก ' + sv.missing }}<i class="st"></i></button>
               }
             </section>
           }
           <section class="block grow">
-            <header><h2>เลเวล <small>{{ p.level }} / {{ p.levelCap }}</small></h2>
+            <header><h2 class="has-icon"><img [src]="gild('level_up')" alt="" />เลเวล <small>{{ p.level }} / {{ p.levelCap }}</small></h2>
               <span class="slot-inline">
                 @if (inTeam()) { <span class="chip">อยู่ในทีมแล้ว</span> }
-                @else { <button type="button" class="mini wide" [class.on]="training()" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()" [title]="'ฮีโร่สำรองได้ ' + slotShare * 100 + '% ของ EXP จาก Training Ground'">{{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องฝึกเต็ม' : 'ส่งเข้าช่องฝึก' }}</button> }
+                @else { <button type="button" class="mini wide" [class.on]="training()" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()" [title]="'ฮีโร่สำรองได้ ' + slotShare * 100 + '% ของ EXP จาก Training Ground'"><img class="ico" [src]="gild('training_slot')" alt="" />{{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องฝึกเต็ม' : 'ส่งเข้าช่องฝึก' }}</button> }
               </span>
             </header>
             @if (p.state === 'BREAKTHROUGH_READY') {
               @if (p.breakthrough; as bt) {
-                <p class="hint">ถึงเพดานเลเวล — ใช้หิน Breakthrough เพื่อไปต่อ</p>
+                <p class="hint bt-hint"><img [src]="gild('breakthrough')" alt="" />ถึงเพดานเลเวล — ใช้หิน Breakthrough เพื่อไปต่อ</p>
                 <div class="item-row">@for (n of bt.def.requiredItems; track n.itemId; let i = $index) {
-                  <div class="item-card" [class.ok]="bt.have[i].count >= n.count"><span class="orb"><app-icon [name]="n.itemId" [size]="30" /></span><span class="nm">{{ itemName(n.itemId) }}</span><b>{{ bt.have[i].count }} / {{ n.count }}</b></div>
+                  <div class="item-card" [class.ok]="bt.have[i].count >= n.count"><span class="orb"><app-icon [name]="n.itemId" [size]="34" /><img class="ring" [src]="gild('ring_frame')" alt="" /></span><span class="nm">{{ itemName(n.itemId) }}</span><b>{{ bt.have[i].count }} / {{ n.count }}</b></div>
                 }
                 <a class="item-card more" routerLink="/dungeons/ascension"><span>วัสดุ Breakthrough<br>ศาลเทพ</span><b aria-hidden="true">→</b></a></div>
               }
             } @else if (p.state !== 'MAX') {
               <div class="item-row">
               @for (po of potions(); track po.id) {
-                <div class="item-card"><span class="orb"><app-icon [name]="po.id" [size]="30" /></span><span class="nm">{{ po.name }} <em>×{{ po.n }}</em></span>
+                <div class="item-card"><span class="orb"><app-icon [name]="po.id" [size]="34" /><img class="ring" [src]="gild('ring_frame')" alt="" /></span><span class="nm">{{ po.name }} <em>×{{ po.n }}</em></span>
                   <span class="use">
                     <button type="button" class="mini" (click)="use(po.id, 1)">1</button>
                     <button type="button" class="mini" (click)="use(po.id, 10)">10</button>

@@ -71,13 +71,14 @@ h1 { margin: 0; display: flex; flex-direction: column;
   .st { position: absolute; left: 50%; top: -12px; margin-left: -6px; @include g.spark(12px); filter: drop-shadow(0 0 5px g.$gold-bright); } }
 .class-name { display: flex; flex-direction: column; line-height: 1.25;
   b { font: 600 17px g.$font-body; } small { @include g.foil; @include g.label; font-size: 11px; } }
-.stars { margin-left: auto; display: flex; gap: 2px; filter: drop-shadow(0 0 6px rgba(243, 220, 164, .55)); }
+.stars { margin-left: auto; display: flex; gap: 2px; filter: drop-shadow(0 0 6px rgba(243, 220, 164, .55)); img { width: 34px; height: 34px; } }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { all: unset; display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; border-radius: 999px; font: 500 14px g.$font-body; color: g.$text-2;
   background: rgba(24, 18, 13, .55); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .28);
   &.gold { color: g.$gold-pale; box-shadow: inset 0 0 0 1px rgba(243, 220, 164, .7); }
   &.link { cursor: pointer; color: g.$gold-bright; &:hover { box-shadow: inset 0 0 0 1px g.$gold-bright; } &:focus-visible { outline: 2px solid g.$gold-pale; } } }
-.level { display: flex; flex-direction: column; gap: 6px; }
+.level { position: relative; display: flex; flex-direction: column; gap: 6px;
+  app-sheet-fx { left: 50%; top: 40%; z-index: 3; } .fx-level { width: 260px; height: 260px; } .fx-breakthrough { width: 340px; height: 340px; } }
 .lv-row { display: flex; justify-content: space-between; align-items: baseline; color: g.$text-2; font: 500 17px g.$font-body;
   b { @include g.foil; font: 700 24px g.$font-label; } .lv small { color: #8c7e6a; } .power b { font-size: 20px; } }
 .bar { position: relative; height: 6px; background: rgba(0, 0, 0, .55); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .3);

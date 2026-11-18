@@ -26,7 +26,7 @@ import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
-import { UiSymbolComponent } from '../../shared/ui-symbol.component';
+import { SheetFxComponent } from '../../shared/sheet-fx.component';
 
 const UPGRADE_ERROR: Record<SkillUpgradeError, string> = {
   MAX_RANK: 'ระดับสูงสุดแล้ว', RANK_CAP: 'ติดเพดานระดับ — ต้อง Breakthrough', NEED_LEVEL: 'เลเวลไม่ถึง',
@@ -44,7 +44,7 @@ const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shie
 /** Hero detail (Gilded Ember): fixed key art, vertical tabs, floating identity + panel, roster strip. */
 @Component({
   selector: 'app-hero-detail',
-  imports: [StateEmblemComponent, EquipmentArtComponent, UiSymbolComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
+  imports: [StateEmblemComponent, EquipmentArtComponent, SheetFxComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './hero-detail.component.html',
   styleUrl: './hero-detail.component.scss',
 })
@@ -86,9 +86,16 @@ export class HeroDetailComponent {
   readonly nextPerk = computed(() => STAR_PERKS[this.star() + 1]?.label ?? '');
   starUp(): void {
     const s = this.star();
-    if (this.roster.starUp(this.uid())) this.say(`อัปเป็น ${s + 1}★ แล้ว`);
+    const node = this.constellation()[s];   // the node that lights up
+    if (this.roster.starUp(this.uid())) { this.say(`อัปเป็น ${s + 1}★ แล้ว`); if (node) this.starFx.set({ key: Date.now(), x: node.x, y: node.y }); }
     else this.say('Memory ไม่พอ', false);
   }
+  /** Gilded Ember pack (public/ui/gilded): icons + one-shot VFX sheets */
+  readonly gild = (name: string) => `ui/gilded/${name}.webp`;
+  readonly starImg = (n: number, lit: boolean) => this.gild(!lit ? 'star_empty' : n === 6 ? 'star_awakened' : 'star_lit');
+  /** star-up VFX (pillar + burst) on the node that just lit · level ring / breakthrough seal on the level bar */
+  readonly starFx = signal<{ key: number; x: number; y: number } | null>(null);
+  readonly levelFx = signal<{ key: number; kind: 'level' | 'breakthrough' } | null>(null);
 
   readonly inventory = computed(() => this.save.state().inventory);
   /** owned count of an item (missing = 0) */
@@ -220,11 +227,13 @@ export class HeroDetailComponent {
   use(id: string, n: number | 'max') {
     const used = this.roster.usePotion(this.uid(), id, n);
     this.say(used ? `ใช้ ${this.itemName(id)} ×${used}` : 'ใช้ไม่ได้ตอนนี้', !!used);
+    if (used) this.levelFx.set({ key: Date.now(), kind: 'level' });
   }
-  useMax() { this.roster.usePotionsToCap(this.uid()); this.say('ใช้ยาจนถึงเพดานเลเวลแล้ว'); }
+  useMax() { this.roster.usePotionsToCap(this.uid()); this.say('ใช้ยาจนถึงเพดานเลเวลแล้ว'); this.levelFx.set({ key: Date.now(), kind: 'level' }); }
   breakthrough() {
     const err = this.roster.breakthrough(this.uid());
     this.say(err === 'NEED_ITEMS' ? 'หิน Breakthrough ไม่พอ' : err === 'NEED_EXP' ? 'EXP ยังไม่ครบ' : err ? 'ทำไม่ได้' : 'Breakthrough สำเร็จ! เพดานเลเวลเพิ่มขึ้น', !err);
+    if (!err) this.levelFx.set({ key: Date.now(), kind: 'breakthrough' });
   }
   toggleSlot() {
     if (!this.roster.toggleTrainingSlot(this.uid())) this.say(`ช่องฝึกเต็ม (${TRAINING_SLOTS.count} ช่อง)`, false);

@@ -1,0 +1,264 @@
+{
+  "pack": "Eldervane Gilded Ember UI VFX",
+  "version": 1,
+  "assets": [
+    {
+      "filename": "star_lit.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "star_empty.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "star_awakened.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "ring_frame.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "sparkle.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "divider.png",
+      "width": 2048,
+      "height": 256,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "hero_memory.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "star_up.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "level_up.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "breakthrough.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "training_slot.png",
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "blend": "normal",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "vfx_starup_pillar.png",
+      "width": 2048,
+      "height": 1536,
+      "alpha": false,
+      "blend": "additive",
+      "sourceSize": [
+        1448,
+        1086
+      ],
+      "columns": 4,
+      "rows": 3,
+      "frames": 12,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "order": "left-to-right,top-to-bottom",
+      "lastFrame": "black",
+      "suggestedFPS": 12,
+      "pivotSuggestion": [
+        0.5,
+        0.9
+      ]
+    },
+    {
+      "filename": "vfx_starup_burst.png",
+      "width": 2048,
+      "height": 1536,
+      "alpha": false,
+      "blend": "additive",
+      "sourceSize": [
+        1448,
+        1086
+      ],
+      "columns": 4,
+      "rows": 3,
+      "frames": 12,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "order": "left-to-right,top-to-bottom",
+      "lastFrame": "black",
+      "suggestedFPS": 12,
+      "pivotSuggestion": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "filename": "vfx_levelup_ring.png",
+      "width": 2048,
+      "height": 1536,
+      "alpha": false,
+      "blend": "additive",
+      "sourceSize": [
+        1448,
+        1086
+      ],
+      "columns": 4,
+      "rows": 3,
+      "frames": 12,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "order": "left-to-right,top-to-bottom",
+      "lastFrame": "black",
+      "suggestedFPS": 12,
+      "pivotSuggestion": [
+        0.5,
+        0.78
+      ]
+    },
+    {
+      "filename": "vfx_breakthrough.png",
+      "width": 2048,
+      "height": 1536,
+      "alpha": false,
+      "blend": "additive",
+      "sourceSize": [
+        1448,
+        1086
+      ],
+      "columns": 4,
+      "rows": 3,
+      "frames": 12,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "order": "left-to-right,top-to-bottom",
+      "lastFrame": "black",
+      "suggestedFPS": 12,
+      "pivotSuggestion": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "qa": "Dimensions, alpha channels and fully black final VFX frames checked. Visual alignment, timing and in-game readability require integration review."
+}
