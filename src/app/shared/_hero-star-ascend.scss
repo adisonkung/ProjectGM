@@ -70,7 +70,10 @@ app-hero-detail {
     }
   }
 
-  .node app-awakened-star { width: 100%; }
+  .node app-awakened-star {
+    width: 100%;
+    z-index: 1;
+  }
 
   .asc-pulse {
     position: absolute;
@@ -80,6 +83,11 @@ app-hero-detail {
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255, 241, 207, .62), rgba(230, 200, 138, .26) 35%, transparent 69%);
     animation: sa-unlock 880ms ease-out both;
+  }
+
+  .node app-awakened-star + .asc-pulse {
+    z-index: 0;
+    background: radial-gradient(circle, rgba(245, 185, 98, .27), rgba(230, 180, 108, .12) 36%, transparent 69%);
   }
 
   @keyframes sa-aura {

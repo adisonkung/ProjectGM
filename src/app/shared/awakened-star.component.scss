@@ -1,80 +1,103 @@
 :host {
+  --gleam-wait: calc(1.35s + var(--accent-delay, 0s));
   position: relative;
   display: grid;
   place-items: center;
   isolation: isolate;
   aspect-ratio: 1;
+  pointer-events: none;
 }
 
 img {
   display: block;
-  position: relative;
   z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: brightness(1.13) drop-shadow(0 0 2px #fff2c4bb);
+  filter: drop-shadow(0 0 2px #e9ab585f);
 }
 
-.fire {
-  position: absolute;
-  z-index: 0;
-  inset: -22% -17% -12%;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 58%, #ffcc8050, #d875181b 47%, transparent 70%);
+.aura,
+.sheen,
+.glint { position: absolute; }
 
-  &::before,
-  &::after {
+.aura {
+  inset: -32%;
+  background: radial-gradient(ellipse at 50% 53%, #f8d29142, #e8a45024 37%, #b6782014 52%, transparent 70%);
+
+  &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: url('/ui/gilded/star_fire.webp') center / contain no-repeat;
-    transform-origin: 50% 60%;
-  }
-
-  &::before {
-    animation: gold-fire-rise 2.8s ease-in-out var(--fire-delay) infinite;
+    opacity: 0;
+    background: radial-gradient(circle, #f6d09757, #e8ae6338 34%, transparent 67%);
+    animation: awakened-aura 4.8s ease-in-out var(--accent-delay, 0s) infinite backwards;
   }
 
   &::after {
-    inset: 4%;
-    animation: gold-fire-fold 3.4s ease-in-out var(--fire-delay) infinite;
+    content: '';
+    position: absolute;
+    inset: 3%;
+    opacity: 0;
+    background:
+      radial-gradient(circle at 22% 52%, #ffe2a2 0 .8%, transparent 2%),
+      radial-gradient(circle at 66% 31%, #f7d08c 0 1%, transparent 2.2%),
+      radial-gradient(circle at 77% 64%, #f4ce8c 0 .75%, transparent 1.8%);
+    animation: awakened-dust 5.3s ease-in-out calc(.45s + var(--accent-delay, 0s)) infinite backwards;
   }
 }
 
 .sheen {
-  position: absolute;
   z-index: 2;
   inset: 0;
   mask: url('/ui/gilded/star_lit.webp') center / contain no-repeat;
-  pointer-events: none;
 
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(112deg, transparent 33%, #ffdf9b88 44%, #fffae8f2 50%, #ffdf9b88 57%, transparent 67%);
-    animation: gold-star-sheen 5.4s linear var(--shine-delay) infinite;
+    opacity: 0;
+    transform: translateX(-95%);
+    background: linear-gradient(112deg, transparent 34%, #efbf675a 45%, #ffe5a5b8 50%, #efbf675a 56%, transparent 65%);
+    // The base and delay frames stay transparent, even when the star mounts mid-navigation.
+    animation: awakened-sheen 6s linear var(--gleam-wait) infinite backwards;
   }
 }
 
-@keyframes gold-fire-rise {
-  0%, 100% { transform: translateY(3%) rotate(-6deg) scale(.92, .93); opacity: .67; }
-  45% { transform: translateY(-9%) rotate(7deg) scale(1.05, 1.14); opacity: .98; }
-  73% { transform: translateY(-2%) rotate(-1deg) scale(.99, 1.05); opacity: .82; }
+.glint {
+  z-index: 3;
+  top: 15%;
+  right: 12%;
+  width: 24%;
+  aspect-ratio: 1;
+  opacity: 0;
+  background: #ffe5ae;
+  clip-path: polygon(50% 0, 59% 41%, 100% 50%, 59% 59%, 50% 100%, 41% 59%, 0 50%, 41% 41%);
+  animation: awakened-glint 6s ease-in-out var(--gleam-wait) infinite backwards;
 }
 
-@keyframes gold-fire-fold {
-  0%, 100% { transform: scaleX(-.82) scaleY(.91) rotate(7deg); opacity: .48; }
-  62% { transform: translateY(-7%) scaleX(-1.03) scaleY(1.06) rotate(-6deg); opacity: .7; }
+@keyframes awakened-aura {
+  0%, 100% { opacity: 0; transform: scale(.9); }
+  52% { opacity: .68; transform: scale(1.09); }
 }
 
-@keyframes gold-star-sheen {
-  0%, 13% { transform: translateX(-90%); }
-  32%, 100% { transform: translateX(90%); }
+@keyframes awakened-dust {
+  0%, 12%, 100% { opacity: 0; transform: translateY(8%); }
+  40% { opacity: .7; }
+  70%, 89% { opacity: 0; transform: translateY(-15%); }
+}
+
+@keyframes awakened-sheen {
+  0%, 14% { opacity: 0; transform: translateX(-95%); }
+  24% { opacity: .62; }
+  36%, 100% { opacity: 0; transform: translateX(95%); }
+}
+
+@keyframes awakened-glint {
+  0%, 22%, 44%, 100% { opacity: 0; transform: scale(.38); }
+  31% { opacity: .66; transform: scale(.94); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fire::before { animation: none; opacity: .85; }
-  .fire::after, .sheen { display: none; }
+  .aura::before, .aura::after, .sheen, .glint { display: none; }
 }

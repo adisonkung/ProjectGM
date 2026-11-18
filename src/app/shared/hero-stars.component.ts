@@ -6,13 +6,13 @@ import { MAX_STAR } from '../core/data/stars';
   standalone: true,
   host: {
     'aria-hidden': 'true',
-    '[style.--fire-delay]': "index() * -280 + 'ms'",
-    '[style.--shine-delay]': "index() * 320 + 'ms'",
+    '[style.--accent-delay]': "index() * 320 + 'ms'",
   },
   template: `
-    <span class="fire" aria-hidden="true"></span>
+    <span class="aura"></span>
     <img src="ui/gilded/star_lit.webp" alt="" />
-    <span class="sheen" aria-hidden="true"></span>
+    <span class="sheen"></span>
+    <span class="glint"></span>
   `,
   styleUrl: './awakened-star.component.scss',
 })
