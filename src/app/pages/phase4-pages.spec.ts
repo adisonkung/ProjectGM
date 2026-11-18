@@ -53,12 +53,17 @@ describe('Phase 4 pages', () => {
     const h = TestBed.inject(SaveService).state().heroes[0];
     expect(el.querySelector('h1')!.textContent).toContain(HERO_BY_ID[h.templateId].name);
     // Key art remains intact; overview includes the actual gear slots.
-    expect(el.querySelectorAll('.show img.key').length).toBe(heroArt(h.templateId)?.banner ? 1 : 0);
+    expect(el.querySelectorAll('.art img.key').length).toBe(heroArt(h.templateId)?.banner ? 1 : 0);
     expect(el.querySelectorAll('.skill').length).toBe(0);
     expect(el.querySelectorAll('.gear-list > a').length).toBe(3);
     (el.querySelector('#hero-tab-skills') as HTMLButtonElement).click();
     f.detectChanges();
-    expect(el.querySelectorAll('.skill').length).toBe(3);
+    // Three skill picks; the selected one shows its full card.
+    expect(el.querySelectorAll('.skill-picks .pick').length).toBe(3);
+    expect(el.querySelectorAll('.skill').length).toBe(1);
+    (el.querySelectorAll('.skill-picks .pick')[2] as HTMLButtonElement).click();
+    f.detectChanges();
+    expect(el.querySelector('.skill')!.classList.contains('ult')).toBeTrue();
     expect(el.querySelectorAll('.basic-attack').length).toBe(1);
     expect(el.querySelector('#hero-panel')!.getAttribute('aria-labelledby')).toBe('hero-tab-skills');
     el.querySelector('#hero-tab-skills')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));

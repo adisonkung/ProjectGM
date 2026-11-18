@@ -104,27 +104,6 @@ html body {
     .controls { padding: 16px; gap: 8px; background: #11181ee6; border: 1px solid #b99a5d66; }
     .controls button.citadel-control { padding: 12px 22px; }
   }
-  app-hero-detail {
-    .content-grid.single:has(> .skills) { grid-template-columns: minmax(0,1fr); }
-    .skills .basic-attack { padding: 20px; background: #0d141b; border-color: #b99a5d66; }
-    .skills .skill-list { gap: 18px; }
-    .skills .skill { padding: 24px; border-radius: 0; background: linear-gradient(110deg,#29313a80,#0c131b80); border: 1px solid #bda16377; gap: 22px; }
-    .skills .skill.ult { border-color: #e4c17e; background: linear-gradient(110deg,#65451d26,#11171e); }
-    .skills .skill .icon { width: 86px; height: 86px; flex: none; border-radius: 0; border: 2px solid #d9b670; box-shadow: inset 0 0 0 3px #14191f,0 5px 18px #0005; }
-    .skills .skill .icon img { border-radius: 0; }
-    .skills .skill .body header b { font-size: 21px; color: #f4ddb0; }
-    .skills .cur { font-size: 15px; line-height: 1.9; color: #eee5d3; }
-    .skills .next { color: #bcdbc9; font-size: 14px; line-height: 1.9; }
-    .skills .cost { gap: 10px; padding-top: 10px; font-size: 13px; }
-    .skills .act { margin-top: 12px; }
-    .skills .convert { padding-top: 20px; border-color: #c7a86a66; }
-    .content-grid.single > .gear .gear-list { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; padding-block: 18px; }
-    .content-grid.single > .gear .gear-slot { flex-direction: column; text-align: center; min-height: 245px; padding: 28px 20px; border-radius: 0; background: radial-gradient(ellipse at 50% 10%,#c9a25c13,transparent 75%),#10171d; border-color: #c6a26688; }
-    .content-grid.single > .gear .gear-slot .gi { width: 100px; height: 100px; font-size: 30px; border-radius: 0; background: #0b1219; }
-    .gear-slot .gi app-equipment-art { display: block; width: 100%; }
-    .content-grid.single > .gear .gear-slot b { font-size: 17px; }
-    .content-grid.single > .gear .gear-slot small, .content-grid.single > .gear .lines { font-size: 14px; }
-  }
   @media(max-width:1050px) {
     app-armory .workbench { grid-template-columns: minmax(0,1fr); }
   }
@@ -149,13 +128,6 @@ html body {
     app-account .card.citadel-surface { padding: 24px; }
     app-welcome .card.citadel-surface { padding: 28px 24px; }
     app-battle .result-card.citadel-surface, app-battle .menu.citadel-surface { padding: 26px; }
-    app-hero-detail .skills .skill { padding: 18px; gap: 14px; }
-    app-hero-detail .skills .skill .icon { width: 62px; height: 62px; }
-    app-hero-detail .skills .skill .body header b { font-size: 18px; }
-    app-hero-detail .skills .cur { font-size: 14px; }
-    app-hero-detail .content-grid.single > .gear .gear-list { grid-template-columns: minmax(0,1fr); gap: 12px; }
-    app-hero-detail .content-grid.single > .gear .gear-slot { flex-direction: row; text-align: left; min-height: 130px; padding: 20px; }
-    app-hero-detail .content-grid.single > .gear .gear-slot .gi { width: 75px; height: 75px; flex: none; }
   }
 }
 

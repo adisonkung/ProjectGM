@@ -1,6 +1,7 @@
 @use './app/shared/adventure-fonts';
 @use './app/shared/citadel-pages';
-@use './app/shared/hero-detail-panels';
+@use './app/shared/hero-detail-growth';
+@use './app/shared/hero-star-ascend';
 @use './app/shared/battle-reference';
 @use './app/shared/battle-match';
 @use './app/shared/battle-expand';
@@ -110,20 +111,16 @@ html body .app app-account .profile-card app-profile-portrait.island-thumb {
 }
 html body .app:has(.cosmetic-dialog) .bar { z-index:0; }
 
-// Preserve every banner's native ratio; keep identity and progress off the artwork.
-html body .app app-hero-detail .detail.reference-overview .show.has-banner {
-  height:auto; min-height:0; padding:9px; background:linear-gradient(145deg,#1d2b38,#101923);
-  .key-art { position:relative; inset:auto; height:auto; width:100%; clip-path:none; overflow:visible; &::after { display:none; } }
-  .key { width:100%; height:auto; aspect-ratio:auto; object-fit:contain; object-position:center; }
-  .plate { position:relative; inset:auto; width:auto; max-width:none; margin:0; padding:22px 25px; box-sizing:border-box; }
-  .hero-status { right:25px; bottom:25px; }
-}
-@media(max-width:720px) {
-  html body .app app-hero-detail .detail.reference-overview .show.has-banner {
-    .plate { padding:18px 16px; }
-    .hero-status { position:relative; inset:auto; }
-    .name-line h1 { font-size:clamp(22px,6vw,31px); overflow-wrap:anywhere; }
-  }
+
+// ---------------------------------------------------------------- UI scale 75 % on desktop (user 2026-11-18)
+// html.ui-zoom is set by AppComponent for menu pages + Home. Full-screen scenes that measure the window
+// (summon cutscene, battle) keep 100 % and only shrink the top bar so the chrome matches everywhere.
+// Pages that fill the screen height divide 100dvh by --ui-zoom (zoom also scales viewport units).
+:root { --ui-zoom: 1; }
+@media (min-width: 901px) and (min-height: 501px) {
+  html.ui-zoom { zoom: .75; --ui-zoom: .75; }
+  html.ui-zoom body { overflow-x: clip; }  // full-bleed pages (hero detail) never scroll sideways
+  html:not(.ui-zoom) .app:not(.bare) .bar { zoom: .75; }
 }
 
 /* Echo profile: shared by combat's DOM fallback and the roster preview. */

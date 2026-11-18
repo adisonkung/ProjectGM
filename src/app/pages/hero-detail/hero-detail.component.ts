@@ -1,5 +1,4 @@
 import { StateEmblemComponent } from '../../shared/state-emblem.component';
-import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -9,6 +8,7 @@ import { CLASS_NAME } from '../../core/data/classes';
 import { EXP_POTIONS, ITEMS, TRAINING_SLOTS } from '../../core/data/economy';
 import { FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
 import { heroArt } from '../../core/data/hero-art';
+import { GENERATED_ICONS } from '../../core/data/generated-art';
 import { kitOf } from '../../core/data/hero-skills';
 import { TOME_CONVERSION } from '../../core/data/skill-ranks';
 import { EquipmentInstance, EquipmentSlot, EquipStat, Rarity } from '../../core/models/equipment';
@@ -26,21 +26,25 @@ import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
+import { SheetFxComponent } from '../../shared/sheet-fx.component';
 
 const UPGRADE_ERROR: Record<SkillUpgradeError, string> = {
   MAX_RANK: 'ระดับสูงสุดแล้ว', RANK_CAP: 'ติดเพดานระดับ — ต้อง Breakthrough', NEED_LEVEL: 'เลเวลไม่ถึง',
   NEED_BREAKTHROUGH: 'ต้อง Breakthrough ก่อน', NEED_MATERIALS: 'Skill Tome ไม่พอ', NEED_GOLD: 'ทองไม่พอ', NO_HERO: '',
 };
-type DetailTab = 'overview' | 'stats' | 'skills' | 'gear' | 'growth';
+type DetailTab = 'overview' | 'stats' | 'skills' | 'gear' | 'growth' | 'star';
+
+/** Latin display line above the Thai name (two-syllable wuxia names get a space). */
+const LATIN_NAME: Record<string, string> = { bailong: 'Bai Long', yuezheng: 'Yue Zheng', moye: 'Mo Ye', tangxun: 'Tang Xun', linxue: 'Lin Xue' };
 
 const RARITY_TIER: Record<Rarity, number> = { COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5 };
 const SLOT_LABEL: Record<EquipmentSlot, string> = { WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
 const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
 
-/** Hero detail: full key art, live identity/skill shortcuts, then overview · stats · skills · equipment · growth. */
+/** Hero detail (Gilded Ember): fixed key art, vertical tabs, floating identity + panel, roster strip. */
 @Component({
   selector: 'app-hero-detail',
-  imports: [StateEmblemComponent, TowerOrnamentComponent, EquipmentArtComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
+  imports: [StateEmblemComponent, EquipmentArtComponent, SheetFxComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './hero-detail.component.html',
   styleUrl: './hero-detail.component.scss',
 })
@@ -68,11 +72,38 @@ export class HeroDetailComponent {
   });
   /** 4★ / 5★ / 6★ perks + visual evolution, reached or not */
   readonly starSteps = computed(() => [4, 5, 6].map(n => ({ n, perk: STAR_PERKS[n].label, visual: STAR_VISUAL[n].label, reached: this.star() >= n, gain: Math.round((starMultiplier(n) - 1) * 100) })));
+  /** 6★ = full: the star row blazes (shimmer + flames + embers) · rainbow stars are kept for a future 7★–9★ */
+  readonly maxed = computed(() => this.star() >= MAX_STAR);
+  readonly starRow = computed(() => Array.from({ length: MAX_STAR }, (_, i) => {
+    const n = i + 1, s = this.star();
+    return { n, state: n <= s ? 'lit' : n === s + 1 ? 'next' : 'locked' };
+  }));
+  /** rising embers over the blazing 6★ row: [left %, delay s, duration s] */
+  readonly embers: [number, number, number][] = Array.from({ length: 8 }, (_, i) => [8 + ((i * 41) % 84), (i * .55) % 4, 3.2 + ((i * 7) % 5) * .3]);
+  readonly maxPerks = [4, 5, 6].map(n => STAR_PERKS[n].label).join(' · ');
+  readonly ordinal = (n: number) => ['FIRST', 'SECOND', 'THIRD', 'FOURTH', 'FIFTH', 'SIXTH'][n - 1] ?? '';
+  /** HP / ATK / DEF now vs after the next star */
+  readonly starDeltas = computed(() => {
+    const h = this.hero(), t = this.t();
+    if (!h || !t || this.star() >= MAX_STAR) return [];
+    const a = heroStats(t, h), b = heroStats(t, { ...h, star: this.star() + 1 });
+    const row = (label: string, icon: string, x: number, y: number) => ({ label, icon, cur: Math.round(x), next: Math.round(y), delta: Math.round(y) - Math.round(x) });
+    return [row('HP', 'base-stat-hp', a.hp, b.hp), row('ATK', 'base-stat-atk', a.atk, b.atk), row('DEF', 'base-stat-def', a.def, b.def)];
+  });
+  readonly universalIcon = GENERATED_ICONS['universal_memory'];
+  /** the perk the next star unlocks (4★–6★), if any */
+  readonly nextPerk = computed(() => STAR_PERKS[this.star() + 1]?.label ?? '');
   starUp(): void {
     const s = this.star();
-    if (this.roster.starUp(this.uid())) this.say(`อัปเป็น ${s + 1}★ แล้ว`);
+    if (this.roster.starUp(this.uid())) { this.say(`อัปเป็น ${s + 1}★ แล้ว`); this.starFx.set({ key: Date.now(), n: s + 1 }); }
     else this.say('Memory ไม่พอ', false);
   }
+  /** Gilded Ember pack (public/ui/gilded): icons + one-shot VFX sheets */
+  readonly gild = (name: string) => `ui/gilded/${name}.webp`;
+  readonly starImg = (n: number, lit: boolean) => this.gild(!lit ? 'star_empty' : n > MAX_STAR ? 'star_awakened' : 'star_lit');
+  /** star-up VFX (pillar + burst) on the node that just lit · level ring / breakthrough seal on the level bar */
+  readonly starFx = signal<{ key: number; n: number } | null>(null);
+  readonly levelFx = signal<{ key: number; kind: 'level' | 'breakthrough' } | null>(null);
 
   readonly inventory = computed(() => this.save.state().inventory);
   /** owned count of an item (missing = 0) */
@@ -116,6 +147,8 @@ export class HeroDetailComponent {
 
   /** wide key art behind the header (heroes that have one) */
   readonly banner = computed(() => heroArt(this.t()?.id)?.banner);
+  /** key art whose hero stands right of centre is mirrored so the info column never covers them */
+  readonly bannerMirror = computed(() => !!heroArt(this.t()?.id)?.bannerMirror);
   readonly portrait = computed(() => heroArt(this.t()?.id)?.portrait);
   readonly attack = computed(() => { const t = this.t(); return t ? kitOf(t.id, t.cls).attack : null; });
   readonly tab = signal<DetailTab>(inject(ActivatedRoute).snapshot?.queryParamMap?.get('tab') === 'skills' ? 'skills' : 'overview');
@@ -125,19 +158,46 @@ export class HeroDetailComponent {
     { id: 'stats', label: 'ค่าสถานะ', icon: 'sword' },
     { id: 'skills', label: 'สกิล', icon: 'bolt' },
     { id: 'gear', label: 'อุปกรณ์', icon: 'armory' },
-    { id: 'growth', label: 'พัฒนา', icon: 'star' },
+    { id: 'growth', label: 'เลเวล', icon: 'crystal' },
+    { id: 'star', label: 'อัปดาว', icon: 'star' },
   ];
 
+  readonly numerals = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+  /** drifting embers over the key art: [left %, top %, delay s] */
+  readonly motes = [[22, 70, 0], [34, 78, 1.4], [44, 64, 2.8], [27, 58, 4.1], [48, 82, 5.3]];
+  readonly skillSel = signal(0);
+  /** overview: which skill icon is open (null = none) */
+  readonly overviewSkill = signal<number | null>(null);
+  toggleOverviewSkill(i: number): void { this.overviewSkill.set(this.overviewSkill() === i ? null : i); }
+
   onTabKey(event: KeyboardEvent): void {
-    const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
+    const keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
     if (!keys.includes(event.key)) return;
     event.preventDefault();
     const i = this.tabs.findIndex(t => t.id === this.tab());
+    const back = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
     const n = event.key === 'Home' ? 0 : event.key === 'End' ? this.tabs.length - 1
-      : (i + (event.key === 'ArrowRight' ? 1 : -1) + this.tabs.length) % this.tabs.length;
+      : (i + (back ? -1 : 1) + this.tabs.length) % this.tabs.length;
     this.tab.set(this.tabs[n].id);
     (event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>('[role="tab"]')[n]?.focus();
   }
+
+  readonly latinName = computed(() => { const id = this.t()?.id ?? ''; return LATIN_NAME[id] ?? id.charAt(0).toUpperCase() + id.slice(1); });
+  readonly classIcon = computed(() => GENERATED_ICONS['class-' + (this.t()?.cls ?? '')]);
+  readonly expRound = computed(() => Math.floor(this.expPct()));
+  readonly expPct = computed(() => { const p = this.progress(); return !p ? 0 : p.state === 'MAX' ? 100 : this.pct(p.exp, p.expToNext); });
+
+  /** roster strip: the current hero first (left), then the next heroes in roster order (wraps), up to 7 */
+  readonly strip = computed(() => {
+    const list = this.save.state().heroes;
+    const i = list.findIndex(h => h.uid === this.uid());
+    if (i < 0) return [];
+    const n = Math.min(7, list.length);
+    return Array.from({ length: n }, (_, k) => list[(i + k) % list.length]).map(h => {
+      const t = this.roster.template(h);
+      return { uid: h.uid, name: t?.name ?? '', portrait: heroArt(t?.id)?.portrait };
+    });
+  });
 
   readonly skills = computed(() => {
     const h = this.hero(), t = this.t();
@@ -159,14 +219,6 @@ export class HeroDetailComponent {
   readonly potions = computed(() => EXP_POTIONS.map(id => ({ id, name: ITEMS[id]?.name ?? id, n: this.inventory()[id] ?? 0 })).filter(p => p.n > 0));
   readonly conversions = TOME_CONVERSION;
 
-  /** prev / next hero in roster order */
-  readonly siblings = computed(() => {
-    const list = this.save.state().heroes;
-    const i = list.findIndex(h => h.uid === this.uid());
-    if (i < 0 || list.length < 2) return null;
-    return { prev: list[(i - 1 + list.length) % list.length].uid, next: list[(i + 1) % list.length].uid };
-  });
-
   readonly className = (c: string) => CLASS_NAME[c as keyof typeof CLASS_NAME];
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
   readonly gearName = itemName;
@@ -174,6 +226,7 @@ export class HeroDetailComponent {
   readonly slotTag: Record<SkillKind, string> = { skill: 'สกิล 1', skill2: 'สกิล 2', ult: 'ท่าไม้ตาย' };
   readonly errorText = (e: SkillUpgradeError | null) => (e ? UPGRADE_ERROR[e] : '');
   readonly stars = (n: number) => '★'.repeat(n);
+  readonly starList = computed(() => Array.from({ length: this.star() }, (_, i) => i));
   readonly pct = (a: number, b: number) => Math.min(100, (a / Math.max(1, b)) * 100);
 
   private fmt(stat: EquipStat, v: number) {
@@ -187,11 +240,13 @@ export class HeroDetailComponent {
   use(id: string, n: number | 'max') {
     const used = this.roster.usePotion(this.uid(), id, n);
     this.say(used ? `ใช้ ${this.itemName(id)} ×${used}` : 'ใช้ไม่ได้ตอนนี้', !!used);
+    if (used) this.levelFx.set({ key: Date.now(), kind: 'level' });
   }
-  useMax() { this.roster.usePotionsToCap(this.uid()); this.say('ใช้ยาจนถึงเพดานเลเวลแล้ว'); }
+  useMax() { this.roster.usePotionsToCap(this.uid()); this.say('ใช้ยาจนถึงเพดานเลเวลแล้ว'); this.levelFx.set({ key: Date.now(), kind: 'level' }); }
   breakthrough() {
     const err = this.roster.breakthrough(this.uid());
     this.say(err === 'NEED_ITEMS' ? 'หิน Breakthrough ไม่พอ' : err === 'NEED_EXP' ? 'EXP ยังไม่ครบ' : err ? 'ทำไม่ได้' : 'Breakthrough สำเร็จ! เพดานเลเวลเพิ่มขึ้น', !err);
+    if (!err) this.levelFx.set({ key: Date.now(), kind: 'breakthrough' });
   }
   toggleSlot() {
     if (!this.roster.toggleTrainingSlot(this.uid())) this.say(`ช่องฝึกเต็ม (${TRAINING_SLOTS.count} ช่อง)`, false);
@@ -202,5 +257,5 @@ export class HeroDetailComponent {
   }
   convert(from: string) { if (this.roster.convertTomes(from)) this.say('แลก Skill Tome แล้ว'); }
   setMain() { if (this.isl.setMainHero(this.uid())) this.say('ตั้งเป็นฮีโร่หลักบนเกาะแล้ว'); }
-  go(uid: number) { this.message.set(null); this.router.navigate(['/heroes', uid]); }
+  go(uid: number) { this.message.set(null); this.skillSel.set(0); this.router.navigate(['/heroes', uid]); }
 }

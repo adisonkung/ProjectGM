@@ -1,259 +1,304 @@
 @if (hero(); as h) {
   @let tp = t()!;
   @let p = progress()!;
-  <section class="detail reference-overview" [class.reference-panels]="tab() !== 'overview'" [attr.data-tab]="tab()">
-    <nav class="crumbs" aria-label="นำทางฮีโร่">
-      <a routerLink="/heroes" class="gm-btn small ghost"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="back" [size]="16" /> กลับหอวีรชน</a>
-      @if (siblings(); as sb) {
-        <span class="step">
-          <button type="button" class="gm-btn small ghost" (click)="go(sb.prev)" aria-label="ฮีโร่ก่อนหน้า"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="back" [size]="18" /></button>
-          <button type="button" class="gm-btn small ghost" (click)="go(sb.next)" aria-label="ฮีโร่ถัดไป"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="arrow" [size]="18" /></button>
-        </span>
+  <div class="art" aria-hidden="true">
+    <div class="glow"></div>
+    <svg class="ring" viewBox="0 0 600 600">
+      <circle cx="300" cy="300" r="290" fill="none" stroke="#e6c88a" stroke-opacity=".5" />
+      <circle cx="300" cy="300" r="272" fill="none" stroke="#e6c88a" stroke-dasharray="2 10" stroke-opacity=".7" />
+      <circle cx="300" cy="300" r="210" fill="none" stroke="#e6c88a" stroke-opacity=".25" />
+      <path d="M300 4 L308 22 L300 40 L292 22Z M300 560 L308 578 L300 596 L292 578Z M4 300 L22 292 L40 300 L22 308Z M560 300 L578 292 L596 300 L578 308Z" fill="#e6c88a" />
+    </svg>
+    @if (banner(); as bn) { <img class="key" [class.mirror]="bannerMirror()" [src]="bn" [alt]="tp.name" fetchpriority="high" /> }
+    @else { <div class="fallback"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="300" /></div> }
+    <div class="scrim"></div>
+    @for (m of motes; track m) { <i class="mote" [style.left.%]="m[0]" [style.top.%]="m[1]" [style.animation-delay.s]="m[2]"></i> }
+  </div>
+
+  <section class="detail" [attr.data-tab]="tab()">
+    <header class="show">
+      <a routerLink="/heroes" class="back" aria-label="กลับหอวีรชน"><app-icon name="back" [size]="20" /></a>
+      <span class="page-title"><b>ฮีโร่</b><small>CHARACTER</small></span>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="รายละเอียดฮีโร่" aria-orientation="vertical" (keydown)="onTabKey($event)">
+      @for (item of tabs; track item.id; let i = $index) {
+        <button type="button" role="tab" [id]="'hero-tab-' + item.id" aria-controls="hero-panel" [attr.aria-selected]="tab() === item.id" [attr.tabindex]="tab() === item.id ? 0 : -1" [class.on]="tab() === item.id" (click)="tab.set(item.id)">
+          <i class="gem" aria-hidden="true"></i><span class="no" aria-hidden="true">{{ numerals[i] }}</span><span class="lbl">{{ item.label }}</span>
+        </button>
       }
     </nav>
-    <header class="show" [class.has-banner]="!!banner()"><app-citadel-frame [cut]="28" />
-      @if (banner(); as bn) {
-        <div class="key-art"><img class="key" [src]="bn" [alt]="tp.name" fetchpriority="high" /></div>
-      } @else {
-        <div class="fallback-art"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="240" /></div>
-      }
-      <div class="plate">
-        <div class="identity">
-          <span class="eyebrow"><app-icon name="heroes" [size]="16" /> ฮีโร่หมายเลข #{{ h.uid }}</span>
-          <div class="name-line"><h1>{{ tp.name }}</h1><span class="hero-stars" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">{{ stars(star()) }}</span></div>
-          <span class="hero-class"><app-citadel-icon [name]="'class-' + tp.cls" [size]="21" /> {{ className(tp.cls) }}</span>
-          <div class="chips">
-            @if (inTeam()) { <span class="gm-chip gold"><app-icon name="team" [size]="13" /> อยู่ในทีม</span> }
-            <span class="gm-chip">ศักยภาพ {{ h.potential }}</span><span class="gm-chip">BT {{ h.breakthroughTier ?? 0 }}/3</span>
-            @if (isMain()) { <span class="gm-chip arcane"><app-icon name="crown" [size]="13" /> ฮีโร่หลักบนเกาะ</span> }
-            @else { <button type="button" class="gm-btn small arcane" (click)="setMain()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" /><app-icon name="crown" [size]="13" /> ตั้งเป็นฮีโร่หลัก</button> }
-          </div>
-          <div class="identity-note"><app-icon name="team" [size]="18" /><span>{{ training() ? 'กำลังฝึกฝนที่ Training Ground' : inTeam() ? 'พร้อมออกผจญภัยไปกับทีมของคุณ' : 'พร้อมเข้าร่วมทีม — จัดทัพเพื่อออกผจญภัย' }}</span></div>
-        </div>
-        <div class="hero-status">
-          <div class="level">
-            <div class="lvnum"><small>Lv.</small><b>{{ p.level }}</b><small>/ {{ p.levelCap }}</small></div>
-            <div class="gm-bar gold" role="progressbar" aria-label="ประสบการณ์ฮีโร่" aria-valuemin="0" [attr.aria-valuemax]="p.expToNext || 1" [attr.aria-valuenow]="p.state === 'MAX' ? 1 : (p.exp > p.expToNext ? p.expToNext : p.exp)"><i [style.width.%]="p.state === 'MAX' ? 100 : pct(p.exp, p.expToNext)"></i></div>
-            <small class="exp">{{ p.state === 'MAX' ? 'เลเวลสูงสุด' : 'EXP ' + p.exp + ' / ' + p.expToNext }}</small>
-          </div>
-          <div class="power"><app-citadel-icon name="armory" [size]="24" /><span>พลังรบ</span><b>{{ power() }}</b></div>
-          <div class="skill-shortcuts" aria-label="สกิลของฮีโร่">
-            <button type="button" (click)="tab.set('skills')" aria-controls="hero-panel" [attr.aria-label]="'ดูโจมตีปกติ ' + (attack()?.name || '')"><span class="skill-orb"><app-icon name="sword" [size]="28" /></span><b>โจมตีปกติ</b><small>{{ attack()?.name }}</small></button>
-            @for (v of skills(); track v.slot) {
-              <button type="button" (click)="tab.set('skills')" aria-controls="hero-panel" [attr.aria-label]="'ดู' + slotTag[v.slot] + ' ' + v.name"><span class="skill-orb">@if (v.icon) { <img [src]="v.icon" alt="" /> } @else { <app-icon [name]="v.slot === 'ult' ? 'bolt' : 'star'" [size]="28" /> }</span><b>{{ slotTag[v.slot] }}</b><small>{{ v.name }}</small></button>
-            }
-          </div>
-        </div>
-      </div>
-    </header>
-    @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
-    <div class="tabs" role="tablist" aria-label="รายละเอียดฮีโร่" (keydown)="onTabKey($event)">
-      @for (item of tabs; track item.id) {
-        <button type="button" role="tab" [id]="'hero-tab-' + item.id" aria-controls="hero-panel" [attr.aria-selected]="tab() === item.id" [attr.tabindex]="tab() === item.id ? 0 : -1" [class.on]="tab() === item.id" (click)="tab.set(item.id)"><app-citadel-frame shape="tab" [cut]="14" [crimson]="tab() === item.id" [lacquer]="tab() === item.id" /><app-citadel-icon [name]="item.id === 'overview' ? 'heroes' : item.id === 'stats' ? 'sword' : item.id === 'skills' ? 'summon' : item.id === 'growth' ? 'gem' : 'shield'" [size]="23" /> {{ item.label }}</button>
-      }
-    </div>
-    <div id="hero-panel" class="content-grid" role="tabpanel" [attr.aria-labelledby]="'hero-tab-' + tab()" tabindex="0" [class.single]="tab() !== 'overview'" [class.stats-layout]="tab() === 'stats'" [class.skills-layout]="tab() === 'skills'" [class.gear-layout]="tab() === 'gear'" [class.growth-layout]="tab() === 'growth'">
-@if (tab() === 'overview' || tab() === 'growth') {
-    @if (starView(); as sv) {
-      <section class="gm-panel stars-panel">@if (tab() === 'overview') { <app-citadel-frame [cut]="24" /> } @else { <app-tower-ornament [grooved]="true" [ornate]="true" /> }
-        <h2 class="gm-h2"><app-icon name="star" [size]="23" /> พัฒนาดาว <small>{{ star() }}★ / {{ MAX_STAR }}★ · ดาวเกิด {{ tp.star }}★</small></h2>
-        <div class="star-row">
-          @for (n of [1, 2, 3, 4, 5, 6]; track n) {
-            <span class="st r{{ n }}" [class.on]="n <= star()" [class.base]="n <= tp.star" [attr.title]="n + '★'">★</span>
-          }
-        </div>
-        @if (sv.maxed) {
-          <p class="maxed"><app-icon name="crown" [size]="14" /> ถึง 6★ แล้ว — ตัวซ้ำจะกลายเป็น Universal Memory</p>
-        } @else {
-          <div class="mem">
-            <div class="memory-art">@if (portrait(); as pt) { <img [src]="pt" alt="" loading="lazy" /> } @else { <app-icon name="star" [size]="32" /> }</div>
-            <div class="need">
-              <span>ใช้ <b>{{ sv.cost }}</b> Memory เพื่อไป {{ star() + 1 }}★ <em>(+{{ nextStarGain() }}% HP/ATK/DEF)</em></span>
-              <div class="gm-bar arcane"><i [style.width.%]="pct(sv.spendHero + sv.spendUniversal, sv.cost)"></i></div>
-              <small>Hero Memory {{ sv.heroMemory }} · Universal Memory {{ sv.universal }}@if (sv.canUp) { · จะใช้ Hero {{ sv.spendHero }} + Universal {{ sv.spendUniversal }} } @else { · ขาดอีก {{ sv.missing }} }</small>
-            </div>
-            <button type="button" class="gm-btn primary" [disabled]="!sv.canUp" (click)="starUp()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" /><app-icon name="star" [size]="15" /> อัปดาว</button>
-          </div>
-        }
-        <ul class="steps">
-          @for (st of starSteps(); track st.n) {
-            <li [class.on]="st.reached"><b>{{ st.n }}★</b> +{{ st.gain }}% ค่าพลัง · {{ st.perk }}<small> · {{ st.visual }}</small></li>
-          }
-        </ul>
-        <small class="hint">Hero Memory ได้จากการอัญเชิญซ้ำ · Universal Memory ได้จากเคลียร์หอคอยครั้งแรกและ Ascension</small>
-      </section>
-    }
 
-}
-@if (tab() === 'overview' || tab() === 'stats') {
-      <section class="gm-panel stats" [class.full-stats]="tab() === 'stats'">@if (tab() === 'overview') { <app-citadel-frame [cut]="24" /> } @else { <app-tower-ornament [grooved]="true" [ornate]="true" /> }
-        <header class="panel-heading"><h2 class="gm-h2">ค่าสถานะ <small>STATS</small></h2>@if (tab() === 'overview') { <button type="button" class="gm-btn small ghost" [attr.aria-expanded]="statBreakdown()" (click)="statBreakdown.set(!statBreakdown())"><app-citadel-frame shape="hex" [cut]="14" />{{ statBreakdown() ? 'ย่อข้อมูล' : 'รายละเอียด' }}</button> }</header>
-        <table [class.breakdown]="tab() === 'stats' || statBreakdown()">
-          @if (tab() === 'stats' || statBreakdown()) { <thead><tr><th scope="col">ค่าสถานะ</th><th scope="col">พื้นฐาน</th><th scope="col">อุปกรณ์</th><th scope="col">รวม</th></tr></thead> }
-          <tbody>
-            @for (r of tab() === 'overview' && !statBreakdown() ? statRows().slice(0,3) : statRows(); track r.label) {
-              <tr><th scope="row"><app-icon [name]="r.icon" [size]="tab() === 'stats' ? 20 : 13" /> {{ r.label }}</th>@if (tab() === 'stats' || statBreakdown()) { <td>{{ r.base }}</td><td class="bonus">{{ r.bonus || (tab() === 'stats' ? '0' : '—') }}</td> }<td class="tot">{{ r.total }}</td></tr>
-            }
-          </tbody>
-        </table>
-        @if (extraStats().length) {
-          <div class="extra">@for (x of extraStats(); track x.stat) { <span class="gm-chip arcane"><app-icon [name]="'equip-stat-' + x.stat" [size]="18" />{{ x.text }}</span> }</div>
-        }
-      </section>
-
-@if (tab() === 'stats') {
-  <aside class="gm-panel stats-progress" aria-label="ความก้าวหน้าฮีโร่">
-    <app-tower-ornament [grooved]="true" [ornate]="true" />
-    <header class="stats-level"><app-citadel-icon name="heroes" [size]="25" /><span>เลเวล <b>{{ p.level }}</b><small> / {{ p.levelCap }}</small></span></header>
-    <div class="stats-exp"><span>{{ p.state === 'MAX' ? 'เลเวลสูงสุด' : 'EXP ' + p.exp + ' / ' + p.expToNext }}</span><div class="gm-bar gold"><i [style.width.%]="p.state === 'MAX' ? 100 : pct(p.exp,p.expToNext)"></i></div></div>
-    @if (starView(); as sv) {
-      <h2 class="gm-h2">ความก้าวหน้าการพัฒนา</h2>
-      <div class="stats-memory">
-        <div class="memory-art">@if (portrait(); as pt) { <img [src]="pt" alt="" /> } @else { <app-citadel-icon name="heroes" [size]="28" /> }</div>
-        <div><b>Memory ของ{{ tp.name }}</b><span>{{ sv.heroMemory }} <small>· Universal {{ sv.universal }}</small></span><div class="gm-bar gold"><i [style.width.%]="sv.maxed ? 100 : pct(sv.heroMemory + sv.universal, sv.cost)"></i></div></div>
-      </div>
-      <div class="stats-stars" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">@for (n of [1,2,3,4,5,6]; track n) { <span [class.earned]="n <= star()" aria-hidden="true">★</span> }</div>
-      <p class="stats-guidance">{{ sv.maxed ? 'พัฒนาดาวถึงระดับสูงสุดแล้ว' : 'ใช้ ' + sv.cost + ' Memory เพื่อพัฒนาเป็น ' + (star() + 1) + ' ดาว' }}</p>
-    }
-    <button type="button" class="gm-btn primary stats-develop" (click)="tab.set('growth')" aria-controls="hero-panel"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><app-icon name="star" [size]="18" />พัฒนาฮีโร่ <app-icon name="arrow" [size]="16" /></button>
-    <button type="button" class="gm-btn stats-overview" (click)="tab.set('overview')" aria-controls="hero-panel"><app-citadel-frame shape="hex" [cut]="17" /><app-icon name="back" [size]="18" />กลับภาพรวม</button>
-  </aside>
-}
-
-}
-@if (tab() === 'overview' || tab() === 'gear') {
-    <section class="gm-panel gear">@if (tab() === 'overview') { <app-citadel-frame [cut]="24" /> } @else { <app-tower-ornament [grooved]="true" [ornate]="true" /> }
-      <header class="panel-heading"><h2 class="gm-h2"><app-icon name="armory" [size]="23" /> อุปกรณ์ <small>EQUIPMENT</small></h2><a class="gm-btn small ghost" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }"><app-citadel-frame shape="hex" [cut]="14" />จัดการ <app-icon name="arrow" [size]="14" /></a></header>
-      <div class="gear-list">
-        @for (g of gear(); track g.slot) {
-          <a class="gear-slot" [class]="'gear-slot t' + g.tier + (g.item ? '' : ' empty')" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }" [attr.aria-label]="g.label + (g.item ? ' ' + gearName(g.item) : ' ว่าง — จัดการอุปกรณ์')">
-            @if (tab() === 'gear') { <app-tower-ornament [grooved]="true" /> }
-            <span class="gi">@if (g.item; as equipped) { <app-equipment-art [definitionId]="equipped.definitionId" [rarity]="equipped.rarity" [level]="equipped.upgradeLevel" [instanceId]="equipped.instanceId" /> } @else { <app-citadel-icon [name]="g.slot === 'WEAPON' ? 'sword' : g.slot === 'ARMOR' ? 'shield' : 'summon'" [size]="34" /> }</span>
-            <div>
-              <small>{{ g.label }}</small>
-              @if (g.item; as it) {
-                <b>{{ gearName(it) }}</b>
-                <span class="lines">{{ g.lines.join(' · ') }}</span>
-              } @else { <b class="none">+ เพิ่มอุปกรณ์</b> }
-            </div>
-          </a>
+    <div class="info">
+      <div class="identity">
+        <h1><span class="latin">{{ latinName() }}</span><span class="th">{{ tp.name }}</span></h1>
+        @if (tab() === 'overview') {
+        <div class="class-row">
+          <span class="class-badge">
+            <span class="medal">@if (classIcon(); as ci) { <img [src]="ci" alt="" /> }</span>
+            <i class="st" aria-hidden="true"></i>
+          </span>
+          <span class="class-name"><b>{{ className(tp.cls) }}</b><small>{{ tp.cls }}</small></span>
+          <span class="stars" [class.blaze]="maxed()" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">@for (n of starList(); track n) { <img [src]="starImg(n + 1, true)" alt="" /> }</span>
+        </div>
+        <div class="chips">
+          @if (inTeam()) { <span class="chip">อยู่ในทีม</span> }
+          @if (training()) { <span class="chip">อยู่ในช่องฝึก</span> }
+          <span class="chip">ศักยภาพ {{ h.potential }}</span>
+          <span class="chip">BT {{ h.breakthroughTier ?? 0 }}/3</span>
+          @if (isMain()) { <span class="chip gold">ฮีโร่หลักบนเกาะ</span> }
+          @else { <button type="button" class="chip link" (click)="setMain()">ตั้งเป็นฮีโร่หลัก</button> }
+        </div>
+        <div class="level">
+          <div class="lv-row">
+            <span class="lv">ระดับ <b>{{ p.level }}</b><small> / {{ p.levelCap }}</small></span>
+            <span class="power">พลังรบ <b>{{ power() }}</b></span>
+          </div>
+          <div class="bar" role="progressbar" aria-label="ประสบการณ์ฮีโร่" aria-valuemin="0" [attr.aria-valuemax]="p.expToNext || 1" [attr.aria-valuenow]="p.state === 'MAX' ? 1 : (p.exp > p.expToNext ? p.expToNext : p.exp)">
+            <i [style.width.%]="expPct()"></i><b class="tip" [style.left.%]="expPct()"></b>
+          </div>
+          <small class="exp">{{ p.state === 'MAX' ? 'เลเวลสูงสุด' : p.state === 'BREAKTHROUGH_READY' ? 'ต้อง Breakthrough เพื่อไปต่อ' : 'EXP ' + p.exp + ' / ' + p.expToNext }}</small>
+        </div>
         }
       </div>
-    </section>
-    @if (tab() === 'gear') {
-      <aside class="gm-panel gear-summary"><app-tower-ornament [grooved]="true" [ornate]="true" />
-        <h2 class="gm-h2">ผลจากอุปกรณ์ <small>EQUIPMENT BONUS</small></h2>
-        <dl>@for (r of statRows().slice(0,3); track r.label) { <div><dt><app-icon [name]="r.icon" [size]="22" />{{ r.label }}</dt><dd>{{ r.bonus || '0' }}</dd></div> }</dl>
-        @if (extraStats().length) { <div class="extra">@for (x of extraStats(); track x.stat) { <span class="gm-chip"><app-icon [name]="'equip-stat-' + x.stat" [size]="18" />{{ x.text }}</span> }</div> }
-        <a class="gm-btn" routerLink="/armory" [queryParams]="{ hero: h.uid }"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="armory" [size]="21" />จัดการอุปกรณ์ <app-icon name="arrow" [size]="16" /></a>
-        <a class="gm-btn primary" routerLink="/forge" [queryParams]="{ tab: 'enhance' }"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><app-icon name="sword" [size]="21" />ไปโรงตีเหล็ก <app-icon name="arrow" [size]="16" /></a>
-      </aside>
-    }
-}
-@if (tab() === 'overview' || tab() === 'growth') {
-      <section class="gm-panel grow">@if (tab() === 'overview') { <app-citadel-frame [cut]="24" /> } @else { <app-tower-ornament [grooved]="true" [ornate]="true" /> }
-        <h2 class="gm-h2"><app-icon name="crystal" [size]="23" /> การเติบโต <small>GROWTH</small></h2>
-        @if (p.state === 'BREAKTHROUGH_READY') {
-          <div class="bt">
-            <b><app-icon name="crystal" [size]="16" /> ต้อง Breakthrough เพื่อไปต่อ</b>
-            @if (p.breakthrough; as bt) {
-              <ul>
-                @for (n of bt.def.requiredItems; track n.itemId; let i = $index) {
-                  <li [class.ok]="bt.have[i].count >= n.count"><app-icon name="crystal" [size]="24" />{{ itemName(n.itemId) }} <b>{{ bt.have[i].count }} / {{ n.count }}</b></li>
-                }
-              </ul>
-            }
-            <button type="button" class="gm-btn primary" (click)="breakthrough()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" />Breakthrough</button>
-          </div>
-        } @else if (p.state !== 'MAX') {
-          @for (po of potions(); track po.id) {
-            <div class="potion">
-              <app-icon [name]="po.id" [size]="26" />
-              <span>{{ po.name }} <small>×{{ po.n }}</small></span>
-              <span class="use">
-                <button type="button" class="gm-btn small" (click)="use(po.id, 1)"><app-citadel-frame shape="hex" [cut]="14" />1</button>
-                <button type="button" class="gm-btn small" (click)="use(po.id, 10)"><app-citadel-frame shape="hex" [cut]="14" />10</button>
-                <button type="button" class="gm-btn small" (click)="use(po.id, 'max')"><app-citadel-frame shape="hex" [cut]="14" />Max</button>
-              </span>
-            </div>
-          } @empty {
-            <p class="hint">ไม่มียา EXP — ได้จากหอคอยและ Training Ground</p>
-          }
-          @if (potions().length) { <button type="button" class="gm-btn arcane" (click)="useMax()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" />ใช้ยาจนถึงเพดาน</button> }
-        } @else {
-          <p class="hint">เลเวลเต็มแล้ว — เพิ่มพลังด้วยสกิลและอุปกรณ์</p>
-        }
-        <a class="growth-link" routerLink="/dungeons/training"><span><b>รับ EXP เพิ่มเติม</b><small>Training Ground · ยา EXP และช่องฝึก</small></span><app-icon name="arrow" [size]="18" /></a>
-        <a class="growth-link" routerLink="/dungeons/ascension"><span><b>วัสดุ Breakthrough</b><small>ตรวจเงื่อนไขและรางวัลที่ศาลเทพ</small></span><app-icon name="arrow" [size]="18" /></a>
-        <div class="slot">
-          <div>
-            <b>ช่องฝึก</b>
-            <small>ฮีโร่สำรองในช่องฝึกได้ {{ slotShare * 100 }}% ของ EXP จาก Training Ground</small>
-          </div>
-          @if (inTeam()) {
-            <span class="gm-chip">อยู่ในทีมแล้ว</span>
-          } @else {
-            <button type="button" class="gm-btn small" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()"><app-citadel-frame shape="hex" [cut]="14" />
-              {{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องเต็ม' : 'ส่งเข้าช่องฝึก' }}
-            </button>
-          }
-        </div>
-      </section>
-}
-@if (tab() === 'skills') {
-    <section class="gm-panel skills"><app-tower-ornament [grooved]="true" [ornate]="true" />
-      <h2 class="gm-h2"><app-icon name="bolt" [size]="23" /> สกิล <small class="gold">ทอง {{ gold() }}</small></h2>
-      @if (attack(); as a) { <article class="basic-attack"><app-icon name="sword" [size]="25" /><div><small>โจมตีปกติ</small><b>{{ a.name }}</b><span>{{ a.label }}</span></div></article> }
-      <div class="skill-list">
-        @for (v of skills(); track v.slot) {
-          <article class="skill" [class.ult]="v.slot === 'ult'"><app-tower-ornament [grooved]="true" />
-            <div class="icon"><app-citadel-frame [cut]="8" />
-              @if (v.icon) { <img [src]="v.icon" alt="" loading="lazy" /> } @else { <app-icon [name]="v.slot === 'ult' ? 'bolt' : 'star'" [size]="28" /> }
-              <span class="rank">R{{ v.rank }}</span>
-            </div>
-            <div class="body">
-              <header>
-                <small class="tag">{{ slotTag[v.slot] }}</small>
-                <b>{{ v.name }}</b>
-                @if (v.def.cooldown) { <small class="cd">คูลดาวน์ {{ v.def.cooldown }} วิ</small> }
-              </header>
-              <div class="pips" [attr.aria-label]="'ระดับ ' + v.rank + ' จาก ' + v.maxRank">
-                @for (i of [1, 2, 3, 4, 5].slice(0, v.maxRank); track i) { <i [class.on]="i <= v.rank"></i> }
-              </div>
-              <p class="cur">{{ v.current.join(' · ') }}</p>
-              @if (v.next) {
-                <p class="next"><b>R{{ v.rank + 1 }}</b> {{ v.changes.length ? v.changes.join(' · ') : 'ไม่มีตัวเลขเปลี่ยน' }}</p>
-                @if (v.cost; as c) {
-                  <p class="cost">
-                    @for (m of c.requiredMaterials; track m.itemId) {
-                      <span [class.miss]="have(m.itemId) < m.count"><app-icon [name]="m.itemId" [size]="24" /> {{ itemName(m.itemId) }} {{ have(m.itemId) }}/{{ m.count }}</span>
-                    }
-                    <span [class.miss]="gold() < c.requiredGold"><app-icon name="coin" [size]="12" /> {{ c.requiredGold }}</span>
-                    <span [class.miss]="h.level < c.requiredHeroLevel">Lv{{ c.requiredHeroLevel }}+</span>
-                    @if (c.requiredBreakthroughTier) { <span [class.miss]="(h.breakthroughTier ?? 0) < c.requiredBreakthroughTier">BT {{ c.requiredBreakthroughTier }}</span> }
-                  </p>
-                }
-                <div class="act">
-                  <button type="button" class="gm-btn small primary" [disabled]="!!v.blocked" (click)="upgrade(v.slot)"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" />อัป R{{ v.rank + 1 }}</button>
-                  @if (v.blocked) { <small class="warn">{{ errorText(v.blocked) }}</small> }
-                </div>
-              } @else {
-                <span class="gm-chip gold">ระดับสูงสุด</span>
+
+      @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
+
+      <div id="hero-panel" class="panel" role="tabpanel" [attr.aria-labelledby]="'hero-tab-' + tab()" tabindex="0">
+        @if (tab() === 'overview') {
+          <section class="block ov-skills">
+            <header><h2>สกิล</h2><small>แตะไอคอนเพื่อดูรายละเอียด</small></header>
+            <div class="ov-picks" role="group" aria-label="สกิลของฮีโร่">
+              @for (v of skills(); track v.slot; let i = $index) {
+                <button type="button" class="pick" [class.on]="overviewSkill() === i" [attr.aria-expanded]="overviewSkill() === i" (click)="toggleOverviewSkill(i)" [attr.aria-label]="slotTag[v.slot] + ' ' + v.name">
+                  <span class="sk">@if (v.icon) { <img [src]="v.icon" alt="" /> } @else { <app-icon [name]="v.slot === 'ult' ? 'bolt' : 'star'" [size]="28" /> }</span>
+                  <small>{{ v.slot === 'ult' ? 'ULT' : v.slot === 'skill' ? 'S1' : 'S2' }} · R{{ v.rank }}</small>
+                </button>
               }
             </div>
-          </article>
+            @for (v of skills(); track v.slot; let i = $index) {
+              @if (overviewSkill() === i) {
+                <article class="skill" [class.ult]="v.slot === 'ult'">
+                  <i class="st" aria-hidden="true"></i>
+                  <header><b>{{ v.name }}</b>@if (v.def.cooldown) { <small class="cd">คูลดาวน์ {{ v.def.cooldown }} วิ</small> } @else if (v.slot === 'ult') { <small class="cd">ท่าไม้ตาย</small> }</header>
+                  <div class="rank-row"><span class="tag">{{ slotTag[v.slot] }} · ระดับ {{ v.rank }} / {{ v.maxRank }}</span>
+                    <span class="pips" aria-hidden="true">@for (n of [1, 2, 3, 4, 5].slice(0, v.maxRank); track n) { <i [class.on]="n <= v.rank"></i> }</span>
+                  </div>
+                  <p class="cur">{{ v.current.join(' · ') }}</p>
+                  <button type="button" class="link" (click)="tab.set('skills')">อัปสกิล →</button>
+                </article>
+              }
+            }
+          </section>
+        }
+        @if (tab() === 'overview' || tab() === 'stats') {
+          <section class="block stats">
+            <header><h2>ค่าสถานะ</h2>
+              @if (tab() === 'overview') { <button type="button" class="link" [attr.aria-expanded]="statBreakdown()" (click)="statBreakdown.set(!statBreakdown())">{{ statBreakdown() ? 'ย่อ' : 'รายละเอียด' }}</button> }
+            </header>
+            @if (tab() === 'overview' && !statBreakdown()) {
+              <div class="stat-grid">@for (r of statRows(); track r.label) { <div><app-icon [name]="r.icon" [size]="17" /><span>{{ r.label }}</span><b>{{ r.total }}</b></div> }</div>
+            } @else {
+            <table [class.breakdown]="tab() === 'stats' || statBreakdown()">
+              @if (tab() === 'stats' || statBreakdown()) { <thead><tr><th scope="col">ค่าสถานะ</th><th scope="col">พื้นฐาน</th><th scope="col">อุปกรณ์</th><th scope="col">รวม</th></tr></thead> }
+              <tbody>
+                @for (r of tab() === 'overview' && !statBreakdown() ? statRows().slice(0, 4) : statRows(); track r.label) {
+                  <tr><th scope="row"><app-icon [name]="r.icon" [size]="18" /> {{ r.label }}</th>
+                    @if (tab() === 'stats' || statBreakdown()) { <td>{{ r.base }}</td><td class="bonus">{{ r.bonus || '0' }}</td> }
+                    <td class="tot">{{ r.total }}</td></tr>
+                }
+              </tbody>
+            </table>
+            }
+            @if (extraStats().length) { <div class="extra">@for (x of extraStats(); track x.stat) { <span class="chip">{{ x.text }}</span> }</div> }
+          </section>
+        }
+
+        @if (tab() === 'skills') {
+          <section class="block skills">
+            <div class="skill-top">
+            <div class="skill-picks" role="group" aria-label="เลือกสกิล">
+              @for (v of skills(); track v.slot; let i = $index) {
+                <button type="button" class="pick" [class.on]="skillSel() === i" [attr.aria-pressed]="skillSel() === i" (click)="skillSel.set(i)" [attr.aria-label]="slotTag[v.slot] + ' ' + v.name">
+                  <span class="sk">@if (v.icon) { <img [src]="v.icon" alt="" /> } @else { <app-icon [name]="v.slot === 'ult' ? 'bolt' : 'star'" [size]="28" /> }</span>
+                  <small>{{ v.slot === 'ult' ? 'ULT' : v.slot === 'skill' ? 'S1' : 'S2' }}</small>
+                </button>
+              }
+            </div>
+            @if (attack(); as a) {
+              <article class="basic-attack"><span class="orb"><app-icon name="sword" [size]="24" /></span><div><small>โจมตีปกติ</small><b>{{ a.name }}</b></div></article>
+            }
+            </div>
+            <div class="skill-list">
+              @for (v of skills(); track v.slot; let i = $index) {
+                @if (skillSel() === i) {
+                  <article class="skill" [class.ult]="v.slot === 'ult'">
+                    <i class="st" aria-hidden="true"></i>
+                    <header>
+                      <b>{{ v.name }}</b>
+                      @if (v.def.cooldown) { <small class="cd">คูลดาวน์ {{ v.def.cooldown }} วิ</small> } @else if (v.slot === 'ult') { <small class="cd">ท่าไม้ตาย</small> }
+                    </header>
+                    <div class="rank-row"><span class="tag">{{ slotTag[v.slot] }} · R{{ v.rank }}</span>
+                      <span class="pips" [attr.aria-label]="'ระดับ ' + v.rank + ' จาก ' + v.maxRank">@for (n of [1, 2, 3, 4, 5].slice(0, v.maxRank); track n) { <i [class.on]="n <= v.rank"></i> }</span>
+                    </div>
+                    <p class="cur">{{ v.current.join(' · ') }}</p>
+                    @if (v.next) {
+                      <p class="next"><b>R{{ v.rank + 1 }}</b> {{ v.changes.length ? v.changes.join(' · ') : 'ไม่มีตัวเลขเปลี่ยน' }}</p>
+                      @if (v.cost; as c) {
+                        <p class="cost">
+                          @for (m of c.requiredMaterials; track m.itemId) { <span [class.miss]="have(m.itemId) < m.count"><app-icon [name]="m.itemId" [size]="20" /> {{ itemName(m.itemId) }} {{ have(m.itemId) }}/{{ m.count }}</span> }
+                          <span [class.miss]="gold() < c.requiredGold"><app-icon name="coin" [size]="14" /> {{ c.requiredGold }}</span>
+                          <span [class.miss]="h.level < c.requiredHeroLevel">Lv{{ c.requiredHeroLevel }}+</span>
+                          @if (c.requiredBreakthroughTier) { <span [class.miss]="(h.breakthroughTier ?? 0) < c.requiredBreakthroughTier">BT {{ c.requiredBreakthroughTier }}</span> }
+                        </p>
+                      }
+                      <div class="act">
+                        <button type="button" class="btn-gold small" [disabled]="!!v.blocked" (click)="upgrade(v.slot)"><i class="st"></i>อัป R{{ v.rank + 1 }}<i class="st"></i></button>
+                        @if (v.blocked) { <small class="warn">{{ errorText(v.blocked) }}</small> }
+                      </div>
+                    } @else { <span class="chip gold">ระดับสูงสุด</span> }
+                  </article>
+                }
+              }
+            </div>
+            <details class="convert"><summary>แลกตำราสกิล</summary>
+              <small>แลก Skill Tome (ไม่คุ้ม — ฟาร์ม Skill Trial ดีกว่า)</small>
+              @for (c of conversions; track c.from) {
+                <button type="button" class="btn-glass small" [disabled]="have(c.from) < c.ratio" (click)="convert(c.from)">{{ c.ratio }} {{ itemName(c.from) }} → 1 {{ itemName(c.to) }}</button>
+              }
+            </details>
+          </section>
+        }
+
+        @if (tab() === 'overview' || tab() === 'gear') {
+          <section class="block gear">
+            <header><h2>อุปกรณ์</h2><a class="link" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }">จัดการ</a></header>
+            <div class="gear-list">
+              @for (g of gear(); track g.slot) {
+                <a [class]="'gear-slot t' + g.tier + (g.item ? '' : ' empty')" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }" [attr.aria-label]="g.label + (g.item ? ' ' + gearName(g.item) : ' ว่าง — จัดการอุปกรณ์')">
+                  <span class="gi">@if (g.item; as eq) { <app-equipment-art [definitionId]="eq.definitionId" [rarity]="eq.rarity" [level]="eq.upgradeLevel" [instanceId]="eq.instanceId" /> } @else { <span class="plus">+</span> }<img class="ring" [src]="gild('ring_frame')" alt="" /></span>
+                  <small>{{ g.label }}</small>
+                  @if (g.item; as it) { <b>{{ gearName(it) }}</b>@if (tab() === 'gear') { <span class="lines">{{ g.lines.join(' · ') }}</span> } }
+                </a>
+              }
+            </div>
+            @if (tab() === 'gear') {
+              <div class="row-actions">
+                <a class="btn-glass small" routerLink="/armory" [queryParams]="{ hero: h.uid }"><i class="st"></i>คลังอุปกรณ์<i class="st"></i></a>
+                <a class="btn-glass small" routerLink="/forge" [queryParams]="{ tab: 'enhance' }"><i class="st"></i>โรงตีเหล็ก<i class="st"></i></a>
+              </div>
+            }
+          </section>
+        }
+
+        @if (tab() === 'star') {
+          @if (starView(); as sv) {
+            <section class="block ascend" [class.max]="sv.maxed">
+              <header class="asc-head">
+                <span class="asc-title">{{ sv.maxed ? 'STAR AWAKENED' : 'STAR ASCENSION' }}</span>
+                <span class="asc-sub">{{ latinName() }} · {{ tp.name }}</span>
+              </header>
+              <div class="asc-step">@if (!sv.maxed) { CURRENT <b>{{ star() }}★</b><i aria-hidden="true">→</i>NEXT <b class="nx">{{ star() + 1 }}★</b> } @else { ดาวเต็ม <b class="nx">{{ MAX_STAR }}★</b> }</div>
+              <div class="srow" [class.blaze]="sv.maxed" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">
+                <i class="wing" aria-hidden="true"></i>
+                @for (s of starRow(); track s.n) {
+                  <span [class]="'node ' + s.state">
+                    @if (sv.maxed) { <app-sheet-fx class="flame" [src]="gild('vfx_starup_burst')" [loop]="[3, 7]" [fps]="5" [delayMs]="s.n * 260" /> }
+                    <img [src]="starImg(s.n, s.state === 'lit')" alt="" />
+                    @if (sv.maxed) { <i class="sheen" [style.--m]="'url(' + gild('star_lit') + ')'" [style.animation-delay.s]="s.n * .12"></i> }
+                    @if (starFx(); as f) { @if (f.n === s.n) { @for (k of [f.key]; track k) {
+                      <app-sheet-fx class="fx-pillar" [src]="gild('vfx_starup_pillar')" [fps]="12" />
+                      <app-sheet-fx class="fx-burst" [src]="gild('vfx_starup_burst')" [fps]="14" [delayMs]="450" (done)="starFx.set(null)" />
+                    } } }
+                  </span>
+                }
+                <i class="wing r" aria-hidden="true"></i>
+                @if (sv.maxed) { @for (e of embers; track $index) { <i class="ember" aria-hidden="true" [style.left.%]="e[0]" [style.animation-delay.s]="e[1]" [style.animation-duration.s]="e[2]"></i> } }
+              </div>
+              @if (!sv.maxed) {
+                <table class="deltas">
+                  <thead><tr><th scope="col">STAT</th><th scope="col">BEFORE</th><th aria-hidden="true"></th><th scope="col">AFTER</th><th></th></tr></thead>
+                  <tbody>
+                    @for (r of starDeltas(); track r.label) {
+                      <tr><th scope="row"><app-icon [name]="r.icon" [size]="20" /> {{ r.label }}</th><td class="cur">{{ r.cur }}</td><td class="arr" aria-hidden="true">→</td><td class="nxt">{{ r.next }}</td><td class="plus">(+{{ r.delta }})</td></tr>
+                    }
+                  </tbody>
+                </table>
+                <div class="bonus"><img [src]="gild('sparkle')" alt="" /><span>STAR BONUS</span><b>{{ nextPerk() || ('ค่าพลัง +' + nextStarGain() + '%') }}</b></div>
+                <h3 class="mats-h"><span>MATERIALS</span></h3>
+                <div class="mats">
+                  <div class="mat" [class.ok]="sv.heroMemory >= sv.cost"><img [src]="gild('hero_memory')" alt="" /><span><small>Hero Memory</small><b>{{ sv.heroMemory }} <em>/ {{ sv.cost }}</em></b></span></div>
+                  <i class="sep" aria-hidden="true"></i>
+                  <div class="mat">@if (universalIcon) { <img [src]="universalIcon" alt="" /> }<span><small>Universal Memory</small><b>{{ sv.universal }}</b></span></div>
+                </div>
+                <button type="button" class="confirm" [disabled]="!sv.canUp" (click)="starUp()">{{ sv.canUp ? 'ยืนยันอัปดาว' : 'Memory ไม่พอ · ขาดอีก ' + sv.missing }}</button>
+                <small class="consume">{{ sv.canUp ? 'ใช้ Hero Memory ' + sv.spendHero + (sv.spendUniversal ? ' + Universal ' + sv.spendUniversal : '') : 'Hero Memory ได้จากการอัญเชิญซ้ำ · Universal จากหอคอยครั้งแรก' }}</small>
+              } @else {
+                <div class="bonus"><img [src]="gild('sparkle')" alt="" /><span>STAR BONUS</span><b>{{ maxPerks }}</b></div>
+                <p class="hint">ตัวซ้ำของฮีโร่ {{ MAX_STAR }}★ จะกลายเป็น Universal Memory</p>
+              }
+            </section>
+          }
+        }
+
+        @if (tab() === 'growth') {
+          <div class="growth">
+          <section class="block grow">
+            <header><h2 class="has-icon"><img [src]="gild('level_up')" alt="" />เลเวล <small>{{ p.level }} / {{ p.levelCap }}</small></h2>
+              @if (levelFx(); as f) {
+                @for (k of [f.key]; track k) {
+                  <app-sheet-fx [class]="'fx-' + f.kind" [src]="gild(f.kind === 'level' ? 'vfx_levelup_ring' : 'vfx_breakthrough')" [fps]="13" (done)="levelFx.set(null)" />
+                }
+              }
+              <span class="slot-inline">
+                @if (inTeam()) { <span class="chip">อยู่ในทีมแล้ว</span> }
+                @else { <button type="button" class="mini wide" [class.on]="training()" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()" [title]="'ฮีโร่สำรองได้ ' + slotShare * 100 + '% ของ EXP จาก Training Ground'"><img class="ico" [src]="gild('training_slot')" alt="" />{{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องฝึกเต็ม' : 'ส่งเข้าช่องฝึก' }}</button> }
+              </span>
+            </header>
+            <div class="lv-exp">
+              <div class="bar" role="progressbar" aria-label="ประสบการณ์ฮีโร่" aria-valuemin="0" [attr.aria-valuemax]="p.expToNext || 1" [attr.aria-valuenow]="p.state === 'MAX' ? 1 : (p.exp > p.expToNext ? p.expToNext : p.exp)"><i [style.width.%]="expPct()"></i><b class="tip" [style.left.%]="expPct()"></b></div>
+              <span><b>LV {{ p.level }}</b>{{ p.state === 'MAX' ? 'เลเวลสูงสุด' : p.state === 'BREAKTHROUGH_READY' ? 'EXP เต็ม — ต้อง Breakthrough' : 'EXP ' + p.exp + ' / ' + p.expToNext }}<em>{{ p.state === 'MAX' ? '' : expRound() + '%' }}</em></span>
+            </div>
+            @if (p.state === 'BREAKTHROUGH_READY') {
+              @if (p.breakthrough; as bt) {
+                <p class="hint bt-hint"><img [src]="gild('breakthrough')" alt="" />ถึงเพดานเลเวล — ใช้หิน Breakthrough เพื่อไปต่อ</p>
+                <div class="item-row">@for (n of bt.def.requiredItems; track n.itemId; let i = $index) {
+                  <div class="item-card" [class.ok]="bt.have[i].count >= n.count"><span class="orb"><app-icon [name]="n.itemId" [size]="34" /><img class="ring" [src]="gild('ring_frame')" alt="" /></span><span class="nm">{{ itemName(n.itemId) }}</span><b>{{ bt.have[i].count }} / {{ n.count }}</b></div>
+                }
+                <a class="item-card more" routerLink="/dungeons/ascension"><span>วัสดุ Breakthrough<br>ศาลเทพ</span><b aria-hidden="true">→</b></a></div>
+              }
+            } @else if (p.state !== 'MAX') {
+              <div class="item-row">
+              @for (po of potions(); track po.id) {
+                <div class="item-card"><span class="orb"><app-icon [name]="po.id" [size]="34" /><img class="ring" [src]="gild('ring_frame')" alt="" /></span><span class="nm">{{ po.name }} <em>×{{ po.n }}</em></span>
+                  <span class="use">
+                    <button type="button" class="mini" (click)="use(po.id, 1)">1</button>
+                    <button type="button" class="mini" (click)="use(po.id, 10)">10</button>
+                    <button type="button" class="mini" (click)="use(po.id, 'max')">Max</button>
+                  </span>
+                </div>
+              }
+              <a class="item-card more" routerLink="/dungeons/training"><span>@if (!potions().length) { ไม่มียา EXP<br> }รับเพิ่มที่<br>Training Ground</span><b aria-hidden="true">→</b></a>
+              </div>
+            } @else { <p class="hint">เลเวลเต็มแล้ว — เพิ่มพลังด้วยสกิลและอุปกรณ์</p> }
+          </section>
+          </div>
         }
       </div>
-      <details class="convert"><summary><app-icon name="book" [size]="18" />แลกตำราสกิล <span>⌄</span></summary>
-        <small>แลก Skill Tome (ไม่คุ้ม — ฟาร์ม Skill Trial ดีกว่า):</small>
-        @for (c of conversions; track c.from) {
-          <button type="button" class="gm-btn small ghost" [disabled]="have(c.from) < c.ratio" (click)="convert(c.from)"><app-citadel-frame shape="hex" [cut]="14" /><app-icon [name]="c.from" [size]="24" />{{ c.ratio }} {{ itemName(c.from) }} → <app-icon [name]="c.to" [size]="24" />1 {{ itemName(c.to) }}</button>
-        }
-      </details>
-    </section>
 
-}
     </div>
+
+    @if (strip().length > 1) {
+      <nav class="roster" aria-label="สลับฮีโร่">
+        @for (r of strip(); track r.uid) {
+          @if (r.uid === h.uid) {
+            <span class="mate on" aria-current="page"><span class="face">@if (r.portrait) { <img [src]="r.portrait" alt="" /> }</span><small>{{ r.name }}</small></span>
+          } @else {
+            <button type="button" class="mate" (click)="go(r.uid)" [attr.aria-label]="r.name"><span class="face">@if (r.portrait) { <img [src]="r.portrait" alt="" /> }</span></button>
+          }
+        }
+      </nav>
+    }
   </section>
 } @else {
   <section class="missing-hero reference-empty" role="status"><app-state-emblem icon="heroes" /><h1>ไม่พบฮีโร่</h1><p>ฮีโร่ที่เลือกไม่มีอยู่ในคอลเลกชันนี้<br>กลับไปเลือกฮีโร่อีกครั้ง</p><a class="gm-btn" routerLink="/heroes"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-citadel-icon name="heroes" [size]="27" />ดูฮีโร่ทั้งหมด <span aria-hidden="true">›</span></a></section>

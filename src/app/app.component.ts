@@ -83,5 +83,8 @@ export class AppComponent {
     // start decoding the island art right away (the home screen is the island)
     inject(PreloadService).warmCity();
     effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive()));
+    // UI scale (user 2026-11-18): menu pages + Home render at 75 % on desktop (styles.scss `html.ui-zoom`).
+    // Summon cutscene and battle size themselves from the window, so only their top bar is scaled.
+    effect(() => document.documentElement.classList.toggle('ui-zoom', this.collection() || /^\/home([?#]|$)/.test(this.url())));
   }
 }

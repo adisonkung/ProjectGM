@@ -10,6 +10,8 @@ export interface HeroArt {
   ult?: string;
   /** wide key art behind the hero-detail header (optional) */
   banner?: string;
+  /** the hero stands right of centre in the banner → hero detail mirrors it so the right-hand info column never covers them */
+  bannerMirror?: boolean;
 }
 
 const art = (id: string): HeroArt => ({
@@ -32,7 +34,7 @@ export const HERO_ART: Record<string, HeroArt> = {
   sylas: { ...art('sylas'), banner: 'banners/sylas.webp' },
   // Mordrienne UI art (user 2026-10-27, assets/heroes/Mordrienne/art → tools/sprites/mordrienne_art.py): portrait, the
   // three skill icons (Ashen Mark broken hex / Cinderbind Hex thorned ground hex / House of Ashes serpent field) and banner.
-  mordrienne: { ...art('mordrienne'), banner: 'banners/mordrienne.webp' },
+  mordrienne: { ...art('mordrienne'), banner: 'banners/mordrienne.webp', bannerMirror: true },
   // Draeven UI art (user 2026-10-26, assets/heroes/Draeven/art → tools/sprites/draeven_art.py): portrait, the three
   // skill icons (Blood Debt sigil / crimson slash / Blood Dominion sword impact) and banner.
   draeven: { ...art('draeven'), banner: 'banners/draeven.webp' },
@@ -45,11 +47,11 @@ export const HERO_ART: Record<string, HeroArt> = {
   // Supplied final-art ZIP (2026-10-17): portrait, skill icons and banner.
   mirelle: { ...art('mirelle'), banner: 'banners/mirelle.webp' },
   // ไป๋หลง: ภาพจากผู้ใช้ 2026-10 (art/incoming/bailong/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
-  bailong: { ...art('bailong'), banner: 'banners/bailong.webp' },
+  bailong: { ...art('bailong'), banner: 'banners/bailong.webp', bannerMirror: true },
   // เยว่เจิ้ง: ภาพจากผู้ใช้ 2026-10 (art/incoming/yuezheng/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
   yuezheng: { ...art('yuezheng'), banner: 'banners/yuezheng.webp' },
   // โม่เย่: ภาพจากผู้ใช้ 2026-10 (art/incoming/moye/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
-  moye: { ...art('moye'), banner: 'banners/moye.webp' },
+  moye: { ...art('moye'), banner: 'banners/moye.webp', bannerMirror: true },
   // ถังซวิ่น: ภาพจากผู้ใช้ 2026-10 (art/incoming/tangxun/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
   tangxun: { ...art('tangxun'), banner: 'banners/tangxun.webp' },
   // หลินเสวี่ย: ภาพจากผู้ใช้ 2026-10 (art/incoming/linxue/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
