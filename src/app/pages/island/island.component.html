@@ -67,7 +67,7 @@
                   @if (h.portrait) { <img [src]="h.portrait" [alt]="h.name" draggable="false" /> }
                   @else { <app-hero-portrait [heroId]="h.id" [star]="h.star" [size]="64" /> }
                   <span class="party-class" [attr.title]="h.className"><app-citadel-icon [name]="'class-' + h.cls" [size]="25" /></span>
-                  <span class="party-stars" aria-hidden="true">{{ '★'.repeat(h.star) }}</span>
+                  <app-hero-stars class="party-stars" [count]="h.star" aria-hidden="true" />
                   <span class="party-level">Lv. {{ h.level }}</span>
                 </span>
                 <span class="party-name">{{ h.shortName }}</span>
@@ -164,7 +164,7 @@
             <div class="island-dialog-content hero-content">
             <div class="hero-keyart" aria-hidden="true">@if (s.art?.banner ?? s.art?.portrait; as src) { <img [src]="src" alt="" /> } @else { <app-hero-portrait [heroId]="s.t.id" [size]="220" /> }</div>
             <div class="hero-copy">
-              <header><h2>{{ s.t.name }}</h2><div class="hero-rating"><span class="detail-stars" [attr.aria-label]="s.star + ' ดาว'">{{ '★'.repeat(s.star) }}</span><b>Lv. {{ s.level }}</b></div></header>
+              <header><h2>{{ s.t.name }}</h2><div class="hero-rating"><app-hero-stars class="detail-stars" [count]="s.star" /><b>Lv. {{ s.level }}</b></div></header>
               <div class="hero-class-power"><span><app-icon name="shield" [size]="25" />{{ s.cls }}</span><span><app-citadel-icon name="team" [size]="23" />พลังรบ <b>{{ s.power }}</b></span></div>
               <div class="hero-skill-list">@for (skill of s.skills; track skill.slot) { <span><small>{{ skill.slot === 'skill' ? 'S1' : skill.slot === 'skill2' ? 'S2' : 'ULT' }}</small>{{ skill.name }}</span> }</div>
               @if (s.isMain) { <p class="main-hero-status"><app-icon name="crown" [size]="19" /> ฮีโร่หลักประจำเกาะ</p> }

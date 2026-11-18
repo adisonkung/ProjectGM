@@ -71,7 +71,7 @@ h1 { margin: 0; display: flex; flex-direction: column;
   .st { position: absolute; left: 50%; top: -12px; margin-left: -6px; @include g.spark(12px); filter: drop-shadow(0 0 5px g.$gold-bright); } }
 .class-name { display: flex; flex-direction: column; line-height: 1.25;
   b { font: 600 17px g.$font-body; } small { @include g.foil; @include g.label; font-size: 11px; } }
-.stars { margin-left: auto; display: flex; gap: 2px; filter: drop-shadow(0 0 6px rgba(243, 220, 164, .55)); img { width: 34px; height: 34px; } }
+.stars { margin-left: auto; --hero-star-size: 34px; --hero-star-gap: 2px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { all: unset; display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; border-radius: 999px; font: 500 14px g.$font-body; color: g.$text-2;
   background: rgba(24, 18, 13, .55); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .28);
@@ -213,7 +213,7 @@ table { width: 100%; border-collapse: collapse; font-size: 16px;
   .back { width: 40px; height: 40px; }
   .tabs { align-self: start; padding: 8px 0 0 8px; button { min-height: clamp(26px, 8dvh, 40px); padding: 0 0 0 12px; font-size: 13px; } .no { display: none; } }
   .roster { gap: 8px; padding: 0 0 2px;
-    .mate .face { width: 32px; height: 32px; } .mate.on .face { width: 44px; height: 44px; } .mate.on small, .mate.on::before { display: none; }
+    .mate .face { width: 32px; height: 32px; } .mate.on .face { width: 44px; height: 44px; } .mate.on:not(.named) small, .mate.on::before { display: none; }
     .mate:not(.on):nth-child(n+6) { display: none; } }
   .info { overflow-y: auto; gap: 10px; padding: 0 10px 0 16px; margin-right: -10px;
     background: linear-gradient(90deg, rgba(15, 11, 9, 0), rgba(15, 11, 9, .7) 14%); scrollbar-width: thin; scrollbar-color: rgba(230, 200, 138, .45) transparent;

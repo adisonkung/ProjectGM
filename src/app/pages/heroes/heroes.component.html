@@ -47,7 +47,7 @@
               @if (h.inTeam) { <span class="flag team" title="อยู่ในทีม"><app-citadel-icon name="armory" [size]="15" /></span> }
               @else if (h.training) { <span class="flag train" title="อยู่ในช่องฝึก"><app-icon name="book" [size]="15" /></span> }
             </span>
-            <span class="identity"><app-citadel-icon class="class-seal" [name]="classIcon(h.cls)" [size]="26" [attr.title]="classLabel(h.cls)" /><span class="name">{{ h.name }}</span><span class="list-class">{{ classLabel(h.cls) }}</span><span class="gm-stars">{{ stars(h.star) }}</span></span>
+            <span class="identity"><app-citadel-icon class="class-seal" [name]="classIcon(h.cls)" [size]="26" [attr.title]="classLabel(h.cls)" /><span class="name">{{ h.name }}</span><span class="list-class">{{ classLabel(h.cls) }}</span><app-hero-stars class="gm-stars" [count]="h.star" /></span>
             <span class="lv">Lv. {{ h.level }}</span>
             <span class="pw"><app-citadel-icon name="armory" [size]="18" />{{ h.power }}</span>
             <span class="list-chevron" aria-hidden="true">›</span>

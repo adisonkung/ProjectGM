@@ -62,7 +62,7 @@
       @for (h of occupied().values(); track h.uid) {
         <button type="button" (click)="tapHero(h.uid, $event)" [attr.aria-pressed]="selected() === h.uid">
           @if (h.portrait) { <img [src]="h.portrait" alt="" /> }
-          <span><b>{{ h.name }}</b><small>{{ h.clsName }} · Lv.{{ h.level }}</small><em>{{ '★'.repeat(h.star) }}</em></span>
+          <span><b>{{ h.name }}</b><small>{{ h.clsName }} · Lv.{{ h.level }}</small><em><app-hero-stars [count]="h.star" /></em></span>
         </button>
       }
       <p><app-icon name="save" [size]="16" /> บันทึกตำแหน่งอัตโนมัติ</p>
@@ -78,7 +78,7 @@
             <app-citadel-frame [cut]="9" [crimson]="selected() === h.uid" />
             @if (h.portrait) { <img [src]="h.portrait" [alt]="h.name" draggable="false" /> }
             <span class="battle-hero-level"><app-icon [name]="classIcon(h.cls)" [size]="15" />Lv.{{ h.level }}</span>
-            <span class="battle-hero-stars" [attr.aria-label]="h.star + ' ดาว'">{{ '★'.repeat(h.star) }}</span>
+            <app-hero-stars class="battle-hero-stars" [count]="h.star" />
           </button>
         } @empty { <p class="empty">เลือกฮีโร่สำรอง แล้วแตะช่องฝั่งซ้ายเพื่อวาง</p> }
       </div>
