@@ -128,9 +128,16 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
       host().handleEvents([{ type: 'cast', src: hero.id, skill: 'ชื่อสกิลจริง', kind: 'ult' }]);
       fixture.detectChanges();
       const image = fixture.nativeElement.querySelector('app-themed-cutin img') as HTMLImageElement;
-      expect(image.getAttribute('src')).toBe(`/ui/cutins/${id}.webp`);
-      expect(fixture.nativeElement.querySelector('app-themed-cutin .label').textContent).toContain('ชื่อสกิลจริง');
-      expect(fixture.nativeElement.querySelector('app-themed-cutin .hero-name span').textContent.trim()).toBe(component.cutIn()!.name);
+      expect(image.getAttribute('src')).toBe(`/ui/cutins/${id === 'bailong' ? 'bailong-aura-italic' : id}.webp`);
+      if (id === 'bailong') {
+        expect(image.alt).toBe(`ชื่อสกิลจริง — ${component.cutIn()!.name}`);
+        expect(fixture.nativeElement.querySelector('app-themed-cutin .label')).toBeNull();
+        expect(fixture.nativeElement.querySelector('app-themed-cutin .water-ribbons')).not.toBeNull();
+      } else {
+        expect(fixture.nativeElement.querySelector('app-themed-cutin .label').textContent).toContain('ชื่อสกิลจริง');
+        expect(fixture.nativeElement.querySelector('app-themed-cutin .hero-name span').textContent.trim()).toBe(component.cutIn()!.name);
+        expect(fixture.nativeElement.querySelector('app-themed-cutin .water-ribbons')).toBeNull();
+      }
       // Switching between embedded and live badges must not leave two frames behind.
       expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .name-frame').length)
         .toBe(['bailong', 'moye', 'linxue'].includes(id) ? 0 : 1);

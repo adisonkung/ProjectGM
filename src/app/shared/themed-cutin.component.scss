@@ -7,6 +7,29 @@
   animation: cutin-impact 1.25s cubic-bezier(.16,.8,.24,1) both;
 }
 .plate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; }
+.water .motes { display: none; }
+.water .energy,.water .sweep { clip-path: polygon(0 0,100% 0,100% 35%,44% 35%,44% 100%,0 100%); }
+.water-burst { position: absolute; inset: -2%; z-index: 0; }
+.water-burst i { position: absolute; inset: 12% 2% 4% 1%; border: .18cqw solid #a6efff; border-radius: 50%;
+  box-shadow: 0 0 1.4cqw #60cfff, inset 0 0 1cqw #a4eaff; transform: rotate(-15deg);
+  animation: water-ring .85s .06s ease-out both; }
+.water-burst i:nth-child(2) { inset: 4% 8% 12%; animation-delay: .16s; }
+.water-burst i:nth-child(3) { inset: 16% 12% 0 2%; animation-delay: .28s; }
+.water-ribbons { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; overflow: visible;
+  fill: none; stroke-linecap: round; filter: drop-shadow(0 0 .45cqw #45caff); }
+.current { stroke: #d5faff; stroke-width: 3; stroke-dasharray: 220 1500; stroke-dashoffset: 1550;
+  animation: water-current .95s .08s cubic-bezier(.14,.7,.25,1) both; }
+.current.upper { stroke-width: 2; animation-delay: .17s; }
+.glint { stroke: #fff0b9; stroke-width: 2; stroke-dasharray: 70 1450; stroke-dashoffset: 1450;
+  animation: water-current .8s .25s ease-out both; }
+.water-droplets { position: absolute; inset: 0; z-index: 3; }
+.water-droplets i { position: absolute; left: calc(5% + var(--i) * 7%); top: calc(4% + mod(var(--i) * 13,27) * 1%);
+  width: .65cqw; height: 1.2cqw; border-radius: 70% 25% 65% 35%; background: #cff9ff;
+  box-shadow: 0 0 .65cqw #40bfff; opacity: 0; animation: water-droplet .75s calc(.08s + var(--i) * .035s) ease-out both; }
+@keyframes water-ring { from { opacity: .8; transform: rotate(-15deg) scale(.7); } to { opacity: 0; transform: rotate(-15deg) scale(1.13); } }
+@keyframes water-current { 12% { opacity: 1; } to { stroke-dashoffset: -230; opacity: 0; } }
+@keyframes water-droplet { 0% { opacity: 0; transform: translate(-2cqw,2cqw) scale(.2) rotate(35deg); }
+  20%,45% { opacity: .85; } 100% { opacity: 0; transform: translate(7cqw,-4cqw) scale(.45) rotate(60deg); } }
 .aura { position: absolute; inset: 8% 2% 10% 6%; z-index: 0; opacity: .5;
   background: radial-gradient(ellipse at 48% 48%, var(--accent), transparent 68%);
   filter: blur(15px); animation: aura-breathe .7s ease-in-out infinite alternate; }
@@ -62,5 +85,6 @@
   .stage { animation: none; }
   .aura { animation: none; opacity: .3; }
   .energy,.sweep,.motes { display: none; }
+  .water-burst,.water-ribbons,.water-droplets { display: none; }
   .label,.hero-name { animation: none; }
 }

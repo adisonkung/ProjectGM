@@ -1,0 +1,187 @@
+{
+  "report": [
+    {
+      "id": "bailong",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c866548734_cutin-impact",
+        "water": {
+          "display": "block",
+          "droplets": 12
+        }
+      }
+    },
+    {
+      "id": "bailong",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c866548734_cutin-impact",
+        "water": {
+          "display": "block",
+          "droplets": 12
+        }
+      }
+    },
+    {
+      "id": "bailong",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "droplets": 12
+        }
+      }
+    },
+    {
+      "id": "yuezheng",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 907.199951171875,
+        "height": 386.97186279296875,
+        "expectedWidth": 907.2,
+        "baked": false,
+        "label": {
+          "x": 444.515625,
+          "y": 197.35311889648438,
+          "width": 263.08123779296875,
+          "height": 73.96875
+        },
+        "slots": [
+          {
+            "x": 461.8828125,
+            "y": 216.2109375,
+            "width": 228.33282470703125,
+            "height": 55.110931396484375
+          },
+          {
+            "x": 485.33905029296875,
+            "y": 274.7390441894531,
+            "width": 181.43438720703125,
+            "height": 30.951568603515625
+          },
+          {
+            "x": 548.8452758789062,
+            "y": 275.9203186035156,
+            "width": 54.421875,
+            "height": 28.574981689453125
+          }
+        ],
+        "src": "/ui/cutins/yuezheng.webp",
+        "alt": "",
+        "framed": true,
+        "text": "ULTIMATEป้อมผนึกภูผา",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c866548734_cutin-impact"
+      }
+    },
+    {
+      "id": "yuezheng",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 531.7171630859375,
+        "height": 226.79998779296875,
+        "expectedWidth": 531.72,
+        "baked": false,
+        "label": {
+          "x": 260.5359191894531,
+          "y": 115.6640625,
+          "width": 154.1953125,
+          "height": 43.34062194824219
+        },
+        "slots": [
+          {
+            "x": 270.7312316894531,
+            "y": 126.7171859741211,
+            "width": 133.79061889648438,
+            "height": 32.287498474121094
+          },
+          {
+            "x": 284.45623779296875,
+            "y": 161.015625,
+            "width": 106.34063720703125,
+            "height": 18.140625
+          },
+          {
+            "x": 321.6796875,
+            "y": 161.70468139648438,
+            "width": 31.879669189453125,
+            "height": 16.748443603515625
+          }
+        ],
+        "src": "/ui/cutins/yuezheng.webp",
+        "alt": "",
+        "framed": true,
+        "text": "ULTIMATEป้อมผนึกภูผา",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c866548734_cutin-impact"
+      }
+    }
+  ],
+  "errors": []
+}

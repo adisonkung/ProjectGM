@@ -1,0 +1,10 @@
+{
+  "source": "assets/ui/cutins/bailong-aura-italic.png",
+  "file": "public/ui/cutins/bailong-aura-italic.webp",
+  "w": 1899,
+  "h": 828,
+  "hero": "ไป๋หลง",
+  "skill": "ลำดับเก้ามังกร",
+  "source_sha256": "1ee88f5036832f5af7f28cb926eaf1e13da9437551617453487f2ababf32405a",
+  "runtime_sha256": "e23dd129b2db5c18390ae9d06f256b75d0e1cc528fa5d4cee45697021ec6be41"
+}

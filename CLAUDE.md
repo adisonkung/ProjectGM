@@ -16,6 +16,16 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Bai Long readable italic cut-in + live water VFX — Codex, 2026-11-19
+
+User explicitly requested importing the selected aura cut-in into the actual game, gently italicizing the readable premium Thai font, and seeing real animated VFX. Only Bai Long now uses the new isolated, generated source `assets/ui/cutins/bailong-aura-italic.png` and lossless runtime WebP; the other nine themed heroes retain the last committed art/layout. The rejected screenshot-extraction attempt was archived outside the repository at `/workspace/abandoned-reference-cutout-2026-11-19`, not imported or committed. No screenshot HUD holes or battlefield pixels are used in the new art.
+
+Bai Long uses baked readable lightly italic Thai lettering, accessible image text, no duplicate live title/name frame, native artwork aspect ratio, a 76vw base at the existing .9 top-left scale. Presentation-only animated water ripples, traveling current strokes, gold edge glints and twelve droplets run inside ThemedCutinComponent. General sweep/rays are masked away from the lettering. Reduced motion hides all water motion and retains the existing static/fade path. Skill events, damage, stats, targeting and the existing 650/300ms engine freeze and 1250/700ms overlay lifetimes are unchanged. The separate battlefield water-wave drawn in the earlier generated mockup is conceptual; actual combat keeps the existing skill FX.
+
+Validation: app/spec typechecks; Karma 1005/1005; five desktop/mobile/reduced-motion/legacy browser cases; two native manual-cast recordings with successful overlay cleanup and no page errors. Production compilation passes with the temporary font-inlining bypass for the environment's existing Google Fonts HTTP 403, with angular.json restored unchanged.
+
+Review and real manual-cast screenshots/clips: `docs/reviews/bailong-aura-live/index.html`. Browser screenshots are actual game frames paused at 400ms for inspection; video is native Chromium recording at normal animation speed with no frozen/composited frames. Re-export the asset using `python3 tools/ui/export_bailong_cutin.py`. Other portraits/banners and map assets are unchanged. No master merge or deployment; confirmed synchronization metadata is unchanged.
+
 ## Themed ultimate cut-ins — Codex, 2026-11-18
 
 ### Name-frame and typography correction — Codex, 2026-11-18

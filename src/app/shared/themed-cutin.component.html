@@ -1,13 +1,26 @@
-<div class="stage" [style.--accent]="art().accent" [style.aspect-ratio]="art().ratio"
+<div class="stage" [class.water]="art().vfx === 'water'" [style.width]="art().stageWidth || null"
+     [style.--accent]="art().accent" [style.aspect-ratio]="art().ratio"
      [style.--label-left]="art().left" [style.--label-top]="art().top" [style.--label-width]="art().width"
      [style.--title-size]="art().titleSize" [style.--name-size]="art().nameSize">
   <div class="aura" aria-hidden="true"></div>
-  <img class="plate" [src]="'/' + art().file" alt="" draggable="false" />
+  <img class="plate" [src]="'/' + art().file" [alt]="art().bakedText ? skill() + ' — ' + name() : ''" draggable="false" />
+  @if (art().vfx === 'water') {
+    <div class="water-burst" aria-hidden="true"><i></i><i></i><i></i></div>
+    <svg class="water-ribbons" viewBox="0 0 1000 440" preserveAspectRatio="none" aria-hidden="true">
+      <path class="current" d="M-20 424 Q160 330 315 365 T760 308 Q906 243 994 28" />
+      <path class="current upper" d="M-10 168 Q100 -30 320 48 T680 68 Q860 68 1000 22" />
+      <path class="glint" d="M0 395 735 308 994 28 M60 34 502 14" />
+    </svg>
+    <div class="water-droplets" aria-hidden="true">
+      @for (i of motes; track i) { <i [style.--i]="i"></i> }
+    </div>
+  }
   <div class="energy" aria-hidden="true"></div>
   <div class="sweep" aria-hidden="true"></div>
   <div class="motes" aria-hidden="true">
     @for (i of motes; track i) { <i [style.--i]="i"></i> }
   </div>
+  @if (!art().bakedText) {
   <div class="label" [class.add-stars]="art().addTitleStars"><small>ULTIMATE</small><b>{{ skill() }}</b></div>
   <div class="hero-name" [style.left]="art().nameLeft" [style.top]="art().nameTop"
        [style.width]="art().nameWidth" [style.height]="art().nameHeight">
@@ -20,4 +33,5 @@
     }
     <span>{{ name() }}</span>
   </div>
+  }
 </div>
