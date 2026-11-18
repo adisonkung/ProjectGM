@@ -2,6 +2,12 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Branch integration — user-requested master merge (2026-11-18, Codex)
+
+The user explicitly requested merging every branch still outside master. Integrated `feature/eldervane-ui-design-references`, `wip/codex-echo-trial`, `feature/claude-gilded-hero-detail`, `fix/star-ascension-aura`, and `feature/claude-battle-fullscreen` from remote master `3245cfa`, preserving their history and branch tips. Earlier pending-review/no-merge statements for these branches are historical and superseded by this request. Documentation conflicts retain both work streams; BattleComponent teardown retains engine disposal plus loader/cut-in cleanup. No gameplay values were retuned. Canonical local/cloud synchronization metadata is unchanged.
+
+Validation: app/spec typechecks; 1003/1003 Karma specs; 40 shipped-roster AUTO/TACTICAL simulation battles. Standard production build is blocked by Google Fonts HTTP 403 in this environment; production compilation/budgets pass with font inlining temporarily disabled, with angular.json restored afterwards. Real Chromium checks at 1440×860 and 844×390 pass for hero detail, Echo loading/fullscreen combat, ultimate cut-in, and disposed session on exit, with no page errors. Remote publication is verified separately after the merge commits are pushed.
+
 ## Latest task — Star Ascension aura and hero detail frame (Codex, 2026-11-18)
 
 Branch `fix/star-ascension-aura` continues the Star Ascension work from `feature/claude-gilded-hero-detail`. Last confirmed shared base is `a49da3b`.

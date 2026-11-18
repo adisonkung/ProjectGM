@@ -16,6 +16,12 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Branch integration — user-requested master merge (2026-11-18, Codex)
+
+The user explicitly requested merging every branch still outside master. Integrated `feature/eldervane-ui-design-references`, `wip/codex-echo-trial`, `feature/claude-gilded-hero-detail`, `fix/star-ascension-aura`, and `feature/claude-battle-fullscreen` from remote master `3245cfa`, preserving their history and branch tips. Earlier pending-review/no-merge statements for these branches are historical and superseded by this request. Documentation conflicts retain both work streams; BattleComponent teardown retains engine disposal plus loader/cut-in cleanup. No gameplay values were retuned. Canonical local/cloud synchronization metadata is unchanged.
+
+Validation: app/spec typechecks; 1003/1003 Karma specs; 40 shipped-roster AUTO/TACTICAL simulation battles. Standard production build is blocked by Google Fonts HTTP 403 in this environment; production compilation/budgets pass with font inlining temporarily disabled, with angular.json restored afterwards. Real Chromium checks at 1440×860 and 844×390 pass for hero detail, Echo loading/fullscreen combat, ultimate cut-in, and disposed session on exit, with no page errors. Remote publication is verified separately after the merge commits are pushed.
+
 ## Gilded Ember UI direction + hero detail (2026-11-17, Claude)
 
 branch `feature/claude-gilded-hero-detail` (ฐาน origin/master 3245cfa, ยังไม่ merge — รอรีวิว) · ผู้ใช้อนุมัติทิศทาง UI จาก mockup บน claude.ai canvas (HSR เป็นโครง + ทองแบบ Genshin เฉพาะจุด) · กติกาล็อก: I อาร์ตนำ ไม่มีกล่องทึบใหญ่ · II ลายเดียว = ดาวประกาย 4 แฉก + วงแหวนทอง (ห้ามลายม้วน/มุมสามเหลี่ยม) · III ห้ามเพิ่มสี/ห้ามม่วง-น้ำเงิน · IV ที่เลือก = ใหญ่ขึ้น + วงทอง + เรือง · **V มือถือเล่นแนวนอนเท่านั้น** (ออกแบบทุกหน้าสำหรับจอแนวนอนเตี้ย; การ์ดหมุนจอทั้งแอปยังไม่ทำ)
