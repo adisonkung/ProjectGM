@@ -150,7 +150,7 @@
             <div class="gear-list">
               @for (g of gear(); track g.slot) {
                 <a [class]="'gear-slot t' + g.tier + (g.item ? '' : ' empty')" [routerLink]="['/armory']" [queryParams]="{ hero: h.uid }" [attr.aria-label]="g.label + (g.item ? ' ' + gearName(g.item) : ' ว่าง — จัดการอุปกรณ์')">
-                  <span class="gi">@if (g.item; as eq) { <app-equipment-art [definitionId]="eq.definitionId" [rarity]="eq.rarity" [level]="eq.upgradeLevel" [instanceId]="eq.instanceId" /> } @else { <span class="plus">+</span> }</span>
+                  <span class="gi">@if (g.item; as eq) { <app-equipment-art [definitionId]="eq.definitionId" [rarity]="eq.rarity" [level]="eq.upgradeLevel" [instanceId]="eq.instanceId" /> } @else { <span class="plus">+</span> }<img class="ring" [src]="gild('ring_frame')" alt="" /></span>
                   <small>{{ g.label }}</small>
                   @if (g.item; as it) { <b>{{ gearName(it) }}</b>@if (tab() === 'gear') { <span class="lines">{{ g.lines.join(' · ') }}</span> } }
                 </a>

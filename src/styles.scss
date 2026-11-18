@@ -118,5 +118,6 @@ html body .app:has(.cosmetic-dialog) .bar { z-index:0; }
 :root { --ui-zoom: 1; }
 @media (min-width: 901px) and (min-height: 501px) {
   html.ui-zoom { zoom: .75; --ui-zoom: .75; }
+  html.ui-zoom body { overflow-x: clip; }  // full-bleed pages (hero detail) never scroll sideways
   html:not(.ui-zoom) .app:not(.bare) .bar { zoom: .75; }
 }
