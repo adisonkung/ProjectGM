@@ -202,10 +202,10 @@
               <div class="srow" [class.awakened]="sv.maxed" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">
                 <i class="wing" aria-hidden="true"></i>
                 @for (s of starRow(); track s.n) {
-                  <span [class]="'node ' + s.state">
+                  <span [class]="'node ' + s.state" [style.--sheen-delay]="sv.maxed ? (s.n - 1) * 360 + 'ms' : null">
                     <img [src]="starImg(s.n, s.state === 'lit')" alt="" />
                     @if (sv.maxed) {
-                      <i class="sheen" aria-hidden="true" [style.--star-mask]="'url(' + gild('star_lit') + ')'" [style.--sheen-delay]="s.n * 120 + 'ms'"></i>
+                      <i class="sheen" aria-hidden="true" [style.--star-mask]="'url(' + gild('star_lit') + ')'"></i>
                     }
                     @if (fx?.uid === h.uid && fx?.n === s.n) {
                       <i class="asc-pulse" aria-hidden="true" (animationend)="starFx.set(null)"></i>
