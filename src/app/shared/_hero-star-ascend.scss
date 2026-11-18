@@ -38,27 +38,27 @@ app-hero-detail {
     .node { width: 66px; height: 66px; > img { width: 62px; height: 62px; } }
     .wing { max-width: 40px; }
     &::before { content: ''; position: absolute; inset: -6px -10px; pointer-events: none; filter: blur(10px);
-      background: radial-gradient(ellipse 54% 62% at 50% 55%, rgba(255, 186, 74, .7), rgba(214, 74, 24, .38) 55%, transparent 78%);
-      animation: sa-aura 1.6s ease-in-out infinite alternate; }
+      background: radial-gradient(ellipse 54% 62% at 50% 55%, rgba(255, 186, 74, .45), rgba(214, 74, 24, .2) 55%, transparent 78%);
+      animation: sa-aura 3.6s ease-in-out infinite alternate; }
     .wing { background: linear-gradient(90deg, transparent, #ffb24a); box-shadow: 0 0 8px rgba(255, 160, 60, .9); }
-    .node > img { animation: sa-flicker 1.1s ease-in-out infinite alternate; }
-    .node:nth-of-type(2n) > img { animation-delay: -.45s; }
-    .flame { left: 50%; top: 42%; width: 160px; height: 160px; z-index: 0; mix-blend-mode: plus-lighter; opacity: .95; }
+    .node > img { animation: sa-flicker 3.2s ease-in-out infinite alternate; }
+    .node:nth-of-type(2n) > img { animation-delay: -1.6s; }
+    .flame { left: 50%; top: 44%; width: 96px; height: 96px; z-index: 0; mix-blend-mode: plus-lighter; opacity: .6; }
     .sheen { position: absolute; z-index: 2; inset: 1px; pointer-events: none;
       -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat;
-      background: linear-gradient(115deg, transparent 35%, rgba(255, 252, 235, .95) 48%, rgba(255, 214, 140, .6) 54%, transparent 66%) 0 0 / 300% 100% no-repeat;
-      mix-blend-mode: plus-lighter; animation: sa-sheen 2.4s ease-in-out infinite; } }
+      background: linear-gradient(115deg, transparent 35%, rgba(255, 252, 235, .55) 48%, rgba(255, 214, 140, .3) 54%, transparent 66%) 0 0 / 300% 100% no-repeat;
+      mix-blend-mode: plus-lighter; animation: sa-sheen 5.5s ease-in-out infinite; } }
   .ember { position: absolute; bottom: 8px; width: 4px; height: 4px; border-radius: 50%; pointer-events: none; z-index: 3;
-    background: #ffe2a0; box-shadow: 0 0 6px 2px rgba(255, 150, 50, .9); opacity: 0; animation: sa-ember 2s ease-out infinite; }
-  @keyframes sa-aura { from { opacity: .7; transform: scale(.96); } to { opacity: 1; transform: scale(1.06); } }
+    background: #ffe2a0; box-shadow: 0 0 5px 1px rgba(255, 150, 50, .7); width: 3px; height: 3px; opacity: 0; animation: sa-ember 3.6s ease-out infinite; }
+  @keyframes sa-aura { from { opacity: .75; transform: scale(.98); } to { opacity: 1; transform: scale(1.03); } }
   @keyframes sa-flicker {
-    from { transform: scale(1); filter: drop-shadow(0 0 6px rgba(255, 200, 110, .9)) drop-shadow(0 0 16px rgba(255, 120, 40, .7)) brightness(1.05); }
-    to { transform: scale(1.07); filter: drop-shadow(0 0 10px rgba(255, 236, 170, 1)) drop-shadow(0 0 26px rgba(255, 140, 40, .95)) brightness(1.25); } }
+    from { transform: scale(1); filter: drop-shadow(0 0 5px rgba(255, 200, 110, .7)) drop-shadow(0 0 12px rgba(255, 120, 40, .45)); }
+    to { transform: scale(1.025); filter: drop-shadow(0 0 7px rgba(255, 226, 160, .85)) drop-shadow(0 0 16px rgba(255, 140, 40, .6)) brightness(1.08); } }
   @keyframes sa-sheen { 0%, 25% { background-position: 100% 0; } 75%, 100% { background-position: 0 0; } }
-  @keyframes sa-ember { 0% { opacity: 0; transform: translate(0, 0) scale(1); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(6px, -100px) scale(.3); } }
+  @keyframes sa-ember { 0% { opacity: 0; transform: translate(0, 0) scale(1); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(4px, -70px) scale(.3); } }
   // overview: the small star row next to the class flickers + sweeps once maxed
   .stars.blaze { position: relative; filter: drop-shadow(0 0 6px rgba(255, 180, 80, .9)) drop-shadow(0 0 14px rgba(255, 110, 30, .6));
-    img { animation: sa-flicker 1.1s ease-in-out infinite alternate; } img:nth-child(2n) { animation-delay: -.5s; } }
+    img { animation: sa-flicker 3.2s ease-in-out infinite alternate; } img:nth-child(2n) { animation-delay: -1.6s; } }
 
   // ---------------------------------------------------------------- stats / bonus / materials / confirm
   .ascend .deltas { width: 100%; border-collapse: collapse; font-size: 17px;

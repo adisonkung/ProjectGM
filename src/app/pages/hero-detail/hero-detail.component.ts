@@ -79,7 +79,7 @@ export class HeroDetailComponent {
     return { n, state: n <= s ? 'lit' : n === s + 1 ? 'next' : 'locked' };
   }));
   /** rising embers over the blazing 6★ row: [left %, delay s, duration s] */
-  readonly embers: [number, number, number][] = Array.from({ length: 16 }, (_, i) => [6 + ((i * 37) % 88), (i * .31) % 2.6, 1.8 + ((i * 7) % 5) * .22]);
+  readonly embers: [number, number, number][] = Array.from({ length: 8 }, (_, i) => [8 + ((i * 41) % 84), (i * .55) % 4, 3.2 + ((i * 7) % 5) * .3]);
   readonly maxPerks = [4, 5, 6].map(n => STAR_PERKS[n].label).join(' · ');
   readonly ordinal = (n: number) => ['FIRST', 'SECOND', 'THIRD', 'FOURTH', 'FIFTH', 'SIXTH'][n - 1] ?? '';
   /** HP / ATK / DEF now vs after the next star */

@@ -203,7 +203,7 @@
                 <i class="wing" aria-hidden="true"></i>
                 @for (s of starRow(); track s.n) {
                   <span [class]="'node ' + s.state">
-                    @if (sv.maxed) { <app-sheet-fx class="flame" [src]="gild('vfx_starup_burst')" [loop]="[3, 7]" [fps]="10" [delayMs]="s.n * 110" /> }
+                    @if (sv.maxed) { <app-sheet-fx class="flame" [src]="gild('vfx_starup_burst')" [loop]="[3, 7]" [fps]="5" [delayMs]="s.n * 260" /> }
                     <img [src]="starImg(s.n, s.state === 'lit')" alt="" />
                     @if (sv.maxed) { <i class="sheen" [style.--m]="'url(' + gild('star_lit') + ')'" [style.animation-delay.s]="s.n * .12"></i> }
                     @if (starFx(); as f) { @if (f.n === s.n) { @for (k of [f.key]; track k) {
