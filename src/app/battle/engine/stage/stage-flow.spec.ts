@@ -739,10 +739,10 @@ describe('In-wave reinforcements (farm dungeons: sustained waves without extra t
     expect(firstWaveClearAt).toBeGreaterThan(0);
   });
 
-  it('farm dungeons are special modes: Training SURVIVAL, Ascension BOSS DUEL, Hunt TREASURE, Skill Trial CHALLENGE', () => {
+  it('farm dungeons are special modes: Training SURVIVAL, Ascension BOSS DUEL, Hunt TREASURE, Skill Trial single Echo room', () => {
     const kinds = Object.fromEntries(FARM_DUNGEONS.map(d => [d.id, d.stage.special?.kind]));
     for (const d of FARM_DUNGEONS) {
-      const want = ({ TRAINING: 'SURVIVAL', ASCENSION: 'BOSS_DUEL', EQUIPMENT: 'TREASURE', SKILL: 'CHALLENGE' } as Record<string, StageModeKind>)[d.type];
+      const want = ({ TRAINING: 'SURVIVAL', ASCENSION: 'BOSS_DUEL', EQUIPMENT: 'TREASURE', SKILL: 'STORY' } as Record<string, StageModeKind>)[d.type];
       expect(kinds[d.id]).withContext(d.id).toBe(want);
     }
     // SURVIVAL: one wave held in place + a horde that keeps coming
@@ -764,7 +764,7 @@ describe('In-wave reinforcements (farm dungeons: sustained waves without extra t
       const carriers = wavesOf(d.stage).flatMap(w => w.spawns).filter(sp => sp.monsterId.startsWith('coin_kobold'));
       expect(carriers.length).withContext(d.id).toBe(3);
     }
-    // CHALLENGE: every trial has at least one fail rule
-    for (const d of FARM_DUNGEONS.filter(x => x.type === 'SKILL')) expect(d.stage.special!.challenge!.length).toBeGreaterThan(0);
+    // Echo Trial: every tier is a single dynamically filled room
+    for (const d of FARM_DUNGEONS.filter(x => x.type === 'SKILL')) expect(d.stage.special!.echo).toBeDefined();
   });
 });

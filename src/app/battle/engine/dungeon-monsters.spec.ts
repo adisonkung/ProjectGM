@@ -49,7 +49,6 @@ describe('Special-dungeon monsters: data', () => {
     const own: Record<string, string[]> = {
       TRAINING: ['straw_recruit', 'crossbow_dummy', 'drill_sergeant'],
       EQUIPMENT: ['gem_beetle', 'mimic_chest', 'coin_kobold'],
-      SKILL: ['rune_wisp', 'grimoire_familiar', 'arcane_examiner'],
     };
     for (const d of FARM_DUNGEONS.filter(x => own[x.type])) {
       const st = d.stage;

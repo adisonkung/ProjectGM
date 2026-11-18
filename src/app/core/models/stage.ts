@@ -71,6 +71,8 @@ export type ChallengeRule =
   | { type: 'KILL_BEFORE'; monsterId: string; seconds: number; label: string };
 
 export interface StageModeRules {
+  /** One dynamically mirrored hero encounter; no static monster roster. */
+  echo?: import('../data/echo-trial').EchoCombatProfile;
   kind: StageModeKind;
   /** SURVIVAL: every `every` s of combat the next group (cycled) walks in while fewer than `maxAlive` enemies stand */
   horde?: { every: number; maxAlive: number; groups: EnemySpawn[][] };

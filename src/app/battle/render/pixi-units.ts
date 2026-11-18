@@ -77,6 +77,7 @@ interface UnitGfx {
   lastHit?: number;
   flashAt?: number;
   filterKey?: string;
+  smoke?: Sprite[];
   rings?: Graphics;
   ringKey?: string;
 }
@@ -112,8 +113,12 @@ export class PixiUnitLayer {
   private readonly fxPool: Sprite[] = [];
   private readonly crispTextures = new Map<string, Texture>();
   private readonly bloom?: AdvancedBloomFilter;
+  private readonly echoOutline?: import('pixi-filters').OutlineFilter;
   private readonly partLayer: Container;
   private readonly partSprites: Sprite[] = [];
+  private echoSmokeTexture?: Texture;
+  private echoSmokeLoading = false;
+  private echoSmokeDisposed = false;
   private readonly partTex = new Map<ParticleShape, Texture>();
   private readonly emitters: Emitter[] = [];
   private readonly rng = particleRng(0x5eed);
@@ -133,6 +138,7 @@ export class PixiUnitLayer {
     this.overFx.sortableChildren = true;
     this.overFx.zIndex = Z_OVER;
     if (filters) {
+      this.echoOutline = new filters.OutlineFilter({ thickness: 1, color: 0xa58ade, alpha: .45, quality: .1 });
       this.bloom = new filters.AdvancedBloomFilter({ threshold: 0.55, bloomScale: 0.9, brightness: 1, blur: 6, quality: 4 });
       this.overFx.filters = [this.bloom];
     }
@@ -201,6 +207,8 @@ export class PixiUnitLayer {
     for (const sprite of this.fxPool) sprite.destroy();
     this.fxPool.length = 0;
     this.app.destroy(true, { children: true });
+    this.echoOutline?.destroy();
+    this.echoSmokeDisposed = true; // Assets owns the one cached wisp texture across battle sessions.
     for (const texture of this.crispTextures.values()) texture.destroy(true);
     this.crispTextures.clear();
     for (const t of this.chunks.values()) t.destroy(true);
@@ -465,6 +473,7 @@ export class PixiUnitLayer {
       s.clip.request(u.req, u.key, now, u.moving);
       const pose = s.clip.pose(now, idleNow, u.moving, u.pace);
       if (!base) {
+        s.smoke?.forEach(p => p.visible = false);
         s.sprite.visible = false;
         continue;
       }
@@ -497,6 +506,7 @@ export class PixiUnitLayer {
   private dropUnit(s: UnitGfx): void {
     s.sprite.destroy();
     s.rings?.destroy();
+    s.smoke?.forEach(p => p.destroy());
   }
 
   /** one white texture per particle shape (tinted per particle) */
@@ -564,19 +574,56 @@ export class PixiUnitLayer {
     for (let i = n; i < this.partSprites.length; i++) this.partSprites[i].visible = false;
   }
 
+  /** Shared tapered wisp artwork, three owned sprites; no blurred cloud billboards. */
+  private drawEchoSmoke(s: UnitGfx, u: PixiUnit, cell: number, idleNow: number): void {
+    const active = !!u.look?.echo && !!u.look.rings?.includes('echo');
+    if (!active) { s.smoke?.forEach(p => p.visible = false); return; }
+    if (!this.echoSmokeTexture) {
+      if (!this.echoSmokeLoading) {
+        this.echoSmokeLoading = true;
+        this.pixi.Assets.load<Texture>('/vfx/echo-shadow-wisp.svg').then(texture => {
+          if (!this.echoSmokeDisposed) this.echoSmokeTexture = texture;
+        }).catch(() => { /* Missing presentation art never blocks combat. */ });
+      }
+      return;
+    }
+    if (!s.smoke) s.smoke = Array.from({ length: 3 }, () => {
+      const p = new this.pixi.Sprite(this.echoSmokeTexture);
+      p.anchor.set(.5, 1);
+      this.stage.addChild(p); return p;
+    });
+    s.smoke.forEach((p, i) => {
+      const progress = this.reduced ? .45 : (idleNow / 4.2 + i / 3 + u.id * .137) % 1;
+      const wave = Math.sin(progress * Math.PI * 2 + i * 1.7);
+      const side = i === 1 ? 1 : -1;
+      p.position.set(u.x + cell * (.5 + side * (.34 + wave * .045)), u.y + cell * (.99 - progress * .23));
+      p.width = cell * (i === 2 ? .20 : .35);
+      p.height = cell * (i === 0 ? .90 : .65);
+      p.scale.x = Math.abs(p.scale.x) * side;
+      p.rotation = side * wave * .045;
+      p.alpha = Math.sin(progress * Math.PI) * .62 * u.alpha;
+      p.zIndex = u.z - .03; p.visible = p.alpha > .001;
+    });
+  }
+
   /** the CSS state looks of the DOM `.unit`, drawn on the canvas (render/unit-look.ts) */
   private applyLook(s: UnitGfx, u: PixiUnit, cell: number, idleNow: number): void {
+    this.drawEchoSmoke(s, u, cell, idleNow);
     const look = u.look;
     const sp = s.sprite;
     const px = cell / 56; // CSS px at the reference cell size (56 px)
     // broken: darkened sepia (brightness .6 sepia .6 hue −20°) + 2 px jitter every 0.2 s · untargetable: partly grey
     let tone: ColorMatrixFilter | undefined;
-    if (look?.broken || look?.gray) {
+    if (look?.echo || look?.broken || look?.gray) {
       tone = s.tone ??= new this.pixi.ColorMatrixFilter();
-      const want = look.broken ? 'broken' : 'gray';
+      const want = look.echo ? 'echo' : look.broken ? 'broken' : 'gray';
       if (s.filterKey?.split('|')[0] !== want) {
         tone.reset();
-        if (look.broken) {
+        if (look.echo) {
+          tone.saturate(-.55, false);
+          tone.brightness(.66, true);
+          tone.tint(0xb5a1eb, true);
+        } else if (look.broken) {
           tone.brightness(0.6, false);
           tone.sepia(true);
         } else {
@@ -606,9 +653,9 @@ export class PixiUnitLayer {
       const pulse = look.glowPulse && !this.reduced ? Math.abs(((idleNow / 0.9) % 2) - 1) : 1;
       glow.outerStrength = 1.4 + 1.6 * pulse;
     }
-    const key = `${tone ? (look!.broken ? 'broken' : 'gray') : ''}|${flash ? 'f' : ''}|${glow ? 'g' : ''}`;
+    const key = `${tone ? (look!.echo ? 'echo' : look!.broken ? 'broken' : 'gray') : ''}|${flash ? 'f' : ''}|${glow ? 'g' : ''}`;
     if (key !== s.filterKey) {
-      const list = [tone, flash, glow].filter((x): x is NonNullable<typeof x> => !!x);
+      const list = [tone, flash, glow, ...(look?.echo ? [this.echoOutline] : [])].filter((x): x is NonNullable<typeof x> => !!x);
       sp.filters = list.length ? list : null;
       s.filterKey = key;
     }
@@ -620,7 +667,7 @@ export class PixiUnitLayer {
     }
     if (s.rings) {
       const g = s.rings;
-      if (s.ringKey !== rkey) {
+      if (s.ringKey !== rkey || look?.echo) {
         g.clear();
         for (const r of look?.rings ?? []) {
           const b = RING_BOX[r];
@@ -633,9 +680,18 @@ export class PixiUnitLayer {
             g.ellipse(0, cy, rx, ry).fill({ color: col, alpha: 0.35 });
             g.ellipse(0, cy, rx, ry).stroke({ color: r === 'aura6' ? LOOK_COLORS.aura6Rim : LOOK_COLORS.aura5Rim, width: 2 * px, alpha: 1 });
           } else {
-            const col = r === 'elite' ? LOOK_COLORS.r5 : LOOK_COLORS.gold;
-            g.ellipse(0, cy, rx + 3 * px, ry + 3 * px).stroke({ color: col, width: 4 * px, alpha: 0.25 });
-            g.ellipse(0, cy, rx, ry).stroke({ color: col, width: 2 * px, alpha: 1 });
+            const col = r === 'echo' ? 0xa58ade : r === 'elite' ? LOOK_COLORS.r5 : LOOK_COLORS.gold;
+            if (r === 'echo') {
+              for (let i = 0; i < 3; i++) {
+                const rise = this.reduced ? .4 : (idleNow * .35 + i * .31 + u.id * .17) % 1;
+                g.rect((i - 1) * rx * .6, cy - rise * cell * .7, 1.5 * px, 2 * px).fill({ color: col, alpha: .4 * (1 - rise) });
+              }
+              g.ellipse(0, cy, rx * 1.15, ry * 1.4).fill({ color: 0x4c3478, alpha: .13 });
+              g.ellipse(0, cy, rx, ry).stroke({ color: col, width: px, alpha: .30 });
+            } else {
+              g.ellipse(0, cy, rx + 3 * px, ry + 3 * px).stroke({ color: col, width: 4 * px, alpha: 0.25 });
+              g.ellipse(0, cy, rx, ry).stroke({ color: col, width: 2 * px, alpha: 1 });
+            }
           }
         }
         s.ringKey = rkey;

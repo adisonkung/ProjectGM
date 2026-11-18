@@ -152,7 +152,7 @@ describe('Special mode rewards', () => {
     const h = FARM_BY_ID['hunt_1'];
     expect([0, 1, 2, 3].map(n => clearRating(h, { deaths: 0, time: 1, mode: score({ kind: 'TREASURE', carriersKilled: n }) }))).toEqual([1, 1, 2, 3]);
     const c = FARM_BY_ID['trial_1'];
-    const max = c.stage.special!.challenge![0].type === 'CAST_LIMIT' ? 1 : 0;
+    const max = 0;
     expect(clearRating(c, { deaths: 0, time: 1, mode: score({ kind: 'CHALLENGE', strikes: 0, maxStrikes: max }) })).toBe(3);
     const a1 = FARM_BY_ID['ascension_1'];
     expect(clearRating(a1, { deaths: 0, time: a1.targetTime - 1, mode: score({ kind: 'BOSS_DUEL' }) })).toBe(3);

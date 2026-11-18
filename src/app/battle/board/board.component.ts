@@ -20,6 +20,7 @@ import { unitLook } from '../render/unit-look';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
 export interface UnitView {
+  echo?: boolean;
   id: number;
   side: Side;
   name: string;

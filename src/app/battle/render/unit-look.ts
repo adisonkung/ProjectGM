@@ -8,9 +8,10 @@
  *   untargetable → partly grey (its 0.4 opacity already comes in through the unit's alpha)
  *   rings     → 5★ / 6★ star aura, elite ring, taunt ring (ground decals under the sprite)
  */
-export type GroundRing = 'aura5' | 'aura6' | 'elite' | 'taunt';
+export type GroundRing = 'echo' | 'aura5' | 'aura6' | 'elite' | 'taunt';
 
 export interface UnitLook {
+  echo?: boolean;
   glow?: number;
   glowPulse?: boolean;
   broken?: boolean;
@@ -19,6 +20,7 @@ export interface UnitLook {
 }
 
 export interface LookSource {
+  echo?: boolean;
   alive: boolean;
   side: string;
   star?: number;
@@ -45,12 +47,14 @@ export const LOOK_COLORS = {
 /** the same class conditions as board.component.html */
 export function unitLook(u: LookSource): UnitLook | undefined {
   const look: UnitLook = {};
+  if (u.echo) look.echo = true;
   if (u.reviving) look.glow = LOOK_COLORS.reviving;
   else if (u.alive && u.enraged) look.glow = LOOK_COLORS.enraged;
   else if (u.alive && u.buffed) (look.glow = LOOK_COLORS.buffed), (look.glowPulse = true);
   if (u.alive && u.broken) look.broken = true;
   if (u.alive && u.untargetable) look.gray = true;
   const rings: GroundRing[] = [];
+  if (u.echo && u.alive) rings.push('echo');
   if (u.taunt) rings.push('taunt');
   else if (u.alive && u.side !== 'enemy' && (u.star ?? 0) >= 6) rings.push('aura6');
   else if (u.alive && u.side !== 'enemy' && u.star === 5) rings.push('aura5');
@@ -61,6 +65,7 @@ export function unitLook(u: LookSource): UnitLook | undefined {
 
 /** ring box in cells (the CSS pseudo-element: centre x 0.5, centre y from the cell top, width, height) */
 export const RING_BOX: Record<GroundRing, { cy: number; w: number; h: number }> = {
+  echo: { cy: .89, w: .72, h: .20 },
   aura5: { cy: 1.04 - 0.15, w: 0.92, h: 0.3 },
   aura6: { cy: 1.04 - 0.15, w: 0.92, h: 0.3 },
   elite: { cy: 1.02 - 0.13, w: 0.88, h: 0.26 },

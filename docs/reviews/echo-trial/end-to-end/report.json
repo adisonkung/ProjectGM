@@ -1,0 +1,58 @@
+{
+  "scenarios": [
+    {
+      "name": "full-five-menu-to-victory",
+      "result": "win",
+      "waves": 1,
+      "echoes": 5,
+      "skill1": 5,
+      "skill2": 3,
+      "echoHeals": 6,
+      "echoAttacks": 22,
+      "firstClearReward": true
+    },
+    {
+      "name": "retry-leave-reenter",
+      "disposedOnRetry": true,
+      "disposedOnLeave": true,
+      "reenteredEchoes": 5
+    },
+    {
+      "name": "three-hero-tank-dps-healer",
+      "echoes": 3,
+      "result": "win"
+    },
+    {
+      "name": "tier-four-one-hero-defeat",
+      "result": "lose",
+      "rewardNotGranted": true
+    },
+    {
+      "name": "level-independent-normalization",
+      "sameEchoStatsAtPlayerLevel1And10": true
+    },
+    {
+      "name": "regression-training",
+      "echoes": 0,
+      "enemies": 5,
+      "fightTime": 2.499999999999999
+    },
+    {
+      "name": "regression-equipment-hunt",
+      "echoes": 0,
+      "enemies": 6,
+      "fightTime": 2.499999999999999
+    },
+    {
+      "name": "regression-normal-tower",
+      "echoes": 0,
+      "enemies": 2,
+      "fightTime": 2.3
+    },
+    {
+      "name": "regression-player-ultimate",
+      "playerUltCasts": 1
+    }
+  ],
+  "javascriptErrors": []
+}

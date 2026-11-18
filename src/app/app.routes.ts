@@ -10,6 +10,7 @@ export const welcomeGuard: CanActivateFn = () => (inject(AccountService).needsNa
 
 /** every page is lazy-loaded: the initial bundle holds only the shell + shared services (keeps it under the size budget) */
 const GAME_ROUTES: Routes = [
+  { path: 'echo-lab', loadComponent: () => import('./pages/echo-lab/echo-lab.component').then(m => m.EchoLabComponent), title: 'Echo Preview · Eldervane' },
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   { path: 'account', loadComponent: () => import('./pages/account/account.component').then(m => m.AccountComponent), title: 'บัญชี & ย้ายเซฟ · Eldervane' },
   { path: 'home', loadComponent: () => import('./pages/island/island.component').then(m => m.IslandComponent), title: 'เกาะของฉัน · Eldervane' },

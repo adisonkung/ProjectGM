@@ -1,3 +1,4 @@
+import { echoSpec, echoKit } from '../../core/rules/echo-trial';
 import { inBasicAttackRange, isMeleeRange, meleeStandY } from './melee-contact';
 import { BLADE_TRACE, SlashTraceDefinition } from '../../core/data/special-skills';
 import { CombatModifiers, ResistableStatus } from '../../core/models/progression';
@@ -156,6 +157,7 @@ export interface RuntimeProjectile {
 }
 
 export interface BattleUnit {
+  echo?: import('../../core/data/echo-trial').EchoCombatProfile;
   id: number;
   side: Side;
   name: string;
@@ -403,7 +405,18 @@ export class BattleEngine {
   /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม (สลับได้ระหว่างสู้) */
   autoUlt: boolean;
 
+  private readonly echoSources = new Map<string, UnitSpec>();
+
   constructor(cfg: BattleConfig) {
+    if (cfg.stage.special?.echo) {
+      const spawns = cfg.allies.map((source, i) => {
+        const id = `echo_${i}`;
+        this.echoSources.set(id, source);
+        return { monsterId: id, formationSlot: { depth: source.pos.r, lane: source.pos.c } };
+      });
+      cfg = { ...cfg, stage: { ...cfg.stage, enemies: [], rounds: undefined,
+        waveEvery: undefined, waves: undefined, waveDefs: [{ spawns }] } };
+    }
     this.rng = createRng(cfg.seed ?? Date.now());
     this.stage = cfg.stage;
     this.templates = cfg.enemyTemplates;
@@ -513,8 +526,27 @@ export class BattleEngine {
     return this.units.filter(u => isPlayerUnit(u) && !u.alive && u.life !== 'REVIVING' && u.heroUid != null).map(u => u.heroUid!);
   }
 
+  private released = false;
+  get disposed(): boolean { return this.released; }
+
+  /** Release a finished/replaced session after its result presentation; never persist runtime enemies. */
+  dispose(): void {
+    if (this.released) return;
+    this.released = true;
+    this.listeners = [];
+    this.pending = [];
+    this.fields.clear();
+    this.skills.dispose();
+    this.projectiles.length = 0;
+    for (const u of this.units) this.grid.remove(u.id, u.pos);
+    this.units.length = 0;
+    this.echoSources.clear();
+    this.statusVariants.clear();
+    this.events.drain();
+  }
+
   step(dt: number): void {
-    if (this.result) return;
+    if (this.released || this.result) return;
     this.time += dt;
     this.flow.update(dt);
     if (this.flow.stageResult) this.flow.stageResult.battleDuration = this.time;
@@ -697,7 +729,7 @@ export class BattleEngine {
 
   /** mana (ultimate gauge) only grows in COMBAT unless the stage rules say otherwise */
   private gainMana(u: BattleUnit, amount: number): void {
-    if (u.maxMana <= 0) return;
+    if (u.echo || u.maxMana <= 0) return;
     if (this.flow.phase !== BattlePhase.COMBAT && !this.rules.ultimateGaugeGenerationDuringTransition) return;
     u.mana = Math.min(u.maxMana, u.mana + amount);
   }
@@ -813,6 +845,17 @@ export class BattleEngine {
   }
 
   private spawnEnemy(enemyId: string, local?: Cell): BattleUnit | null {
+    const source = this.echoSources.get(enemyId), profile = this.stage.special?.echo;
+    if (source && profile) {
+      const unit = this.addUnit('enemy', echoSpec(source, profile));
+      if (unit) {
+        unit.echo = profile;
+        unit.kit = echoKit(source, profile);
+        unit.cd1 = (unit.kit.skill.cooldown ?? 0) * START_CD;
+        unit.cd2 = (unit.kit.skill2.cooldown ?? 0) * START_CD;
+      }
+      return unit;
+    }
     const m = this.monsterDefs[enemyId];
     if (m) return this.spawnMonster(m, local);
     const t = this.templates[enemyId];
@@ -993,7 +1036,7 @@ export class BattleEngine {
     // ultimate: full gauge + (player tap / AUTO per UltimateUseMode / enemy) → fires once a suitable target exists
     const ultMode = this.skills.mode(u, 'ult');
     const autoOk = this.autoUlt && ultMode !== 'MANUAL' && (ultMode !== 'RESERVE' || this.skills.reserveUltReady(u));
-    const wantsUlt = u.ultQueued || !isPlayerUnit(u) || autoOk;
+    const wantsUlt = !u.echo && (u.ultQueued || !isPlayerUnit(u) || autoOk);
     if (!silenced && u.mana >= u.maxMana && wantsUlt && settling
       && this.skills.chooseUltimate(u, this.units.find(x => x.id === u.targetId) ?? null, u.ultQueued)) return;
     if (!silenced && u.mana >= u.maxMana && wantsUlt && this.tryUltimate(u, u.ultQueued)) {
@@ -1975,6 +2018,7 @@ export class BattleEngine {
 
   /** ท่าไม้ตาย: ใช้เกจเต็ม (ผู้เล่นสั่ง = ขอแค่มีเป้า · ออโต้/ศัตรู = ต้องผ่านเงื่อนไข AI ด้วย) · เกจ = 0 */
   private tryUltimate(u: BattleUnit, manual: boolean): boolean {
+    if (u.echo) return false;
     const t = this.skills.chooseUltimate(u, this.units.find(x => x.id === u.targetId) ?? null, manual);
     if (!t) return false;
     u.mana = 0;
@@ -2029,7 +2073,14 @@ export class BattleEngine {
 
   private applyStatus(dst: BattleUnit, id: string, src: BattleUnit, duration?: number, opts?: StatusApplyOptions): void {
     if (!dst.alive) return;
-    const def = this.rankedStatus(SkillSystem.status(id), opts?.modifiers);
+    let def = this.rankedStatus(SkillSystem.status(id), opts?.modifiers);
+    if (src.echo) {
+      if (!Number.isFinite(duration ?? def.duration)) duration = 3;
+      if (def.stackPolicy === 'STACK_DURATION') def = { ...def, stackPolicy: 'REFRESH_DURATION' };
+      if (def.stackPolicy === 'STACK_MAGNITUDE' && !Number.isFinite(def.maxStacks)) def = { ...def, maxStacks: 5 };
+    }
+    if (src.echo && def.flags?.some(f => ['stun', 'root', 'taunted', 'silence', 'broken'].includes(f)))
+      duration = Math.min(duration ?? def.duration, src.echo.maxCrowdControlDuration);
     if (this.resists(dst, def)) {
       this.events.push({ type: 'immune', src: src.id, dst: dst.id, skill: def.name });
       return;
@@ -2292,6 +2343,7 @@ export class BattleEngine {
       guarded: u => u.shield > 0 || modifier(u, 'damageTakenMultiplier') < 1,
       knockback: (src, dst, cells) => self.knockback(src, dst, cells),
       shield: (src, dst, amount, duration) => {
+        amount = Math.round(amount * (src.echo?.shieldMultiplier ?? 1));
         dst.shield += amount;
         dst.shieldTime = duration;
         self.events.push({ type: 'shield', src: src.id, dst: dst.id, amount });
@@ -2301,7 +2353,7 @@ export class BattleEngine {
       canRevive: dead =>
         !self.flow.outcome && self.flow.rules.allowRevive && isDead(dead) && self.flow.limitedRevives < self.flow.rules.partyReviveLimit,
       revive: (src, dead, hpPct) =>
-        self.reviveHero({ unitId: dead.id, reviveHpPercent: hpPct, sourceUnitId: src.id, sourceId: `ult:${src.heroId ?? src.cls}`, countsTowardLimit: true }).ok,
+        !src.echo && self.reviveHero({ unitId: dead.id, reviveHpPercent: hpPct, sourceUnitId: src.id, sourceId: `ult:${src.heroId ?? src.cls}`, countsTowardLimit: true }).ok,
       freeCellNear: (at, from) => self.freeCellNear(at, from),
       relocate: (u, cell, how, duration) => self.relocate(u, cell, how, duration),
       canLand: cell => Grid.inBounds(cell) && self.grid.isFree(cell) && !self.reservedBodyCell(cell),
@@ -2414,6 +2466,7 @@ export class BattleEngine {
         if (isRanged(dst) && this.positioning.threatCount(dst.pos, this.positioning.threats(dst)) > 0) this.metrics.rangedDeathsInThreat++;
       }
       this.grid.remove(dst.id, dst.pos);
+      if (dst.echo) this.pending.push({ at: this.time + .65, fn: () => { dst.visible = false; dst.life = 'DEAD_HIDDEN'; } });
       if (dst.boss && !isPlayerUnit(dst) && this.metrics.bossDiedAt == null) this.metrics.bossDiedAt = this.time;
       this.events.push({ type: 'death', dst: dst.id });
       this.flow.onDeath(dst);
@@ -2452,6 +2505,7 @@ export class BattleEngine {
 
   private heal(dst: BattleUnit, amount: number, src?: BattleUnit): void {
     if (!dst.alive) return;
+    amount *= src?.echo?.healingMultiplier ?? 1;
     // Forest Oblivion: healing received −50% · equipment Healing Received
     amount *= modifier(dst, 'healingReceivedMultiplier') * (dst.mods?.healingReceived ?? 1);
     const a = Math.round(Math.min(amount, dst.maxHp - dst.hp));

@@ -266,22 +266,12 @@ describe('Skill Trial I–IV', () => {
     });
   });
 
-  it('themes (Arcane Exam Hall roster): I Rune Wisp casters · II a Grimoire every wave · III several casters at once (Grimoire + Rune-Bolt wisp) · IV Arcane Examiner (break only, 100)', () => {
-    const ids = (id: string) => wavesOf(FARM_BY_ID[id].stage).map(w => [...w.spawns, ...(w.reinforcements ?? []).flatMap(r => r.spawns)].map(s => s.monsterId.split('@')[0]));
-    const casters = (id: string) => wavesOf(FARM_BY_ID[id].stage).flatMap(w => [...w.spawns, ...(w.reinforcements ?? []).flatMap(r => r.spawns)])
-      .filter(s => MONSTERS[s.monsterId].skills.length > 0);
-    expect(casters('trial_1').some(s => MONSTERS[s.monsterId].skills.includes('rune_bolt'))).toBeTrue();
-    expect(ids('trial_2').every(w => w.includes('grimoire_familiar'))).toBeTrue();
-    expect(wavesOf(FARM_BY_ID['trial_3'].stage).some(w => w.spawns.filter(s => MONSTERS[s.monsterId].skills.length > 0).length >= 2)).toBeTrue();
-    expect(ids('trial_4').flat()).toContain('arcane_examiner');
-    // only the Arcane Exam Hall's own monsters
-    for (const t of ['trial_1', 'trial_2', 'trial_3', 'trial_4']) {
-      expect(ids(t).flat().every(id => ['rune_wisp', 'grimoire_familiar', 'arcane_examiner'].includes(id))).withContext(t).toBeTrue();
+  it('all tiers use a single dynamic Echo room with no monster roster or challenge fail rules', () => {
+    for (const trial of trials) {
+      expect(wavesOf(trial.stage)).toEqual([{ spawns: [] }]);
+      expect(trial.stage.special!.echo).toBeDefined();
+      expect(trial.stage.special!.challenge).toBeUndefined();
     }
-    const seal = MONSTER_SKILLS['arcane_seal'] as unknown as { breakRequired: number; interruptible: boolean };
-    expect(seal.breakRequired).toBe(100);
-    expect(seal.interruptible).toBeFalse();
-    expect(MONSTERS['arcane_examiner'].animation.sheet).toBe('enemy-arcane-examiner.png');
   });
 
   it('a Trial clear pays tomes / fragments + gold, bonus runs ×1.5 then repeats ×0.6, first clear once', () => {
