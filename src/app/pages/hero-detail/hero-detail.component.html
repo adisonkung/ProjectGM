@@ -32,6 +32,7 @@
     <div class="info">
       <div class="identity">
         <h1><span class="latin">{{ latinName() }}</span><span class="th">{{ tp.name }}</span></h1>
+        @if (tab() === 'overview') {
         <div class="class-row">
           <span class="class-badge">
             <span class="medal">@if (classIcon(); as ci) { <img [src]="ci" alt="" /> }</span>
@@ -56,13 +57,9 @@
           <div class="bar" role="progressbar" aria-label="ประสบการณ์ฮีโร่" aria-valuemin="0" [attr.aria-valuemax]="p.expToNext || 1" [attr.aria-valuenow]="p.state === 'MAX' ? 1 : (p.exp > p.expToNext ? p.expToNext : p.exp)">
             <i [style.width.%]="expPct()"></i><b class="tip" [style.left.%]="expPct()"></b>
           </div>
-          @if (levelFx(); as f) {
-            @for (k of [f.key]; track k) {
-              <app-sheet-fx [class]="'fx-' + f.kind" [src]="gild(f.kind === 'level' ? 'vfx_levelup_ring' : 'vfx_breakthrough')" [fps]="13" (done)="levelFx.set(null)" />
-            }
-          }
           <small class="exp">{{ p.state === 'MAX' ? 'เลเวลสูงสุด' : p.state === 'BREAKTHROUGH_READY' ? 'ต้อง Breakthrough เพื่อไปต่อ' : 'EXP ' + p.exp + ' / ' + p.expToNext }}</small>
         </div>
+        }
       </div>
 
       @if (message(); as m) { <p class="msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
@@ -174,12 +171,24 @@
             <section class="block stars-block">
               <header><h2 class="has-icon"><img [src]="gild('star_up')" alt="" />พัฒนาดาว</h2><small class="eyebrow">CONSTELLATION OF ASCENT</small></header>
               <div class="constellation" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                  @for (l of constellationLinks(); track $index) { <line [attr.x1]="l.x1" [attr.y1]="l.y1" [attr.x2]="l.x2" [attr.y2]="l.y2" [class.on]="l.on" vector-effect="non-scaling-stroke" /> }
+                <svg class="astro" viewBox="0 0 200 200" aria-hidden="true">
+                  <circle cx="100" cy="100" r="96" /><circle cx="100" cy="100" r="88" class="dash" /><circle cx="100" cy="100" r="62" class="thin" />
+                  <path d="M100 2 L104 12 L100 22 L96 12Z M100 178 L104 188 L100 198 L96 188Z M2 100 L12 96 L22 100 L12 104Z M178 100 L188 96 L198 100 L188 104Z" class="gem" />
                 </svg>
+                <svg class="arc" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                  <path class="track" d="M6 78 Q50 -42 94 78" vector-effect="non-scaling-stroke" />
+                  <path class="lit" d="M6 78 Q50 -42 94 78" pathLength="100" [attr.stroke-dasharray]="arcLit() + ' 100'" vector-effect="non-scaling-stroke" />
+                </svg>
+                @for (t of twinkles; track $index) { <img class="tw" [src]="gild('sparkle')" alt="" aria-hidden="true" [style.left.%]="t[0]" [style.top.%]="t[1]" [style.width.px]="t[2]" [style.animation-delay.s]="t[3]" /> }
                 @for (c of constellation(); track c.n) {
-                  <span class="node" [class.on]="c.on" [class.next]="c.next" [style.left.%]="c.x" [style.top.%]="c.y" aria-hidden="true"><img [src]="starImg(c.n, c.on || c.next)" alt="" />@if (c.next) { <em>NEXT</em> }</span>
+                  <span class="node" [class.on]="c.on" [class.next]="c.next" [style.left.%]="c.x" [style.top.%]="c.y" aria-hidden="true">@if (c.next) { <img class="frame" [src]="gild('ring_frame')" alt="" /> }<img class="star" [src]="starImg(c.n, c.on || c.next)" alt="" /></span>
                 }
+                <div class="core" aria-hidden="true">
+                  <img class="halo" [src]="gild('sparkle')" alt="" />
+                  <img class="big" [src]="starImg(sv.maxed ? star() : star() + 1, true)" alt="" />
+                  <b>{{ sv.maxed ? star() : star() + 1 }}</b>
+                  <small>{{ sv.maxed ? 'ดาวสูงสุด' : 'จาก ' + star() + '★' }}</small>
+                </div>
                 @if (starFx(); as f) {
                   @for (k of [f.key]; track k) {
                     <app-sheet-fx class="fx-pillar" [src]="gild('vfx_starup_pillar')" [fps]="12" [style.left.%]="f.x" [style.top.%]="f.y" />
@@ -187,13 +196,12 @@
                   }
                 }
               </div>
-              <span class="leap">@if (sv.maxed) { <b class="to">{{ star() }}</b><img class="big" [src]="starImg(star(), true)" alt="" /> } @else { <b>{{ star() }}</b><img class="small" [src]="starImg(star(), true)" alt="" /><i class="st" aria-hidden="true"></i><b class="to">{{ star() + 1 }}</b><img class="big" [src]="starImg(star() + 1, true)" alt="" /> }</span>
               @if (sv.maxed) { <p class="hint centered">ถึง 6★ แล้ว — ตัวซ้ำจะกลายเป็น Universal Memory</p> }
               @else {
                 <div class="facts">
                   <div><small>HP · ATK · DEF</small><b class="up">+{{ nextStarGain() }}%</b></div>
-                  <div><small>ปลดล็อก</small><b class="perk">{{ nextPerk() || '—' }}</b></div>
-                  <div class="mem-fact"><img [src]="gild('hero_memory')" alt="" /><small>ใช้ Memory</small><b>{{ sv.cost }}</b></div>
+                  <div class="perk"><small>ปลดล็อก</small><b>{{ nextPerk() || '—' }}</b></div>
+                  <div><small>ใช้ Memory</small><b>{{ sv.cost }}</b></div>
                 </div>
                 <div class="mem-row"><span><img [src]="gild('hero_memory')" alt="" />Memory ของ{{ tp.name }} {{ sv.heroMemory }} · Universal {{ sv.universal }}</span><b>{{ sv.spendHero + sv.spendUniversal }} <small>/ {{ sv.cost }}</small></b></div>
                 <div class="bar"><i [style.width.%]="pct(sv.spendHero + sv.spendUniversal, sv.cost)"></i></div>
@@ -203,6 +211,11 @@
           }
           <section class="block grow">
             <header><h2 class="has-icon"><img [src]="gild('level_up')" alt="" />เลเวล <small>{{ p.level }} / {{ p.levelCap }}</small></h2>
+              @if (levelFx(); as f) {
+                @for (k of [f.key]; track k) {
+                  <app-sheet-fx [class]="'fx-' + f.kind" [src]="gild(f.kind === 'level' ? 'vfx_levelup_ring' : 'vfx_breakthrough')" [fps]="13" (done)="levelFx.set(null)" />
+                }
+              }
               <span class="slot-inline">
                 @if (inTeam()) { <span class="chip">อยู่ในทีมแล้ว</span> }
                 @else { <button type="button" class="mini wide" [class.on]="training()" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()" [title]="'ฮีโร่สำรองได้ ' + slotShare * 100 + '% ของ EXP จาก Training Ground'"><img class="ico" [src]="gild('training_slot')" alt="" />{{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องฝึกเต็ม' : 'ส่งเข้าช่องฝึก' }}</button> }

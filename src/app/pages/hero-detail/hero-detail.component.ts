@@ -82,6 +82,10 @@ export class HeroDetailComponent {
     const a = this.constellation()[i];
     return { x1: a.x, y1: a.y, x2: b.x, y2: b.y, on: b.on };
   }));
+  /** lit share of the constellation arc (path length 100) */
+  readonly arcLit = computed(() => Math.max(0, Math.min(100, (this.star() - 1) / 5 * 100)));
+  /** twinkling sparkles around the constellation: [left %, top %, size px, delay s] */
+  readonly twinkles = [[18, 18, 22, 0], [34, 4, 16, 1.1], [66, 4, 18, .5], [83, 20, 22, 1.7], [12, 52, 14, 2.3], [90, 50, 16, .8]];
   /** the perk the next star unlocks (4★–6★), if any */
   readonly nextPerk = computed(() => STAR_PERKS[this.star() + 1]?.label ?? '');
   starUp(): void {

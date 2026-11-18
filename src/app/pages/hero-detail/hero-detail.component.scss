@@ -176,7 +176,10 @@ table { width: 100%; border-collapse: collapse; font-size: 16px;
 
 // ---------------------------------------------------------------- desktop: fill the screen under the global 75 % UI zoom (styles.scss)
 @media (min-height: 501px) and (min-width: 901px) {
-  .detail { height: calc(100dvh / var(--ui-zoom) - 158px); min-height: 700px; }
+  // break out of the app's centred column: menu hugs the left edge, info the right (user 2026-11-18)
+  .detail { height: calc(100dvh / var(--ui-zoom) - 158px); min-height: 700px;
+    --full: calc(100vw / var(--ui-zoom) - 96px); width: var(--full); margin-left: calc((100% - var(--full)) / 2);
+    grid-template-columns: 220px minmax(0, 1fr) minmax(460px, 600px); }
 }
 
 // ---------------------------------------------------------------- narrower desktop / tablet landscape
