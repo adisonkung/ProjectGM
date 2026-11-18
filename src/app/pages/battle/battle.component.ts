@@ -1,7 +1,11 @@
 import { isMeleeRange } from '../../battle/engine/melee-contact';
 import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
 import { bodyFrontCell } from '../../battle/engine/footprint';
-import { battleViewport } from './battle-viewport';
+import { battleViewport, fullscreenViewport } from './battle-viewport';
+import { heroArt, HERO_ART } from '../../core/data/hero-art';
+import { spriteUrl } from '../../core/data/sprite-files';
+import { battleSpriteFiles, stageMonsterSprites } from '../../battle/render/battle-assets';
+import { preloadBattle } from '../../battle/render/battle-preload';
 import { BattleEmblemComponent } from './battle-emblem.component';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { A11yModule } from '@angular/cdk/a11y';
@@ -124,11 +128,16 @@ export class BattleComponent implements OnDestroy {
   readonly floor = signal(1);
   readonly viewport = signal({ width: typeof window === 'undefined' ? 1280 : window.innerWidth, height: typeof window === 'undefined' ? 900 : window.innerHeight });
   readonly fieldLayout = computed(() => {
-    const lab=this.mode()==='lab',bg=this.background();
-    return battleViewport(this.viewport().width,this.viewport().height,lab ? 0 : (bg?.groundRows ?? .8),lab ? 0 : (bg?.skyRows ?? 0));
+    const lab=this.mode()==='lab',bg=this.background(),{width,height}=this.viewport();
+    const ground=lab ? 0 : (bg?.groundRows ?? .8),sky=lab ? 0 : (bg?.skyRows ?? 0);
+    if (!this.fullscreen()) return { ...battleViewport(width,height,ground,sky), dock: 0, partyCell: 0 };
+    // full-screen fight: extra sky only as far as the art reaches (arena images cover the whole field)
+    const maxExtra=lab ? 0 : bg?.arena ? 2 : Math.max(0,((bg?.zoom ?? 1)-1)*5);
+    return fullscreenViewport(width,height,ground,sky,maxExtra);
   });
   readonly sceneryExtraRows = computed(() => {
     if (this.mode() === 'lab') return 0;
+    if (this.fullscreen()) return this.fieldLayout().extraRows;
     // Fixed arena images cover the full field, so extra sky does not expose an empty tiled band.
     if (this.background()?.arena) return this.fieldLayout().extraRows;
     const requested = this.placing() ? (this.viewport().width >= 900 ? .65 : 0) : this.fieldLayout().extraRows;
@@ -264,7 +273,86 @@ export class BattleComponent implements OnDestroy {
   });
   readonly background = computed(() => BACKGROUNDS[this.stage().background ?? ''] ?? null);
   /** ก่อนกดเริ่ม: แสดงกระดานจัดตำแหน่ง */
-  readonly placing = computed(() => !this.running() && !this.result());
+  readonly placing = computed(() => !this.running() && !this.result() && !this.loading());
+  /**
+   * The fight owns the whole window (mobile-landscape style on every screen): from the loading screen through the
+   * result popup. The app's menu bar is covered and the page does not scroll. (The lab keeps its tool layout — it gets
+   * the loading screen and cut-in only.)
+   */
+  readonly fullscreen = computed(() => !this.placing() && this.mode() !== 'lab');
+
+  // ---------------------------------------------------------------- pre-battle loading screen
+  /** loading screen over the field: random hero key art + progress; the board mounts underneath meanwhile */
+  readonly loading = signal<{ banner: string; name: string; title: string; done: number; total: number; leaving: boolean } | null>(null);
+  readonly loadPct = computed(() => { const l = this.loading(); return l ? (l.total ? Math.round((l.done / l.total) * 100) : 0) : 0; });
+  private loadToken: { cancelled: boolean } | null = null;
+  private loadTimers: ReturnType<typeof setTimeout>[] = [];
+  static readonly LOAD_MIN_MS = 1000;
+  static readonly LOAD_FADE_MS = 420;
+  private readonly reducedMotion = (): boolean => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /**
+   * Start button: show the loading screen, fetch + decode every sheet / FX strip this fight can draw (team + every
+   * monster of every wave, the Pixi chunk, the stage art), hold at least LOAD_MIN_MS, then fade into the running fight.
+   * A file that fails or times out is skipped. Presentation only — the engine starts exactly as `start()` always did.
+   */
+  enter(): void {
+    if (this.running() || this.loading()) return;
+    if (this.result()) this.prepare();
+    if (!this.engine.alive(PLAYER_TEAM).length) return;
+    this.lockLandscape(); // needs the tap's user activation — before any await
+    const team = this.engine.units.filter(u => isPlayerUnit(u) && u.heroId);
+    const withBanner = team.filter(u => heroArt(u.heroId!)?.banner);
+    const pool = withBanner.length ? withBanner.map(u => u.heroId!) : Object.keys(HERO_ART).filter(id => HERO_ART[id].banner);
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    const pickedName = team.find(u => u.heroId === pick)?.name ?? '';
+    const banner = '/' + (heroArt(pick)?.banner ?? heroArt(pick)?.portrait ?? '');
+    const title = this.farmId() ? FARM_BY_ID[this.farmId()!].name : this.mode() === 'lab' ? `ห้องทดลอง · ชั้น ${this.floor()}` : `ชั้น ${this.floor()}${this.stage().name ? ' · ' + this.stage().name : ''}`;
+    this.loading.set({ banner, name: pickedName, title, done: 0, total: 0, leaving: false });
+    const token = (this.loadToken = { cancelled: false });
+    const t0 = performance.now();
+    const sprites = battleSpriteFiles([...this.engine.units.map(u => u.sprite), ...stageMonsterSprites(this.stage())]).map(spriteUrl);
+    // the stage art, and every team member's key art (the ultimate cut-in shows it)
+    const images = [this.background()?.file, ...team.flatMap(u => { const a = heroArt(u.heroId!); return [a?.banner, a?.portrait]; })]
+      .filter((f): f is string => !!f).map(f => '/' + f);
+    void preloadBattle({ sprites, images, pixi: this.renderer() === 'pixi', token,
+      onProgress: (done, total) => { if (!token.cancelled) this.loading.update(l => l && { ...l, done, total }); } }).then(() => {
+      if (token.cancelled) return;
+      const reduced = this.reducedMotion();
+      const wait = Math.max(0, (reduced ? 600 : BattleComponent.LOAD_MIN_MS) - (performance.now() - t0));
+      this.loadTimers.push(setTimeout(() => {
+        if (token.cancelled) return;
+        this.loading.update(l => l && { ...l, leaving: true });
+        this.start();
+        this.loadTimers.push(setTimeout(() => { if (!token.cancelled) this.loading.set(null); }, reduced ? 0 : BattleComponent.LOAD_FADE_MS));
+      }, wait));
+    });
+  }
+  private cancelLoading(): void {
+    if (this.loadToken) this.loadToken.cancelled = true;
+    this.loadToken = null;
+    this.loadTimers.forEach(clearTimeout);
+    this.loadTimers = [];
+    this.loading.set(null);
+  }
+
+  // ---------------------------------------------------------------- ultimate cut-in
+  /** hero key art sliding in at the top-left while the field holds still for a beat (player ultimates only) */
+  readonly cutIn = signal<{ key: number; art: string; name: string; skill: string } | null>(null);
+  private cutInTimer?: ReturnType<typeof setTimeout>;
+  static readonly ULT_FREEZE_MS = 650;
+  private ultCutIn(u: BattleUnit, skill: string): void {
+    const art = u.heroId ? heroArt(u.heroId) : undefined;
+    const reduced = this.reducedMotion();
+    this.cutIn.set({ key: ++this.animKey, art: art ? '/' + (art.banner ?? art.portrait) : '', name: u.name, skill });
+    // the same presentation hold as a hit-stop: engine steps, the Pixi game clock and every board animation wait —
+    // game time does not move, so the cast's timing / damage are exactly what they would have been
+    const freeze = reduced ? 300 : BattleComponent.ULT_FREEZE_MS;
+    playImpactFeel(this.boardEl()?.nativeElement, { hitStopMs: freeze });
+    this.hitStopUntil = Math.max(this.hitStopUntil, performance.now() + freeze);
+    clearTimeout(this.cutInTimer);
+    this.cutInTimer = setTimeout(() => this.cutIn.set(null), reduced ? 900 : 1500);
+  }
   readonly teamPower = computed(() => this.team.units().reduce((a, u) => a + power(u.stats), 0));
   readonly timeLeft = computed(() => Math.max(0, Math.ceil(this.stage().timeLimit - this.time())));
 
@@ -371,6 +459,8 @@ export class BattleComponent implements OnDestroy {
       const top = Math.min(this.progression.cleared() + 1, STAGES.length);
       if (!(q >= 1) || q > top) this.floor.set(top);
     }
+    // full-screen fight: the window belongs to the battle (no page scroll, menu bar covered)
+    effect(() => { const on = this.fullscreen(); if (typeof document !== 'undefined') document.documentElement.classList.toggle('battle-full', on); });
     // จัดทีมใหม่ระหว่างรอเริ่ม: สร้างการต่อสู้ใหม่ให้ตรงกับตำแหน่งล่าสุด
     effect(() => {
       this.team.units();
@@ -383,6 +473,9 @@ export class BattleComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopLoop();
+    this.cancelLoading();
+    clearTimeout(this.cutInTimer);
+    if (typeof document !== 'undefined') document.documentElement.classList.remove('battle-full');
     this.endTimers.forEach(clearTimeout);
     this.portraitMq?.removeEventListener('change', this.onOrientation);
     this.releaseLandscape();
@@ -436,6 +529,9 @@ export class BattleComponent implements OnDestroy {
   /** สร้างการต่อสู้ใหม่และแสดงตำแหน่งเริ่มต้น */
   prepare(): void {
     this.stopLoop();
+    this.cancelLoading();
+    clearTimeout(this.cutInTimer);
+    this.cutIn.set(null);
     this.endTimers.forEach(clearTimeout);
     this.endTimers = [];
     this.ending.set(false);
@@ -1140,6 +1236,7 @@ export class BattleComponent implements OnDestroy {
           set(e.src, e.kind);
           const p = posOf(e.src);
           floats.push({ id: ++this.floatId, r: p.r, c: p.c, text: e.skill, kind: 'skill' });
+          if (e.kind === 'ult' && isPlayerUnit(unitOf(e.src))) this.ultCutIn(unitOf(e.src), e.skill);
           addFx(e.src, e.dst, e.kind, { on: 'cast' });
           fx.push(...sequenceFx(unitOf(e.src).sprite, e.kind, e.src, e.dst, this.animKey, posOf, unitOf(e.src).actionFacing?.left ?? !!this.facing.get(e.src))
             .map(f => ({ ...f, id: ++this.floatId })));

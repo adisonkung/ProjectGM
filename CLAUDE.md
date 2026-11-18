@@ -16,6 +16,14 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Full-screen fight + loading screen + ultimate cut-in (2026-11-18, Claude)
+
+branch `feature/claude-battle-fullscreen` (ฐาน origin/master 3245cfa, ยังไม่ merge — รอรีวิว) · ผู้ใช้: หน้าโหลดก่อนสู้ (VFX ไม่ขึ้นเพราะยังไม่โหลด), จอสู้เต็มจอแบบเกมมือถือแนวนอน, banner อัลติมุมซ้ายบน + เกมค้างแปปนึง (ภาพตัวอย่างจากเกมอื่น = แนวคิดเท่านั้น)
+- **หน้าโหลด**: ปุ่มเริ่ม/ลองใหม่ = `enter()` (`start()` เดิมไม่เปลี่ยน) → banner ฮีโร่ในทีมแบบสุ่ม + หลอดทอง · `battle/render/battle-assets.ts` (`sheetFxNames` = รายการ preload ของ Pixi เดิม ใช้ร่วม, `stageMonsterSprites` ทุกเวฟ/กำลังเสริม/horde/ตัวที่ถูกอัญเชิญ, `battleSpriteFiles`) → `battle-preload.ts` (Pixi `Assets.load(spriteUrl)` = cache เดียวกับ layer · ภาพอื่น decode · 6 ไฟล์พร้อมกัน, 6 วิ/ไฟล์, รวม ≤ 10 วิ, พังข้าม) · ค้างขั้นต่ำ 1 วิ (ลดการเคลื่อนไหว 0.6) แล้วเริ่มเอนจิน + เฟด 0.42 วิ · กระดาน mount ใต้หน้าโหลด
+- **เต็มจอ** (`fullscreen()` = ไม่ใช่ตอนจัดตำแหน่ง และไม่ใช่ lab): `html.battle-full` ซ่อนแถบเมนู/ล็อกสกรอล · `fullscreenViewport()` ช่องจัตุรัส 16 คอลัมน์เต็มกว้าง กระดานถึงขอบล่าง (foot = พื้น) ฟ้าเพิ่มเท่าที่ภาพมี · แถบทีมลอยล่างกลาง (`--battle-dock`, `--party-cell` ≤ 84/60 px) ทับได้แค่พื้นตกแต่ง · จอกว้างมาก = กระดานกลาง + ภาพด่านเบลอข้างหลัง · HUD ลอยมุมจอ · สไตล์ `shared/_battle-fullscreen.scss` (ค่า Gilded Ember คัดลอกไว้ — เปลี่ยนไป `@use 'gilded'` เมื่อ branch หน้าฮีโร่ merge)
+- **Cut-in อัลติ**: event `cast` kind `ult` ของฮีโร่ฝั่งเรา (กดเอง/AUTO) → `ultCutIn()` แถบเฉียงเบอร์กันดี/ทอง + banner + ชื่อสกิล · ค้าง 0.65 วิ (0.3 ลดการเคลื่อนไหว) ผ่าน `hitStopUntil` + `playImpactFeel({hitStopMs})` — เวลาเกมไม่เดิน จังหวะ/ดาเมจเอนจินเท่าเดิม · มอน/สกิลธรรมดาไม่มี cut-in
+- เทสต์ `pages/battle/battle-fullscreen.spec.ts` · Karma 989/989 · ภาพ `docs/battle-fullscreen-review/`
+
 ## Combat motion — เดินลื่น + ไม่สไลด์ตอนตี/สกิล (2026-11-16, Claude)
 
 branch `fix/claude-combat-motion-smooth` (ฐาน origin/master 41a3bc3, merge เข้า master แล้ว 2026-11-17 ตามที่ผู้ใช้สั่ง) · ผู้ใช้: "เดินกระตุก ๆ ไม่ลื่นไหล และยังเดินไปตีไป … เดินถึงเป้าค่อยตี หรือเดินให้ถึงระยะตีก่อนค่อยตีหรือสกิล … ขอสมูท ๆ"
