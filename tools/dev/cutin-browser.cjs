@@ -2,7 +2,7 @@
 const { chromium } = require('playwright');
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
-const allIds = ['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara', 'elira'];
+const allIds = ['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara', 'elira', 'vaelric', 'draeven', 'mordrienne', 'sylas', 'lucien'];
 const ids = process.env.CUTIN_IDS?.split(',') || allIds;
 (async () => {
     const b = await chromium.launch({ executablePath: process.env.CHROME_BIN || '/usr/bin/chromium', headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage', '--enable-unsafe-swiftshader'] });
@@ -57,7 +57,8 @@ const ids = process.env.CUTIN_IDS?.split(',') || allIds;
                         text:host.querySelector('.label')?.textContent || img.alt, overflow:document.documentElement.scrollWidth > innerWidth,
                         animation:getComputedStyle(stage).animationName, water:host.querySelector('.water-vfx') ? {display:getComputedStyle(host.querySelector('.water-vfx')).display, layers:host.querySelectorAll('.water-layer').length} : null};
                 });
-                const group = ['garrick','kael','mirelle','sylvara','elira'].includes(id) ? 'locked-next-five' : 'locked-five';
+                const group = ['vaelric','draeven','mordrienne','sylas','lucien'].includes(id) ? 'locked-final-five'
+                    : ['garrick','kael','mirelle','sylvara','elira'].includes(id) ? 'locked-next-five' : 'locked-five';
                 assert.equal(bounds.src, id === 'bailong' ? '/ui/cutins/bailong-aura-italic.webp' : `/ui/cutins/${group}/${id}.webp`);
                 assert(Math.abs(bounds.width - bounds.expectedWidth) < 2);
                 assert(Math.abs(bounds.x) < 1 && Math.abs(bounds.y) < 1);

@@ -1,0 +1,247 @@
+[
+  {
+    "id": "vaelric",
+    "name": "เวลริค",
+    "canonical_name": "เวลริค น็อกธาร์",
+    "skill": "พิธีศพพันคมดาบ",
+    "accent": "#e5cbdc",
+    "source": "assets/ui/cutins/locked-final-five/vaelric.png",
+    "file": "public/ui/cutins/locked-final-five/vaelric.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "fdc8328fe03681f584dcd2d10d5eb25360ef3bc54dc2fd30754e4ce926f709ad",
+    "runtime_sha256": "48709627d30de5365ae4c83a43f2a2f182cc2fc08ce5513be67b2df50734018d",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-final-five/vaelric-wake.png",
+        "file": "public/ui/cutins/locked-final-five/vaelric-wake.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "5aea02a9345ad0e0d1b4162948f3991860220f0af5a8abf9031328df692a70cf",
+        "runtime_sha256": "3559b02407ab96bf247a5988e11af058e3839f5efc9e579a600948547f730785",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          627
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-final-five/vaelric-spray.png",
+        "file": "public/ui/cutins/locked-final-five/vaelric-spray.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "824354695385b76909570a2188e292495865355449e1179ee3795e32e1451b9f",
+        "runtime_sha256": "4332ede539b6cceda210d1edcf5410776771b974b39be551ac81beb08d707317",
+        "crop_box": [
+          0,
+          627,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-final-five/vaelric-vfx-sheet.png",
+    "sheet_sha256": "37570443d0ca6573c320356e25d25b7ebedb7ca6ae39aed81516f83ecd033de3",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/vaelric.webp",
+    "generated_plate": "exec-d6772e89-c767-4f55-8429-38cd0140d76d.png",
+    "generated_sheet": "exec-2d7947f3-4e53-493a-95c4-832a8bd4ba0f.png"
+  },
+  {
+    "id": "draeven",
+    "name": "เดรเวน",
+    "canonical_name": "เดรเวน มอร์แคนต์",
+    "skill": "อาณาจักรโลหิต",
+    "accent": "#e84b60",
+    "source": "assets/ui/cutins/locked-final-five/draeven.png",
+    "file": "public/ui/cutins/locked-final-five/draeven.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "fbae193e9a0a12803411e41670e4d60bc63ed0b41d1c33ea37d7f80bf5f0fca0",
+    "runtime_sha256": "6aa92f6d7044dcc4da534ab30ca77fa1111a40aa8cc254bca228aa08f8f0d908",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-final-five/draeven-wake.png",
+        "file": "public/ui/cutins/locked-final-five/draeven-wake.webp",
+        "w": 1254,
+        "h": 689,
+        "source_sha256": "c85697502124297a5117a043123c92d826d754b3ce923f5eb7f89f6793ced229",
+        "runtime_sha256": "536eecd375a0b9a894bc9a6da534d94a6ebecd0b4ee7b33b4d2754fb4fd7a188",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          689
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-final-five/draeven-spray.png",
+        "file": "public/ui/cutins/locked-final-five/draeven-spray.webp",
+        "w": 1254,
+        "h": 565,
+        "source_sha256": "25057a933c50ef199881014b9044852c23b8eb318fc50b9beecf288f0dbb0c25",
+        "runtime_sha256": "d372569051b7138f2bfaed4ba507c8d23579752878cc677df6b9044219bed249",
+        "crop_box": [
+          0,
+          689,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-final-five/draeven-vfx-sheet.png",
+    "sheet_sha256": "ff858263663104cb6e8583e522bd8801d8a8d20adf8b8ee53c2776252840e248",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/draeven.webp",
+    "generated_plate": "exec-4a73d767-bd6b-4be8-a0f9-347fb2d3b02b.png",
+    "generated_sheet": "exec-cabdeca2-74a9-436f-83ea-40fb14844c21.png"
+  },
+  {
+    "id": "mordrienne",
+    "name": "มอร์เดรียนน์",
+    "canonical_name": "มอร์เดรียนน์ เวล",
+    "skill": "เรือนแห่งเถ้าธุลี",
+    "accent": "#98c9aa",
+    "source": "assets/ui/cutins/locked-final-five/mordrienne.png",
+    "file": "public/ui/cutins/locked-final-five/mordrienne.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "041452024d950822d3d4bd2d9aedc35d5b281b11a6bb1a57948d04b075959a38",
+    "runtime_sha256": "bcc201e9ff7ac3a7af003b4fc35d40b35f3f1cfd61791ffc568ece1ed4e86427",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-final-five/mordrienne-wake.png",
+        "file": "public/ui/cutins/locked-final-five/mordrienne-wake.webp",
+        "w": 1254,
+        "h": 630,
+        "source_sha256": "4a07c2c0441987e165d7bcbd17b418d38aac1b4982f693a3585d86b6bdc111df",
+        "runtime_sha256": "7cc6439cb99289926c641ff592fecb89dd5c5ae6f36074c629ec6dedee5adc1e",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          630
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-final-five/mordrienne-spray.png",
+        "file": "public/ui/cutins/locked-final-five/mordrienne-spray.webp",
+        "w": 1254,
+        "h": 624,
+        "source_sha256": "58278d15a7d8dc5391866cc38903aa4070804486ada4e52cf3b394bed2aa596b",
+        "runtime_sha256": "b719ac5fbd62aebaaa05db1f39a2b425c9dd75a0229589c0ed94d9dcbad443e7",
+        "crop_box": [
+          0,
+          630,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-final-five/mordrienne-vfx-sheet.png",
+    "sheet_sha256": "1fb3c69168b5c59767b31380176c2d9abae69ec820cc75a167c13c1eae1bb4f0",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/mordrienne.webp",
+    "generated_plate": "exec-b63f781b-b2cb-4086-96c8-d957869d3fed.png",
+    "generated_sheet": "exec-35326847-d2dc-4c14-ba56-b7bf132f71b9.png"
+  },
+  {
+    "id": "sylas",
+    "name": "ไซลัส",
+    "canonical_name": "ไซลัส เวิร์น",
+    "skill": "ประหารรัตติกาล",
+    "accent": "#69d8d4",
+    "source": "assets/ui/cutins/locked-final-five/sylas.png",
+    "file": "public/ui/cutins/locked-final-five/sylas.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "dcb960a6761eddd4163d6e42a4af6f9d51463298d9e0402012f595fd1e5f278f",
+    "runtime_sha256": "6754198420ac0786a07cb3da99c740417fb69595284762fdfda85f2edd90eef2",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-final-five/sylas-wake.png",
+        "file": "public/ui/cutins/locked-final-five/sylas-wake.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "d3f1b5e288643bb03adc35d3409801d30a630063b098eeb1822d07366d822276",
+        "runtime_sha256": "c257f89362bca075115b2991f81f36ee348d2aa2caf90f0d9be8073f789a6113",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          627
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-final-five/sylas-spray.png",
+        "file": "public/ui/cutins/locked-final-five/sylas-spray.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "c4b8984fdc6f1065b5d436364e923cb108e674e93d35689340244e1cb0082a0d",
+        "runtime_sha256": "799a65711642996d4dd035122534970db2dbd089691df2ab5320dd39e7683738",
+        "crop_box": [
+          0,
+          627,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-final-five/sylas-vfx-sheet.png",
+    "sheet_sha256": "db9ca33b6b4d380912503618b823c8acaf17151d876e22352b5e3aa013d8197d",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/sylas.webp",
+    "generated_plate": "exec-ac9a64e6-3796-4b11-93ac-283087682492.png",
+    "generated_sheet": "exec-3b844bf1-e358-48a7-b128-7ba65b679dc7.png"
+  },
+  {
+    "id": "lucien",
+    "name": "ลูเซียน",
+    "canonical_name": "ลูเซียน วัลธอร์น",
+    "skill": "ปาฏิหาริย์ทมิฬ",
+    "accent": "#eed1a5",
+    "source": "assets/ui/cutins/locked-final-five/lucien.png",
+    "file": "public/ui/cutins/locked-final-five/lucien.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "7bc05fdcf96f2fbf3b67843abac2f89c2c8b31fc9216c3729b895fcb58112fda",
+    "runtime_sha256": "1e507129d6a0c683a81dbbad92a8ecc9832562e54794bf78a21e92e9b19c700c",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-final-five/lucien-wake.png",
+        "file": "public/ui/cutins/locked-final-five/lucien-wake.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "78fab7584069a97e55ec363964276da3a77595b9939dc21dae772d87b49c3c20",
+        "runtime_sha256": "62f810a571916c6abeeb317b9570e2906665e01ee7d12040c253718ca2a04052",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          627
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-final-five/lucien-spray.png",
+        "file": "public/ui/cutins/locked-final-five/lucien-spray.webp",
+        "w": 1254,
+        "h": 627,
+        "source_sha256": "088457de99bcfc6fe8094b5bc8f760ad3f788a5828be55978154ef1c46880ef6",
+        "runtime_sha256": "d056d18b8117a9a7b05ee110237419df29ce097d177d0b6be7f4ba827d8bbdcb",
+        "crop_box": [
+          0,
+          627,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-final-five/lucien-vfx-sheet.png",
+    "sheet_sha256": "79bc27f43604a29ea99c696743f6d60fef4d3441dc951552c14769c9d3a275f3",
+    "reference": "assets/ui/cutins/bailong-aura-italic.png",
+    "identity_reference": "public/portraits/lucien.webp",
+    "generated_plate": "exec-ef15cae7-47d9-4fc5-a1d9-7264c20203ca.png",
+    "generated_sheet": "exec-899302b1-983f-467d-847b-f5c28d08883a.png"
+  }
+]

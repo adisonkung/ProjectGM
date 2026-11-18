@@ -48,4 +48,9 @@ export const ULTIMATE_CUTINS: Readonly<Record<string, UltimateCutinArt>> = {
   mirelle: lockedPlate('mirelle', '#a9e8ff', 1899, 828, 'locked-next-five'),
   sylvara: lockedPlate('sylvara', '#9be66a', 1899, 828, 'locked-next-five'),
   elira: lockedPlate('elira', '#ffe0a1', 1899, 828, 'locked-next-five'),
+  vaelric: lockedPlate('vaelric', '#e5cbdc', 1899, 828, 'locked-final-five'),
+  draeven: lockedPlate('draeven', '#e84b60', 1899, 828, 'locked-final-five'),
+  mordrienne: lockedPlate('mordrienne', '#98c9aa', 1899, 828, 'locked-final-five'),
+  sylas: lockedPlate('sylas', '#69d8d4', 1899, 828, 'locked-final-five'),
+  lucien: lockedPlate('lucien', '#eed1a5', 1899, 828, 'locked-final-five'),
 };

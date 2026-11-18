@@ -120,15 +120,16 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
     expect(component.cutIn()).toBeNull();
   });
 
-  it('replaces themed artwork on consecutive casts and keeps other heroes on their existing cut-in', () => {
+  it('replaces themed artwork on consecutive roster casts and falls back when art is unregistered', () => {
     component.start();
     const hero = host().engine.units.find(u => isPlayerUnit(u) && u.heroId)!;
-    for (const id of ['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara', 'elira']) {
+    for (const id of ['bailong', 'yuezheng', 'moye', 'tangxun', 'linxue', 'garrick', 'kael', 'mirelle', 'sylvara', 'elira', 'vaelric', 'draeven', 'mordrienne', 'sylas', 'lucien']) {
       hero.heroId = id;
       host().handleEvents([{ type: 'cast', src: hero.id, skill: 'ชื่อสกิลจริง', kind: 'ult' }]);
       fixture.detectChanges();
       const image = fixture.nativeElement.querySelector('app-themed-cutin img') as HTMLImageElement;
-      const group = ['yuezheng', 'moye', 'tangxun', 'linxue'].includes(id) ? 'locked-five' : 'locked-next-five';
+      const group = ['vaelric', 'draeven', 'mordrienne', 'sylas', 'lucien'].includes(id) ? 'locked-final-five'
+        : ['yuezheng', 'moye', 'tangxun', 'linxue'].includes(id) ? 'locked-five' : 'locked-next-five';
       expect(image.getAttribute('src')).toBe(id === 'bailong' ? '/ui/cutins/bailong-aura-italic.webp' : `/ui/cutins/${group}/${id}.webp`);
       expect(image.alt).toBe(`ชื่อสกิลจริง — ${component.cutIn()!.name}`);
       expect(fixture.nativeElement.querySelector('app-themed-cutin .label')).toBeNull();
@@ -138,7 +139,7 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
       expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .name-frame').length).toBe(0);
       expect(fixture.nativeElement.querySelectorAll('.ult-cutin').length).toBe(1);
     }
-    hero.heroId = 'vaelric';
+    hero.heroId = 'unregisteredhero'; // fixture only; all 15 shipped heroes now have themed art
     host().handleEvents([{ type: 'cast', src: hero.id, skill: 'สกิลเดิม', kind: 'ult' }]);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-themed-cutin')).toBeNull();

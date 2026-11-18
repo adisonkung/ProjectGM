@@ -37,7 +37,8 @@ const assert=require('node:assert/strict');
       await page.locator('.party-in .ultk').first().click();
       await page.locator('app-themed-cutin .water-vfx').waitFor();
       const source=await page.locator('app-themed-cutin .plate').getAttribute('src');
-      const group=['garrick','kael','mirelle','sylvara','elira'].includes(id)?'locked-next-five':'locked-five';
+      const group=['vaelric','draeven','mordrienne','sylas','lucien'].includes(id)?'locked-final-five'
+        :['garrick','kael','mirelle','sylvara','elira'].includes(id)?'locked-next-five':'locked-five';
       assert.equal(source,id==='bailong'?'/ui/cutins/bailong-aura-italic.webp':`/ui/cutins/${group}/${id}.webp`);
       await page.waitForTimeout(1900);
       assert.equal(await page.locator('app-themed-cutin').count(),0);
