@@ -16,11 +16,11 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
-## Themed ultimate cut-ins — Codex, 2026-11-18 (in progress)
+## Themed ultimate cut-ins — Codex, 2026-11-18
 
 User approved style 3 for ten heroes (Bai Long, Yue Zheng, Mo Ye, Tang Xun, Lin Xue, Garrick, Kael, Mirelle, Sylvara, Elira), with extra dynamic VFX/aura and a 10% size reduction. Branch `wip/codex-themed-ultimate-cutins` continues the reviewed map/card/prototype stack at be368b2. Ten isolated alpha art plates and approved references are retained under assets/ui/cutins and docs/reviews/themed-cutins; runtime exports use public/ui/cutins. Generic ThemedCutinComponent draws the plate, live localized text, per-hero aura, rays, energy sweep and motes. The stage enters with impact overshoot and settles at scale(.9), origin top left, base 70vw. Full-screen shade is 65%. Timed presentation lasts 1250 ms / 700 ms reduced motion; combat freeze remains unchanged at 650 / 300 ms. Team cut-in images preload before battle. Five unselected heroes keep the previous cut-in. No engine/stat/save changes or master merge/deployment.
 
-Checkpoint: app/spec checks and Karma complete; actual manual-cast browser checks passed all ten desktop and are continuing through mobile/reduced motion. Next: inspect all screenshots/text plaques, finish browser report/clips, production compilation, final diff and validation note. Confirmed local/cloud synchronization metadata remains unchanged.
+Completed: app/spec checks, Karma 1005/1005, 23 actual manual-cast browser cases (all ten desktop/mobile plus three reduced-motion cases), no page errors or bounds failures. Production compilation/budgets pass with font inlining temporarily disabled for the environment's existing Google Fonts HTTP 403; angular.json restored unchanged. Approved-reference / actual-game pairs, native frames and real playback clips: docs/reviews/themed-cutins/index.html. Re-export assets with tools/ui/import_cutins.py; reproduce browser checks with tools/dev/cutin-browser.cjs. Original portraits/banners unchanged. No master merge/deployment. Confirmed local/cloud synchronization metadata remains unchanged.
 
 ### Ultimate cut-in prototype — user follow-up (Codex, 2026-11-18)
 

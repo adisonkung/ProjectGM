@@ -388,3 +388,7 @@ Battle presentation: `battleViewport` reserves 0.8 decorative floor rows below t
 
 
 Animation-room extension: /sprite-lab supports sprite-backed monster/boss casters and targets, independently editable whole-body placements and larger visual margins. monster-review.ts samples isolated real engine casts through requestMonsterSkill; normal AI is unchanged. See [SPRITE_LAB_EXPANDED.md](SPRITE_LAB_EXPANDED.md).
+
+### Themed ultimate cut-in overlays (2026-11-18)
+
+`core/data/ultimate-cutins.ts` maps ten approved heroes to alpha plates, accent colors, native ratios and live-text plaque coordinates. `shared/ThemedCutinComponent` handles top-left presentation at 90% scale with aura, energy sweep/rays and twelve motes. BattleComponent chooses presentation from the hero id on the existing player ultimate cast event; this registry is UI-only. Team plates preload with battle images. Existing engine time/hit-stop logic is retained. Reduced motion disables movement/sweeps/motes. Other heroes keep the prior fallback. Source PNGs/manifests are in assets/ui/cutins; tools/ui/import_cutins.py exports WebP runtime plates to public/ui/cutins. Validation and approved-reference/game comparisons live in docs/reviews/themed-cutins.
