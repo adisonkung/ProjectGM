@@ -1,0 +1,20 @@
+[
+  {
+    "id": "wake",
+    "source": "assets/ui/cutins/bailong-water-wake.png",
+    "file": "public/ui/cutins/bailong-water-wake.webp",
+    "w": 1902,
+    "h": 827,
+    "source_sha256": "68980104871a296ca46602a7f1231d561d63f709678de4b4b351ae317c1b24df",
+    "runtime_sha256": "b617eb5a6c9e5e017480c04c330eb3efb7f6bf3d6e8e9adc2f43cc9a87b0fc04"
+  },
+  {
+    "id": "spray",
+    "source": "assets/ui/cutins/bailong-water-spray.png",
+    "file": "public/ui/cutins/bailong-water-spray.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "c4b3b6f639267162389a4382758fcb2952730c54a30d35e1bb3ddf225338e264",
+    "runtime_sha256": "c0dc1e07d2bded626d20e5784d2b9e1e5b373f5979826a488a4c2d5cfeb836f6"
+  }
+]

@@ -132,11 +132,12 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
       if (id === 'bailong') {
         expect(image.alt).toBe(`ชื่อสกิลจริง — ${component.cutIn()!.name}`);
         expect(fixture.nativeElement.querySelector('app-themed-cutin .label')).toBeNull();
-        expect(fixture.nativeElement.querySelector('app-themed-cutin .water-ribbons')).not.toBeNull();
+        expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .water-layer').length).toBe(2);
+        expect(fixture.nativeElement.querySelector('app-themed-cutin .water-burst, app-themed-cutin .water-ribbons')).toBeNull();
       } else {
         expect(fixture.nativeElement.querySelector('app-themed-cutin .label').textContent).toContain('ชื่อสกิลจริง');
         expect(fixture.nativeElement.querySelector('app-themed-cutin .hero-name span').textContent.trim()).toBe(component.cutIn()!.name);
-        expect(fixture.nativeElement.querySelector('app-themed-cutin .water-ribbons')).toBeNull();
+        expect(fixture.nativeElement.querySelector('app-themed-cutin .water-vfx')).toBeNull();
       }
       // Switching between embedded and live badges must not leave two frames behind.
       expect(fixture.nativeElement.querySelectorAll('app-themed-cutin .name-frame').length)

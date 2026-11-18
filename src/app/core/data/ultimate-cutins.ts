@@ -19,6 +19,7 @@ export interface UltimateCutinArt {
   bakedText?: boolean;
   stageWidth?: string;
   vfx?: 'water';
+  layers?: readonly string[];
 }
 
 const plate = (id: string, accent: string): UltimateCutinArt => ({
@@ -29,6 +30,7 @@ const plate = (id: string, accent: string): UltimateCutinArt => ({
 export const ULTIMATE_CUTINS: Readonly<Record<string, UltimateCutinArt>> = {
   bailong: { ...plate('bailong', '#8edfff'), file: 'ui/cutins/bailong-aura-italic.webp', ratio: '1899 / 828',
     bakedText: true, stageWidth: '76vw', vfx: 'water',
+    layers: ['ui/cutins/bailong-water-wake.webp', 'ui/cutins/bailong-water-spray.webp'],
     left: '47%', top: '48.5%', width: '28%', titleSize: '4.3cqw',
     nameLeft: '49.2%', nameTop: '63.2%', nameWidth: '23.8%', nameHeight: '8.4%', embeddedNameFrame: true },
   yuezheng: { ...plate('yuezheng', '#ffbd55'), ratio: '1920 / 819',

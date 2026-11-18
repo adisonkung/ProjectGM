@@ -32,7 +32,7 @@ const ids = process.env.CUTIN_IDS?.split(',') || allIds;
                 await p.locator('.party-in .ultk').first().click();
                 await p.locator('app-themed-cutin .stage').waitFor({ timeout: 15000 });
                 await p.evaluate(() => { const c = ng.getComponent(document.querySelector('app-battle')); clearTimeout(c.cutInTimer); c.paused.set(true); document.querySelector('.ult-cutin').getAnimations({ subtree: true }).forEach(a => { a.currentTime = 400; a.pause(); }); });
-                await p.waitForFunction(() => { const img = document.querySelector('app-themed-cutin img'); return img?.complete && img.naturalWidth > 0; });
+                await p.waitForFunction(() => { return [...document.querySelectorAll('app-themed-cutin img')].every(img => img.complete && img.naturalWidth > 0); });
                 await p.evaluate(() => document.fonts.ready);
                 await p.screenshot({ path: `${root}/${id}-${w}${reduced ? '-reduced' : ''}.png`, timeout: 5000 });
                 const bounds = await p.evaluate(() => {
@@ -43,7 +43,7 @@ const ids = process.env.CUTIN_IDS?.split(',') || allIds;
                         baked:!!art.bakedText, label:rect('.label'), slots:['.label b','.hero-name','.hero-name span'].map(rect),
                         src:img.getAttribute('src'), alt:img.alt, framed:!!art.bakedText || !!host.querySelector('.name-frame') || art.embeddedNameFrame,
                         text:host.querySelector('.label')?.textContent || img.alt, overflow:document.documentElement.scrollWidth > innerWidth,
-                        animation:getComputedStyle(stage).animationName, water:host.querySelector('.water-ribbons') ? {display:getComputedStyle(host.querySelector('.water-ribbons')).display, droplets:host.querySelectorAll('.water-droplets i').length} : null};
+                        animation:getComputedStyle(stage).animationName, water:host.querySelector('.water-vfx') ? {display:getComputedStyle(host.querySelector('.water-vfx')).display, layers:host.querySelectorAll('.water-layer').length} : null};
                 });
                 assert.equal(bounds.src, `/ui/cutins/${id === 'bailong' ? 'bailong-aura-italic' : id}.webp`);
                 assert(Math.abs(bounds.width - bounds.expectedWidth) < 2);
@@ -54,7 +54,7 @@ const ids = process.env.CUTIN_IDS?.split(',') || allIds;
                     assert.equal(bounds.label, null);
                     assert(bounds.slots.every(slot => slot === null), `${id}: duplicate live lettering/frame`);
                     assert(bounds.alt.includes(' — '));
-                    assert.equal(bounds.water.droplets,12);
+                    assert.equal(bounds.water.layers,2);
                     assert.equal(bounds.water.display === 'none',reduced);
                 } else {
                     assert(bounds.label.x >= 0 && bounds.label.x + bounds.label.width <= bounds.width + 2);

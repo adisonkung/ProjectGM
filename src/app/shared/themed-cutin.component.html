@@ -5,14 +5,10 @@
   <div class="aura" aria-hidden="true"></div>
   <img class="plate" [src]="'/' + art().file" [alt]="art().bakedText ? skill() + ' — ' + name() : ''" draggable="false" />
   @if (art().vfx === 'water') {
-    <div class="water-burst" aria-hidden="true"><i></i><i></i><i></i></div>
-    <svg class="water-ribbons" viewBox="0 0 1000 440" preserveAspectRatio="none" aria-hidden="true">
-      <path class="current" d="M-20 424 Q160 330 315 365 T760 308 Q906 243 994 28" />
-      <path class="current upper" d="M-10 168 Q100 -30 320 48 T680 68 Q860 68 1000 22" />
-      <path class="glint" d="M0 395 735 308 994 28 M60 34 502 14" />
-    </svg>
-    <div class="water-droplets" aria-hidden="true">
-      @for (i of motes; track i) { <i [style.--i]="i"></i> }
+    <div class="water-vfx" aria-hidden="true">
+      @for (file of art().layers ?? []; track file; let i = $index) {
+        <img class="water-layer" [class.spray]="i === 1" [src]="'/' + file" alt="" draggable="false" />
+      }
     </div>
   }
   <div class="energy" aria-hidden="true"></div>

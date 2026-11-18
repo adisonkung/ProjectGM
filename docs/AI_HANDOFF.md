@@ -2,6 +2,12 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Bai Long natural generated VFX — Codex, 2026-11-19
+
+User rejected the rigid geometric water rings/lines and requested separately generated VFX. Replaced only Bai Long's runtime effect with two isolated alpha textures (wake/mist and foam/spray) under the unchanged portrait/frame/readable italic lettering. Layers drift by small different translations and fade; removed the old CSS rings, SVG currents/glint, droplets and generic sweep/rays for Bai Long. Reduced motion hides the generated layers. Both textures now preload with team art before combat. Other heroes and all gameplay timing/damage remain unchanged.
+
+Source/hashes: `assets/ui/cutins/bailong-water-layers.json`; lossless exports under public/ui/cutins. Re-export with `tools/ui/export_bailong_cutin.py`. Review: `docs/reviews/bailong-natural-vfx/index.html`, with separate generated source images, previous/new real game frames and native recordings. App/spec typechecks and Karma 1005/1005 pass; five actual browser cases and two native manual-cast recordings pass, with no page errors or overlay cleanup failures. No master merge/deployment or synchronization-base update.
+
 ## Bai Long readable italic cut-in + live water VFX — Codex, 2026-11-19
 
 User explicitly requested importing the selected aura cut-in into the actual game, gently italicizing the readable premium Thai font, and seeing real animated VFX. Only Bai Long now uses the new isolated, generated source `assets/ui/cutins/bailong-aura-italic.png` and lossless runtime WebP; the other nine themed heroes retain the last committed art/layout. The rejected screenshot-extraction attempt was archived outside the repository at `/workspace/abandoned-reference-cutout-2026-11-19`, not imported or committed. No screenshot HUD holes or battlefield pixels are used in the new art.

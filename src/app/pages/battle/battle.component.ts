@@ -317,7 +317,7 @@ export class BattleComponent implements OnDestroy {
     const t0 = performance.now();
     const sprites = battleSpriteFiles([...this.engine.units.map(u => u.sprite), ...stageMonsterSprites(this.stage())]).map(spriteUrl);
     // the stage art, and every team member's key art (the ultimate cut-in shows it)
-    const images = [this.background()?.file, ...team.flatMap(u => { const a = heroArt(u.heroId!); return [a?.banner, a?.portrait, ULTIMATE_CUTINS[u.heroId!]?.file]; })]
+    const images = [this.background()?.file, ...team.flatMap(u => { const a = heroArt(u.heroId!); return [a?.banner, a?.portrait, ULTIMATE_CUTINS[u.heroId!]?.file, ...(ULTIMATE_CUTINS[u.heroId!]?.layers ?? [])]; })]
       .filter((f): f is string => !!f).map(f => '/' + f);
     void preloadBattle({ sprites, images, pixi: this.renderer() === 'pixi', token,
       onProgress: (done, total) => { if (!token.cancelled) this.loading.update(l => l && { ...l, done, total }); } }).then(() => {
