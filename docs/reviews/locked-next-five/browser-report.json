@@ -1,0 +1,545 @@
+{
+  "report": [
+    {
+      "id": "garrick",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/garrick.webp",
+        "alt": "ยืนหยัดเฝ้าประตู — การ์ริก",
+        "framed": true,
+        "text": "ยืนหยัดเฝ้าประตู — การ์ริก",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "kael",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/kael.webp",
+        "alt": "เถ้าธุลีแยกแผ่นดิน — เคล",
+        "framed": true,
+        "text": "เถ้าธุลีแยกแผ่นดิน — เคล",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "mirelle",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/mirelle.webp",
+        "alt": "อาณาเขตแก้วเหมันต์ — มิเรลล์ ฟรอสต์กลาส",
+        "framed": true,
+        "text": "อาณาเขตแก้วเหมันต์ — มิเรลล์ ฟรอสต์กลาส",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "sylvara",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/sylvara.webp",
+        "alt": "ฝนศรมรกต — ซิลวารา วินด์วิสเปอร์",
+        "framed": true,
+        "text": "ฝนศรมรกต — ซิลวารา วินด์วิสเปอร์",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "elira",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/elira.webp",
+        "alt": "เขตพิทักษ์แสงอุ่น — เอลิรา ดอว์นเมียร์",
+        "framed": true,
+        "text": "เขตพิทักษ์แสงอุ่น — เอลิรา ดอว์นเมียร์",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "bailong",
+      "w": 1440,
+      "h": 860,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 984.9515380859375,
+        "height": 429.4546813964844,
+        "expectedWidth": 984.9600000000002,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "garrick",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/garrick.webp",
+        "alt": "ยืนหยัดเฝ้าประตู — การ์ริก",
+        "framed": true,
+        "text": "ยืนหยัดเฝ้าประตู — การ์ริก",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "kael",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/kael.webp",
+        "alt": "เถ้าธุลีแยกแผ่นดิน — เคล",
+        "framed": true,
+        "text": "เถ้าธุลีแยกแผ่นดิน — เคล",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "mirelle",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/mirelle.webp",
+        "alt": "อาณาเขตแก้วเหมันต์ — มิเรลล์ ฟรอสต์กลาส",
+        "framed": true,
+        "text": "อาณาเขตแก้วเหมันต์ — มิเรลล์ ฟรอสต์กลาส",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "sylvara",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/sylvara.webp",
+        "alt": "ฝนศรมรกต — ซิลวารา วินด์วิสเปอร์",
+        "framed": true,
+        "text": "ฝนศรมรกต — ซิลวารา วินด์วิสเปอร์",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "elira",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/elira.webp",
+        "alt": "เขตพิทักษ์แสงอุ่น — เอลิรา ดอว์นเมียร์",
+        "framed": true,
+        "text": "เขตพิทักษ์แสงอุ่น — เอลิรา ดอว์นเมียร์",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "bailong",
+      "w": 844,
+      "h": 390,
+      "reduced": false,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "_ngcontent-ng-c3882333201_cutin-impact",
+        "water": {
+          "display": "block",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "garrick",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/garrick.webp",
+        "alt": "ยืนหยัดเฝ้าประตู — การ์ริก",
+        "framed": true,
+        "text": "ยืนหยัดเฝ้าประตู — การ์ริก",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "kael",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/kael.webp",
+        "alt": "เถ้าธุลีแยกแผ่นดิน — เคล",
+        "framed": true,
+        "text": "เถ้าธุลีแยกแผ่นดิน — เคล",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "mirelle",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/mirelle.webp",
+        "alt": "อาณาเขตแก้วเหมันต์ — มิเรลล์ ฟรอสต์กลาส",
+        "framed": true,
+        "text": "อาณาเขตแก้วเหมันต์ — มิเรลล์ ฟรอสต์กลาส",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "sylvara",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/sylvara.webp",
+        "alt": "ฝนศรมรกต — ซิลวารา วินด์วิสเปอร์",
+        "framed": true,
+        "text": "ฝนศรมรกต — ซิลวารา วินด์วิสเปอร์",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "elira",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/locked-next-five/elira.webp",
+        "alt": "เขตพิทักษ์แสงอุ่น — เอลิรา ดอว์นเมียร์",
+        "framed": true,
+        "text": "เขตพิทักษ์แสงอุ่น — เอลิรา ดอว์นเมียร์",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    },
+    {
+      "id": "bailong",
+      "w": 844,
+      "h": 390,
+      "reduced": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 577.2937622070312,
+        "height": 251.70468139648438,
+        "expectedWidth": 577.296,
+        "baked": true,
+        "label": null,
+        "slots": [
+          null,
+          null,
+          null
+        ],
+        "src": "/ui/cutins/bailong-aura-italic.webp",
+        "alt": "ลำดับเก้ามังกร — ไป๋หลง",
+        "framed": true,
+        "text": "ลำดับเก้ามังกร — ไป๋หลง",
+        "overflow": false,
+        "animation": "none",
+        "water": {
+          "display": "none",
+          "layers": 2
+        }
+      }
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "garrick",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-next-five/garrick.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "kael",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-next-five/kael.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "mirelle",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-next-five/mirelle.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "sylvara",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-next-five/sylvara.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "elira",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-next-five/elira.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "garrick",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-next-five/garrick.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "kael",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-next-five/kael.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "mirelle",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-next-five/mirelle.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "sylvara",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-next-five/sylvara.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "elira",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-next-five/elira.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  }
+]
