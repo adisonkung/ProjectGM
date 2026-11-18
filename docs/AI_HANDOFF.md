@@ -2,6 +2,10 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+### Bottom hero cards enlarged — user follow-up (Codex, 2026-11-18)
+
+The user requested larger bottom hero card frames using the free space below the grid. Same `fix/fullscreen-map-art` review branch. Full-screen `.party-in` now spans the safe viewport width; combat `.bar.compact` overrides the generic menu 75% zoom and uses the existing dock height. Desktop cards grow from ~164×87 to ~243×126 px. Landscape phones use a portrait-left / skills-right arrangement (~148×54 px at 844×390). Combat cells/lanes/terrain geometry and control handlers are unchanged. App/spec checks and Karma 1004/1004 pass; real desktop 1440×860 and phone 844×390 screenshots/bounds checks pass with no page errors or card/viewport/lane overlap. Previous-reference / updated-game pairs: `docs/reviews/battle-dock-size/comparison.html`. No master merge/deployment; confirmed synchronization metadata unchanged.
+
 ## Full-screen forest map import — Codex, 2026-11-18
 
 User supplied `iloveimg-compressed (16).zip` and requested trying all three maps in game. Branch `fix/fullscreen-map-art` from origin/master 9544059. Untouched PNG sources/hashes in `assets/backgrounds/fullscreen-2026-11-18`; lossless WebP replaces forest-1/twilight-1/misty-1. Current stage assignments retained. New `battlefieldCut` metadata and `artworkViewport()` fit a centered square-cell 16×3 board on the clearing above the dock; full-screen background is one cover image, bottom aligned, with no duplicate lower strip. Preparation and sprite lab use the existing arena path; Ascension maps retain their existing sizing. Source pixels are unchanged. Mobile cover crops top sky; the board stays narrower than the full artwork when needed to preserve square cells and dock clearance.

@@ -1,0 +1,143 @@
+{
+  "report": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 860
+      },
+      "id": "forest-1",
+      "background": "forest-1",
+      "layout": {
+        "cell": 75.88000000000002,
+        "extraRows": 4.460200316288875,
+        "groundRows": 0,
+        "foot": 142.15999999999997,
+        "dock": 134.16,
+        "partyCell": 68.8,
+        "width": 1214.0800000000004,
+        "height": 860
+      },
+      "board": {
+        "x": 112.953125,
+        "y": 0,
+        "w": 1214.078125,
+        "h": 860
+      },
+      "laneBottom": 717.84,
+      "cardRects": [
+        {
+          "x": 20,
+          "y": 725.84375,
+          "width": 242.703125,
+          "height": 126.15625,
+          "bottom": 852
+        },
+        {
+          "x": 267.703125,
+          "y": 725.84375,
+          "width": 242.71875,
+          "height": 126.15625,
+          "bottom": 852
+        },
+        {
+          "x": 515.421875,
+          "y": 725.84375,
+          "width": 242.703125,
+          "height": 126.15625,
+          "bottom": 852
+        },
+        {
+          "x": 763.125,
+          "y": 725.84375,
+          "width": 242.703125,
+          "height": 126.15625,
+          "bottom": 852
+        },
+        {
+          "x": 1010.828125,
+          "y": 725.84375,
+          "width": 242.703125,
+          "height": 126.15625,
+          "bottom": 852
+        }
+      ],
+      "dock": {
+        "top": 721.84375,
+        "bottom": 856
+      },
+      "fieldHidden": "hidden",
+      "art": "url(\"http://127.0.0.1:4200/backgrounds/forest-1.webp\")",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "id": "forest-1",
+      "background": "forest-1",
+      "layout": {
+        "cell": 46.17700956937801,
+        "extraRows": 2.022542235282474,
+        "groundRows": 0,
+        "foot": 65.71999999999997,
+        "dock": 57.72,
+        "partyCell": 31.2,
+        "width": 738.8321531100481,
+        "height": 390
+      },
+      "board": {
+        "x": 52.578125,
+        "y": 0,
+        "w": 738.828125,
+        "h": 390
+      },
+      "laneBottom": 324.28000000000003,
+      "cardRects": [
+        {
+          "x": 8,
+          "y": 332.28125,
+          "width": 148.09375,
+          "height": 53.71875,
+          "bottom": 386
+        },
+        {
+          "x": 159.09375,
+          "y": 332.28125,
+          "width": 148.109375,
+          "height": 53.71875,
+          "bottom": 386
+        },
+        {
+          "x": 310.203125,
+          "y": 332.28125,
+          "width": 148.09375,
+          "height": 53.71875,
+          "bottom": 386
+        },
+        {
+          "x": 461.296875,
+          "y": 332.28125,
+          "width": 148.109375,
+          "height": 53.71875,
+          "bottom": 386
+        },
+        {
+          "x": 612.40625,
+          "y": 332.28125,
+          "width": 148.09375,
+          "height": 53.71875,
+          "bottom": 386
+        }
+      ],
+      "dock": {
+        "top": 330.28125,
+        "bottom": 388
+      },
+      "fieldHidden": "hidden",
+      "art": "url(\"http://127.0.0.1:4200/backgrounds/forest-1.webp\")",
+      "overflow": false
+    }
+  ],
+  "errors": []
+}
