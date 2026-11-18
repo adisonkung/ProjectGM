@@ -4,12 +4,13 @@ Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tr
 
 ## Latest task — Star Ascension aura and hero detail frame (Codex, 2026-11-18)
 
-Branch `fix/star-ascension-aura` continues the Star Ascension work from `feature/claude-gilded-hero-detail`. Last confirmed shared base is `31b62f3`.
+Branch `fix/star-ascension-aura` continues the Star Ascension work from `feature/claude-gilded-hero-detail`. Last confirmed shared base is `a49da3b`.
 
 - The next star and full 6★ row use a soft CSS aura. Full stars have a masked shimmer, and an upgrade plays a short glow on the newly lit star. Reduce Motion disables the looping animation.
 - The 6★ refinement adds an individual champagne halo and stronger sheen to each star. The pass starts 360 ms later on each successive star. A real 5★ → 6★ upgrade verified that the effect starts at 6★ and that Reduce Motion keeps a static halo.
 - The next revision uses the transparent `star_fire` texture and smooth CSS flame wisps with a staggered sheen. `HeroStarsComponent` and `AwakenedStarComponent` share the effect across ascension, the hero overview, collection grid/list, island party and hero sheet, armory, formation and battle preparation. Below 6★ the original glyphs or painted stars remain. The active portrait caption is visible on the ascension tab, including on landscape phones.
 - The current 6★ effect combines the approved gold mist and gemstone glint previews. Base opacity and the first animation keyframe keep the sweep and glint hidden during their staggered delay, fixing the white flash on mount. Unlock glow stays behind the 6★ icon. Browser checks cover the first and active phases, the 5★ → 6★ upgrade, and Reduce Motion.
+- The follow-up increases the dust and four-point glint size and visibility and starts their fades sooner. Chrome measured visible dust at about 1.0 s and visible glint at about 1.7 s after a 5★ → 6★ upgrade. The sweep and glint are still transparent on entry.
 - Hero-detail tabs share the panel frame. The star tab uses matching section dividers and headings and removes duplicate hero labels and the upgrade-success message. The star cost, perks, and save use the existing roster rules.
 - Checked Kael on real Chrome at 1440 × 860 and 844 × 390. Verified the 3★ → 4★ upgrade, the 6★ aura, Reduce Motion, insufficient Memory, and right-panel width across all tabs. The portrait fallback was checked for horizontal overflow at 390 × 844.
 - App and spec typechecks passed. Karma passed 978 tests and the production build succeeded. Hero-detail component CSS is 23.95 kB against a 24 kB error threshold.
