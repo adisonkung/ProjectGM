@@ -26,6 +26,7 @@ import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
+import { UiSymbolComponent } from '../../shared/ui-symbol.component';
 
 const UPGRADE_ERROR: Record<SkillUpgradeError, string> = {
   MAX_RANK: 'ระดับสูงสุดแล้ว', RANK_CAP: 'ติดเพดานระดับ — ต้อง Breakthrough', NEED_LEVEL: 'เลเวลไม่ถึง',
@@ -43,7 +44,7 @@ const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shie
 /** Hero detail (Gilded Ember): fixed key art, vertical tabs, floating identity + panel, roster strip. */
 @Component({
   selector: 'app-hero-detail',
-  imports: [StateEmblemComponent, EquipmentArtComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
+  imports: [StateEmblemComponent, EquipmentArtComponent, UiSymbolComponent, RouterLink, HeroPortraitComponent, IconComponent, CitadelFrameComponent, CitadelIconComponent],
   templateUrl: './hero-detail.component.html',
   styleUrl: './hero-detail.component.scss',
 })
@@ -205,6 +206,7 @@ export class HeroDetailComponent {
   readonly slotTag: Record<SkillKind, string> = { skill: 'สกิล 1', skill2: 'สกิล 2', ult: 'ท่าไม้ตาย' };
   readonly errorText = (e: SkillUpgradeError | null) => (e ? UPGRADE_ERROR[e] : '');
   readonly stars = (n: number) => '★'.repeat(n);
+  readonly starList = computed(() => Array.from({ length: this.star() }, (_, i) => i));
   readonly pct = (a: number, b: number) => Math.min(100, (a / Math.max(1, b)) * 100);
 
   private fmt(stat: EquipStat, v: number) {

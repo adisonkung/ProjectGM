@@ -38,7 +38,7 @@
             <i class="st" aria-hidden="true"></i>
           </span>
           <span class="class-name"><b>{{ className(tp.cls) }}</b><small>{{ tp.cls }}</small></span>
-          <span class="stars" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">{{ stars(star()) }}</span>
+          <span class="stars" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">@for (n of starList(); track n) { <app-ui-symbol name="star" [size]="36" /> }</span>
         </div>
         <div class="chips">
           @if (inTeam()) { <span class="chip">อยู่ในทีม</span> }
@@ -173,10 +173,10 @@
                   @for (l of constellationLinks(); track $index) { <line [attr.x1]="l.x1" [attr.y1]="l.y1" [attr.x2]="l.x2" [attr.y2]="l.y2" [class.on]="l.on" vector-effect="non-scaling-stroke" /> }
                 </svg>
                 @for (c of constellation(); track c.n) {
-                  <span class="node" [class.on]="c.on" [class.next]="c.next" [style.left.%]="c.x" [style.top.%]="c.y" aria-hidden="true">★@if (c.next) { <em>NEXT</em> }</span>
+                  <span class="node" [class.on]="c.on" [class.next]="c.next" [style.left.%]="c.x" [style.top.%]="c.y" aria-hidden="true"><app-ui-symbol name="star" [size]="c.next ? 96 : 66" />@if (c.next) { <em>NEXT</em> }</span>
                 }
               </div>
-              <span class="leap">@if (sv.maxed) { <b class="to">{{ star() }}★</b> } @else { <b>{{ star() }}★</b><i class="st" aria-hidden="true"></i><b class="to">{{ star() + 1 }}★</b> }</span>
+              <span class="leap">@if (sv.maxed) { <b class="to">{{ star() }}</b><app-ui-symbol name="star" [size]="58" /> } @else { <b>{{ star() }}</b><app-ui-symbol class="dim" name="star" [size]="38" /><i class="st" aria-hidden="true"></i><b class="to">{{ star() + 1 }}</b><app-ui-symbol name="star" [size]="58" /> }</span>
               @if (sv.maxed) { <p class="hint centered">ถึง 6★ แล้ว — ตัวซ้ำจะกลายเป็น Universal Memory</p> }
               @else {
                 <div class="facts">
