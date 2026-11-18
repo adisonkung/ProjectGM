@@ -1,0 +1,33 @@
+@use './gilded' as g;
+// Hero detail — growth tab (stars, perks, item cards). Global (scoped to app-hero-detail) to keep the
+// component stylesheet under the production budget. Gilded Ember tokens only.
+app-hero-detail {
+.growth-links { display: flex; flex-wrap: wrap; gap: 8px;
+  a { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 14px; border-radius: 999px; color: g.$gold-bright; font-size: 13px; text-decoration: none;
+    background: rgba(24, 18, 13, .5); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .3);
+    .st { @include g.spark(8px, g.$gold-line); } &:hover { color: g.$gold-pale; box-shadow: inset 0 0 0 1px g.$gold-bright; } &:focus-visible { outline: 2px solid g.$gold-pale; } } }
+// growth: star medals, next-star leap, perk timeline, item cards
+.star-medals { display: flex; gap: 8px; padding: 4px 0 2px;
+  .medal { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 17px; color: rgba(230, 200, 138, .28);
+    background: rgba(24, 18, 13, .55); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .25);
+    &.on { color: #3a2508; @include g.ring(0); background: radial-gradient(circle at 50% 35%, #fff8e6, #e0b871 55%, #9c6f32); box-shadow: 0 0 0 1px g.$gold-deep, 0 0 14px rgba(243, 220, 164, .55); }
+    &.next { color: g.$gold-bright; box-shadow: inset 0 0 0 1px g.$gold-bright, 0 0 12px rgba(243, 220, 164, .35); animation: breathe 2.4s ease-in-out infinite; } } }
+@keyframes breathe { 50% { box-shadow: inset 0 0 0 1px g.$gold-bright, 0 0 20px rgba(243, 220, 164, .6); } }
+.next-star { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; @include g.glass(.09);
+  .leap { display: flex; align-items: center; gap: 10px; b { font: 700 20px g.$font-label; color: g.$text-2; } .to { @include g.foil; font-size: 26px; } .st { @include g.spark(12px, g.$gold-bright); } }
+  .gain { font-size: 13px; color: #c9dcb5; } }
+.mem-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: g.$text-2; b { font: 600 16px g.$font-body; color: g.$text; small { color: g.$text-3; font-size: 12px; } } }
+.perks { margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; position: relative;
+  &::before { content: ''; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(rgba(230, 200, 138, .5), rgba(230, 200, 138, .1)); }
+  li { position: relative; display: flex; align-items: baseline; gap: 10px; font-size: 13px; color: g.$text-3; padding-left: 20px;
+    .st { position: absolute; left: 0; top: 4px; @include g.spark(11px, rgba(230, 200, 138, .35)); } b { font: 600 13px g.$font-label; color: g.$text-3; }
+    &.on { color: g.$text-body; .st { background: g.$gold-pale; filter: drop-shadow(0 0 5px g.$gold-bright); } b { color: g.$gold-bright; } } } }
+.item-cards { display: flex; flex-direction: column; gap: 8px; }
+.item-card { display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; @include g.glass(.07); color: #f0a28f;
+  .orb { position: relative; flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; color: g.$text;
+    background: radial-gradient(circle at 50% 35%, rgba(255, 236, 200, .16), rgba(24, 18, 13, .8)); box-shadow: 0 0 0 1px rgba(230, 200, 138, .55), 0 0 0 4px rgba(230, 200, 138, .08);
+    em { position: absolute; right: -6px; bottom: -4px; font: 600 11px g.$font-body; font-style: normal; color: g.$gold-pale; padding: 1px 6px; border-radius: 999px; background: #1a120c; box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .5); } }
+  .nm { flex: 1; font-size: 14px; color: g.$text-body; } b { font: 600 15px g.$font-body; }
+  .use { display: flex; gap: 6px; } &.ok { b { color: g.$gold-bright; } } }
+
+}

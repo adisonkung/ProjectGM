@@ -119,6 +119,8 @@ export class HeroDetailComponent {
 
   /** wide key art behind the header (heroes that have one) */
   readonly banner = computed(() => heroArt(this.t()?.id)?.banner);
+  /** key art whose hero stands right of centre is mirrored so the info column never covers them */
+  readonly bannerMirror = computed(() => !!heroArt(this.t()?.id)?.bannerMirror);
   readonly portrait = computed(() => heroArt(this.t()?.id)?.portrait);
   readonly attack = computed(() => { const t = this.t(); return t ? kitOf(t.id, t.cls).attack : null; });
   readonly tab = signal<DetailTab>(inject(ActivatedRoute).snapshot?.queryParamMap?.get('tab') === 'skills' ? 'skills' : 'overview');
@@ -152,13 +154,13 @@ export class HeroDetailComponent {
   readonly classIcon = computed(() => GENERATED_ICONS['class-' + (this.t()?.cls ?? '')]);
   readonly expPct = computed(() => { const p = this.progress(); return !p ? 0 : p.state === 'MAX' ? 100 : this.pct(p.exp, p.expToNext); });
 
-  /** roster strip: up to 7 heroes around the current one (roster order, wraps) */
+  /** roster strip: the current hero first (left), then the next heroes in roster order (wraps), up to 7 */
   readonly strip = computed(() => {
     const list = this.save.state().heroes;
     const i = list.findIndex(h => h.uid === this.uid());
     if (i < 0) return [];
-    const n = Math.min(7, list.length), start = i - Math.floor((n - 1) / 2);
-    return Array.from({ length: n }, (_, k) => list[(start + k + list.length * 2) % list.length]).map(h => {
+    const n = Math.min(7, list.length);
+    return Array.from({ length: n }, (_, k) => list[(i + k) % list.length]).map(h => {
       const t = this.roster.template(h);
       return { uid: h.uid, name: t?.name ?? '', portrait: heroArt(t?.id)?.portrait };
     });

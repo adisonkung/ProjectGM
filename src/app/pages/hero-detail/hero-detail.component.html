@@ -9,7 +9,7 @@
       <circle cx="300" cy="300" r="210" fill="none" stroke="#e6c88a" stroke-opacity=".25" />
       <path d="M300 4 L308 22 L300 40 L292 22Z M300 560 L308 578 L300 596 L292 578Z M4 300 L22 292 L40 300 L22 308Z M560 300 L578 292 L596 300 L578 308Z" fill="#e6c88a" />
     </svg>
-    @if (banner(); as bn) { <img class="key" [src]="bn" [alt]="tp.name" fetchpriority="high" /> }
+    @if (banner(); as bn) { <img class="key" [class.mirror]="bannerMirror()" [src]="bn" [alt]="tp.name" fetchpriority="high" /> }
     @else { <div class="fallback"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="300" /></div> }
     <div class="scrim"></div>
     @for (m of motes; track m) { <i class="mote" [style.left.%]="m[0]" [style.top.%]="m[1]" [style.animation-delay.s]="m[2]"></i> }
@@ -167,27 +167,37 @@
           <div class="growth-grid">
           @if (starView(); as sv) {
             <section class="block stars-block">
-              <header><h2>พัฒนาดาว</h2><small>{{ star() }}★ / {{ MAX_STAR }}★ · ดาวเกิด {{ tp.star }}★</small></header>
-              <div class="star-row">@for (n of [1, 2, 3, 4, 5, 6]; track n) { <span [class.on]="n <= star()" [class.base]="n <= tp.star">★</span> }</div>
+              <header><h2>พัฒนาดาว</h2><small>ดาวเกิด {{ tp.star }}★</small></header>
+              <div class="star-medals" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">
+                @for (n of [1, 2, 3, 4, 5, 6]; track n) { <span class="medal" [class.on]="n <= star()" [class.next]="n === star() + 1" aria-hidden="true">★</span> }
+              </div>
               @if (sv.maxed) { <p class="hint">ถึง 6★ แล้ว — ตัวซ้ำจะกลายเป็น Universal Memory</p> }
               @else {
-                <p class="need">ใช้ <b>{{ sv.cost }}</b> Memory เพื่อไป {{ star() + 1 }}★ <em>(+{{ nextStarGain() }}% HP/ATK/DEF)</em></p>
-                <div class="bar thin"><i [style.width.%]="pct(sv.spendHero + sv.spendUniversal, sv.cost)"></i></div>
-                <small class="hint">Hero Memory {{ sv.heroMemory }} · Universal {{ sv.universal }}@if (!sv.canUp) { · ขาดอีก {{ sv.missing }} }</small>
-                <button type="button" class="btn-glass small" [disabled]="!sv.canUp" (click)="starUp()"><i class="st"></i>อัปดาว<i class="st"></i></button>
+                <div class="next-star">
+                  <span class="leap"><b>{{ star() }}★</b><i class="st" aria-hidden="true"></i><b class="to">{{ star() + 1 }}★</b></span>
+                  <span class="gain">+{{ nextStarGain() }}% HP · ATK · DEF</span>
+                </div>
+                <div class="mem-row"><span>Memory</span><b>{{ sv.spendHero + sv.spendUniversal }} <small>/ {{ sv.cost }}</small></b></div>
+                <div class="bar"><i [style.width.%]="pct(sv.spendHero + sv.spendUniversal, sv.cost)"></i></div>
+                <small class="hint">Hero {{ sv.heroMemory }} · Universal {{ sv.universal }}@if (!sv.canUp) { · ขาดอีก {{ sv.missing }} }</small>
+                <button type="button" class="btn-gold small" [disabled]="!sv.canUp" (click)="starUp()"><i class="st"></i>อัปดาว<i class="st"></i></button>
               }
-              <ul class="steps">@for (st of starSteps(); track st.n) { <li [class.on]="st.reached"><b>{{ st.n }}★</b> +{{ st.gain }}% · {{ st.perk }}</li> }</ul>
+              <ol class="perks">@for (st of starSteps(); track st.n) { <li [class.on]="st.reached"><i class="st" aria-hidden="true"></i><b>{{ st.n }}★</b><span>+{{ st.gain }}% · {{ st.perk }}</span></li> }</ol>
             </section>
           }
           <section class="block grow">
-            <header><h2>เลเวล</h2></header>
+            <header><h2>เลเวล</h2><small>{{ p.level }} / {{ p.levelCap }}</small></header>
             @if (p.state === 'BREAKTHROUGH_READY') {
               @if (p.breakthrough; as bt) {
-                <ul class="bt-items">@for (n of bt.def.requiredItems; track n.itemId; let i = $index) { <li [class.ok]="bt.have[i].count >= n.count"><app-icon [name]="n.itemId" [size]="22" />{{ itemName(n.itemId) }} <b>{{ bt.have[i].count }} / {{ n.count }}</b></li> }</ul>
+                <p class="hint">ถึงเพดานเลเวล — ใช้หิน Breakthrough เพื่อไปต่อ</p>
+                <div class="item-cards">@for (n of bt.def.requiredItems; track n.itemId; let i = $index) {
+                  <div class="item-card" [class.ok]="bt.have[i].count >= n.count"><span class="orb"><app-icon [name]="n.itemId" [size]="30" /></span><span class="nm">{{ itemName(n.itemId) }}</span><b>{{ bt.have[i].count }} / {{ n.count }}</b></div>
+                }</div>
               }
             } @else if (p.state !== 'MAX') {
+              <div class="item-cards">
               @for (po of potions(); track po.id) {
-                <div class="potion"><app-icon [name]="po.id" [size]="24" /><span>{{ po.name }} <small>×{{ po.n }}</small></span>
+                <div class="item-card"><span class="orb"><app-icon [name]="po.id" [size]="30" /><em>×{{ po.n }}</em></span><span class="nm">{{ po.name }}</span>
                   <span class="use">
                     <button type="button" class="mini" (click)="use(po.id, 1)">1</button>
                     <button type="button" class="mini" (click)="use(po.id, 10)">10</button>
@@ -195,15 +205,16 @@
                   </span>
                 </div>
               } @empty { <p class="hint">ไม่มียา EXP — ได้จากหอคอยและ Training Ground</p> }
+              </div>
             } @else { <p class="hint">เลเวลเต็มแล้ว — เพิ่มพลังด้วยสกิลและอุปกรณ์</p> }
             <div class="slot">
               <span><b>ช่องฝึก</b><small>ฮีโร่สำรองได้ {{ slotShare * 100 }}% ของ EXP จาก Training Ground</small></span>
               @if (inTeam()) { <span class="chip">อยู่ในทีมแล้ว</span> }
-              @else { <button type="button" class="mini wide" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()">{{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องเต็ม' : 'ส่งเข้าช่องฝึก' }}</button> }
+              @else { <button type="button" class="mini wide" [class.on]="training()" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()">{{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องเต็ม' : 'ส่งเข้าช่องฝึก' }}</button> }
             </div>
             <nav class="growth-links">
-              <a routerLink="/dungeons/training">รับ EXP เพิ่ม · Training Ground</a>
-              <a routerLink="/dungeons/ascension">วัสดุ Breakthrough · ศาลเทพ</a>
+              <a routerLink="/dungeons/training"><i class="st" aria-hidden="true"></i>รับ EXP เพิ่ม · Training Ground</a>
+              <a routerLink="/dungeons/ascension"><i class="st" aria-hidden="true"></i>วัสดุ Breakthrough · ศาลเทพ</a>
             </nav>
           </section>
           </div>
