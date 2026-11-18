@@ -2,7 +2,16 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
-## Latest task — Gilded Ember UI + hero detail page (Claude, 2026-11-17)
+## Latest task — Star Ascension aura and hero detail frame (Codex, 2026-11-18)
+
+Branch `fix/star-ascension-aura` continues the Star Ascension work from `feature/claude-gilded-hero-detail`. Last confirmed shared feature base is `52e699e`.
+
+- The next star and full 6★ row use a soft CSS aura. Full stars have a masked shimmer, and an upgrade plays a short glow on the newly lit star. Reduce Motion disables the looping animation.
+- Hero-detail tabs share the panel frame. The star tab uses matching section dividers and headings and removes duplicate hero labels and the upgrade-success message. The star cost, perks, and save use the existing roster rules.
+- Checked Kael on real Chrome at 1440 × 860 and 844 × 390. Verified the 3★ → 4★ upgrade, the 6★ aura, Reduce Motion, insufficient Memory, and right-panel width across all tabs. The portrait fallback was checked for horizontal overflow at 390 × 844.
+- App and spec typechecks passed. Karma passed 978 tests and the production build succeeded. Hero-detail component CSS is 23.95 kB against a 24 kB error threshold.
+
+## Previous task — Gilded Ember UI + hero detail page (Claude, 2026-11-17)
 
 Branch `feature/claude-gilded-hero-detail` from origin/master 3245cfa. User approved a design direction in a claude.ai canvas mockup (HSR base + Genshin-style gold accent, 4 iterations): warm ink + champagne gold + burgundy, no purple/blue, one ornament motif (four-point sparkle + gold metal ring), no scroll/corner filigree. Locked rules I–V incl. **V: phones are landscape-only** (design every page for short landscape screens; portrait gets a rotate prompt — the app-wide prompt is NOT implemented yet).
 
