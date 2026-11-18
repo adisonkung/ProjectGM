@@ -1,7 +1,7 @@
 @if (hero(); as h) {
   @let tp = t()!;
   @let p = progress()!;
-  <div class="art" [class.dim]="tab() === 'star'" aria-hidden="true">
+  <div class="art" aria-hidden="true">
     <div class="glow"></div>
     <svg class="ring" viewBox="0 0 600 600">
       <circle cx="300" cy="300" r="290" fill="none" stroke="#e6c88a" stroke-opacity=".5" />
@@ -29,42 +29,6 @@
       }
     </nav>
 
-    @if (tab() === 'star') {
-      <section class="mosaic" aria-label="Memory Mosaic — ภาพความทรงจำของฮีโร่ เติมทีละชิ้นตามดาว">
-        <div class="board">
-          @for (sh of shards(); track sh.n) {
-            <div [class]="'shard ' + sh.state" [style.clip-path]="sh.clip">@if (banner(); as bn) { <img [src]="bn" [class.mirror]="bannerMirror()" alt="" /> }</div>
-          }
-          <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            @for (sh of shards(); track sh.n) { <polygon [attr.points]="sh.points" [class]="sh.state" vector-effect="non-scaling-stroke" /> }
-            @for (sh of shards(); track sh.n) { @if (sh.state === 'next') { <polygon class="runner" [attr.points]="sh.points" pathLength="100" vector-effect="non-scaling-stroke" /><polygon class="runner late" [attr.points]="sh.points" pathLength="100" vector-effect="non-scaling-stroke" /> } }
-          </svg>
-          @for (sh of shards(); track sh.n) {
-            @if (sh.state !== 'locked') {
-              @for (c of sh.corners; track $index) { <img [class]="'glint ' + sh.state" [src]="gild('sparkle')" alt="" aria-hidden="true" [style.left.%]="c.x" [style.top.%]="c.y" [style.animation-delay.s]="$index * .45 + sh.n * .2" /> }
-            }
-          }
-          @for (sh of shards(); track sh.n) {
-            <span [class]="'tag ' + sh.state" [style.left.%]="sh.cx" [style.top.%]="sh.cy" aria-hidden="true">
-              @if (sh.state === 'locked') { <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 018 0v3" /></svg> }
-              @else { @if (sh.state === 'next') { <app-sheet-fx class="ignite" [src]="gild('vfx_starup_burst')" [loop]="[3, 7]" [fps]="9" /> }<img [src]="starImg(sh.n, true)" alt="" /><b>{{ sh.n }}</b> }
-            </span>
-          }
-          @if (starFx(); as f) {
-            @for (k of [f.key]; track k) {
-              <app-sheet-fx class="fx-pillar" [src]="gild('vfx_starup_pillar')" [fps]="12" [style.left.%]="f.x" [style.top.%]="f.y" />
-              <app-sheet-fx class="fx-burst" [src]="gild('vfx_starup_burst')" [fps]="14" [delayMs]="450" [style.left.%]="f.x" [style.top.%]="f.y" (done)="starFx.set(null)" />
-            }
-          }
-        </div>
-        <div class="caption">
-          <span class="now">CURRENT {{ star() }}<img [src]="starImg(star(), true)" alt="" />@if (star() < MAX_STAR) { <i aria-hidden="true">→</i> NEXT {{ star() + 1 }}<img [src]="starImg(star() + 1, true)" alt="" /> }</span>
-          <span class="row" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">@for (sh of shards(); track sh.n) { <img [src]="starImg(sh.n, sh.state !== 'locked')" [class]="sh.state" alt="" /> }</span>
-          <small><i class="st" aria-hidden="true"></i>MEMORY MOSAIC<i class="st" aria-hidden="true"></i></small>
-        </div>
-      </section>
-    }
-
     <div class="info">
       <div class="identity">
         <h1><span class="latin">{{ latinName() }}</span><span class="th">{{ tp.name }}</span></h1>
@@ -75,7 +39,7 @@
             <i class="st" aria-hidden="true"></i>
           </span>
           <span class="class-name"><b>{{ className(tp.cls) }}</b><small>{{ tp.cls }}</small></span>
-          <span class="stars" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">@for (n of starList(); track n) { <img [src]="starImg(n + 1, true)" alt="" /> }</span>
+          <span class="stars" [class.blaze]="maxed()" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">@for (n of starList(); track n) { <img [src]="starImg(n + 1, true)" alt="" /> }</span>
         </div>
         <div class="chips">
           @if (inTeam()) { <span class="chip">อยู่ในทีม</span> }
@@ -229,29 +193,50 @@
 
         @if (tab() === 'star') {
           @if (starView(); as sv) {
-            <section class="block star-panel">
-              <div class="star-title">
-                <span class="ord">{{ sv.maxed ? 'MAX STAR' : ordinal(star() + 1) + ' STAR' }}</span>
-                <small>{{ sv.maxed ? 'ถึง ' + MAX_STAR + '★ แล้ว' : 'ดาวที่ ' + (star() + 1) + ' ของ' + tp.name }}</small>
+            <section class="block ascend" [class.max]="sv.maxed">
+              <header class="asc-head">
+                <span class="asc-title">{{ sv.maxed ? 'STAR AWAKENED' : 'STAR ASCENSION' }}</span>
+                <span class="asc-sub">{{ latinName() }} · {{ tp.name }}</span>
+              </header>
+              <div class="asc-step">@if (!sv.maxed) { CURRENT <b>{{ star() }}★</b><i aria-hidden="true">→</i>NEXT <b class="nx">{{ star() + 1 }}★</b> } @else { ดาวเต็ม <b class="nx">{{ MAX_STAR }}★</b> }</div>
+              <div class="srow" [class.blaze]="sv.maxed" role="img" [attr.aria-label]="star() + ' ดาว จาก ' + MAX_STAR">
+                <i class="wing" aria-hidden="true"></i>
+                @for (s of starRow(); track s.n) {
+                  <span [class]="'node ' + s.state">
+                    @if (sv.maxed) { <app-sheet-fx class="flame" [src]="gild('vfx_starup_burst')" [loop]="[3, 7]" [fps]="10" [delayMs]="s.n * 110" /> }
+                    <img [src]="starImg(s.n, s.state === 'lit')" alt="" />
+                    @if (sv.maxed) { <i class="sheen" [style.--m]="'url(' + gild('star_lit') + ')'" [style.animation-delay.s]="s.n * .12"></i> }
+                    @if (starFx(); as f) { @if (f.n === s.n) { @for (k of [f.key]; track k) {
+                      <app-sheet-fx class="fx-pillar" [src]="gild('vfx_starup_pillar')" [fps]="12" />
+                      <app-sheet-fx class="fx-burst" [src]="gild('vfx_starup_burst')" [fps]="14" [delayMs]="450" (done)="starFx.set(null)" />
+                    } } }
+                  </span>
+                }
+                <i class="wing r" aria-hidden="true"></i>
+                @if (sv.maxed) { @for (e of embers; track $index) { <i class="ember" aria-hidden="true" [style.left.%]="e[0]" [style.animation-delay.s]="e[1]" [style.animation-duration.s]="e[2]"></i> } }
               </div>
               @if (!sv.maxed) {
-                <div class="ribbon"><i class="st" aria-hidden="true"></i>NEXT UPGRADE<i class="st" aria-hidden="true"></i></div>
                 <table class="deltas">
+                  <thead><tr><th scope="col">STAT</th><th scope="col">BEFORE</th><th aria-hidden="true"></th><th scope="col">AFTER</th><th></th></tr></thead>
                   <tbody>
                     @for (r of starDeltas(); track r.label) {
                       <tr><th scope="row"><app-icon [name]="r.icon" [size]="20" /> {{ r.label }}</th><td class="cur">{{ r.cur }}</td><td class="arr" aria-hidden="true">→</td><td class="nxt">{{ r.next }}</td><td class="plus">(+{{ r.delta }})</td></tr>
                     }
                   </tbody>
                 </table>
-                <div class="bonus"><img [src]="gild('sparkle')" alt="" /><span>STAR BONUS</span><b>{{ nextPerk() || ('+' + nextStarGain() + '% HP · ATK · DEF') }}</b></div>
-                <h3 class="mats-h">MATERIALS</h3>
+                <div class="bonus"><img [src]="gild('sparkle')" alt="" /><span>STAR BONUS</span><b>{{ nextPerk() || ('ค่าพลัง +' + nextStarGain() + '%') }}</b></div>
+                <h3 class="mats-h"><span>MATERIALS</span></h3>
                 <div class="mats">
-                  <div class="mat" [class.ok]="sv.heroMemory >= sv.cost"><span class="pic"><img [src]="gild('hero_memory')" alt="" /></span><b>{{ sv.heroMemory }} <small>/ {{ sv.cost }}</small></b><small>Hero Memory</small></div>
-                  <div class="mat"><span class="pic">@if (universalIcon) { <img [src]="universalIcon" alt="" /> }</span><b>{{ sv.universal }}</b><small>Universal Memory</small></div>
+                  <div class="mat" [class.ok]="sv.heroMemory >= sv.cost"><img [src]="gild('hero_memory')" alt="" /><span><small>Hero Memory</small><b>{{ sv.heroMemory }} <em>/ {{ sv.cost }}</em></b></span></div>
+                  <i class="sep" aria-hidden="true"></i>
+                  <div class="mat">@if (universalIcon) { <img [src]="universalIcon" alt="" /> }<span><small>Universal Memory</small><b>{{ sv.universal }}</b></span></div>
                 </div>
-                <button type="button" class="btn-gold wide" [disabled]="!sv.canUp" (click)="starUp()"><i class="st"></i>{{ sv.canUp ? 'ปลดล็อกดาวที่ ' + (star() + 1) : 'Memory ไม่พอ · ขาดอีก ' + sv.missing }}<i class="st"></i></button>
+                <button type="button" class="confirm" [disabled]="!sv.canUp" (click)="starUp()">{{ sv.canUp ? 'ยืนยันอัปดาว' : 'Memory ไม่พอ · ขาดอีก ' + sv.missing }}</button>
                 <small class="consume">{{ sv.canUp ? 'ใช้ Hero Memory ' + sv.spendHero + (sv.spendUniversal ? ' + Universal ' + sv.spendUniversal : '') : 'Hero Memory ได้จากการอัญเชิญซ้ำ · Universal จากหอคอยครั้งแรก' }}</small>
-              } @else { <p class="hint">ตัวซ้ำของฮีโร่ 6★ จะกลายเป็น Universal Memory</p> }
+              } @else {
+                <div class="bonus"><img [src]="gild('sparkle')" alt="" /><span>STAR BONUS</span><b>{{ maxPerks }}</b></div>
+                <p class="hint">ตัวซ้ำของฮีโร่ {{ MAX_STAR }}★ จะกลายเป็น Universal Memory</p>
+              }
             </section>
           }
         }
@@ -270,6 +255,10 @@
                 @else { <button type="button" class="mini wide" [class.on]="training()" [attr.aria-pressed]="training()" [disabled]="!training() && slotsFull()" (click)="toggleSlot()" [title]="'ฮีโร่สำรองได้ ' + slotShare * 100 + '% ของ EXP จาก Training Ground'"><img class="ico" [src]="gild('training_slot')" alt="" />{{ training() ? 'อยู่ในช่องฝึก' : slotsFull() ? 'ช่องฝึกเต็ม' : 'ส่งเข้าช่องฝึก' }}</button> }
               </span>
             </header>
+            <div class="lv-exp">
+              <div class="bar" role="progressbar" aria-label="ประสบการณ์ฮีโร่" aria-valuemin="0" [attr.aria-valuemax]="p.expToNext || 1" [attr.aria-valuenow]="p.state === 'MAX' ? 1 : (p.exp > p.expToNext ? p.expToNext : p.exp)"><i [style.width.%]="expPct()"></i><b class="tip" [style.left.%]="expPct()"></b></div>
+              <span><b>LV {{ p.level }}</b>{{ p.state === 'MAX' ? 'เลเวลสูงสุด' : p.state === 'BREAKTHROUGH_READY' ? 'EXP เต็ม — ต้อง Breakthrough' : 'EXP ' + p.exp + ' / ' + p.expToNext }}<em>{{ p.state === 'MAX' ? '' : expRound() + '%' }}</em></span>
+            </div>
             @if (p.state === 'BREAKTHROUGH_READY') {
               @if (p.breakthrough; as bt) {
                 <p class="hint bt-hint"><img [src]="gild('breakthrough')" alt="" />ถึงเพดานเลเวล — ใช้หิน Breakthrough เพื่อไปต่อ</p>

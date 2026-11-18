@@ -1,0 +1,103 @@
+@use './gilded' as g;
+// Hero detail — star tab "Star Ascension" panel (user reference 2026-11-18): banner stays as the backdrop,
+// right panel = current → next star, star row, stat before/after, star bonus ribbon, materials, confirm.
+// 6★ (full) = the star row blazes: flames, shimmer, embers. Rainbow stars are reserved for a future 7★–9★.
+// Global, scoped to app-hero-detail, to keep the component stylesheet under the production budget.
+app-hero-detail {
+  .ascend { position: relative; gap: 12px; padding: 18px 22px 16px; text-align: center;
+    background: linear-gradient(180deg, rgba(30, 22, 16, .82), rgba(18, 13, 10, .74));
+    box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .32), inset 0 1px 0 rgba(255, 241, 207, .35), 0 18px 40px rgba(0, 0, 0, .45);
+    &::before { content: ''; position: absolute; left: 10px; top: 26px; bottom: 26px; width: 1px; pointer-events: none;
+      background: linear-gradient(180deg, transparent, rgba(230, 200, 138, .7) 12%, rgba(230, 200, 138, .2) 70%, transparent); } }
+  .asc-head { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-bottom: 10px;
+    border-bottom: 1px solid; border-image: linear-gradient(90deg, transparent, rgba(230, 200, 138, .6), transparent) 1; }
+  .asc-title { @include g.foil; font: 700 34px/1.05 g.$font-display; letter-spacing: .06em; filter: drop-shadow(0 2px 12px rgba(243, 220, 164, .3)); }
+  .asc-sub { font: 600 15px g.$font-label; letter-spacing: .16em; text-transform: uppercase; color: g.$text-body; }
+  .asc-step { display: flex; align-items: baseline; justify-content: center; gap: 8px; font: 600 15px g.$font-label; letter-spacing: .2em; color: g.$text-2;
+    b { font: 700 22px g.$font-label; letter-spacing: .04em; color: g.$text; } .nx { @include g.foil; } i { font-style: normal; color: g.$gold-line; margin: 0 10px; } }
+
+  // ---------------------------------------------------------------- star row
+  .srow { position: relative; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 0 4px; }
+  .wing { flex: 1; max-width: 60px; height: 1px; background: linear-gradient(90deg, transparent, g.$gold-line); position: relative;
+    &::after { content: ''; position: absolute; right: -3px; top: -3px; @include g.spark(7px, g.$gold-line); }
+    &.r { transform: scaleX(-1); } }
+  .node { position: relative; display: grid; place-items: center; width: 52px; height: 52px;
+    > img { position: relative; z-index: 1; width: 50px; height: 50px; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .7)); }
+    &.lit > img { filter: drop-shadow(0 0 8px rgba(255, 210, 130, .55)); }
+    &.locked > img { opacity: .45; width: 44px; height: 44px; }
+    &.next { width: 64px; height: 64px;
+      &::before { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 2px #e0b871, 0 0 14px rgba(255, 196, 110, .75), inset 0 0 18px rgba(255, 190, 100, .45);
+        background: radial-gradient(circle, rgba(140, 70, 20, .45), rgba(30, 18, 10, .6) 70%); animation: sa-pulse 2.2s ease-in-out infinite; }
+      > img { width: 44px; height: 44px; filter: drop-shadow(0 0 10px rgba(255, 220, 150, .9)); } }
+    .fx-pillar { left: 50%; top: 50%; width: 220px; height: 220px; margin-top: -70px; z-index: 3; }
+    .fx-burst { left: 50%; top: 50%; width: 240px; height: 240px; z-index: 4; } }
+  @keyframes sa-pulse { 50% { transform: scale(1.08); box-shadow: inset 0 0 0 2px #fff1cf, 0 0 26px rgba(255, 196, 110, 1), inset 0 0 22px rgba(255, 200, 110, .7); } }
+
+  // ---------------------------------------------------------------- 6★ blaze: fire aura, flames per star, shimmer sweep, rising embers
+  .srow.blaze { padding: 26px 0 22px; gap: 16px;
+    .node { width: 66px; height: 66px; > img { width: 62px; height: 62px; } }
+    .wing { max-width: 40px; }
+    &::before { content: ''; position: absolute; inset: -6px -10px; pointer-events: none; filter: blur(10px);
+      background: radial-gradient(ellipse 54% 62% at 50% 55%, rgba(255, 186, 74, .7), rgba(214, 74, 24, .38) 55%, transparent 78%);
+      animation: sa-aura 1.6s ease-in-out infinite alternate; }
+    .wing { background: linear-gradient(90deg, transparent, #ffb24a); box-shadow: 0 0 8px rgba(255, 160, 60, .9); }
+    .node > img { animation: sa-flicker 1.1s ease-in-out infinite alternate; }
+    .node:nth-of-type(2n) > img { animation-delay: -.45s; }
+    .flame { left: 50%; top: 42%; width: 160px; height: 160px; z-index: 0; mix-blend-mode: plus-lighter; opacity: .95; }
+    .sheen { position: absolute; z-index: 2; inset: 1px; pointer-events: none;
+      -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat;
+      background: linear-gradient(115deg, transparent 35%, rgba(255, 252, 235, .95) 48%, rgba(255, 214, 140, .6) 54%, transparent 66%) 0 0 / 300% 100% no-repeat;
+      mix-blend-mode: plus-lighter; animation: sa-sheen 2.4s ease-in-out infinite; } }
+  .ember { position: absolute; bottom: 8px; width: 4px; height: 4px; border-radius: 50%; pointer-events: none; z-index: 3;
+    background: #ffe2a0; box-shadow: 0 0 6px 2px rgba(255, 150, 50, .9); opacity: 0; animation: sa-ember 2s ease-out infinite; }
+  @keyframes sa-aura { from { opacity: .7; transform: scale(.96); } to { opacity: 1; transform: scale(1.06); } }
+  @keyframes sa-flicker {
+    from { transform: scale(1); filter: drop-shadow(0 0 6px rgba(255, 200, 110, .9)) drop-shadow(0 0 16px rgba(255, 120, 40, .7)) brightness(1.05); }
+    to { transform: scale(1.07); filter: drop-shadow(0 0 10px rgba(255, 236, 170, 1)) drop-shadow(0 0 26px rgba(255, 140, 40, .95)) brightness(1.25); } }
+  @keyframes sa-sheen { 0%, 25% { background-position: 100% 0; } 75%, 100% { background-position: 0 0; } }
+  @keyframes sa-ember { 0% { opacity: 0; transform: translate(0, 0) scale(1); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(6px, -100px) scale(.3); } }
+  // overview: the small star row next to the class flickers + sweeps once maxed
+  .stars.blaze { position: relative; filter: drop-shadow(0 0 6px rgba(255, 180, 80, .9)) drop-shadow(0 0 14px rgba(255, 110, 30, .6));
+    img { animation: sa-flicker 1.1s ease-in-out infinite alternate; } img:nth-child(2n) { animation-delay: -.5s; } }
+
+  // ---------------------------------------------------------------- stats / bonus / materials / confirm
+  .ascend .deltas { width: 100%; border-collapse: collapse; font-size: 17px;
+    th, td { padding: 8px 6px; border-bottom: 1px solid rgba(230, 200, 138, .14); }
+    thead th { @include g.label; font-size: 12px; color: g.$text-2; text-align: right; border-bottom-color: rgba(230, 200, 138, .32); &:first-child { text-align: left; } }
+    tbody th { text-align: left; font-weight: 600; color: g.$text-body; app-icon { color: g.$gold-line; vertical-align: -4px; margin-right: 8px; } }
+    .cur { color: g.$text-2; text-align: right; } .arr { color: g.$gold-line; text-align: center; width: 30px; }
+    .nxt { @include g.foil; font: 700 21px g.$font-body; text-align: right; } .plus { color: #9fd486; font-weight: 600; text-align: right; width: 64px; } }
+  .ascend .bonus { display: flex; align-items: center; gap: 12px; padding: 11px 22px; text-align: left;
+    background: linear-gradient(180deg, #6e1a21, #45100f); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .65), 0 4px 14px rgba(0, 0, 0, .35);
+    clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
+    img { width: 30px; height: 30px; } span { @include g.label; font-size: 12px; color: #e8cfa6; padding-right: 12px; border-right: 1px solid rgba(230, 200, 138, .4); }
+    b { flex: 1; font: 600 17px g.$font-body; color: #fff1cf; } }
+  .ascend .mats-h { display: flex; align-items: center; gap: 12px; margin: 2px 0 0; @include g.label; font-size: 13px; color: g.$gold-line;
+    &::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(230, 200, 138, .55), transparent); } }
+  .ascend .mats { display: flex; align-items: center; justify-content: space-around; gap: 10px;
+    .sep { width: 1px; align-self: stretch; background: linear-gradient(180deg, transparent, rgba(230, 200, 138, .45), transparent); }
+    .mat { display: flex; align-items: center; gap: 12px; text-align: left;
+      img { width: 62px; height: 62px; filter: drop-shadow(0 4px 12px rgba(255, 190, 110, .35)); }
+      span { display: flex; flex-direction: column; gap: 2px; } small { font-size: 14px; color: g.$text-body; }
+      b { font: 700 22px g.$font-body; color: #f0a28f; em { font-style: normal; font-size: 17px; color: g.$text-2; } }
+      &.ok b { color: #9fd486; } } }
+  .ascend .confirm { all: unset; box-sizing: border-box; cursor: pointer; align-self: stretch; display: grid; place-items: center; min-height: 58px; padding: 0 36px;
+    font: 700 20px g.$font-body; letter-spacing: .05em; color: #3a2508; text-shadow: 0 1px 0 rgba(255, 248, 230, .6);
+    background: linear-gradient(180deg, #fffbef 0%, #f6e2ae 24%, #e0b871 55%, #b98a45 84%, #d8b06a 100%);
+    clip-path: polygon(26px 0, calc(100% - 26px) 0, 100% 50%, calc(100% - 26px) 100%, 26px 100%, 0 50%);
+    filter: drop-shadow(0 6px 18px rgba(201, 154, 82, .45)); transition: filter .2s, transform .12s;
+    &:hover:not(:disabled) { filter: drop-shadow(0 6px 26px rgba(255, 210, 130, .8)) brightness(1.06); }
+    &:active:not(:disabled) { transform: translateY(1px); }
+    &:focus-visible { outline: 2px solid g.$gold-pale; outline-offset: 3px; }
+    &:disabled { cursor: not-allowed; color: #e9d9b8; background: linear-gradient(180deg, #6a5838, #3e321f); filter: none; text-shadow: none; } }
+  .ascend .consume { font-size: 14px; color: g.$text-2; font-style: italic; margin-top: -4px; }
+
+  @media (max-height: 500px) and (orientation: landscape) {
+    .ascend { gap: 8px; padding: 12px 14px; } .asc-title { font-size: 24px; } .node { width: 40px; height: 40px; > img { width: 38px; height: 38px; } &.next { width: 48px; height: 48px; } }
+    .ascend .deltas th, .ascend .deltas td { padding: 4px; } .ascend .mats .mat img { width: 44px; height: 44px; } .ascend .confirm { min-height: 46px; font-size: 17px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .node.next::before, .srow.blaze::before, .srow.blaze .node > img, .srow.blaze .sheen, .stars.blaze img { animation: none; }
+    .ember { display: none; }
+  }
+}

@@ -72,32 +72,15 @@ export class HeroDetailComponent {
   });
   /** 4★ / 5★ / 6★ perks + visual evolution, reached or not */
   readonly starSteps = computed(() => [4, 5, 6].map(n => ({ n, perk: STAR_PERKS[n].label, visual: STAR_VISUAL[n].label, reached: this.star() >= n, gain: Math.round((starMultiplier(n) - 1) * 100) })));
-  // ---------------------------------------------------------------- Memory Mosaic (star tab, user concept 2026-11-18)
-  /** hub of the mosaic (% of the board) — the six shards fan around it */
-  readonly hub = { x: 46, y: 52 };
-  /** six shards of the hero's banner, one per star: perimeter runs clockwise from the left edge */
-  readonly shards = computed(() => {
-    const C = this.hub, star = this.star();
-    const edges: [number, number][][] = [
-      [[3, 80], [0, 9], [13, 3]], [[13, 3], [47, 0]], [[47, 0], [84, 4]],
-      [[84, 4], [99, 12], [100, 60]], [[100, 60], [93, 97], [67, 100]], [[67, 100], [8, 95], [3, 80]],
-    ];
-
-    return edges.map((perim, i) => {
-      const poly: [number, number][] = [[C.x, C.y], ...perim];   // shards meet at the hub — no hole in the middle
-      const cx = poly.reduce((a, p) => a + p[0], 0) / poly.length, cy = poly.reduce((a, p) => a + p[1], 0) / poly.length;
-      const ox = (cx - C.x) * .02, oy = (cy - C.y) * .02;   // a hair apart, like cut glass
-      const pts = poly.map(([x, y]) => [cx + (x - cx) * .965 + ox, cy + (y - cy) * .965 + oy]);   // thin gutter between shards
-      const n = i + 1;
-      return {
-        n, cx: cx + ox, cy: cy + oy, state: n <= star ? 'lit' : n === star + 1 ? 'next' : 'locked',
-        clip: `polygon(${pts.map(([x, y]) => `${x.toFixed(2)}% ${y.toFixed(2)}%`).join(', ')})`,
-        points: pts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' '),
-        /** outer corners (not the hub point) — glints sit here on lit / next shards */
-        corners: pts.slice(1).map(([x, y]) => ({ x, y })),
-      };
-    });
-  });
+  /** 6★ = full: the star row blazes (shimmer + flames + embers) · rainbow stars are kept for a future 7★–9★ */
+  readonly maxed = computed(() => this.star() >= MAX_STAR);
+  readonly starRow = computed(() => Array.from({ length: MAX_STAR }, (_, i) => {
+    const n = i + 1, s = this.star();
+    return { n, state: n <= s ? 'lit' : n === s + 1 ? 'next' : 'locked' };
+  }));
+  /** rising embers over the blazing 6★ row: [left %, delay s, duration s] */
+  readonly embers: [number, number, number][] = Array.from({ length: 16 }, (_, i) => [6 + ((i * 37) % 88), (i * .31) % 2.6, 1.8 + ((i * 7) % 5) * .22]);
+  readonly maxPerks = [4, 5, 6].map(n => STAR_PERKS[n].label).join(' · ');
   readonly ordinal = (n: number) => ['FIRST', 'SECOND', 'THIRD', 'FOURTH', 'FIFTH', 'SIXTH'][n - 1] ?? '';
   /** HP / ATK / DEF now vs after the next star */
   readonly starDeltas = computed(() => {
@@ -112,15 +95,14 @@ export class HeroDetailComponent {
   readonly nextPerk = computed(() => STAR_PERKS[this.star() + 1]?.label ?? '');
   starUp(): void {
     const s = this.star();
-    const shard = this.shards()[s];   // the shard that lights up
-    if (this.roster.starUp(this.uid())) { this.say(`อัปเป็น ${s + 1}★ แล้ว`); if (shard) this.starFx.set({ key: Date.now(), x: shard.cx, y: shard.cy }); }
+    if (this.roster.starUp(this.uid())) { this.say(`อัปเป็น ${s + 1}★ แล้ว`); this.starFx.set({ key: Date.now(), n: s + 1 }); }
     else this.say('Memory ไม่พอ', false);
   }
   /** Gilded Ember pack (public/ui/gilded): icons + one-shot VFX sheets */
   readonly gild = (name: string) => `ui/gilded/${name}.webp`;
-  readonly starImg = (n: number, lit: boolean) => this.gild(!lit ? 'star_empty' : n === 6 ? 'star_awakened' : 'star_lit');
+  readonly starImg = (n: number, lit: boolean) => this.gild(!lit ? 'star_empty' : n > MAX_STAR ? 'star_awakened' : 'star_lit');
   /** star-up VFX (pillar + burst) on the node that just lit · level ring / breakthrough seal on the level bar */
-  readonly starFx = signal<{ key: number; x: number; y: number } | null>(null);
+  readonly starFx = signal<{ key: number; n: number } | null>(null);
   readonly levelFx = signal<{ key: number; kind: 'level' | 'breakthrough' } | null>(null);
 
   readonly inventory = computed(() => this.save.state().inventory);
@@ -202,6 +184,7 @@ export class HeroDetailComponent {
 
   readonly latinName = computed(() => { const id = this.t()?.id ?? ''; return LATIN_NAME[id] ?? id.charAt(0).toUpperCase() + id.slice(1); });
   readonly classIcon = computed(() => GENERATED_ICONS['class-' + (this.t()?.cls ?? '')]);
+  readonly expRound = computed(() => Math.floor(this.expPct()));
   readonly expPct = computed(() => { const p = this.progress(); return !p ? 0 : p.state === 'MAX' ? 100 : this.pct(p.exp, p.expToNext); });
 
   /** roster strip: the current hero first (left), then the next heroes in roster order (wraps), up to 7 */
