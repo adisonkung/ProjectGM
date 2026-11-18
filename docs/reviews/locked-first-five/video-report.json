@@ -1,0 +1,82 @@
+[
+  {
+    "id": "yuezheng",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-five/yuezheng.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "moye",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-five/moye.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "tangxun",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-five/tangxun.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "linxue",
+    "width": 1440,
+    "height": 860,
+    "source": "/ui/cutins/locked-five/linxue.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "yuezheng",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-five/yuezheng.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "moye",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-five/moye.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "tangxun",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-five/tangxun.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  },
+  {
+    "id": "linxue",
+    "width": 844,
+    "height": 390,
+    "source": "/ui/cutins/locked-five/linxue.webp",
+    "errors": [],
+    "manualCast": true,
+    "normalPlayback": true,
+    "cleanedUp": true
+  }
+]

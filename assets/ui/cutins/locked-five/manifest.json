@@ -1,0 +1,182 @@
+[
+  {
+    "id": "yuezheng",
+    "name": "เยว่เจิ้ง",
+    "skill": "ป้อมผนึกภูผา",
+    "accent": "#ffbd55",
+    "source": "assets/ui/cutins/locked-five/yuezheng.png",
+    "file": "public/ui/cutins/locked-five/yuezheng.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "bf289bcccd130c611eb0ed0ee452ee076ff50ae5b9c6df44f45ac10367fae712",
+    "runtime_sha256": "9ee41e6f48ad3c6de062b9331389620a1973314cc3a8a99a16ed7f3b977ef5fa",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-five/yuezheng-wake.png",
+        "file": "public/ui/cutins/locked-five/yuezheng-wake.webp",
+        "w": 1254,
+        "h": 619,
+        "source_sha256": "34daab2bd0dfddb01b41867e6747d97e31f8f56fc86df27fde13e6b8792d3ae2",
+        "runtime_sha256": "96e22b8ea2f275e99f78a7c3f11d56948911e53abe5ef5aeba1d6f8219edfb96",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          619
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-five/yuezheng-spray.png",
+        "file": "public/ui/cutins/locked-five/yuezheng-spray.webp",
+        "w": 1254,
+        "h": 635,
+        "source_sha256": "948829ac1e6399a330ee6b976def8fcc6af3eac81c724b3f0bab4f3b3d276cf7",
+        "runtime_sha256": "d6d05f6f529efc219b4125ab9cfd037f1afbdc3ea199587a2852b340e58db14e",
+        "crop_box": [
+          0,
+          619,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-five/yuezheng-vfx-sheet.png",
+    "sheet_sha256": "91a488b2e6dbcf78ad38dba764f7f369f522497231904e646f89bdff37da6e46",
+    "minor_name_border_overlap_accepted": true
+  },
+  {
+    "id": "moye",
+    "name": "โม่เย่",
+    "skill": "ประหารพันกลีบ",
+    "accent": "#ff5267",
+    "source": "assets/ui/cutins/locked-five/moye.png",
+    "file": "public/ui/cutins/locked-five/moye.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "4ee8762b8b0e2741f8eac2bd1230dc517f589b0445ad3ac51175f056c0e0df02",
+    "runtime_sha256": "ac1140bbdeb3db2c49e02d6fc28125edff4daf2eb6f38075122cea443bf1ab67",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-five/moye-wake.png",
+        "file": "public/ui/cutins/locked-five/moye-wake.webp",
+        "w": 1254,
+        "h": 622,
+        "source_sha256": "84c3926491c2a71df33ba28ebd149128b4eb4f0452a7b11c55266a1a0799689f",
+        "runtime_sha256": "e271024e40ce183dc1cf411dc31b12e42bd03a03300e5f18ead1e33813185c9f",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          622
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-five/moye-spray.png",
+        "file": "public/ui/cutins/locked-five/moye-spray.webp",
+        "w": 1254,
+        "h": 632,
+        "source_sha256": "dbdb8d90f0c42179f3e5cd83d865e74f5b45f87ada22b4dbeee1f2b47cc6e868",
+        "runtime_sha256": "8413f7223a86dee89d75127aead595345628b76536f44724f18e9313ce16781a",
+        "crop_box": [
+          0,
+          622,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-five/moye-vfx-sheet.png",
+    "sheet_sha256": "27ffbc8c0b8cd87679ea4bced2432df46671bd3e41b754830d74393a5d63a3a8",
+    "minor_name_border_overlap_accepted": true
+  },
+  {
+    "id": "tangxun",
+    "name": "ถังซวิ่น",
+    "skill": "ค่ายมีดตาข่ายสวรรค์",
+    "accent": "#78e5ae",
+    "source": "assets/ui/cutins/locked-five/tangxun.png",
+    "file": "public/ui/cutins/locked-five/tangxun.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "5ac841cff03f9e1e7ed10a7f083a4ea2969c7ce7083dc6df8fc884cda4f50b7f",
+    "runtime_sha256": "1ada0c7876f3fe9461f0107796ca3256b10ac129f44741cf85b28053466de7ef",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-five/tangxun-wake.png",
+        "file": "public/ui/cutins/locked-five/tangxun-wake.webp",
+        "w": 1254,
+        "h": 599,
+        "source_sha256": "d13cd2e7148a8346eb2526a6a34ca3b9deb305bdd7e2d9f34108fae45f752a70",
+        "runtime_sha256": "3c4a7a8d52b94b05b7327c9e9d2473ecc4201ab600ec3e1835280444efe2d7c4",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          599
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-five/tangxun-spray.png",
+        "file": "public/ui/cutins/locked-five/tangxun-spray.webp",
+        "w": 1254,
+        "h": 655,
+        "source_sha256": "d9ed3c3dca9c968ec0e9beba95028ce3cf387c7e560f18220b9479bcb803d5f0",
+        "runtime_sha256": "f02e725a4417dd734c2e4d434f945989cf961d759862b01accd1d2ee7cd5d4e2",
+        "crop_box": [
+          0,
+          599,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-five/tangxun-vfx-sheet.png",
+    "sheet_sha256": "141209c230f15b195e62aceb5e580d4a2ded77607361289fc8bfd0eb3e80348f",
+    "minor_name_border_overlap_accepted": true
+  },
+  {
+    "id": "linxue",
+    "name": "หลินเสวี่ย",
+    "skill": "พิธีคืนวสันต์",
+    "accent": "#ffb5cf",
+    "source": "assets/ui/cutins/locked-five/linxue.png",
+    "file": "public/ui/cutins/locked-five/linxue.webp",
+    "w": 1899,
+    "h": 828,
+    "source_sha256": "7256809d8ee0654f6db78c280f05a85e98f9cd2b88a6cacb67c86edddc92bca0",
+    "runtime_sha256": "7a154212ff74740f3929bb73a7afc7b80b2cc47be78c0582bed6a94347d5cef8",
+    "layers": [
+      {
+        "source": "assets/ui/cutins/locked-five/linxue-wake.png",
+        "file": "public/ui/cutins/locked-five/linxue-wake.webp",
+        "w": 1254,
+        "h": 597,
+        "source_sha256": "50f4c617f1e5b301bcbade33288d4495108bc162db0e17380c61bb3094c7219a",
+        "runtime_sha256": "41bc03cf3b923cb8def5d38050b339c4aa363b24bb8bd77b0ea0adff5f3d8109",
+        "crop_box": [
+          0,
+          0,
+          1254,
+          597
+        ]
+      },
+      {
+        "source": "assets/ui/cutins/locked-five/linxue-spray.png",
+        "file": "public/ui/cutins/locked-five/linxue-spray.webp",
+        "w": 1254,
+        "h": 657,
+        "source_sha256": "bfaf8f7233d75f0f2bbae3eb0fabd19b930325bfd160b1a8838120725eb7a477",
+        "runtime_sha256": "1c4d2ce06af9be076be8e1e931868f7afd1aee5e736ad5d3d50e2bdb66bb014f",
+        "crop_box": [
+          0,
+          597,
+          1254,
+          1254
+        ]
+      }
+    ],
+    "sheet": "assets/ui/cutins/locked-five/linxue-vfx-sheet.png",
+    "sheet_sha256": "134bdf9098bdd34c465ea315bfc6b44c73929da259e79a54cfff644870da366d",
+    "minor_name_border_overlap_accepted": true
+  }
+]

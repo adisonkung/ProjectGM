@@ -13,7 +13,7 @@ export interface UltimateCutinArt {
   nameWidth: string;
   nameHeight: string;
   nameSize: string;
-  /** Three source plates already contain the small gold name badge. */
+  /** Whether the source plate already contains the small gold name badge. */
   embeddedNameFrame: boolean;
   addTitleStars?: boolean;
   bakedText?: boolean;
@@ -27,24 +27,22 @@ const plate = (id: string, accent: string): UltimateCutinArt => ({
   titleSize: '3.5cqw', nameLeft: '53%', nameTop: '70%', nameWidth: '23%', nameHeight: '8.5%',
   nameSize: '2.1cqw', embeddedNameFrame: false,
 });
+/** Same approved Bai Long layout/animation, with hero-specific generated art and aura. */
+const lockedPlate = (id: string, accent: string, w: number, h: number): UltimateCutinArt => ({
+  ...plate(id, accent), file: `ui/cutins/locked-five/${id}.webp`, ratio: `${w} / ${h}`,
+  bakedText: true, embeddedNameFrame: true, stageWidth: '76vw', vfx: 'water',
+  layers: [`ui/cutins/locked-five/${id}-wake.webp`, `ui/cutins/locked-five/${id}-spray.webp`],
+});
 export const ULTIMATE_CUTINS: Readonly<Record<string, UltimateCutinArt>> = {
   bailong: { ...plate('bailong', '#8edfff'), file: 'ui/cutins/bailong-aura-italic.webp', ratio: '1899 / 828',
     bakedText: true, stageWidth: '76vw', vfx: 'water',
     layers: ['ui/cutins/bailong-water-wake.webp', 'ui/cutins/bailong-water-spray.webp'],
     left: '47%', top: '48.5%', width: '28%', titleSize: '4.3cqw',
     nameLeft: '49.2%', nameTop: '63.2%', nameWidth: '23.8%', nameHeight: '8.4%', embeddedNameFrame: true },
-  yuezheng: { ...plate('yuezheng', '#ffbd55'), ratio: '1920 / 819',
-    left: '49%', top: '51%', width: '29%', titleSize: '4.5cqw',
-    nameLeft: '53.5%', nameTop: '71%', nameWidth: '20%', nameHeight: '8%' },
-  moye: { ...plate('moye', '#ff5267'), ratio: '1927 / 816',
-    left: '46.2%', top: '49.5%', width: '29%', titleSize: '4.3cqw',
-    nameLeft: '51.4%', nameTop: '66.6%', nameWidth: '18.6%', nameHeight: '8.4%', embeddedNameFrame: true },
-  tangxun: { ...plate('tangxun', '#78e5ae'), ratio: '1940 / 810',
-    left: '47%', top: '53%', width: '31%', titleSize: '3.4cqw',
-    nameLeft: '52.5%', nameTop: '71%', nameWidth: '20%', nameHeight: '8%', addTitleStars: true },
-  linxue: { ...plate('linxue', '#ffb5cf'), ratio: '1885 / 834',
-    left: '49.5%', top: '49.5%', width: '25%', titleSize: '4.4cqw',
-    nameLeft: '52.9%', nameTop: '66.8%', nameWidth: '18.2%', nameHeight: '8%', embeddedNameFrame: true },
+  yuezheng: lockedPlate('yuezheng', '#ffbd55', 1899, 828),
+  moye: lockedPlate('moye', '#ff5267', 1899, 828),
+  tangxun: lockedPlate('tangxun', '#78e5ae', 1899, 828),
+  linxue: lockedPlate('linxue', '#ffb5cf', 1899, 828),
   garrick: { ...plate('garrick', '#e7c37a'), ratio: '1942 / 809',
     left: '46%', top: '47.5%', width: '30%', titleSize: '4cqw',
     nameLeft: '50%', nameTop: '63.5%', nameWidth: '22%', nameHeight: '8%' },
