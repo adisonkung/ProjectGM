@@ -10,6 +10,7 @@ import { Emitter, particleRng } from './particles';
 import { ClipRequest, UnitClip } from './unit-clip';
 import { frameChunk } from './tex-chunks';
 import { LOOK_COLORS, RING_BOX, UnitLook } from './unit-look';
+import { sheetFxNames } from './battle-assets';
 
 /** one unit to draw this frame (board pixels, already interpolated by the board's motion loop) */
 export interface PixiUnit {
@@ -284,13 +285,7 @@ export class PixiUnitLayer {
 
   /** a unit's skill FX textures start loading when the unit first appears (its first cast is not drawn by the DOM) */
   private preloadFx(def: SheetDef): void {
-    const names = [...(def.preloadFx ?? []), def.deathFx, ...Object.values(def.damageFx ?? {}),
-      ...Object.values(def.monsterFx ?? {}).flatMap(f => [...(f.cast ?? []), ...(f.activate ?? [])]),
-      ...Object.values(def.fx ?? {}).flat(), ...(def.attackFx ?? []), ...Object.values(def.projectile ?? {}).flat(),
-      ...Object.values(def.motionFx ?? {}).flatMap(f => [f.start, f.loop]),
-      ...Object.values(def.appliedStatusFx ?? {}), ...Object.values(def.statusFx ?? {}).flatMap(f => [f.start, f.loop]),
-      ...[def.fieldFx?.start, def.fieldFx?.loop, def.fieldFx?.end, def.fieldFx?.residual, def.fieldFx?.wave?.rain, def.fieldFx?.wave?.impact],
-      ...Object.values(def.sequenceFx ?? {}).flatMap(cues => cues.flatMap(cue => [...cue.names, ...Object.values(cue.variants ?? {}).flat(), ...(cue.outward?.trails ?? [])]))].filter((n): n is string => !!n);
+    const names = sheetFxNames(def);
     for (const n of names) {
       const d = FX[n];
       if (!d) continue;

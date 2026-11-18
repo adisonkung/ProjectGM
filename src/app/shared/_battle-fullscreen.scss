@@ -1,0 +1,169 @@
+// Full-screen fight + pre-battle loading screen + ultimate cut-in (user 2026-11-18).
+// Colours / motif follow the approved "Gilded Ember" direction: warm ink, champagne gold, burgundy, the four-point
+// sparkle + gold ring. The shared token file (shared/_gilded.scss) lives on the unmerged hero-detail branch, so the
+// values are mirrored here — switch to `@use 'gilded'` once that branch lands on master.
+$ink: #0f0b09;
+$ember-dark: #1e140e;
+$text: #fff8e6;
+$text-2: #cfc4b2;
+$gold-line: #e6c88a;
+$gold-bright: #f3dca4;
+$gold-pale: #fff1cf;
+$gold-deep: #8c622a;
+$burgundy: #8e2a2f;
+$spark-shape: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%);
+$gold-ring: conic-gradient(from 200deg, #6e4a1e, #fff8e6, #b98a45, #f3dca4, #6e4a1e);
+@mixin foil {
+  background: linear-gradient(180deg, #fff8e6 0%, #f3dca4 30%, #c99a52 58%, #8c622a 72%, #e9cc8c 88%, #fff1cf 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+@mixin label { font: 600 12px 'Cinzel', serif; letter-spacing: .22em; text-transform: uppercase; }
+
+// the window belongs to the fight: no page scroll, no rubber-band
+html.battle-full, html.battle-full body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+// app menu bar / mobile dock step aside; the battle host (an isolated stacking context) rises above the app chrome
+html.battle-full body .app > header.bar { visibility: hidden; .menu { visibility: hidden; } }
+html.battle-full body .app app-battle { z-index: 1000; }
+
+// ============================================================ full-screen field
+// (`.fighting.battle-full` outranks the older `.reference-battle` layout rules it replaces while fighting)
+html body .app app-battle .lab.fighting.battle-full {
+  position: fixed; inset: 0; z-index: 1000; display: block; width: 100vw; height: 100vh; height: 100dvh; max-width: none; margin: 0; padding: 0;
+  gap: 0; overflow: hidden; background: $ink;
+  // backdrop: the stage art blurred behind the field — fills any sky / side the board itself does not cover
+  &::before { content: ''; position: absolute; inset: -40px; background: var(--battle-scene, none) center bottom / cover no-repeat;
+    filter: blur(16px) brightness(.42) saturate(.85); pointer-events: none; }
+  > header, > .floors, > .status, > .sim, > .lab-simulation, .stage-dbg { display: none; }
+
+  .arena { position: absolute; inset: 0; display: block; }
+  .screen { position: absolute; inset: 0; display: flex; justify-content: center; align-items: flex-end; --foot: var(--battle-foot); --hud-h: 64px; isolation: isolate; }
+  .battle-field-frame, .lab-field-frame, .battle-party-frame { display: none; }
+  .arena app-board { flex: none; --cell: var(--battle-cell); width: calc(var(--battle-cell) * 16); }
+  .arena app-board .board { border: 0; border-radius: 0; box-shadow: none; }
+  // board narrower than the window (very wide screens): soften its side edges into the backdrop
+  .arena app-board::before, .arena app-board::after { content: none; }
+
+  // ---------------------------------------------------------- floating HUD (window corners, like a landscape phone game)
+  .hud-top { top: max(8px, env(safe-area-inset-top)); max-width: calc(100% - 360px); }
+  .hud-right { top: max(8px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
+  .focus-card { top: max(8px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); }
+  .wave-panel, .clock { box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .55), 0 6px 18px rgba(0, 0, 0, .5); }
+
+  // party dock: bottom centre over the ground strip, cards sized by --party-cell (capped on big screens)
+  .party-in {
+    --battle-cell: var(--party-cell); position: absolute; left: 50%; right: auto; bottom: max(4px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    width: min(calc(var(--party-cell) * 14.2), calc(100% - 16px)); max-width: none; z-index: 240;
+  }
+  app-party-bar .bar.compact { height: var(--battle-dock); background: none; box-shadow: none; }
+  .party-in::before { content: ''; position: absolute; inset: 18% -6% -10%; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse 60% 70% at 50% 100%, rgba(15, 11, 9, .82), rgba(15, 11, 9, 0) 72%); }
+
+  .overlay { position: fixed; inset: 0; }
+  .rotate-hint { z-index: 2100; }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  html body .app app-battle .lab.fighting.battle-full {
+    padding: 0;
+    .screen { --hud-h: 40px; }
+    .hud-top { top: max(3px, env(safe-area-inset-top)); max-width: calc(100% - 300px); }
+    .hud-right { top: max(3px, env(safe-area-inset-top)); right: max(6px, env(safe-area-inset-right)); }
+    .party-in { width: min(calc(var(--party-cell) * 14.5), calc(100% - 8px - env(safe-area-inset-left) - env(safe-area-inset-right))); bottom: max(2px, env(safe-area-inset-bottom)); }
+  }
+}
+
+// ============================================================ pre-battle loading screen
+html body .app app-battle .battle-loading {
+  position: fixed; inset: 0; z-index: 1700; overflow: hidden; background: $ink; color: $text;
+  display: grid; align-items: end; justify-items: center; animation: bl-in .28s ease-out both;
+  transition: opacity .42s ease, visibility 0s linear .42s;
+  &.leaving { opacity: 0; visibility: hidden; pointer-events: none; }
+  .bl-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%;
+    animation: bl-drift 6s ease-out both; }
+  .bl-shade { position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(15, 11, 9, .15) 0%, rgba(15, 11, 9, 0) 38%, rgba(15, 11, 9, .7) 70%, rgba(15, 11, 9, .96) 100%),
+      radial-gradient(ellipse 120% 90% at 50% 40%, rgba(15, 11, 9, 0) 55%, rgba(15, 11, 9, .6) 100%); }
+  // the one ornament motif: a slowly turning gold ring with a sparkle at its heart (top-right corner)
+  .bl-ring { position: absolute; top: max(22px, 4vh); right: max(24px, 3vw); width: 64px; height: 64px; border-radius: 50%;
+    background: $gold-ring; -webkit-mask: radial-gradient(circle, transparent 62%, #000 64%, #000 72%, transparent 74%);
+    mask: radial-gradient(circle, transparent 62%, #000 64%, #000 72%, transparent 74%); animation: bl-spin 2.4s linear infinite;
+    filter: drop-shadow(0 0 8px rgba(243, 220, 164, .55)); }
+  .bl-ring::after { content: ''; position: absolute; inset: 34%; background: $gold-pale; clip-path: $spark-shape; animation: bl-spin 2.4s linear infinite reverse; }
+  .bl-panel { position: relative; display: grid; justify-items: center; gap: 8px; width: min(620px, calc(100% - 48px)); padding-bottom: max(28px, 6vh); text-align: center; }
+  .bl-kicker { @include label; font-size: 14px; color: $gold-line; text-shadow: 0 2px 6px #000; }
+  .bl-title { font: 700 clamp(22px, 3.2vw, 38px)/1.25 'Cinzel', 'IBM Plex Sans Thai', serif; letter-spacing: .04em; @include foil;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .85)); }
+  .bl-bar { position: relative; width: 100%; height: 7px; margin-top: 6px; border-radius: 3px; background: rgba(255, 241, 207, .12);
+    box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .35); overflow: visible;
+    i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; transition: width .25s ease-out;
+      background: linear-gradient(90deg, $gold-deep, $gold-line 60%, $gold-pale); box-shadow: 0 0 10px rgba(243, 220, 164, .6); }
+    // sparkle riding the head of the bar
+    i::after { content: ''; position: absolute; right: -9px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%);
+      background: $gold-pale; clip-path: $spark-shape; filter: drop-shadow(0 0 4px #fff); }
+  }
+  .bl-state { font: 500 14px 'IBM Plex Sans Thai', system-ui, sans-serif; color: $text-2; text-shadow: 0 1px 4px #000;
+    em { font-style: normal; font-variant-numeric: tabular-nums; color: $gold-bright; margin-left: 6px; } }
+}
+@keyframes bl-in { from { opacity: 0; } }
+@keyframes bl-drift { from { transform: scale(1.08); } to { transform: scale(1); } }
+@keyframes bl-spin { to { transform: rotate(1turn); } }
+@media (orientation: landscape) and (max-height: 500px) {
+  html body .app app-battle .battle-loading {
+    .bl-panel { gap: 4px; padding-bottom: max(14px, env(safe-area-inset-bottom)); width: min(480px, calc(100% - 32px)); }
+    .bl-title { font-size: 22px; }
+    .bl-ring { top: 14px; right: max(16px, env(safe-area-inset-right)); width: 40px; height: 40px; }
+    .bl-state { font-size: 12px; }
+  }
+}
+
+// ============================================================ ultimate cut-in (top-left)
+html body .app app-battle .ult-cutin {
+  --ci-h: clamp(96px, 19vh, 168px);
+  position: fixed; z-index: 1300; left: 0; top: clamp(64px, 12.5vh, 118px); width: min(42vw, 600px); height: var(--ci-h); pointer-events: none;
+  animation: ci-life 1.5s cubic-bezier(.2, .8, .2, 1) both;
+  .ci-band { position: absolute; inset: 0; overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--ci-h) * .45) 100%, 0 100%);
+    background: linear-gradient(100deg, $ember-dark, $burgundy 120%);
+    box-shadow: inset 0 2px 0 $gold-line, inset 0 -2px 0 $gold-deep; }
+  .ci-band::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(90deg, rgba(15, 11, 9, 0) 30%, rgba(15, 11, 9, .35) 62%, rgba(15, 11, 9, .9) 100%); }
+  // gold edges of the slanted band
+  .ci-band::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: linear-gradient($gold-bright, $gold-bright) top / 100% 3px no-repeat, linear-gradient($gold-deep, $gold-line) bottom / 100% 3px no-repeat; }
+  img { position: absolute; left: 0; top: 50%; width: 100%; height: auto; min-height: 100%; transform: translateY(-38%); object-fit: cover;
+    animation: ci-pan 1.5s linear both; }
+  .ci-sheen { position: absolute; z-index: 3; top: 0; bottom: 0; left: -30%; width: 22%; transform: skewX(-24deg);
+    background: linear-gradient(90deg, rgba(255, 248, 230, 0), rgba(255, 248, 230, .55), rgba(255, 248, 230, 0)); animation: ci-sheen .9s .18s ease-out both; }
+  .ci-text { position: absolute; z-index: 4; right: calc(var(--ci-h) * .55); bottom: 12%; display: grid; justify-items: end; gap: 0; text-align: right;
+    max-width: 62%; animation: ci-text .5s .12s cubic-bezier(.2, .8, .2, 1) both; }
+  .ci-text small { @include label; font-size: 11px; color: $gold-line; text-shadow: 0 1px 3px #000; }
+  .ci-text b { font: 700 clamp(18px, 2.4vw, 30px)/1.2 'Cinzel', 'IBM Plex Sans Thai', serif; @include foil; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .9));
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .ci-text span { font: 500 13px 'IBM Plex Sans Thai', system-ui, sans-serif; color: $text-2; text-shadow: 0 1px 3px #000; }
+  .ci-spark { position: absolute; z-index: 5; width: 26px; height: 26px; background: $gold-pale; clip-path: $spark-shape;
+    filter: drop-shadow(0 0 6px #fff); animation: ci-spark .9s .2s ease-out both; }
+  .ci-spark.s1 { right: calc(var(--ci-h) * .42); top: -10px; }
+  .ci-spark.s2 { right: calc(var(--ci-h) * .45 + 46%); bottom: -9px; width: 16px; height: 16px; animation-delay: .32s; }
+}
+@keyframes ci-life {
+  0% { transform: translateX(-105%) skewX(-8deg); opacity: 0; }
+  14% { transform: translateX(0) skewX(0); opacity: 1; }
+  80% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-30%); opacity: 0; }
+}
+@keyframes ci-pan { from { transform: translateY(-38%) scale(1.12) translateX(3%); } to { transform: translateY(-38%) scale(1.02) translateX(-2%); } }
+@keyframes ci-sheen { to { left: 115%; } }
+@keyframes ci-text { from { opacity: 0; transform: translateX(28px); } }
+@keyframes ci-spark { 0% { transform: scale(0) rotate(0); opacity: 0; } 40% { transform: scale(1.2) rotate(45deg); opacity: 1; } 100% { transform: scale(.4) rotate(90deg); opacity: 0; } }
+@media (orientation: landscape) and (max-height: 500px) {
+  html body .app app-battle .ult-cutin { --ci-h: 78px; top: 38px; width: min(50vw, 420px);
+    .ci-text b { font-size: 18px; } .ci-text span { font-size: 11px; } }
+}
+
+// reduced motion: no slides, drifts or spins — the cut-in is shown briefly in place, the loader just fades
+@media (prefers-reduced-motion: reduce) {
+  html body .app app-battle .battle-loading { animation: none; transition: none;
+    .bl-art, .bl-ring, .bl-ring::after { animation: none; } }
+  html body .app app-battle .ult-cutin { animation: ci-still .9s linear both;
+    img, .ci-sheen, .ci-text, .ci-spark { animation: none; } .ci-sheen, .ci-spark { display: none; } }
+}
+@keyframes ci-still { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
