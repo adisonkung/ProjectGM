@@ -32,7 +32,7 @@ const UPGRADE_ERROR: Record<SkillUpgradeError, string> = {
   MAX_RANK: 'ระดับสูงสุดแล้ว', RANK_CAP: 'ติดเพดานระดับ — ต้อง Breakthrough', NEED_LEVEL: 'เลเวลไม่ถึง',
   NEED_BREAKTHROUGH: 'ต้อง Breakthrough ก่อน', NEED_MATERIALS: 'Skill Tome ไม่พอ', NEED_GOLD: 'ทองไม่พอ', NO_HERO: '',
 };
-type DetailTab = 'overview' | 'stats' | 'skills' | 'gear' | 'growth';
+type DetailTab = 'overview' | 'stats' | 'skills' | 'gear' | 'growth' | 'star';
 
 /** Latin display line above the Thai name (two-syllable wuxia names get a space). */
 const LATIN_NAME: Record<string, string> = { bailong: 'Bai Long', yuezheng: 'Yue Zheng', moye: 'Mo Ye', tangxun: 'Tang Xun', linxue: 'Lin Xue' };
@@ -72,26 +72,46 @@ export class HeroDetailComponent {
   });
   /** 4★ / 5★ / 6★ perks + visual evolution, reached or not */
   readonly starSteps = computed(() => [4, 5, 6].map(n => ({ n, perk: STAR_PERKS[n].label, visual: STAR_VISUAL[n].label, reached: this.star() >= n, gain: Math.round((starMultiplier(n) - 1) * 100) })));
-  /** growth tab constellation: six star nodes on an arc (x / y in % of the box) — lit, next or dim */
-  readonly constellation = computed(() => [1, 2, 3, 4, 5, 6].map(n => {
-    const t = (n - 1) / 5;
-    return { n, x: 6 + 88 * t, y: 78 - 240 * t * (1 - t), on: n <= this.star(), next: n === this.star() + 1 };
-  }));
-  /** lit / dim arc segments between consecutive nodes */
-  readonly constellationLinks = computed(() => this.constellation().slice(1).map((b, i) => {
-    const a = this.constellation()[i];
-    return { x1: a.x, y1: a.y, x2: b.x, y2: b.y, on: b.on };
-  }));
-  /** lit share of the constellation arc (path length 100) */
-  readonly arcLit = computed(() => Math.max(0, Math.min(100, (this.star() - 1) / 5 * 100)));
-  /** twinkling sparkles around the constellation: [left %, top %, size px, delay s] */
-  readonly twinkles = [[18, 18, 22, 0], [34, 4, 16, 1.1], [66, 4, 18, .5], [83, 20, 22, 1.7], [12, 52, 14, 2.3], [90, 50, 16, .8]];
+  // ---------------------------------------------------------------- Memory Mosaic (star tab, user concept 2026-11-18)
+  /** hub of the mosaic (% of the board) — the six shards fan around it */
+  readonly hub = { x: 46, y: 52 };
+  /** six shards of the hero's banner, one per star: perimeter runs clockwise from the left edge */
+  readonly shards = computed(() => {
+    const C = this.hub, star = this.star();
+    const edges: [number, number][][] = [
+      [[3, 80], [0, 9], [13, 3]], [[13, 3], [47, 0]], [[47, 0], [84, 4]],
+      [[84, 4], [99, 12], [100, 60]], [[100, 60], [93, 97], [67, 100]], [[67, 100], [8, 95], [3, 80]],
+    ];
+    const inner = ([x, y]: [number, number]): [number, number] => [C.x + (x - C.x) * .24, C.y + (y - C.y) * .24];
+    return edges.map((perim, i) => {
+      const poly = [inner(perim[0]), ...perim, inner(perim[perim.length - 1])];
+      const cx = poly.reduce((a, p) => a + p[0], 0) / poly.length, cy = poly.reduce((a, p) => a + p[1], 0) / poly.length;
+      const ox = (cx - C.x) * .07, oy = (cy - C.y) * .07;   // pieces pushed outward from the hub
+      const pts = poly.map(([x, y]) => [cx + (x - cx) * .93 + ox, cy + (y - cy) * .93 + oy]);   // gutter between shards
+      const n = i + 1;
+      return {
+        n, cx: cx + ox, cy: cy + oy, state: n <= star ? 'lit' : n === star + 1 ? 'next' : 'locked',
+        clip: `polygon(${pts.map(([x, y]) => `${x.toFixed(2)}% ${y.toFixed(2)}%`).join(', ')})`,
+        points: pts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' '),
+      };
+    });
+  });
+  readonly ordinal = (n: number) => ['FIRST', 'SECOND', 'THIRD', 'FOURTH', 'FIFTH', 'SIXTH'][n - 1] ?? '';
+  /** HP / ATK / DEF now vs after the next star */
+  readonly starDeltas = computed(() => {
+    const h = this.hero(), t = this.t();
+    if (!h || !t || this.star() >= MAX_STAR) return [];
+    const a = heroStats(t, h), b = heroStats(t, { ...h, star: this.star() + 1 });
+    const row = (label: string, icon: string, x: number, y: number) => ({ label, icon, cur: Math.round(x), next: Math.round(y), delta: Math.round(y) - Math.round(x) });
+    return [row('HP', 'base-stat-hp', a.hp, b.hp), row('ATK', 'base-stat-atk', a.atk, b.atk), row('DEF', 'base-stat-def', a.def, b.def)];
+  });
+  readonly universalIcon = GENERATED_ICONS['universal_memory'];
   /** the perk the next star unlocks (4★–6★), if any */
   readonly nextPerk = computed(() => STAR_PERKS[this.star() + 1]?.label ?? '');
   starUp(): void {
     const s = this.star();
-    const node = this.constellation()[s];   // the node that lights up
-    if (this.roster.starUp(this.uid())) { this.say(`อัปเป็น ${s + 1}★ แล้ว`); if (node) this.starFx.set({ key: Date.now(), x: node.x, y: node.y }); }
+    const shard = this.shards()[s];   // the shard that lights up
+    if (this.roster.starUp(this.uid())) { this.say(`อัปเป็น ${s + 1}★ แล้ว`); if (shard) this.starFx.set({ key: Date.now(), x: shard.cx, y: shard.cy }); }
     else this.say('Memory ไม่พอ', false);
   }
   /** Gilded Ember pack (public/ui/gilded): icons + one-shot VFX sheets */
@@ -154,10 +174,11 @@ export class HeroDetailComponent {
     { id: 'stats', label: 'ค่าสถานะ', icon: 'sword' },
     { id: 'skills', label: 'สกิล', icon: 'bolt' },
     { id: 'gear', label: 'อุปกรณ์', icon: 'armory' },
-    { id: 'growth', label: 'พัฒนา', icon: 'star' },
+    { id: 'growth', label: 'เลเวล', icon: 'crystal' },
+    { id: 'star', label: 'อัปดาว', icon: 'star' },
   ];
 
-  readonly numerals = ['I', 'II', 'III', 'IV', 'V'];
+  readonly numerals = ['I', 'II', 'III', 'IV', 'V', 'VI'];
   /** drifting embers over the key art: [left %, top %, delay s] */
   readonly motes = [[22, 70, 0], [34, 78, 1.4], [44, 64, 2.8], [27, 58, 4.1], [48, 82, 5.3]];
   readonly skillSel = signal(0);
