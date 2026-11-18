@@ -90,7 +90,7 @@ h1 { margin: 0; display: flex; flex-direction: column;
 // ---------------------------------------------------------------- panel content (floats on the scene)
 .panel { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; outline: none; padding: 10px 10px 10px 0; margin-right: -10px;
   scrollbar-width: thin; scrollbar-color: rgba(230, 200, 138, .45) transparent; }
-.block { display: flex; flex-direction: column; gap: 8px; > .btn-glass, > .btn-gold { align-self: flex-start; }
+.block { display: flex; flex-direction: column; gap: 8px; > .btn-glass, > .btn-gold:not(.wide) { align-self: flex-start; }
   > header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
     padding-bottom: 6px; border-bottom: 1px solid rgba(230, 200, 138, .22);
     h2 { margin: 0; display: flex; align-items: center; gap: 10px; font: 600 18px g.$font-body; color: g.$text;
@@ -108,7 +108,7 @@ table { width: 100%; border-collapse: collapse; font-size: 16px;
 .stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px;
   > div { display: flex; align-items: center; gap: 10px; height: 42px; border-bottom: 1px solid rgba(230, 200, 138, .12); font-size: 16px; color: g.$text-2;
     app-icon { color: g.$gold-line; } span { flex: 1; } b { font: 600 18px g.$font-body; color: g.$text; } } }
-.growth-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; > .block { gap: 10px; } }
+
 
 .basic-attack { display: flex; align-items: center; gap: 12px;
   .orb { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: g.$gold-bright; box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .5); background: rgba(24, 18, 13, .6); }
@@ -219,6 +219,6 @@ table { width: 100%; border-collapse: collapse; font-size: 16px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .art .ring, .art .mote, .star-medals .medal.next { animation: none; }
+  .art .ring, .art .mote { animation: none; }
   .art .mote { display: none; }
 }

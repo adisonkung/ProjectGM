@@ -71,6 +71,18 @@ export class HeroDetailComponent {
   });
   /** 4★ / 5★ / 6★ perks + visual evolution, reached or not */
   readonly starSteps = computed(() => [4, 5, 6].map(n => ({ n, perk: STAR_PERKS[n].label, visual: STAR_VISUAL[n].label, reached: this.star() >= n, gain: Math.round((starMultiplier(n) - 1) * 100) })));
+  /** growth tab constellation: six star nodes on an arc (x / y in % of the box) — lit, next or dim */
+  readonly constellation = computed(() => [1, 2, 3, 4, 5, 6].map(n => {
+    const t = (n - 1) / 5;
+    return { n, x: 6 + 88 * t, y: 78 - 240 * t * (1 - t), on: n <= this.star(), next: n === this.star() + 1 };
+  }));
+  /** lit / dim arc segments between consecutive nodes */
+  readonly constellationLinks = computed(() => this.constellation().slice(1).map((b, i) => {
+    const a = this.constellation()[i];
+    return { x1: a.x, y1: a.y, x2: b.x, y2: b.y, on: b.on };
+  }));
+  /** the perk the next star unlocks (4★–6★), if any */
+  readonly nextPerk = computed(() => STAR_PERKS[this.star() + 1]?.label ?? '');
   starUp(): void {
     const s = this.star();
     if (this.roster.starUp(this.uid())) this.say(`อัปเป็น ${s + 1}★ แล้ว`);

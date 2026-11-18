@@ -1,33 +1,39 @@
 @use './gilded' as g;
-// Hero detail — growth tab (stars, perks, item cards). Global (scoped to app-hero-detail) to keep the
-// component stylesheet under the production budget. Gilded Ember tokens only.
+// Hero detail — growth tab, design A "Constellation of Ascent" (user 2026-11-18). Global, scoped to
+// app-hero-detail, to keep the component stylesheet under the production budget. Gilded Ember tokens only.
 app-hero-detail {
-.growth-links { display: flex; flex-wrap: wrap; gap: 8px;
-  a { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 14px; border-radius: 999px; color: g.$gold-bright; font-size: 14px; text-decoration: none;
-    background: rgba(24, 18, 13, .5); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .3);
-    .st { @include g.spark(8px, g.$gold-line); } &:hover { color: g.$gold-pale; box-shadow: inset 0 0 0 1px g.$gold-bright; } &:focus-visible { outline: 2px solid g.$gold-pale; } } }
-// growth: star medals, next-star leap, perk timeline, item cards
-.star-medals { display: flex; gap: 8px; padding: 4px 0 2px;
-  .medal { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 17px; color: rgba(230, 200, 138, .28);
-    background: rgba(24, 18, 13, .55); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .25);
-    &.on { color: #3a2508; @include g.ring(0); background: radial-gradient(circle at 50% 35%, #fff8e6, #e0b871 55%, #9c6f32); box-shadow: 0 0 0 1px g.$gold-deep, 0 0 14px rgba(243, 220, 164, .55); }
-    &.next { color: g.$gold-bright; box-shadow: inset 0 0 0 1px g.$gold-bright, 0 0 12px rgba(243, 220, 164, .35); animation: breathe 2.4s ease-in-out infinite; } } }
-@keyframes breathe { 50% { box-shadow: inset 0 0 0 1px g.$gold-bright, 0 0 20px rgba(243, 220, 164, .6); } }
-.next-star { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; @include g.glass(.09);
-  .leap { display: flex; align-items: center; gap: 10px; b { font: 700 22px g.$font-label; color: g.$text-2; } .to { @include g.foil; font-size: 26px; } .st { @include g.spark(12px, g.$gold-bright); } }
-  .gain { font-size: 14px; color: #c9dcb5; } }
-.mem-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: g.$text-2; b { font: 600 16px g.$font-body; color: g.$text; small { color: g.$text-3; font-size: 12px; } } }
-.perks { margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; position: relative;
-  &::before { content: ''; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(rgba(230, 200, 138, .5), rgba(230, 200, 138, .1)); }
-  li { position: relative; display: flex; align-items: baseline; gap: 10px; font-size: 14px; color: g.$text-3; padding-left: 20px;
-    .st { position: absolute; left: 0; top: 4px; @include g.spark(11px, rgba(230, 200, 138, .35)); } b { font: 600 14px g.$font-label; color: g.$text-3; }
-    &.on { color: g.$text-body; .st { background: g.$gold-pale; filter: drop-shadow(0 0 5px g.$gold-bright); } b { color: g.$gold-bright; } } } }
-.item-cards { display: flex; flex-direction: column; gap: 8px; }
-.item-card { display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; @include g.glass(.07); color: #f0a28f;
-  .orb { position: relative; flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; color: g.$text;
-    background: radial-gradient(circle at 50% 35%, rgba(255, 236, 200, .16), rgba(24, 18, 13, .8)); box-shadow: 0 0 0 1px rgba(230, 200, 138, .55), 0 0 0 4px rgba(230, 200, 138, .08);
-    em { position: absolute; right: -6px; bottom: -4px; font: 600 11px g.$font-body; font-style: normal; color: g.$gold-pale; padding: 1px 6px; border-radius: 999px; background: #1a120c; box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .5); } }
-  .nm { flex: 1; font-size: 15px; color: g.$text-body; } b { font: 600 15px g.$font-body; }
-  .use { display: flex; gap: 6px; } &.ok { b { color: g.$gold-bright; } } }
-
+  .growth { display: flex; flex-direction: column; gap: 18px; }
+  .eyebrow { @include g.foil; @include g.label; font-size: 12px !important; letter-spacing: .24em; }
+  .constellation { position: relative; height: 150px; margin: 0 8px;
+    svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    line { stroke: rgba(230, 200, 138, .28); stroke-width: 2; &.on { stroke: g.$gold-bright; filter: drop-shadow(0 0 4px rgba(243, 220, 164, .7)); } }
+    .node { position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+      font-size: 20px; color: rgba(230, 200, 138, .38); background: rgba(24, 18, 13, .75); box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .35);
+      &.on { color: #3a2508; background: radial-gradient(circle at 50% 35%, #fff8e6, #e0b871 55%, #9c6f32); box-shadow: 0 0 0 1px g.$gold-deep, 0 0 18px rgba(243, 220, 164, .6); }
+      &.next { width: 62px; height: 62px; font-size: 28px; color: g.$gold-bright; box-shadow: inset 0 0 0 2px g.$gold-bright, 0 0 0 6px rgba(243, 220, 164, .15), 0 0 32px rgba(243, 220, 164, .55); animation: gd-breathe 2.4s ease-in-out infinite; }
+      em { position: absolute; top: 100%; margin-top: 6px; font: 600 12px g.$font-label; font-style: normal; letter-spacing: .2em; color: g.$gold-bright; } } }
+  .leap { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: -34px;
+    b { font: 700 26px g.$font-display; color: g.$text-2; } .to { @include g.foil; font-size: 40px; filter: drop-shadow(0 2px 14px rgba(243, 220, 164, .3)); }
+    .st { @include g.spark(14px, g.$gold-bright); } }
+  @keyframes gd-breathe { 50% { box-shadow: inset 0 0 0 2px g.$gold-bright, 0 0 0 8px rgba(243, 220, 164, .2), 0 0 44px rgba(243, 220, 164, .75); } }
+  .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;
+    > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; @include g.glass(.1); }
+    small { font-size: 14px; color: g.$text-2; } b { font: 600 24px g.$font-body; color: g.$text; line-height: 1.25; }
+    .up { color: #c9dcb5; } .perk { font-size: 16px; } }
+  .mem-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 15px; color: g.$text-2;
+    b { font: 600 18px g.$font-body; color: g.$text; small { color: g.$text-3; font-size: 14px; } } }
+  .growth .bar { height: 10px; border-radius: 999px; > i { border-radius: 999px; } }
+  .block > .btn-gold.wide { align-self: stretch; }
+  .centered { text-align: center; }
+  .grow > header { align-items: center; h2 small { color: g.$text-2; font: 500 16px g.$font-body; margin-left: 6px; } }
+  .item-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .item-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 10px; text-align: center; @include g.glass(.09); color: g.$text-body;
+    .orb { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; color: g.$text;
+      background: radial-gradient(circle at 50% 35%, rgba(255, 236, 200, .18), rgba(24, 18, 13, .85)); box-shadow: 0 0 0 1px rgba(230, 200, 138, .6), 0 0 0 5px rgba(230, 200, 138, .08); }
+    .nm { font: 600 15px g.$font-body; em { font-style: normal; color: g.$gold-bright; } } b { font: 600 16px g.$font-body; color: #f0a28f; }
+    .use { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    &.ok b { color: g.$gold-bright; }
+    &.more { justify-content: center; text-decoration: none; background: none; box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .22); color: g.$text-2; font-size: 14px;
+      b { color: g.$gold-bright; font-size: 22px; } &:hover { box-shadow: inset 0 0 0 1px g.$gold-bright; } &:focus-visible { outline: 2px solid g.$gold-pale; } } }
+  @media (prefers-reduced-motion: reduce) { .constellation .node.next { animation: none; } }
 }
