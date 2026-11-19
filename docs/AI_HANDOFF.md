@@ -2,6 +2,13 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## K7 home screen — Claude, 2026-11-19
+
+Branch `wip/claude-home-k7` from origin/master 40ab4bb. User picked mockup K7 (claude.ai canvas, Home K-series): banner-led home, black glass, champagne-gold hairlines, amber `#FFA830` for selection/emphasis. `/home` is now `pages/home/HomeComponent`; the Sky City/classic island moved unchanged to `/island` (IslandComponent, title เกาะลอยฟ้า). The app bar is hidden on `/home` only (`AppComponent.ownChrome`); `/island` keeps the immersive lobby chrome and 75 % `ui-zoom` (moved from /home). Home lays out on a 1600×900 board scaled to the window (`zoom` 0.55–1.2), so phone landscape 844×390 fits.
+- Top-left: square profile (account portrait, gold double frame + corner studs) + island name → /account. Top-right: glass wallet (real gems/gold), news, mail, settings (/account), round amber menu button (4-square icon) → panel: world-boss strip + 6 tiles (forge /forge, account /account real; events/missions/achievements/login mock).
+- Bottom-left: event banner carousel (auto 5 s, swipe, indicator). Bottom: 5-item menu (icon 42 px = Thai+English text height): heroes, team, armory, summon, Sky Isle. Bottom-right: Adventure card → /tower (real cleared/10), Arena (mock, coming soon), Daily dungeon → /dungeons/training (real remaining daily bonuses).
+- Background = main island hero banner, else first team hero with a banner. All mock content lives in `pages/home/home-mock.ts`; mock taps show a "เร็ว ๆ นี้" notice. No save/combat/economy changes. Rajdhani added to the Google Fonts link (English labels).
+
 ## Authorized master integration — Codex, 2026-11-19
 
 The user explicitly requested merging the completed `wip/codex-themed-ultimate-cutins` branch into master and pushing it. This authorization covers the branch's completed full-screen map/dock work and the fifteen-hero locked cut-in/VFX set; earlier checkpoint statements about waiting for review/no master merge are historical and superseded by this request. Remote master was verified as an ancestor of completed implementation tip846a821, with a clean working tree and no competing master commits, so integration can fast-forward while preserving every commit.

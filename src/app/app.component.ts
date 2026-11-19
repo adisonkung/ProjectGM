@@ -65,8 +65,10 @@ export class AppComponent {
   /** in a fight the mobile dock steps aside (the battle screen needs the height) */
   readonly fight = computed(() => /^\/(battle|lab)(\/|\?|$)/.test(this.url()));
   readonly onAccount = computed(() => this.url().startsWith('/account'));
-  /** Home and summon sanctum fill the locked screen; chrome floats above the scene */
-  readonly immersive = computed(() => /^\/(home|gacha)([?#]|$)/.test(this.url()));
+  /** Home, the Sky Isle and summon sanctum fill the locked screen; chrome floats above the scene */
+  readonly immersive = computed(() => /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
+  /** K7 home (2026-11-19) draws its own top bar + menu, so the app bar steps aside there */
+  readonly ownChrome = computed(() => /^\/home([?#]|$)/.test(this.url()));
 
   /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
   readonly forgePage = computed(() => /^\/forge([?#]|$)/.test(this.url()));
@@ -83,8 +85,8 @@ export class AppComponent {
     // start decoding the island art right away (the home screen is the island)
     inject(PreloadService).warmCity();
     effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive()));
-    // UI scale (user 2026-11-18): menu pages + Home render at 75 % on desktop (styles.scss `html.ui-zoom`).
-    // Summon cutscene and battle size themselves from the window, so only their top bar is scaled.
-    effect(() => document.documentElement.classList.toggle('ui-zoom', this.collection() || /^\/home([?#]|$)/.test(this.url())));
+    // UI scale (user 2026-11-18): menu pages + the Sky Isle render at 75 % on desktop (styles.scss `html.ui-zoom`).
+    // Summon cutscene, battle and the K7 home size themselves from the window.
+    effect(() => document.documentElement.classList.toggle('ui-zoom', this.collection() || /^\/island([?#]|$)/.test(this.url())));
   }
 }

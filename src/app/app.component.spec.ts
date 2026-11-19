@@ -14,7 +14,7 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }, { path: 'heroes/:uid', component: NavigationTestPage }, { path: 'account', component: NavigationTestPage }, { path: 'gacha', component: NavigationTestPage }, { path: 'tower', component: NavigationTestPage }, { path: 'dungeons/:type', component: NavigationTestPage }])],
+      providers: [provideRouter([{ path: 'home', component: NavigationTestPage }, { path: 'island', component: NavigationTestPage }, { path: 'heroes', component: NavigationTestPage }, { path: 'heroes/:uid', component: NavigationTestPage }, { path: 'account', component: NavigationTestPage }, { path: 'gacha', component: NavigationTestPage }, { path: 'tower', component: NavigationTestPage }, { path: 'dungeons/:type', component: NavigationTestPage }])],
     }).compileComponents();
   });
 
@@ -31,15 +31,20 @@ describe('AppComponent', () => {
     for (const p of ['/tower', '/dungeons', '/forge', '/armory', '/battle', '/lab']) expect(island.match).withContext(p).toContain(p);
   });
 
-  it('uses six destinations on Home, summon and collection pages, without exposing a floor-locked feature', async () => {
+  it('uses six destinations on summon and collection pages, without exposing a floor-locked feature', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     const router = TestBed.inject(Router);
     fixture.detectChanges();
     await router.navigateByUrl('/home');
     fixture.detectChanges();
     const links = () => [...(fixture.nativeElement as HTMLElement).querySelectorAll('nav a')].map(a => a.getAttribute('href'));
+    // K7 home (2026-11-19) draws its own top bar and menu: the app bar steps aside there
+    expect(fixture.componentInstance.ownChrome()).toBeTrue();
+    expect(links()).toEqual([]);
+    await router.navigateByUrl('/island');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.immersive()).toBeTrue();
     expect(links()).toEqual(['/home', '/heroes', '/team', '/armory', '/gacha', '/tower']);
-    expect(fixture.nativeElement.querySelector('nav a[aria-current="page"]').getAttribute('href')).toBe('/home');
     const buildingActions = ISLAND_BUILDINGS.flatMap(b => b.actions.map(a => ({ route: a.route, floor: actionUnlockFloor(b, a) })));
     for (const n of LOBBY_NAV.filter(n => !MAIN_NAV.some(core => core.path === n.path))) {
       expect(buildingActions.some(a => a.route === n.path && a.floor === 0)).withContext(n.path).toBeTrue();

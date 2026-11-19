@@ -1,8 +1,8 @@
 <a class="skip-link" href="#game-content">ข้ามไปเนื้อหา</a>
 <div class="app" [class.bare]="bare()" [class.fight]="fight()" [class.immersive]="immersive()" [class.fantasy]="fantasy()" [class.collection]="collection()" [class.forge-view]="forgePage()" [class.reference-home]="homeChrome()">
-  @if (!bare()) {
+  @if (!bare() && !ownChrome()) {
     <header class="bar">
-      <a class="brand" routerLink="/home" aria-label="Eldervane — กลับเกาะ">
+      <a class="brand" routerLink="/home" aria-label="Eldervane — กลับหน้าหลัก">
         <img class="brand-logo" src="/ui/branding/eldervane-wordmark-champagne.webp" alt="Eldervane" width="2023" height="456" decoding="async" fetchpriority="high" />
       </a>
 

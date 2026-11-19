@@ -1,0 +1,159 @@
+<div class="backdrop" aria-hidden="true">
+  <img [src]="background()" alt="" />
+  <i class="shade"></i><i class="scan"></i>
+</div>
+
+<div class="board" [style.width.px]="boardW()" [style.height.px]="boardH()" [style.zoom]="scale()">
+  <!-- profile + island name -->
+  <a class="profile" routerLink="/account" aria-label="บัญชีและรูปโปรไฟล์">
+    <span class="frame">
+      <i class="stud tl"></i><i class="stud tr"></i><i class="stud bl"></i><i class="stud br"></i>
+      <span class="well"><img [src]="account.portrait()" alt="รูปโปรไฟล์" /></span>
+    </span>
+    <span class="who">
+      <small><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path class="spark" d="M12 0c.6 6.2 5.8 11.4 12 12-6.2.6-11.4 5.8-12 12-.6-6.2-5.8-11.4-12-12C6.2 11.4 11.4 6.2 12 0z" /></svg>SKY ISLAND</small>
+      <b>{{ account.islandName() }}</b>
+      <i class="rule" aria-hidden="true"></i>
+    </span>
+  </a>
+
+  <!-- top right: currencies + news, mail, settings, menu -->
+  <div class="top-right">
+    <div class="glass wallet">
+      <span class="res" [attr.title]="'เพชร ' + gemsFull()" [attr.aria-label]="'เพชร ' + gemsFull()">
+        <svg class="gem" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z" /><path class="cut" d="M2 9h20M9 3l3 18 3-18" /></svg>{{ gems() }}
+        <button type="button" class="add" aria-label="เติมเพชร" (click)="soon()">+</button>
+      </span>
+      <i class="vr" aria-hidden="true"></i>
+      <span class="res" [attr.title]="'ทอง ' + goldFull()" [attr.aria-label]="'ทอง ' + goldFull()">
+        <i class="coin" aria-hidden="true"></i>{{ gold() }}
+        <button type="button" class="add" aria-label="เติมทอง" (click)="soon()">+</button>
+      </span>
+    </div>
+    <button type="button" class="rb" aria-label="ประกาศ" title="ประกาศ" (click)="soon()"><app-line-icon name="news" [size]="21" [weight]="1.4" /></button>
+    <button type="button" class="rb" aria-label="จดหมาย" title="จดหมาย" (click)="soon()"><app-line-icon name="mail" [size]="21" [weight]="1.4" /><span class="dot">{{ mail }}</span></button>
+    <a class="rb" routerLink="/account" aria-label="ตั้งค่า" title="ตั้งค่า"><app-line-icon name="settings" [size]="21" [weight]="1.4" /></a>
+    <button type="button" class="menu-btn" [class.open]="menuOpen()" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-controls="home-menu" [attr.aria-label]="menuOpen() ? 'ปิดเมนู' : 'เปิดเมนู'">
+      <app-line-icon [name]="menuOpen() ? 'close' : 'grid'" [size]="22" [weight]="1.6" />
+      @if (!menuOpen()) { <span class="dot">{{ menuBadge }}</span> }
+    </button>
+  </div>
+
+  <!-- event banner carousel (mock events) -->
+  <section class="events" aria-label="กิจกรรม" aria-roledescription="carousel">
+    <div class="slides">
+      @for (ev of events; track ev.title; let i = $index) {
+        <button type="button" class="slide" [class.on]="i === slide()" [attr.aria-hidden]="i !== slide()" [attr.tabindex]="i === slide() ? 0 : -1"
+                [attr.aria-label]="ev.title + ' · ' + ev.sub" (pointerdown)="swipeStart($event)" (pointerup)="swipeEnd($event, ev)" (keydown.enter)="open(ev.route)">
+          <img [src]="ev.banner" [style.object-position]="ev.pos" alt="" draggable="false" />
+          <i class="fade" aria-hidden="true"></i>
+          <span class="copy">
+            <small>{{ ev.tag }}</small>
+            <b>{{ ev.title }}</b>
+            <span class="sub">{{ ev.sub }}</span>
+            <span class="time">{{ ev.time }}</span>
+          </span>
+        </button>
+      }
+    </div>
+    <div class="dots">
+      <span class="num">{{ (slide() + 1).toString().padStart(2, '0') }}</span>
+      @for (ev of events; track ev.title; let i = $index) {
+        <button type="button" [class.on]="i === slide()" (click)="show(i)" [attr.aria-label]="'กิจกรรมที่ ' + (i + 1)" [attr.aria-current]="i === slide()"></button>
+      }
+      <span class="num">{{ events.length.toString().padStart(2, '0') }}</span>
+    </div>
+  </section>
+
+  <!-- main menu -->
+  <nav class="glass main-nav" aria-label="เมนูหลัก">
+    @for (n of nav; track n.path) {
+      <a class="mn" [routerLink]="n.path">
+        @if ((n.path === '/heroes' && readyCount()) || (n.path === '/island' && islandNews())) { <i class="badge" aria-hidden="true"></i> }
+        <app-line-icon [name]="n.icon" [size]="42" [weight]="1.2" />
+        <span><b>{{ n.th }}</b><small>{{ n.en }}</small></span>
+      </a>
+    }
+  </nav>
+
+  <!-- key functions -->
+  <div class="functions">
+    <a class="card adventure" routerLink="/tower" [attr.aria-label]="'ผจญภัย หอคอย ชั้น ' + nextFloor()">
+      <img class="bg" src="island/sky_city/thumb.webp" alt="" />
+      <i class="tint" aria-hidden="true"></i>
+      <i class="sweep" aria-hidden="true"></i>
+      @for (e of embers; track $index) { <i class="ember" aria-hidden="true" [style.left.px]="e.left" [style.animation-duration.s]="e.dur" [style.animation-delay.s]="e.delay"></i> }
+      <span class="emblem" aria-hidden="true">
+        <svg class="ring-a" viewBox="0 0 208 208"><circle cx="104" cy="104" r="96" class="thin" /><circle cx="104" cy="104" r="88" class="dash" />
+          @for (k of ticks; track k) { <line x1="104" y1="10" x2="104" [attr.y2]="k % 3 ? 22 : 30" [class.major]="k % 3 === 0" [attr.transform]="'rotate(' + k * 15 + ' 104 104)'" /> }
+        </svg>
+        <svg class="ring-b" viewBox="0 0 208 208"><circle cx="104" cy="104" r="62" class="disc" /><circle cx="104" cy="104" r="54" class="accent" /><path d="M104 46l9 49 49 9-49 9-9 49-9-49-49-9 49-9z" class="star" /></svg>
+        <svg class="core" viewBox="0 0 208 208"><defs><radialGradient id="home-core"><stop offset="0" stop-color="#FFF8E6" /><stop offset=".55" stop-color="#F3DCA4" /><stop offset="1" stop-color="#C99A52" /></radialGradient></defs>
+          <path d="M104 64c2 20 18 36 40 40-22 4-38 20-40 40-2-20-18-36-40-40 22-4 38-20 40-40z" fill="url(#home-core)" /><circle cx="104" cy="104" r="9" class="heart" /></svg>
+      </span>
+      <i class="fr" aria-hidden="true"></i><i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br bb"></i>
+      <span class="ghost" aria-hidden="true">ADVENTURE</span>
+      <span class="adv-copy">
+        <small><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path class="spark" d="M12 0c.6 6.2 5.8 11.4 12 12-6.2.6-11.4 5.8-12 12-.6-6.2-5.8-11.4-12-12C6.2 11.4 11.4 6.2 12 0z" /></svg>ADVENTURE</small>
+        <b>ผจญภัย</b>
+        <span class="floor">หอคอย · ชั้น {{ nextFloor() }}<em>{{ cleared() }} / {{ totalFloors }}</em></span>
+        <span class="rail" role="progressbar" aria-label="ชั้นหอคอยที่พิชิตแล้ว" aria-valuemin="0" [attr.aria-valuemax]="totalFloors" [attr.aria-valuenow]="cleared()"><i [style.width.%]="cleared() / totalFloors * 100"></i></span>
+        <span class="go">เข้าสู่หอคอย ›</span>
+      </span>
+    </a>
+    <div class="pair">
+      <button type="button" class="card tile-card" aria-label="ประลอง (เร็ว ๆ นี้)" (click)="soon()">
+        <img class="bg" src="banners/kael.webp" style="object-position: 55% 22%" alt="" />
+        <i class="tint" aria-hidden="true"></i>
+        <i class="fr" aria-hidden="true"></i><i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br bb"></i>
+        <span class="tc">
+          <span class="head"><span class="orb"><app-line-icon name="arena" [size]="18" [weight]="1.6" /></span><small>ARENA</small></span>
+          <b>ประลอง</b><span class="sub">ฤดูกาล 1 · เร็ว ๆ นี้</span>
+        </span>
+      </button>
+      <a class="card tile-card" routerLink="/dungeons/training" aria-label="ดันเจี้ยนรายวัน">
+        <img class="bg" src="banners/moye.webp" style="object-position: 50% 20%" alt="" />
+        <i class="tint" aria-hidden="true"></i>
+        <i class="fr" aria-hidden="true"></i><i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br bb"></i>
+        <span class="tc">
+          <span class="head"><span class="orb"><app-line-icon name="daily" [size]="18" [weight]="1.6" /></span><small>DAILY DUNGEON</small></span>
+          <b>ดันเจี้ยนรายวัน</b><span class="sub">โบนัสวันนี้ {{ dailyLeft() }}</span>
+        </span>
+        @if (dailyLeft()) { <span class="tag">{{ dailyLeft() }}</span> }
+      </a>
+    </div>
+  </div>
+
+  <!-- expanded menu -->
+  @if (menuOpen()) {
+    <div class="veil" (click)="closeMenu()" aria-hidden="true"></div>
+    <section id="home-menu" class="menu-panel" role="dialog" aria-modal="true" aria-label="เมนู" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+      <div class="panel-in">
+        <svg class="deco" viewBox="0 0 260 260" aria-hidden="true"><circle cx="130" cy="130" r="120" /><circle cx="130" cy="130" r="104" class="dash" /></svg>
+        <header>
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path class="spark" d="M12 0c.6 6.2 5.8 11.4 12 12-6.2.6-11.4 5.8-12 12-.6-6.2-5.8-11.4-12-12C6.2 11.4 11.4 6.2 12 0z" /></svg>
+          <small>MENU</small><h2>เมนู</h2><i aria-hidden="true"></i>
+        </header>
+        <button type="button" class="boss" (click)="soon()">
+          <i class="sweep" aria-hidden="true"></i>
+          <span class="orb"><app-line-icon name="boss" [size]="24" [weight]="1.4" /></span>
+          <span class="bc"><span><b>{{ boss.title }}</b><em>LIVE</em></span><small>WORLD BOSS · ENDS {{ boss.ends }}</small></span>
+          <span class="join">เข้าร่วม ›</span>
+        </button>
+        <div class="tiles">
+          @for (t of tiles; track t.th) {
+            <button type="button" class="tile" (click)="tile(t)">
+              @if (t.badge) { <span class="pill" [class.soft]="t.badge.includes('/')">{{ t.badge }}</span> }
+              @if (t.dot) { <i class="pill dot-only" aria-hidden="true"></i> }
+              <span class="ring"><app-line-icon [name]="t.icon" [size]="24" [weight]="1.4" /></span>
+              <b>{{ t.th }}</b><small>{{ t.en }}</small>
+            </button>
+          }
+        </div>
+        <footer aria-hidden="true"><i></i>ELDERVANE<i></i></footer>
+      </div>
+    </section>
+  }
+
+  @if (notice(); as n) { <div class="notice" role="status">{{ n }}</div> }
+</div>
