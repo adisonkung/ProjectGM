@@ -31,6 +31,8 @@ Native desktop and landscape phone captures and the K7 baseline comparisons are 
 
 Compass follow-up: translucent gray matte at the outer ring texture edges rotated with the metal and showed a rectangular edge. An annular CSS mask with four tip extensions confines the outer image to the ring and preserves the lock burst. The K7 review includes matched in-game frames at three rotation times on desktop and landscape phone.
 
+The user approved a fast-forward of `wip/codex-home-k7-art` into `master` on 2026-11-19, including the reviewed compass fix at `a175d55`.
+
 ## Authorized master integration — Codex, 2026-11-19
 
 The user explicitly requested merging the completed `wip/codex-themed-ultimate-cutins` branch into master and pushing it. This authorization covers the branch's completed full-screen map/dock work and the fifteen-hero locked cut-in/VFX set; earlier checkpoint statements about waiting for review/no master merge are historical and superseded by this request. Remote master was verified as an ancestor of completed implementation tip846a821, with a clean working tree and no competing master commits, so integration can fast-forward while preserving every commit.

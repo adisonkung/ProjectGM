@@ -8,9 +8,11 @@ Work branch `wip/codex-home-k7-art` starts from the merged K7 home at `origin/ma
 
 Hover, visible keyboard focus and touch play the decorative component layers. Arena impacts are scheduled at 180/500 ms, Adventure settles at 45°, and Daily lifts the portcullis by 60%. Touch mode starts the card plays 300 ms apart and activates small icons on pointerdown. Route clicks remain immediate. Reduced motion presents still poses. Missing art uses the existing line glyphs or background fallback. Changes are limited to Home presentation and art import.
 
-The [review](reviews/home-k7-art/README.md) contains actual game captures, videos and the checked-in K7 screenshots used as layout references. The earlier external K7 canvas was unavailable in this checkout. The branch is ready for visual review. Confirmed local/cloud synchronization metadata is unchanged.
+The [review](reviews/home-k7-art/README.md) contains actual game captures, videos and the checked-in K7 screenshots used as layout references. The earlier external K7 canvas was unavailable in this checkout. Confirmed local/cloud synchronization metadata is unchanged.
 
 Follow-up on the same K7 branch: the outer compass ring carried gray matte to the edge of its square texture. Its CSS mask now follows the metal ring and four tips while the burst renders above it. The [desktop](reviews/home-k7-art/compass/desktop-comparison.jpg) and [phone](reviews/home-k7-art/compass/phone-comparison.jpg) comparisons show the same three animation positions before and after.
+
+The user approved integrating the completed K7 branch into `master` on 2026-11-19. The fast-forward includes both the art and motion work and the compass fix at the reviewed implementation tip `a175d55`.
 
 ## K7 home screen — Claude, 2026-11-19
 
