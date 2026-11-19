@@ -10,6 +10,8 @@ Hover, visible keyboard focus and touch play the decorative component layers. Ar
 
 The [review](reviews/home-k7-art/README.md) contains actual game captures, videos and the checked-in K7 screenshots used as layout references. The earlier external K7 canvas was unavailable in this checkout. The branch is ready for visual review. Confirmed local/cloud synchronization metadata is unchanged.
 
+Follow-up on the same K7 branch: the outer compass ring carried gray matte to the edge of its square texture. Its CSS mask now follows the metal ring and four tips while the burst renders above it. The [desktop](reviews/home-k7-art/compass/desktop-comparison.jpg) and [phone](reviews/home-k7-art/compass/phone-comparison.jpg) comparisons show the same three animation positions before and after.
+
 ## K7 home screen — Claude, 2026-11-19
 
 Branch `wip/claude-home-k7` from origin/master 40ab4bb. User picked mockup K7 (claude.ai canvas, Home K-series): banner-led home, black glass, champagne-gold hairlines, amber `#FFA830` for selection/emphasis. `/home` is now `pages/home/HomeComponent`; the Sky City/classic island moved unchanged to `/island` (IslandComponent, title เกาะลอยฟ้า). The app bar is hidden on `/home` only (`AppComponent.ownChrome`); `/island` keeps the immersive lobby chrome and 75 % `ui-zoom` (moved from /home). Home lays out on a 1600×900 board scaled to the window (`zoom` 0.55–1.2), so phone landscape 844×390 fits.

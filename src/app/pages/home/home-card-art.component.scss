@@ -9,7 +9,16 @@
   &::before { content: ''; position: absolute; inset: 7%; z-index: -1; border-radius: 50%; background: radial-gradient(circle, #120c08e8, #130d09a0 60%, transparent 74%); }
   .outer, .inner { position: absolute; inset: 0; }
   .inner { inset: 19%; }
-  .outer img { animation: compass-turn 40s linear infinite; }
+  .outer img {
+    // Keep the metal and cardinal tips while hiding the matte at the texture edges.
+    mask-image:
+      radial-gradient(circle closest-side, transparent 76%, #000 78% 89%, transparent 92%),
+      radial-gradient(ellipse 2.5% 6% at 50% 6%, #000 42%, transparent 80%),
+      radial-gradient(ellipse 6% 2.5% at 94% 50%, #000 42%, transparent 80%),
+      radial-gradient(ellipse 2.5% 6% at 50% 94%, #000 42%, transparent 80%),
+      radial-gradient(ellipse 6% 2.5% at 6% 50%, #000 42%, transparent 80%);
+    animation: compass-turn 40s linear infinite;
+  }
   .inner img { animation: compass-turn 26s linear infinite reverse; }
   .needle { inset: 20%; width: 60%; height: 60%; transform: rotate(-16deg); transition: transform .3s; }
   .gem { width: 19%; height: 19%; top: 40.5%; left: 40.5%; }

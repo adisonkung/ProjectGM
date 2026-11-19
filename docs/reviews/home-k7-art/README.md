@@ -19,3 +19,12 @@ ImageGen สร้างภาพแยกตามคำอธิบายร�
 ต้นฉบับ PNG มี 40 ไฟล์และเก็บใน [assets/ui/home-k7](../../../assets/ui/home-k7) การส่งออก WebP ใช้ [import_home_k7.py](../../../tools/ui/import_home_k7.py) และแปลงพื้นดำของ VFX 4 แผ่นเป็น alpha
 
 Typecheck ของแอปและเทสต์ผ่านทั้งหมด Production build ผ่าน และ Karma ผ่าน 1,014 เทสต์ ผลตรวจจังหวะใน Chrome อยู่ใน [browser-report.json](browser-report.json)
+
+## แก้ขอบเงาที่เข็มทิศขณะหมุน
+
+วงแหวนเดิมมีพื้นเทาโปร่งติดไปถึงขอบสี่เหลี่ยมของภาพ จึงเห็นขอบนั้นหมุนตามวงทอง แก้ด้วยมาสก์ตามรูปวงแหวนและปลายประดับทั้งสี่จุด ภาพจากเกมด้านล่างจับจังหวะเดียวกันที่ 220, 480 และ 1,020 มิลลิวินาที ชุดภาพแรกเทียบกับเฟรมที่พบปัญหา ส่วนภาพบันทึก K7 ดั้งเดิมอยู่ในตารางด้านบน
+
+| จอ | เฟรมเดิม 220 ms | เฟรมแก้แล้ว 220 ms | เทียบสามจังหวะ | ภาพเกมเต็มจอหลังแก้ |
+|---|---|---|---|---|
+| เดสก์ท็อป 1440 × 860 | [ก่อนแก้](compass/desktop-before.png) | [หลังแก้](compass/desktop-after.png) | [คู่เทียบ](compass/desktop-comparison.jpg) | [เต็มจอ](compass/desktop-game.webp) |
+| มือถือแนวนอน 844 × 390 | [ก่อนแก้](compass/phone-before.png) | [หลังแก้](compass/phone-after.png) | [คู่เทียบ](compass/phone-comparison.jpg) | [เต็มจอ](compass/phone-game.png) |
