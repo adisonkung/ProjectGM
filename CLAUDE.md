@@ -16,6 +16,12 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Authorized master integration — Codex, 2026-11-19
+
+The user explicitly requested merging the completed `wip/codex-themed-ultimate-cutins` branch into master and pushing it. This authorization covers the branch's completed full-screen map/dock work and the fifteen-hero locked cut-in/VFX set; earlier checkpoint statements about waiting for review/no master merge are historical and superseded by this request. Remote master was verified as an ancestor of completed implementation tip846a821, with a clean working tree and no competing master commits, so integration can fast-forward while preserving every commit.
+
+No implementation changes were needed for integration. The completed code already passed app/spec typechecks and Karma1005/1005, with desktop/phone/reduced-motion source/game comparisons and native manual-cast clips in the three locked-cut-in review folders. Those results remain applicable to the unchanged implementation tree; this integration only updates the handoff notebooks. Deployment was not requested. Confirmed local/cloud synchronization-base metadata remains unchanged; query Git for current branch/tree and verify remote publication after push.
+
 ## Final five roster cut-ins — completed (Codex, 2026-11-19)
 
 User requested the next five after the completed ten. Current HEROES registry identifies Vaelric, Draeven, Mordrienne, Sylas and Lucien; these complete the shipped15. Imported isolated1899×828 plates using the locked Bai Long layout/font reference and canonical portraits, plus separate generated alpha aura/particle sheets. Themes: silver/crimson phantom wisps, blood dominion, emerald/charcoal curse ashes, teal dusk wind, and gold/crimson black-miracle light. Short name badges and actual kit ultimate names are baked into the plates; canonical names/skills and generated source IDs are recorded in `assets/ui/cutins/locked-final-five/manifest.json`. Runtime exports use `public/ui/cutins/locked-final-five/` and the existing exporter with --manifest. Correct titles: พิธีศพพันคมดาบ / อาณาจักรโลหิต / เรือนแห่งเถ้าธุลี / ประหารรัตติกาล / ปาฏิหาริย์ทมิฬ.
