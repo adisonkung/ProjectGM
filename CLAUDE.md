@@ -22,6 +22,7 @@ Branch `wip/claude-home-k7` from origin/master 40ab4bb. User picked mockup K7 (c
 - Top-left: square profile (account portrait, gold double frame + corner studs) + island name → /account. Top-right: glass wallet (real gems/gold), news, mail, settings (/account), round amber menu button (4-square icon) → panel: world-boss strip + 6 tiles (forge /forge, account /account real; events/missions/achievements/login mock).
 - Bottom-left: event banner carousel (auto 5 s, swipe, indicator). Bottom: 5-item menu (icon 42 px = Thai+English text height): heroes, team, armory, summon, Sky Isle. Bottom-right: Adventure card → /tower (real cleared/10), Arena (mock, coming soon), Daily dungeon → /dungeons/training (real remaining daily bonuses).
 - Background = main island hero banner, else first team hero with a banner. All mock content lives in `pages/home/home-mock.ts`; mock taps show a "เร็ว ๆ นี้" notice. No save/combat/economy changes. Rajdhani added to the Google Fonts link (English labels).
+- Art spec + hover choreography (user 2026-11-19, e.g. Arena swords clash twice then cross): `docs/art/HOME_K7_ART_SPEC.md` — layered static parts animated in code + black-background VFX sheets; sources go to `assets/ui/home-k7/` → `public/ui/home-k7/`. Waiting for the user's generated images.
 
 ## Authorized master integration — Codex, 2026-11-19
 
