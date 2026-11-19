@@ -2,6 +2,14 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## K7 home art and animation — Codex, 2026-11-19
+
+Work branch `wip/codex-home-k7-art` starts from the merged K7 home at `origin/master`. The user asked to carry out [the art spec](art/HOME_K7_ART_SPEC.md). ImageGen produced all 40 production PNGs for the right-hand cards, bottom dock and menu utilities, including four VFX sheets. Runtime files are in `public/ui/home-k7/`. Regenerate them from the tracked source pack with `python3 tools/ui/import_home_k7.py` (Pillow and NumPy).
+
+Hover, visible keyboard focus and touch play the decorative component layers. Arena impacts are scheduled at 180/500 ms, Adventure settles at 45°, and Daily lifts the portcullis by 60%. Touch mode starts the card plays 300 ms apart and activates small icons on pointerdown. Route clicks remain immediate. Reduced motion presents still poses. Missing art uses the existing line glyphs or background fallback. Changes are limited to Home presentation and art import.
+
+The [review](reviews/home-k7-art/README.md) contains actual game captures, videos and the checked-in K7 screenshots used as layout references. The earlier external K7 canvas was unavailable in this checkout. The branch is ready for visual review. Confirmed local/cloud synchronization metadata is unchanged.
+
 ## K7 home screen — Claude, 2026-11-19
 
 Branch `wip/claude-home-k7` from origin/master 40ab4bb. User picked mockup K7 (claude.ai canvas, Home K-series): banner-led home, black glass, champagne-gold hairlines, amber `#FFA830` for selection/emphasis. `/home` is now `pages/home/HomeComponent`; the Sky City/classic island moved unchanged to `/island` (IslandComponent, title เกาะลอยฟ้า). The app bar is hidden on `/home` only (`AppComponent.ownChrome`); `/island` keeps the immersive lobby chrome and 75 % `ui-zoom` (moved from /home). Home lays out on a 1600×900 board scaled to the window (`zoom` 0.55–1.2), so phone landscape 844×390 fits.

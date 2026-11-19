@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { Component } from '@angular/core';
 import { HomeComponent, HOME_NAV } from './home.component';
@@ -64,4 +64,57 @@ describe('HomeComponent (K7)', () => {
     expect(k).toBeGreaterThanOrEqual(0.55);
     expect(k).toBeLessThanOrEqual(1.2);
   });
+
+  it('plays both arena impacts on hover and removes the effects on exit', () => {
+    const matchMedia = window.matchMedia.bind(window);
+    spyOn(window, 'matchMedia').and.callFake(() => matchMedia('not all'));
+    const f = TestBed.createComponent(HomeComponent);
+    f.detectChanges();
+    const card = (f.nativeElement as HTMLElement).querySelector('.arena')!;
+    card.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    f.detectChanges();
+    expect(card.classList).toContain('art-active');
+    expect(card.querySelectorAll('app-sheet-fx.clash').length).toBe(2);
+    card.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }));
+    f.detectChanges();
+    expect(card.classList).not.toContain('art-active');
+    expect(card.querySelector('app-sheet-fx')).toBeNull();
+  });
+
+  it('starts the three touch intros 300 ms apart and plays a short icon press', fakeAsync(() => {
+    const matchMedia = window.matchMedia.bind(window);
+    spyOn(window, 'matchMedia').and.callFake(query => matchMedia(query.includes('pointer: coarse') ? 'all' : 'not all'));
+    const f = TestBed.createComponent(HomeComponent);
+    f.detectChanges();
+    const el = f.nativeElement as HTMLElement;
+    const activeCards = () => Array.from(el.querySelectorAll('.card.art-active'));
+    tick(240); f.detectChanges();
+    expect(activeCards()).toEqual([el.querySelector('.adventure')!]);
+    tick(300); f.detectChanges();
+    expect(activeCards().length).toBe(2);
+    tick(300); f.detectChanges();
+    expect(activeCards().length).toBe(3);
+
+    const icon = el.querySelector('.main-nav .mn')!;
+    icon.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch' }));
+    f.detectChanges();
+    expect(icon.classList).toContain('art-short');
+    expect(icon.classList).toContain('art-active');
+    tick(460); f.detectChanges();
+    expect(icon.classList).not.toContain('art-active');
+    f.destroy();
+  }));
+
+  it('skips hover, touch and intro effects under reduced motion', fakeAsync(() => {
+    const matchMedia = window.matchMedia.bind(window);
+    spyOn(window, 'matchMedia').and.callFake(() => matchMedia('all'));
+    const f = TestBed.createComponent(HomeComponent);
+    f.detectChanges();
+    const el = f.nativeElement as HTMLElement;
+    el.querySelector('.arena')!.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    el.querySelector('.arena')!.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch' }));
+    tick(1500); f.detectChanges();
+    expect(el.querySelector('.art-active, app-sheet-fx')).toBeNull();
+    f.destroy();
+  }));
 });

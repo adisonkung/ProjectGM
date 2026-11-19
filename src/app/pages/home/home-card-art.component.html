@@ -1,0 +1,58 @@
+@switch (card()) {
+  @case ('adventure') {
+    <span class="emblem compass">
+      @if (failed()) {
+        <app-line-icon name="summon" [size]="100" [weight]="0.7" />
+      } @else {
+        <span class="outer">
+          <img [src]="art + 'adv_ring_outer.webp'" alt="" (error)="failed.set(true)" />
+        </span>
+        <span class="inner">
+          <img [src]="art + 'adv_ring_inner.webp'" alt="" (error)="failed.set(true)" />
+        </span>
+        <img class="needle" [src]="art + 'adv_needle.webp'" alt="" (error)="failed.set(true)" />
+        <img class="gem" [src]="art + 'adv_core.webp'" alt="" />
+        @if (active()) {
+          <app-sheet-fx class="compass-fx" [src]="art + 'fx_compass_burst.webp'" [delayMs]="900" [fps]="32" />
+        }
+      }
+    </span>
+  }
+  @case ('arena') {
+    @if (!failed()) {
+      <span class="emblem swords">
+        <img class="glow" [src]="art + 'arena_emblem_glow.webp'" alt="" />
+        <span class="sword left">
+          <img [src]="art + 'arena_sword_left.webp'" alt="" (error)="failed.set(true)" />
+        </span>
+        <span class="sword right">
+          <img [src]="art + 'arena_sword_right.webp'" alt="" (error)="failed.set(true)" />
+        </span>
+        @if (active()) {
+          <app-sheet-fx class="clash first" [src]="art + 'fx_clash_spark.webp'" [delayMs]="180" [fps]="44" />
+          <app-sheet-fx class="clash second" [src]="art + 'fx_clash_spark.webp'" [delayMs]="500" [fps]="44" />
+        }
+      </span>
+    }
+  }
+  @case ('daily') {
+    @if (!failed()) {
+      <span class="emblem gate">
+        <span class="opening">
+          <img class="light" [src]="art + 'daily_gate_light.webp'" alt="" />
+          <img class="bars" [src]="art + 'daily_gate_bars.webp'" alt="" (error)="failed.set(true)" />
+          @if (active()) {
+            @for (x of dust; track x; let i = $index) {
+              <i class="dust" [style.left.%]="x" [style.animation-delay.ms]="80 + i * 56"></i>
+            }
+          }
+        </span>
+        <img class="arch" [src]="art + 'daily_gate_arch.webp'" alt="" (error)="failed.set(true)" />
+        @if (active()) {
+          <app-sheet-fx class="torch left" [src]="art + 'fx_torch_loop.webp'" [rows]="2" [frames]="8" [fps]="15" [loop]="[0, 7]" />
+          <app-sheet-fx class="torch right" [src]="art + 'fx_torch_loop.webp'" [rows]="2" [frames]="8" [fps]="15" [loop]="[0, 7]" [delayMs]="120" />
+        }
+      </span>
+    }
+  }
+}

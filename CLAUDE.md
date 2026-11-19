@@ -23,6 +23,12 @@ Branch `wip/claude-home-k7` from origin/master 40ab4bb. User picked mockup K7 (c
 - Bottom-left: event banner carousel (auto 5 s, swipe, indicator). Bottom: 5-item menu (icon 42 px = Thai+English text height): heroes, team, armory, summon, Sky Isle. Bottom-right: Adventure card → /tower (real cleared/10), Arena (mock, coming soon), Daily dungeon → /dungeons/training (real remaining daily bonuses).
 - Background = main island hero banner, else first team hero with a banner. All mock content lives in `pages/home/home-mock.ts`; mock taps show a "เร็ว ๆ นี้" notice. No save/combat/economy changes. Rajdhani added to the Google Fonts link (English labels).
 
+### K7 layered art and motion (2026-11-19, Codex)
+
+All 40 files from [HOME_K7_ART_SPEC.md](docs/art/HOME_K7_ART_SPEC.md) are staged as independent PNG masters in `assets/ui/home-k7/`. `python3 tools/ui/import_home_k7.py` exports the WebP runtime pack, including four black-to-alpha sheets. `HomeCardArtComponent` composes the compass, two swords and gate, and `HomeIconComponent` composes the dock, utility, menu and boss art. The existing `SheetFxComponent` plays the bursts and torch loop. `HomeMotionDirective` activates decorative layers on hover, visible keyboard focus and touch. The coarse-pointer intro staggers the three cards by 300 ms. `prefers-reduced-motion` uses final still poses. Missing primary icon art returns to the line glyph, and missing card backgrounds return to the previous image.
+
+Native desktop and landscape phone captures and the K7 baseline comparisons are in [docs/reviews/home-k7-art](docs/reviews/home-k7-art/README.md). The authored card and control bounds, live save-derived values and click destinations continue to come from the original K7 page.
+
 ## Authorized master integration — Codex, 2026-11-19
 
 The user explicitly requested merging the completed `wip/codex-themed-ultimate-cutins` branch into master and pushing it. This authorization covers the branch's completed full-screen map/dock work and the fifteen-hero locked cut-in/VFX set; earlier checkpoint statements about waiting for review/no master merge are historical and superseded by this request. Remote master was verified as an ancestor of completed implementation tip846a821, with a clean working tree and no competing master commits, so integration can fast-forward while preserving every commit.

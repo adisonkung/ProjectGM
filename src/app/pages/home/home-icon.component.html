@@ -1,0 +1,41 @@
+@let base = primary();
+<span [class]="'icon ' + name()" [class.active]="active()" [class.short]="short()">
+  @if (name() === 'grid') {
+    <span class="squares">
+      @for (corner of squares; track corner) { <i [class]="corner"></i> }
+    </span>
+  } @else if (base) {
+    <span class="layer primary">
+      <img [src]="base" alt="" (error)="markMissing(base)" />
+      @if (lightSweep()) {
+        <i class="glint" [style.mask-image]="'url(' + base + ')'"></i>
+      }
+      @if (name() === 'event' || name() === 'boss') { <i class="light"></i> }
+      @if (name() === 'login') { <i class="page"></i> }
+    </span>
+    @if (secondary(); as part) {
+      <span class="layer secondary">
+        <img [src]="part" alt="" (error)="markMissing(part)" />
+      </span>
+    }
+    @if (active()) {
+      @switch (name()) {
+        @case ('gear') {
+          <app-sheet-fx class="spark" [src]="spark" [delayMs]="short() ? 96 : 155" [fps]="54" />
+          <app-sheet-fx class="spark" [src]="spark" [delayMs]="short() ? 248 : 400" [fps]="54" />
+        }
+        @case ('forge') {
+          <app-sheet-fx class="spark" [src]="spark" [delayMs]="short() ? 133 : 215" [fps]="51" />
+        }
+        @case ('summon') {
+          <app-sheet-fx class="spark" [src]="spark" [delayMs]="short() ? 80 : 150" [fps]="34" />
+        }
+        @case ('news') {
+          <i class="wave one"></i><i class="wave two"></i>
+        }
+      }
+    }
+  } @else {
+    <app-line-icon [name]="name()" [size]="size() * .8" [weight]="1.4" />
+  }
+</span>

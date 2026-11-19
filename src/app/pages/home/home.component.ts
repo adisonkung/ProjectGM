@@ -11,6 +11,9 @@ import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
 import { formatCurrency } from '../../shared/format-currency';
 import { HOME_EVENTS, HomeEvent, MENU_TILES, MenuTile, MOCK_MAIL, WORLD_BOSS } from './home-mock';
+import { HomeCardArtComponent } from './home-card-art.component';
+import { HomeIconComponent } from './home-icon.component';
+import { HomeMotionDirective } from './home-motion.directive';
 import { LineIconComponent } from './line-icon.component';
 
 /** layout is authored on a 1600 × 900 board and scaled to the window (landscape only) */
@@ -30,7 +33,7 @@ export const HOME_NAV = [
  */
 @Component({
   selector: 'app-home',
-  imports: [A11yModule, RouterLink, LineIconComponent],
+  imports: [A11yModule, RouterLink, LineIconComponent, HomeCardArtComponent, HomeIconComponent, HomeMotionDirective],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -137,7 +140,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   readonly embers = Array.from({ length: 12 }, (_, k) => ({ left: (k * 53) % 420, dur: 3.2 + (k % 4) * 0.7, delay: (k * 0.61) % 3 }));
-  readonly ticks = Array.from({ length: 24 }, (_, k) => k);
+
+  useCardFallback(event: Event, fallback: string): void {
+    const image = event.target as HTMLImageElement;
+    if (image.getAttribute('src') === fallback) return;
+    image.classList.add('fallback');
+    image.src = fallback;
+  }
 
   ngOnInit(): void {
     this.fit();

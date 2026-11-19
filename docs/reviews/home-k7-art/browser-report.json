@@ -1,0 +1,50 @@
+{
+  "desktop": {
+    "size": {
+      "width": 1440,
+      "height": 860
+    },
+    "compassLockDegrees": 45,
+    "arenaImpactsMs": [
+      180,
+      500
+    ],
+    "gateLift": -0.5993870588235294,
+    "hovers": {
+      "cards": 3,
+      "navigation": 5,
+      "topRight": 4,
+      "menu": 7
+    }
+  },
+  "phone": {
+    "size": {
+      "width": 844,
+      "height": 390
+    },
+    "starts": [
+      {
+        "key": "adventure",
+        "at": 1168.8999999985099
+      },
+      {
+        "key": "arena",
+        "at": 1466.2999999970198
+      },
+      {
+        "key": "daily",
+        "at": 1768.199999999255
+      }
+    ],
+    "tapArenaPlayed": true,
+    "tapDailyReached": "/dungeons/training"
+  },
+  "reducedMotion": {
+    "stillSwordsDegrees": 41,
+    "sheetEffects": 0
+  },
+  "missingArt": {
+    "navFallback": "line icon",
+    "cardFallback": "hero banner"
+  }
+}
