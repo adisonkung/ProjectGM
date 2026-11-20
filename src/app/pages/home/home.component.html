@@ -176,7 +176,7 @@
           </button>
           @for (o of ownedBanners(); track o.id) {
             <button type="button" class="bn" role="radio" [attr.aria-checked]="account.bannerId() === o.id" [class.on]="account.bannerId() === o.id" (click)="pickBanner(o.id)">
-              <span class="thumb"><img [src]="o.banner" alt="" loading="lazy" />@if (o.video) { <i class="live">▶ LIVE</i> }</span>
+              <span class="thumb"><img [src]="o.banner" alt="" loading="lazy" /></span>
               <b>{{ o.name }}</b>
             </button>
           }

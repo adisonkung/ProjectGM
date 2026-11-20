@@ -197,8 +197,7 @@ a { text-decoration: none; }
   box-shadow: inset 0 0 0 1px rgba(230,200,138,.18); transition: box-shadow .2s, background .2s;
   .thumb { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 3px; background: #0C0C0E; }
   img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 18%; display: block; }
-  .live, .auto-mark { position: absolute; font-style: normal; }
-  .live { right: 6px; top: 6px; padding: 1px 6px; border-radius: 3px; font: 700 10px $tech; letter-spacing: .12em; color: #fff; background: $red; }
+  .auto-mark { position: absolute; font-style: normal; }
   .auto-mark { inset: 0; display: grid; place-items: center; color: $gold-hi; background: rgba(8,8,10,.55); }
   b { font: 600 15px $thai; color: #F7EEDC; } small { margin-top: -4px; font-size: 11px; color: #A6A29B; }
   &:hover { background: rgba($acc, .1); }
