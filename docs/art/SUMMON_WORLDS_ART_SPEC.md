@@ -28,13 +28,26 @@
 
 ### Prompt หลัก
 
-ดาว / ชิ้นส่วน (ใส่หน้าทุก prompt):
+ดาว / โลก (ใส่หน้าทุก prompt ของ B–C):
 
 ```
-premium fantasy gacha game art, painterly high-detail rendering, cinematic lighting,
-a single complete sphere planet centered, isolated on transparent background,
-no text, no glow halo around the planet, no stars around it
+stylized fantasy game art of a small magical world-orb, hand-painted illustration,
+like a world icon on a gacha game summon screen,
+the orb is a miniature living world with oversized landmarks that break its round silhouette,
+clean readable shapes, rich saturated colors, soft painterly shading, glowing magical accents,
+one single orb centered, isolated on plain black background
 ```
+
+ใส่ท้ายทุก prompt (ห้าม):
+
+```
+NOT photorealistic, not a NASA photo, no realistic Earth continents, no satellite cloud texture,
+no Saturn rings, no other planets, no text, no labels, no glow halo around the orb
+```
+
+> **ทำไม (รอบแรกออกมาเหมือนภาพถ่ายโลกจริง):** คำว่า `planet` / `sphere` ทำให้ AI วาดดาวแบบภาพถ่ายดาราศาสตร์ ให้เรียกว่า **world-orb / miniature world** แทน แล้วบังคับให้มี **สิ่งก่อสร้างขนาดใหญ่เกินจริงที่ยื่นออกนอกขอบวงกลม** (ยอดเขา ปราสาท มังกร) ซึ่งเป็นสิ่งที่ทำให้ภาพอ่านออกว่าเป็นแฟนตาซีทันที
+> - gen ทีละดวง ทีละไฟล์ ห้ามรวมหลายดวงในภาพเดียว และห้ามมีชื่อในภาพ
+> - gen **เอลเดอร์เวย์นก่อน** แล้วแนบเป็น style reference ตอน gen ดวงอื่น (`same art style as the reference image`) ทุกดวงจะได้เข้าชุดกัน
 
 VFX:
 
@@ -59,7 +72,7 @@ no text, no grid lines, no numbers
 
 | ชื่อไฟล์ | ขนาด | prompt เพิ่ม |
 |---|---|---|
-| `eldervane_world.png` | 2048 × 2048 | `the world of Eldervane: a sphere wrapped in a sea of sunset clouds, a floating sky city with white stone towers and golden roofs rising from the clouds near the top, warm dusk light, champagne-gold atmosphere rim` |
+| `eldervane_world.png` | 2048 × 2048 | `the world of Eldervane: the orb is covered by a sea of golden sunset clouds, a grand floating sky city of white stone towers with golden spires rises from the top and sticks out above the orb, small floating islands with waterfalls drift close around it, warm champagne-gold light` |
 | `eldervane_rune_ring.png` | 2048 × 2048 | `a thin flat ring of glowing golden runes and engraved circles, seen straight from above, perfectly circular, empty transparent center, transparent background` (โค้ดจะเอียงและหมุนให้เป็นวงรอบดาว) |
 
 ### C. โลกที่โคจรรอบเอลเดอร์เวย์น
@@ -70,10 +83,10 @@ no text, no grid lines, no numbers
 
 | ชื่อไฟล์ | ขนาด | โลก (ชั่วคราว) | ฮีโร่ | สีประจำ | prompt เพิ่ม |
 |---|---|---|---|---|---|
-| `world_wulin.png` | 1024 × 1024 | แผ่นดินยุทธภพหยก · THE JADE WULIN | ไป๋หลง · เยว่เจิ้ง · โม่เย่ · ถังซวิ่น · หลินเสวี่ย | หยก + แดงชาด | `an eastern wuxia world: jade-green mountains piercing the clouds, misty valleys, tiny red pagodas and a white dragon-shaped river, jade and vermilion tones` |
-| `world_crown.png` | 1024 × 1024 | อาณาจักรมงกุฎทอง · THE GOLDEN CROWNLANDS | การ์ริก · เคล · มิเรลล์ · ซิลวารา · เอลิรา | ฟ้าใส + ทอง | `a classic western fantasy kingdom world: green meadows, stone castles with blue banners, a frosted mountain range at one pole and a deep emerald forest, bright daylight blue and gold tones` |
-| `world_dusk.png` | 1024 × 1024 | ดินแดนสนธยาทมิฬ · THE DUSKBLIGHT | เวลริค · เดรเวน · มอร์เดรียนน์ · ไซลัส · ลูเซียน | แดงเลือด + เขียวคำสาป + ดำ | `a dark fantasy world under eternal dusk: black gothic cathedrals, blood-red rivers, ashen forests with faint emerald curse light, charcoal and crimson tones` |
-| `world_veiled.png` | 1024 × 1024 | โลกที่ยังไม่ปรากฏ (เผื่อทีมใหม่ในอนาคต) | — | เทาเงิน | `an unknown world completely shrouded in swirling silver mist, only faint shapes visible beneath, mysterious, desaturated` (โค้ดย้อมสีแล้วใช้ซ้ำ 2–3 ดวง เพื่อให้วงโคจรดูเต็ม) |
+| `world_wulin.png` | 1024 × 1024 | แผ่นดินยุทธภพหยก · THE JADE WULIN | ไป๋หลง · เยว่เจิ้ง · โม่เย่ · ถังซวิ่น · หลินเสวี่ย | หยก + แดงชาด | `an eastern wuxia world: jade-green mountain peaks so tall they stick out past the orb's edge, a white dragon coiling around the orb, red pagodas on the peaks, misty waterfalls, jade and vermilion palette` |
+| `world_crown.png` | 1024 × 1024 | อาณาจักรมงกุฎทอง · THE GOLDEN CROWNLANDS | การ์ริก · เคล · มิเรลล์ · ซิลวารา · เอลิรา | ฟ้าใส + ทอง | `a classic western fantasy kingdom world: a golden-roofed castle with blue banners stands on top of the orb, rolling green meadows, a waterfall pouring off the orb's edge into space, a frosted mountain on one side and a deep emerald forest on the other, bright sky blue and gold palette` |
+| `world_dusk.png` | 1024 × 1024 | ดินแดนสนธยาทมิฬ · THE DUSKBLIGHT | เวลริค · เดรเวน · มอร์เดรียนน์ · ไซลัส · ลูเซียน | แดงเลือด + เขียวคำสาป + ดำ | `a dark fantasy world under eternal dusk: black gothic cathedral spires pierce out of the orb, thorny black vines wrap around it, rivers of glowing crimson, faint emerald curse fog, a small blood-red moon beside it, charcoal and crimson palette` |
+| `world_veiled.png` | 1024 × 1024 | โลกที่ยังไม่ปรากฏ (เผื่อทีมใหม่ในอนาคต) | — | เทาเงิน | `an unknown world wrapped in swirling silver mist and faint glowing runes, the silhouette of hidden towers barely visible inside, mysterious, desaturated silver-blue` (โค้ดย้อมสีแล้วใช้ซ้ำ 2–3 ดวง เพื่อให้วงโคจรดูเต็ม) |
 
 ### D. VFX ของชุด 1
 
