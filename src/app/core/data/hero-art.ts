@@ -14,6 +14,9 @@ export interface HeroArt {
   bannerMirror?: boolean;
   /** looping animated banner (muted MP4); `banner` stays the still / poster for reduced motion and small previews */
   bannerVideo?: string;
+  /** full-screen banner pushed down by this % of the box (top-anchored, never crops the head; the gap above is a
+   *  blurred copy that fades in) — for art whose head sits right at the top edge */
+  bannerDrop?: number;
 }
 
 const art = (id: string): HeroArt => ({
@@ -63,7 +66,7 @@ export const HERO_ART: Record<string, HeroArt> = {
   // เคล: ภาพจากผู้ใช้ 2026-10 (art/incoming/kael/art, ไม่ commit) → webp 288 / 160 / แบนเนอร์ 1400 กว้าง
   // Animated banner (user knight_idle_loop_smooth.mp4, 2026-11-20): original kept in assets/ui/banner-video-2026-11-20,
   // runtime = 1600 px H.264 loop; the still banner is its first frame.
-  kael: { ...art('kael'), banner: 'banners/kael.webp', bannerVideo: 'banners/kael.mp4' },
+  kael: { ...art('kael'), banner: 'banners/kael.webp', bannerVideo: 'banners/kael.mp4', bannerDrop: 8 },
 };
 
 export const heroArt = (heroId?: string): HeroArt | undefined => (heroId ? HERO_ART[heroId] : undefined);

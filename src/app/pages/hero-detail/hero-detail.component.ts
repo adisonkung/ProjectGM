@@ -150,6 +150,10 @@ export class HeroDetailComponent {
   readonly banner = computed(() => heroArt(this.t()?.id)?.banner);
   /** key art whose hero stands right of centre is mirrored so the info column never covers them */
   readonly bannerMirror = computed(() => !!heroArt(this.t()?.id)?.bannerMirror);
+  readonly bannerDrop = computed(() => heroArt(this.t()?.id)?.bannerDrop ?? 0);
+  private readonly reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /** looping animated banner (muted); reduced motion keeps the still */
+  readonly bannerVideo = computed(() => (this.reducedMotion ? undefined : heroArt(this.t()?.id)?.bannerVideo));
   readonly portrait = computed(() => heroArt(this.t()?.id)?.portrait);
   readonly attack = computed(() => { const t = this.t(); return t ? kitOf(t.id, t.cls).attack : null; });
   readonly tab = signal<DetailTab>(inject(ActivatedRoute).snapshot?.queryParamMap?.get('tab') === 'skills' ? 'skills' : 'overview');

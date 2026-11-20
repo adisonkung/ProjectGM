@@ -88,6 +88,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     return id !== 'auto' && this.ownedBanners().some(o => o.id === id) ? id : this.autoBanner();
   });
   readonly background = computed(() => heroArt(this.bannerHero())?.banner ?? 'banners/kael.webp');
+  readonly bannerDrop = computed(() => heroArt(this.bannerHero())?.bannerDrop ?? 0);
   readonly reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   /** looping animated banner (muted) — none under reduced motion, the still is its poster */
   readonly backgroundVideo = computed(() => (this.reducedMotion ? undefined : heroArt(this.bannerHero())?.bannerVideo));

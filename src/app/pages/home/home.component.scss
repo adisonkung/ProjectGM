@@ -7,7 +7,9 @@ $thai: 'IBM Plex Sans Thai', sans-serif;
 
 :host { position: fixed; inset: 0; z-index: 0; display: block; overflow: hidden; background: #0c0c0e; color: #F7F1E6; font-family: $thai; }
 
-.backdrop { position: absolute; inset: 0;
+.backdrop { position: absolute; inset: 0; overflow: hidden;
+  &.dropped > :is(img:not(.haze), video) { top: var(--drop); object-position: 45% 0%; -webkit-mask-image: linear-gradient(180deg, transparent, #000 10%); mask-image: linear-gradient(180deg, transparent, #000 10%); }
+  .haze { filter: blur(26px) brightness(.75); transform: scale(1.15); }
   :is(img, video) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 45% 18%; filter: contrast(1.06) saturate(.92); }
   .shade { position: absolute; inset: 0; background:
     linear-gradient(180deg, rgba(8,8,10,.55) 0%, rgba(8,8,10,0) 14%, rgba(8,8,10,0) 58%, rgba(8,8,10,.88) 100%),

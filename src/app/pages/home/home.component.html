@@ -1,4 +1,5 @@
-<div class="backdrop" aria-hidden="true">
+<div class="backdrop" aria-hidden="true" [class.dropped]="bannerDrop()" [style.--drop.%]="bannerDrop()">
+  @if (bannerDrop()) { <img class="haze" [src]="background()" alt="" /> }
   @if (backgroundVideo(); as v) {
     <video [src]="v" [poster]="background()" [muted]="true" autoplay loop playsinline disablepictureinpicture preload="auto"></video>
   } @else {

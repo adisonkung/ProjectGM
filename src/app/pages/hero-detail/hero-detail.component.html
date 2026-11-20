@@ -9,7 +9,14 @@
       <circle cx="300" cy="300" r="210" fill="none" stroke="#e6c88a" stroke-opacity=".25" />
       <path d="M300 4 L308 22 L300 40 L292 22Z M300 560 L308 578 L300 596 L292 578Z M4 300 L22 292 L40 300 L22 308Z M560 300 L578 292 L596 300 L578 308Z" fill="#e6c88a" />
     </svg>
-    @if (banner(); as bn) { <img class="key" [class.mirror]="bannerMirror()" [src]="bn" [alt]="tp.name" fetchpriority="high" /> }
+    @if (banner(); as bn) {
+      @if (bannerDrop()) { <img class="haze" [src]="bn" alt="" /> }
+      @if (bannerVideo(); as v) {
+        <video class="key" [class.mirror]="bannerMirror()" [class.dropped]="bannerDrop()" [style.--drop.%]="bannerDrop()" [src]="v" [poster]="bn" [muted]="true" autoplay loop playsinline disablepictureinpicture></video>
+      } @else {
+        <img class="key" [class.mirror]="bannerMirror()" [class.dropped]="bannerDrop()" [style.--drop.%]="bannerDrop()" [src]="bn" [alt]="tp.name" fetchpriority="high" />
+      }
+    }
     @else { <div class="fallback"><app-hero-portrait [heroId]="tp.id" [star]="star()" [size]="300" /></div> }
     <div class="scrim"></div>
     @for (m of motes; track m) { <i class="mote" [style.left.%]="m[0]" [style.top.%]="m[1]" [style.animation-delay.s]="m[2]"></i> }
