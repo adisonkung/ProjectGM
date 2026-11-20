@@ -1,12 +1,12 @@
 import { summonCardBack } from './summon-card-art';
+import { SummonAltarComponent } from './summon-altar.component';
+import { SUMMON_TIMING } from './summon-cinematic';
 import { SummonFlightComponent } from './summon-flight.component';
-import { SummonVfxComponent } from './summon-vfx.component';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, input, OnDestroy, output, signal, viewChild } from '@angular/core';
 import { heroArt } from '../../core/data/hero-art';
 import { PullResult } from '../../core/rules/stars';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
-import { SummonSanctumComponent } from './summon-sanctum.component';
 
 export type SummonPull = PullResult & { name: string; cls: string };
 type Phase = 'charge' | 'burst' | 'cards' | 'spotlight' | 'out';
@@ -14,7 +14,7 @@ type Phase = 'charge' | 'burst' | 'cards' | 'spotlight' | 'out';
 /** Presentation of a committed transaction. Skipping / revealing never rolls or spends again. */
 @Component({
   selector: 'app-summon-scene',
-  imports: [SummonFlightComponent, SummonVfxComponent, TowerOrnamentComponent, HeroPortraitComponent, SummonSanctumComponent],
+  imports: [SummonAltarComponent, SummonFlightComponent, TowerOrnamentComponent, HeroPortraitComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './summon-scene.component.html',
   styleUrl: './summon-scene.component.scss',
@@ -27,10 +27,11 @@ export class SummonSceneComponent implements AfterViewInit, OnDestroy {
   readonly index = signal(-1);
   readonly opened = signal<ReadonlySet<number>>(new Set());
   readonly grand = computed(() => this.results().some(r => r.star >= 3));
+  readonly timing = computed(() => this.grand() ? SUMMON_TIMING.grand : SUMMON_TIMING.ordinary);
+  readonly opening = computed(() => this.phase() === 'charge' || this.phase() === 'burst');
   readonly current = computed(() => this.results()[this.index()] ?? null);
   readonly banner = computed(() => heroArt(this.current()?.templateId ?? '')?.banner);
   readonly remaining = computed(() => this.results().length - this.opened().size);
-  readonly motes = Array.from({ length: 26 }, (_, i) => ({ x: (i * 37) % 100, delay: -(i % 7) * .4, duration: 2 + (i % 5) * .4 }));
   readonly cardBack = summonCardBack;
   readonly flightStars = computed(() => this.results().map(r => r.star));
   private timers: ReturnType<typeof setTimeout>[] = [];
@@ -41,8 +42,9 @@ export class SummonSceneComponent implements AfterViewInit, OnDestroy {
     this.stage().nativeElement.showModal();
     this.motion.addEventListener('change', this.onMotion);
     if (this.motion.matches) { this.showCards(); return; }
-    this.at(this.grand() ? 2600 : 550, () => this.phase.set('burst'));
-    this.at(this.grand() ? 5200 : 2050, () => this.showCards());
+    const { charge, burst } = this.timing();
+    this.at(charge, () => this.phase.set('burst'));
+    this.at(charge + burst, () => this.showCards());
   }
   ngOnDestroy(): void {
     this.clearTimers();

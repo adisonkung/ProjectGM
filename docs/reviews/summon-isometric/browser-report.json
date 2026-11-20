@@ -1,0 +1,44 @@
+{
+  "desktop": {
+    "width": 1440,
+    "height": 860,
+    "pulls": 10,
+    "origin": {
+      "dx": -0.01,
+      "dy": -0.01,
+      "flightL": 700.13,
+      "flightT": 458.8,
+      "lightX": 700.13,
+      "lightY": 458.8
+    },
+    "confirmedOneTransaction": true,
+    "openedOneThenAll": true,
+    "assetErrors": []
+  },
+  "landscape": {
+    "width": 844,
+    "height": 390,
+    "pulls": 10,
+    "origin": {
+      "dx": -0.01,
+      "dy": -0.01,
+      "flightL": 411.02,
+      "flightT": 210.91,
+      "lightX": 411.02,
+      "lightY": 210.91
+    },
+    "confirmedOneTransaction": true,
+    "openedOneThenAll": true,
+    "assetErrors": []
+  },
+  "single": {
+    "pulls": 1,
+    "reducedMotion": false,
+    "skipShowsCommittedResult": true
+  },
+  "reduced": {
+    "pulls": 1,
+    "reducedMotion": true,
+    "skipShowsCommittedResult": true
+  }
+}

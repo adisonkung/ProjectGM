@@ -2,6 +2,10 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Isometric summon opening — Codex, 2026-11-20
+
+Work branch `wip/codex-isometric-summon` begins at the shared K7 base. The user asked for a premium, fluid summon opening. Built an elevated night-time altar with a camera push, local projected light and the existing articulated cards lifting from the engraved center. Both the lighting and card flight use the same responsive coordinates. Existing committed-pull outcomes, rate disclosure, hero art, skip, reduced motion and reveal controls remain in place. Production source and the browser review are linked from [the review](reviews/summon-isometric/README.md). Confirmed local/cloud synchronization metadata is unchanged.
+
 ## K7 home art and animation — Codex, 2026-11-19
 
 Work branch `wip/codex-home-k7-art` starts from the merged K7 home at `origin/master`. The user asked to carry out [the art spec](art/HOME_K7_ART_SPEC.md). ImageGen produced all 40 production PNGs for the right-hand cards, bottom dock and menu utilities, including four VFX sheets. Runtime files are in `public/ui/home-k7/`. Regenerate them from the tracked source pack with `python3 tools/ui/import_home_k7.py` (Pillow and NumPy).

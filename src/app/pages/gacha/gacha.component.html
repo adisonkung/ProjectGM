@@ -1,3 +1,4 @@
+<link rel="preload" as="image" href="/ui/summon-isometric-altar.webp" fetchpriority="low" />
 <section class="gate" [class.summoning]="playing()" aria-label="วิหารอัญเชิญ">
   <app-summon-sanctum [paused]="playing()" [showFloatingCards]="false" />
   @if (showcase) { <div class="summon-showcase" aria-hidden="true"><img [src]="showcase" alt="" decoding="async" /></div> }

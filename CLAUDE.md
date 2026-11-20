@@ -511,6 +511,10 @@ User supplied `1000004528.jpg` and requested the character detail UI. `feature/c
 
 ## Summon sanctum reference UI (2026-10-19, Codex)
 
+### Isometric opening (2026-11-20, Codex)
+
+The committed-pull modal uses a bespoke evening altar from `public/ui/summon-isometric-altar.webp`. `SummonAltarComponent` anchors its light and the existing articulated cards to the same painted center on both axes. Charge/release times are shared through `summon-cinematic.ts` (3,400 ms for a result with 3★ and 2,100 ms otherwise). The modal softens the same backdrop for the sealed cards and hero spotlight; the idle Sanctum retains its own rendered stage. The existing confirmation, save transaction, reveal actions and skip flow own all results. See [summon review](docs/reviews/summon-isometric/README.md).
+
 `feature/codex-summon-sanctum` continues published hero-detail/lobby `b0ff2af` above fresh master `455de5b`. User-supplied static hall/card JPEGs are copied unchanged to `public/ui/summon-{sanctum,card}.jpg`; runtime CSS clips the card exterior. `/gacha` now shares Home's immersive six-item chrome. Fixed hall, independent bobbing cards and a capped-DPR/30fps gold-light canvas; hidden/reduced-motion cleanup. Reference-like side menu, lower-left real roster portraits and lower-right actual pity/rates/x1/x10. Native dialogs for roster/Memory/rates/results, with existing summon cinematic/services. Costs, pity, fallback-tier behaviour and duplicate rules stay unchanged, and rates explain the all-3★ current roster. No fabricated rate-up/history/currencies. Mobile uses a centred crop of the supplied landscape art with scrollable UI; no portrait image generated. App/spec checks,717/717 Karma/build and native eight-size/motion/dialog/transaction checks pass (size warnings retained). See `docs/SUMMON_SANCTUM_UI.md` for scope, provenance and validation. Old SVG-hall descriptions above apply to the retained summon cinematic, not this idle scene. Publish this task branch only; no master merge or canonical-local sync claim.
 
 ### Summon energy visual refinement (2026-10-19, Codex)
