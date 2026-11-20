@@ -16,9 +16,9 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
-## Summon opening "Heroes from Other Worlds" — art spec (2026-11-20, Claude)
+## Summon opening "Book of Heroes · Sky Sanctuary" — art spec (2026-11-20, Claude)
 
-User-approved animatic v4 (claude.ai artifact, procedural mock art): SC01 Eldervane world with orbiting worlds looping until a floating "แตะเพื่ออัญเชิญ" text (no button art) → SC02 gold threads → SC03 answering world gold aura burst → SC04 rune-gate warp into Eldervane → sky rift (white; 3★ = second tear bursting gold/rainbow) → comets become cards (3★ = light rainbow shimmer only) → ×1 3★ hero steps from a light pillar → splash. One world per hero team (names provisional). Image list, prompts, timing and delivery order: [docs/art/SUMMON_WORLDS_ART_SPEC.md](docs/art/SUMMON_WORLDS_ART_SPEC.md). Spec only; no game code yet. Codex's isometric altar summon work is separate and unmerged.
+User picked a single neutral summon motif (like a meteor / train in other games): an ancient book on a white marble altar in a floating sky sanctuary (bright fantasy, no dark pillared hall). Approved animatic (claude.ai artifact, procedural mock art): wide shot → push in on the closed book lying on the right half of the altar (spine fixed, no glow before the tap) → floating "แตะเพื่ออัญเชิญ" text on the cover → black-hole charge (light pulled in, slow zoom, building shake) → burst blows the cover open to the left → pages flip in the wind → small lines of ancient glyphs write themselves in glowing ink (white-blue; 3★ ink turns gold mid-writing) → light lifts off the glyphs into a pillar → cut to a low angle → orbs become cards (3★ = light shimmer only). Book art is requested as flat textures that code wraps into a 3D book; glyphs come as a design sheet that Claude redraws as vector strokes. Spec: [docs/art/SUMMON_BOOK_ART_SPEC.md](docs/art/SUMMON_BOOK_ART_SPEC.md) (supersedes the orbiting-worlds spec). Spec only; no game code yet. Codex's isometric altar summon work is separate and unmerged.
 
 ## K7 home screen (2026-11-19, Claude)
 
