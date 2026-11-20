@@ -22,7 +22,7 @@ describe('Kael (3★ Fighter, base sheet + kit)', () => {
     expect(HERO_BY_ID['kael']).toEqual(jasmine.objectContaining({ name: 'เคล', cls: 'fighter', star: 3, sprite: 'hero-kael.png' }));
     expect(HERO_ART['kael']).toEqual({
       portrait: 'portraits/kael.webp', s1: 'skills/kael-s1.webp', s2: 'skills/kael-s2.webp', ult: 'skills/kael-ult.webp',
-      banner: 'banners/kael.webp',
+      banner: 'banners/kael.webp', bannerVideo: 'banners/kael.mp4',
     });
   });
 

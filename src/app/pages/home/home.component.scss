@@ -8,7 +8,7 @@ $thai: 'IBM Plex Sans Thai', sans-serif;
 :host { position: fixed; inset: 0; z-index: 0; display: block; overflow: hidden; background: #0c0c0e; color: #F7F1E6; font-family: $thai; }
 
 .backdrop { position: absolute; inset: 0;
-  img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 45% 18%; filter: contrast(1.06) saturate(.92); }
+  :is(img, video) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 45% 18%; filter: contrast(1.06) saturate(.92); }
   .shade { position: absolute; inset: 0; background:
     linear-gradient(180deg, rgba(8,8,10,.55) 0%, rgba(8,8,10,0) 14%, rgba(8,8,10,0) 58%, rgba(8,8,10,.88) 100%),
     linear-gradient(270deg, rgba(8,8,10,.6), rgba(8,8,10,0) 32%),
@@ -157,7 +157,7 @@ a { text-decoration: none; }
   -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
 .deco { position: absolute; right: -90px; top: -90px; width: 260px; height: 260px; opacity: .35; animation: spin 60s linear infinite;
   circle { fill: none; stroke: $gold; } .dash { stroke-dasharray: 2 7; } }
-.menu-panel header { position: relative; display: flex; align-items: center; gap: 12px;
+:is(.menu-panel, .banner-panel) header { position: relative; display: flex; align-items: center; gap: 12px;
   small { font: 700 14px $tech; letter-spacing: .42em; color: $gold; }
   h2 { margin: 0; font: 600 20px $thai; color: #FFF6E6; }
   i { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(230,200,138,.5), rgba(230,200,138,0)); } }
@@ -186,6 +186,22 @@ a { text-decoration: none; }
 .menu-panel footer { position: relative; display: flex; align-items: center; gap: 10px; margin-top: 16px; font: 600 12px $tech; letter-spacing: .2em; color: #8C7D64;
   i { flex: 1; height: 1px; background: rgba(230,200,138,.2); } }
 
+// ---------------------------------------------------------------- banner picker
+.banner-panel { position: absolute; z-index: 25; right: 32px; top: 100px; width: 640px; padding: 1px; border-radius: 10px; animation: drop .22s ease-out;
+  background: linear-gradient(160deg, $cream, #C99A52 25%, rgba(140,98,42,.35) 50%, #C99A52 78%, $cream); box-shadow: 0 24px 60px rgba(0,0,0,.7);
+  .x { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: $cream; box-shadow: inset 0 0 0 1px rgba(230,200,138,.4); &:hover { color: $acc-hi; } } }
+.banners { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; max-height: 560px; overflow-y: auto; padding: 4px; }
+.bn { display: flex; flex-direction: column; gap: 6px; padding: 6px 6px 8px; border-radius: 6px; background: rgba(255,241,207,.03);
+  box-shadow: inset 0 0 0 1px rgba(230,200,138,.18); transition: box-shadow .2s, background .2s;
+  .thumb { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 3px; background: #0C0C0E; }
+  img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 18%; display: block; }
+  .live, .auto-mark { position: absolute; font-style: normal; }
+  .live { right: 6px; top: 6px; padding: 1px 6px; border-radius: 3px; font: 700 10px $tech; letter-spacing: .12em; color: #fff; background: $red; }
+  .auto-mark { inset: 0; display: grid; place-items: center; color: $gold-hi; background: rgba(8,8,10,.55); }
+  b { font: 600 15px $thai; color: #F7EEDC; } small { margin-top: -4px; font-size: 11px; color: #A6A29B; }
+  &:hover { background: rgba($acc, .1); }
+  &.on { background: rgba($acc, .18); box-shadow: inset 0 0 0 1.5px $acc, 0 0 18px rgba($acc, .3); b { color: $acc-hi; } } }
+
 .notice { position: absolute; z-index: 40; left: 50%; top: 110px; transform: translateX(-50%); padding: 10px 22px; border-radius: 6px; font: 600 15px $thai; color: $cream;
   background: rgba(10,10,12,.88); box-shadow: inset 0 0 0 1px rgba($acc, .7), 0 10px 26px rgba(0,0,0,.6); animation: fade .2s; }
 
@@ -197,7 +213,7 @@ a { text-decoration: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .sweep, .ember { display: none; }
-  .deco, .veil, .menu-panel, .notice { animation: none; }
+  .deco, .veil, .menu-panel, .banner-panel, .notice { animation: none; }
   .slide, .card, .card .bg, .rb, .mn, .tile, .tile .ring, .dots button { transition: none; }
   .card:is(.art-active, :focus-visible), .card:is(.art-active, :focus-visible) .bg { transform: none; }
 }

@@ -3,6 +3,13 @@ import { provideRouter, Router } from '@angular/router';
 import { Component } from '@angular/core';
 import { HomeComponent, HOME_NAV } from './home.component';
 import { HOME_EVENTS } from './home-mock';
+import { SaveService } from '../../core/services/save.service';
+
+/** the test roster is the legacy fixture → give the save three shipped heroes with banner art */
+function ownShipped(): void {
+  const save = TestBed.inject(SaveService);
+  save.update(s => ({ ...s, heroes: [...s.heroes, ...['bailong', 'kael', 'moye'].map((templateId, k) => ({ ...s.heroes[0], uid: 9000 + k, templateId }))] }));
+}
 
 @Component({ template: '' })
 class StubPage {}
@@ -117,4 +124,41 @@ describe('HomeComponent (K7)', () => {
     expect(el.querySelector('.art-active, app-sheet-fx')).toBeNull();
     f.destroy();
   }));
+  it('banner picker: top-right icon opens it, choice persists, cosmetics kept, Escape closes', () => {
+    ownShipped();
+    const f = TestBed.createComponent(HomeComponent); f.detectChanges();
+    const el = f.nativeElement as HTMLElement, c = f.componentInstance;
+    const acct = c.account;
+    acct.setFrame('wuxia');
+    (el.querySelector('.top-right button[aria-label="เปลี่ยนแบนเนอร์"]') as HTMLButtonElement).click(); f.detectChanges();
+    expect(el.querySelector('.banner-panel')).not.toBeNull();
+    const owned = c.ownedBanners();
+    expect(owned.length).toBeGreaterThan(1);
+    const pick = owned.find(o => o.id !== c.bannerHero())!;
+    const btn = [...el.querySelectorAll('.banner-panel .bn')].find(b => b.textContent!.includes(pick.name)) as HTMLButtonElement;
+    btn.click(); f.detectChanges();
+    expect(c.bannerHero()).toBe(pick.id);
+    expect(c.background()).toBe(pick.banner);
+    expect(acct.frame()).toBe('wuxia');
+    expect(TestBed.inject(SaveService).state().profile?.banner).toBe(pick.id);
+    c.pickBanner('auto'); f.detectChanges();
+    expect(acct.bannerId()).toBe('auto');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); f.detectChanges();
+    expect(el.querySelector('.banner-panel')).toBeNull();
+  });
+
+  it('Kael banner plays as a looping muted video; other heroes stay still images', () => {
+    ownShipped();
+    const f = TestBed.createComponent(HomeComponent); f.detectChanges();
+    const c = f.componentInstance;
+    c.pickBanner('kael'); f.detectChanges();
+    const v = (f.nativeElement as HTMLElement).querySelector('.backdrop video') as HTMLVideoElement | null;
+    if (c.reducedMotion) { expect(v).toBeNull(); return; }
+    expect(v).not.toBeNull();
+    expect(v!.getAttribute('src')).toBe('banners/kael.mp4');
+    expect(v!.muted && v!.loop).toBeTrue();
+    const other = c.ownedBanners().find(o => !o.video)!;
+    c.pickBanner(other.id); f.detectChanges();
+    expect((f.nativeElement as HTMLElement).querySelector('.backdrop video')).toBeNull();
+  });
 });

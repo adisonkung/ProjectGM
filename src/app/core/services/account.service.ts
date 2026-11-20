@@ -25,11 +25,21 @@ export class AccountService {
   readonly portraitId = computed(() => this.save.state().profile?.portrait ?? 'default');
   setPortrait(id: string): void {
     if (id !== 'default' && !HERO_ART[id]) return;
-    this.save.update(s => ({ ...s, profile: { portrait: id, frame: this.frame() } }));
+    this.save.update(s => ({ ...s, profile: { ...s.profile, portrait: id, frame: this.frame() } }));
   }
   setFrame(id: string): void {
     if (!this.frames.some(f => f.id === id)) return;
-    this.save.update(s => ({ ...s, profile: { portrait: this.portraitId(), frame: id } }));
+    this.save.update(s => ({ ...s, profile: { ...s.profile, portrait: this.portraitId(), frame: id } }));
+  }
+
+  /** home banner: hero id chosen in the home banner picker, or 'auto' (main island hero → team) */
+  readonly bannerId = computed(() => {
+    const id = this.save.state().profile?.banner;
+    return id && HERO_ART[id]?.banner ? id : 'auto';
+  });
+  setBanner(id: string): void {
+    if (id !== 'auto' && !HERO_ART[id]?.banner) return;
+    this.save.update(s => ({ ...s, profile: { portrait: this.portraitId(), frame: this.frame(), ...(id === 'auto' ? {} : { banner: id }) } }));
   }
 
   readonly islandName = computed(() => this.save.state().island?.name ?? '');

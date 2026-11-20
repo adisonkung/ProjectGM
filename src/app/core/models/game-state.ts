@@ -28,7 +28,8 @@ export interface FarmRecord {
 export interface GameState {
   version: 6;
   /** Optional cosmetics keep existing v6 saves compatible. */
-  profile?: { portrait: string; frame: string };
+  /** cosmetics: portrait / frame, and `banner` = hero id whose banner fills the home screen (missing = automatic) */
+  profile?: { portrait: string; frame: string; banner?: string };
   gems: number;
   gold: number;
   pity: number;

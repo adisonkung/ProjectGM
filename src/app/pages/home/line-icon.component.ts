@@ -21,6 +21,7 @@ const PATHS: Record<string, string> = {
   grid: 'M4 4h6.5v6.5H4zM13.5 4H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z',
   boss: 'M12 3a7 7 0 0 0-7 7c0 2.5 1.3 4.2 3 5.2V19h8v-3.8c1.7-1 3-2.7 3-5.2a7 7 0 0 0-7-7z',
   close: 'M6 6l12 12M18 6L6 18',
+  banner: 'M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6M15.5 7.5a1.5 1.5 0 1 1 0 3a1.5 1.5 0 1 1 0-3z',
 };
 const FILLS: Record<string, string> = {
   boss: 'M9.5 9.3a1.2 1.2 0 1 1 0 2.4a1.2 1.2 0 1 1 0-2.4zM14.5 9.3a1.2 1.2 0 1 1 0 2.4a1.2 1.2 0 1 1 0-2.4z',

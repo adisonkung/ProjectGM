@@ -2,7 +2,8 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { Component, computed, HostListener, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DAILY_BONUS } from '../../core/data/economy';
-import { heroArt } from '../../core/data/hero-art';
+import { HERO_ART, heroArt } from '../../core/data/hero-art';
+import { HEROES } from '../../core/data/heroes';
 import { STAGES } from '../../core/data/stages';
 import { dailyBonusLeft, ensureDaily } from '../../core/rules/rewards';
 import { AccountService } from '../../core/services/account.service';
@@ -74,17 +75,33 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly cleared = computed(() => this.save.state().cleared);
   readonly nextFloor = computed(() => Math.min(this.cleared() + 1, this.totalFloors));
 
-  /** background = the island's main hero banner (falls back to the first team hero with art) */
-  readonly background = computed(() => {
+  /** automatic background = the island's main hero banner (falls back to the first team hero with art) */
+  private readonly autoBanner = computed(() => {
     const s = this.save.state();
     const ids = [s.heroes.find(h => h.uid === this.isl.mainHeroUid())?.templateId,
       ...s.team.map(t => s.heroes.find(h => h.uid === t.uid)?.templateId)];
-    for (const id of ids) {
-      const banner = id && heroArt(id)?.banner;
-      if (banner) return banner;
-    }
-    return 'banners/kael.webp';
+    return ids.find(id => id && heroArt(id)?.banner) ?? 'kael';
   });
+  /** hero whose banner fills the home screen: the banner picker's choice, else automatic */
+  readonly bannerHero = computed(() => {
+    const id = this.account.bannerId();
+    return id !== 'auto' && this.ownedBanners().some(o => o.id === id) ? id : this.autoBanner();
+  });
+  readonly background = computed(() => heroArt(this.bannerHero())?.banner ?? 'banners/kael.webp');
+  readonly reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /** looping animated banner (muted) — none under reduced motion, the still is its poster */
+  readonly backgroundVideo = computed(() => (this.reducedMotion ? undefined : heroArt(this.bannerHero())?.bannerVideo));
+
+  // ---------------------------------------------------------------- banner picker
+  /** owned heroes that have banner art, in roster order */
+  readonly ownedBanners = computed(() => {
+    const owned = new Set(this.save.state().heroes.map(h => h.templateId));
+    return HEROES.filter(t => owned.has(t.id) && HERO_ART[t.id]?.banner)
+      .map(t => ({ id: t.id, name: t.name, banner: HERO_ART[t.id].banner!, video: !!HERO_ART[t.id].bannerVideo }));
+  });
+  readonly bannerOpen = signal(false);
+  openBanners(): void { this.menuOpen.set(false); this.bannerOpen.set(true); }
+  pickBanner(id: string): void { this.account.setBanner(id); }
 
   readonly readyCount = computed(() => this.save.state().heroes.filter(h => {
     const p = this.roster.progress(h);
@@ -126,7 +143,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private noticeTimer?: ReturnType<typeof setTimeout>;
   toggleMenu(): void { this.menuOpen.update(v => !v); }
   @HostListener('document:keydown.escape')
-  closeMenu(): void { this.menuOpen.set(false); }
+  closeMenu(): void { this.menuOpen.set(false); this.bannerOpen.set(false); }
   /** real page if the entry has one, otherwise the feature is still mock → short notice */
   open(route?: string): void {
     if (route) { this.menuOpen.set(false); void this.router.navigateByUrl(route); return; }

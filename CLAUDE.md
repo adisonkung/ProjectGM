@@ -16,6 +16,13 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Animated Kael banner + home banner picker (2026-11-20, Claude)
+
+Branch `feature/claude-home-banner-picker` from origin/master 4009069. User supplied `knight_idle_loop_smooth.mp4` (1728×992, 48 fps, 5.4 s loop) to replace Kael's banner. Original kept unchanged at `assets/ui/banner-video-2026-11-20/kael_idle_loop_source.mp4` (SHA256 c5ed8748…a6ef9b). Runtime `public/banners/kael.mp4` = ffmpeg H.264 1600×918, CRF 25, no audio, faststart (~2.1 MB). `public/banners/kael.webp` is now that video's first frame (1600×918, cwebp q92), used as the poster, the hero-detail still and the reduced-motion fallback. Re-running `tools/dev/import_hero_ui_art.py` would put back the old still, so skip `kael` there. New generic `HeroArt.bannerVideo`; only Kael sets it.
+- Home backdrop plays `bannerVideo` as a muted (`[muted]` property, needed for autoplay), looping, inline `<video>` with the still as poster. Under reduced motion it shows the still.
+- New top-right `banner` icon (line glyph, first round button) opens a picker dialog. It lists **automatic** (the old rule: main island hero, then the team) plus every owned hero that has banner art, in roster order, with a LIVE tag on animated ones. Escape or the veil closes it. The choice is saved in the optional `profile.banner` (hero id). An unknown or unowned id falls back to automatic. `setPortrait`/`setFrame` now keep the other profile fields. No save version bump.
+- Tests: home spec (picker + video), ashen-vanguard HERO_ART expectation; Karma 1016/1016. Checked in the browser at 1440×860 and 844×390: the video advances, `muted`/`loop` are on, the choice persists, and the panel fits.
+
 ## K7 home screen (2026-11-19, Claude)
 
 Branch `wip/claude-home-k7` from origin/master 40ab4bb. User picked mockup K7 (claude.ai canvas, Home K-series): banner-led home, black glass, champagne-gold hairlines, amber `#FFA830` for selection/emphasis. `/home` is now `pages/home/HomeComponent`; the Sky City/classic island moved unchanged to `/island` (IslandComponent, title เกาะลอยฟ้า). The app bar is hidden on `/home` only (`AppComponent.ownChrome`); `/island` keeps the immersive lobby chrome and 75 % `ui-zoom` (moved from /home). Home lays out on a 1600×900 board scaled to the window (`zoom` 0.55–1.2), so phone landscape 844×390 fits.
