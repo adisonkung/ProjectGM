@@ -33,13 +33,15 @@ export const HERO_ART: Record<string, HeroArt> = {
   // Lucien UI art (user 2026-10-28, assets/heroes/Lucien/art → tools/sprites/lucien_art.py): portrait, the three
   // skill icons cut from one framed strip (Black Benediction cross / Martyr's Veil linked crosses / Black Miracle
   // radiant cross) and banner.
-  lucien: { ...art('lucien'), banner: 'banners/lucien.webp' },
+  // Animated banner (user Archive 2.zip, 2026-11-20; original in assets/ui/banner-video-2026-11-20), still = first frame.
+  lucien: { ...art('lucien'), banner: 'banners/lucien.webp', bannerVideo: 'banners/lucien.mp4', bannerDrop: 8 },
   // Sylas UI art (user 2026-10-27, assets/heroes/Sylas/art → tools/sprites/sylas_art.py): portrait, the three skill
   // icons (Dusk Mark bolt + crosshair / Reaver Volley three bolts / Nightfall Execution vortex) and banner (2:1).
   sylas: { ...art('sylas'), banner: 'banners/sylas.webp' },
   // Mordrienne UI art (user 2026-10-27, assets/heroes/Mordrienne/art → tools/sprites/mordrienne_art.py): portrait, the
   // three skill icons (Ashen Mark broken hex / Cinderbind Hex thorned ground hex / House of Ashes serpent field) and banner.
-  mordrienne: { ...art('mordrienne'), banner: 'banners/mordrienne.webp', bannerMirror: true },
+  // Animated banner (user Archive 2.zip, 2026-11-20); mirror kept so hero detail's right panel doesn't cover her face.
+  mordrienne: { ...art('mordrienne'), banner: 'banners/mordrienne.webp', bannerVideo: 'banners/mordrienne.mp4', bannerDrop: 8, bannerMirror: true },
   // Draeven UI art (user 2026-10-26, assets/heroes/Draeven/art → tools/sprites/draeven_art.py): portrait, the three
   // skill icons (Blood Debt sigil / crimson slash / Blood Dominion sword impact) and banner.
   draeven: { ...art('draeven'), banner: 'banners/draeven.webp' },
