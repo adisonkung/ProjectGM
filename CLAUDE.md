@@ -16,6 +16,10 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Summon opening "Heroes from Other Worlds" — art spec (2026-11-20, Claude)
+
+User-approved animatic v4 (claude.ai artifact, procedural mock art): SC01 Eldervane world with orbiting worlds looping until a floating "แตะเพื่ออัญเชิญ" text (no button art) → SC02 gold threads → SC03 answering world gold aura burst → SC04 rune-gate warp into Eldervane → sky rift (white; 3★ = second tear bursting gold/rainbow) → comets become cards (3★ = light rainbow shimmer only) → ×1 3★ hero steps from a light pillar → splash. One world per hero team (names provisional). Image list, prompts, timing and delivery order: [docs/art/SUMMON_WORLDS_ART_SPEC.md](docs/art/SUMMON_WORLDS_ART_SPEC.md). Spec only; no game code yet. Codex's isometric altar summon work is separate and unmerged.
+
 ## K7 home screen (2026-11-19, Claude)
 
 Branch `wip/claude-home-k7` from origin/master 40ab4bb. User picked mockup K7 (claude.ai canvas, Home K-series): banner-led home, black glass, champagne-gold hairlines, amber `#FFA830` for selection/emphasis. `/home` is now `pages/home/HomeComponent`; the Sky City/classic island moved unchanged to `/island` (IslandComponent, title เกาะลอยฟ้า). The app bar is hidden on `/home` only (`AppComponent.ownChrome`); `/island` keeps the immersive lobby chrome and 75 % `ui-zoom` (moved from /home). Home lays out on a 1600×900 board scaled to the window (`zoom` 0.55–1.2), so phone landscape 844×390 fits.
