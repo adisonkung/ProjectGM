@@ -8,30 +8,36 @@
 - **2026-11-22 อนุมัติแล้ว:** `a_full.png` (1672 × 941) และ `book_cover_front.png` (1060 × 1484) อยู่ใน `assets/ui/summon-25d/`
 - `book_cover_trace.png` **ไม่ต้องทำ:** Claude ดึงเส้นทองจากปกได้เองอัตโนมัติ (ลายทองตัดกับหนังดำชัด)
 - ก่อนแยกชั้นฉาก A ให้ขยาย `a_full.png` อย่างน้อย 2 เท่าด้วยตัวขยายภาพ AI ก่อน แล้วแยกทุกชั้นจากภาพที่ขยายแล้ว
-- ต่อไป: ชั้นของฉาก A + ชิ้นที่เหลือของตำรา (ด้านในปก หน้ากระดาษ ขอบ สัน)
+- **2026-11-22 ลำดับใหม่ (ผู้ใช้):** ตำราไม่เปิดแล้ว · ตำราลอยเหนือแท่นใหญ่กลางหอ แตะแล้วซูมเข้าปก แสงค่อย ๆ ไล่ตามลวดลาย ตำราสั่น แล้วระเบิดแสงขึ้นฟ้า · สีแสงบอกผล 3 แบบ (ดูตารางลำดับ) · ต้นแบบ: claude.ai artifact Dj67mgsb9TRdCoZahUXQyz
+- ต่อไป: **gen `a_full.png` ใหม่ให้แท่นอลังการ** (ภาพห้องที่อนุมัติไปใช้ได้ทุกอย่างยกเว้นแท่น) แล้วแยกชั้น + ปกหลัง/สัน/ขอบกระดาษ + VFX ระเบิดสองสี
 
 ## หลักการ 2.5D
 
 - **ฉาก = ภาพวาดหลายชั้นซ้อนกัน** วาดจากมุมกล้องเดียวกัน แต่แยกตามระยะ (ไกล → ใกล้) แล้วโค้ดวางแต่ละชั้นไว้คนละระยะ
 - **กล้องขยับนิดเดียว** (เลื่อน/ซูมช้า ๆ) ชั้นใกล้จะเลื่อนมากกว่าชั้นไกล จึงเห็นความลึกโดยไม่ต้องมีห้อง 3 มิติ และภาพไม่ยืดแบบรอบก่อน
 - **ของที่ต้องขยับเองแยกเป็นชิ้น:** ตำรา แอสโตรเลบ ฟ้าในช่องฟ้า แสงจันทร์ เปลวเทียน ละออง
-- **ตำราเป็นวัตถุชิ้นเดียวที่เป็น 3D** (บาง ๆ แบบหนังสือจริง) เพราะต้องเปิดปกและพลิกหน้า
+- **ตำราเป็นวัตถุชิ้นเดียวที่เป็น 3D** (บาง ๆ แบบหนังสือจริง) เพราะลอยหมุนช้า ๆ ให้เห็นความหนา · **ไม่เปิดปกแล้ว**
 - **เอฟเฟกต์ใช้ภาพวาด VFX** ไม่วาดเส้นด้วยโค้ด (ผู้ใช้ติว่ารอบก่อนดูเป็นเส้นโค้ด)
 
-## ลำดับฉาก (ตามที่ผู้ใช้กำหนด)
+## ลำดับฉาก (ตามที่ผู้ใช้กำหนด 2026-11-22)
 
 | ช่วง | ฉาก | เกิดอะไร |
 |---|---|---|
-| ก่อนแตะ | **A ห้องกว้าง** | ฉากมีชีวิต: ตำราลอยขึ้นลงเบา ๆ บนแท่น, ฟ้าในช่องฟ้าเลื่อน, แสงจันทร์ส่ายช้า ๆ, แอสโตรเลบหมุน, เทียนไหว, ละอองลอย · ข้อความ "แตะเพื่ออัญเชิญ" ลอยในวงแหวน |
-| 0–0.9 วิ | A → ซูมเข้าตำรา | กล้องเคลื่อนเข้าหาตำรา ชั้นหน้าเลื่อนผ่านกล้อง |
-| 0.5–1.8 วิ | **B ใกล้ตำรา** | **แสงทองไล่ตามเส้นลวดลายและอักขระบนปก** จากตรากลางออกไปจนทั่วปก แล้วทั้งปกสว่างวาบ |
-| 2.0 วิ | B | ระเบิดเปิดตำรา (เหมือนเดิม) ปกเปิดไปทางซ้าย |
-| 2.0–3.8 วิ | B | หน้ากระดาษพลิกรัวไปหยุดหน้ากลาง |
-| 3.9–6.3 วิ | B | อักขระตัวเล็ก ๆ เขียนตัวเองเต็มทั้งสองหน้า (3★ หมึกเป็นทอง) |
-| 6.3–6.9 วิ | B | แสงทองระเบิดจากหน้ากระดาษ รวมเป็นเสาแสง |
-| 6.9 วิ | แสงวาบ ตัดภาพ | |
-| 6.9–8.5 วิ | **C มุมต่ำ** | มองจากพื้นทะลุชั้นหนังสือขึ้นไปถึงช่องฟ้า เสาแสงพุ่งผ่านกลาง แตกเป็นแสงที่ช่องฟ้า |
-| 7.3–9.0 วิ | C | ดวงแสงหล่นจากเสาแสง แต่ละดวงบานเป็นการ์ดเรียงกันทีละใบ (เหมือนเวอร์ชัน 3D) |
+| ก่อนแตะ | **A ห้องกว้าง** | แท่นใหญ่กลางหอ ตำราลอยหมุนช้า ๆ เหนือแท่น ห้องมีชีวิต (ฟ้าในช่องฟ้าเลื่อน แสงจันทร์ส่าย เทียนไหว ละอองลอย) · ข้อความ "แตะเพื่ออัญเชิญ" |
+| 0–1.0 วิ | A → ซูมเข้าปก | กล้องเคลื่อนเข้าหาปก ตำราค่อย ๆ หันหน้าเข้ากล้อง |
+| 0.8–3.4 วิ | **B ใกล้ปก** | แสงไหล **ช้า ๆ และนุ่ม** จากตรากลางไปตามลวดลายทั่วปก · ละอองแสงลอยขึ้นจากปก · ลำแสงหมุนอยู่หลังตำรา |
+| 3.3–4.0 วิ | B | ทั้งปกสว่างจ้า ตำราสั่นแรงขึ้นและยกตัว กล้องสั่น |
+| 4.0 วิ | B | ระเบิดแสง เสาแสงพุ่งขึ้นฟ้า กล้องเงยตาม |
+| 4.55 วิ | แสงวาบ ตัดภาพ | |
+| 4.55–6.1 วิ | **C มุมต่ำ** | มองจากพื้นทะลุหอขึ้นฟ้า เสาแสงผ่านกลาง ดวงแสงหล่นแล้วบานเป็นการ์ด |
+
+**สีแสงบอกผล (ใช้ทั้งเส้นที่ไล่ ละออง ลำแสง ระเบิด เสาแสง):**
+
+| ผล | สีแสง |
+|---|---|
+| ไม่มี 3★ | **ขาวฟ้า** ตั้งแต่ต้นจนจบ |
+| มี 3★ (ปกติ) | **ทอง** ตั้งแต่ต้นจนจบ |
+| มี 3★ (แอ็กชัน 3 ลุ้น นาน ๆ ครั้ง) | เริ่ม **ขาวฟ้า** · พอแสงไล่ได้ครึ่งปก (≈ 2.1 วิ) **ระเบิดกลางปก** แล้วเส้นที่สว่างแล้วเปลี่ยนเป็น **ทอง** แผ่ออกจากตรากลาง และไล่ต่อเป็นทองจนจบ |
 
 ## กติกาไฟล์
 
@@ -74,14 +80,15 @@ no book on the lectern, no astrolabe
 
 | ชื่อไฟล์ | ขนาด | ชั้น | คืออะไร / prompt เพิ่ม |
 |---|---|---|---|
-| `a_full.png` | 3840 × 2160 | อ้างอิง | ภาพรวมของฉาก `wide shot of the empty central marble lectern under the oculus, the lectern top is flat and empty` |
+| `a_full.png` | 3840 × 2160 | อ้างอิง | **gen ใหม่ (แท่นอลังการ)** โดย image edit จาก `a_full.png` ที่อนุมัติ ให้ห้องเหมือนเดิมทุกอย่าง: `replace the central lectern with a grand ceremonial altar: a tiered round dais of white marble and gold, a ring of floating gold arcane circles and small glowing crystals around it, slender gold spires at its edge, a glowing magic seal on its top, and empty space above the altar where a book will float; keep the rest of the library exactly the same` |
 | `a_sky.png` | 3840 × 1200 | 0 ไกลสุด | ฟ้าที่เห็นผ่านช่องฟ้า **กว้างกว่าช่อง** ให้เลื่อนได้ `a night sky with dense stars and a soft violet-blue nebula, seen at a steep upward angle` |
 | `a_back.png` | 3840 × 2160 | 1 | ผนังชั้นหนังสือไกล + โดม + **ช่องฟ้าโปร่งใส** |
 | `a_mid.png` | 3840 × 2160 | 2 โปร่งใส | ระเบียงและราวทองช่วงกลาง ซ้าย-ขวา (ส่วนที่ใกล้กว่าผนังไกล) |
 | `a_floor.png` | 3840 × 2160 | 3 โปร่งใส | พื้นหินอ่อนขัดเงา + วงรูนทองรอบแท่น (ครึ่งล่างของภาพ) |
-| `a_lectern.png` | 3840 × 2160 | 4 โปร่งใส | แท่นหินอ่อนขอบทอง **ว่าง** พร้อมเงาบนพื้น |
+| `a_altar.png` | 3840 × 2160 | 4 โปร่งใส | แท่นอลังการ (ไม่มีตำรา) พร้อมเงาบนพื้น |
 | `a_fore_left.png` · `a_fore_right.png` | 3840 × 2160 | 5 ใกล้สุด โปร่งใส | ชั้นหนังสือ/เสา/เชิงเทียนที่อยู่ใกล้กล้องที่ขอบซ้ายและขวา (จะถูกเบลอให้ดูใกล้) |
-| `a_lectern_hd.png` | 4096 × 2304 | 4 ฉบับละเอียด | ครอปเฉพาะส่วนบนของแท่น (ภาพเดียวกับ `a_lectern` ส่วนบน) ใช้ตอนซูมใกล้ ไม่ให้ภาพแตก |
+| `a_altar_hd.png` | 4096 × 2304 | 4 ฉบับละเอียด | ครอปเฉพาะส่วนบนของแท่น (ภาพเดียวกับ `a_altar` ส่วนบน) ใช้ตอนซูมใกล้ ไม่ให้ภาพแตก |
+| `a_altar_ring.png` | 2048 × 2048 | แยกชิ้น โปร่งใส | วงเวททองรอบแท่น (มองตรง) ให้โค้ดหมุนได้ `a flat ornate gold arcane ring with runes, seen straight on, transparent center and outside` |
 
 ## ฉาก C — มุมต่ำมองทะลุหอขึ้นฟ้า
 
@@ -97,34 +104,34 @@ no book on the lectern, no astrolabe
 
 ## ตำราใหม่ — ลวดลายโบราณแบบขลัง ๆ
 
-สัดส่วนหน้า **1 : 1.4** เหมือนเดิม · ทุกไฟล์ต้องเป็นเล่มเดียวกัน
+สัดส่วนหน้า **1 : 1.4** · ปกหน้าอนุมัติแล้ว · ตำราไม่เปิด จึง **ไม่ต้องทำ** ด้านในปก หน้ากระดาษ และเส้น trace (ดึงจากปกเอง)
 
 | ชื่อไฟล์ | ขนาด | คืออะไร | prompt |
 |---|---|---|---|
-| `book_cover_front.png` | 1536 × 2150 | ปกหน้า | `the front cover of an ancient arcane grimoire, perfectly flat front view, evenly lit: aged midnight-black leather, an intricate inlaid champagne-gold filigree of interlocking arcane circles, a central sigil of a star inside nested rune rings, borders of small engraved ancient runes running around the edges, fine gold lines connecting the circles like a star chart, worn gold corner guards, a gold clasp on the right edge, mysterious and sacred` |
-| `book_cover_trace.png` | 1536 × 2150 | **เส้นสำหรับแสงทองไล่** | image edit จากปกหน้า: `turn this into a mask: only the gold engraved lines, runes and filigree as pure white on pure black, keep the exact same composition, do not redraw` · ถ้าได้ไม่ตรง Claude จะดึงเส้นทองจากปกเอง |
-| `book_cover_inside.png` | 1536 × 2150 | ด้านในปก | `inside of an ancient grimoire cover: dark marbled endpaper in midnight blue and gold, a thin gold-tooled leather turn-in at the edges, flat front view` |
-| `book_page_a.png` · `_b` · `_c` | 1536 × 2150 | หน้ากระดาษพลิก 3 แบบ | `a single aged vellum page, warm ivory with darker worn edges, very faint old ruled lines and a faded circular diagram, flat front view` (ต้องจางมาก) |
-| `book_page_blank.png` | 1536 × 2150 | หน้ากลางที่อักขระจะเขียนทับ | เหมือน page_a แต่ไม่มีลายเลย |
-| `book_page_edge.png` | 2150 × 200 | ขอบปึกกระดาษ | `the gilded edge of a thick stack of old vellum pages seen straight on, fine uneven layers, gold leaf edge` |
-| `book_spine.png` | 300 × 2150 | สันหนังสือ | `the spine of the same grimoire, black leather with raised bands and gold rune tooling, flat front view` |
+| `book_cover_front.png` | 1060 × 1484 | ปกหน้า ✅ อนุมัติแล้ว | — |
+| `book_cover_back.png` | 1060 × 1484 | ปกหลัง (เห็นตอนตำราหมุน) | image edit จากปกหน้า: `the back cover of the same grimoire: same black leather and corner guards, a simpler gold border and one small central star sigil, no clasp, flat front view` |
+| `book_spine.png` | 300 × 1484 | สันหนังสือ | `the spine of the same grimoire, black leather with raised bands and gold rune tooling, flat front view` |
+| `book_page_edge.png` | 1484 × 200 | ขอบปึกกระดาษ | `the gilded edge of a thick stack of old vellum pages seen straight on, fine uneven layers, gold leaf edge` |
 
-**สิ่งที่โค้ดทำเอง:** แสงทองไล่ตามเส้นของ `book_cover_trace` จากตรากลางออกไป, ห่อลายผิวเป็นหนังสือ, เปิดปก, พลิกหน้า, เขียนอักขระตัวเล็กเต็มหน้า (ใช้แผ่นอักษรเดิม)
+**สิ่งที่โค้ดทำเอง:** ห่อลายผิวเป็นหนังสือ, ลอยหมุน, แสงไล่ตามลายทองบนปก (3 แบบสี), สั่น
 
 ## VFX ที่ต้องเพิ่ม
+
+ทุกระเบิดต้องมี **สองสี: ขาวฟ้า และ ทอง** (ตั้งชื่อ `_blue` / `_gold`) ใช้ตามผล
 
 | ชื่อไฟล์ | กริด / ช่อง | ใช้ตอน | prompt เพิ่ม |
 |---|---|---|---|
 | `fx_moonlight.png` | 4 × 2 · 512 × 1024 | ฉาก A แสงจันทร์ส่าย (ลูป) | `soft volumetric moonlight god rays falling diagonally from the top, silver-blue, gently shifting, loopable` |
-| `fx_gold_burst.png` | 4 × 3 · 1024 × 1024 | ระเบิดเปิดตำรา + ระเบิดจากหน้ากระดาษ | `a burst of warm gold light: frames 1-2 a blinding point, 3-6 a radial explosion with a flat shockwave ring and gold shards, 7-12 drifting gold sparks fade out` |
-| `fx_cover_flash.png` | 4 × 2 · 1024 × 1024 | ทั้งปกสว่างวาบหลังแสงไล่ครบ | `a flat rectangular flash of gold light with a soft bloom, flaring then fading, loopable is not needed` |
-| `fx_oculus_flare_gold.png` | 4 × 3 · 1024 × 1024 | ฉาก C เสาแสงถึงช่องฟ้า | เหมือน `fx_oculus_flare.png` เดิม แต่สีทอง |
+| `fx_sky_burst_blue.png` · `_gold.png` | 4 × 3 · 1024 × 1024 | ตำราระเบิดแสงขึ้นฟ้า | `an epic upward burst of light from a single point: frames 1-2 a blinding core, 3-6 a radial explosion with a shockwave ring and a column of light shooting straight up, 7-12 sparks and light shards drift and fade` + `white-blue` / `rich gold` |
+| `fx_upgrade_flare.png` | 4 × 3 · 1024 × 1024 | แอ็กชัน 3 เปลี่ยนเป็นทองกลางปก | `a gold flare bursting outward from a small blue-white point: a ring of gold fire expands and swallows the blue light, gold sparks spray out, then settles into a steady gold glow` |
+| `fx_seal_rays_blue.png` · `_gold.png` | 4 × 2 · 1024 × 1024 | ลำแสงหมุนหลังตำราตอนแสงไล่และตอนสั่น (ลูป) | `radiant light rays from a center like a holy star, slowly rotating, soft edges, loopable` + สี |
+| `fx_oculus_flare_gold.png` | 4 × 3 · 1024 × 1024 | ฉาก C เสาแสงถึงช่องฟ้า (ทอง) | เหมือน `fx_oculus_flare.png` เดิม แต่สีทอง · ของเดิมใช้กับสีฟ้า |
 
-ใช้ของเดิมต่อ: `fx_candle_flame`, `fx_page_wisp`, `pillar_blue/gold`, `orb_card`, แผ่นอักษร `glyph_reference`, ชิ้นแอสโตรเลบ, ปก/สันหนังสือลอย
+ใช้ของเดิมต่อ: `fx_candle_flame`, `pillar_blue/gold`, `orb_card`, ชิ้นแอสโตรเลบ
 
 ## ลำดับการส่ง
 
-1. `a_full.png` + `book_cover_front.png` ให้ผู้ใช้อนุมัติหน้าตาก่อน
-2. ชั้นของฉาก A + ตำราใหม่ทั้งชุด: Claude ทำฉากก่อนแตะจนถึงพลิกหน้า/เขียนอักขระได้เลย
-3. ฉาก C
-4. VFX ใหม่
+1. `a_full.png` แท่นอลังการ (image edit จากภาพเดิม) ให้ผู้ใช้อนุมัติก่อน
+2. ชั้นของฉาก A (จากภาพที่ขยาย 2 เท่าแล้ว) + ปกหลัง / สัน / ขอบกระดาษ
+3. VFX สองสี
+4. ฉาก C
