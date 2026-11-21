@@ -90,7 +90,7 @@ no book on the lectern, no astrolabe
 | `a_altar.png` | 3840 × 2160 | 4 โปร่งใส | แท่นอลังการ (ไม่มีตำรา) พร้อมเงาบนพื้น |
 | `a_fore_left.png` · `a_fore_right.png` | 3840 × 2160 | 5 ใกล้สุด โปร่งใส | ชั้นหนังสือ/เสา/เชิงเทียนที่อยู่ใกล้กล้องที่ขอบซ้ายและขวา (จะถูกเบลอให้ดูใกล้) |
 | `a_altar_hd.png` | 4096 × 2304 | 4 ฉบับละเอียด | ครอปเฉพาะส่วนบนของแท่น (ภาพเดียวกับ `a_altar` ส่วนบน) ใช้ตอนซูมใกล้ ไม่ให้ภาพแตก |
-| `a_altar_ring.png` | 2048 × 2048 | แยกชิ้น โปร่งใส | วงเวททองรอบแท่น (มองตรง) ให้โค้ดหมุนได้ `a flat ornate gold arcane ring with runes, seen straight on, transparent center and outside` |
+| ~~`a_altar_ring.png`~~ | — | — | **เปลี่ยนเป็น VFX วงเวทแสง** (`fx_magic_circle*` ด้านล่าง) · ผู้ใช้ 2026-11-22: วงที่ gen มากับห้องดูเป็นวงเหล็กลอย ให้ลบออกจากภาพห้อง |
 
 ## ฉาก C — มุมต่ำมองทะลุหอขึ้นฟ้า
 
@@ -123,6 +123,8 @@ no book on the lectern, no astrolabe
 
 | ชื่อไฟล์ | กริด / ช่อง | ใช้ตอน | prompt เพิ่ม |
 |---|---|---|---|
+| `fx_magic_circle.png` | 2048 × 2048 ภาพเดียว | วงเวทแสงรอบตำรา: โค้ดเอียงเป็นวงรี หมุน และย้อมเป็นฟ้าหรือทองตามผล | `a flat ornate magic circle made only of glowing light: concentric rings of small runes and star symbols, thin bright lines, seen straight on from the front, pure black background, white light with a faint silver tint, no metal, no solid objects, no 3D` |
+| `fx_magic_circle_inner.png` | 2048 × 2048 ภาพเดียว | วงชั้นในหมุนสวนทาง | เหมือนข้างบน แต่เป็นวงเล็กกว่า ลายเรขาคณิต (ดาวหกแฉกในวง) ตรงกลางโปร่ง |
 | `fx_moonlight.png` | 4 × 2 · 512 × 1024 | ฉาก A แสงจันทร์ส่าย (ลูป) | `soft volumetric moonlight god rays falling diagonally from the top, silver-blue, gently shifting, loopable` |
 | `fx_sky_burst_blue.png` · `_gold.png` | 4 × 3 · 1024 × 1024 | ตำราระเบิดแสงขึ้นฟ้า | `an epic upward burst of light from a single point: frames 1-2 a blinding core, 3-6 a radial explosion with a shockwave ring and a column of light shooting straight up, 7-12 sparks and light shards drift and fade` + `white-blue` / `rich gold` |
 | `fx_upgrade_flare.png` | 4 × 3 · 1024 × 1024 | แอ็กชัน 3 เปลี่ยนเป็นทองกลางปก | `a gold flare bursting outward from a small blue-white point: a ring of gold fire expands and swallows the blue light, gold sparks spray out, then settles into a steady gold glow` |
