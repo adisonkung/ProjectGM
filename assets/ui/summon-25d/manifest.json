@@ -1,0 +1,33 @@
+{
+  "spec": "docs/art/SUMMON_25D_ART_SPEC.md",
+  "stage": "1 — master scene and cover review before layer extraction",
+  "generation_method": "built-in image generation",
+  "files": [
+    {
+      "filename": "a_full.png",
+      "actual_dimensions": [
+        1672,
+        941
+      ],
+      "spec_dimensions": [
+        3840,
+        2160
+      ],
+      "sha256": "09fbb1f63873eb43241235d92f81f8b088063e60c3e8c65f30be860deb274694",
+      "status": "pending_visual_approval"
+    },
+    {
+      "filename": "book_cover_front.png",
+      "actual_dimensions": [
+        1060,
+        1484
+      ],
+      "spec_dimensions": [
+        1536,
+        2150
+      ],
+      "sha256": "0b32ccf47a50f5da3dbf1b853a5af55d66cca279aaf8db52cb97c96ff43b313d",
+      "status": "pending_visual_approval"
+    }
+  ]
+}
