@@ -16,6 +16,16 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Summon book cinematic in game (2026-11-22, Claude)
+
+Branch `wip/claude-summon-book` from origin/master 6562d13. The user asked to put the approved 2.5D animatic ("Book of Heroes · Astral Archive", claude.ai artifact) into the game in place of the isometric altar cinematic.
+- `pages/gacha/summon-book/book-scene.ts` is the animatic's three.js module ported almost unchanged (`// @ts-nocheck`, so the reviewed look does not drift) inside `mountBookScene(host, opts) → { dispose }`. Game changes: cards come from the real pull, the light colour from the best star in the pull (gold if any 3★, else blue); a 3★ pull plays the blue-then-gold suspense version at `SUSPENSE_CHANCE` 0.35. Every 3★ card waits for its own tap and intro, in pull order (the animatic handled one). Prototype controls and captions for scene numbers are removed. The canvas keeps 16:9 and covers the screen (the long side is cropped). Dispose frees geometry, materials, textures and the WebGL context.
+- `SummonBookComponent` (`app-summon-book`) is a full-screen dialog with the canvas, caption, tap hint, gold intro (quote → banner with Thai/English names), skip, and "ดูผลการอัญเชิญ" when every card is open. Reduced motion, no WebGL or a failed chunk → the existing 2D `app-summon-scene` (Codex's altar) with the same results. Presentation only: skipping never rolls or spends.
+- Intro copy is in `summon-book/hero-intro.ts` (Latin name, epithet, one line per hero). Quotes and the Vaelric/Mordrienne epithets are first drafts. A missing hero falls back to its game name.
+- Art: 25 images extracted unchanged from the animatic plus `blank.webp` (stand-in for textures the scene declares but never shows) in `public/ui/summon-book/` (4.8 MB, loaded only when a summon starts). three 0.160.0 (exact) is a lazy chunk of about 140 kB gzipped; the initial bundle grew by about 0.6 kB.
+- With today's all-3★ roster, every pull lights gold and every card is gold. Blue light and grey/silver cards appear once 1★/2★ heroes exist. On 20:9 phones the close-up crops the top of the book slightly.
+- Tests: `summon-book.component.spec.ts` (card data, intro fallback, reduced-motion fallback, single done); gacha spec expects `app-summon-book`. Karma 1020/1020; production build passes. Checked in the browser at 1280×720 and 844×390: opening, trace, burst, cards, gold intro, flip, next gold, skip, finish button, canvas removed after close.
+
 ## Summon page layout B — hero banner (2026-11-22, Claude)
 
 Branch `feature/claude-summon-banner-page` from origin/master 0682c86. The user picked concept B of three summon-page mockups (claude.ai design canvas): a full-screen featured hero banner over a dark left/bottom fade. The idle `/gacha` page is rebuilt; confirm, results, rates, pool, memory and banner dialogs, the summon cinematic and all summon rules are unchanged.

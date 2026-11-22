@@ -124,7 +124,7 @@ describe('GachaComponent', () => {
     component.confirmSummon();
     fixture.detectChanges();
     // the summon cinematic plays first; the results grid shows once it ends / is skipped
-    expect((fixture.nativeElement as HTMLElement).querySelector('app-summon-scene')).not.toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-summon-book')).not.toBeNull();
     component.finishSummon();
     fixture.detectChanges();
     expect(save.state().gems).toBe(gems - 900);

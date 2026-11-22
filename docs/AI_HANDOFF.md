@@ -2,6 +2,10 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Summon book cinematic in game — Claude, 2026-11-22
+
+Branch `wip/claude-summon-book` from origin/master 6562d13, not merged and awaiting the user's review. The summon cinematic is now the approved 2.5D book scene (three.js, lazy chunk), driven by real pull results; the isometric altar scene remains the reduced-motion / no-WebGL fallback. Details are in CLAUDE.md. Confirmed local/cloud synchronization metadata is unchanged.
+
 ## Summon page layout B — Claude, 2026-11-22
 
 Branch `feature/claude-summon-banner-page` from origin/master 0682c86, merged into master on 2026-11-22 at the user's request. The idle `/gacha` page now shows the user-chosen layout B: a full-screen featured banner (Lucien, illustration only, no rate-up), a pool-tab rail with an event placeholder, pills for rates/pool/memory, and a pity box with ×1/×10 buttons. Summon logic, dialogs and the cinematic are unchanged. Details are in CLAUDE.md. Codex's unmerged `wip/codex-isometric-summon` touches the first line of `gacha.component.html`. Confirmed local/cloud synchronization metadata is unchanged.
