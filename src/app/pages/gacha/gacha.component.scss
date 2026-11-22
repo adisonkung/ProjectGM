@@ -59,6 +59,14 @@
   &:disabled{opacity:.48;cursor:not-allowed;}}
 .funds-note,.err{display:block;margin:0;padding:7px 14px;border-radius:8px;font-size:12px;line-height:1.6;color:#f1d7a5;background:#0c0a14d9;text-align:center;}
 
+// Desktop follow-up: larger pool tabs, lower details, fixed framing around the living banner art.
+@media(min-width:1001px) and (min-height:501px){
+  .summon-ui{grid-template-columns:164px minmax(0,1fr) auto;}
+  .banner-tab .tab-art{aspect-ratio:7/4;}
+  .banner-heading{position:relative;top:clamp(32px,6dvh,56px);}
+  .key-art>img,.key-art>video{animation:none;}
+}
+
 // Phones / short landscape: the rail becomes a row; the purchase block spans the width.
 @media(max-width:1000px){
   .summon-ui{grid-template-columns:104px minmax(0,1fr);grid-template-rows:auto auto auto;}

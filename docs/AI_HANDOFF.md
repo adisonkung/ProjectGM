@@ -6,6 +6,14 @@ Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tr
 
 The user explicitly requested deferring Mobile while pages are still being revised. Implement and visually verify Desktop only for current page/UI/flow work; collect responsive/Mobile layout and dedicated phone QA for one later pass after the main Desktop pages/flows are complete and stable, or when specifically requested. Mobile is not a completion blocker for Desktop tasks. Existing typechecks/automated regression suites still run normally. This current-phase policy is canonical in AGENTS.md, PROJECT_RULES §22 and UI_REFERENCE_RULES.md, and supersedes earlier per-task Mobile verification requirements. Mobile evidence already captured before this instruction may remain as historical evidence; do not continue dedicated Mobile work by default.
 
+## Summon gate banner size and steady framing — Codex, 2026-11-23
+
+Branch `fix/summon-banner-layout` continues the user's current summon stack atc6a9f0e (origin/master0af5781). User requested bigger left banners, details lower and fixing the swaying background. Only Desktop CSS changes: rail132→164px, thumbnail2:1→7:4 (standard button132×100.6→164×127px); details statically43.2/54px lower at1280×720/1600×900; the full-image16s `key-breathe` zoom/pan disabled. Existing character video/internal motion remains. No Mobile/short-landscape layout changes; preload, aura, gameplay and saves unchanged.
+
+Actual paired game images, geometry and dialog/cancel evidence: `docs/reviews/summon-banner-layout/index.html`; browser script `tools/dev/summon-banner-browser.cjs`. Paired screenshots pause the video at1s; CSS motion sampled at0/16s separately. New banner bounds remain identical across that old cycle; no viewport overflow, extra transaction or page/local-resource errors. External Google Fonts requests are unavailable in this environment and recorded separately. No master merge/deploy or confirmed synchronization metadata update.
+
+Validation complete: app/spec typechecks, full Karma1026/1026 and both Desktop browser scenarios pass.
+
 ## Tighter gold-card aura — Codex, 2026-11-22
 
 Branch `fix/summon-gold-aura` continues the user's summon-preload/Desktop-first stack at89e7c7e; origin/master remains0af5781. Only summon presentation changes: aura quad1.75×2.4→1.5×2.1, shorter smoke falloff, clearer inner gold, actual card scale/quaternion followed through landing/flip. BokehPass's override depth material ignored shader alpha and exposed a full sharp rectangle of background. Aura meshes now live in a separate transparent pass after DOF/before bloom+grading; hollow centre follows the card and no quad enters the depth image. `depthWrite:false`, DoubleSide, normal scene disposal includes the new scene. No preload, card layout/art, timing, transaction or save changes.
