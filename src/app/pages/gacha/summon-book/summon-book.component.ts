@@ -5,11 +5,21 @@ import { heroArt } from '../../../core/data/hero-art';
 import { SummonPull, SummonSceneComponent } from '../summon-scene.component';
 import type { BookCard, BookSceneHandle } from './book-scene';
 import { heroIntro } from './hero-intro';
+import { BOOK_ART, BOOK_ART_DIR } from './book-assets';
 
 /** share of 3★ pulls that play the blue-then-gold suspense version of the trace */
 export const SUSPENSE_CHANCE = 0.35;
-const ASSET_DIR = '/ui/summon-book/';
 const url = (p?: string) => (!p ? '' : /^(\/|https?:)/.test(p) ? p : '/' + p);
+
+let preloaded = false;
+/** Warm the summon book while the player is on the summon page: the 3D chunk and its art download in the background,
+ * so pressing summon zooms straight into the room instead of waiting on a black screen. */
+export function preloadSummonBook(): void {
+  if (preloaded || typeof window === 'undefined' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  preloaded = true;
+  void import('./book-scene').catch(() => { preloaded = false; });
+  for (const f of Object.values(BOOK_ART)) { const im = new Image(); im.decoding = 'async'; im.src = BOOK_ART_DIR + f; }
+}
 
 /** The pull's cards as the book scene draws them (pure, tested). */
 export function bookCards(results: readonly SummonPull[]): BookCard[] {
@@ -62,8 +72,8 @@ export class SummonBookComponent implements AfterViewInit, OnDestroy {
       const top = Math.max(...this.results().map(r => r.star));
       const suspense = this.suspense() ?? (top >= 3 && Math.random() < SUSPENSE_CHANCE);
       this.handle = await mountBookScene(host, {
-        cards: bookCards(this.results()), suspense, asset: f => ASSET_DIR + f,
-        overlay: { cine: q('.cine'), cineQuote: q('.cine-quote'), cineBan: q('.cine-ban'), cineImg: q('.cine-ban img'), cineEp: q('.cine-ep'), cineTh: q('.cine-th'), cineEn: q('.cine-en'), cineTap: q('.cine-tap'), cap: q('.cap'), hint: q('.hint') },
+        cards: bookCards(this.results()), suspense, asset: f => BOOK_ART_DIR + f,
+        overlay: { cine: q('.cine'), cineQuote: q('.cine-quote'), cineBan: q('.cine-ban'), cineImg: q('.cine-ban img'), cineEp: q('.cine-ep'), cineTh: q('.cine-th'), cineEn: q('.cine-en'), cineTap: q('.cine-tap'), cap: q('.cap'), hint: q('.hint'), summon: q('.summon') },
         onFinished: () => this.finished.set(true),
       });
       if (this.destroyed) { this.handle.dispose(); this.handle = null; return; }

@@ -1,17 +1,18 @@
 @if (fallback()) {
   <app-summon-scene [results]="results()" (done)="done.emit()" />
 } @else {
-  <dialog #stage class="book" aria-label="กำลังอัญเชิญ" (cancel)="$event.preventDefault(); finish()">
+  <dialog #stage class="book" [class.ready]="!loading()" aria-label="กำลังอัญเชิญ" (cancel)="$event.preventDefault(); finish()">
     <div #host class="book-host"></div>
     <div class="cap" style="opacity: 0" aria-hidden="true"><b></b><small></small></div>
     <div class="hint" role="status" hidden></div>
+    <button type="button" class="summon" hidden><span>แตะเพื่ออัญเชิญ</span><small>TAP TO SUMMON</small></button>
     @if (loading()) { <p class="loading" role="status">กำลังอัญเชิญ…</p> }
     <div class="cine" hidden>
       <p class="cine-quote"></p>
       <div class="cine-ban"><img alt="" /><div class="cine-plate"><small class="cine-ep"></small><b class="cine-th"></b><span class="cine-en"></span><i aria-hidden="true">★ ★ ★</i></div></div>
       <span class="cine-tap">แตะเพื่อปิด</span>
     </div>
-    <button type="button" class="skip" (click)="finish()" autofocus>ข้าม <span aria-hidden="true">»</span></button>
+    <button type="button" class="skip" (click)="finish()">ข้าม <span aria-hidden="true">»</span></button>
     @if (finished()) { <button type="button" class="results" (click)="finish()">ดูผลการอัญเชิญ »</button> }
   </dialog>
 }

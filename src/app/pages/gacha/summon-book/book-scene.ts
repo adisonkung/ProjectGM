@@ -12,16 +12,16 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
+import { BOOK_ART as ART_KEYS } from './book-assets';
 
 /** one card of the pull, already resolved to display data */
 export interface BookCard { star: number; id: string; th: string; en: string; cls: string; epithet: string; quote: string; portrait: string; banner?: string }
 /** DOM overlay the component owns (gold-card intro, caption, hint) */
-export interface BookOverlay { cine: HTMLElement; cineQuote: HTMLElement; cineBan: HTMLElement; cineImg: HTMLImageElement; cineEp: HTMLElement; cineTh: HTMLElement; cineEn: HTMLElement; cineTap: HTMLElement; cap: HTMLElement; hint: HTMLElement }
+export interface BookOverlay { cine: HTMLElement; cineQuote: HTMLElement; cineBan: HTMLElement; cineImg: HTMLImageElement; cineEp: HTMLElement; cineTh: HTMLElement; cineEn: HTMLElement; cineTap: HTMLElement; cap: HTMLElement; hint: HTMLElement; summon: HTMLElement }
 export interface BookSceneOptions { cards: BookCard[]; suspense: boolean; overlay: BookOverlay; asset: (key: string) => string; onFinished: () => void }
 export interface BookSceneHandle { dispose(): void }
 /** textures the animatic declared but never shows: they share one 1 px image */
 const BLANK_KEYS = ['bhCharge', 'bhLoop', 'coverInsideHd', 'pageAHd', 'pageBHd', 'pageCHd', 'pageBlankHd', 'astrolabeCore', 'astrolabeInner', 'astrolabeMiddle', 'astrolabeOuter', 'balconyRail', 'domeCeiling', 'floorMarble', 'fxCandleFlame', 'fxPageWisp', 'goldTrim', 'ledgeTrim', 'marbleWhite', 'oculusSky', 'pillarWood', 'shelfWall', 'shelfWallAlt'];
-const ART_KEYS = { card: 'card.jpg', card3: 'card3.jpg', glyphs: 'glyphs.webp', burst: 'burst.webp', pillarBlue: 'pillarBlue.webp', pillarGold: 'pillarGold.webp', orbCard: 'orbCard.webp', coverFrontHd: 'coverFrontHd.webp', lSky: 'lSky.webp', plateC: 'plateC.webp', fxRaysB: 'fxRaysB.webp', fxRaysG: 'fxRaysG.webp', fxBurstB: 'fxBurstB.webp', fxBurstG: 'fxBurstG.webp', fxUpgrade: 'fxUpgrade.webp', fxFlareG: 'fxFlareG.webp', bookBack: 'bookBack.webp', bookSpine: 'bookSpine.webp', plateA: 'plateA.webp', circleOuter: 'circleOuter.webp', circleInner: 'circleInner.webp', pageEdgeHd: 'pageEdgeHd.webp', bookCovers: 'bookCovers.webp', bookSpines: 'bookSpines.webp', fxOculusFlare: 'fxOculusFlare.webp' };
 
 export async function mountBookScene(host: HTMLElement, opts: BookSceneOptions): Promise<BookSceneHandle> {
 let disposed = false, raf = 0;
@@ -726,30 +726,33 @@ function updateShot2(T2, u, dt) {
     const ob = seg(u, t0 + .45, t0 + 1.05); c.bloom.set(ob * 12, ob > 0 && ob < 1 ? (g3 ? .85 : .45) : 0, at, w / .44);
     const k = seg(u, t0 + .68, t0 + 1.0), e = eoBack(k);
     const rs = revealAt(i), fl = isFinite(rs) ? eio(seg(u, rs, rs + .45)) : 0, wait = g3 ? seg(u, goldWaitAt(), goldWaitAt() + .8) * (u < rs + .3 ? 1 : 0) : 0, pop = g3 ? bump(u, rs + .3, .35) : 0;
-    const lift = (g3 ? .12 * eio(wait) - (isFinite(rs) ? .12 * eio(seg(u, rs + .3, rs + .8)) : 0) : 0), shk = wait * wait * (.004 + .004 * Math.max(0, Math.sin(T2 * 2.4)));
+    const lift = (g3 ? .12 * eio(wait) - (isFinite(rs) ? .12 * eio(seg(u, rs + .3, rs + .8)) : 0) : 0), shk = 0; // no per-frame jitter (user 2026-11-22: the waiting gold cards flickered)
     c.m.visible = k > 0; c.m.position.copy(at); c.m.position.y += lift + (rnd() - .5) * shk; c.m.position.x += (rnd() - .5) * shk; c.m.scale.setScalar(w * Math.min(1.05, e) * (1 + .12 * pop + .06 * wait));
     c.m.quaternion.copy(camera.quaternion).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(T2 * .5 + i) * .05 * k * (1 - fl), (1 - eio(k)) * Math.PI * .55 + Math.sin(T2 * .7 + i * 1.3) * .06 * k * (1 - fl) + fl * Math.PI, (1 - eio(k)) * .25)));
     c.m.userData.body.material = g3 ? rimMat : rimDark; c.m.userData.body.scale.set(g3 ? 1 : .978, g3 ? 1 : .985, 1); /* plain cards: only a thin grey edge shows */ c.face.material.map = g3 ? T.card3 : T.card; if (!card.tex) card.tex = cardFace(card.hero, card.star); c.back.material.map = card.tex; c.face.material.opacity = c.back.material.opacity = Math.min(1, k * 2);
     c.sheen.visible = false; // no shimmer on the cards
-    c.glow.visible = g3 && pop > .02; c.glow.position.copy(at).addScaledVector(camera.getWorldDirection(tmp), .05); c.glow.scale.setScalar(w * (2.4 + 1.6 * pop)); c.glow.material.color.copy(col).multiplyScalar(.5 * pop); c.glow.material.opacity = Math.min(1, k * 2);
-    c.aura.visible = g3 && k > 0; if (c.aura.visible) { c.aura.position.copy(c.m.position).addScaledVector(camera.getWorldDirection(tmp), .04); c.aura.quaternion.copy(camera.quaternion); c.aura.scale.set(w * 1.75 * (1 + .1 * pop), w * 1.6 * 1.5 * (1 + .1 * pop), 1); c.aura.renderOrder = 39.5; c.aura.material.uniforms.time.value = T2; c.aura.material.uniforms.amt.value = Math.min(1, k * 2) * (.75 + wait * (.5 + .2 * Math.sin(T2 * 3)) + .8 * pop); }
-    if (g3 && k > 0 && once('land' + i)) sparks.emit(40, at, col, { speed: 1.6, life: .7 });
+    // a steady soft gold glow behind every 3★ card, breathing slowly (the dark smoke / flame aura read as a black-edged mosaic at card size and flickered on ten cards)
+    const breathe = .5 + .5 * Math.sin(T2 * 1.1 + i * .7); c.glow.visible = g3 && k > 0; c.glow.position.copy(c.m.position).addScaledVector(camera.getWorldDirection(tmp), -.02); c.glow.scale.set(w * (1.9 + .25 * breathe + 1.2 * pop), w * 1.5 * (1.75 + .2 * breathe + 1.0 * pop), 1); c.glow.material.color.copy(col).multiplyScalar(.16 + .06 * breathe + .1 * eio(wait) + .45 * pop); c.glow.material.opacity = Math.min(1, k * 2);
+    c.aura.visible = false;
+    if (g3 && k > 0 && once('land' + i)) sparks.emit(10, at, col, { speed: 1.2, life: .6 });
     if (g3 && u > rs + .3 && once('pop' + i)) { sparks.emit(160, at, col, { speed: 2.6, life: 1, drag: 1.2 }); embers.emit(50, at, col, { speed: 1.2, life: 1.3, grav: .3 }); }
   });
   bookLight.intensity = 0;
 }
 
 // ---------------------------------------------------------------- UI overlay (owned by the Angular component)
-const { cine, cineQuote, cineBan, cineImg, cineEp, cineTh, cineEn, cineTap, cap, hint } = opts.overlay;
+const { cine, cineQuote, cineBan, cineImg, cineEp, cineTh, cineEn, cineTap, cap, hint, summon } = opts.overlay;
 function captionOf(u) {
   const w = (t, a, b) => seg(t, a, a + .45) * (1 - seg(t, b - .45, b));
-  if (u == null) return ['', '', 0];
+  if (u == null) return ['หอดาราจารึกแห่งเอลเดอร์เวย์น ตำราวีรชนรอผู้อัญเชิญ', 'THE ASTRAL ARCHIVE', w(S.intro, .8, 9e9)];
   const list = [[S.up && S.top === 3 && u > TS + .1 ? 'แสงแปรเป็นทอง · วีรชนผู้ยิ่งใหญ่กำลังมา' : S.top === 3 ? 'แสงทองตื่นขึ้นบนผนึกโบราณ' : 'แสงไหลตามลวดลายโบราณบนปก', 'THE ARCANE SEAL AWAKENS', TL.trace[0], TL.burst]];
   for (const [a, b, s0, s1] of list) { const o = w(u, s0, s1); if (o > 0) return [a, b, o]; }
   return ['', '', 0];
 }
 let lastCap = '', shownHero = -1, finished = false;
-function ui(u) {
+function ui(u, cc) {
+  const show = u == null && S.intro > 1.2; summon.hidden = !show;
+  if (show && cc) { const p = cc.clone().project(camera), r = renderer.domElement.getBoundingClientRect(), hr = host.getBoundingClientRect(); summon.style.left = (r.left - hr.left + (p.x + 1) / 2 * r.width) + 'px'; summon.style.top = (r.top - hr.top + (1 - p.y) / 2 * r.height) + 'px'; }
   const [a, b, o] = captionOf(u); if (a !== lastCap && a) { cap.querySelector('b').textContent = a; cap.querySelector('small').textContent = b; lastCap = a; } cap.style.opacity = o.toFixed(3);
   // the current gold card's intro: black, the hero's line, then the banner with both names
   const k = cineIndex(), gi = k >= 0 ? goldIdx()[k] : -1, cv = u == null || gi < 0 ? -1 : u - (S.goldTaps[k] - S.tap);
@@ -774,19 +777,19 @@ function resize() { const W = host.clientWidth, H = host.clientHeight; if (!W ||
   const rw = Math.round(Math.min(w, 1920)), rh = Math.round(rw * 9 / 16); renderer.setSize(rw, rh, false); composer.setSize(rw, rh); bloom.setSize(rw, rh); }
 function step(raw) {
   resize(); const dt = raw * S.speed; S.T += dt; if (S.tap == null) S.intro += dt;
-  if (S.tap == null && S.intro > .6) tap(); // the player already chose to summon: a short look at the archive, then the book wakes
   const u = S.tap == null ? null : S.T - S.tap;
-  if (u == null || u < TL.cut) updateShot1(S.T, u, dt); else updateShot2(S.T, u, dt);
+  const cc = u == null || u < TL.cut ? updateShot1(S.T, u, dt) : (updateShot2(S.T, u, dt), null);
   sparks.step(dt); embers.step(dt); grade.uniforms.uTime.value = S.T % 10;
-  composer.render(dt); ui(u);
+  composer.render(dt); ui(u, cc);
 }
 let last = 0;
 function frame(now) { if (disposed) return; const raw = last ? clamp((now - last) / 1000, 0, .1) : 0; last = Math.max(last, now); step(raw); raf = requestAnimationFrame(frame); }
 function tap() { if (S.tap != null) return; retime(); S.goldTaps = []; S.cineClosed = []; S.tap = S.T; S.once.clear(); makeCards(); }
 function closeCine() { const k = cineIndex(); if (cineActive() && S.T - S.goldTaps[k] > 3.9) S.cineClosed[k] = S.T; }
-const onCanvas = () => { if (S.tap == null) return; if (goldWaiting()) S.goldTaps.push(S.T); else closeCine(); };
+const onCanvas = () => { if (S.tap == null) { if (S.intro < 1.2) S.intro = 1.3; else tap(); return; } if (goldWaiting()) S.goldTaps.push(S.T); else closeCine(); };
 const onCine = e => { e.stopPropagation(); closeCine(); };
-renderer.domElement.addEventListener('click', onCanvas); cine.addEventListener('click', onCine);
+const onSummon = e => { e.stopPropagation(); tap(); };
+renderer.domElement.addEventListener('click', onCanvas); cine.addEventListener('click', onCine); summon.addEventListener('click', onSummon);
 fg.traverse(o => { if (o.isSprite || o.isPoints) fxHide.push(o); });
 
 { // reflections come from the library itself: bake the room once into the environment map
@@ -798,7 +801,7 @@ raf = requestAnimationFrame(frame);
 
 return { dispose() {
   if (disposed) return; disposed = true; cancelAnimationFrame(raf);
-  renderer.domElement.removeEventListener('click', onCanvas); cine.removeEventListener('click', onCine);
+  renderer.domElement.removeEventListener('click', onCanvas); cine.removeEventListener('click', onCine); summon.removeEventListener('click', onSummon);
   const seen = new Set();
   const free = m => { if (!m || seen.has(m)) return; seen.add(m); for (const v of Object.values(m)) if (v && v.isTexture) v.dispose(); if (m.uniforms) for (const un of Object.values(m.uniforms)) if (un.value && un.value.isTexture) un.value.dispose(); m.dispose(); };
   for (const sc of [bg, fg]) sc.traverse(o => { o.geometry?.dispose(); (Array.isArray(o.material) ? o.material : [o.material]).forEach(free); });
