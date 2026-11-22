@@ -2,6 +2,10 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Summon page layout B — Claude, 2026-11-22
+
+Branch `feature/claude-summon-banner-page` from origin/master 0682c86, not merged and awaiting review. The idle `/gacha` page now shows the user-chosen layout B: a full-screen featured banner (Lucien, illustration only, no rate-up), a pool-tab rail with an event placeholder, pills for rates/pool/memory, and a pity box with ×1/×10 buttons. Summon logic, dialogs and the cinematic are unchanged. Details are in CLAUDE.md. Codex's unmerged `wip/codex-isometric-summon` touches the first line of `gacha.component.html`. Confirmed local/cloud synchronization metadata is unchanged.
+
 ## K7 home art and animation — Codex, 2026-11-19
 
 Work branch `wip/codex-home-k7-art` starts from the merged K7 home at `origin/master`. The user asked to carry out [the art spec](art/HOME_K7_ART_SPEC.md). ImageGen produced all 40 production PNGs for the right-hand cards, bottom dock and menu utilities, including four VFX sheets. Runtime files are in `public/ui/home-k7/`. Regenerate them from the tracked source pack with `python3 tools/ui/import_home_k7.py` (Pillow and NumPy).

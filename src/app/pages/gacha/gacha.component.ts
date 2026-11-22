@@ -1,7 +1,6 @@
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
 import { HeroClass } from '../../core/models/hero';
-import { SummonCampaign, SummonCampaignComponent } from './summon-campaign.component';
-import { SummonVfxComponent } from './summon-vfx.component';
+import { SummonCampaign } from './summon-campaign.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
@@ -15,12 +14,17 @@ import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
 import { SummonPull, SummonSceneComponent } from './summon-scene.component';
 import { heroArt } from '../../core/data/hero-art';
-import { SummonSanctumComponent } from './summon-sanctum.component';
 
-/** Summon gate: base rarity 1★–3★ · pity · duplicates → Hero Memory (develop any hero to 6★ on its detail page) */
+/**
+ * Featured art of the standard pool (illustration only: no rate-up). The epithet / Latin name are display copy for
+ * the banner name plate; a missing or unknown hero falls back to the first roster hero that has banner art.
+ */
+const FEATURED = { id: 'lucien', epithet: 'THE BLACK SAINT', latin: 'Lucien Valthorne' };
+
+/** Summon gate (layout B, user 2026-11-22): full-screen featured banner, pool tabs, pity + ×1/×10. Base rarity 1★–3★ · pity · duplicates → Hero Memory (develop any hero to 6★ on its detail page) */
 @Component({
   selector: 'app-gacha',
-  imports: [CitadelIconComponent, SummonCampaignComponent, SummonVfxComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonSceneComponent, SummonSanctumComponent],
+  imports: [CitadelIconComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonSceneComponent],
   templateUrl: './gacha.component.html',
   styleUrl: './gacha.component.scss',
 })
@@ -41,7 +45,16 @@ export class GachaComponent {
   readonly pool = HEROES.map(h => ({ ...h, portrait: heroArt(h.id)?.portrait, className: CLASS_NAME[h.cls] }));
   readonly classIcon = (cls: HeroClass) => ({ tank: 'class-tank', fighter: 'class-fighter', assassin: 'class-assassin', archer: 'class-archer', mage: 'class-mage', healer: 'class-healer' })[cls];
   readonly preview = this.pool.slice(0, 5);
-  readonly showcase = heroArt(HEROES[0]?.id)?.banner;
+  private readonly featuredId = HERO_BY_ID[FEATURED.id] && heroArt(FEATURED.id)?.banner ? FEATURED.id : HEROES.find(h => heroArt(h.id)?.banner)?.id;
+  readonly featured = this.featuredId ? {
+    name: HERO_BY_ID[this.featuredId].name,
+    epithet: this.featuredId === FEATURED.id ? FEATURED.epithet : '',
+    latin: this.featuredId === FEATURED.id ? FEATURED.latin : this.featuredId.charAt(0).toUpperCase() + this.featuredId.slice(1),
+  } : null;
+  readonly showcase = heroArt(this.featuredId)?.banner;
+  private readonly reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /** looping banner video while idle; paused out of the DOM during the summon cinematic, still under reduced motion */
+  readonly featuredVideo = computed(() => (this.reducedMotion || this.playing() ? undefined : heroArt(this.featuredId)?.bannerVideo));
   readonly campaign: SummonCampaign = { id: 'standard', kind: 'standard', label: 'อัญเชิญปกติ', title: 'เสียงเรียกแห่งดวงดาว', subtitle: 'เหล่าวีรชนแห่งเอลเดอร์เวย์น', art: this.showcase };
   readonly infoDialog = viewChild.required<ElementRef<HTMLDialogElement>>('infoDialog');
   readonly resultsDialog = viewChild.required<ElementRef<HTMLDialogElement>>('resultsDialog');
@@ -61,6 +74,7 @@ export class GachaComponent {
   readonly gems = computed(() => this.save.state().gems);
   /** pulls left until the guaranteed 3★ */
   readonly pityLeft = computed(() => GACHA.pity - (this.save.state().pity ?? 0));
+  readonly rate3 = Math.round((GACHA.rates[3] ?? 0) * 100);
   readonly rates = Object.entries(GACHA.rates).map(([star, r]) => ({ star: +star, pct: Math.round(r * 100), count: HEROES.filter(h => h.star === +star).length }));
   readonly dupMemory = Object.entries(DUPLICATE_MEMORY).map(([star, m]) => ({ star: +star, m }));
   readonly toSix = Object.values(STAR_UP_COST).slice(2).reduce((a, b) => a + b, 0);

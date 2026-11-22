@@ -16,6 +16,15 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Summon page layout B — hero banner (2026-11-22, Claude)
+
+Branch `feature/claude-summon-banner-page` from origin/master 0682c86. The user picked concept B of three summon-page mockups (claude.ai design canvas): a full-screen featured hero banner over a dark left/bottom fade. The idle `/gacha` page is rebuilt; confirm, results, rates, pool, memory and banner dialogs, the summon cinematic and all summon rules are unchanged.
+- Featured art = `FEATURED` in `gacha.component.ts` (Lucien, epithet THE BLACK SAINT, Latin name). It is illustration only (no rate-up), and the name plate says so. If the id or its banner is missing, the first roster hero with a banner is used. `bannerVideo` plays muted and looping; it is removed during the cinematic and shows the still under reduced motion.
+- Left rail: the standard pool tab (opens the banner details dialog) and a disabled placeholder event tab marked "เร็ว ๆ นี้". Title, pool facts (count, 3★ rate from `GACHA.rates`, duplicates → Memory) and the name plate. Pills for rates, pool and memory, plus last results when they exist. Bottom right: a glass pity box (progress, pulls left, the ×10 2★+ note) and pill ×1/×10 buttons that keep the `.summon-button`/`.price` hooks.
+- The idle page no longer uses `app-summon-sanctum`, the ambient `app-summon-vfx` or `app-summon-campaign`. Their files remain. The banner dialog notice now names the featured hero instead of the hard-coded Bai Long.
+- Layout: three columns on desktop; two columns at ≤1000 px; a one-screen fit for short landscape (≤500 px tall, top padding 84 px for the 72 px phone bar); stacked on portrait phones. The art box starts at 16vw (≤260 px) with object-position 0% 0% on desktop, so the hero sits right of the text and the head is never cropped. Portrait uses 50% 0%.
+- Codex's unmerged `wip/codex-isometric-summon` adds a preload line at the top of `gacha.component.html`; a merge needs that one line reapplied.
+
 ## Animated Kael banner + home banner picker (2026-11-20, Claude)
 
 Branch `feature/claude-home-banner-picker` from origin/master 4009069. User supplied `knight_idle_loop_smooth.mp4` (1728×992, 48 fps, 5.4 s loop) to replace Kael's banner. Original kept unchanged at `assets/ui/banner-video-2026-11-20/kael_idle_loop_source.mp4` (SHA256 c5ed8748…a6ef9b). Runtime `public/banners/kael.mp4` = ffmpeg H.264 1600×918, CRF 25, no audio, faststart (~2.1 MB). `public/banners/kael.webp` is now that video's first frame (1600×918, cwebp q92), used as the poster, the hero-detail still and the reduced-motion fallback. Re-running `tools/dev/import_hero_ui_art.py` would put back the old still, so skip `kael` there. New generic `HeroArt.bannerVideo`; only Kael sets it.

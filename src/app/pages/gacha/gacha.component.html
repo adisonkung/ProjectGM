@@ -1,25 +1,47 @@
-<section class="gate" [class.summoning]="playing()" aria-label="วิหารอัญเชิญ">
-  <app-summon-sanctum [paused]="playing()" [showFloatingCards]="false" />
-  @if (showcase) { <div class="summon-showcase" aria-hidden="true"><img [src]="showcase" alt="" decoding="async" /></div> }
-  <app-summon-vfx mode="ambient" [paused]="playing()" />
+<section class="gate" [class.summoning]="playing()" aria-label="ตู้อัญเชิญ">
+  <div class="key-art" aria-hidden="true">
+    @if (featuredVideo(); as v) {
+      <video [src]="v" [poster]="showcase" [muted]="true" autoplay loop playsinline disablepictureinpicture preload="auto"></video>
+    } @else if (showcase) { <img [src]="showcase" alt="" fetchpriority="high" decoding="async" /> }
+  </div>
   <div class="summon-ui">
-    <aside class="hero-pool campaign-column" aria-label="แบนเนอร์ตู้อัญเชิญ">
-      <header class="campaign-heading"><span class="eyebrow">SUMMON · CELESTIAL SANCTUM</span><h1>ประตูอัญเชิญ</h1><p>เรียกวีรชนร่วมเดินทาง สู่ยอดหอคอย</p></header>
-      <app-summon-campaign [campaign]="campaign" (details)="openInfo('banner')" />
-      <nav class="pool-tools" aria-label="ข้อมูลการอัญเชิญ"><button type="button" aria-label="รายละเอียดอัตรา" (click)="openInfo('rates')"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="scroll" [size]="20" /><span>อัตราอัญเชิญ</span></button><button type="button" aria-label="รายชื่อฮีโร่" (click)="openInfo('pool')"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="heroes" [size]="20" /><span>รายชื่อฮีโร่</span></button><button type="button" aria-label="ความทรงจำฮีโร่" (click)="openInfo('memory')"><app-tower-ornament [grooved]="true" [arrow]="true" /><app-icon name="book" [size]="20" /><span>ความทรงจำ</span></button></nav>
-      @if (results().length && !playing()) { <button type="button" class="last-results" (click)="openResults()"><app-icon name="restart" [size]="16" />ดูผลครั้งล่าสุด</button> }
-    </aside>
+    <nav class="banner-rail" aria-label="ตู้อัญเชิญ">
+      <button type="button" class="banner-tab active" aria-current="true" (click)="openInfo('banner')"><span class="tab-art">@if (showcase) { <img [src]="showcase" alt="" /> }</span><b>{{ campaign.label }}</b></button>
+      <button type="button" class="banner-tab soon" disabled><span class="tab-art"><app-icon name="lock" [size]="18" /></span><span class="tab-text"><b>ตู้กิจกรรม</b><small>เร็ว ๆ นี้</small></span></button>
+    </nav>
+    <header class="banner-heading">
+      <span class="eyebrow">STANDARD SUMMON</span>
+      <h1>{{ campaign.title }}</h1>
+      <p class="banner-facts">วีรชน {{ pool.length }} คนในตู้ · อัตรา 3★ {{ rate3 }}% · ตัวซ้ำเป็น Hero Memory</p>
+      @if (featured; as f) {
+        <button type="button" class="name-plate" (click)="openInfo('banner')" aria-label="ดูรายละเอียดตู้อัญเชิญ">
+          @if (f.epithet) { <span class="epithet">{{ f.epithet }}</span> }
+          <b>{{ f.name }}</b>
+          <span class="latin">{{ f.latin }}</span>
+          <small>ภาพประกอบตู้ · ไม่เพิ่มโอกาสได้รับ</small>
+        </button>
+      }
+    </header>
+    <nav class="pool-tools" aria-label="ข้อมูลการอัญเชิญ">
+      <button type="button" (click)="openInfo('rates')"><app-icon name="scroll" [size]="17" />อัตราอัญเชิญ</button>
+      <button type="button" (click)="openInfo('pool')"><app-icon name="heroes" [size]="17" />รายชื่อฮีโร่</button>
+      <button type="button" (click)="openInfo('memory')"><app-icon name="book" [size]="17" />ความทรงจำ</button>
+      @if (results().length && !playing()) { <button type="button" (click)="openResults()"><app-icon name="restart" [size]="17" />ผลครั้งล่าสุด</button> }
+    </nav>
     <section class="summon-footer" aria-label="อัญเชิญฮีโร่">
-      <div class="pity-panel framed citadel-surface"><app-tower-ornament [grooved]="true" [ornate]="true" [crimson]="false" />
-        <header><app-icon name="star" [size]="24" /><b>การันตีระดับ <span>3★</span></b><button type="button" aria-label="ดูเงื่อนไขการันตีและอัตรา" (click)="openInfo('rates')" class="citadel-surface citadel-control"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" />?</button></header>
-        <div class="pity-progress"><div class="pity-rail" role="progressbar" aria-label="ความคืบหน้าการันตี" aria-valuemin="0" [attr.aria-valuemax]="G.pity" [attr.aria-valuenow]="pity()"><i [style.width.%]="pity() / G.pity * 100"></i></div><b>{{ pity() }} <small>/ {{ G.pity }}</small></b></div>
-        <p>ภายในอีก {{ pityLeft() }} ครั้ง · ×10 ได้ระดับ 2★+ อย่างน้อย 1 ครั้ง</p>
-
+      <div class="pity-box">
+      <div class="pity">
+        <b>การันตี 3★</b>
+        <div class="pity-rail" role="progressbar" aria-label="ความคืบหน้าการันตี" aria-valuemin="0" [attr.aria-valuemax]="G.pity" [attr.aria-valuenow]="pity()"><i [style.width.%]="pity() / G.pity * 100"></i></div>
+        <span>อีก {{ pityLeft() }} ครั้ง</span>
+        <button type="button" class="pity-help" aria-label="ดูเงื่อนไขการันตีและอัตรา" (click)="openInfo('rates')">?</button>
+      </div>
+      <p class="pity-note">×10 ได้ 2★ ขึ้นไปอย่างน้อย 1 ตัวเสมอ</p>
       </div>
       @if (error(); as e) { <p class="err" role="alert">{{ e }}</p> }
       <div class="acts">
-        <button type="button" class="summon-button single citadel-surface citadel-control" (click)="summon(1)" [disabled]="playing() || !canAfford(1)"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" /><b>อัญเชิญ 1 ครั้ง</b><span class="price"><app-icon name="gem" [size]="22" /> {{ G.single }}</span><small>{{ freeSummons ? 'ทดสอบฟรี · ไม่หักเพชร' : 'SUMMON ×1' }}</small></button>
-        <button type="button" class="summon-button multi citadel-surface citadel-control" (click)="summon(10)" [disabled]="playing() || !canAfford(10)"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><b>อัญเชิญ 10 ครั้ง</b><span class="price"><app-icon name="gem" [size]="22" /> {{ G.multi }}</span><small>{{ freeSummons ? 'ทดสอบฟรี · ไม่หักเพชร' : 'SUMMON ×10' }}</small></button>
+        <button type="button" class="summon-button single" (click)="summon(1)" [disabled]="playing() || !canAfford(1)"><b>อัญเชิญ ×1</b><span class="price"><app-icon name="gem" [size]="16" /> {{ G.single }}</span></button>
+        <button type="button" class="summon-button multi" (click)="summon(10)" [disabled]="playing() || !canAfford(10)"><b>อัญเชิญ ×10</b><span class="price"><app-icon name="gem" [size]="16" /> {{ G.multi }}</span></button>
       </div>
       @if (freeSummons) { <span class="funds-note" role="status">อัญเชิญฟรีชั่วคราวสำหรับทดสอบ · แสดงราคาเดิม แต่ไม่หักเพชร</span> }
       @if (!freeSummons && gems() < G.single) { <span class="funds-note">เพชรไม่พอสำหรับอัญเชิญ · ต้องใช้ {{ G.single }} เพชร</span> }
@@ -32,10 +54,10 @@
   <header class="dialog-heading">@if (info() !== 'banner') { <app-citadel-icon class="information-emblem" [name]="info() === 'memory' ? 'compass' : 'tower'" [size]="57" /> }<div class="information-title"><h2 id="summon-info-title">{{ info() === 'banner' ? 'รายละเอียดตู้อัญเชิญ' : info() === 'pool' ? 'รายชื่อฮีโร่ในตู้' : info() === 'memory' ? 'ความทรงจำฮีโร่' : 'อัตราและเงื่อนไขอัญเชิญ' }}</h2>@if (info() !== 'banner') { <p>{{ info() === 'pool' ? 'ฮีโร่ทั้งหมดที่สามารถอัญเชิญได้' : info() === 'memory' ? 'รายละเอียดการได้รับและการใช้งานความทรงจำฮีโร่' : info() === 'rates' ? 'รายละเอียดอัตราการได้รับ และเงื่อนไขการอัญเชิญ' : 'ตู้อัญเชิญปกติ' }}</p> }</div>@if (info() === 'pool') { <span class="information-count">{{ pool.length }} / {{ pool.length }}</span> }<button type="button" class="close citadel-surface citadel-control" aria-label="ปิดข้อมูล" (click)="closeInfo()" autofocus><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" /><app-icon name="close" [size]="24" /></button></header>
   <div class="modal-body">
   @if (info() === 'banner') {
-    <div class="banner-details-art">@if (showcase) { <img [src]="showcase" alt="ภาพประกอบไป๋หลง" /> }<div><span class="eyebrow">STANDARD SUMMON</span><h3>{{ campaign.title }}</h3><p>{{ campaign.subtitle }}</p></div></div>
+    <div class="banner-details-art">@if (showcase) { <img [src]="showcase" [alt]="featured?.name ?? ''" /> }<div><span class="eyebrow">STANDARD SUMMON</span><h3>{{ campaign.title }}</h3><p>{{ campaign.subtitle }}</p></div></div>
     <p class="dialog-intro">อัญเชิญปกติ · ฮีโร่ในตู้ {{ pool.length }} ตัว · ไม่มี Rate Up หรือการันตีฮีโร่เฉพาะตัว</p>
     <div class="hero-lineup">@for (h of preview; track h.id) { <button type="button" class="pool-card" (click)="openInfo('pool')" [attr.aria-label]="'ดูรายชื่อในตู้ ' + h.name"><app-citadel-frame [cut]="8" />@if (h.portrait) { <img [src]="h.portrait" alt="" /> }<span><small>{{ stars(h.star) }}</small><b>{{ h.name }}</b></span></button> }</div>
-    <p class="pool-notice">ภาพไป๋หลงเป็นภาพประกอบตู้ปกติ ไม่ได้เพิ่มโอกาสได้รับฮีโร่ตัวนี้ @if (freeSummons) { เปิดทดสอบฟรีชั่วคราว ไม่หักเพชร }</p>
+    <p class="pool-notice">ภาพ{{ featured?.name }}เป็นภาพประกอบตู้ปกติ ไม่ได้เพิ่มโอกาสได้รับฮีโร่ตัวนี้ @if (freeSummons) { เปิดทดสอบฟรีชั่วคราว ไม่หักเพชร }</p>
     <nav class="pool-tools" aria-label="รายละเอียดตู้"><button type="button" (click)="openInfo('rates')"><app-tower-ornament [grooved]="true" [arrow]="true" />อัตราและราคา</button><button type="button" (click)="openInfo('pool')"><app-tower-ornament [grooved]="true" [arrow]="true" />ฮีโร่ทั้งหมด</button><button type="button" (click)="openInfo('memory')"><app-tower-ornament [grooved]="true" [arrow]="true" />Hero Memory</button></nav>
   } @else if (info() === 'pool') {
     <p class="dialog-intro pool-intro">ตู้อัญเชิญปกติ · ไม่มี Rate Up หรือการันตีฮีโร่เฉพาะตัว</p>
