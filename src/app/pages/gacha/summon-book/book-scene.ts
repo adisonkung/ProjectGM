@@ -64,7 +64,7 @@ renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.domElement.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);cursor:pointer;touch-action:manipulation'; host.prepend(renderer.domElement);
-const bg = new THREE.Scene(), fg = new THREE.Scene();
+const bg = new THREE.Scene(), fg = new THREE.Scene(), auraScene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(35, 16 / 9, .05, 300);
 const pmrem = new THREE.PMREMGenerator(renderer); fg.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
 const composer = new EffectComposer(renderer);
@@ -80,7 +80,10 @@ const grade = new ShaderPass({
       c.rgb += uFlash; c.rgb += (rnd(vUv * vec2(1280., 720.) + uTime) - .5) * .03; gl_FragColor = c; }` });
 const bokeh = new BokehPass(fg, camera, { focus: 4, aperture: .001, maxblur: .007 }), fxHide = [];
 { const r = bokeh.render.bind(bokeh); bokeh.render = (...a) => { const v = fxHide.map(o => o.visible); fxHide.forEach(o => o.visible = false); r(...a); fxHide.forEach((o, i) => o.visible = v[i]); }; }
-composer.addPass(bgPass); composer.addPass(fgPass); composer.addPass(bokeh); composer.addPass(bloom); composer.addPass(grade); composer.addPass(new OutputPass());
+// The aura has a transparent card-shaped centre. Draw it after DOF: BokehPass's override material
+// otherwise turns the whole transparent plane into a sharp depth rectangle around the moving card.
+const auraPass = new RenderPass(auraScene, camera); auraPass.clear = false; auraPass.clearDepth = true;
+composer.addPass(bgPass); composer.addPass(fgPass); composer.addPass(bokeh); composer.addPass(auraPass); composer.addPass(bloom); composer.addPass(grade); composer.addPass(new OutputPass());
 
 // ---------------------------------------------------------------- textures
 const T = {};
@@ -565,27 +568,27 @@ function cardFace(hero, star) { return canvasTex(800, 1200, (g, W, H) => { const
   if (gold) for (const [cx, cy, sx, sy] of [[26, 26, 1, 1], [W - 26, 26, -1, 1], [26, H - 26, 1, -1], [W - 26, H - 26, -1, -1]]) { g.save(); g.translate(cx, cy); g.scale(sx, sy); g.fillStyle = fr; g.beginPath(); g.moveTo(0, 0); g.lineTo(70, 0); g.quadraticCurveTo(26, 6, 0, 70); g.closePath(); g.fill(); g.fillStyle = '#fff1c4'; g.beginPath(); g.arc(18, 18, 6, 0, Math.PI * 2); g.fill(); g.restore(); }
   }); }
 // a living aura for the gold card: dark smoke with gold fire licking up around the edges
-const auraMat = () => new THREE.ShaderMaterial({ uniforms: { time: { value: 0 }, amt: { value: 0 } }, transparent: true, depthWrite: true, toneMapped: false, // writes depth so the depth of field keeps it sharp with its card
+const auraMat = () => new THREE.ShaderMaterial({ uniforms: { time: { value: 0 }, amt: { value: 0 } }, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false,
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
   fragmentShader: `uniform float time, amt; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
     float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f); return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
     float fbm(vec2 p){ float v = 0., a = .5; for (int i = 0; i < 5; i++) { v += a * n(p); p *= 2.03; a *= .5; } return v; }
-    void main(){ vec2 p = (vUv - .5) * vec2(1.75, 1.6); vec2 q = abs(p) - vec2(.52, .5); float d = length(max(q, 0.)) + min(max(q.x, q.y), 0.) - .04; /* distance from the card's edge */
+    void main(){ vec2 p = (vUv - .5) * vec2(1.5, 1.4); vec2 q = abs(p) - vec2(.48, .48); float d = length(max(q, 0.)) + min(max(q.x, q.y), 0.) - .04; /* match the 1.04 x 1.56 card body inside the tighter aura */
       float f = fbm(vec2(atan(p.y, p.x) * 2.2, d * 3. - time * 1.6)) + .35 * fbm(p * 5. + vec2(0., -time * 2.));
-      float reach = .1 + .22 * f * amt + .06 * max(0., p.y) * amt; float outside = smoothstep(-.015, .02, d);
-      float body = 1. - smoothstep(0., reach, d), smokeBody = 1. - smoothstep(0., reach * 1.9 + .08, d - .02 * fbm(p * 7. - vec2(0., time)));
+      float reach = .065 + .12 * f * min(amt, 1.4) + .035 * max(0., p.y) * min(amt, 1.4); float outside = smoothstep(-.015, .02, d);
+      float smokeBody = (1. - smoothstep(0., reach * 1.35 + .025, d - .02 * fbm(p * 7. - vec2(0., time)))) * (1. - smoothstep(.09, .2, d));
       float smoke = smokeBody * outside; float tongue = fbm(vec2(atan(p.y, p.x) * 6., d * 9. - time * 3.)); float flame = smoothstep(.52, .72, tongue) * smoothstep(.16, 0., d - .06 * tongue) * outside; /* thin licking tongues near the edge */ float rim = exp(-max(d, 0.) * 40.) * outside;
-      vec3 col = mix(vec3(.02, .005, .03), vec3(.07, .03, .06), fbm(p * 4. + time * .2)); col = mix(col, vec3(.95, .62, .2), clamp(flame * 1.3, 0., 1.)) + vec3(.05, .1, .1) * pow(flame, 3.) + vec3(.9, .66, .26) * rim * .55; col = min(col, vec3(.98)); /* stay under the bloom threshold: crisp flames, visible dark smoke */
-      vec2 e = min(vUv, 1. - vUv); float edge = smoothstep(0., .16, e.x) * smoothstep(0., .12, e.y); /* no quad edge */
-      gl_FragColor = vec4(col, clamp(smoke * .95 + flame + rim * .8, 0., 1.) * min(amt, 1.) * edge); }` });
+      vec3 col = mix(vec3(.02, .005, .03), vec3(.07, .03, .06), fbm(p * 4. + time * .2)); col = mix(col, vec3(.98, .68, .24), clamp(flame * 1.45, 0., 1.)) + vec3(.05, .1, .1) * pow(flame, 3.) + vec3(.95, .72, .3) * rim * .75; col = min(col, vec3(.98)); /* keep the inner gold clear without enlarging the smoke */
+      vec2 e = min(vUv, 1. - vUv); float edge = smoothstep(0., .12, e.x) * smoothstep(0., .1, e.y);
+      gl_FragColor = vec4(col, clamp(smoke * .7 + flame * 1.15 + rim * .9, 0., 1.) * min(amt, 1.) * edge); }` });
 const rimDark = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, metalness: .75, roughness: .35, envMapIntensity: 1.1 });
 const cards = Array.from({ length: 10 }, () => { const m = new THREE.Group(); m.visible = false; fg.add(m);
   const body = new THREE.Mesh(cardBody, rimMat); m.add(body); m.userData.body = body;
   const face = new THREE.Mesh(cardGeo, faceMat()); face.position.z = .032; face.renderOrder = 40; m.add(face);
   const back = new THREE.Mesh(cardGeo, faceMat()); back.position.z = -.032; back.rotation.y = Math.PI; m.add(back);
   const sheen = new THREE.Mesh(cardGeo, new THREE.MeshBasicMaterial({ map: sheenTex.clone(), alphaMap: cardMask, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: .3 })); sheen.material.map.needsUpdate = true; sheen.material.map.wrapS = sheen.material.map.wrapT = THREE.RepeatWrapping; sheen.position.z = .034; sheen.renderOrder = 41; m.add(sheen);
-  const aura = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), auraMat()); aura.renderOrder = 38; aura.visible = false; fg.add(aura);
+  const aura = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), auraMat()); aura.renderOrder = 38; aura.visible = false; auraScene.add(aura);
   return { m, face, back, sheen, aura, glow: glowSprite(new THREE.Color(1, 1, 1), 39), orb: glowSprite(new THREE.Color(1, 1, 1), 42), bloom: new Sheet(T.orbCard, 4, 3, 1.05) }; });
 // the reveal: plain cards flip first one by one, the gold card waits, flares, then flips last
 // the reveal: plain cards flip first one by one; each gold card waits for its own tap, plays its intro behind a black
@@ -735,9 +738,9 @@ function updateShot2(T2, u, dt) {
     c.m.quaternion.copy(camera.quaternion).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(T2 * .5 + i) * .05 * k * (1 - fl), (1 - eio(k)) * Math.PI * .55 + Math.sin(T2 * .7 + i * 1.3) * .06 * k * (1 - fl) + fl * Math.PI, (1 - eio(k)) * .25)));
     c.m.userData.body.material = g3 ? rimMat : rimDark; c.m.userData.body.scale.set(g3 ? 1 : .978, g3 ? 1 : .985, 1); /* plain cards: only a thin grey edge shows */ c.face.material.map = g3 ? T.card3 : T.card; if (!card.tex) card.tex = cardFace(card.hero, card.star); c.back.material.map = card.tex; c.face.material.opacity = c.back.material.opacity = Math.min(1, k * 2);
     c.sheen.visible = false; // no shimmer on the cards
-    // the dark-smoke / gold-flame aura of every 3★ card (user 2026-11-22: kept, but calmer and without a visible quad edge)
+    // Tight dark smoke / clear gold flames follow the card's size and pose, including its landing and flip.
     c.glow.visible = g3 && pop > .02; c.glow.position.copy(at).addScaledVector(camera.getWorldDirection(tmp), .05); c.glow.scale.setScalar(w * (2.4 + 1.6 * pop)); c.glow.material.color.copy(col).multiplyScalar(.5 * pop); c.glow.material.opacity = Math.min(1, k * 2);
-    c.aura.visible = g3 && k > 0; if (c.aura.visible) { c.aura.position.copy(c.m.position).addScaledVector(camera.getWorldDirection(tmp), .04); c.aura.quaternion.copy(camera.quaternion); c.aura.scale.set(w * 1.75 * (1 + .1 * pop), w * 1.6 * 1.5 * (1 + .1 * pop), 1); c.aura.renderOrder = 39.5; c.aura.material.uniforms.time.value = T2 * .5; c.aura.material.uniforms.amt.value = Math.min(1, k * 2) * (.75 + wait * (.45 + .1 * Math.sin(T2 * 1.2)) + .8 * pop); }
+    c.aura.visible = g3 && k > 0; if (c.aura.visible) { c.aura.position.copy(c.m.position).addScaledVector(camera.getWorldDirection(tmp), .04); c.aura.quaternion.copy(c.m.quaternion); c.aura.scale.set(c.m.scale.x * 1.5, c.m.scale.y * 1.4 * 1.5, 1); c.aura.renderOrder = 39.5; c.aura.material.uniforms.time.value = T2 * .5; c.aura.material.uniforms.amt.value = Math.min(1, k * 2) * (.75 + wait * (.45 + .1 * Math.sin(T2 * 1.2)) + .8 * pop); }
     if (g3 && k > 0 && once('land' + i)) sparks.emit(10, at, col, { speed: 1.2, life: .6 });
     if (g3 && u > rs + .3 && once('pop' + i)) { sparks.emit(160, at, col, { speed: 2.6, life: 1, drag: 1.2 }); embers.emit(50, at, col, { speed: 1.2, life: 1.3, grav: .3 }); }
   });
@@ -823,7 +826,7 @@ return { skip, present(pulls, suspense) {
   renderer.domElement.removeEventListener('click', onCanvas); cine.removeEventListener('click', onCine); summon.removeEventListener('click', onSummon);
   const seen = new Set();
   const free = m => { if (!m || seen.has(m)) return; seen.add(m); for (const v of Object.values(m)) if (v && v.isTexture) v.dispose(); if (m.uniforms) for (const un of Object.values(m.uniforms)) if (un.value && un.value.isTexture) un.value.dispose(); m.dispose(); };
-  for (const sc of [bg, fg]) sc.traverse(o => { o.geometry?.dispose(); (Array.isArray(o.material) ? o.material : [o.material]).forEach(free); });
+  for (const sc of [bg, fg, auraScene]) sc.traverse(o => { o.geometry?.dispose(); (Array.isArray(o.material) ? o.material : [o.material]).forEach(free); });
   Object.values(T).forEach(t => t.dispose()); mirror.dispose?.(); pmrem.dispose(); composer.dispose?.();
   renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
 } };

@@ -1,0 +1,123 @@
+[
+  {
+    "count": 1,
+    "viewport": "1280x720",
+    "pausedSceneFrames": true,
+    "movingAfterTapMs": 6700,
+    "waitingAdditionalMs": 2200,
+    "summaryViaNativeSkip": true,
+    "noAdditionalTransaction": true,
+    "waitingAuras": [
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6627078384798126,
+        "heightRatio": 1.5201900237529713,
+        "poseAligned": false
+      }
+    ],
+    "errors": [],
+    "externalFailures": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      }
+    ]
+  },
+  {
+    "count": 10,
+    "viewport": "1280x720",
+    "pausedSceneFrames": true,
+    "movingAfterTapMs": 7000,
+    "waitingAdditionalMs": 2200,
+    "summaryViaNativeSkip": true,
+    "noAdditionalTransaction": true,
+    "waitingAuras": [
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      },
+      {
+        "depthExcluded": false,
+        "depthWrite": true,
+        "widthRatio": 1.6509433962264153,
+        "heightRatio": 1.509433962264151,
+        "poseAligned": false
+      }
+    ],
+    "errors": [],
+    "externalFailures": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      }
+    ]
+  }
+]
