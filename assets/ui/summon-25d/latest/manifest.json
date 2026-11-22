@@ -1,0 +1,212 @@
+{
+  "title": "Eldervane — Latest Summon Assets",
+  "scope": "Back cover, spine, page edges and assets made after that point; latest designs only. No previous room variants or legacy 3D archive textures.",
+  "images": 22,
+  "files": [
+    {
+      "path": "book/book_cover_back.png",
+      "dimensions": [
+        1060,
+        1484
+      ],
+      "bytes": 3205070,
+      "sha256": "820941d2b936520206611866f4fc33501a08436a4194d2626bcf8b67ac2b879b"
+    },
+    {
+      "path": "book/book_page_edge.png",
+      "dimensions": [
+        1510,
+        1042
+      ],
+      "bytes": 3604326,
+      "sha256": "27118a069c328a28270cdde971ac03b15f13232ac091bd345a462222e147b2ce"
+    },
+    {
+      "path": "book/book_spine.png",
+      "dimensions": [
+        1042,
+        1510
+      ],
+      "bytes": 3109325,
+      "sha256": "ff31281389d3083f659fe203329d5bb5bc46a01ed05954a8e37531370a744c86"
+    },
+    {
+      "path": "scene-a/a_altar.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "bytes": 325081,
+      "sha256": "df20904e305bd2b0244c1b24809b9840fe1989a264bdeec8c8d3f27c1d08edb4"
+    },
+    {
+      "path": "scene-a/a_altar_hd.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "bytes": 2045912,
+      "sha256": "16e084df4775fa60009650417d4c42915c6f2ff302581fa1f59144b2ce7a9eb6"
+    },
+    {
+      "path": "scene-a/a_back.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "bytes": 2836943,
+      "sha256": "8fb91b157adf2a9ca0289b53b50b0e8ec821e873a0564823bd98f93ddeb84cf6"
+    },
+    {
+      "path": "scene-a/a_floor.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "bytes": 730248,
+      "sha256": "d305a9999539468177845f8eaf5550f2cd5d15ef1c4d6d567feb3b2cfce0965d"
+    },
+    {
+      "path": "scene-a/a_fore_left.png",
+      "dimensions": [
+        1672,
+        940
+      ],
+      "bytes": 420838,
+      "sha256": "43028fe065320cb9cac72fa31f581dc69df3e1cf299b9dfd0f39f8260e79c6bb"
+    },
+    {
+      "path": "scene-a/a_fore_right.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "bytes": 409207,
+      "sha256": "fa7518b1ac6e57d2e19446767f120158191ab9cac8edd1ec948dfaf9c26b4ad8"
+    },
+    {
+      "path": "scene-a/a_full_dais_2x.png",
+      "dimensions": [
+        3344,
+        1882
+      ],
+      "bytes": 8812617,
+      "sha256": "45b6fdf2d0ce69801dafff9b31f2ead8381e626ea172b44ec2809558fd78c7eb"
+    },
+    {
+      "path": "scene-a/a_mid.png",
+      "dimensions": [
+        1673,
+        940
+      ],
+      "bytes": 1195837,
+      "sha256": "02d815e744845c0946281776c8ecc5f851ab53d20149d97d259581c0461479d1"
+    },
+    {
+      "path": "scene-a/a_sky.png",
+      "dimensions": [
+        2172,
+        724
+      ],
+      "bytes": 2745588,
+      "sha256": "6b95b70fc992c3b313946d637e3112410024bf73c30d395cf5570955aed7e3e3"
+    },
+    {
+      "path": "scene-c/c_full.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "bytes": 3198742,
+      "sha256": "cf59c34b567c4f6f4bb8be468c8a43227e54e13042aaa14d74f452c86a50442f"
+    },
+    {
+      "path": "vfx/fx_magic_circle.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "bytes": 1706316,
+      "sha256": "506841b03c42a59f1a5790f4ee21da994e80e09b63e461b955040a7dbd78d89f"
+    },
+    {
+      "path": "vfx/fx_magic_circle_inner.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "bytes": 915429,
+      "sha256": "33f302bea2465286327e8a2ceebfc95ac36b1afc58dfdaa32b116b7bddc46c55"
+    },
+    {
+      "path": "vfx/fx_moonlight.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "bytes": 1117885,
+      "sha256": "3968e2de13524d1fddc068761fbc72ed6075695d51c6b33d8c0120bb14f37952"
+    },
+    {
+      "path": "vfx/fx_oculus_flare_gold.png",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "bytes": 1274526,
+      "sha256": "8f638ec709a914997a46bda0235f8d417f7522d3ee4ad49bb414129c61907ff7"
+    },
+    {
+      "path": "vfx/fx_seal_rays_blue.png",
+      "dimensions": [
+        1774,
+        887
+      ],
+      "bytes": 958783,
+      "sha256": "79408c31ca4e024f07cdfd65514e989f18b29fae35bff79765c75f139ef48fe6"
+    },
+    {
+      "path": "vfx/fx_seal_rays_gold.png",
+      "dimensions": [
+        1774,
+        887
+      ],
+      "bytes": 967742,
+      "sha256": "a8537387507f310695b7f41a18b5b6741167d0313d295c4bf11b2b2a16aa758d"
+    },
+    {
+      "path": "vfx/fx_sky_burst_blue.png",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "bytes": 1055314,
+      "sha256": "4a4a8f6438d6498cad8f9f9669b19f3fdc6586f2e8195e86227ba0feafdaa4fd"
+    },
+    {
+      "path": "vfx/fx_sky_burst_gold.png",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "bytes": 1103887,
+      "sha256": "bfa77c64cad8e674a433415199a836110bbf71a75ce9353c910e6b25f82858d3"
+    },
+    {
+      "path": "vfx/fx_upgrade_flare.png",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "bytes": 1118564,
+      "sha256": "a7ebeeb845de45001aa40bfcd61c6a49b1b788a2a53ac679843b915b608d10a8"
+    }
+  ],
+  "status": {
+    "master": "User-provided 3344 x 1882 2x room included",
+    "scene_a_layers": "Generated drafts, canvas normalization and pixel registration still pending",
+    "scene_c": "Low-angle master pending approval before extraction",
+    "vfx": "Generated source sheets, size/grid/runtime preparation pending"
+  },
+  "images_modified_during_packaging": false
+}
