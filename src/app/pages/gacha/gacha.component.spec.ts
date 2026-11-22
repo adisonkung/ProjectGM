@@ -4,6 +4,7 @@ import { GACHA } from '../../core/data/stars';
 import { GachaService } from '../../core/services/gacha.service';
 import { SaveService } from '../../core/services/save.service';
 import { GachaComponent } from './gacha.component';
+import { SummonBookComponent } from './summon-book/summon-book.component';
 
 describe('Summon sanctum transactions', () => {
   let freeMode: jasmine.Spy;
@@ -127,6 +128,8 @@ describe('GachaComponent', () => {
   let freeMode: jasmine.Spy;
 
   beforeEach(async () => {
+    // Test the page/transaction boundary without constructing a real WebGL renderer.
+    spyOn<any>(SummonBookComponent.prototype, 'mount').and.stub();
     localStorage.clear();
     await TestBed.configureTestingModule({ imports: [GachaComponent], providers: [provideRouter([])] }).compileComponents();
     freeMode = spyOnProperty(TestBed.inject(GachaService), 'freeSummons', 'get').and.returnValue(false);
@@ -134,6 +137,19 @@ describe('GachaComponent', () => {
     fixture = TestBed.createComponent(GachaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('prepares a hidden book on entry without rolling or spending', () => {
+    fixture.destroy();
+    const service = TestBed.inject(GachaService), summon = spyOn(service, 'summon').and.callThrough();
+    const save = TestBed.inject(SaveService), before = JSON.stringify(save.state());
+    fixture = TestBed.createComponent(GachaComponent); component = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-summon-book')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('dialog.book')?.open).toBeFalse();
+    expect(component.playing()).toBeFalse();
+    expect(summon).not.toHaveBeenCalled();
+    expect(JSON.stringify(save.state())).toBe(before);
   });
 
   it('a 10-pull spends 900 gems and shows 10 results (1★–3★ only, at least one 2★+)', () => {

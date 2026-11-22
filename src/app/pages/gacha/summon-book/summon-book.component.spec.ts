@@ -42,6 +42,7 @@ describe('SummonBookComponent', () => {
   it('back() closes once and emits done once; summonAgain() emits again', () => {
     spyOn(window, 'matchMedia').and.callFake((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList);
     const fixture = TestBed.createComponent(SummonBookComponent);
+    spyOn<any>(fixture.componentInstance, 'mount').and.stub();
     fixture.componentRef.setInput('results', [pull('bailong')]);
     let done = 0, again = 0;
     fixture.componentInstance.done.subscribe(() => done++);
@@ -53,6 +54,33 @@ describe('SummonBookComponent', () => {
     expect(done).toBe(1);
     expect(again).toBe(0);
     expect((fixture.nativeElement as HTMLElement).querySelector<HTMLDialogElement>('dialog.book')?.open).toBeFalse();
+    fixture.destroy();
+  });
+
+  it('prepares while inactive, presents only real confirmed results, and prepares again after closing', () => {
+    spyOn(window, 'matchMedia').and.returnValue({ matches: false } as MediaQueryList);
+    const fixture = TestBed.createComponent(SummonBookComponent), c = fixture.componentInstance;
+    const mount = spyOn<any>(c, 'mount').and.stub();
+    fixture.componentRef.setInput('active', false);
+    fixture.componentRef.setInput('results', []);
+    fixture.detectChanges();
+    const scene = jasmine.createSpyObj('prepared scene', ['present', 'dispose', 'skip']);
+    (c as any).handle = scene; c.loading.set(false);
+    fixture.detectChanges();
+    expect(mount).toHaveBeenCalledTimes(1);
+    expect(scene.present).not.toHaveBeenCalled();
+    expect(c.stage()!.nativeElement.open).toBeFalse();
+    fixture.componentRef.setInput('results', [pull('kael')]);
+    fixture.componentRef.setInput('suspense', false);
+    fixture.componentRef.setInput('active', true);
+    fixture.detectChanges();
+    expect(scene.present).toHaveBeenCalledOnceWith(bookCards([pull('kael')]), false);
+    expect(c.stage()!.nativeElement.open).toBeTrue();
+    c.back();
+    fixture.componentRef.setInput('active', false); fixture.detectChanges();
+    expect(scene.dispose).toHaveBeenCalledTimes(1);
+    expect(mount).toHaveBeenCalledTimes(2);
+    expect(c.stage()!.nativeElement.open).toBeFalse();
     fixture.destroy();
   });
 });

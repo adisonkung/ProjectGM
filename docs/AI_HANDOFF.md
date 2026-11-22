@@ -2,6 +2,12 @@
 
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
+## Route-entry summon preparation — in progress (Codex, 2026-11-22)
+
+User requested loading library resources upon entering /gacha, before spending gems. Branch `wip/codex-summon-preload` from origin/master0af5781. The page now retains an inactive SummonBookComponent: it downloads the lazy scene chunk and bounded decoded image cache immediately, constructs/renders the wide-room WebGL scene behind a closed dialog, then pauses its render loop/timeline. Only confirmed real pulls activate/present it. Previous1200ms delayed fire-and-forget preload and second TextureLoader download/decode path are removed. Canonical portraits are prepared; intro banners warm after critical room art without delaying room readiness. Failed images/batches can retry.
+
+Returning from a pull disposes that scene and prepares the next one; leaving the page disposes prepared/running GPU resources and guards late async completion. Reduced Motion skips room preparation and shows the existing2D fallback only after a confirmed pull. Existing artwork, camera/trace timing, rates/pity/costs, confirmation and repeat guards are unchanged. App/spec typechecks and Karma1025/1025 pass, including image sharing/decode/retry, inactive lifecycle and no-roll/no-spend entry coverage. Native browser checks/performance comparisons are in progress at `docs/reviews/summon-preload/`; do not claim measured improvement until its browser-report.json is complete. Baseline was captured on this environment's software WebGL (before-report.json), not a real-device benchmark. No master merge/deployment or confirmed sync-base update.
+
 ## Summon book cinematic in game — Claude, 2026-11-22
 
 Branch `wip/claude-summon-book` from origin/master 6562d13, not merged and awaiting the user's review. The summon cinematic is now the approved 2.5D book scene (three.js, lazy chunk), driven by real pull results; the isometric altar scene remains the reduced-motion / no-WebGL fallback. Details are in CLAUDE.md. Confirmed local/cloud synchronization metadata is unchanged.

@@ -1,7 +1,7 @@
-@if (fallback()) {
+@if (fallback() && active()) {
   <app-summon-scene [results]="results()" (done)="done.emit()" />
-} @else {
-  <dialog #stage class="book" [class.ready]="!loading()" aria-label="กำลังอัญเชิญ" (cancel)="$event.preventDefault(); back()">
+} @else if (!fallback()) {
+  <dialog #stage class="book" [class.ready]="!loading() && active()" aria-label="กำลังอัญเชิญ" (cancel)="$event.preventDefault(); back()">
     <div #host class="book-host"></div>
     <div class="cap" style="opacity: 0" aria-hidden="true"><b></b><small></small></div>
     <div class="hint" role="status" hidden></div>

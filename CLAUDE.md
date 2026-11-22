@@ -16,6 +16,12 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Route-entry summon preparation — in progress (Codex, 2026-11-22)
+
+User requested loading library resources upon entering /gacha, before spending gems. Branch `wip/codex-summon-preload` from origin/master0af5781. The page now retains an inactive SummonBookComponent: it downloads the lazy scene chunk and bounded decoded image cache immediately, constructs/renders the wide-room WebGL scene behind a closed dialog, then pauses its render loop/timeline. Only confirmed real pulls activate/present it. Previous1200ms delayed fire-and-forget preload and second TextureLoader download/decode path are removed. Canonical portraits are prepared; intro banners warm after critical room art without delaying room readiness. Failed images/batches can retry.
+
+Returning from a pull disposes that scene and prepares the next one; leaving the page disposes prepared/running GPU resources and guards late async completion. Reduced Motion skips room preparation and shows the existing2D fallback only after a confirmed pull. Existing artwork, camera/trace timing, rates/pity/costs, confirmation and repeat guards are unchanged. App/spec typechecks and Karma1025/1025 pass, including image sharing/decode/retry, inactive lifecycle and no-roll/no-spend entry coverage. Native browser checks/performance comparisons are in progress at `docs/reviews/summon-preload/`; do not claim measured improvement until its browser-report.json is complete. Baseline was captured on this environment's software WebGL (before-report.json), not a real-device benchmark. No master merge/deployment or confirmed sync-base update.
+
 ## Summon book cinematic in game (2026-11-22, Claude)
 
 Branch `wip/claude-summon-book` from origin/master 6562d13. The user asked to put the approved 2.5D animatic ("Book of Heroes · Astral Archive", claude.ai artifact) into the game in place of the isometric altar cinematic.

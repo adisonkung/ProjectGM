@@ -3,7 +3,7 @@ import { HeroClass } from '../../core/models/hero';
 import { SummonCampaign } from './summon-campaign.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
-import { Component, computed, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { formatCurrency } from '../../shared/format-currency';
 import { HERO_BY_ID, HEROES } from '../../core/data/heroes';
@@ -14,7 +14,7 @@ import { SaveService } from '../../core/services/save.service';
 import { HeroPortraitComponent } from '../../shared/hero-portrait.component';
 import { IconComponent } from '../../shared/icon.component';
 import { SummonPull } from './summon-scene.component';
-import { preloadSummonBook, SummonBookComponent } from './summon-book/summon-book.component';
+import { SummonBookComponent } from './summon-book/summon-book.component';
 import { heroArt } from '../../core/data/hero-art';
 
 /**
@@ -30,13 +30,11 @@ const FEATURED = { id: 'lucien', epithet: 'THE BLACK SAINT', latin: 'Lucien Valt
   templateUrl: './gacha.component.html',
   styleUrl: './gacha.component.scss',
 })
-export class GachaComponent implements OnDestroy {
+export class GachaComponent {
   private readonly save = inject(SaveService);
   private readonly gacha = inject(GachaService);
 
   readonly G = GACHA;
-  /** warm the summon book scene in the background so pressing summon zooms straight in */
-  private readonly warm = typeof window !== 'undefined' ? setTimeout(preloadSummonBook, 1200) : 0;
   get freeSummons(): boolean { return this.gacha.freeSummons; }
   canAfford(n: 1 | 10): boolean { return this.freeSummons || this.gems() >= (n === 10 ? GACHA.multi : GACHA.single); }
   readonly info = signal<'banner' | 'rates' | 'pool' | 'memory' | null>(null);
@@ -132,5 +130,4 @@ export class GachaComponent implements OnDestroy {
   }
   readonly portrait = (id: string) => heroArt(id)?.portrait;
   readonly stars = (n: number) => '★'.repeat(n);
-  ngOnDestroy(): void { clearTimeout(this.warm); }
 }

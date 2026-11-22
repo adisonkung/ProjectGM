@@ -13,20 +13,23 @@ import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
 import { BOOK_ART as ART_KEYS } from './book-assets';
+import { BOOK_PORTRAITS, loadBookImage } from './book-preload';
 
 /** one card of the pull, already resolved to display data */
 export interface BookCard { star: number; id: string; th: string; en: string; cls: string; epithet: string; quote: string; portrait: string; banner?: string }
 /** DOM overlay the component owns (gold-card intro, caption, hint) */
 export interface BookOverlay { cine: HTMLElement; cineQuote: HTMLElement; cineBan: HTMLElement; cineImg: HTMLImageElement; cineEp: HTMLElement; cineTh: HTMLElement; cineEn: HTMLElement; cineTap: HTMLElement; cap: HTMLElement; hint: HTMLElement; summon: HTMLElement }
-export interface BookSceneOptions { cards: BookCard[]; suspense: boolean; overlay: BookOverlay; asset: (key: string) => string; onFinished: () => void }
-export interface BookSceneHandle { dispose(): void; /** jump to the end: every card face up, summary showing */ skip(): void }
+export interface BookSceneOptions { cards: BookCard[]; suspense: boolean; prepared?: boolean; overlay: BookOverlay; asset: (key: string) => string; onFinished: () => void }
+export interface BookSceneHandle { dispose(): void; present(cards: BookCard[], suspense: boolean): void; /** jump to the end: every card face up, summary showing */ skip(): void }
 /** textures the animatic declared but never shows: they share one 1 px image */
 const BLANK_KEYS = ['bhCharge', 'bhLoop', 'coverInsideHd', 'pageAHd', 'pageBHd', 'pageCHd', 'pageBlankHd', 'astrolabeCore', 'astrolabeInner', 'astrolabeMiddle', 'astrolabeOuter', 'balconyRail', 'domeCeiling', 'floorMarble', 'fxCandleFlame', 'fxPageWisp', 'goldTrim', 'ledgeTrim', 'marbleWhite', 'oculusSky', 'pillarWood', 'shelfWall', 'shelfWallAlt'];
 
 export async function mountBookScene(host: HTMLElement, opts: BookSceneOptions): Promise<BookSceneHandle> {
-let disposed = false, raf = 0;
-const IMG = { ...Object.fromEntries(Object.entries(ART_KEYS).map(([k, f]) => [k, opts.asset(f)])), ...Object.fromEntries(BLANK_KEYS.map(k => [k, opts.asset('blank.webp')])) };
+let disposed = false, raf = 0, running = !opts.prepared;
+const IMG = { ...Object.fromEntries(Object.entries(ART_KEYS).map(([k, f]) => [k, opts.asset(f)])), ...Object.fromEntries(BLANK_KEYS.map(k => [k, opts.asset('blank.webp')])), ...Object.fromEntries(Object.entries(BOOK_PORTRAITS).map(([id, url]) => ['por_' + id, url])) };
 for (const c of opts.cards) IMG['por_' + c.id] = c.portrait;
+// Decode before allocating WebGL, then reuse the route-entry image objects without a second loader/request.
+const decoded = await Promise.all(Object.entries(IMG).map(async ([key, url]) => [key, await loadBookImage(url)]));
 
 // ---------------------------------------------------------------- helpers
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), seg = (t, a, b) => clamp((t - a) / (b - a)), lerp = (a, b, p) => a + (b - a) * p;
@@ -80,8 +83,8 @@ const bokeh = new BokehPass(fg, camera, { focus: 4, aperture: .001, maxblur: .00
 composer.addPass(bgPass); composer.addPass(fgPass); composer.addPass(bokeh); composer.addPass(bloom); composer.addPass(grade); composer.addPass(new OutputPass());
 
 // ---------------------------------------------------------------- textures
-const loader = new THREE.TextureLoader(), T = {};
-await Promise.all(Object.keys(IMG).map(async k => { const t = await loader.loadAsync(IMG[k]); t.colorSpace = k === 'glyphs' ? THREE.NoColorSpace : THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); T[k] = t; }));
+const T = {};
+for (const [k, image] of decoded) { const t = new THREE.Texture(image); t.needsUpdate = true; t.colorSpace = k === 'glyphs' ? THREE.NoColorSpace : THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); T[k] = t; }
 function canvasTex(w, h, draw) { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; }
 const glowTex = canvasTex(128, 128, (g) => { const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(.2, 'rgba(255,255,255,.6)'); r.addColorStop(.5, 'rgba(255,255,255,.15)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 128, 128); });
 const darkTex = canvasTex(128, 128, (g) => { const r = g.createRadialGradient(64, 64, 0, 64, 64, 64); r.addColorStop(0, 'rgba(4,2,12,1)'); r.addColorStop(.45, 'rgba(6,3,16,.85)'); r.addColorStop(1, 'rgba(6,3,16,0)'); g.fillStyle = r; g.fillRect(0, 0, 128, 128); });
@@ -773,7 +776,7 @@ function ui(u, cc) {
 // ---------------------------------------------------------------- loop + input
 // the canvas keeps the animatic's 16:9 frame and covers the screen (crops the long side), so every shot keeps its framing
 let lastW = 0, lastH = 0;
-function resize() { const W = host.clientWidth, H = host.clientHeight; if (!W || !H || (W === lastW && H === lastH)) return; lastW = W; lastH = H;
+function resize() { const W = host.clientWidth || innerWidth, H = host.clientHeight || innerHeight; if (!W || !H || (W === lastW && H === lastH)) return; lastW = W; lastH = H;
   const w = Math.max(W, H * 16 / 9), h = w * 9 / 16; renderer.domElement.style.width = w + 'px'; renderer.domElement.style.height = h + 'px';
   const rw = Math.round(Math.min(w, 1920)), rh = Math.round(rw * 9 / 16); renderer.setSize(rw, rh, false); composer.setSize(rw, rh); bloom.setSize(rw, rh); }
 function step(raw) {
@@ -784,7 +787,7 @@ function step(raw) {
   composer.render(dt); ui(u, cc);
 }
 let last = 0;
-function frame(now) { if (disposed) return; const raw = last ? clamp((now - last) / 1000, 0, .1) : 0; last = Math.max(last, now); step(raw); raf = requestAnimationFrame(frame); }
+function frame(now) { if (disposed || !running) return; const raw = last ? clamp((now - last) / 1000, 0, .1) : 0; last = Math.max(last, now); step(raw); raf = requestAnimationFrame(frame); }
 function tap() { if (S.tap != null) return; retime(); S.goldTaps = []; S.cineClosed = []; S.tap = S.T; S.once.clear(); makeCards(); }
 function closeCine() { const k = cineIndex(); if (cineActive() && S.T - S.goldTaps[k] > 3.9) S.cineClosed[k] = S.T; }
 const onCanvas = () => { if (S.tap == null) { if (S.intro < 1.2) S.intro = 1.3; else tap(); return; } if (goldWaiting()) S.goldTaps.push(S.T); else closeCine(); };
@@ -798,7 +801,9 @@ fg.traverse(o => { if (o.isSprite || o.isPoints) fxHide.push(o); });
   const hide = [book, shadowCatch, mirror, ...cards.map(c => c.m)]; hide.forEach(o => o.userData.v = o.visible); hide.forEach(o => o.visible = false);
   const fog = fg.fog; fg.fog = null; cube.update(renderer, fg); fg.fog = fog; hide.forEach(o => o.visible = o.userData.v);
   fg.environment = pmrem.fromCubemap(rt.texture).texture; fg.remove(cube); rt.dispose(); fxHide.push(mirror); }
-raf = requestAnimationFrame(frame);
+// Compile/upload the wide-room frame during route entry, then leave its timeline and render loop paused.
+step(0);
+if (running) raf = requestAnimationFrame(frame);
 
 // skip: every card lands face up at once, no bursts replayed, the summary shows
 function skip() {
@@ -808,7 +813,12 @@ function skip() {
   const golds = goldIdx(); S.goldTaps = golds.map(() => S.tap + goldWaitAt() - 1.4); S.cineClosed = golds.map(() => -1e6);
   S.T = S.tap + revealEnd() + .05; sparks.clear(); embers.clear();
 }
-return { skip, dispose() {
+return { skip, present(pulls, suspense) {
+  if (disposed || running) return;
+  opts.cards = pulls; opts.suspense = suspense;
+  S.n = pulls.length; S.top = pulls.some(c => c.star >= 3) ? 3 : 2; S.up = S.top === 3 && suspense;
+  running = true; last = 0; raf = requestAnimationFrame(frame);
+}, dispose() {
   if (disposed) return; disposed = true; cancelAnimationFrame(raf);
   renderer.domElement.removeEventListener('click', onCanvas); cine.removeEventListener('click', onCine); summon.removeEventListener('click', onSummon);
   const seen = new Set();
