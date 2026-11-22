@@ -16,6 +16,10 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Current UI phase — Desktop first (user instruction, 2026-11-22)
+
+The user explicitly requested deferring Mobile while pages are still being revised. Implement and visually verify Desktop only for current page/UI/flow work; collect responsive/Mobile layout and dedicated phone QA for one later pass after the main Desktop pages/flows are complete and stable, or when specifically requested. Mobile is not a completion blocker for Desktop tasks. Existing typechecks/automated regression suites still run normally. This current-phase policy is canonical in AGENTS.md, PROJECT_RULES §22 and UI_REFERENCE_RULES.md, and supersedes earlier per-task Mobile verification requirements. Mobile evidence already captured before this instruction may remain as historical evidence; do not continue dedicated Mobile work by default.
+
 ## Route-entry summon preparation — in progress (Codex, 2026-11-22)
 
 User requested loading library resources upon entering /gacha, before spending gems. Branch `wip/codex-summon-preload` from origin/master0af5781. The page now retains an inactive SummonBookComponent: it downloads the lazy scene chunk and bounded decoded image cache immediately, constructs/renders the wide-room WebGL scene behind a closed dialog, then pauses its render loop/timeline. Only confirmed real pulls activate/present it. Previous1200ms delayed fire-and-forget preload and second TextureLoader download/decode path are removed. Canonical portraits are prepared; intro banners warm after critical room art without delaying room readiness. Failed images/batches can retry.

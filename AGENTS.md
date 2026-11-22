@@ -100,3 +100,7 @@ Work produced by any agent is first-class. Never rewrite it for style or prefere
 ## UI visual matching — user-added rule (2026-10-25)
 
 Every UI change must follow [docs/UI_REFERENCE_RULES.md](docs/UI_REFERENCE_RULES.md) and PROJECT_RULES §21: match the selected reference precisely, inspect real screenshots, and send both the actual game image and its reference for direct comparison. Do not claim visual completion based on passing tests. This addition is explicitly authorized by the user.
+
+## Current phase: Desktop first, Mobile deferred (user instruction, 2026-11-22)
+
+For page, UI and interaction changes, implement and visually verify **Desktop only** for now. Do not automatically add Mobile/responsive layout work, phone/portrait/landscape browser checks or mobile screenshot deliverables. Collect that work for one later pass after the main Desktop pages and flows are complete and stable, or do it when the user specifically requests Mobile. Mobile work is not a completion requirement for current Desktop tasks. Keep required typechecks and the existing automated test suite running normally. See PROJECT_RULES §22; this phase supersedes earlier mandatory mobile UI verification requirements.

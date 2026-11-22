@@ -361,4 +361,12 @@ See `docs/ARCHITECTURE.md` → *Known architectural issues*.
 
 ## 21. UI must match the selected reference (user instruction, 2026-10-25)
 
-For every UI task, follow [UI_REFERENCE_RULES.md](UI_REFERENCE_RULES.md). Open the exact selected reference before editing, match its composition/proportions/materials/buttons/icons precisely, verify real desktop/mobile screenshots, and deliver the reference and actual implementation images together for comparison. Tests alone do not establish visual fidelity. Report remaining differences honestly; preserve real gameplay/data and do not deploy without explicit authorization. This addition is explicitly requested by the user; it does not relax any other rule.
+For every UI task, follow [UI_REFERENCE_RULES.md](UI_REFERENCE_RULES.md). Open the exact selected reference before editing, match its composition/proportions/materials/buttons/icons precisely, verify real Desktop screenshots during the current phase (§22), and deliver the reference and actual implementation images together for comparison. Tests alone do not establish visual fidelity. Report remaining differences honestly; preserve real gameplay/data and do not deploy without explicit authorization. This addition is explicitly requested by the user; the temporary Mobile deferral is specified below.
+
+## 22. Desktop first; defer Mobile to a consolidated pass (user instruction, 2026-11-22)
+
+- During the current iteration phase, build/fix pages, UI and interaction flows for **Desktop only**.
+- Do not automatically expand work into Mobile/responsive layouts, phone viewport/portrait/landscape QA, or mobile screenshots/clips. Defer these to one consolidated pass after the main Desktop pages/flows are complete and the design is stable, or handle Mobile when explicitly requested for a task.
+- Deferred Mobile work must not block completion of a Desktop task. Existing Mobile code may be preserved while shared logic changes as needed; do not rewrite Mobile layouts as incidental cleanup.
+- Continue required typechecks and the existing automated test suite normally, including any Mobile cases already in that suite. This instruction defers dedicated Mobile implementation/QA, not the project's normal regression checks.
+- Desktop reference matching and actual-game visual inspection remain required under §21. This phase takes precedence over earlier instructions requiring Mobile work for every UI task.
