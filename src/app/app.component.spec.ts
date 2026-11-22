@@ -41,6 +41,10 @@ describe('AppComponent', () => {
     // K7 home (2026-11-19) draws its own top bar and menu: the app bar steps aside there
     expect(fixture.componentInstance.ownChrome()).toBeTrue();
     expect(links()).toEqual([]);
+    // summon page (2026-11-22) has its own back / home / wallet bar like other gacha games
+    await router.navigateByUrl('/gacha');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.ownChrome()).toBeTrue();
     await router.navigateByUrl('/island');
     fixture.detectChanges();
     expect(fixture.componentInstance.immersive()).toBeTrue();
@@ -49,10 +53,10 @@ describe('AppComponent', () => {
     for (const n of LOBBY_NAV.filter(n => !MAIN_NAV.some(core => core.path === n.path))) {
       expect(buildingActions.some(a => a.route === n.path && a.floor === 0)).withContext(n.path).toBeTrue();
     }
+    // the summon page draws its own back / home bar (2026-11-22): no lobby menu there
     await router.navigateByUrl('/gacha');
     fixture.detectChanges();
-    expect(links()).toEqual(LOBBY_NAV.map(n => n.path));
-    expect(fixture.nativeElement.querySelector('nav a[aria-current="page"]').getAttribute('href')).toBe('/gacha');
+    expect(links()).toEqual([]);
     await router.navigateByUrl('/heroes');
     fixture.detectChanges();
     expect(links()).toEqual(LOBBY_NAV.map(n => n.path));

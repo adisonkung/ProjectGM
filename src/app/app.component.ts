@@ -68,7 +68,8 @@ export class AppComponent {
   /** Home, the Sky Isle and summon sanctum fill the locked screen; chrome floats above the scene */
   readonly immersive = computed(() => /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
   /** K7 home (2026-11-19) draws its own top bar + menu, so the app bar steps aside there */
-  readonly ownChrome = computed(() => /^\/home([?#]|$)/.test(this.url()));
+  /** pages that draw their own top bar (K7 home; summon page has back + wallet like other gacha games) */
+  readonly ownChrome = computed(() => /^\/(home|gacha)([?#]|$)/.test(this.url()));
 
   /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
   readonly forgePage = computed(() => /^\/forge([?#]|$)/.test(this.url()));

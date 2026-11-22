@@ -4,6 +4,13 @@
       <video [src]="v" [poster]="showcase" [muted]="true" autoplay loop playsinline disablepictureinpicture preload="auto"></video>
     } @else if (showcase) { <img [src]="showcase" alt="" fetchpriority="high" decoding="async" /> }
   </div>
+  <header class="top-bar">
+    <button type="button" class="round" aria-label="ย้อนกลับ" (click)="back()"><app-icon name="back" [size]="22" /></button>
+    <div class="page-title"><span>SUMMON</span><b>อัญเชิญ</b></div>
+    <span class="spacer"></span>
+    <span class="wallet" [attr.aria-label]="'เพชร ' + gems()"><app-icon name="gem" [size]="18" />{{ gemsShort() }}</span>
+    <a class="round" routerLink="/home" aria-label="กลับหน้าหลัก"><app-icon name="home" [size]="20" /></a>
+  </header>
   <div class="summon-ui">
     <nav class="banner-rail" aria-label="ตู้อัญเชิญ">
       <button type="button" class="banner-tab active" aria-current="true" (click)="openInfo('banner')"><span class="tab-art">@if (showcase) { <img [src]="showcase" alt="" /> }</span><b>{{ campaign.label }}</b></button>
