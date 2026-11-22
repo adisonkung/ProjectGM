@@ -4,7 +4,11 @@ Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tr
 
 ## Summon page layout B — Claude, 2026-11-22
 
-Branch `feature/claude-summon-banner-page` from origin/master 0682c86, not merged and awaiting review. The idle `/gacha` page now shows the user-chosen layout B: a full-screen featured banner (Lucien, illustration only, no rate-up), a pool-tab rail with an event placeholder, pills for rates/pool/memory, and a pity box with ×1/×10 buttons. Summon logic, dialogs and the cinematic are unchanged. Details are in CLAUDE.md. Codex's unmerged `wip/codex-isometric-summon` touches the first line of `gacha.component.html`. Confirmed local/cloud synchronization metadata is unchanged.
+Branch `feature/claude-summon-banner-page` from origin/master 0682c86, merged into master on 2026-11-22 at the user's request. The idle `/gacha` page now shows the user-chosen layout B: a full-screen featured banner (Lucien, illustration only, no rate-up), a pool-tab rail with an event placeholder, pills for rates/pool/memory, and a pity box with ×1/×10 buttons. Summon logic, dialogs and the cinematic are unchanged. Details are in CLAUDE.md. Codex's unmerged `wip/codex-isometric-summon` touches the first line of `gacha.component.html`. Confirmed local/cloud synchronization metadata is unchanged.
+
+## Isometric summon opening — Codex, 2026-11-20
+
+Work branch `wip/codex-isometric-summon` begins at the shared K7 base. The user asked for a premium, fluid summon opening. Built an elevated night-time altar with a camera push, local projected light and the existing articulated cards lifting from the engraved center. Both the lighting and card flight use the same responsive coordinates. Existing committed-pull outcomes, rate disclosure, hero art, skip, reduced motion and reveal controls remain in place. Production source and the browser review are linked from [the review](reviews/summon-isometric/README.md). Confirmed local/cloud synchronization metadata is unchanged.
 
 ## K7 home art and animation — Codex, 2026-11-19
 

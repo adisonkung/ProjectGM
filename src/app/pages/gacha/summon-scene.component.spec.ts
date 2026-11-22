@@ -17,18 +17,18 @@ describe('Summon cinematic', () => {
   it('uses the large beam only when the committed results contain a 3-star hero', fakeAsync(() => {
     const f = scene([1, 2]);
     expect(f.componentInstance.grand()).toBeFalse();
-    tick(550);
+    tick(950);
     expect(f.componentInstance.phase()).toBe('burst');
-    tick(1500);
+    tick(1150);
     expect(f.componentInstance.phase()).toBe('cards');
     f.destroy();
     const rare = scene([2, 3]);
     expect(rare.componentInstance.grand()).toBeTrue();
-    tick(550);
+    tick(950);
     expect(rare.componentInstance.phase()).toBe('charge');
-    tick(2050);
+    tick(850);
     expect(rare.componentInstance.phase()).toBe('burst');
-    tick(2600);
+    tick(1600);
     expect(rare.componentInstance.phase()).toBe('cards');
     rare.destroy();
   }));
@@ -37,7 +37,7 @@ describe('Summon cinematic', () => {
     const done = jasmine.createSpy('done'); c.done.subscribe(done);
     c.reveal(0); // Cannot reveal during the intro.
     expect(c.opened().size).toBe(0);
-    tick(5200);
+    tick(3400);
     c.revealNext();
     expect(c.current()?.star).toBe(3);
     expect(c.remaining()).toBe(1);

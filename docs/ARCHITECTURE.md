@@ -352,6 +352,8 @@ TowerOrnamentComponent accepts inherited optional gradient-stop, inner-line, eng
 
 ### Summon flight/card art revision (25 October 2026)
 
+The November 20 isometric modal replaces the earlier opening-stage light layers described below. `SummonAltarComponent` holds a still evening plate and CSS light effects. Camera origin, floor light and the flight origin follow the painted altar center after viewport cover cropping. `summon-cinematic.ts` shares timings between the flight and modal phases. The lobby scene and cinematic result/transaction boundaries keep their existing owners.
+
 `SummonFlightComponent` renders one physical-style card per committed result during charge/burst, replacing legacy image spokes and the Sanctum floating-card overlay. Native WAAPI receives64-segment cubic3D trajectories: quintic gather settling, accelerating release, depth-dependent scale and banking, plus tangent-oriented wakes. Gather end/release start poses match exactly; all Animation handles cancel on replacement/destruction, and reduced motion never starts them. Lighting is separate masked foil, static card shadow, moving ribbons and floor light. No runtime physics engine, frame loop, RNG or save access is introduced.
 
 `summon-card-art.ts` maps existing1/2/3★ to newly generated alpha WebP backs, shared by flight and sealed cards. Steel/silver and bronze ordinary assets remain ready for existing tiers without adding hero templates. The live roster/fallback remains all3★. See `docs/art/summon-cards/manifest.json` for generation/optimization provenance. Hero artwork and material icon backlog are untouched; no deployment.
