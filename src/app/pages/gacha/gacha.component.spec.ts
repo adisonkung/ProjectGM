@@ -29,9 +29,28 @@ describe('Summon sanctum transactions', () => {
     expect(c.playing()).toBeTrue();
     c.finishSummon();
     expect(c.playing()).toBeFalse();
+    // the summon book ends on its own card summary; the results list opens from "ผลครั้งล่าสุด"
+    expect(c.resultsDialog().nativeElement.open).toBeFalse();
+    c.openResults();
     expect(c.resultsDialog().nativeElement.open).toBeTrue();
     expect(save.state().gems).toBe(before - GACHA.multi);
     c.resultsDialog().nativeElement.close();
+    f.destroy();
+  });
+
+  it('"สุ่มอีกครั้ง" from the summary asks to confirm the same count again and spends nothing yet', () => {
+    const f = TestBed.createComponent(GachaComponent);
+    f.detectChanges();
+    const c = f.componentInstance, save = TestBed.inject(SaveService);
+    save.update(s => ({ ...s, gems: 5000 }));
+    c.summon(10); c.confirmSummon();
+    const after = save.state().gems;
+    c.summonAgain();
+    expect(c.playing()).toBeFalse();
+    expect(c.pending()).toBe(10);
+    expect(c.confirmDialog().nativeElement.open).toBeTrue();
+    expect(save.state().gems).toBe(after);
+    c.cancelSummon();
     f.destroy();
   });
 
@@ -126,6 +145,7 @@ describe('GachaComponent', () => {
     // the summon cinematic plays first; the results grid shows once it ends / is skipped
     expect((fixture.nativeElement as HTMLElement).querySelector('app-summon-book')).not.toBeNull();
     component.finishSummon();
+    component.openResults();
     fixture.detectChanges();
     expect(save.state().gems).toBe(gems - 900);
     const res = component.results();

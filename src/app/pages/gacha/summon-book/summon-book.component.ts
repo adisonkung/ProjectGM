@@ -46,7 +46,10 @@ export class SummonBookComponent implements AfterViewInit, OnDestroy {
   readonly results = input.required<SummonPull[]>();
   /** test hook: force (or forbid) the blue-then-gold version */
   readonly suspense = input<boolean | null>(null);
+  /** back to the summon page */
   readonly done = output<void>();
+  /** summon again with the same count (the page asks for confirmation as usual) */
+  readonly again = output<void>();
   readonly fallback = signal(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
   readonly loading = signal(true);
   readonly finished = signal(false);
@@ -55,6 +58,7 @@ export class SummonBookComponent implements AfterViewInit, OnDestroy {
   private handle: BookSceneHandle | null = null;
   private destroyed = false;
   private closed = false;
+  private skipWhenReady = false;
 
   ngAfterViewInit(): void {
     if (this.fallback()) return;
@@ -78,6 +82,7 @@ export class SummonBookComponent implements AfterViewInit, OnDestroy {
       });
       if (this.destroyed) { this.handle.dispose(); this.handle = null; return; }
       this.loading.set(false);
+      if (this.skipWhenReady) this.handle.skip();
     } catch {
       // no WebGL (or the chunk failed): the 2D scene shows the same results
       if (this.destroyed) return;
@@ -86,13 +91,21 @@ export class SummonBookComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  finish(): void {
-    if (this.closed) return;
+  /** jump to the summary: every card face up, the two summary buttons showing */
+  skip(): void {
+    if (this.handle) this.handle.skip(); else this.skipWhenReady = true;
+  }
+  /** close and go back to the summon page */
+  back(): void { if (this.close()) this.done.emit(); }
+  /** close and summon again */
+  summonAgain(): void { if (this.close()) this.again.emit(); }
+  private close(): boolean {
+    if (this.closed) return false;
     this.closed = true;
     this.handle?.dispose();
     this.handle = null;
     this.stage()?.nativeElement.close();
-    this.done.emit();
+    return true;
   }
 
   ngOnDestroy(): void {

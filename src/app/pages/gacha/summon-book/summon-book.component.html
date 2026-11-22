@@ -1,7 +1,7 @@
 @if (fallback()) {
   <app-summon-scene [results]="results()" (done)="done.emit()" />
 } @else {
-  <dialog #stage class="book" [class.ready]="!loading()" aria-label="กำลังอัญเชิญ" (cancel)="$event.preventDefault(); finish()">
+  <dialog #stage class="book" [class.ready]="!loading()" aria-label="กำลังอัญเชิญ" (cancel)="$event.preventDefault(); back()">
     <div #host class="book-host"></div>
     <div class="cap" style="opacity: 0" aria-hidden="true"><b></b><small></small></div>
     <div class="hint" role="status" hidden></div>
@@ -12,7 +12,9 @@
       <div class="cine-ban"><img alt="" /><div class="cine-plate"><small class="cine-ep"></small><b class="cine-th"></b><span class="cine-en"></span><i aria-hidden="true">★ ★ ★</i></div></div>
       <span class="cine-tap">แตะเพื่อปิด</span>
     </div>
-    <button type="button" class="skip" (click)="finish()">ข้าม <span aria-hidden="true">»</span></button>
-    @if (finished()) { <button type="button" class="results" (click)="finish()">ดูผลการอัญเชิญ »</button> }
+    @if (!finished()) { <button type="button" class="skip" (click)="skip()">ข้าม <span aria-hidden="true">»</span></button> }
+    @if (finished()) {
+      <nav class="summary" aria-label="สรุปการอัญเชิญ"><button type="button" class="back" (click)="back()">แตะเพื่อกลับไปหน้ากาชา</button><button type="button" class="again" (click)="summonAgain()">สุ่มอีกครั้ง</button></nav>
+    }
   </dialog>
 }

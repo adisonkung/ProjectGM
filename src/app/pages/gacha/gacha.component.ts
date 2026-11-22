@@ -73,7 +73,9 @@ export class GachaComponent implements OnDestroy {
     this.showResults.set(true);
     this.resultsDialog().nativeElement.showModal();
   }
-  finishSummon(): void { this.playing.set(false); this.openResults(); }
+  /** the summon book ends on its own card summary; "ผลครั้งล่าสุด" on the page still opens the results list */
+  finishSummon(): void { this.playing.set(false); }
+  summonAgain(): void { this.playing.set(false); this.summon(this.lastCount()); }
   readonly MAX_STAR = MAX_STAR;
   readonly gems = computed(() => this.save.state().gems);
   readonly gemsShort = computed(() => formatCurrency(this.gems()));

@@ -39,16 +39,19 @@ describe('SummonBookComponent', () => {
     });
   });
 
-  it('finish() closes once and emits done once', () => {
+  it('back() closes once and emits done once; summonAgain() emits again', () => {
     spyOn(window, 'matchMedia').and.callFake((q: string) => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList);
     const fixture = TestBed.createComponent(SummonBookComponent);
     fixture.componentRef.setInput('results', [pull('bailong')]);
-    let done = 0;
+    let done = 0, again = 0;
     fixture.componentInstance.done.subscribe(() => done++);
+    fixture.componentInstance.again.subscribe(() => again++);
     fixture.detectChanges();
-    fixture.componentInstance.finish();
-    fixture.componentInstance.finish();
+    fixture.componentInstance.back();
+    fixture.componentInstance.back();
+    fixture.componentInstance.summonAgain();
     expect(done).toBe(1);
+    expect(again).toBe(0);
     expect((fixture.nativeElement as HTMLElement).querySelector<HTMLDialogElement>('dialog.book')?.open).toBeFalse();
     fixture.destroy();
   });

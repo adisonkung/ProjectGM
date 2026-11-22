@@ -19,7 +19,7 @@ export interface BookCard { star: number; id: string; th: string; en: string; cl
 /** DOM overlay the component owns (gold-card intro, caption, hint) */
 export interface BookOverlay { cine: HTMLElement; cineQuote: HTMLElement; cineBan: HTMLElement; cineImg: HTMLImageElement; cineEp: HTMLElement; cineTh: HTMLElement; cineEn: HTMLElement; cineTap: HTMLElement; cap: HTMLElement; hint: HTMLElement; summon: HTMLElement }
 export interface BookSceneOptions { cards: BookCard[]; suspense: boolean; overlay: BookOverlay; asset: (key: string) => string; onFinished: () => void }
-export interface BookSceneHandle { dispose(): void }
+export interface BookSceneHandle { dispose(): void; /** jump to the end: every card face up, summary showing */ skip(): void }
 /** textures the animatic declared but never shows: they share one 1 px image */
 const BLANK_KEYS = ['bhCharge', 'bhLoop', 'coverInsideHd', 'pageAHd', 'pageBHd', 'pageCHd', 'pageBlankHd', 'astrolabeCore', 'astrolabeInner', 'astrolabeMiddle', 'astrolabeOuter', 'balconyRail', 'domeCeiling', 'floorMarble', 'fxCandleFlame', 'fxPageWisp', 'goldTrim', 'ledgeTrim', 'marbleWhite', 'oculusSky', 'pillarWood', 'shelfWall', 'shelfWallAlt'];
 
@@ -574,7 +574,8 @@ const auraMat = () => new THREE.ShaderMaterial({ uniforms: { time: { value: 0 },
       float body = 1. - smoothstep(0., reach, d), smokeBody = 1. - smoothstep(0., reach * 1.9 + .08, d - .02 * fbm(p * 7. - vec2(0., time)));
       float smoke = smokeBody * outside; float tongue = fbm(vec2(atan(p.y, p.x) * 6., d * 9. - time * 3.)); float flame = smoothstep(.52, .72, tongue) * smoothstep(.16, 0., d - .06 * tongue) * outside; /* thin licking tongues near the edge */ float rim = exp(-max(d, 0.) * 40.) * outside;
       vec3 col = mix(vec3(.02, .005, .03), vec3(.07, .03, .06), fbm(p * 4. + time * .2)); col = mix(col, vec3(.95, .62, .2), clamp(flame * 1.3, 0., 1.)) + vec3(.05, .1, .1) * pow(flame, 3.) + vec3(.9, .66, .26) * rim * .55; col = min(col, vec3(.98)); /* stay under the bloom threshold: crisp flames, visible dark smoke */
-      gl_FragColor = vec4(col, clamp(smoke * .95 + flame + rim * .8, 0., 1.) * min(amt, 1.)); }` });
+      vec2 e = min(vUv, 1. - vUv); float edge = smoothstep(0., .16, e.x) * smoothstep(0., .12, e.y); /* no quad edge */
+      gl_FragColor = vec4(col, clamp(smoke * .95 + flame + rim * .8, 0., 1.) * min(amt, 1.) * edge); }` });
 const rimDark = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, metalness: .75, roughness: .35, envMapIntensity: 1.1 });
 const cards = Array.from({ length: 10 }, () => { const m = new THREE.Group(); m.visible = false; fg.add(m);
   const body = new THREE.Mesh(cardBody, rimMat); m.add(body); m.userData.body = body;
@@ -698,7 +699,7 @@ function updateShot1(T2, u, dt) {
   return cc;
 }
 const CARD_D = 4; function px2w(px, py) { const h = 2 * CARD_D * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), s = h / 720; return camera.localToWorld(V((px - 640) * s, (360 - py) * s, -CARD_D)); }
-function cardSlot(i) { if (S.n === 1) return { x: 640, y: 320, w: 196 }; const r = i < 5 ? 0 : 1, c = i % 5; return { x: 640 + (c - 2) * 152, y: 228 + r * 214, w: 122 }; }
+function cardSlot(i) { if (S.n === 1) return { x: 640, y: 320, w: 186 }; const r = i < 5 ? 0 : 1, c = i % 5; return { x: 640 + (c - 2) * 178, y: 214 + r * 232, w: 112 }; } // ~66 px between cards so the auras do not merge
 function updateShot2(T2, u, dt) {
   plate.visible = false; updateFloatBooks(T2, false, 0); updateDust(T2, false); ringPivot.visible = false; pivot.position.set(0, FLOAT_Y, -.15); pivot.rotation.set(-.14, 0, 0); ringO.g.visible = ringI.g.visible = false; rays.visible = halo.visible = false; hall.visible = false; low.visible = false; hallFg.visible = false; lowFg.visible = false; props.visible = false; book.visible = false; shadowCatch.visible = false; motes.visible = true; inflow.visible = false;
   [bhCharge, bhLoop, burst, burstB, burstG, upFlare].forEach(s => s.set(0, 0)); dark.visible = coreGlow.visible = false; glyphs.forEach(m => m.visible = m.userData.halo.visible = false);
@@ -731,9 +732,9 @@ function updateShot2(T2, u, dt) {
     c.m.quaternion.copy(camera.quaternion).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(T2 * .5 + i) * .05 * k * (1 - fl), (1 - eio(k)) * Math.PI * .55 + Math.sin(T2 * .7 + i * 1.3) * .06 * k * (1 - fl) + fl * Math.PI, (1 - eio(k)) * .25)));
     c.m.userData.body.material = g3 ? rimMat : rimDark; c.m.userData.body.scale.set(g3 ? 1 : .978, g3 ? 1 : .985, 1); /* plain cards: only a thin grey edge shows */ c.face.material.map = g3 ? T.card3 : T.card; if (!card.tex) card.tex = cardFace(card.hero, card.star); c.back.material.map = card.tex; c.face.material.opacity = c.back.material.opacity = Math.min(1, k * 2);
     c.sheen.visible = false; // no shimmer on the cards
-    // a steady soft gold glow behind every 3★ card, breathing slowly (the dark smoke / flame aura read as a black-edged mosaic at card size and flickered on ten cards)
-    const breathe = .5 + .5 * Math.sin(T2 * 1.1 + i * .7); c.glow.visible = g3 && k > 0; c.glow.position.copy(c.m.position).addScaledVector(camera.getWorldDirection(tmp), -.02); c.glow.scale.set(w * (1.9 + .25 * breathe + 1.2 * pop), w * 1.5 * (1.75 + .2 * breathe + 1.0 * pop), 1); c.glow.material.color.copy(col).multiplyScalar(.16 + .06 * breathe + .1 * eio(wait) + .45 * pop); c.glow.material.opacity = Math.min(1, k * 2);
-    c.aura.visible = false;
+    // the dark-smoke / gold-flame aura of every 3★ card (user 2026-11-22: kept, but calmer and without a visible quad edge)
+    c.glow.visible = g3 && pop > .02; c.glow.position.copy(at).addScaledVector(camera.getWorldDirection(tmp), .05); c.glow.scale.setScalar(w * (2.4 + 1.6 * pop)); c.glow.material.color.copy(col).multiplyScalar(.5 * pop); c.glow.material.opacity = Math.min(1, k * 2);
+    c.aura.visible = g3 && k > 0; if (c.aura.visible) { c.aura.position.copy(c.m.position).addScaledVector(camera.getWorldDirection(tmp), .04); c.aura.quaternion.copy(camera.quaternion); c.aura.scale.set(w * 1.75 * (1 + .1 * pop), w * 1.6 * 1.5 * (1 + .1 * pop), 1); c.aura.renderOrder = 39.5; c.aura.material.uniforms.time.value = T2 * .5; c.aura.material.uniforms.amt.value = Math.min(1, k * 2) * (.75 + wait * (.45 + .1 * Math.sin(T2 * 1.2)) + .8 * pop); }
     if (g3 && k > 0 && once('land' + i)) sparks.emit(10, at, col, { speed: 1.2, life: .6 });
     if (g3 && u > rs + .3 && once('pop' + i)) { sparks.emit(160, at, col, { speed: 2.6, life: 1, drag: 1.2 }); embers.emit(50, at, col, { speed: 1.2, life: 1.3, grav: .3 }); }
   });
@@ -799,7 +800,15 @@ fg.traverse(o => { if (o.isSprite || o.isPoints) fxHide.push(o); });
   fg.environment = pmrem.fromCubemap(rt.texture).texture; fg.remove(cube); rt.dispose(); fxHide.push(mirror); }
 raf = requestAnimationFrame(frame);
 
-return { dispose() {
+// skip: every card lands face up at once, no bursts replayed, the summary shows
+function skip() {
+  if (S.tap == null) tap();
+  for (const k of ['burst', 'clasp', 'upgrade', 'lift', 'goldturn']) S.once.add(k);
+  S.cards.forEach((c, i) => ['land', 'pop', 'orb'].forEach(p => S.once.add(p + i)));
+  const golds = goldIdx(); S.goldTaps = golds.map(() => S.tap + goldWaitAt() - 1.4); S.cineClosed = golds.map(() => -1e6);
+  S.T = S.tap + revealEnd() + .05; sparks.clear(); embers.clear();
+}
+return { skip, dispose() {
   if (disposed) return; disposed = true; cancelAnimationFrame(raf);
   renderer.domElement.removeEventListener('click', onCanvas); cine.removeEventListener('click', onCine); summon.removeEventListener('click', onSummon);
   const seen = new Set();

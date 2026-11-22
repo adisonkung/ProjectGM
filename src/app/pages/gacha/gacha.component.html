@@ -55,7 +55,7 @@
     </section>
   </div>
 </section>
-@if (playing() && results().length) { <app-summon-book [results]="results()" (done)="finishSummon()" /> }
+@if (playing() && results().length) { <app-summon-book [results]="results()" (done)="finishSummon()" (again)="summonAgain()" /> }
 
 <dialog #infoDialog class="summon-dialog citadel-surface" [class.reference-summon-info]="info() !== 'banner'" aria-labelledby="summon-info-title" (close)="info.set(null)" (click)="$event.target === infoDialog && closeInfo()"><app-tower-ornament [grooved]="true" [ornate]="true" [crimson]="false" />
   <header class="dialog-heading">@if (info() !== 'banner') { <app-citadel-icon class="information-emblem" [name]="info() === 'memory' ? 'compass' : 'tower'" [size]="57" /> }<div class="information-title"><h2 id="summon-info-title">{{ info() === 'banner' ? 'รายละเอียดตู้อัญเชิญ' : info() === 'pool' ? 'รายชื่อฮีโร่ในตู้' : info() === 'memory' ? 'ความทรงจำฮีโร่' : 'อัตราและเงื่อนไขอัญเชิญ' }}</h2>@if (info() !== 'banner') { <p>{{ info() === 'pool' ? 'ฮีโร่ทั้งหมดที่สามารถอัญเชิญได้' : info() === 'memory' ? 'รายละเอียดการได้รับและการใช้งานความทรงจำฮีโร่' : info() === 'rates' ? 'รายละเอียดอัตราการได้รับ และเงื่อนไขการอัญเชิญ' : 'ตู้อัญเชิญปกติ' }}</p> }</div>@if (info() === 'pool') { <span class="information-count">{{ pool.length }} / {{ pool.length }}</span> }<button type="button" class="close citadel-surface citadel-control" aria-label="ปิดข้อมูล" (click)="closeInfo()" autofocus><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" /><app-icon name="close" [size]="24" /></button></header>
