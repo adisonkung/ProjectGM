@@ -13,7 +13,7 @@
   </header>
   <div class="summon-ui">
     <nav class="banner-rail" aria-label="ตู้อัญเชิญ">
-      <button type="button" class="banner-tab active" aria-current="true" (click)="openInfo('banner')"><span class="tab-art">@if (showcase) { <img [src]="showcase" alt="" /> }</span><b>{{ campaign.label }}</b></button>
+      <button type="button" class="banner-tab active" aria-current="true" (click)="openInfo('banner')"><span class="tab-art">@if (showcase) { <img [src]="showcase" alt="" /> }</span><span class="tab-text"><b>{{ campaign.label }}</b></span></button>
       <button type="button" class="banner-tab soon" disabled><span class="tab-art"><app-icon name="lock" [size]="18" /></span><span class="tab-text"><b>ตู้กิจกรรม</b><small>เร็ว ๆ นี้</small></span></button>
     </nav>
     <header class="banner-heading">

@@ -2,17 +2,20 @@
 const { chromium } = require('playwright');
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
-const root = 'docs/reviews/summon-banner-layout';
+const fullscreen = process.env.BANNER_LAYOUT === 'fullscreen';
+const root = fullscreen ? 'docs/reviews/summon-banner-fullscreen' : 'docs/reviews/summon-banner-layout';
 const label = process.env.BANNER_CAPTURE || 'after';
 const base = process.env.SUMMON_URL || 'http://127.0.0.1:4200';
 
 async function bounds(page) {
   return page.evaluate(() => {
-    const sels = ['.gate', '.banner-tab.active', '.banner-tab.soon', '.banner-heading', '.pool-tools', '.summon-footer', '.key-art', '.key-art > video, .key-art > img'];
+    const sels = ['.gate', '.banner-tab.active', '.banner-tab.soon', '.banner-heading', '.pool-tools', '.summon-footer', '.key-art', '.key-art > video, .key-art > img', '.banner-rail', '.banner-tab.active .tab-art', '.banner-tab.active .tab-text', '.banner-heading h1', '.banner-heading .eyebrow', '.name-plate'];
     return Object.fromEntries(sels.map(sel => {
-      const e = document.querySelector(sel), r = e.getBoundingClientRect(), css = getComputedStyle(e);
-      return [sel, { x: r.x, y: r.y, width: r.width, height: r.height, bottom: r.bottom,
-        animation: css.animationName, scale: css.scale, translate: css.translate }];
+      const e = document.querySelector(sel);
+      if (!e) return [sel, null]; // older references predate the overlaid caption wrapper
+      const r = e.getBoundingClientRect(), css = getComputedStyle(e);
+      return [sel, { x: r.x, y: r.y, width: r.width, height: r.height, right: r.right, bottom: r.bottom,
+        fontSize: css.fontSize, animation: css.animationName, scale: css.scale, translate: css.translate }];
     }));
   });
 }
@@ -76,7 +79,21 @@ async function bounds(page) {
         assert.deepEqual(start, end, 'the banner must not translate/scale over its former animation cycle');
         const before = JSON.parse(fs.readFileSync(`${root}/before-report.json`)).find(r => r.width === width).start;
         assert(start['.banner-tab.active'].width > before['.banner-tab.active'].width);
-        assert(start['.banner-tab.active'].height > before['.banner-tab.active'].height);
+        if (fullscreen) {
+          const tab = start['.banner-tab.active'], inactive = start['.banner-tab.soon'];
+          const art = start['.banner-tab.active .tab-art'], caption = start['.banner-tab.active .tab-text'];
+          assert(tab.height < before['.banner-tab.active'].height);
+          assert(tab.width > inactive.width && tab.width - inactive.width <= 20);
+          assert(Math.abs(art.width - (tab.width - 2)) < 1 && Math.abs(art.height - (tab.height - 2)) < 1);
+          assert(caption.right <= tab.right - 8 && caption.bottom <= tab.bottom - 8);
+          assert(caption.y > tab.y + tab.height / 2, 'the tab caption belongs at the bottom right');
+          assert.equal(start['.key-art'].x, 0); assert.equal(start['.key-art'].y, 0);
+          assert.equal(start['.key-art'].width, width); assert.equal(start['.key-art'].height, height);
+          assert(start['.pool-tools'].y - start['.banner-heading'].bottom <= 20);
+          assert.equal(start['.pool-tools'].x, start['.banner-heading'].x);
+          assert(start['.banner-heading'].right < start['.summon-footer'].x);
+          assert(start['.banner-tab.soon'].bottom + 12 < start['.banner-heading'].y);
+        } else assert(start['.banner-tab.active'].height > before['.banner-tab.active'].height);
         assert(start['.banner-heading'].y > before['.banner-heading'].y);
         assert(start['.banner-heading'].bottom < start['.pool-tools'].y);
         assert(start['.banner-tab.soon'].bottom < height);

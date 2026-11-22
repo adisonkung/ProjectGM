@@ -1,0 +1,364 @@
+[
+  {
+    "width": 1280,
+    "height": 720,
+    "start": {
+      ".gate": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720,
+        "bottom": 720,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-tab.active": {
+        "x": 24.3125,
+        "y": 90,
+        "width": 164,
+        "height": 127.015625,
+        "bottom": 217.015625,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-tab.soon": {
+        "x": 24.3125,
+        "y": 229.015625,
+        "width": 164,
+        "height": 146.8125,
+        "bottom": 375.828125,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-heading": {
+        "x": 244.625,
+        "y": 190.5,
+        "width": 449.546875,
+        "height": 253.984375,
+        "bottom": 444.484375,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".pool-tools": {
+        "x": 244.625,
+        "y": 643.609375,
+        "width": 449.546875,
+        "height": 44,
+        "bottom": 687.609375,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".summon-footer": {
+        "x": 750.484375,
+        "y": 478.625,
+        "width": 486,
+        "height": 208.984375,
+        "bottom": 687.609375,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".key-art": {
+        "x": 204.796875,
+        "y": 0,
+        "width": 1075.203125,
+        "height": 720,
+        "bottom": 720,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".key-art > video, .key-art > img": {
+        "x": 204.796875,
+        "y": 0,
+        "width": 1075.203125,
+        "height": 720,
+        "bottom": 720,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      }
+    },
+    "end": {
+      ".gate": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 720,
+        "bottom": 720,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-tab.active": {
+        "x": 24.3125,
+        "y": 90,
+        "width": 164,
+        "height": 127.015625,
+        "bottom": 217.015625,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-tab.soon": {
+        "x": 24.3125,
+        "y": 229.015625,
+        "width": 164,
+        "height": 146.8125,
+        "bottom": 375.828125,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-heading": {
+        "x": 244.625,
+        "y": 190.5,
+        "width": 449.546875,
+        "height": 253.984375,
+        "bottom": 444.484375,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".pool-tools": {
+        "x": 244.625,
+        "y": 643.609375,
+        "width": 449.546875,
+        "height": 44,
+        "bottom": 687.609375,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".summon-footer": {
+        "x": 750.484375,
+        "y": 478.625,
+        "width": 486,
+        "height": 208.984375,
+        "bottom": 687.609375,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".key-art": {
+        "x": 204.796875,
+        "y": 0,
+        "width": 1075.203125,
+        "height": 720,
+        "bottom": 720,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".key-art > video, .key-art > img": {
+        "x": 204.796875,
+        "y": 0,
+        "width": 1075.203125,
+        "height": 720,
+        "bottom": 720,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      }
+    },
+    "dialogsAndCancel": true,
+    "noTransaction": true,
+    "errors": [],
+    "externalFailures": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      }
+    ]
+  },
+  {
+    "width": 1600,
+    "height": 900,
+    "start": {
+      ".gate": {
+        "x": 0,
+        "y": 0,
+        "width": 1600,
+        "height": 900,
+        "bottom": 900,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-tab.active": {
+        "x": 28,
+        "y": 99,
+        "width": 164,
+        "height": 127.015625,
+        "bottom": 226.015625,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-tab.soon": {
+        "x": 28,
+        "y": 238.015625,
+        "width": 164,
+        "height": 146.8125,
+        "bottom": 384.828125,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-heading": {
+        "x": 256,
+        "y": 289.109375,
+        "width": 520,
+        "height": 259.28125,
+        "bottom": 548.390625,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".pool-tools": {
+        "x": 256,
+        "y": 815.5,
+        "width": 746,
+        "height": 44,
+        "bottom": 859.5,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".summon-footer": {
+        "x": 1066,
+        "y": 650.515625,
+        "width": 486,
+        "height": 208.984375,
+        "bottom": 859.5,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".key-art": {
+        "x": 256,
+        "y": 0,
+        "width": 1344,
+        "height": 900,
+        "bottom": 900,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".key-art > video, .key-art > img": {
+        "x": 256,
+        "y": 0,
+        "width": 1344,
+        "height": 900,
+        "bottom": 900,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      }
+    },
+    "end": {
+      ".gate": {
+        "x": 0,
+        "y": 0,
+        "width": 1600,
+        "height": 900,
+        "bottom": 900,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-tab.active": {
+        "x": 28,
+        "y": 99,
+        "width": 164,
+        "height": 127.015625,
+        "bottom": 226.015625,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-tab.soon": {
+        "x": 28,
+        "y": 238.015625,
+        "width": 164,
+        "height": 146.8125,
+        "bottom": 384.828125,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".banner-heading": {
+        "x": 256,
+        "y": 289.109375,
+        "width": 520,
+        "height": 259.28125,
+        "bottom": 548.390625,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".pool-tools": {
+        "x": 256,
+        "y": 815.5,
+        "width": 746,
+        "height": 44,
+        "bottom": 859.5,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".summon-footer": {
+        "x": 1066,
+        "y": 650.515625,
+        "width": 486,
+        "height": 208.984375,
+        "bottom": 859.5,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".key-art": {
+        "x": 256,
+        "y": 0,
+        "width": 1344,
+        "height": 900,
+        "bottom": 900,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      },
+      ".key-art > video, .key-art > img": {
+        "x": 256,
+        "y": 0,
+        "width": 1344,
+        "height": 900,
+        "bottom": 900,
+        "animation": "none",
+        "scale": "none",
+        "translate": "none"
+      }
+    },
+    "dialogsAndCancel": true,
+    "noTransaction": true,
+    "errors": [],
+    "externalFailures": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      }
+    ]
+  }
+]
