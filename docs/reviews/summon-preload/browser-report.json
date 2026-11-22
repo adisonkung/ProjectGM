@@ -1,0 +1,45 @@
+[
+  {
+    "width": 1280,
+    "height": 720,
+    "preparedMs": 12025,
+    "firstArtRequestMs": 508,
+    "preConfirmRequests": 26,
+    "confirmToOpenMs": 6588,
+    "confirmToRoomMs": 26904,
+    "bookRequestsAtEnd": 26,
+    "free": true,
+    "reusedCanvas": true,
+    "pausedWhileHidden": true,
+    "unchargedBeforeConfirm": true,
+    "singleTransaction": true,
+    "repreparedAfterReturn": true,
+    "cleanupOnExit": true,
+    "errors": []
+  },
+  {
+    "width": 844,
+    "height": 390,
+    "preparedMs": 7140,
+    "firstArtRequestMs": 388,
+    "preConfirmRequests": 26,
+    "confirmToOpenMs": 8914,
+    "confirmToRoomMs": 15811,
+    "bookRequestsAtEnd": 26,
+    "free": true,
+    "reusedCanvas": true,
+    "pausedWhileHidden": true,
+    "unchargedBeforeConfirm": true,
+    "singleTransaction": true,
+    "repreparedAfterReturn": true,
+    "cleanupOnExit": true,
+    "errors": []
+  },
+  {
+    "width": 844,
+    "height": 390,
+    "reduced": true,
+    "noBookDownloads": true,
+    "fallback": true
+  }
+]

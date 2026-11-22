@@ -41,6 +41,11 @@ export class GachaComponent {
   readonly showResults = signal(false);
   readonly pending = signal<1 | 10 | null>(null);
   readonly confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>('confirmDialog');
+  readonly book = viewChild(SummonBookComponent);
+  readonly bookReady = computed(() => {
+    const book = this.book();
+    return !book || book.fallback() || !book.loading();
+  });
   readonly pendingCost = computed(() => this.pending() === 10 ? GACHA.multi : GACHA.single);
   readonly lastCount = signal<1 | 10>(1);
   readonly pity = computed(() => this.save.state().pity ?? 0);
@@ -113,7 +118,7 @@ export class GachaComponent {
   }
   confirmSummon(): void {
     const n = this.pending();
-    if (!n || this.playing()) return;
+    if (!n || this.playing() || !this.bookReady()) return;
     // Consume the pending intent before spending; rapid clicks cannot repeat a transaction.
     this.cancelSummon();
     const r = this.gacha.summon(n);

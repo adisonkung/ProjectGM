@@ -1,0 +1,9 @@
+{
+  "width": 1280,
+  "height": 720,
+  "blockedWhilePreparing": true,
+  "noSpendOrRoll": true,
+  "cancelAllowed": true,
+  "noLateWebGLAfterExit": true,
+  "errors": []
+}

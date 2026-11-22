@@ -137,6 +137,8 @@ describe('GachaComponent', () => {
     fixture = TestBed.createComponent(GachaComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    component.book()!.loading.set(false);
+    fixture.detectChanges();
   });
 
   it('prepares a hidden book on entry without rolling or spending', () => {
@@ -150,6 +152,20 @@ describe('GachaComponent', () => {
     expect(component.playing()).toBeFalse();
     expect(summon).not.toHaveBeenCalled();
     expect(JSON.stringify(save.state())).toBe(before);
+  });
+
+  it('does not spend a confirmed intent until the prepared room is ready', () => {
+    const c = component, save = TestBed.inject(SaveService), gems = save.state().gems;
+    const summon = spyOn(TestBed.inject(GachaService), 'summon').and.callThrough();
+    c.book()!.loading.set(true); fixture.detectChanges();
+    c.summon(1); c.confirmSummon();
+    expect(c.pending()).toBe(1); expect(c.playing()).toBeFalse();
+    expect(save.state().gems).toBe(gems); expect(summon).not.toHaveBeenCalled();
+    c.book()!.loading.set(false); fixture.detectChanges();
+    c.confirmSummon(); c.confirmSummon();
+    expect(save.state().gems).toBe(gems - GACHA.single);
+    expect(summon).toHaveBeenCalledTimes(1);
+    expect(c.playing()).toBeTrue();
   });
 
   it('a 10-pull spends 900 gems and shows 10 results (1★–3★ only, at least one 2★+)', () => {

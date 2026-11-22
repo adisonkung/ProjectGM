@@ -1,0 +1,15 @@
+const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('node:assert/strict');
+(async()=>{const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox','--enable-unsafe-swiftshader']});let release;
+try{const page=await browser.newPage({viewport:{width:1280,height:720}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>{window.__contexts=0;const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){const c=original.call(this,type,...args);if(type.includes('webgl')&&c)window.__contexts++;return c;};});
+await page.goto('http://127.0.0.1:4200');await page.locator('#isle-name').fill('Cold preload');await page.locator('button[type=submit]').click();await page.waitForURL('**/home');await page.waitForTimeout(600);
+const gate=new Promise(r=>release=r);await page.route('**/ui/summon-book/plateA.webp',async r=>{await gate;await r.continue().catch(()=>{});});
+await page.goto('http://127.0.0.1:4200/gacha',{waitUntil:'domcontentloaded'});await page.locator('app-summon-book').waitFor({state:'attached'});
+const before=await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('projectgm-save-v1'));return {gems:s.gems,pity:s.pity,heroes:s.heroes,heroMemory:s.heroMemory};});
+await page.locator('.summon-button').first().click();const confirm=page.getByRole('button',{name:'กำลังเตรียมห้องอัญเชิญ…'});await confirm.waitFor();assert(await confirm.isDisabled());
+await page.evaluate(()=>ng.getComponent(document.querySelector('app-gacha')).confirmSummon());
+const after=await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('projectgm-save-v1'));return {gems:s.gems,pity:s.pity,heroes:s.heroes,heroMemory:s.heroMemory};});assert.deepEqual(after,before);assert.equal(await page.locator('dialog.book[open]').count(),0);
+await page.waitForTimeout(450);await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:'docs/reviews/summon-preload/cold-confirm-1280.png'});await page.getByRole('button',{name:'ยกเลิก',exact:true}).click();
+const contexts=await page.evaluate(()=>window.__contexts);await page.getByRole('link',{name:'กลับหน้าหลัก',exact:true}).click();await page.waitForFunction(()=>location.pathname==='/home');release();await page.waitForTimeout(2000);
+assert.equal(await page.locator('app-summon-book canvas').count(),0);assert.equal(await page.evaluate(()=>window.__contexts),contexts);assert.deepEqual(errors,[]);
+fs.writeFileSync('docs/reviews/summon-preload/cold-report.json',JSON.stringify({width:1280,height:720,blockedWhilePreparing:true,noSpendOrRoll:true,cancelAllowed:true,noLateWebGLAfterExit:true,errors},null,2)+'\n');console.log('PASS cold confirmation and exit during preparation');
+}finally{release?.();await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
