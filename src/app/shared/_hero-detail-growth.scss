@@ -31,3 +31,10 @@ app-hero-detail {
     &.more { justify-content: center; text-decoration: none; background: none; box-shadow: inset 0 0 0 1px rgba(230, 200, 138, .22); color: g.$text-2; font-size: 14px;
       b { color: g.$gold-bright; font-size: 22px; } &:hover { box-shadow: inset 0 0 0 1px g.$gold-bright; } &:focus-visible { outline: 2px solid g.$gold-pale; } } }
 }
+
+// Gear tab: large equipment cards (moved from the component stylesheet, 2026-11-22, style budget).
+app-hero-detail .detail[data-tab='gear'] {
+  .gear-list { gap: 18px; }
+  .gear-slot { min-height: 260px; justify-content: center; gap: 12px; padding: 22px 12px; @include g.glass(.08);
+    .gi { width: 120px; height: 120px; .plus { font-size: 44px; } } small { font-size: 17px; } b { font-size: 18px; } }
+}

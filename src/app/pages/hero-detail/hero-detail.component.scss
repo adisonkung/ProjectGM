@@ -249,9 +249,4 @@ table { width: 100%; border-collapse: collapse; font-size: 16px;
   .art .mote { display: none; }
 }
 
-// gear tab: large equipment cards
-.detail[data-tab='gear'] {
-  .gear-list { gap: 18px; }
-  .gear-slot { min-height: 260px; justify-content: center; gap: 12px; padding: 22px 12px; @include g.glass(.08);
-    .gi { width: 120px; height: 120px; .plus { font-size: 44px; } } small { font-size: 17px; } b { font-size: 18px; } }
-}
+// gear tab large cards: global in shared/_hero-detail-growth.scss (production style budget)
