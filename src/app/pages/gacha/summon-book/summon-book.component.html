@@ -14,7 +14,8 @@
     </div>
     @if (!finished()) { <button type="button" class="skip" (click)="skip()">ข้าม <span aria-hidden="true">»</span></button> }
     @if (finished()) {
-      <nav class="summary" aria-label="สรุปการอัญเชิญ"><button type="button" class="back" (click)="back()">แตะเพื่อกลับไปหน้ากาชา</button><button type="button" class="again" (click)="summonAgain()">สุ่มอีกครั้ง</button></nav>
+      <button type="button" class="book-return" (click)="back()" aria-label="กลับหน้ากาชา"><app-icon name="back" [size]="22" /><span>ย้อนกลับ</span></button>
+      <nav class="summary" aria-label="สรุปการอัญเชิญ"><app-summon-button class="again" [count]="repeatCount()" label="อัญเชิญอีกครั้ง" tone="repeat" [disabled]="!canRepeat()" (activate)="summonAgain()" /></nav>
     }
   </dialog>
 }

@@ -1,4 +1,5 @@
-// Approved classic-gold summon controls. Scope prevents changing shared dialogs or other pages.
+@font-face{font-family:'Eldervane Summon Sans';src:url('/fonts/noto-sans-thai/noto-sans-thai-600.woff') format('woff');font-weight:600;font-display:swap;}
+// Summon chrome. The gate/repeat button itself is shared by SummonButtonComponent.
 @font-face {
   font-family: 'Eldervane Summon Serif';
   src: url('/fonts/noto-serif-thai/noto-serif-thai-600.woff') format('woff');
@@ -26,58 +27,7 @@ app-gacha.summon-classic .gate.summon-classic {
   }
 
   .acts { gap: 12px; }
-  .summon-button {
-    position: relative;
-    flex-direction: row;
-    gap: 0;
-    height: 76px;
-    padding: 0;
-    overflow: hidden;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    background: transparent url('/ui/summon-classic/buttons.webp') no-repeat 50.3817% 14.4852% / 107.9732% 282.4841%;
-    &.multi { background-position: 50.3817% 85.5148%; }
-    .price {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 44%;
-      min-width: 44%;
-      height: 100%;
-      padding: 0 5px 0 47px;
-      gap: 0;
-      color: #f5d876;
-      font: 700 18.5px Georgia, serif;
-      &::before {
-        content: '';
-        position: absolute;
-        left: 22px;
-        right: 5px;
-        top: 25%;
-        bottom: 25%;
-        clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-        background: linear-gradient(#29241ff5, #09090bf5);
-        border-top: 1px solid #e7d29c66;
-        border-bottom: 1px solid #00000088;
-        box-shadow: inset 0 1px 3px #00000099;
-      }
-      .gem { position: absolute; z-index: 2; left: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; }
-      .amount { position: relative; flex: 1; min-width: 0; text-align: center; text-shadow: 0 1px 2px #000c; }
-    }
-    .summon-label {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 5px;
-      color: #fffaf0;
-      font: 600 22px/1.35 'Eldervane Summon Serif', serif;
-      text-shadow: 0 1px 1px #3d3122c9, 0 0 2px #4a403a8c;
-      small { font: 400 18px/1.15 Georgia, serif; letter-spacing: .02em; }
-    }
-  }
+
 }
 
 // Current phase: Desktop only. Existing narrow-screen page rules remain in their component.

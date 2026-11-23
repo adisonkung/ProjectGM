@@ -1,0 +1,47 @@
+[
+  {
+    "name": "standard",
+    "source": "blue-aurora-source.png",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "crop": [
+      182,
+      89,
+      514,
+      694
+    ],
+    "url": "/ui/summon-seals/standard.webp"
+  },
+  {
+    "name": "aurora",
+    "source": "blue-aurora-source.png",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "crop": [
+      1069,
+      48,
+      513,
+      753
+    ],
+    "url": "/ui/summon-seals/aurora.webp"
+  },
+  {
+    "name": "gold",
+    "source": "gold-source.png",
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "crop": [
+      213,
+      56,
+      805,
+      1114
+    ],
+    "url": "/ui/summon-seals/gold.webp"
+  }
+]

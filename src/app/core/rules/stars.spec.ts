@@ -78,7 +78,7 @@ describe('Stars — rarity, development, Memory, gacha', () => {
     expect(units.find(u => u.heroId === 'jin')!.sprite).toBe(HERO_BY_ID['jin'].sprite);
   });
 
-  it('gacha: 1★–3★ only, pity at 50 guarantees a 3★, every 10-pull has a 2★+, costs 100 / 900 gems', () => {
+  it('legacy gem-priced pull helper: 1★–3★, pity50, 2★+ ten-pull floor and original 100/900 costs', () => {
     const rng = mulberry32(7);
     for (let i = 0; i < 500; i++) expect([1, 2, 3]).toContain(rollRarity(rng, 0));
     expect(rollRarity(() => 0.0, GACHA.pity - 1)).toBe(3);

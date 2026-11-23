@@ -27,10 +27,9 @@
 .skip { top: max(14px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); height: 40px; padding: 0 18px; border: 1px solid rgba(230, 200, 138, .45); background: rgba(10, 8, 16, .55); color: var(--gold-hi);
   &:hover { background: rgba(26, 20, 36, .8); border-color: var(--gold); } }
 // summary (as in the animatic, the cards stay on screen): back to the summon page, or summon again
-.summary { position: absolute; z-index: 9; left: 0; right: 0; bottom: max(20px, env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 16px; padding: 0 16px; animation: rise .4s ease-out both;
-  button { position: static; height: 52px; padding: 0 28px; }
-  .back { border: 1px solid rgba(230, 200, 138, .55); background: rgba(10, 8, 16, .72); color: #f2ebdd; &:hover { background: rgba(26, 20, 36, .9); border-color: var(--gold); } }
-  .again { border: 1px solid #ffe3a3; background: linear-gradient(180deg, #f2cf86, #b8862e); color: #2a1a08; box-shadow: 0 0 26px rgba(255, 190, 90, .35); &:hover { filter: brightness(1.08); } } }
+.summary{position:absolute;z-index:9;left:0;right:0;bottom:max(22px,env(safe-area-inset-bottom));display:flex;justify-content:center;padding:0 24px;animation:rise .4s ease-out both;app-summon-button{flex:none;width:min(410px,100%);}}
+.book-return{position:absolute;z-index:10;top:max(16px,env(safe-area-inset-top));left:max(24px,env(safe-area-inset-left));display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid #c9d8fa73;border-radius:3px;background:#101522d9;color:#edf3ff;cursor:pointer;font:600 14px 'Eldervane Summon Sans',sans-serif;&:hover{background:#29324be8;}}
+
 
 .cine { position: absolute; inset: 0; z-index: 8; background: #000; display: grid; place-items: center; overflow: hidden; cursor: pointer; }
 .cine[hidden] { display: none; }

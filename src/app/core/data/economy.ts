@@ -1,4 +1,5 @@
 import { EchoCombatProfile, ECHO_GOAL, ECHO_PROFILE } from './echo-trial';
+import { SUMMON_SEALS } from './summon-seals';
 /**
  * Patch 1 economy configuration (spec: claude/patch1-hero-level-spec.md) — every number here is tuning data,
  * never read directly by combat code. Level curve, breakthroughs, items, tower EXP, farm dungeons, daily bonus.
@@ -29,6 +30,9 @@ export const HERO_LEVELS: HeroLevelDefinition[] = Array.from({ length: 10 }, (_,
 export const EXP_AT_CAP_POLICY = 'STOP' as const;
 
 export const ITEMS: Record<string, ItemDefinition> = {
+  [SUMMON_SEALS.standard.id]: { id: SUMMON_SEALS.standard.id, name: SUMMON_SEALS.standard.name, kind: 'SUMMON_SEAL' },
+  [SUMMON_SEALS.special.id]: { id: SUMMON_SEALS.special.id, name: SUMMON_SEALS.special.name, kind: 'SUMMON_SEAL' },
+  [SUMMON_SEALS.aurora.id]: { id: SUMMON_SEALS.aurora.id, name: SUMMON_SEALS.aurora.name, kind: 'SUMMON_SEAL' },
   enhancement_ore: { id: 'enhancement_ore', name: 'Enhancement Ore', kind: 'MATERIAL' },
   equip_frag_basic: { id: 'equip_frag_basic', name: 'Basic Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
   equip_frag_rare: { id: 'equip_frag_rare', name: 'Rare Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },

@@ -1,0 +1,22 @@
+:host{display:block;flex:1;min-width:0;}
+.summon-button{position:relative;isolation:isolate;display:flex;align-items:center;width:100%;height:76px;min-width:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#f5f5ff;cursor:pointer;font:600 20px/1.35 'Eldervane Summon Sans',sans-serif;transition:filter .15s,translate .12s;
+  &::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:url('/ui/summon-classic/buttons.webp') no-repeat 50.3817% 14.4852% / 107.9732% 282.4841%;filter:sepia(.15) hue-rotate(150deg) saturate(.75);}
+  &.multi::before{background-position:50.3817% 85.5148%;filter:hue-rotate(145deg) saturate(.62) brightness(1.08);}
+  &.repeat::before,&.aurora-seal::before{background-position:50.3817% 85.5148%;filter:hue-rotate(210deg) saturate(.6) brightness(1.12);}
+  &.gold-seal::before{background-position:50.3817% 85.5148%;filter:none;}
+  &:hover:not(:disabled){filter:brightness(1.06);}
+  &:active:not(:disabled){translate:0 1px;}
+  &:disabled{opacity:.48;cursor:not-allowed;}
+  &:focus-visible{outline:2px solid #f1edff;outline-offset:4px;}
+}
+.price{position:relative;flex:0 0 45%;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;height:calc(100% - 28px);margin:0 12px;padding:5px 8px;background:linear-gradient(#24242df5,#070911f8);clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);color:#f3edff;box-shadow:inset 0 1px #bac9ea33;
+  img{display:block;width:37px;height:39px;flex:none;object-fit:contain;}
+  .amount{font-size:20px;white-space:nowrap;}
+}
+.price-divider{flex:none;width:1px;height:48%;background:linear-gradient(#f2f6ff08,#f4f4ffc7 25%,#f4f4ffc7 75%,#f2f6ff08);box-shadow:1px 0 #27345e3d;}
+.summon-label{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:0 9px;color:#fffdf5;font-size:22px;text-align:center;text-shadow:0 1px 2px #20243ba8;white-space:nowrap;
+  small{font-size:13px;line-height:1.45;font-weight:600;opacity:.95;}
+}
+.single .summon-label{color:#303544;text-shadow:0 1px #ffffff73;}
+.repeat .summon-label{font-size:21px;color:#303544;text-shadow:0 1px #ffffff73;}
+@media(prefers-reduced-motion:reduce){.summon-button{transition:none;}}

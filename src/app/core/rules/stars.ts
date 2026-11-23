@@ -86,13 +86,16 @@ export function rollRarity(rng: () => number, pity: number, floor = 1): number {
 }
 
 /**
- * n pulls (1 or 10). Spends gems, adds new heroes (Lv1, base star) or Memory for duplicates, updates pity.
- * null when the player can't afford it. Explicit free pulls retain the wallet and all normal reward/pity rules.
+ * n pulls (1 or 10). Spends the requested payment, adds new heroes or Memory, and updates pity.
+ * null when the player cannot afford payment. The live service supplies an item cost; the default gem price remains for legacy callers/sims. Explicit free pulls retain both wallets and all normal reward/pity rules.
  */
-export function pull(s: GameState, n: 1 | 10, rng: () => number = Math.random, options: { free?: boolean } = {}): { state: GameState; results: PullResult[] } | null {
-  const cost = options.free ? 0 : n === 10 ? GACHA.multi : GACHA.single * n;
+export function pull(s: GameState, n: 1 | 10, rng: () => number = Math.random, options: { free?: boolean; itemCost?: { itemId: string; count: number } } = {}): { state: GameState; results: PullResult[] } | null {
+  const itemCost = !options.free ? options.itemCost : undefined;
+  if (itemCost && (!Number.isInteger(itemCost.count) || itemCost.count <= 0 || (s.inventory[itemCost.itemId] ?? 0) < itemCost.count)) return null;
+  const cost = options.free || options.itemCost ? 0 : n === 10 ? GACHA.multi : GACHA.single * n;
   if (s.gems < cost) return null;
   let state: GameState = { ...s, gems: s.gems - cost, heroes: [...s.heroes], heroMemory: { ...(s.heroMemory ?? {}) }, inventory: { ...s.inventory } };
+  if (itemCost) state.inventory[itemCost.itemId] = (state.inventory[itemCost.itemId] ?? 0) - itemCost.count;
   const results: PullResult[] = [];
   let pity = s.pity ?? 0;
   for (let i = 0; i < n; i++) {

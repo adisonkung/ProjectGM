@@ -1,4 +1,6 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, input, OnChanges, OnDestroy, output, signal, viewChild } from '@angular/core';
+import { SummonButtonComponent } from '../summon-button.component';
+import { IconComponent } from '../../../shared/icon.component';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, input, OnChanges, OnDestroy, output, signal, viewChild } from '@angular/core';
 import { CLASS_NAME } from '../../../core/data/classes';
 import { HERO_BY_ID } from '../../../core/data/heroes';
 import { heroArt } from '../../../core/data/hero-art';
@@ -28,7 +30,7 @@ export function bookCards(results: readonly SummonPull[]): BookCard[] {
  */
 @Component({
   selector: 'app-summon-book',
-  imports: [SummonSceneComponent],
+  imports: [SummonSceneComponent, SummonButtonComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './summon-book.component.html',
   styleUrl: './summon-book.component.scss',
@@ -36,6 +38,7 @@ export function bookCards(results: readonly SummonPull[]): BookCard[] {
 export class SummonBookComponent implements AfterViewInit, OnChanges, OnDestroy {
   /** Prepare on route entry, but open only after the page commits a real pull. */
   readonly active = input(true);
+  readonly canRepeat = input(true);
   readonly results = input.required<SummonPull[]>();
   /** test hook: force (or forbid) the blue-then-gold version */
   readonly suspense = input<boolean | null>(null);
@@ -46,6 +49,7 @@ export class SummonBookComponent implements AfterViewInit, OnChanges, OnDestroy 
   readonly fallback = signal(typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches);
   readonly loading = signal(true);
   readonly finished = signal(false);
+  readonly repeatCount = computed<1 | 10>(() => this.results().length === 10 ? 10 : 1);
   readonly stage = viewChild<ElementRef<HTMLDialogElement>>('stage');
   readonly host = viewChild<ElementRef<HTMLElement>>('host');
   private handle: BookSceneHandle | null = null;

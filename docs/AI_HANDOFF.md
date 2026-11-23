@@ -1,5 +1,13 @@
 # Current Development State
 
+## Three summon seals and shared gate/repeat controls — Codex, 2026-11-23
+
+User selected focus-layout3, bottom-centred repeat, upper-left Back and the supplied framed skin in different colours. Price icon×quantity now sits wholly inside the enlarged black box with a vertical separator. User chose rune stones instead of tickets and three colours: blue/silver, gold and purple/pink rainbow, and explicitly chose1/10 units. Task wip/codex-summon-seal-controls continues the reviewed card fixes at3edd668. Original art/exports: assets/ui/summon-seals; shared UI: SummonButtonComponent. Standard page uses blue/silver stones, silver/cyan action skins and a lavender repeat. Gold/aurora assets and item IDs are ready without enabling new pools.
+
+The standard service now passes an explicit itemCost to the pure pull rule; missing seals are zero and payment is atomic. Gems/other seals/rates/pity/rewards and the legacy gem-helper default remain. No save-version change, currency grants or conversions. Existing free-test flag remains enabled and waives payment; normal affordability/debit uses1/10 standard seals when it is disabled. Current rates/confirmation copy and repeat affordability are consistent.
+
+Validation: app/spec checks, Karma1028/1028, optimized build/budgets with the existing untracked no-inline-font override for external Google Fonts403; actual Desktop paid-mode single/ten cases cover geometry, price containment/divider, centered repeat/top-left Back, exact debit, preserved other wallets and repeat→confirm→cancel. Review docs/reviews/summon-seal-controls/README.md; reproduce tools/dev/summon-seal-controls-browser.cjs. Images are native paused-frame captures, not FPS claims. No Mobile/master merge/deployment or confirmed canonical-local sync-base update.
+
 ## Equal projected card-frame margins — Codex, 2026-11-23
 
 User reported that the thinned borders still lean toward alternate sides by column. Task fix/summon-card-frame-centering continues aec3813. Root cause reproduced in actual projected bounds: aura depth offset .04 shifts its centre4.14px from the outer-slot face; the separately offset face/body leaves approximately−.04/1.19px side rims at1280×720, reversed on the opposite side. Aura now shares the card position. Opened/settled hero faces sit on their slot plane with only their painted frame visible; waiting/turning cards retain the thin3D body. Names, stationary opened poses, animated aura and transaction/reveal timing are retained.

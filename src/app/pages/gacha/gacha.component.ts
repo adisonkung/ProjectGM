@@ -1,3 +1,5 @@
+import { SUMMON_SEALS, SUMMON_SEAL_COST } from '../../core/data/summon-seals';
+import { SummonButtonComponent } from './summon-button.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
 import { HeroClass } from '../../core/models/hero';
 import { SummonCampaign } from './summon-campaign.component';
@@ -27,7 +29,7 @@ const FEATURED = { id: 'lucien', epithet: 'THE BLACK SAINT', latin: 'Lucien Valt
 @Component({
   selector: 'app-gacha',
   host: { class: 'summon-classic' },
-  imports: [CitadelIconComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonBookComponent],
+  imports: [SummonButtonComponent, CitadelIconComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonBookComponent],
   templateUrl: './gacha.component.html',
   styleUrl: './gacha.component.scss',
 })
@@ -36,8 +38,11 @@ export class GachaComponent {
   private readonly gacha = inject(GachaService);
 
   readonly G = GACHA;
+  readonly seals = SUMMON_SEALS;
+  readonly costs = SUMMON_SEAL_COST;
+  readonly standardSeals = computed(() => this.save.state().inventory[SUMMON_SEALS.standard.id] ?? 0);
   get freeSummons(): boolean { return this.gacha.freeSummons; }
-  canAfford(n: 1 | 10): boolean { return this.freeSummons || this.gems() >= (n === 10 ? GACHA.multi : GACHA.single); }
+  canAfford(n: 1 | 10): boolean { return this.freeSummons || this.standardSeals() >= (n === 10 ? SUMMON_SEAL_COST.multi : SUMMON_SEAL_COST.single); }
   readonly info = signal<'banner' | 'rates' | 'pool' | 'memory' | null>(null);
   readonly showResults = signal(false);
   readonly pending = signal<1 | 10 | null>(null);
@@ -47,7 +52,7 @@ export class GachaComponent {
     const book = this.book();
     return !book || book.fallback() || !book.loading();
   });
-  readonly pendingCost = computed(() => this.pending() === 10 ? GACHA.multi : GACHA.single);
+  readonly pendingCost = computed(() => this.pending() === 10 ? SUMMON_SEAL_COST.multi : SUMMON_SEAL_COST.single);
   readonly lastCount = signal<1 | 10>(1);
   readonly pity = computed(() => this.save.state().pity ?? 0);
   readonly pool = HEROES.map(h => ({ ...h, portrait: heroArt(h.id)?.portrait, className: CLASS_NAME[h.cls] }));
@@ -104,7 +109,7 @@ export class GachaComponent {
   summon(n: 1 | 10): void {
     if (this.playing() || this.pending()) return;
     if (!this.canAfford(n)) {
-      this.error.set('เพชรไม่พอ');
+      this.error.set('ศิลาดาราไม่พอ');
       return;
     }
     this.resultsDialog().nativeElement.close();
@@ -124,7 +129,7 @@ export class GachaComponent {
     this.cancelSummon();
     const r = this.gacha.summon(n);
     if (!r) {
-      this.error.set('เพชรไม่พอ');
+      this.error.set('ศิลาดาราไม่พอ');
       return;
     }
     this.error.set(null);
