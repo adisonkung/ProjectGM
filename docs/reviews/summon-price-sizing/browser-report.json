@@ -1,0 +1,262 @@
+[
+  {
+    "count": 1,
+    "skins": [
+      {
+        "filter": "none",
+        "position": "50.3817% 14.4852%",
+        "icon": "/ui/summon-pages/standard.webp",
+        "label": "อัญเชิญ 1 ครั้ง ใช้หน้าตำราดารา 1 แผ่น"
+      },
+      {
+        "filter": "none",
+        "position": "50.3817% 85.5148%",
+        "icon": "/ui/summon-pages/standard.webp",
+        "label": "อัญเชิญ 10 ครั้ง ใช้หน้าตำราดารา 10 แผ่น"
+      }
+    ],
+    "gate": [
+      {
+        "box": {
+          "x": 642.484375,
+          "y": 611.609375,
+          "width": 291,
+          "height": 76,
+          "top": 611.609375,
+          "right": 933.484375,
+          "bottom": 687.609375,
+          "left": 642.484375
+        },
+        "price": {
+          "x": 654.484375,
+          "y": 627.609375,
+          "width": 125.125,
+          "height": 44,
+          "top": 627.609375,
+          "right": 779.609375,
+          "bottom": 671.609375,
+          "left": 654.484375
+        },
+        "iconInside": true,
+        "amountInside": true,
+        "dividerBetween": true,
+        "iconSize": [
+          33,
+          35
+        ],
+        "amountFont": "18px",
+        "priceBasis": "43%",
+        "text": "×1อัญเชิญ1 ครั้ง"
+      },
+      {
+        "box": {
+          "x": 945.484375,
+          "y": 611.609375,
+          "width": 291,
+          "height": 76,
+          "top": 611.609375,
+          "right": 1236.484375,
+          "bottom": 687.609375,
+          "left": 945.484375
+        },
+        "price": {
+          "x": 957.484375,
+          "y": 627.609375,
+          "width": 125.125,
+          "height": 44,
+          "top": 627.609375,
+          "right": 1082.609375,
+          "bottom": 671.609375,
+          "left": 957.484375
+        },
+        "iconInside": true,
+        "amountInside": true,
+        "dividerBetween": true,
+        "iconSize": [
+          33,
+          35
+        ],
+        "amountFont": "18px",
+        "priceBasis": "43%",
+        "text": "×10อัญเชิญ10 ครั้ง"
+      }
+    ],
+    "summary": {
+      "box": {
+        "x": 435,
+        "y": 622,
+        "width": 410,
+        "height": 76,
+        "top": 622,
+        "right": 845,
+        "bottom": 698,
+        "left": 435
+      },
+      "price": {
+        "x": 447,
+        "y": 638,
+        "width": 176.296875,
+        "height": 44,
+        "top": 638,
+        "right": 623.296875,
+        "bottom": 682,
+        "left": 447
+      },
+      "iconInside": true,
+      "amountInside": true,
+      "dividerBetween": true,
+      "iconSize": [
+        33,
+        35
+      ],
+      "amountFont": "18px",
+      "priceBasis": "43%",
+      "text": "×1อัญเชิญอีกครั้ง1 ครั้ง"
+    },
+    "back": {
+      "x": 24,
+      "y": 16,
+      "width": 111.203125,
+      "height": 44
+    },
+    "chargedOnce": true,
+    "gemsUnchanged": true,
+    "otherSealsUnchanged": true,
+    "repeatOnlyOpensConfirmation": true,
+    "errors": [],
+    "external": [
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap"
+    ]
+  },
+  {
+    "count": 10,
+    "skins": [
+      {
+        "filter": "none",
+        "position": "50.3817% 14.4852%",
+        "icon": "/ui/summon-pages/standard.webp",
+        "label": "อัญเชิญ 1 ครั้ง ใช้หน้าตำราดารา 1 แผ่น"
+      },
+      {
+        "filter": "none",
+        "position": "50.3817% 85.5148%",
+        "icon": "/ui/summon-pages/standard.webp",
+        "label": "อัญเชิญ 10 ครั้ง ใช้หน้าตำราดารา 10 แผ่น"
+      }
+    ],
+    "gate": [
+      {
+        "box": {
+          "x": 642.484375,
+          "y": 611.609375,
+          "width": 291,
+          "height": 76,
+          "top": 611.609375,
+          "right": 933.484375,
+          "bottom": 687.609375,
+          "left": 642.484375
+        },
+        "price": {
+          "x": 654.484375,
+          "y": 627.609375,
+          "width": 125.125,
+          "height": 44,
+          "top": 627.609375,
+          "right": 779.609375,
+          "bottom": 671.609375,
+          "left": 654.484375
+        },
+        "iconInside": true,
+        "amountInside": true,
+        "dividerBetween": true,
+        "iconSize": [
+          33,
+          35
+        ],
+        "amountFont": "18px",
+        "priceBasis": "43%",
+        "text": "×1อัญเชิญ1 ครั้ง"
+      },
+      {
+        "box": {
+          "x": 945.484375,
+          "y": 611.609375,
+          "width": 291,
+          "height": 76,
+          "top": 611.609375,
+          "right": 1236.484375,
+          "bottom": 687.609375,
+          "left": 945.484375
+        },
+        "price": {
+          "x": 957.484375,
+          "y": 627.609375,
+          "width": 125.125,
+          "height": 44,
+          "top": 627.609375,
+          "right": 1082.609375,
+          "bottom": 671.609375,
+          "left": 957.484375
+        },
+        "iconInside": true,
+        "amountInside": true,
+        "dividerBetween": true,
+        "iconSize": [
+          33,
+          35
+        ],
+        "amountFont": "18px",
+        "priceBasis": "43%",
+        "text": "×10อัญเชิญ10 ครั้ง"
+      }
+    ],
+    "summary": {
+      "box": {
+        "x": 435,
+        "y": 622,
+        "width": 410,
+        "height": 76,
+        "top": 622,
+        "right": 845,
+        "bottom": 698,
+        "left": 435
+      },
+      "price": {
+        "x": 447,
+        "y": 638,
+        "width": 176.296875,
+        "height": 44,
+        "top": 638,
+        "right": 623.296875,
+        "bottom": 682,
+        "left": 447
+      },
+      "iconInside": true,
+      "amountInside": true,
+      "dividerBetween": true,
+      "iconSize": [
+        33,
+        35
+      ],
+      "amountFont": "18px",
+      "priceBasis": "43%",
+      "text": "×10อัญเชิญอีกครั้ง10 ครั้ง"
+    },
+    "back": {
+      "x": 24,
+      "y": 16,
+      "width": 111.203125,
+      "height": 44
+    },
+    "chargedOnce": true,
+    "gemsUnchanged": true,
+    "otherSealsUnchanged": true,
+    "repeatOnlyOpensConfirmation": true,
+    "errors": [],
+    "external": [
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap"
+    ]
+  }
+]

@@ -90,3 +90,8 @@ User replaced the request to top up their private browser save with “ปรั
 ## Ancient-page currency art and orange gate — Codex, 2026-11-23
 
 The user approved the flat loose ancient-page sheet with dark silver, antique gold and saturated rainbow corners, replacing rolled-spine and stone studies. Original sheet/export manifest lives in `assets/ui/summon-pages`; `tools/ui/export_summon_pages.py` makes the three512px-tall alpha WebPs used by the existing currency registry. Display names/cost copy now describe pages (แผ่น), while inventory IDs, balances,1/10 costs, rates, free-test flag and transaction logic are retained. Both gate actions use the original unfiltered orange-gold skin; the existing lavender repeat, black price field and vertical divider remain. Gold/aurora remain prepared art/items without new pools. Native Desktop review: `docs/reviews/summon-ancient-pages/README.md`.
+
+
+### Smaller page prices / gray single action — 2026-11-23
+
+User refined the previous integration: reduce page art37×39→33×35px, price20→18px, black field45→43% width and48→44px height. Restore the original unfiltered gray/silver skin for the left×1 action and dark label text; right×10 remains original orange, result repeat retains lavender. Shared price sizing also applies to Repeat. Outer76px button size,1/10 costs, page assets and save/payment rules are retained. Native comparison and transaction report: `docs/reviews/summon-price-sizing/README.md`; reproduction: `tools/dev/summon-pages-browser.cjs`.

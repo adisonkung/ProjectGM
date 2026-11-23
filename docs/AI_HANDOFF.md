@@ -1,5 +1,11 @@
 # Current Development State
 
+## Compact summon prices / gray single action — Codex, 2026-11-23
+
+User refined the page integration: reduce the page icon37×39→33×35px, amount20→18px and black price box45→43% /48→44px, with gap8→7px. Left×1 returns to the original unfiltered gray/silver skin and dark label; right×10 stays orange. Shared smaller prices also apply to the existing lavender Repeat. Outer button size/action typography, divider, page assets and payment/save rules are retained. Task `fix/summon-price-sizing` continuesef254d9; fetched master remainsfc20880.
+
+Validation: app/spec typechecks, Karma1028/1028 and optimized build/budgets pass (same external no-font-inline Architect override for known Google Fonts403; tracked build config unchanged). Native Desktop×1/×10 gate and result flows verify exact icon/font/price sizes, gray/orange skins, containment/divider, repeat positioning and atomic payment/cancel. Reference and native before/after: `docs/reviews/summon-price-sizing/index.html`; reproduce `tools/dev/summon-pages-browser.cjs`. No Mobile/master merge/deployment or confirmed canonical-local synchronization update.
+
 ## Ancient summoning pages and orange gate — Codex, 2026-11-23
 
 User approved the flat loose-page art with no rolled spine and stronger silver/gold/aurora corners, then requested installation and the original orange gate buttons. Task `fix/summon-ancient-pages` continues the prior seal-controls head8fedc67 (fresh fetched master remainsfc20880). New source/export manifest: `assets/ui/summon-pages`; generator: `tools/ui/export_summon_pages.py`; runtime: `/ui/summon-pages/{standard,gold,aurora}.webp`. The existing currency registry now displays page names/art, all cost/error/confirmation copy uses pages, and both gate counts use the unfiltered orange-gold atlas skin. Result repeat retains its lavender tone. Inventory IDs/balances,1/10 costs, free-test flag, payment rules and available pools are retained, so no migration/grants/conversions were needed. Old stone sources remain as superseded provenance.
