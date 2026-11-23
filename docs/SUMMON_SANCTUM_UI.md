@@ -97,3 +97,5 @@ The user approved the flat loose ancient-page sheet with dark silver, antique go
 User refined the previous integration: reduce page art37×39→33×35px, price20→18px, black field45→43% width and48→44px height. Restore the original unfiltered gray/silver skin for the left×1 action and dark label text; right×10 remains original orange, result repeat retains lavender. Shared price sizing also applies to Repeat. Outer76px button size,1/10 costs, page assets and save/payment rules are retained. Native comparison and transaction report: `docs/reviews/summon-price-sizing/README.md`; reproduction: `tools/dev/summon-pages-browser.cjs`.
 
 User follow-up: narrow the black price field further43→38% and align page/quantity to opposite ends using space-between with12px horizontal padding (minimum7px gap). Icon33×35px,18px amount,44px field height and gray/orange skins stay as refined above. The same spacing applies to Repeat.
+
+Further icon-only refinement: page art33×35→30×32px (about9% smaller). Amount18px, black field38%×44px,12px side padding and gray/orange/lavender tones remain unchanged.

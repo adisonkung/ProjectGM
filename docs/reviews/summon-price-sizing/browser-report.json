@@ -41,8 +41,8 @@
         "amountInside": true,
         "dividerBetween": true,
         "iconSize": [
-          33,
-          35
+          30,
+          32
         ],
         "amountFont": "18px",
         "priceBasis": "38%",
@@ -77,8 +77,8 @@
         "amountInside": true,
         "dividerBetween": true,
         "iconSize": [
-          33,
-          35
+          30,
+          32
         ],
         "amountFont": "18px",
         "priceBasis": "38%",
@@ -114,8 +114,8 @@
       "amountInside": true,
       "dividerBetween": true,
       "iconSize": [
-        33,
-        35
+        30,
+        32
       ],
       "amountFont": "18px",
       "priceBasis": "38%",
@@ -183,8 +183,8 @@
         "amountInside": true,
         "dividerBetween": true,
         "iconSize": [
-          33,
-          35
+          30,
+          32
         ],
         "amountFont": "18px",
         "priceBasis": "38%",
@@ -219,8 +219,8 @@
         "amountInside": true,
         "dividerBetween": true,
         "iconSize": [
-          33,
-          35
+          30,
+          32
         ],
         "amountFont": "18px",
         "priceBasis": "38%",
@@ -256,8 +256,8 @@
       "amountInside": true,
       "dividerBetween": true,
       "iconSize": [
-        33,
-        35
+        30,
+        32
       ],
       "amountFont": "18px",
       "priceBasis": "38%",
