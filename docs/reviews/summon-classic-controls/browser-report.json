@@ -1,0 +1,92 @@
+[
+  {
+    "width": 1280,
+    "height": 720,
+    "geometry": [
+      {
+        "width": 291,
+        "height": 76,
+        "label": "อัญเชิญ×1",
+        "font": "\"Eldervane Summon Serif\", serif",
+        "size": "22px",
+        "price": "100",
+        "coinGap": 27.140625
+      },
+      {
+        "width": 291,
+        "height": 76,
+        "label": "อัญเชิญ×10",
+        "font": "\"Eldervane Summon Serif\", serif",
+        "size": "22px",
+        "price": "900",
+        "coinGap": 27.140625
+      }
+    ],
+    "errors": [],
+    "externalFailures": [
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap"
+    ],
+    "navigationAborts": [
+      "http://127.0.0.1:4200/banners/bailong.webp",
+      "http://127.0.0.1:4200/banners/garrick.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_squad_pole.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_squad_flag.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_gear_shield.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_gear_hammer.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_summon_crystal.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_summon_ring.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_isle_island.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_isle_cloud.webp",
+      "http://127.0.0.1:4200/ui/home-k7/btn_news_horn.webp",
+      "http://127.0.0.1:4200/ui/home-k7/btn_mail_closed.webp",
+      "http://127.0.0.1:4200/ui/home-k7/btn_mail_open.webp",
+      "http://127.0.0.1:4200/ui/home-k7/btn_settings_gear.webp",
+      "http://127.0.0.1:4200/ui/home-k7/adv_ring_outer.webp",
+      "http://127.0.0.1:4200/ui/home-k7/adv_ring_inner.webp",
+      "http://127.0.0.1:4200/ui/home-k7/adv_needle.webp",
+      "http://127.0.0.1:4200/ui/home-k7/adv_core.webp",
+      "http://127.0.0.1:4200/ui/home-k7/arena_emblem_glow.webp",
+      "http://127.0.0.1:4200/ui/home-k7/arena_sword_left.webp",
+      "http://127.0.0.1:4200/ui/home-k7/arena_sword_right.webp",
+      "http://127.0.0.1:4200/ui/home-k7/daily_gate_light.webp",
+      "http://127.0.0.1:4200/ui/home-k7/daily_gate_bars.webp",
+      "http://127.0.0.1:4200/ui/home-k7/daily_gate_arch.webp",
+      "http://127.0.0.1:4200/ui/home-k7/nav_hero_helm.webp"
+    ],
+    "cancelPreservedSave": true,
+    "informationDialogs": true
+  },
+  {
+    "width": 1600,
+    "height": 900,
+    "geometry": [
+      {
+        "width": 291,
+        "height": 76,
+        "label": "อัญเชิญ×1",
+        "font": "\"Eldervane Summon Serif\", serif",
+        "size": "22px",
+        "price": "100",
+        "coinGap": 27.140625
+      },
+      {
+        "width": 291,
+        "height": 76,
+        "label": "อัญเชิญ×10",
+        "font": "\"Eldervane Summon Serif\", serif",
+        "size": "22px",
+        "price": "900",
+        "coinGap": 27.140625
+      }
+    ],
+    "errors": [],
+    "externalFailures": [
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+      "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap"
+    ],
+    "navigationAborts": [],
+    "cancelPreservedSave": true,
+    "informationDialogs": true
+  }
+]

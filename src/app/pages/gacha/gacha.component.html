@@ -1,20 +1,20 @@
-<section class="gate" [class.summoning]="playing()" aria-label="ตู้อัญเชิญ">
+<section class="gate summon-classic" [class.summoning]="playing()" aria-label="ตู้อัญเชิญ">
   <div class="key-art" aria-hidden="true">
     @if (featuredVideo(); as v) {
       <video [src]="v" [poster]="showcase" [muted]="true" autoplay loop playsinline disablepictureinpicture preload="auto"></video>
     } @else if (showcase) { <img [src]="showcase" alt="" fetchpriority="high" decoding="async" /> }
   </div>
   <header class="top-bar">
-    <button type="button" class="round" aria-label="ย้อนกลับ" (click)="back()"><app-icon name="back" [size]="22" /></button>
+    <button type="button" class="round" aria-label="ย้อนกลับ" (click)="back()"><span class="summon-art-icon back" aria-hidden="true"></span></button>
     <div class="page-title"><span>SUMMON</span><b>อัญเชิญ</b></div>
     <span class="spacer"></span>
-    <span class="wallet" [attr.aria-label]="'เพชร ' + gems()"><app-icon name="gem" [size]="18" />{{ gemsShort() }}</span>
-    <a class="round" routerLink="/home" aria-label="กลับหน้าหลัก"><app-icon name="home" [size]="20" /></a>
+    <span class="wallet" [attr.aria-label]="'เพชร ' + gems()"><span class="summon-art-icon gem" aria-hidden="true"></span>{{ gemsShort() }}</span>
+    <a class="round" routerLink="/home" aria-label="กลับหน้าหลัก"><span class="summon-art-icon home" aria-hidden="true"></span></a>
   </header>
   <div class="summon-ui">
     <nav class="banner-rail" aria-label="ตู้อัญเชิญ">
       <button type="button" class="banner-tab active" aria-current="true" (click)="openInfo('banner')"><span class="tab-art">@if (showcase) { <img [src]="showcase" alt="" /> }</span><span class="tab-text"><b>{{ campaign.label }}</b></span></button>
-      <button type="button" class="banner-tab soon" disabled><span class="tab-art"><app-icon name="lock" [size]="18" /></span><span class="tab-text"><b>ตู้กิจกรรม</b><small>เร็ว ๆ นี้</small></span></button>
+      <button type="button" class="banner-tab soon" disabled><span class="tab-art"><span class="summon-art-icon lock" aria-hidden="true"></span></span><span class="tab-text"><b>ตู้กิจกรรม</b><small>เร็ว ๆ นี้</small></span></button>
     </nav>
     <header class="banner-heading">
       <span class="eyebrow">STANDARD SUMMON</span>
@@ -30,9 +30,9 @@
       }
     </header>
     <nav class="pool-tools" aria-label="ข้อมูลการอัญเชิญ">
-      <button type="button" (click)="openInfo('rates')"><app-icon name="scroll" [size]="17" />อัตราอัญเชิญ</button>
-      <button type="button" (click)="openInfo('pool')"><app-icon name="heroes" [size]="17" />รายชื่อฮีโร่</button>
-      <button type="button" (click)="openInfo('memory')"><app-icon name="book" [size]="17" />ความทรงจำ</button>
+      <button type="button" (click)="openInfo('rates')"><span class="summon-art-icon information" aria-hidden="true"></span>อัตราอัญเชิญ</button>
+      <button type="button" (click)="openInfo('pool')"><span class="summon-art-icon heroes" aria-hidden="true"></span>รายชื่อฮีโร่</button>
+      <button type="button" (click)="openInfo('memory')"><span class="summon-art-icon memory" aria-hidden="true"></span>ความทรงจำ</button>
       @if (results().length && !playing()) { <button type="button" (click)="openResults()"><app-icon name="restart" [size]="17" />ผลครั้งล่าสุด</button> }
     </nav>
     <section class="summon-footer" aria-label="อัญเชิญฮีโร่">
@@ -47,10 +47,9 @@
       </div>
       @if (error(); as e) { <p class="err" role="alert">{{ e }}</p> }
       <div class="acts">
-        <button type="button" class="summon-button single" (click)="summon(1)" [disabled]="playing() || !canAfford(1)"><b>อัญเชิญ ×1</b><span class="price"><app-icon name="gem" [size]="16" /> {{ G.single }}</span></button>
-        <button type="button" class="summon-button multi" (click)="summon(10)" [disabled]="playing() || !canAfford(10)"><b>อัญเชิญ ×10</b><span class="price"><app-icon name="gem" [size]="16" /> {{ G.multi }}</span></button>
+        <button type="button" class="summon-button single" (click)="summon(1)" [disabled]="playing() || !canAfford(1)" [attr.aria-label]="'อัญเชิญ 1 ครั้ง ราคา ' + G.single + ' เพชร'"><span class="price"><span class="summon-art-icon gem" aria-hidden="true"></span><span class="amount">{{ G.single }}</span></span><span class="summon-label">อัญเชิญ<small>×1</small></span></button>
+        <button type="button" class="summon-button multi" (click)="summon(10)" [disabled]="playing() || !canAfford(10)" [attr.aria-label]="'อัญเชิญ 10 ครั้ง ราคา ' + G.multi + ' เพชร'"><span class="price"><span class="summon-art-icon gem" aria-hidden="true"></span><span class="amount">{{ G.multi }}</span></span><span class="summon-label">อัญเชิญ<small>×10</small></span></button>
       </div>
-      @if (freeSummons) { <span class="funds-note" role="status">อัญเชิญฟรีชั่วคราวสำหรับทดสอบ · แสดงราคาเดิม แต่ไม่หักเพชร</span> }
       @if (!freeSummons && gems() < G.single) { <span class="funds-note">เพชรไม่พอสำหรับอัญเชิญ · ต้องใช้ {{ G.single }} เพชร</span> }
     </section>
   </div>

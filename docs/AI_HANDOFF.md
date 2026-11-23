@@ -1,5 +1,11 @@
 # Current Development State
 
+## Classic summon controls and authorized integration — Codex, 2026-11-23
+
+User explicitly requested merging all completed changes into master, pushing and deploying. The unmerged preload → gold-card aura → banner layout → fullscreen banner stack is linear through c837492; no unrelated unmerged remote work was found. New task fix/summon-classic-controls integrates the final approved silver/gold skins, blue-crystal medallions, black angled price strip, smaller Noto Serif Thai typography, generated navigation/information icons and rectangular chrome. The idle free-test footer is removed; existing free-mode logic, prices/rewards/pity, confirmation disclosures and cinematic timing are retained. No Mobile work.
+
+Reference / actual Desktop pairs and interaction report: docs/reviews/summon-classic-controls/index.html. App/spec checks, Karma1026/1026 and optimized compilation/budgets are required for publication; Google Fonts403 requires the existing untracked no-inline-font Architect override in this environment. Tracked build configuration remains unchanged. The connected Cloudflare Worker is eldervane; its preceding master check already failed, so verify the exact published commit check rather than assuming push means live. Current Git/publication/deployment status is authoritative; last confirmed canonical-local synchronization metadata is unchanged.
+
 Git/current registries are authoritative. Query `git rev-parse HEAD` / `HEAD^{tree}`; this note never stores its containing commit or tree hash.
 
 ## Current UI phase — Desktop first (user instruction, 2026-11-22)

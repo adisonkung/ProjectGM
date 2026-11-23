@@ -26,6 +26,7 @@ const FEATURED = { id: 'lucien', epithet: 'THE BLACK SAINT', latin: 'Lucien Valt
 /** Summon gate (layout B, user 2026-11-22): full-screen featured banner, pool tabs, pity + ×1/×10. Base rarity 1★–3★ · pity · duplicates → Hero Memory (develop any hero to 6★ on its detail page) */
 @Component({
   selector: 'app-gacha',
+  host: { class: 'summon-classic' },
   imports: [CitadelIconComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonBookComponent],
   templateUrl: './gacha.component.html',
   styleUrl: './gacha.component.scss',
