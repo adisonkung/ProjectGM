@@ -1,6 +1,7 @@
 import { HEROES } from '../../../core/data/heroes';
 import { heroArt } from '../../../core/data/hero-art';
 import { BOOK_ART, BOOK_ART_DIR } from './book-assets';
+import { preloadBookCardType } from './book-card-type';
 
 /** Keep decoded images, not just fire-and-forget HTTP requests. Three reuses these exact images. */
 const images = new Map<string, Promise<HTMLImageElement>>();
@@ -29,9 +30,9 @@ export function preloadBookImages(): Promise<void> {
   if (warming) return warming;
   const urls = [...new Set([BOOK_ART_DIR + BOOK_ART['plateA'], ...Object.values(BOOK_ART).map(f => BOOK_ART_DIR + f), BOOK_ART_DIR + 'blank.webp', ...Object.values(BOOK_PORTRAITS)])];
   let next = 0;
-  warming = Promise.all(Array.from({ length: 6 }, async () => {
+  warming = Promise.all([preloadBookCardType(), ...Array.from({ length: 6 }, async () => {
     while (next < urls.length) await loadBookImage(urls[next++]);
-  })).then(() => {
+  })]).then(() => {
     // Hero-intro banners start on entry too, after the room's critical images; they do not delay room readiness.
     const banners = HEROES.flatMap(h => { const banner = heroArt(h.id)?.banner; return banner ? ['/' + banner] : []; });
     let banner = 0;

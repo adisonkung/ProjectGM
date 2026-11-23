@@ -14,6 +14,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { Reflector } from 'three/addons/objects/Reflector.js';
 import { BOOK_ART as ART_KEYS } from './book-assets';
 import { BOOK_PORTRAITS, loadBookImage } from './book-preload';
+import { drawBookCardNames, preloadBookCardType } from './book-card-type';
 
 /** one card of the pull, already resolved to display data */
 export interface BookCard { star: number; id: string; th: string; en: string; cls: string; epithet: string; quote: string; portrait: string; banner?: string }
@@ -30,6 +31,7 @@ const IMG = { ...Object.fromEntries(Object.entries(ART_KEYS).map(([k, f]) => [k,
 for (const c of opts.cards) IMG['por_' + c.id] = c.portrait;
 // Decode before allocating WebGL, then reuse the route-entry image objects without a second loader/request.
 const decoded = await Promise.all(Object.entries(IMG).map(async ([key, url]) => [key, await loadBookImage(url)]));
+await preloadBookCardType();
 
 // ---------------------------------------------------------------- helpers
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), seg = (t, a, b) => clamp((t - a) / (b - a)), lerp = (a, b, p) => a + (b - a) * p;
@@ -533,10 +535,11 @@ const inflow = new THREE.Points(iGeo, new THREE.PointsMaterial({ size: .045, map
 
 // ---------------------------------------------------------------- cards (shot 2)
 const cardGeo = new THREE.PlaneGeometry(1, 1.5);
-const cardMask = canvasTex(200, 300, (g) => { g.fillStyle = '#000'; g.fillRect(0, 0, 200, 300); g.fillStyle = '#fff'; g.beginPath(); g.roundRect(3, 3, 194, 294, 14); g.fill(); }); cardMask.colorSpace = THREE.NoColorSpace;
+const cardMask = canvasTex(200, 300, (g) => { g.fillStyle = '#000'; g.fillRect(0, 0, 200, 300); g.fillStyle = '#fff'; g.beginPath(); g.roundRect(0, 0, 200, 300, 11); g.fill(); }); cardMask.colorSpace = THREE.NoColorSpace;
 function roundRect(w, h, r) { const sh = new THREE.Shape(), x = -w / 2, y = -h / 2; sh.moveTo(x + r, y); sh.lineTo(x + w - r, y); sh.quadraticCurveTo(x + w, y, x + w, y + r); sh.lineTo(x + w, y + h - r); sh.quadraticCurveTo(x + w, y + h, x + w - r, y + h); sh.lineTo(x + r, y + h); sh.quadraticCurveTo(x, y + h, x, y + h - r); sh.lineTo(x, y + r); sh.quadraticCurveTo(x, y, x + r, y); return sh; }
-const cardBody = new THREE.ExtrudeGeometry(roundRect(1.04, 1.56, .08), { depth: .03, bevelEnabled: true, bevelThickness: .012, bevelSize: .014, bevelSegments: 4, curveSegments: 8 }); cardBody.translate(0, 0, -.015);
-const rimMat = new THREE.MeshStandardMaterial({ color: 0xc99d55, metalness: 1, roughness: .22, envMapIntensity: 1.7 });
+// A narrow, flat metal edge around the painted face; no second raised gold slab.
+const cardBody = new THREE.ExtrudeGeometry(roundRect(1.012, 1.518, .058), { depth: .014, bevelEnabled: false, curveSegments: 8 }); cardBody.translate(0, 0, -.007);
+const rimMat = new THREE.MeshStandardMaterial({ color: 0xc99d55, metalness: .75, roughness: .52, envMapIntensity: .6 });
 const cardLight = new THREE.PointLight(0xfff0d8, 0, 14, 1.2); fg.add(cardLight);
 const faceMat = () => new THREE.MeshBasicMaterial({ map: T.card, alphaMap: cardMask, transparent: true, toneMapped: false });
 // the card face: the hero's portrait in a frame whose colour tells the rarity, stars and name below
@@ -549,11 +552,9 @@ function cardFace(hero, star) { return canvasTex(800, 1200, (g, W, H) => { const
   const top = g.createLinearGradient(0, 0, 0, H * .16); top.addColorStop(0, 'rgba(8,7,12,.65)'); top.addColorStop(1, 'rgba(8,7,12,0)'); g.fillStyle = top; g.fillRect(0, 0, W, H * .16);
   if (gold) { const gl = g.createRadialGradient(W / 2, H * .82, 10, W / 2, H * .82, W * .7); gl.addColorStop(0, 'rgba(255,190,90,.22)'); gl.addColorStop(1, 'rgba(255,190,90,0)'); g.fillStyle = gl; g.fillRect(0, H * .55, W, H * .45); }
   // class tag, top-left
-  g.font = '600 30px "IBM Plex Sans Thai", sans-serif'; const tw = g.measureText(cls).width; g.fillStyle = 'rgba(10,9,14,.66)'; g.beginPath(); g.roundRect(44, 44, tw + 44, 54, 27); g.fill(); g.strokeStyle = R.a; g.lineWidth = 2; g.stroke(); g.fillStyle = R.t; g.textBaseline = 'middle'; g.fillText(cls, 66, 72);
+  g.textAlign = 'left'; g.font = '600 30px "Eldervane Summon Serif", serif'; const tw = g.measureText(cls).width; g.fillStyle = 'rgba(10,9,14,.66)'; g.beginPath(); g.roundRect(44, 44, tw + 44, 54, 27); g.fill(); g.strokeStyle = R.a; g.lineWidth = 2; g.stroke(); g.fillStyle = R.t; g.textBaseline = 'middle'; g.fillText(cls, 66, 72);
   // name plate
-  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
-  g.fillStyle = R.t; g.globalAlpha = .82; g.font = '600 30px Cinzel, serif'; const spaced = en.toUpperCase().split('').join(String.fromCharCode(8202)); g.fillText(spaced, W / 2, H - 236); g.globalAlpha = 1;
-  g.font = '700 ' + (th.length > 12 ? 56 : 70) + 'px "IBM Plex Sans Thai", sans-serif'; g.fillStyle = '#fff'; g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = 16; g.fillText(th, W / 2, H - 162); g.shadowBlur = 0;
+  drawBookCardNames(g, th, en, W, H, R.t);
   // divider with a diamond
   const ln = g.createLinearGradient(W * .2, 0, W * .8, 0); ln.addColorStop(0, 'rgba(0,0,0,0)'); ln.addColorStop(.5, R.a); ln.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = ln; g.fillRect(W * .2, H - 128, W * .6, 2);
   g.fillStyle = R.a; g.save(); g.translate(W / 2, H - 127); g.rotate(Math.PI / 4); g.fillRect(-7, -7, 14, 14); g.restore();
@@ -563,7 +564,7 @@ function cardFace(hero, star) { return canvasTex(800, 1200, (g, W, H) => { const
   g.restore();
   // frame: a fine double line; gold foil with corner flourishes only for 3★
   const fr = g.createLinearGradient(0, 0, W, H); fr.addColorStop(0, R.a); fr.addColorStop(.5, R.b); fr.addColorStop(1, R.a);
-  g.strokeStyle = fr; g.lineWidth = gold ? 14 : 5; g.beginPath(); g.roundRect(gold ? 7 : 3, gold ? 7 : 3, W - (gold ? 14 : 6), H - (gold ? 14 : 6), 40); g.stroke();
+  g.strokeStyle = fr; g.lineWidth = gold ? 8 : 5; g.beginPath(); g.roundRect(gold ? 5 : 3, gold ? 5 : 3, W - (gold ? 10 : 6), H - (gold ? 10 : 6), 40); g.stroke();
   if (gold) { g.lineWidth = 2; g.globalAlpha = .7; g.beginPath(); g.roundRect(26, 26, W - 52, H - 52, 30); g.stroke(); g.globalAlpha = 1; }
   if (gold) for (const [cx, cy, sx, sy] of [[26, 26, 1, 1], [W - 26, 26, -1, 1], [26, H - 26, 1, -1], [W - 26, H - 26, -1, -1]]) { g.save(); g.translate(cx, cy); g.scale(sx, sy); g.fillStyle = fr; g.beginPath(); g.moveTo(0, 0); g.lineTo(70, 0); g.quadraticCurveTo(26, 6, 0, 70); g.closePath(); g.fill(); g.fillStyle = '#fff1c4'; g.beginPath(); g.arc(18, 18, 6, 0, Math.PI * 2); g.fill(); g.restore(); }
   }); }
@@ -585,8 +586,8 @@ const auraMat = () => new THREE.ShaderMaterial({ uniforms: { time: { value: 0 },
 const rimDark = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, metalness: .75, roughness: .35, envMapIntensity: 1.1 });
 const cards = Array.from({ length: 10 }, () => { const m = new THREE.Group(); m.visible = false; fg.add(m);
   const body = new THREE.Mesh(cardBody, rimMat); m.add(body); m.userData.body = body;
-  const face = new THREE.Mesh(cardGeo, faceMat()); face.position.z = .032; face.renderOrder = 40; m.add(face);
-  const back = new THREE.Mesh(cardGeo, faceMat()); back.position.z = -.032; back.rotation.y = Math.PI; m.add(back);
+  const face = new THREE.Mesh(cardGeo, faceMat()); face.position.z = .010; face.renderOrder = 40; m.add(face);
+  const back = new THREE.Mesh(cardGeo, faceMat()); back.position.z = -.010; back.rotation.y = Math.PI; m.add(back);
   const sheen = new THREE.Mesh(cardGeo, new THREE.MeshBasicMaterial({ map: sheenTex.clone(), alphaMap: cardMask, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: .3 })); sheen.material.map.needsUpdate = true; sheen.material.map.wrapS = sheen.material.map.wrapT = THREE.RepeatWrapping; sheen.position.z = .034; sheen.renderOrder = 41; m.add(sheen);
   const aura = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), auraMat()); aura.renderOrder = 38; aura.visible = false; auraScene.add(aura);
   return { m, face, back, sheen, aura, glow: glowSprite(new THREE.Color(1, 1, 1), 39), orb: glowSprite(new THREE.Color(1, 1, 1), 42), bloom: new Sheet(T.orbCard, 4, 3, 1.05) }; });
@@ -710,14 +711,14 @@ function updateShot2(T2, u, dt) {
   plate.visible = false; updateFloatBooks(T2, false, 0); updateDust(T2, false); ringPivot.visible = false; pivot.position.set(0, FLOAT_Y, -.15); pivot.rotation.set(-.14, 0, 0); ringO.g.visible = ringI.g.visible = false; rays.visible = halo.visible = false; hall.visible = false; low.visible = false; hallFg.visible = false; lowFg.visible = false; props.visible = false; book.visible = false; shadowCatch.visible = false; motes.visible = true; inflow.visible = false;
   [bhCharge, bhLoop, burst, burstB, burstG, upFlare].forEach(s => s.set(0, 0)); dark.visible = coreGlow.visible = false; glyphs.forEach(m => m.visible = m.userData.halo.visible = false);
   const v = u - TL.cut; if (camera.fov !== 58) { camera.fov = 58; camera.updateProjectionMatrix(); }
-  camera.position.set(Math.sin(T2 * .2) * .1, FLOOR + .6, 7.4 - .6 * eo3(seg(v, 0, 3))); camera.lookAt(0, 6.2 + 1.2 * eo3(seg(v, 0, 3)), -1.4); camera.updateMatrixWorld(); bokeh.uniforms.focus.value = CARD_D; bokeh.uniforms.aperture.value = .0005;
+  camera.position.set(0, FLOOR + .6, 7.4 - .6 * eo3(seg(v, 0, 3))); camera.lookAt(0, 6.2 + 1.2 * eo3(seg(v, 0, 3)), -1.4); camera.updateMatrixWorld(); bokeh.uniforms.focus.value = CARD_D; bokeh.uniforms.aperture.value = .0005;
   const inkC = S.top === 3 ? GOLD : BLUE; [pillarB, pillarG].forEach(s => s.s.material.depthTest = true);
   const PD = 30, ph = 2 * PD * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (1.08 - .05 * eo3(seg(v, 0, 4))), pw = ph * T.plateC.image.width / T.plateC.image.height;
   plateC.visible = true; plateC.position.copy(camera.localToWorld(V(0, 0, -PD))); plateC.quaternion.copy(camera.quaternion); plateC.scale.set(pw, ph, 1);
   plateCFore.visible = true; plateCFore.position.copy(camera.localToWorld(V(0, 0, -PD + 2))); plateCFore.quaternion.copy(camera.quaternion); plateCFore.scale.set(pw * (PD - 2) / PD, ph * (PD - 2) / PD, 1);
   const inC = (u2, v2, d = PD - 1) => camera.localToWorld(V((u2 - .5) * pw * d / PD, (.5 - v2) * ph * d / PD, -d)); // a point of the painting, at depth d in front of the camera
   const fl = seg(u, TL.cut + .1, TL.cut + 1.1); flare.visible = fl > 0 && fl < 1; flare.material.map = S.top === 3 ? flareG : flareB; flare.position.copy(inC(.5, .18)); flare.scale.setScalar(ph * .36); flare.material.map.offset.set((Math.floor(fl * 10) % 4) / 4, 1 - (Math.floor(Math.floor(fl * 10) / 4) + 1) / 3); if (S.top === 3) flare.material.color.setScalar(1); else flare.material.color.copy(inkC).multiplyScalar(.7);
-  cardLight.position.set(Math.sin(T2 * .7) * 5, 2.2, 7); cardLight.intensity = 2.2;
+  cardLight.position.set(0, 2.2, 7); cardLight.intensity = 1.3;
   grade.uniforms.uDark.value = S.goldTaps.length < goldIdx().length ? .3 * seg(u, goldWaitAt(), goldWaitAt() + .8) : 0; grade.uniforms.uFlash.value = 1.1 * bump(u, TL.cut, .22);
   const fade = 1 - seg(u, TL.cards[1], TL.cards[1] + 1.2) * .65, base = inC(.5, .875);
   setPillar(base, ph * 1.35, pw * .34, fade, T2); [pillarB, pillarG].forEach(p => p.s.material.color.setScalar(1.7));
@@ -736,6 +737,11 @@ function updateShot2(T2, u, dt) {
     const lift = (g3 ? .12 * eio(wait) - (isFinite(rs) ? .12 * eio(seg(u, rs + .3, rs + .8)) : 0) : 0), shk = 0; // no per-frame jitter (user 2026-11-22: the waiting gold cards flickered)
     c.m.visible = k > 0; c.m.position.copy(at); c.m.position.y += lift + (rnd() - .5) * shk; c.m.position.x += (rnd() - .5) * shk; c.m.scale.setScalar(w * Math.min(1.05, e) * (1 + .12 * pop + .06 * wait));
     c.m.quaternion.copy(camera.quaternion).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(T2 * .5 + i) * .05 * k * (1 - fl), (1 - eio(k)) * Math.PI * .55 + Math.sin(T2 * .7 + i * 1.3) * .06 * k * (1 - fl) + fl * Math.PI, (1 - eio(k)) * .25)));
+    // Open heroes hold an upright, fixed pose. Only the surrounding aura continues to animate.
+    if (u >= rs + .8) {
+      c.m.position.copy(at); c.m.scale.setScalar(w);
+      c.m.quaternion.copy(camera.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(V(0, 1, 0), Math.PI));
+    }
     c.m.userData.body.material = g3 ? rimMat : rimDark; c.m.userData.body.scale.set(g3 ? 1 : .978, g3 ? 1 : .985, 1); /* plain cards: only a thin grey edge shows */ c.face.material.map = g3 ? T.card3 : T.card; if (!card.tex) card.tex = cardFace(card.hero, card.star); c.back.material.map = card.tex; c.face.material.opacity = c.back.material.opacity = Math.min(1, k * 2);
     c.sheen.visible = false; // no shimmer on the cards
     // Tight dark smoke / clear gold flames follow the card's size and pose, including its landing and flip.

@@ -1,0 +1,302 @@
+[
+  {
+    "text": "นักสู้",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 57.26994323730469,
+    "left": 0,
+    "right": 56.66996765136719
+  },
+  {
+    "text": "B A I   L O N G",
+    "x": 311.0234375,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 177.84375,
+    "left": 0,
+    "right": 177.953125
+  },
+  {
+    "text": "ไป๋หลง",
+    "x": 314.98812103271484,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 178.04769897460938,
+    "left": 3,
+    "right": 173.0237579345703
+  },
+  {
+    "text": "แทงก์",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 74.27993774414062,
+    "left": -2,
+    "right": 73.97994995117188
+  },
+  {
+    "text": "Y U E   Z H E N G",
+    "x": 293.6875,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 212.515625,
+    "left": 0,
+    "right": 212.625
+  },
+  {
+    "text": "เยว่เจิ้ง",
+    "x": 304.8881378173828,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 189.24766540527344,
+    "left": -6,
+    "right": 184.22372436523438
+  },
+  {
+    "text": "นักฆ่า",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 73.70993041992188,
+    "left": 0,
+    "right": 71.37994384765625
+  },
+  {
+    "text": "M O   Y E",
+    "x": 341.5546875,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 118.234375,
+    "left": 0,
+    "right": 116.890625
+  },
+  {
+    "text": "โม่เย่",
+    "x": 338.47608184814453,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 129.2157745361328,
+    "left": 2,
+    "right": 125.04783630371094
+  },
+  {
+    "text": "นักธนู",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 76.10992431640625,
+    "left": 0,
+    "right": 76.09994506835938
+  },
+  {
+    "text": "T A N G   X U N",
+    "x": 305.8125,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 188.484375,
+    "left": 0,
+    "right": 188.375
+  },
+  {
+    "text": "ถังซวิ่น",
+    "x": 304.1561279296875,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 189.37567138671875,
+    "left": -4,
+    "right": 187.687744140625
+  },
+  {
+    "text": "ฮีลเลอร์",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 98.21992492675781,
+    "left": -1,
+    "right": 99.62994384765625
+  },
+  {
+    "text": "L I N   X U E",
+    "x": 326.421875,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 148.5,
+    "left": 0,
+    "right": 147.15625
+  },
+  {
+    "text": "หลินเสวี่ย",
+    "x": 272.30419158935547,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 258.5595703125,
+    "left": -1,
+    "right": 254.39161682128906
+  },
+  {
+    "text": "แทงก์",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 74.27993774414062,
+    "left": -2,
+    "right": 73.97994995117188
+  },
+  {
+    "text": "G A R R I C K   S T O N E W A R D",
+    "x": 192.4375,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 415.234375,
+    "left": -1,
+    "right": 414.125
+  },
+  {
+    "text": "การ์ริก",
+    "x": 312.30811309814453,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 176.19171142578125,
+    "left": -4,
+    "right": 171.38377380371094
+  },
+  {
+    "text": "นักสู้",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 57.26994323730469,
+    "left": 0,
+    "right": 56.66996765136719
+  },
+  {
+    "text": "K A E L",
+    "x": 351.3203125,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 98.703125,
+    "left": 0,
+    "right": 97.359375
+  },
+  {
+    "text": "เคล",
+    "x": 347.8400573730469,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 103.42381286621094,
+    "left": -6,
+    "right": 98.31988525390625
+  },
+  {
+    "text": "นักเวท",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 85.25993347167969,
+    "left": 0,
+    "right": 83.30995178222656
+  },
+  {
+    "text": "M I R E L L E   F R O S T G L A S S",
+    "x": 192.3046875,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 416.1875,
+    "left": 0,
+    "right": 415.390625
+  },
+  {
+    "text": "มิเรลล์ ฟรอสต์กลาส",
+    "x": 128.42843627929688,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 541.8230590820312,
+    "left": -3,
+    "right": 540.1431274414062
+  },
+  {
+    "text": "นักธนู",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 76.10992431640625,
+    "left": 0,
+    "right": 76.09994506835938
+  },
+  {
+    "text": "S Y L V A R A   W I N D W H I S P E R",
+    "x": 172.7578125,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 452.59375,
+    "left": -1,
+    "right": 453.484375
+  },
+  {
+    "text": "ซิลวารา วินด์วิสเปอร์",
+    "x": 121.06845092773438,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 553.8550415039062,
+    "left": -1,
+    "right": 556.8630981445312
+  },
+  {
+    "text": "ฮีลเลอร์",
+    "x": 66,
+    "y": 72,
+    "font": "600 30px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 98.21992492675781,
+    "left": -1,
+    "right": 99.62994384765625
+  },
+  {
+    "text": "E L I R A   D A W N M E R E",
+    "x": 229.9609375,
+    "y": 950,
+    "font": "600 32px Georgia, serif",
+    "align": "left",
+    "width": 341.421875,
+    "left": 0,
+    "right": 340.078125
+  },
+  {
+    "text": "เอลิรา ดอว์นเมียร์",
+    "x": 158.24839782714844,
+    "y": 1030,
+    "font": "600 64px \"Eldervane Summon Serif\", serif",
+    "align": "left",
+    "width": 474.4951477050781,
+    "left": -6,
+    "right": 477.5032043457031
+  }
+]
