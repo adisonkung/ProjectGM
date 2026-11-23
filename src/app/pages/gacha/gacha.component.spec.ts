@@ -102,7 +102,7 @@ describe('Summon sanctum transactions', () => {
     save.update(s => ({ ...s, gems: 0, inventory: { ...s.inventory, [SUMMON_SEALS.standard.id]: 0 } }));
     const before = JSON.stringify(save.state());
     c.confirmSummon();
-    expect(c.error()).toBe('ศิลาดาราไม่พอ');
+    expect(c.error()).toBe('หน้าตำราดาราไม่พอ');
     expect(c.pending()).toBeNull();
     expect(c.playing()).toBeFalse();
     expect(JSON.stringify(save.state())).toBe(before);
@@ -117,7 +117,7 @@ describe('Summon sanctum transactions', () => {
     const before = JSON.stringify(save.state());
     f.componentInstance.summon(1);
     expect(f.componentInstance.playing()).toBeFalse();
-    expect(f.componentInstance.error()).toBe('ศิลาดาราไม่พอ');
+    expect(f.componentInstance.error()).toBe('หน้าตำราดาราไม่พอ');
     expect(JSON.stringify(save.state())).toBe(before);
     f.destroy();
   });
@@ -202,7 +202,7 @@ describe('GachaComponent', () => {
     component.summon(10); fixture.detectChanges();
     expect(el.querySelector('.confirm-wallet')?.textContent).toContain('ราคาเดิม');
     expect(el.querySelector('.confirm-wallet')?.textContent).toContain(String(SUMMON_SEAL_COST.multi));
-    expect(el.querySelector('.confirm-note')?.textContent).toContain('ไม่หักศิลาดารา');
+    expect(el.querySelector('.confirm-note')?.textContent).toContain('ไม่หักหน้าตำราดารา');
     expect(el.querySelector<HTMLButtonElement>('.confirm-actions .primary')?.disabled).toBeFalse();
     component.cancelSummon();
   });
@@ -211,7 +211,7 @@ describe('GachaComponent', () => {
     const save = TestBed.inject(SaveService);
     save.update(s => ({ ...s, gems: 50, inventory: { ...s.inventory, [SUMMON_SEALS.standard.id]: 0 } }));
     component.summon(1);
-    expect(component.error()).toBe('ศิลาดาราไม่พอ');
+    expect(component.error()).toBe('หน้าตำราดาราไม่พอ');
     expect((save.state().inventory[SUMMON_SEALS.standard.id] ?? 0)).toBe(0);
   });
 });

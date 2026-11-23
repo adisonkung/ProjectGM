@@ -109,7 +109,7 @@ export class GachaComponent {
   summon(n: 1 | 10): void {
     if (this.playing() || this.pending()) return;
     if (!this.canAfford(n)) {
-      this.error.set('ศิลาดาราไม่พอ');
+      this.error.set('หน้าตำราดาราไม่พอ');
       return;
     }
     this.resultsDialog().nativeElement.close();
@@ -129,7 +129,7 @@ export class GachaComponent {
     this.cancelSummon();
     const r = this.gacha.summon(n);
     if (!r) {
-      this.error.set('ศิลาดาราไม่พอ');
+      this.error.set('หน้าตำราดาราไม่พอ');
       return;
     }
     this.error.set(null);

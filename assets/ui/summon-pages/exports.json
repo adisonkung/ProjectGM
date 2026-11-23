@@ -1,0 +1,47 @@
+[
+  {
+    "name": "standard",
+    "source": "pages-source.png",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "crop": [
+      50,
+      87,
+      525,
+      694
+    ],
+    "url": "/ui/summon-pages/standard.webp"
+  },
+  {
+    "name": "gold",
+    "source": "pages-source.png",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "crop": [
+      621,
+      87,
+      533,
+      694
+    ],
+    "url": "/ui/summon-pages/gold.webp"
+  },
+  {
+    "name": "aurora",
+    "source": "pages-source.png",
+    "sourceSize": [
+      1774,
+      887
+    ],
+    "crop": [
+      1198,
+      86,
+      531,
+      695
+    ],
+    "url": "/ui/summon-pages/aurora.webp"
+  }
+]

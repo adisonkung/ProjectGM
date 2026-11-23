@@ -8,7 +8,7 @@ import { SUMMON_SEALS, SUMMON_SEAL_COST } from '../../core/data/summon-seals';
   template: `
     <button type="button" class="summon-button" [class.single]="count() === 1" [class.multi]="count() === 10"
       [class.repeat]="tone() === 'repeat'" [class.gold-seal]="seal() === 'special'" [class.aurora-seal]="seal() === 'aurora'"
-      [disabled]="disabled()" [attr.aria-label]="label() + ' ' + count() + ' ครั้ง ใช้' + currency().name + ' ' + cost() + ' ชิ้น'"
+      [disabled]="disabled()" [attr.aria-label]="label() + ' ' + count() + ' ครั้ง ใช้' + currency().name + ' ' + cost() + ' แผ่น'"
       (click)="activate.emit()">
       <span class="price"><img [src]="currency().icon" alt="" aria-hidden="true" /><span class="amount">×{{ cost() }}</span></span>
       <span class="price-divider" aria-hidden="true"></span>

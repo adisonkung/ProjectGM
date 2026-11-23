@@ -51,7 +51,7 @@
         <app-summon-button [count]="1" [disabled]="playing() || !canAfford(1)" (activate)="summon(1)" />
         <app-summon-button [count]="10" [disabled]="playing() || !canAfford(10)" (activate)="summon(10)" />
       </div>
-      @if (!freeSummons && standardSeals() < costs.single) { <span class="funds-note">ศิลาดาราไม่พอสำหรับอัญเชิญ · ต้องใช้ {{ costs.single }} ชิ้น</span> }
+      @if (!freeSummons && standardSeals() < costs.single) { <span class="funds-note">หน้าตำราดาราไม่พอสำหรับอัญเชิญ · ต้องใช้ {{ costs.single }} แผ่น</span> }
     </section>
   </div>
 </section>
@@ -64,7 +64,7 @@
     <div class="banner-details-art">@if (showcase) { <img [src]="showcase" [alt]="featured?.name ?? ''" /> }<div><span class="eyebrow">STANDARD SUMMON</span><h3>{{ campaign.title }}</h3><p>{{ campaign.subtitle }}</p></div></div>
     <p class="dialog-intro">อัญเชิญปกติ · ฮีโร่ในตู้ {{ pool.length }} ตัว · ไม่มี Rate Up หรือการันตีฮีโร่เฉพาะตัว</p>
     <div class="hero-lineup">@for (h of preview; track h.id) { <button type="button" class="pool-card" (click)="openInfo('pool')" [attr.aria-label]="'ดูรายชื่อในตู้ ' + h.name"><app-citadel-frame [cut]="8" />@if (h.portrait) { <img [src]="h.portrait" alt="" /> }<span><small>{{ stars(h.star) }}</small><b>{{ h.name }}</b></span></button> }</div>
-    <p class="pool-notice">ภาพ{{ featured?.name }}เป็นภาพประกอบตู้ปกติ ไม่ได้เพิ่มโอกาสได้รับฮีโร่ตัวนี้ @if (freeSummons) { เปิดทดสอบฟรีชั่วคราว ไม่หักศิลาดารา }</p>
+    <p class="pool-notice">ภาพ{{ featured?.name }}เป็นภาพประกอบตู้ปกติ ไม่ได้เพิ่มโอกาสได้รับฮีโร่ตัวนี้ @if (freeSummons) { เปิดทดสอบฟรีชั่วคราว ไม่หักหน้าตำราดารา }</p>
     <nav class="pool-tools" aria-label="รายละเอียดตู้"><button type="button" (click)="openInfo('rates')"><app-tower-ornament [grooved]="true" [arrow]="true" />อัตราและราคา</button><button type="button" (click)="openInfo('pool')"><app-tower-ornament [grooved]="true" [arrow]="true" />ฮีโร่ทั้งหมด</button><button type="button" (click)="openInfo('memory')"><app-tower-ornament [grooved]="true" [arrow]="true" />Hero Memory</button></nav>
   } @else if (info() === 'pool') {
     <p class="dialog-intro pool-intro">ตู้อัญเชิญปกติ · ไม่มี Rate Up หรือการันตีฮีโร่เฉพาะตัว</p>
@@ -77,8 +77,8 @@
 </div></div>
   } @else {
 
-    @if (freeSummons) { <p class="pool-notice">เปิดอัญเชิญฟรีชั่วคราวสำหรับทดสอบ ราคาที่แสดงเป็นราคาเดิม และจะไม่หักศิลาดารา</p> }
-    <div class="rates-layout"><table><caption>อัตราระดับการสุ่ม</caption><thead><tr><th>ระดับ</th><th>อัตรา</th><th>ฮีโร่ในระดับ</th></tr></thead><tbody>@for (r of rates; track r.star) { <tr><th>{{ stars(r.star) }}</th><td>{{ r.pct }}%</td><td>{{ r.count }} ตัว</td></tr> }</tbody></table><dl class="rates-prices"><div><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><dt>อัญเชิญ 1 ครั้ง</dt><dd><img class="seal-inline" [src]="seals.standard.icon" alt="" aria-hidden="true" />{{ costs.single }}</dd></div><div><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><dt>อัญเชิญ 10 ครั้ง</dt><dd><img class="seal-inline" [src]="seals.standard.icon" alt="" aria-hidden="true" />{{ costs.multi }}</dd></div><small>{{ freeSummons ? 'ทดสอบฟรีชั่วคราว · ไม่หักศิลาดารา' : 'ค่าใช้จ่ายเป็นศิลาดาราต่อครั้ง' }}</small></dl></div>
+    @if (freeSummons) { <p class="pool-notice">เปิดอัญเชิญฟรีชั่วคราวสำหรับทดสอบ ราคาที่แสดงเป็นราคาเดิม และจะไม่หักหน้าตำราดารา</p> }
+    <div class="rates-layout"><table><caption>อัตราระดับการสุ่ม</caption><thead><tr><th>ระดับ</th><th>อัตรา</th><th>ฮีโร่ในระดับ</th></tr></thead><tbody>@for (r of rates; track r.star) { <tr><th>{{ stars(r.star) }}</th><td>{{ r.pct }}%</td><td>{{ r.count }} ตัว</td></tr> }</tbody></table><dl class="rates-prices"><div><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><dt>อัญเชิญ 1 ครั้ง</dt><dd><img class="seal-inline" [src]="seals.standard.icon" alt="" aria-hidden="true" />{{ costs.single }}</dd></div><div><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" /><dt>อัญเชิญ 10 ครั้ง</dt><dd><img class="seal-inline" [src]="seals.standard.icon" alt="" aria-hidden="true" />{{ costs.multi }}</dd></div><small>{{ freeSummons ? 'ทดสอบฟรีชั่วคราว · ไม่หักหน้าตำราดารา' : 'ค่าใช้จ่ายเป็นหน้าตำราดาราต่อครั้ง' }}</small></dl></div>
     <p>การันตีสุ่มระดับ 3★ ภายใน {{ G.pity }} ครั้ง และอัญเชิญ ×10 ได้ระดับ 2★ ขึ้นไปอย่างน้อย 1 ครั้ง เกจเริ่มใหม่เมื่อสุ่มได้ระดับ 3★</p>
     <p class="pool-notice">รายชื่อปัจจุบันมีเฉพาะฮีโร่ 3★ หากระดับที่สุ่มได้ไม่มีฮีโร่ ระบบจะเลือกจากรายชื่อรวม ดาวของฮีโร่ที่ได้รับจึงเป็น 3★ ทั้งหมด ส่วนเกจการันตีนับจากระดับที่สุ่มได้</p>
     <p>ตัวซ้ำเปลี่ยนเป็น Hero Memory · ไม่มี Rate Up หรือการันตีฮีโร่เฉพาะตัวในตู้นี้</p>
@@ -96,15 +96,15 @@
       </li>
     }</ul>
     <p class="dialog-intro">เพิ่มฮีโร่และ Memory เข้าเซฟเรียบร้อยแล้ว</p>
-    <footer class="result-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="resultsDialog.close()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" />ยืนยัน</button><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="summon(lastCount())" [disabled]="!canAfford(lastCount())"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" />อัญเชิญอีก {{ lastCount() }} ครั้ง · {{ freeSummons ? 'ทดสอบฟรี' : (lastCount() === 10 ? costs.multi : costs.single) + ' ศิลาดารา' }}</button></footer>
+    <footer class="result-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="resultsDialog.close()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" />ยืนยัน</button><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="summon(lastCount())" [disabled]="!canAfford(lastCount())"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" />อัญเชิญอีก {{ lastCount() }} ครั้ง · {{ freeSummons ? 'ทดสอบฟรี' : (lastCount() === 10 ? costs.multi : costs.single) + ' หน้าตำราดารา' }}</button></footer>
   }
 </dialog>
 
 <dialog #confirmDialog class="summon-dialog confirm-dialog citadel-surface" aria-labelledby="confirm-title" (cancel)="$event.preventDefault(); cancelSummon()" (click)="$event.target === confirmDialog && cancelSummon()"><app-tower-ornament [grooved]="true" [ornate]="true" [crimson]="false" />
   <header class="dialog-heading"><h2 id="confirm-title">ยืนยันการอัญเชิญ</h2><button type="button" class="close citadel-surface citadel-control" aria-label="ยกเลิกอัญเชิญ" (click)="cancelSummon()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" /><app-icon name="close" [size]="24" /></button></header>
-  <p class="confirm-copy">@if (freeSummons) { ต้องการอัญเชิญฟรี <strong>{{ pending() }} ครั้ง</strong><br />สำหรับทดสอบ โดยไม่หักศิลาดารา ใช่หรือไม่? } @else { ต้องการใช้ <strong>{{ pendingCost() }} ศิลาดารา</strong> เพื่ออัญเชิญ <strong>{{ pending() }} ครั้ง</strong><br />ในตู้อัญเชิญปกติ ใช่หรือไม่? }</p>
+  <p class="confirm-copy">@if (freeSummons) { ต้องการอัญเชิญฟรี <strong>{{ pending() }} ครั้ง</strong><br />สำหรับทดสอบ โดยไม่หักหน้าตำราดารา ใช่หรือไม่? } @else { ต้องการใช้ <strong>{{ pendingCost() }} หน้าตำราดารา</strong> เพื่ออัญเชิญ <strong>{{ pending() }} ครั้ง</strong><br />ในตู้อัญเชิญปกติ ใช่หรือไม่? }</p>
   <div class="confirm-banner">@if (showcase) { <img [src]="showcase" alt="" /> }<div><small>STANDARD SUMMON</small><b>เสียงเรียกแห่งดวงดาว</b><span>เหล่าวีรชนแห่งเอลเดอร์เวย์น</span></div></div>
   <div class="confirm-wallet"><span>{{ freeSummons ? 'ราคาเดิม' : 'ใช้จ่าย' }} <strong><img class="seal-inline" [src]="seals.standard.icon" alt="" aria-hidden="true" /> ×{{ pendingCost() }}</strong></span><span>มีอยู่ <strong><img class="seal-inline" [src]="seals.standard.icon" alt="" aria-hidden="true" /> {{ standardSeals() }}</strong></span></div>
-  <p class="confirm-note">{{ freeSummons ? 'โหมดทดสอบ: ไม่หักศิลาดารา แต่ยังได้รับฮีโร่และ Memory ตามปกติ' : 'เมื่อยืนยันจะใช้ศิลาดาราทันที และเพิ่มผลอัญเชิญเข้าเซฟ' }}<br />การข้ามฉากจะไม่เปลี่ยนผลที่ได้รับ</p>
+  <p class="confirm-note">{{ freeSummons ? 'โหมดทดสอบ: ไม่หักหน้าตำราดารา แต่ยังได้รับฮีโร่และ Memory ตามปกติ' : 'เมื่อยืนยันจะใช้หน้าตำราดาราทันที และเพิ่มผลอัญเชิญเข้าเซฟ' }}<br />การข้ามฉากจะไม่เปลี่ยนผลที่ได้รับ</p>
   <footer class="confirm-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="cancelSummon()" autofocus><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="false" />ยกเลิก</button><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="confirmSummon()" [disabled]="!pending() || !canAfford(pending() ?? 1) || !bookReady()" [attr.aria-busy]="!bookReady()"><app-tower-ornament [grooved]="true" [arrow]="true" [crimson]="true" [challenge]="true" />@if (!bookReady()) { กำลังเตรียมห้องอัญเชิญ… } @else { {{ freeSummons ? 'ยืนยันอัญเชิญฟรี' : 'ยืนยันอัญเชิญ' }} {{ pending() }} ครั้ง }</button></footer>
 </dialog>

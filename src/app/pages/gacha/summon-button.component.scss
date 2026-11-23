@@ -1,7 +1,6 @@
 :host{display:block;flex:1;min-width:0;}
 .summon-button{position:relative;isolation:isolate;display:flex;align-items:center;width:100%;height:76px;min-width:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#f5f5ff;cursor:pointer;font:600 20px/1.35 'Eldervane Summon Sans',sans-serif;transition:filter .15s,translate .12s;
-  &::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:url('/ui/summon-classic/buttons.webp') no-repeat 50.3817% 14.4852% / 107.9732% 282.4841%;filter:sepia(.15) hue-rotate(150deg) saturate(.75);}
-  &.multi::before{background-position:50.3817% 85.5148%;filter:hue-rotate(145deg) saturate(.62) brightness(1.08);}
+  &::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:url('/ui/summon-classic/buttons.webp') no-repeat 50.3817% 85.5148% / 107.9732% 282.4841%;}
   &.repeat::before,&.aurora-seal::before{background-position:50.3817% 85.5148%;filter:hue-rotate(210deg) saturate(.6) brightness(1.12);}
   &.gold-seal::before{background-position:50.3817% 85.5148%;filter:none;}
   &:hover:not(:disabled){filter:brightness(1.06);}
@@ -17,6 +16,5 @@
 .summon-label{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:0 9px;color:#fffdf5;font-size:22px;text-align:center;text-shadow:0 1px 2px #20243ba8;white-space:nowrap;
   small{font-size:13px;line-height:1.45;font-weight:600;opacity:.95;}
 }
-.single .summon-label{color:#303544;text-shadow:0 1px #ffffff73;}
 .repeat .summon-label{font-size:21px;color:#303544;text-shadow:0 1px #ffffff73;}
 @media(prefers-reduced-motion:reduce){.summon-button{transition:none;}}
