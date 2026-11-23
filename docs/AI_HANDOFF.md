@@ -2,9 +2,9 @@
 
 ## Compact summon prices / gray single action — Codex, 2026-11-23
 
-User refined the page integration: reduce the page icon37×39→33×35px, amount20→18px and black price box45→43% /48→44px, with gap8→7px. Left×1 returns to the original unfiltered gray/silver skin and dark label; right×10 stays orange. Shared smaller prices also apply to the existing lavender Repeat. Outer button size/action typography, divider, page assets and payment/save rules are retained. Task `fix/summon-price-sizing` continuesef254d9; fetched master remainsfc20880.
+User refined the page integration: reduce the page icon37×39→33×35px, amount20→18px and black price box45→38% /48→44px. Page and amount align to opposite ends with12px horizontal padding and at least7px gap. Left×1 returns to the original unfiltered gray/silver skin and dark label; right×10 stays orange. Shared smaller prices also apply to the existing lavender Repeat. Outer button size/action typography, divider, page assets and payment/save rules are retained. Task `fix/summon-price-sizing` continuesef254d9; fetched master remainsfc20880.
 
-Validation: app/spec typechecks, Karma1028/1028 and optimized build/budgets pass (same external no-font-inline Architect override for known Google Fonts403; tracked build config unchanged). Native Desktop×1/×10 gate and result flows verify exact icon/font/price sizes, gray/orange skins, containment/divider, repeat positioning and atomic payment/cancel. Reference and native before/after: `docs/reviews/summon-price-sizing/index.html`; reproduce `tools/dev/summon-pages-browser.cjs`. No Mobile/master merge/deployment or confirmed canonical-local synchronization update.
+Validation: app/spec typechecks, Karma1028/1028 and optimized build/budgets pass (same external no-font-inline Architect override for known Google Fonts403; tracked build config unchanged). Native Desktop×1/×10 gate and result flows verify exact icon/font/price sizes and12px edge insets, gray/orange skins, containment/divider, repeat positioning and atomic payment/cancel. Reference and native before/after: `docs/reviews/summon-price-sizing/index.html`; reproduce `tools/dev/summon-pages-browser.cjs`. No Mobile/master merge/deployment or confirmed canonical-local synchronization update.
 
 ## Ancient summoning pages and orange gate — Codex, 2026-11-23
 

@@ -9,7 +9,7 @@
   &:disabled{opacity:.48;cursor:not-allowed;}
   &:focus-visible{outline:2px solid #f1edff;outline-offset:4px;}
 }
-.price{position:relative;flex:0 0 43%;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;height:calc(100% - 32px);margin:0 12px;padding:5px 8px;background:linear-gradient(#24242df5,#070911f8);clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);color:#f3edff;box-shadow:inset 0 1px #bac9ea33;
+.price{position:relative;flex:0 0 38%;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:7px;height:calc(100% - 32px);margin:0 12px;padding:5px 12px;background:linear-gradient(#24242df5,#070911f8);clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);color:#f3edff;box-shadow:inset 0 1px #bac9ea33;
   img{display:block;width:33px;height:35px;flex:none;object-fit:contain;}
   .amount{font-size:18px;white-space:nowrap;}
 }
