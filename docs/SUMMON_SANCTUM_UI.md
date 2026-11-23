@@ -99,3 +99,5 @@ User refined the previous integration: reduce page art37×39→33×35px, price20
 User follow-up: narrow the black price field further43→38% and align page/quantity to opposite ends using space-between with12px horizontal padding (minimum7px gap). Icon33×35px,18px amount,44px field height and gray/orange skins stay as refined above. The same spacing applies to Repeat.
 
 Further icon-only refinement: page art33×35→30×32px (about9% smaller). Amount18px, black field38%×44px,12px side padding and gray/orange/lavender tones remain unchanged.
+
+Repeat-only refinement: shrink the bottom-centred result action410×76→370×68px and its black field38%×44px→34%×40px, with4px vertical padding. Page30×32px,18px amount,12px side padding,21px label and lavender skin remain. Gate controls retain their approved gray/orange76px layout. Native comparison: `docs/reviews/summon-price-sizing/index.html`.

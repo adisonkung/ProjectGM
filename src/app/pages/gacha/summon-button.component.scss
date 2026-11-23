@@ -18,5 +18,8 @@
   small{font-size:13px;line-height:1.45;font-weight:600;opacity:.95;}
 }
 .single .summon-label{color:#303544;text-shadow:0 1px #ffffff73;}
+.repeat{height:68px;
+  .price{flex-basis:34%;height:40px;padding-block:4px;}
+}
 .repeat .summon-label{font-size:21px;color:#303544;text-shadow:0 1px #ffffff73;}
 @media(prefers-reduced-motion:reduce){.summon-button{transition:none;}}

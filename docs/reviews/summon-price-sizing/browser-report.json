@@ -91,24 +91,24 @@
     ],
     "summary": {
       "box": {
-        "x": 435,
-        "y": 622,
-        "width": 410,
-        "height": 76,
-        "top": 622,
-        "right": 845,
+        "x": 455,
+        "y": 630,
+        "width": 370,
+        "height": 68,
+        "top": 630,
+        "right": 825,
         "bottom": 698,
-        "left": 435
+        "left": 455
       },
       "price": {
-        "x": 447,
-        "y": 638,
-        "width": 155.796875,
-        "height": 44,
-        "top": 638,
-        "right": 602.796875,
-        "bottom": 682,
-        "left": 447
+        "x": 467,
+        "y": 644,
+        "width": 125.796875,
+        "height": 40,
+        "top": 644,
+        "right": 592.796875,
+        "bottom": 684,
+        "left": 467
       },
       "iconInside": true,
       "amountInside": true,
@@ -118,7 +118,7 @@
         32
       ],
       "amountFont": "18px",
-      "priceBasis": "38%",
+      "priceBasis": "34%",
       "edgeInsets": [
         12,
         12
@@ -233,24 +233,24 @@
     ],
     "summary": {
       "box": {
-        "x": 435,
-        "y": 622,
-        "width": 410,
-        "height": 76,
-        "top": 622,
-        "right": 845,
+        "x": 455,
+        "y": 630,
+        "width": 370,
+        "height": 68,
+        "top": 630,
+        "right": 825,
         "bottom": 698,
-        "left": 435
+        "left": 455
       },
       "price": {
-        "x": 447,
-        "y": 638,
-        "width": 155.796875,
-        "height": 44,
-        "top": 638,
-        "right": 602.796875,
-        "bottom": 682,
-        "left": 447
+        "x": 467,
+        "y": 644,
+        "width": 125.796875,
+        "height": 40,
+        "top": 644,
+        "right": 592.796875,
+        "bottom": 684,
+        "left": 467
       },
       "iconInside": true,
       "amountInside": true,
@@ -260,7 +260,7 @@
         32
       ],
       "amountFont": "18px",
-      "priceBasis": "38%",
+      "priceBasis": "34%",
       "edgeInsets": [
         12,
         12

@@ -1,5 +1,11 @@
 # Current Development State
 
+## Smaller result Repeat action — Codex, 2026-11-23
+
+User requested a slightly smaller Repeat button and black price field. On `fix/summon-price-sizing` after6b44405, only the result action shrinks410×76→370×68px; its price field goes38%×44px→34%×40px with4px vertical padding. Original bottom-centre22px inset, lavender skin,30×32px page art,18px amount,21px label,12px side padding and opposite-end alignment remain. Gate sizes/colors and payment/save behavior are retained.
+
+Validation: app/spec checks, Karma1028/1028 and optimized build/budgets pass using the same external no-font-inline workaround for Google Fonts403. Native Desktop×1/×10 flows verify370×68px Repeat,40px/34% field, containment/12px insets, centred position, transaction/cancel safety and unchanged gate geometry. Reference/native pairs: `docs/reviews/summon-price-sizing/index.html`; reproduce `tools/dev/summon-pages-browser.cjs`. No Mobile/master merge/deployment or canonical-local synchronization update.
+
 ## Compact summon prices / gray single action — Codex, 2026-11-23
 
 User refined the page integration: reduce the page icon37×39→30×32px, amount20→18px and black price box45→38% /48→44px. Page and amount align to opposite ends with12px horizontal padding and at least7px gap. Left×1 returns to the original unfiltered gray/silver skin and dark label; right×10 stays orange. Shared smaller prices also apply to the existing lavender Repeat. Outer button size/action typography, divider, page assets and payment/save rules are retained. Task `fix/summon-price-sizing` continuesef254d9; fetched master remainsfc20880.
