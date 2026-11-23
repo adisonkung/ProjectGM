@@ -738,15 +738,19 @@ function updateShot2(T2, u, dt) {
     c.m.visible = k > 0; c.m.position.copy(at); c.m.position.y += lift + (rnd() - .5) * shk; c.m.position.x += (rnd() - .5) * shk; c.m.scale.setScalar(w * Math.min(1.05, e) * (1 + .12 * pop + .06 * wait));
     c.m.quaternion.copy(camera.quaternion).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(T2 * .5 + i) * .05 * k * (1 - fl), (1 - eio(k)) * Math.PI * .55 + Math.sin(T2 * .7 + i * 1.3) * .06 * k * (1 - fl) + fl * Math.PI, (1 - eio(k)) * .25)));
     // Open heroes hold an upright, fixed pose. Only the surrounding aura continues to animate.
-    if (u >= rs + .8) {
+    const opened = u >= rs + .8;
+    if (opened) {
       c.m.position.copy(at); c.m.scale.setScalar(w);
       c.m.quaternion.copy(camera.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(V(0, 1, 0), Math.PI));
     }
+    // The revealed face carries its own frame. Keep it on the slot plane so off-axis cards
+    // do not acquire a larger rim on the side farther from the screen centre.
+    c.m.userData.body.visible = !opened; c.back.position.z = opened ? 0 : -.010;
     c.m.userData.body.material = g3 ? rimMat : rimDark; c.m.userData.body.scale.set(g3 ? 1 : .978, g3 ? 1 : .985, 1); /* plain cards: only a thin grey edge shows */ c.face.material.map = g3 ? T.card3 : T.card; if (!card.tex) card.tex = cardFace(card.hero, card.star); c.back.material.map = card.tex; c.face.material.opacity = c.back.material.opacity = Math.min(1, k * 2);
     c.sheen.visible = false; // no shimmer on the cards
     // Tight dark smoke / clear gold flames follow the card's size and pose, including its landing and flip.
     c.glow.visible = g3 && pop > .02; c.glow.position.copy(at).addScaledVector(camera.getWorldDirection(tmp), .05); c.glow.scale.setScalar(w * (2.4 + 1.6 * pop)); c.glow.material.color.copy(col).multiplyScalar(.5 * pop); c.glow.material.opacity = Math.min(1, k * 2);
-    c.aura.visible = g3 && k > 0; if (c.aura.visible) { c.aura.position.copy(c.m.position).addScaledVector(camera.getWorldDirection(tmp), .04); c.aura.quaternion.copy(c.m.quaternion); c.aura.scale.set(c.m.scale.x * 1.5, c.m.scale.y * 1.4 * 1.5, 1); c.aura.renderOrder = 39.5; c.aura.material.uniforms.time.value = T2 * .5; c.aura.material.uniforms.amt.value = Math.min(1, k * 2) * (.75 + wait * (.45 + .1 * Math.sin(T2 * 1.2)) + .8 * pop); }
+    c.aura.visible = g3 && k > 0; if (c.aura.visible) { c.aura.position.copy(c.m.position); c.aura.quaternion.copy(c.m.quaternion); c.aura.scale.set(c.m.scale.x * 1.5, c.m.scale.y * 1.4 * 1.5, 1); c.aura.renderOrder = 39.5; c.aura.material.uniforms.time.value = T2 * .5; c.aura.material.uniforms.amt.value = Math.min(1, k * 2) * (.75 + wait * (.45 + .1 * Math.sin(T2 * 1.2)) + .8 * pop); }
     if (g3 && k > 0 && once('land' + i)) sparks.emit(10, at, col, { speed: 1.2, life: .6 });
     if (g3 && u > rs + .3 && once('pop' + i)) { sparks.emit(160, at, col, { speed: 2.6, life: 1, drag: 1.2 }); embers.emit(50, at, col, { speed: 1.2, life: 1.3, grav: .3 }); }
   });

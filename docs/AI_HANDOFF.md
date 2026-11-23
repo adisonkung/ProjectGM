@@ -1,5 +1,11 @@
 # Current Development State
 
+## Equal projected card-frame margins — Codex, 2026-11-23
+
+User reported that the thinned borders still lean toward alternate sides by column. Task fix/summon-card-frame-centering continues aec3813. Root cause reproduced in actual projected bounds: aura depth offset .04 shifts its centre4.14px from the outer-slot face; the separately offset face/body leaves approximately−.04/1.19px side rims at1280×720, reversed on the opposite side. Aura now shares the card position. Opened/settled hero faces sit on their slot plane with only their painted frame visible; waiting/turning cards retain the thin3D body. Names, stationary opened poses, animated aura and transaction/reveal timing are retained.
+
+Real Desktop single/two ten-pulls cover all15 heroes, projected slot/face/aura centres and equal left/right padding within.001px,5seconds of stable opened transforms, names and unchanged post-pull saves. App/spec checks, Karma1026/1026 and optimized compilation/budgets pass (existing untracked no-inline-font override for Google Fonts403). Reference/native frames and measured before/after bounds: docs/reviews/summon-card-frame-centering/index.html; reproduction: tools/dev/summon-card-frame-browser.cjs. Finite CSS entry animation finishes before captures; scene-time/paused frames, not FPS claims. No Mobile/master merge/deployment or confirmed synchronization-base update.
+
 ## Summon card layout and stationary revealed heroes — Codex, 2026-11-23
 
 User requested thinner, flatter card edges and aligned Thai/English names, then explicitly requested no sway after a hero is open. Task fix/summon-card-layout starts at fetched origin/master fc20880. Book cards now have a narrow unbevelled .014-depth body, a full-face rounded mask and a finer painted outline. New book-card-type.ts preloads the existing local Noto Serif Thai600 before texture baking and optically centres/fits both upright name lines. Opened cards hold a fixed position/scale/quaternion after settling; the sideways shot2 camera sway and moving card light are removed. Aura/particles and the original reveal/pull transaction remain.

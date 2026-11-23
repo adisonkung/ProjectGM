@@ -1,0 +1,932 @@
+[
+  {
+    "label": "after-single",
+    "count": 1,
+    "framing": [
+      {
+        "hero": "kael",
+        "bodyVisible": false,
+        "face": {
+          "left": 547,
+          "right": 733,
+          "top": 180.5,
+          "bottom": 459.50000000000006
+        },
+        "body": {
+          "left": 545.884,
+          "right": 734.116,
+          "top": 178.82600000000002,
+          "bottom": 461.17400000000004
+        },
+        "paint": {
+          "left": 548.1624999999999,
+          "right": 731.8375000000001,
+          "top": 181.66250000000005,
+          "bottom": 458.3375000000001
+        },
+        "aura": {
+          "left": 500.50000000000006,
+          "right": 779.5,
+          "top": 124.7000000000001,
+          "bottom": 515.3000000000002
+        },
+        "slot": {
+          "x": 640,
+          "y": 320,
+          "w": 186
+        },
+        "bodyLeft": 1.1159999999999854,
+        "bodyRight": 1.1159999999999854,
+        "auraCenter": 640,
+        "faceCenter": 640,
+        "padLeft": 1.162499999999909,
+        "padRight": 1.162499999999909
+      }
+    ],
+    "roster": [
+      "kael"
+    ],
+    "namesCenteredAndFitted": true,
+    "stationaryForFiveSeconds": true,
+    "body": [
+      1.0119999647140503,
+      1.5180000066757202,
+      0.014000000432133675
+    ],
+    "viewport": "1280x720",
+    "pausedSceneFrames": true,
+    "summaryViaNativeSkip": true,
+    "noAdditionalTransaction": true,
+    "errors": [],
+    "externalFailures": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      }
+    ]
+  },
+  {
+    "label": "after-first",
+    "count": 10,
+    "framing": [
+      {
+        "hero": "bailong",
+        "bodyVisible": false,
+        "face": {
+          "left": 227.99999999999997,
+          "right": 340,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 227.32799999999997,
+          "right": 340.672,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 228.7,
+          "right": 339.30000000000007,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 200,
+          "right": 367.9999999999999,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 284,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.671999999999997,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 283.99999999999994,
+        "faceCenter": 284,
+        "padLeft": 0.700000000000017,
+        "padRight": 0.6999999999999318
+      },
+      {
+        "hero": "yuezheng",
+        "bodyVisible": false,
+        "face": {
+          "left": 406,
+          "right": 518,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 405.32800000000003,
+          "right": 518.672,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 406.70000000000005,
+          "right": 517.3000000000001,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 378,
+          "right": 546,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 462,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.6719999999999686,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 462,
+        "faceCenter": 462,
+        "padLeft": 0.7000000000000455,
+        "padRight": 0.6999999999999318
+      },
+      {
+        "hero": "moye",
+        "bodyVisible": false,
+        "face": {
+          "left": 584,
+          "right": 696,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 583.328,
+          "right": 696.6719999999999,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 584.7,
+          "right": 695.3,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 556,
+          "right": 724,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 640,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6719999999999118,
+        "auraCenter": 640,
+        "faceCenter": 640,
+        "padLeft": 0.7000000000000455,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "tangxun",
+        "bodyVisible": false,
+        "face": {
+          "left": 762,
+          "right": 874,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 761.328,
+          "right": 874.6719999999999,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 762.6999999999999,
+          "right": 873.3,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 734,
+          "right": 902,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 818,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6719999999999118,
+        "auraCenter": 818,
+        "faceCenter": 818,
+        "padLeft": 0.6999999999999318,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "linxue",
+        "bodyVisible": false,
+        "face": {
+          "left": 940,
+          "right": 1052,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 939.328,
+          "right": 1052.672,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 940.6999999999999,
+          "right": 1051.3,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 912,
+          "right": 1080,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 996,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 996,
+        "faceCenter": 996,
+        "padLeft": 0.6999999999999318,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "garrick",
+        "bodyVisible": false,
+        "face": {
+          "left": 227.99999999999997,
+          "right": 340,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 227.32799999999997,
+          "right": 340.672,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 228.7,
+          "right": 339.29999999999995,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 200,
+          "right": 367.9999999999999,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 284,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.671999999999997,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 283.99999999999994,
+        "faceCenter": 284,
+        "padLeft": 0.700000000000017,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "kael",
+        "bodyVisible": false,
+        "face": {
+          "left": 406,
+          "right": 518,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 405.32800000000003,
+          "right": 518.672,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 406.70000000000005,
+          "right": 517.3,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 378,
+          "right": 546,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 462,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.6719999999999686,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 462,
+        "faceCenter": 462,
+        "padLeft": 0.7000000000000455,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "mirelle",
+        "bodyVisible": false,
+        "face": {
+          "left": 584,
+          "right": 696,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 583.328,
+          "right": 696.6719999999999,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 584.7,
+          "right": 695.3,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 556,
+          "right": 724,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 640,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6719999999999118,
+        "auraCenter": 640,
+        "faceCenter": 640,
+        "padLeft": 0.7000000000000455,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "sylvara",
+        "bodyVisible": false,
+        "face": {
+          "left": 762,
+          "right": 874,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 761.328,
+          "right": 874.6719999999999,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 762.6999999999999,
+          "right": 873.3,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 734,
+          "right": 902,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 818,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6719999999999118,
+        "auraCenter": 818,
+        "faceCenter": 818,
+        "padLeft": 0.6999999999999318,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "elira",
+        "bodyVisible": false,
+        "face": {
+          "left": 940,
+          "right": 1052,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 939.328,
+          "right": 1052.672,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 940.6999999999999,
+          "right": 1051.3,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 912.0000000000002,
+          "right": 1080,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 996,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 996.0000000000001,
+        "faceCenter": 996,
+        "padLeft": 0.6999999999999318,
+        "padRight": 0.7000000000000455
+      }
+    ],
+    "roster": [
+      "bailong",
+      "yuezheng",
+      "moye",
+      "tangxun",
+      "linxue",
+      "garrick",
+      "kael",
+      "mirelle",
+      "sylvara",
+      "elira"
+    ],
+    "namesCenteredAndFitted": true,
+    "stationaryForFiveSeconds": true,
+    "body": [
+      1.0119999647140503,
+      1.5180000066757202,
+      0.014000000432133675
+    ],
+    "viewport": "1280x720",
+    "pausedSceneFrames": true,
+    "summaryViaNativeSkip": true,
+    "noAdditionalTransaction": true,
+    "errors": [],
+    "externalFailures": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      }
+    ]
+  },
+  {
+    "label": "after-second",
+    "count": 10,
+    "framing": [
+      {
+        "hero": "vaelric",
+        "bodyVisible": false,
+        "face": {
+          "left": 227.99999999999997,
+          "right": 340,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 227.32799999999997,
+          "right": 340.672,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 228.7,
+          "right": 339.30000000000007,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 200,
+          "right": 367.9999999999999,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 284,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.671999999999997,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 283.99999999999994,
+        "faceCenter": 284,
+        "padLeft": 0.700000000000017,
+        "padRight": 0.6999999999999318
+      },
+      {
+        "hero": "draeven",
+        "bodyVisible": false,
+        "face": {
+          "left": 406,
+          "right": 518,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 405.32800000000003,
+          "right": 518.672,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 406.70000000000005,
+          "right": 517.3000000000001,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 378,
+          "right": 546,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 462,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.6719999999999686,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 462,
+        "faceCenter": 462,
+        "padLeft": 0.7000000000000455,
+        "padRight": 0.6999999999999318
+      },
+      {
+        "hero": "mordrienne",
+        "bodyVisible": false,
+        "face": {
+          "left": 584,
+          "right": 696,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 583.328,
+          "right": 696.6719999999999,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 584.7,
+          "right": 695.3,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 556,
+          "right": 724,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 640,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6719999999999118,
+        "auraCenter": 640,
+        "faceCenter": 640,
+        "padLeft": 0.7000000000000455,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "sylas",
+        "bodyVisible": false,
+        "face": {
+          "left": 762,
+          "right": 874,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 761.328,
+          "right": 874.6719999999999,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 762.6999999999999,
+          "right": 873.3,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 734,
+          "right": 902,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 818,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6719999999999118,
+        "auraCenter": 818,
+        "faceCenter": 818,
+        "padLeft": 0.6999999999999318,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "lucien",
+        "bodyVisible": false,
+        "face": {
+          "left": 940,
+          "right": 1052,
+          "top": 130.00000000000014,
+          "bottom": 298
+        },
+        "body": {
+          "left": 939.328,
+          "right": 1052.672,
+          "top": 128.99200000000005,
+          "bottom": 299.00800000000004
+        },
+        "paint": {
+          "left": 940.6999999999999,
+          "right": 1051.3,
+          "top": 130.70000000000007,
+          "bottom": 297.30000000000007
+        },
+        "aura": {
+          "left": 912,
+          "right": 1080,
+          "top": 96.4,
+          "bottom": 331.60000000000014
+        },
+        "slot": {
+          "x": 996,
+          "y": 214,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 996,
+        "faceCenter": 996,
+        "padLeft": 0.6999999999999318,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "mirelle",
+        "bodyVisible": false,
+        "face": {
+          "left": 227.99999999999997,
+          "right": 340,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 227.32799999999997,
+          "right": 340.672,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 228.7,
+          "right": 339.29999999999995,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 200,
+          "right": 367.9999999999999,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 284,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.671999999999997,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 283.99999999999994,
+        "faceCenter": 284,
+        "padLeft": 0.700000000000017,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "sylvara",
+        "bodyVisible": false,
+        "face": {
+          "left": 406,
+          "right": 518,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 405.32800000000003,
+          "right": 518.672,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 406.70000000000005,
+          "right": 517.3,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 378,
+          "right": 546,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 462,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.6719999999999686,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 462,
+        "faceCenter": 462,
+        "padLeft": 0.7000000000000455,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "elira",
+        "bodyVisible": false,
+        "face": {
+          "left": 584,
+          "right": 696,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 583.328,
+          "right": 696.6719999999999,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 584.7,
+          "right": 695.3,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 556,
+          "right": 724,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 640,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6719999999999118,
+        "auraCenter": 640,
+        "faceCenter": 640,
+        "padLeft": 0.7000000000000455,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "vaelric",
+        "bodyVisible": false,
+        "face": {
+          "left": 762,
+          "right": 874,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 761.328,
+          "right": 874.6719999999999,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 762.6999999999999,
+          "right": 873.3,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 734,
+          "right": 902,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 818,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6719999999999118,
+        "auraCenter": 818,
+        "faceCenter": 818,
+        "padLeft": 0.6999999999999318,
+        "padRight": 0.7000000000000455
+      },
+      {
+        "hero": "draeven",
+        "bodyVisible": false,
+        "face": {
+          "left": 940,
+          "right": 1052,
+          "top": 362.00000000000017,
+          "bottom": 530
+        },
+        "body": {
+          "left": 939.328,
+          "right": 1052.672,
+          "top": 360.9920000000001,
+          "bottom": 531.008
+        },
+        "paint": {
+          "left": 940.6999999999999,
+          "right": 1051.3,
+          "top": 362.70000000000005,
+          "bottom": 529.3000000000001
+        },
+        "aura": {
+          "left": 912.0000000000002,
+          "right": 1080,
+          "top": 328.40000000000003,
+          "bottom": 563.6
+        },
+        "slot": {
+          "x": 996,
+          "y": 446,
+          "w": 112
+        },
+        "bodyLeft": 0.6720000000000255,
+        "bodyRight": 0.6720000000000255,
+        "auraCenter": 996.0000000000001,
+        "faceCenter": 996,
+        "padLeft": 0.6999999999999318,
+        "padRight": 0.7000000000000455
+      }
+    ],
+    "roster": [
+      "vaelric",
+      "draeven",
+      "mordrienne",
+      "sylas",
+      "lucien",
+      "mirelle",
+      "sylvara",
+      "elira",
+      "vaelric",
+      "draeven"
+    ],
+    "namesCenteredAndFitted": true,
+    "stationaryForFiveSeconds": true,
+    "body": [
+      1.0119999647140503,
+      1.5180000066757202,
+      0.014000000432133675
+    ],
+    "viewport": "1280x720",
+    "pausedSceneFrames": true,
+    "summaryViaNativeSkip": true,
+    "noAdditionalTransaction": true,
+    "errors": [],
+    "externalFailures": [
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      },
+      {
+        "url": "https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600;700;800&family=Trirong:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap",
+        "error": "net::ERR_TUNNEL_CONNECTION_FAILED"
+      }
+    ]
+  }
+]
