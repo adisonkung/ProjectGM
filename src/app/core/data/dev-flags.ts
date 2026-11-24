@@ -10,4 +10,6 @@ export const DEV_FLAGS = {
   fullUltAtStart: true,
   /** temporary user-requested free gacha; retain configured prices in the UI */
   freeSummons: true,
+  /** DEV/TEST: bag shows a "เติมของทดสอบ" button that adds 1 of every item id + 1 gear per base (explicit click only). Set false to hide. */
+  bagTestSeed: true,
 };

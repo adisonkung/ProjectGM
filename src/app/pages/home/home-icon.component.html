@@ -1,5 +1,5 @@
 @let base = primary();
-<span [class]="'icon ' + name()" [class.active]="active()" [class.short]="short()">
+<span [class]="'icon ' + name()" [class.spin]="spin()" [class.active]="active()" [class.short]="short()">
   @if (name() === 'grid') {
     <span class="squares">
       @for (corner of squares; track corner) { <i [class]="corner"></i> }

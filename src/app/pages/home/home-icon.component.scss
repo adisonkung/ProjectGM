@@ -56,11 +56,8 @@
 .summon {
   .primary { --scale: 85%; z-index: 1; }
   .secondary { --scale: 95%; opacity: .7; }
-  &.active .primary { animation: crystal-float var(--run) ease-out forwards; }
-  &.active .secondary { animation: rune-turn var(--run) ease-out forwards; }
+  &.active .secondary { filter: drop-shadow(0 0 4px #ffac39); opacity: 1; transition: opacity .2s, filter .2s; }
 }
-@keyframes crystal-float { to { translate: 0 -14%; rotate: 9deg; filter: brightness(1.2); } }
-@keyframes rune-turn { to { rotate: 130deg; filter: drop-shadow(0 0 4px #ffac39); opacity: 1; } }
 
 .isle {
   .primary { --scale: 105%; }
@@ -89,8 +86,10 @@
   &.active .secondary { opacity: 1; translate: 0 -8%; }
   &.short .secondary { transition-duration: .1s, .14s; }
 }
-.settings.active .primary { animation: gear-settle var(--run) cubic-bezier(.2,.78,.34,1) forwards; }
-@keyframes gear-settle { 68% { rotate: 98deg; } to { rotate: 90deg; } }
+/* user 2026-11-24: menu / summon / settings stay in place and turn ~200° then come back (no outward drift) */
+.spin { --spin-run: .9s; &.short { --spin-run: .6s; } }
+.spin.active { animation: icon-spin var(--spin-run) cubic-bezier(.33,.72,.3,1); }
+@keyframes icon-spin { 48% { rotate: 200deg; } to { rotate: 0deg; } }
 
 .squares {
   position: relative; display: grid; grid-template: repeat(2, 1fr) / repeat(2, 1fr); gap: 13%;
@@ -99,8 +98,6 @@
   .tl { --x: -20%; --y: -20%; } .tr { --x: 20%; --y: -20%; }
   .bl { --x: -20%; --y: 20%; } .br { --x: 20%; --y: 20%; }
 }
-.grid.active .squares i { rotate: 45deg; translate: var(--x) var(--y); }
-.grid.short .squares i { transition-duration: .16s; }
 
 .event {
   .primary { transform-origin: 50% 8%; }
@@ -147,7 +144,7 @@
 @keyframes boss-rattle { 18%, 43% { rotate: -4deg; } 30%, 55% { rotate: 4deg; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .icon *, .active * { animation: none !important; transition: none !important; }
+  .icon, .icon *, .active * { animation: none !important; transition: none !important; }
   :is(.mail, .mission):has(.secondary) .primary { opacity: 0; }
   :is(.mail, .mission) .secondary { opacity: 1; translate: 0 -8%; }
 }

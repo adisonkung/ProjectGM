@@ -124,13 +124,16 @@ describe('HomeComponent (K7)', () => {
     expect(el.querySelector('.art-active, app-sheet-fx')).toBeNull();
     f.destroy();
   }));
-  it('banner picker: top-right icon opens it, choice persists, cosmetics kept, Escape closes', () => {
+  it('banner picker: menu tile opens it, choice persists, cosmetics kept, Escape closes', () => {
     ownShipped();
     const f = TestBed.createComponent(HomeComponent); f.detectChanges();
     const el = f.nativeElement as HTMLElement, c = f.componentInstance;
     const acct = c.account;
     acct.setFrame('wuxia');
-    (el.querySelector('.top-right button[aria-label="เปลี่ยนแบนเนอร์"]') as HTMLButtonElement).click(); f.detectChanges();
+    (el.querySelector('.menu-btn') as HTMLButtonElement).click(); f.detectChanges();
+    const tile = [...el.querySelectorAll('#home-menu .tile')].find(t => t.textContent!.includes('แบนเนอร์')) as HTMLButtonElement;
+    tile.click(); f.detectChanges();
+    expect(el.querySelector('#home-menu')).toBeNull();
     expect(el.querySelector('.banner-panel')).not.toBeNull();
     const owned = c.ownedBanners();
     expect(owned.length).toBeGreaterThan(1);
@@ -160,5 +163,45 @@ describe('HomeComponent (K7)', () => {
     const other = c.ownedBanners().find(o => !o.video)!;
     c.pickBanner(other.id); f.detectChanges();
     expect((f.nativeElement as HTMLElement).querySelector('.backdrop video')).toBeNull();
+  });
+
+  it('top-right row has the bag but no banner / settings; both moved into the menu panel', () => {
+    const f = TestBed.createComponent(HomeComponent); f.detectChanges();
+    const el = f.nativeElement as HTMLElement;
+    const labels = [...el.querySelectorAll('.top-right .rb')].map(b => b.getAttribute('aria-label'));
+    expect(labels).toContain('กระเป๋า');
+    expect(labels).not.toContain('เปลี่ยนแบนเนอร์');
+    expect(labels).not.toContain('ตั้งค่า');
+    (el.querySelector('.menu-btn') as HTMLButtonElement).click(); f.detectChanges();
+    const tiles = [...el.querySelectorAll('#home-menu .tile')].map(t => t.textContent!);
+    expect(tiles.some(t => t.includes('แบนเนอร์'))).toBeTrue();
+    expect(tiles.some(t => t.includes('ตั้งค่า'))).toBeTrue();
+  });
+
+  it('settings tile still opens the account page', () => {
+    const f = TestBed.createComponent(HomeComponent); f.detectChanges();
+    const nav = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    f.componentInstance.tile({ icon: 'settings', th: 'ตั้งค่า', en: 'SETTINGS', route: '/account' });
+    expect(nav).toHaveBeenCalledWith('/account');
+  });
+
+  it('menu, summon and settings icons turn in place (spin class) instead of drifting', () => {
+    const f = TestBed.createComponent(HomeComponent); f.detectChanges();
+    const el = f.nativeElement as HTMLElement;
+    expect(el.querySelector('.menu-btn .icon.grid.spin')).not.toBeNull();
+    expect(el.querySelector('.main-nav a[href="/gacha"] .icon.summon.spin')).not.toBeNull();
+    expect(el.querySelector('.main-nav a[href="/heroes"] .icon.spin')).toBeNull();
+    (el.querySelector('.menu-btn') as HTMLButtonElement).click(); f.detectChanges();
+    expect(el.querySelector('#home-menu .icon.settings.spin')).not.toBeNull();
+  });
+
+  it('bag button opens the bag; Escape closes it', () => {
+    const f = TestBed.createComponent(HomeComponent); f.detectChanges();
+    const el = f.nativeElement as HTMLElement;
+    (el.querySelector('.top-right button[aria-label="กระเป๋า"]') as HTMLButtonElement).click(); f.detectChanges();
+    expect(el.querySelector('app-home-bag .bag')).not.toBeNull();
+    expect(el.querySelectorAll('app-home-bag [role="tab"]').length).toBe(3);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); f.detectChanges();
+    expect(el.querySelector('app-home-bag')).toBeNull();
   });
 });

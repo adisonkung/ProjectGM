@@ -1,8 +1,16 @@
 # Current Development State
 
+## Sound + bag merged into master — Claude, 2026-11-24
+
+User explicitly requested merging everything into master. Only `feature/claude-sound-service` and `feature/claude-home-bag` were ahead of origin/master 722f3b9; both merged with --no-ff (handoff conflict kept both notes). Earlier "not merged" wording in the two notes below is historical. Merged tree re-checked with app/spec typechecks and Karma before push. No deployment action beyond the push; confirmed sync base unchanged.
+
 ## Basic sound effects + SoundService — Claude, 2026-11-24
 
 Branch `feature/claude-sound-service` from origin/master 722f3b9 (not merged; waiting for the user to listen and pick A/B). New `SoundService` (Web Audio, settings per device in localStorage), app-wide tap and dialog open/close hooks, summon and level-up sounds, and a sound card on `/account` (on/off, volume, test buttons). Runtime sounds `public/sfx/{tap,open,close,summon,levelup}.{webm,mp3}` come from `tools/audio/build_ui_sfx.sh` (earshot 1.0 + ffmpeg). Validation: app/spec typechecks, Karma 1032/1032, production build completes (existing budget warnings only), browser check on /account: card renders, files fetch and all ten decode. Details in CLAUDE.md.
+
+## Home bag — Claude, 2026-11-24
+
+`feature/claude-home-bag` from origin/master 722f3b9 (sound branch not included). Home bag dialog with gear/materials/summon tabs, 999 per slot, Use (deep link) and Sell (gear only). Banner and settings moved into the menu panel; menu/summon/settings icons spin in place. `DEV_FLAGS.bagTestSeed` is on for testing. App/spec typechecks and Karma 1042/1042 pass; Desktop browser check passes. No Mobile work, no master merge or deployment; confirmed sync base unchanged.
 
 ## Summon integration merge/push authorized — Codex, 2026-11-24
 

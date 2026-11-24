@@ -1,0 +1,74 @@
+// K7 bag — same black glass / champagne gold / amber selection as the home panels.
+$gold: #E6C88A; $gold-hi: #F3DCA4; $cream: #FFF1CF; $acc: #FFA830; $acc-hi: #FFCF8D; $acc-deep: #33220A;
+$tech: 'Rajdhani', 'IBM Plex Sans Thai', sans-serif;
+$thai: 'IBM Plex Sans Thai', sans-serif;
+
+:host { display: contents; }
+button { all: unset; cursor: pointer; box-sizing: border-box; }
+button:focus-visible { outline: 2px solid $acc; outline-offset: 3px; }
+.spark { fill: $gold-hi; }
+
+.veil { position: absolute; inset: 0; z-index: 24; background: rgba(4,4,6,.55); animation: fade .2s ease-out; }
+.bag { position: absolute; z-index: 25; left: 50%; top: 50%; width: 1000px; height: 640px; translate: -50% -50%; box-sizing: border-box;
+  display: flex; flex-direction: column; padding: 22px 26px 24px; border-radius: 10px; color: #F7F1E6; font-family: $thai;
+  background: linear-gradient(180deg, rgba(30,30,34,.92), rgba(8,8,10,.96));
+  box-shadow: inset 0 1px 0 rgba(255,241,207,.16), inset 0 0 0 1px rgba(230,200,138,.45), 0 0 0 4px rgba(8,8,10,.7), 0 24px 60px rgba(0,0,0,.6);
+  animation: drop .22s ease-out; }
+
+header { display: flex; align-items: center; gap: 12px;
+  small { font: 700 12px $tech; letter-spacing: .34em; color: #C9AE7A; }
+  h2 { margin: 0; font: 600 24px $thai; color: $cream; }
+  > i { flex: 1; height: 1px; background: linear-gradient(90deg, $gold, rgba(230,200,138,0)); }
+  .dev { padding: 6px 12px; border-radius: 4px; font: 700 12px $tech; letter-spacing: .08em; color: #1a1205;
+    background: repeating-linear-gradient(135deg, #FFCF8D 0 8px, #F3B24F 8px 16px); box-shadow: 0 0 0 1px #7a4c12; }
+  .x { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: $cream; box-shadow: inset 0 0 0 1px rgba(230,200,138,.4); &:hover { color: $acc-hi; } }
+}
+
+.tabs { display: flex; gap: 8px; margin: 16px 0 14px;
+  [role="tab"] { position: relative; display: flex; align-items: baseline; gap: 8px; padding: 9px 18px; border-radius: 4px; color: #CFC4B0;
+    box-shadow: inset 0 0 0 1px rgba(230,200,138,.28); transition: color .15s, box-shadow .15s, background .15s;
+    b { font: 600 16px $thai; } small { font: 700 11px $tech; letter-spacing: .24em; opacity: .7; }
+    em { font: 700 12px $tech; font-style: normal; min-width: 20px; padding: 1px 6px; border-radius: 9px; text-align: center; background: rgba(230,200,138,.14); }
+    &:hover { color: $cream; }
+    &.on { color: $cream; background: linear-gradient(180deg, rgba($acc, .26), rgba($acc-deep, .5)); box-shadow: inset 0 0 0 1px $acc, 0 0 14px rgba($acc, .3);
+      em { background: $acc; color: #1a1205; } } }
+}
+
+.body { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, 84px); grid-auto-rows: 84px; gap: 10px; align-content: start;
+  overflow-y: auto; padding: 4px; scrollbar-width: thin; scrollbar-color: rgba(230,200,138,.4) transparent; }
+.slot { position: relative; display: grid; place-items: center; border-radius: 6px;
+  background: radial-gradient(circle at 50% 35%, #2A2A30, #0E0E11 75%); box-shadow: inset 0 0 0 1px rgba(230,200,138,.32);
+  transition: box-shadow .15s, transform .15s;
+  img, app-dungeon-reward-icon { width: 58px; height: 58px; object-fit: contain; }
+  app-equipment-art { width: 66px; height: 66px; }
+  &[data-rarity="RARE"] { box-shadow: inset 0 0 0 1px #5b9ad8; } &[data-rarity="ELITE"] { box-shadow: inset 0 0 0 1px #b07ce0; }
+  &[data-rarity="EPIC"] { box-shadow: inset 0 0 0 1px #e8a64a; }
+  &:hover { transform: translateY(-2px); }
+  &.on { box-shadow: inset 0 0 0 2px $acc, 0 0 14px rgba($acc, .45); }
+  .n { position: absolute; right: 5px; bottom: 3px; font: 700 15px $tech; color: $cream; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
+  .lock { position: absolute; left: 4px; top: 2px; font-size: 12px; }
+}
+.empty { grid-column: 1 / -1; margin: 30px 0; text-align: center; color: #9A907E; }
+
+.detail { display: flex; flex-direction: column; align-items: center; padding: 20px 18px; border-radius: 8px; text-align: center;
+  background: linear-gradient(180deg, rgba(255,241,207,.05), rgba(255,241,207,0)); box-shadow: inset 0 0 0 1px rgba(230,200,138,.28);
+  .big { width: 128px; height: 128px; display: grid; place-items: center; border-radius: 8px;
+    background: radial-gradient(circle, rgba($acc, .18), transparent 70%);
+    img, app-dungeon-reward-icon, app-equipment-art { width: 112px; height: 112px; object-fit: contain; } }
+  h3 { margin: 14px 0 4px; font: 600 20px $thai; color: $cream; }
+  .sub { margin: 0; font-size: 14px; color: #CFC4B0; }
+  .own { margin: 10px 0 0; font-size: 14px; color: #CFC4B0; b { font: 700 17px $tech; color: $cream; } }
+  .acts { display: flex; gap: 10px; width: 100%; margin-top: auto; padding-top: 18px;
+    button { flex: 1; display: grid; place-items: center; height: 46px; border-radius: 4px; font: 600 17px $thai; line-height: 1.1;
+      small { font: 700 11px $tech; letter-spacing: .06em; } }
+    .use { color: #1a1205; background: linear-gradient(180deg, $acc-hi, $acc 55%, #C07A1C); box-shadow: inset 0 1px 0 #FFF0D0, 0 0 0 1px #7a4c12; &:hover { filter: brightness(1.08); } }
+    .sell { color: $cream; box-shadow: inset 0 0 0 1px rgba(230,200,138,.6); &:hover:not(:disabled) { box-shadow: inset 0 0 0 1px $acc; }
+      &:disabled { cursor: not-allowed; color: #6F675B; box-shadow: inset 0 0 0 1px rgba(230,200,138,.18); } } }
+  .hint { margin: 8px 0 0; font-size: 12px; color: #9A907E; }
+  .msg { margin: 10px 0 0; font-size: 13px; color: $acc-hi; }
+}
+
+@keyframes drop { from { opacity: 0; translate: -50% calc(-50% - 8px); } }
+@keyframes fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .veil, .bag { animation: none; } .slot { transition: none; } }
