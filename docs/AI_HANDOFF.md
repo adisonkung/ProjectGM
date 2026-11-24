@@ -1,5 +1,9 @@
 # Current Development State
 
+## Summon integration merge/push authorized — Codex, 2026-11-24
+
+User explicitly requested merging all completed changes into master and pushing it. Fresh full remote-branch fetch confirms five unmerged summon branches are contained in the reviewed `fix/summon-price-sizing` head374347a; the eight-commit stack starts from origin/masterfc20880. It includes stationary/aligned hero cards, shared summon controls/currency payment, the final ancient-page art, gray/orange gate actions and compact lavender Repeat. Working tree was clean, local/remote master matched, and the stack can fast-forward without conflict. Existing app/spec checks, Karma1028/1028, native Desktop single/ten flows and optimized build with the documented external no-font-inline workaround cover this unchanged implementation. Only authorization/handoff notes are added for integration. Actual branch/push state must be queried from Git; no separate deployment action or confirmed canonical-local synchronization update is implied.
+
 ## Smaller result Repeat action — Codex, 2026-11-23
 
 User requested a slightly smaller Repeat button and black price field. On `fix/summon-price-sizing` after6b44405, only the result action shrinks410×76→370×68px; its price field goes38%×44px→34%×40px with4px vertical padding. Original bottom-centre22px inset, lavender skin,30×32px page art,18px amount,21px label,12px side padding and opposite-end alignment remain. Gate sizes/colors and payment/save behavior are retained.
