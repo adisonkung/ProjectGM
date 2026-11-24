@@ -1,5 +1,9 @@
 # Current Development State
 
+## Home bag — Claude, 2026-11-24
+
+`feature/claude-home-bag` from origin/master 722f3b9 (sound branch not included). Home bag dialog with gear/materials/summon tabs, 999 per slot, Use (deep link) and Sell (gear only). Banner and settings moved into the menu panel; menu/summon/settings icons spin in place. `DEV_FLAGS.bagTestSeed` is on for testing. App/spec typechecks and Karma 1042/1042 pass; Desktop browser check passes. No Mobile work, no master merge or deployment; confirmed sync base unchanged.
+
 ## Summon integration merge/push authorized — Codex, 2026-11-24
 
 User explicitly requested merging all completed changes into master and pushing it. Fresh full remote-branch fetch confirms five unmerged summon branches are contained in the reviewed `fix/summon-price-sizing` head374347a; the eight-commit stack starts from origin/masterfc20880. It includes stationary/aligned hero cards, shared summon controls/currency payment, the final ancient-page art, gray/orange gate actions and compact lavender Repeat. Working tree was clean, local/remote master matched, and the stack can fast-forward without conflict. Existing app/spec checks, Karma1028/1028, native Desktop single/ten flows and optimized build with the documented external no-font-inline workaround cover this unchanged implementation. Only authorization/handoff notes are added for integration. Actual branch/push state must be queried from Git; no separate deployment action or confirmed canonical-local synchronization update is implied.

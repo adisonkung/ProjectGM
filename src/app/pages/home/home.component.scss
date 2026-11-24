@@ -152,7 +152,7 @@ a { text-decoration: none; }
 
 // ---------------------------------------------------------------- expanded menu
 .veil { position: absolute; inset: 0; z-index: 20; background: rgba(4,4,6,.6); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: fade .2s; }
-.menu-panel { position: absolute; z-index: 25; right: 32px; top: 100px; width: 520px; padding: 1px; border-radius: 10px; animation: drop .22s ease-out;
+.menu-panel { position: absolute; z-index: 25; right: 32px; top: 100px; width: 600px; padding: 1px; border-radius: 10px; animation: drop .22s ease-out;
   background: linear-gradient(160deg, $cream, #C99A52 25%, rgba(140,98,42,.35) 50%, #C99A52 78%, $cream); box-shadow: 0 24px 60px rgba(0,0,0,.7), 0 0 40px rgba(230,190,120,.15); }
 .panel-in { position: relative; overflow: hidden; border-radius: 9px; padding: 22px 24px 20px;
   background: radial-gradient(120% 70% at 85% 0%, rgba($acc, .18), rgba($acc, 0) 60%), linear-gradient(180deg, rgba(22,22,26,.95), rgba(8,8,10,.97));
@@ -173,7 +173,7 @@ a { text-decoration: none; }
   small { font: 700 11px $tech; letter-spacing: .22em; color: $acc-hi; }
   .join { font: 600 14px $thai; color: $cream; }
 }
-.tiles { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.tiles { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
 .tile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; height: 124px; border-radius: 6px;
   background: linear-gradient(180deg, rgba(255,241,207,.05), rgba(255,241,207,.015)); box-shadow: inset 0 0 0 1px rgba(230,200,138,.16); transition: background .2s, box-shadow .2s;
   &:is(:hover, :focus-visible, .art-active) { outline: none; background: linear-gradient(180deg, rgba($acc, .26), rgba($acc, .06)); box-shadow: inset 0 0 0 1px $acc, 0 0 22px rgba($acc, .3);

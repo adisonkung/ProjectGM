@@ -12,7 +12,7 @@ export const HOME_EVENTS: HomeEvent[] = [
   { tag: 'TOWER', title: 'หอคอยแห่งบททดสอบ', sub: 'พิชิตชั้นใหม่รับรางวัลครั้งแรก', time: 'เปิดตลอด', banner: 'banners/kael.webp', pos: '40% 20%', route: '/tower' },
 ];
 
-export interface MenuTile { icon: string; th: string; en: string; badge?: string; dot?: boolean; route?: string }
+export interface MenuTile { icon: string; th: string; en: string; badge?: string; dot?: boolean; route?: string; action?: 'banners' }
 
 export const MENU_TILES: MenuTile[] = [
   { icon: 'event', th: 'กิจกรรม', en: 'EVENTS', badge: '3' },
@@ -21,6 +21,9 @@ export const MENU_TILES: MenuTile[] = [
   { icon: 'login', th: 'ล็อกอินรายวัน', en: 'LOGIN BONUS', dot: true },
   { icon: 'forge', th: 'ตีเหล็ก', en: 'FORGE', route: '/forge' },
   { icon: 'account', th: 'บัญชี', en: 'ACCOUNT', route: '/account' },
+  // moved here from the top-right row (user 2026-11-24): same behaviour as the old round buttons
+  { icon: 'banner', th: 'แบนเนอร์', en: 'BANNER', action: 'banners' },
+  { icon: 'settings', th: 'ตั้งค่า', en: 'SETTINGS', route: '/account' },
 ];
 
 /** mock counters on the top-right buttons */

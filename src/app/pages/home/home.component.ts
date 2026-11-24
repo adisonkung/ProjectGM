@@ -12,6 +12,7 @@ import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
 import { formatCurrency } from '../../shared/format-currency';
 import { HOME_EVENTS, HomeEvent, MENU_TILES, MenuTile, MOCK_MAIL, WORLD_BOSS } from './home-mock';
+import { HomeBagComponent } from './home-bag.component';
 import { HomeCardArtComponent } from './home-card-art.component';
 import { HomeIconComponent } from './home-icon.component';
 import { HomeMotionDirective } from './home-motion.directive';
@@ -34,7 +35,7 @@ export const HOME_NAV = [
  */
 @Component({
   selector: 'app-home',
-  imports: [A11yModule, RouterLink, LineIconComponent, HomeCardArtComponent, HomeIconComponent, HomeMotionDirective],
+  imports: [A11yModule, RouterLink, LineIconComponent, HomeCardArtComponent, HomeIconComponent, HomeMotionDirective, HomeBagComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -102,6 +103,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   });
   readonly bannerOpen = signal(false);
   openBanners(): void { this.menuOpen.set(false); this.bannerOpen.set(true); }
+  readonly bagOpen = signal(false);
+  openBag(): void { this.menuOpen.set(false); this.bannerOpen.set(false); this.bagOpen.set(true); }
   pickBanner(id: string): void { this.account.setBanner(id); }
 
   readonly readyCount = computed(() => this.save.state().heroes.filter(h => {
@@ -144,13 +147,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   private noticeTimer?: ReturnType<typeof setTimeout>;
   toggleMenu(): void { this.menuOpen.update(v => !v); }
   @HostListener('document:keydown.escape')
-  closeMenu(): void { this.menuOpen.set(false); this.bannerOpen.set(false); }
+  closeMenu(): void { this.menuOpen.set(false); this.bannerOpen.set(false); this.bagOpen.set(false); }
   /** real page if the entry has one, otherwise the feature is still mock → short notice */
   open(route?: string): void {
     if (route) { this.menuOpen.set(false); void this.router.navigateByUrl(route); return; }
     this.soon();
   }
-  tile(t: MenuTile): void { this.open(t.route); }
+  tile(t: MenuTile): void { if (t.action === 'banners') this.openBanners(); else this.open(t.route); }
   soon(): void {
     clearTimeout(this.noticeTimer);
     this.notice.set('เร็ว ๆ นี้ — ฟีเจอร์นี้ยังไม่เปิดให้เล่น');

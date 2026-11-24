@@ -34,6 +34,9 @@ const UPGRADE_ERROR: Record<SkillUpgradeError, string> = {
   NEED_BREAKTHROUGH: 'ต้อง Breakthrough ก่อน', NEED_MATERIALS: 'Skill Tome ไม่พอ', NEED_GOLD: 'ทองไม่พอ', NO_HERO: '',
 };
 type DetailTab = 'overview' | 'stats' | 'skills' | 'gear' | 'growth' | 'star';
+const DETAIL_TABS: readonly string[] = ['overview', 'stats', 'skills', 'gear', 'growth', 'star'];
+/** `?tab=` deep link (bag "use" opens growth / skills / star) — unknown values open the overview */
+const detailTab = (q: string | null | undefined): DetailTab => (q && DETAIL_TABS.includes(q) ? q as DetailTab : 'overview');
 
 /** Latin display line above the Thai name (two-syllable wuxia names get a space). */
 const LATIN_NAME: Record<string, string> = { bailong: 'Bai Long', yuezheng: 'Yue Zheng', moye: 'Mo Ye', tangxun: 'Tang Xun', linxue: 'Lin Xue' };
@@ -156,7 +159,7 @@ export class HeroDetailComponent {
   readonly bannerVideo = computed(() => (this.reducedMotion ? undefined : heroArt(this.t()?.id)?.bannerVideo));
   readonly portrait = computed(() => heroArt(this.t()?.id)?.portrait);
   readonly attack = computed(() => { const t = this.t(); return t ? kitOf(t.id, t.cls).attack : null; });
-  readonly tab = signal<DetailTab>(inject(ActivatedRoute).snapshot?.queryParamMap?.get('tab') === 'skills' ? 'skills' : 'overview');
+  readonly tab = signal<DetailTab>(detailTab(inject(ActivatedRoute).snapshot?.queryParamMap?.get('tab')));
   readonly statBreakdown = signal(false);
   readonly tabs: { id: DetailTab; label: string; icon: string }[] = [
     { id: 'overview', label: 'ภาพรวม', icon: 'heroes' },

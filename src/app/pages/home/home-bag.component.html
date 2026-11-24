@@ -1,0 +1,64 @@
+<div class="veil" (click)="closed.emit()" aria-hidden="true"></div>
+<section class="bag" role="dialog" aria-modal="true" aria-labelledby="bag-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <header>
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path class="spark" d="M12 0c.6 6.2 5.8 11.4 12 12-6.2.6-11.4 5.8-12 12-.6-6.2-5.8-11.4-12-12C6.2 11.4 11.4 6.2 12 0z" /></svg>
+    <small>INVENTORY</small><h2 id="bag-title">กระเป๋า</h2><i aria-hidden="true"></i>
+    @if (devSeed) {
+      <button type="button" class="dev" (click)="seed()" title="DEV_FLAGS.bagTestSeed — ปิดได้ใน core/data/dev-flags.ts">DEV · เติมของทดสอบ</button>
+    }
+    <button type="button" class="x" aria-label="ปิด" (click)="closed.emit()"><app-line-icon name="close" [size]="20" [weight]="1.8" /></button>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="หมวดกระเป๋า" (keydown)="tabKey($event)">
+    @for (t of tabs; track t.id) {
+      <button type="button" role="tab" [attr.aria-selected]="tab() === t.id" [attr.tabindex]="tab() === t.id ? 0 : -1" [class.on]="tab() === t.id" (click)="pickTab(t.id)">
+        <b>{{ t.th }}</b><small>{{ t.en }}</small><em>{{ counts()[t.id] }}</em>
+      </button>
+    }
+  </div>
+
+  <div class="body">
+    <div class="grid" role="tabpanel" [attr.aria-label]="tab()">
+      @for (s of shown(); track s.key) {
+        <button type="button" class="slot" [class.on]="selected()?.key === s.key" [attr.data-rarity]="s.rarity ?? null" (click)="pick(s)" [attr.aria-label]="s.name + ' × ' + s.count">
+          @if (s.instance; as it) {
+            <app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel || null" [instanceId]="it.instanceId" />
+          } @else if (s.icon) {
+            <img [src]="s.icon" alt="" decoding="async" />
+          } @else {
+            <app-dungeon-reward-icon [itemId]="s.type === 'memory' ? 'universal_memory' : s.id" />
+          }
+          @if (s.type !== 'equipment') { <span class="n">{{ s.count }}</span> }
+          @if (s.instance?.locked) { <span class="lock" aria-label="ล็อก">🔒</span> }
+        </button>
+      } @empty {
+        <p class="empty">ยังไม่มีของในหมวดนี้</p>
+      }
+    </div>
+
+    <aside class="detail" aria-live="polite">
+      @if (selected(); as s) {
+        <div class="big">
+          @if (s.instance; as it) {
+            <app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel || null" context="inspect" [instanceId]="it.instanceId" />
+          } @else if (s.icon) {
+            <img [src]="s.icon" alt="" />
+          } @else {
+            <app-dungeon-reward-icon [itemId]="s.type === 'memory' ? 'universal_memory' : s.id" />
+          }
+        </div>
+        <h3>{{ s.name }}</h3>
+        <p class="sub">{{ s.note }}</p>
+        <p class="own">มีทั้งหมด <b>{{ s.total.toLocaleString('en-US') }}</b>@if (s.total > s.count) { · ช่องนี้ {{ s.count }} }</p>
+        <div class="acts">
+          <button type="button" class="use" (click)="use(s)">ใช้</button>
+          <button type="button" class="sell" [disabled]="s.sellGold === null" (click)="sell(s)">ขาย@if (s.sellGold !== null) { <small>{{ s.sellGold }} ทอง</small> }</button>
+        </div>
+        @if (s.sellGold === null && s.sellNote) { <p class="hint">{{ s.sellNote }}</p> }
+      } @else {
+        <p class="empty">เลือกไอเท็มเพื่อดูรายละเอียด</p>
+      }
+      @if (message(); as m) { <p class="msg" role="status">{{ m }}</p> }
+    </aside>
+  </div>
+</section>

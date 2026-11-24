@@ -3,6 +3,8 @@ import { SheetFxComponent } from '../../shared/sheet-fx.component';
 import { HOME_ART, HOME_ICONS } from './home-art';
 import { LineIconComponent } from './line-icon.component';
 
+const SPIN_ICONS = new Set(['grid', 'summon', 'settings']);
+
 @Component({
   selector: 'app-home-icon',
   imports: [LineIconComponent, SheetFxComponent],
@@ -23,6 +25,8 @@ export class HomeIconComponent {
   readonly layers = computed(() => HOME_ICONS[this.name()]);
   readonly primary = computed(() => this.url(this.layers()?.[0]));
   readonly secondary = computed(() => this.url(this.layers()?.[1]));
+  /** turn-in-place hover (menu grid, summon, settings) */
+  readonly spin = computed(() => SPIN_ICONS.has(this.name()));
   readonly lightSweep = computed(() => ['hero', 'achieve', 'account'].includes(this.name()));
 
   markMissing(url: string): void {

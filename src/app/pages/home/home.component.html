@@ -22,7 +22,7 @@
     </span>
   </a>
 
-  <!-- top right: currencies + news, mail, settings, menu -->
+  <!-- top right: currencies + bag, news, mail, menu (banner + settings live in the menu panel) -->
   <div class="top-right">
     <div class="glass wallet">
       <span class="res" [attr.title]="'เพชร ' + gemsFull()" [attr.aria-label]="'เพชร ' + gemsFull()">
@@ -35,10 +35,9 @@
         <button type="button" class="add" aria-label="เติมทอง" (click)="soon()">+</button>
       </span>
     </div>
-    <button type="button" class="rb" appHomeMotion #bannerMotion="homeMotion" aria-label="เปลี่ยนแบนเนอร์" title="เปลี่ยนแบนเนอร์" aria-haspopup="dialog" (click)="openBanners()"><app-home-icon name="banner" [size]="30" [active]="bannerMotion.active()" [short]="bannerMotion.short()" /></button>
+    <button type="button" class="rb" appHomeMotion #bagMotion="homeMotion" aria-label="กระเป๋า" title="กระเป๋า" aria-haspopup="dialog" (click)="openBag()"><app-home-icon name="bag" [size]="30" [active]="bagMotion.active()" [short]="bagMotion.short()" /></button>
     <button type="button" class="rb" appHomeMotion #newsMotion="homeMotion" aria-label="ประกาศ" title="ประกาศ" (click)="soon()"><app-home-icon name="news" [size]="30" [active]="newsMotion.active()" [short]="newsMotion.short()" /></button>
     <button type="button" class="rb" appHomeMotion #mailMotion="homeMotion" aria-label="จดหมาย" title="จดหมาย" (click)="soon()"><app-home-icon name="mail" [size]="30" [active]="mailMotion.active()" [short]="mailMotion.short()" /><span class="dot">{{ mail }}</span></button>
-    <a class="rb" appHomeMotion #settingsMotion="homeMotion" routerLink="/account" aria-label="ตั้งค่า" title="ตั้งค่า"><app-home-icon name="settings" [size]="30" [active]="settingsMotion.active()" [short]="settingsMotion.short()" /></a>
     <button type="button" class="menu-btn" appHomeMotion #menuMotion="homeMotion" [class.open]="menuOpen()" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-controls="home-menu" [attr.aria-label]="menuOpen() ? 'ปิดเมนู' : 'เปิดเมนู'">
       <app-home-icon [name]="menuOpen() ? 'close' : 'grid'" [size]="27" [active]="menuMotion.active()" [short]="menuMotion.short()" />
       @if (!menuOpen()) { <span class="dot">{{ menuBadge }}</span> }
@@ -184,6 +183,8 @@
       </div>
     </section>
   }
+
+  @if (bagOpen()) { <app-home-bag (closed)="bagOpen.set(false)" /> }
 
   @if (notice(); as n) { <div class="notice" role="status">{{ n }}</div> }
 </div>
