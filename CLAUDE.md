@@ -54,6 +54,14 @@ Validated: app/spec typechecks; Karma1026/1026; actual prepared-room reuse, no a
 
 Review/reference-game pairs, native reports and scope notes: `docs/reviews/summon-preload/index.html`. Timings are from software WebGL, not real-device/FPS benchmarks. User's current Desktop-first policy is canonical in AGENTS.md, PROJECT_RULES §22 and UI_REFERENCE_RULES.md. No master merge/deployment or confirmed sync-base update.
 
+## Basic sound effects + SoundService (2026-11-24, Claude)
+
+Branch `feature/claude-sound-service` from origin/master 722f3b9. The user asked for a SoundService, a sound on/off checkbox and a volume slider in settings, and trial sounds for tap, window open/close, summon and level up, in a modern Japanese/Korean gacha mood (not too 8-bit).
+- Sounds are made with earshot 1.0 (github.com/Leonxlnx/earshot, MIT, output free for commercial use, no model) plus ffmpeg layering: `tools/audio/build_ui_sfx.sh [work] [out]` renders every layer from a fixed seed into A/B masters; `RUNTIME_DIR=public/sfx` also writes the shipped variant of each (`RUNTIME="tap=A open=A …"`) as Opus WebM + MP3. earshot lives in a venv (`~/.venvs/earshot`, override with `$EARSHOT`). Glass/harp themes with room: tap = glass tick on a soft key (−22 LUFS), open = airy whoosh + rising glass notes, close = reversed whoosh + falling note, level up = glass fanfare + sparkle, summon = cymbal swell bursting into a bell reveal (≈3.4 s, −16 LUFS). Shipping A for all; B variants (harp) are only in the masters.
+- `core/services/sound.service.ts`: Web Audio, one context and master gain, buffers fetched/decoded on first use (WebM when the browser plays Opus, else MP3), per-sound mix level and minimum gap, nothing before the first gesture. Settings `{enabled, volume}` per device in localStorage `eldervane-sound` (not the save). `install()` (AppComponent) = capture-phase click on buttons/links/tabs/checkboxes → tap, MutationObserver counting `[role=dialog]`/`dialog[open]` → open/close. `data-sfx="none"` on an element or parent silences it; `data-sfx="<name>"` swaps the tap for that sound. The summon book dialog is `data-sfx="none"` (summon plays its own sound from `confirmSummon`). RosterService plays level up when a potion or breakthrough raises the level.
+- `/account` has a sound card: on/off checkbox, 0–100 % slider (disabled while off) and five test buttons. New `sound` glyph in `ICON_PATHS`.
+- Not done: battle sounds, music, per-category volume, a summon sound timed to the book cinematic's tap (it plays at confirm).
+
 ## Summon book cinematic in game (2026-11-22, Claude)
 
 Branch `wip/claude-summon-book` from origin/master 6562d13. The user asked to put the approved 2.5D animatic ("Book of Heroes · Astral Archive", claude.ai artifact) into the game in place of the isometric altar cinematic.

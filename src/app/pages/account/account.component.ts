@@ -12,6 +12,7 @@ import { ISLAND_NAME_MAX, nameLength, normalizeIslandName } from '../../core/rul
 import { AccountService } from '../../core/services/account.service';
 import { IconComponent } from '../../shared/icon.component';
 import { SaveImportComponent } from '../../shared/save-import.component';
+import { SoundName, SoundService } from '../../core/services/sound.service';
 
 /** island name + move the save to another device (transfer code / file) — step 1 before cloud login */
 @Component({
@@ -24,6 +25,15 @@ import { SaveImportComponent } from '../../shared/save-import.component';
 export class AccountComponent {
   readonly account = inject(AccountService);
   readonly access = inject(GameAccessService);
+  readonly sound = inject(SoundService);
+  readonly volumePct = computed(() => Math.round(this.sound.volume() * 100));
+  readonly soundTests: { name: SoundName; label: string }[] = [
+    { name: 'tap', label: 'กดปุ่ม' },
+    { name: 'open', label: 'เปิดหน้าต่าง' },
+    { name: 'close', label: 'ปิดหน้าต่าง' },
+    { name: 'summon', label: 'อัญเชิญ' },
+    { name: 'levelup', label: 'อัปเลเวล' },
+  ];
   readonly max = ISLAND_NAME_MAX;
 
   readonly decorating = signal(false);

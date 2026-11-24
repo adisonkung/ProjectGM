@@ -5,6 +5,7 @@ import { heroStats, power } from '../rules/stats';
 import { breakthrough, BreakthroughFail, heroProgressView, useAllPotionsToCap, useExpPotion } from '../rules/leveling';
 import { TRAINING_SLOTS } from '../data/economy';
 import { SaveService } from './save.service';
+import { SoundService } from './sound.service';
 import { SkillKind } from '../models/progression';
 import { SkillRankView, SkillUpgradeError } from '../models/skill-rank';
 import { convertTomes, skillRankView, upgradeSkill } from '../rules/skill-ranks';
@@ -14,6 +15,7 @@ import { heroStar, starUp, starUpView } from '../rules/stars';
 @Injectable({ providedIn: 'root' })
 export class RosterService {
   private readonly save = inject(SaveService);
+  private readonly sound = inject(SoundService);
 
   readonly heroes = computed(() => this.save.state().heroes);
 
@@ -54,6 +56,7 @@ export class RosterService {
     if (!h) return 0;
     const r = useExpPotion(h, s.inventory, itemId, count);
     if (r.used) this.save.update(st => ({ ...st, inventory: r.inventory, heroes: st.heroes.map(x => (x.uid === uid ? r.hero : x)) }));
+    this.levelSound(h, r.hero);
     return r.used;
   }
 
@@ -64,6 +67,7 @@ export class RosterService {
     if (!h) return;
     const r = useAllPotionsToCap(h, s.inventory);
     this.save.update(st => ({ ...st, inventory: r.inventory, heroes: st.heroes.map(x => (x.uid === uid ? r.hero : x)) }));
+    this.levelSound(h, r.hero);
   }
 
   /** consume the breakthrough stones, raise the level and process the stored EXP */
@@ -74,7 +78,13 @@ export class RosterService {
     const r = breakthrough(h, s.inventory);
     if ('error' in r) return r.error;
     this.save.update(st => ({ ...st, inventory: r.inventory, heroes: st.heroes.map(x => (x.uid === uid ? r.hero : x)) }));
+    this.levelSound(h, r.hero);
     return null;
+  }
+
+  /** the level-up sound when a potion or breakthrough raised the level */
+  private levelSound(before: OwnedHero, after: OwnedHero): void {
+    if (after.level > before.level) this.sound.play('levelup');
   }
 
   progress(h: OwnedHero) {

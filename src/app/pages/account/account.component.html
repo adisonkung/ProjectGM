@@ -17,6 +17,14 @@
       @if (backup()) { <p class="undo"><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="undo()"><app-citadel-frame shape="hex" [cut]="14" /><app-icon name="restart" [size]="18" />ย้อนกลับเป็นเซฟก่อนนำเข้า</button></p> }
     </section>
   </div>
+  <section class="gm-panel card sound-card citadel-surface" aria-labelledby="sound-title"><app-tower-ornament [grooved]="true" [ornate]="true" />
+    <header class="section-heading"><app-icon name="sound" [size]="34" /><div><h2 id="sound-title" class="gm-h2">เสียง</h2><p>เปิดปิดเสียงเอฟเฟกต์และปรับระดับเสียง<br />ตั้งค่าเก็บไว้ในเครื่องนี้</p></div></header>
+    <label class="sound-toggle"><input type="checkbox" [checked]="sound.enabled()" (change)="sound.setEnabled($any($event.target).checked)" /><span>เปิดเสียง</span></label>
+    <div class="sound-volume" [class.off]="!sound.enabled()"><label for="sound-volume">ระดับเสียง</label><input id="sound-volume" type="range" min="0" max="100" step="5" data-sfx="none" [disabled]="!sound.enabled()" [value]="volumePct()" (input)="sound.setVolume(+$any($event.target).value / 100)" (change)="sound.play('tap')" /><output for="sound-volume">{{ volumePct() }}%</output></div>
+    <div class="sound-tests" role="group" aria-label="ลองฟังเสียง"><span>ลองฟัง</span>
+      @for (t of soundTests; track t.name) { <button type="button" class="gm-btn small ghost" data-sfx="none" [disabled]="!sound.enabled()" (click)="sound.play(t.name)">▶ {{ t.label }}</button> }
+    </div>
+  </section>
   <section class="gm-panel card test-rooms citadel-surface" aria-labelledby="test-rooms-title"><app-tower-ornament [grooved]="true" [ornate]="true" />
     <header class="section-heading"><app-icon name="lab" [size]="34" /><div><h2 id="test-rooms-title" class="gm-h2">ห้องทดสอบ</h2><p>ลองท่าและสกิลของฮีโร่กับหุ่นฝึก หรือทดลองต่อสู้ด่านไหนก็ได้<br />ไม่มีผลกับเซฟ</p></div></header>
     <div class="test-room-actions"><a class="gm-btn primary citadel-surface citadel-control" routerLink="/sprite-lab"><app-citadel-frame shape="hex" [cut]="18" [crimson]="true" [lacquer]="true" /><app-icon name="lab" [size]="22" />ห้องทดสอบท่า (หุ่นฝึก)</a><a class="gm-btn ghost citadel-surface citadel-control" routerLink="/lab"><app-citadel-frame shape="hex" [cut]="18" /><app-icon name="sword" [size]="22" />ห้องทดลองต่อสู้</a></div>

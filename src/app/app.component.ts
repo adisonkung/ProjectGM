@@ -5,6 +5,7 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { AccountService } from './core/services/account.service';
 import { PreloadService } from './core/services/preload.service';
 import { SaveService } from './core/services/save.service';
+import { SoundService } from './core/services/sound.service';
 import { IconComponent } from './shared/icon.component';
 import { CitadelFrameComponent } from './shared/citadel-frame.component';
 import { CitadelIconComponent } from './shared/citadel-icon.component';
@@ -85,6 +86,8 @@ export class AppComponent {
   constructor() {
     // start decoding the island art right away (the home screen is the island)
     inject(PreloadService).warmCity();
+    // taps on buttons + dialogs opening/closing, app-wide (settings: /account)
+    inject(SoundService).install();
     effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive()));
     // UI scale (user 2026-11-18): menu pages + the Sky Isle render at 75 % on desktop (styles.scss `html.ui-zoom`).
     // Summon cutscene, battle and the K7 home size themselves from the window.
