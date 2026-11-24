@@ -18,6 +18,7 @@ import { IconComponent } from '../../shared/icon.component';
 import { SummonPull } from './summon-scene.component';
 import { SummonBookComponent } from './summon-book/summon-book.component';
 import { heroArt } from '../../core/data/hero-art';
+import { SoundService } from '../../core/services/sound.service';
 
 /**
  * Featured art of the standard pool (illustration only: no rate-up). The epithet / Latin name are display copy for
@@ -36,6 +37,7 @@ const FEATURED = { id: 'lucien', epithet: 'THE BLACK SAINT', latin: 'Lucien Valt
 export class GachaComponent {
   private readonly save = inject(SaveService);
   private readonly gacha = inject(GachaService);
+  private readonly sound = inject(SoundService);
 
   readonly G = GACHA;
   readonly seals = SUMMON_SEALS;
@@ -137,6 +139,7 @@ export class GachaComponent {
     this.showResults.set(false);
     this.results.set(r.map(x => ({ ...x, name: HERO_BY_ID[x.templateId].name, cls: CLASS_NAME[HERO_BY_ID[x.templateId].cls] })));
     this.lastCount.set(n);
+    this.sound.play('summon');
     this.playing.set(true);
   }
   readonly portrait = (id: string) => heroArt(id)?.portrait;

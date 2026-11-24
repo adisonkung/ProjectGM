@@ -1,5 +1,9 @@
 # Current Development State
 
+## Basic sound effects + SoundService — Claude, 2026-11-24
+
+Branch `feature/claude-sound-service` from origin/master 722f3b9 (not merged; waiting for the user to listen and pick A/B). New `SoundService` (Web Audio, settings per device in localStorage), app-wide tap and dialog open/close hooks, summon and level-up sounds, and a sound card on `/account` (on/off, volume, test buttons). Runtime sounds `public/sfx/{tap,open,close,summon,levelup}.{webm,mp3}` come from `tools/audio/build_ui_sfx.sh` (earshot 1.0 + ffmpeg). Validation: app/spec typechecks, Karma 1032/1032, production build completes (existing budget warnings only), browser check on /account: card renders, files fetch and all ten decode. Details in CLAUDE.md.
+
 ## Summon integration merge/push authorized — Codex, 2026-11-24
 
 User explicitly requested merging all completed changes into master and pushing it. Fresh full remote-branch fetch confirms five unmerged summon branches are contained in the reviewed `fix/summon-price-sizing` head374347a; the eight-commit stack starts from origin/masterfc20880. It includes stationary/aligned hero cards, shared summon controls/currency payment, the final ancient-page art, gray/orange gate actions and compact lavender Repeat. Working tree was clean, local/remote master matched, and the stack can fast-forward without conflict. Existing app/spec checks, Karma1028/1028, native Desktop single/ten flows and optimized build with the documented external no-font-inline workaround cover this unchanged implementation. Only authorization/handoff notes are added for integration. Actual branch/push state must be queried from Git; no separate deployment action or confirmed canonical-local synchronization update is implied.

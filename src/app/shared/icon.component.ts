@@ -10,6 +10,7 @@ export const ICON_PATHS: Record<string, string> = {
   armory: 'M4 4l9 9 M20 4l-9 9 M7 17l-3 3 M17 17l3 3 M6 14l4 4 M18 14l-4 4',
   team: 'M5 3v18 M5 4h12l-3 4 3 4H5',
   tower: 'M7 21V9l-2-2V3h3v2h2V3h4v2h2V3h3v4l-2 2v12z M10 21v-4a2 2 0 0 1 4 0v4 M11 11h2',
+  sound: 'M4 9h4l5-4v14l-5-4H4z M16 8.5a5 5 0 010 7 M18.5 6a8.5 8.5 0 010 12',
   summon: 'M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z M19 17l.7 2.3L22 20l-2.3.7L19 23l-.7-2.3L16 20l2.3-.7z M5 3l.5 1.5L7 5l-1.5.5L5 7l-.5-1.5L3 5l1.5-.5z',
   lab: 'M9 3h6 M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3 M7 15h10',
   sword: 'M14.5 3H21v6.5L10 20.5 3.5 14z M5 19l-2 2 M8 16l-3-3',
