@@ -1,0 +1,12 @@
+{
+  "approved": "2026-11-25",
+  "description": "Selected pearl Battle Start, isolated generated aura and existing Forest Goblin walk frames. Runtime text remains live.",
+  "sources": {
+    "assets/ui/battle-entry/pearl-collision.png": "1cfe2f5da492b3877ed4ef772568edb089691a724c1c9f0bed475c6a1b7f6972",
+    "public/sprites/enemy-fa-forest-goblin.png": "372b6dd127a26ff5003d4ef59b0f16e70d14b9871256f59db643ec1b8f895b7e"
+  },
+  "runtime": {
+    "public/ui/battle-entry/pearl-collision.webp": "a10cc4f248468c8bc839d2cd6ab05a6dca30e2e2beb7cddc8f807d5cdca0bb28",
+    "public/ui/battle-entry/goblin-run.webp": "f78a026bb4d16eff0e3fbcd021dfb9a4ecd15bf603306fb5ec0cc744f714234e"
+  }
+}

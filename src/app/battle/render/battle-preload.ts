@@ -1,70 +1,68 @@
-/**
- * Pre-battle warm-up: fetch + decode every image the fight will draw before the board appears (the first cast of a
- * cold session used to miss its VFX while the strip was still loading). Presentation only — never touches the engine.
- *
- * - With the Pixi renderer each sprite strip goes through `Assets.load` (the same URL string PixiUnitLayer uses), so the
- *   layer finds the texture already in Pixi's cache; the Pixi chunk itself is fetched here too.
- * - Plain images (backgrounds, banners, DOM renderer) are decoded with HTMLImageElement.decode().
- * - A file that fails or exceeds its timeout is skipped; the whole run is capped by `budgetMs`. Never throws.
- */
+import { Injectable } from '@angular/core';
+import { BattleLoadToken } from './battle-entry-assets';
+
 export interface PreloadJob {
-  /** sprite strips (sprites/… URLs, spriteUrl()) */
   sprites: string[];
-  /** other images (absolute or relative URLs) */
   images: string[];
   pixi: boolean;
-  onProgress?: (done: number, total: number) => void;
-  /** per file */
+  onProgress?: (loaded: number, total: number) => void;
   timeoutMs?: number;
-  /** whole run */
-  budgetMs?: number;
-  /** set `cancelled` to stop early (route left / prepare()) */
-  token?: { cancelled: boolean };
+  token?: BattleLoadToken;
 }
-
+export interface PreloadResult {
+  loaded: number;
+  total: number;
+  failed: string[];
+  pixiAvailable: boolean;
+}
 const CONCURRENCY = 6;
 
-function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
+function bounded<T>(promise: Promise<T>, ms: number): Promise<T | null> {
   return new Promise(resolve => {
-    const t = setTimeout(() => resolve(null), ms);
-    p.then(v => { clearTimeout(t); resolve(v); }, () => { clearTimeout(t); resolve(null); });
+    const timer = setTimeout(() => resolve(null), ms);
+    promise.then(value => { clearTimeout(timer); resolve(value); }, () => { clearTimeout(timer); resolve(null); });
   });
 }
 
 export function decodeImage(url: string): Promise<boolean> {
   if (typeof Image === 'undefined') return Promise.resolve(false);
-  const img = new Image();
-  img.decoding = 'async';
-  img.src = url;
-  return img.decode().then(() => true, () => false);
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = url;
+  return image.decode().then(() => true, () => false);
 }
 
-type AssetsLike = { load: (url: string) => Promise<unknown> };
-
-export async function preloadBattle(job: PreloadJob): Promise<{ loaded: number; failed: number }> {
-  const timeout = job.timeoutMs ?? 6000;
-  const tasks: (() => Promise<unknown>)[] = [];
+/** All required images must succeed. Timeouts/failures stay below 100% and require retry. */
+export async function preloadBattle(job: PreloadJob): Promise<PreloadResult> {
+  const timeout = job.timeoutMs ?? 15000;
+  const files = [...new Set([...job.sprites, ...job.images])];
+  const result: PreloadResult = { loaded: 0, total: files.length, failed: [], pixiAvailable: false };
+  const report = () => { if (!job.token?.cancelled) job.onProgress?.(result.loaded, result.total); };
+  report();
+  type AssetsLike = { load(url: string): Promise<unknown> };
   let assets: AssetsLike | null = null;
-  if (job.pixi) {
-    tasks.push(() => withTimeout(import('./pixi-units'), timeout));
-    assets = await withTimeout(import('pixi.js').then(m => m.Assets as unknown as AssetsLike), timeout);
+  if (job.pixi && !job.token?.cancelled) {
+    // A missing WebGL/chunk still permits the existing DOM fallback, after decoding the same sheets.
+    const modules = await bounded(Promise.all([import('pixi.js'), import('./pixi-units')]), timeout);
+    if (modules) { assets = modules[0].Assets; result.pixiAvailable = true; }
   }
-  for (const url of job.sprites) tasks.push(() => assets ? withTimeout(assets.load(url), timeout) : withTimeout(decodeImage(url), timeout));
-  for (const url of job.images) tasks.push(() => withTimeout(decodeImage(url), timeout));
-  const total = tasks.length;
-  let done = 0;
-  let loaded = 0;
-  job.onProgress?.(0, total);
+  const sprites = new Set(job.sprites);
   let next = 0;
   const worker = async () => {
-    while (next < tasks.length && !job.token?.cancelled) {
-      const ok = await tasks[next++]();
-      done++;
-      if (ok) loaded++;
-      job.onProgress?.(done, total);
+    while (next < files.length && !job.token?.cancelled) {
+      const url = files[next++];
+      const loaded = await bounded(assets && sprites.has(url) ? assets.load(url).then(Boolean) : decodeImage(url), timeout);
+      if (job.token?.cancelled) return;
+      if (loaded) result.loaded++; else result.failed.push(url);
+      report();
     }
   };
-  const all = Promise.all(Array.from({ length: Math.min(CONCURRENCY, total) }, worker));
-  await withTimeout(all, job.budgetMs ?? 10000);
-  return { loaded, failed: done - loaded };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, files.length) }, worker));
+  return result;
+}
+
+/** Injection seam for battle entry: tests can hold real readiness without launching the engine. */
+@Injectable({ providedIn: 'root' })
+export class BattlePreloadService {
+  load(job: PreloadJob): Promise<PreloadResult> { return preloadBattle(job); }
 }

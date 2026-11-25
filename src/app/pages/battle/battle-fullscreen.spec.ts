@@ -9,6 +9,8 @@ import { isPlayerUnit } from '../../battle/engine/stage/party';
 import { MONSTERS } from '../../core/data/monsters';
 import { STAGES } from '../../core/data/stages';
 import { StageDef } from '../../core/models/stage';
+import { BattlePreloadService, PreloadJob } from '../../battle/render/battle-preload';
+import { BoardComponent } from '../../battle/board/board.component';
 
 describe('full-screen battle viewport', () => {
   it('fits three square-cell lanes on each authored clearing without overlapping the party dock', () => {
@@ -78,7 +80,8 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
   const host = () => component as unknown as Host;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [BattleComponent], providers: [provideRouter([])] }).compileComponents();
+    spyOn(BoardComponent.prototype, 'prepareBattle').and.resolveTo('dom');
+    await TestBed.configureTestingModule({ imports: [BattleComponent], providers: [provideRouter([]), { provide: BattlePreloadService, useValue: { load: async (job: PreloadJob) => { job.onProgress?.(1, 1); return { loaded: 1, total: 1, failed: [], pixiAvailable: false }; } } }] }).compileComponents();
     fixture = TestBed.createComponent(BattleComponent);
     component = fixture.componentInstance;
     component.renderer.set('dom');
@@ -149,17 +152,17 @@ describe('BattleComponent full screen / loading / ultimate cut-in', () => {
     expect(fixture.nativeElement.querySelector('.ult-cutin')).toBeNull();
   });
 
-  it('start button: loading screen with hero art first, then the fight starts by itself', async () => {
+  it('start button: black loading screen and Battle Start finish before combat begins', async () => {
     component.enter();
     fixture.detectChanges();
     expect(component.loading()).not.toBeNull();
     expect(component.running()).toBeFalse();
     expect(component.placing()).toBeFalse();
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('.battle-loading')).not.toBeNull();
+    expect(el.querySelector('app-battle-entry .black')).not.toBeNull();
     expect(el.querySelector('app-board')).not.toBeNull(); // the board mounts underneath while loading
     const until = performance.now() + 9000;
-    while (!component.running() && performance.now() < until) await new Promise(r => setTimeout(r, 50));
+    while (!component.running() && performance.now() < until) { fixture.detectChanges(); await new Promise(r => setTimeout(r, 50)); }
     expect(component.running()).toBeTrue();
   }, 12000);
 

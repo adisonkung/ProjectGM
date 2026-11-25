@@ -5,10 +5,12 @@ import { isMeleeRange } from '../../battle/engine/melee-contact';
 import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
 import { bodyFrontCell } from '../../battle/engine/footprint';
 import { artworkViewport, battleViewport, fullscreenViewport } from './battle-viewport';
-import { heroArt, HERO_ART } from '../../core/data/hero-art';
+import { heroArt } from '../../core/data/hero-art';
 import { spriteUrl } from '../../core/data/sprite-files';
 import { battleSpriteFiles, stageMonsterSprites } from '../../battle/render/battle-assets';
-import { preloadBattle } from '../../battle/render/battle-preload';
+import { BattlePreloadService } from '../../battle/render/battle-preload';
+import { BATTLE_ENTRY_ART, BattleEntryState, BattleLoadToken } from '../../battle/render/battle-entry-assets';
+import { BattleEntryComponent } from './battle-entry.component';
 import { BattleEmblemComponent } from './battle-emblem.component';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { A11yModule } from '@angular/cdk/a11y';
@@ -69,7 +71,7 @@ const TICK = 0.05;
  */
 @Component({
   selector: 'app-battle',
-  imports: [ThemedCutinComponent, DecimalPipe, BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
+  imports: [BattleEntryComponent, ThemedCutinComponent, DecimalPipe, BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })
@@ -157,7 +159,7 @@ export class BattleComponent implements OnDestroy {
   /** who draws the battle units: DOM (Web Animations) or Pixi (WebGL, one game clock) — `?render=pixi|dom`, remembered */
   readonly renderer = signal<BoardRenderer>(savedRenderer());
   /** the board's game clock stands still (paused / hit-stop) */
-  readonly boardFrozen = (): boolean => this.paused() || performance.now() < this.hitStopUntil;
+  readonly boardFrozen = (): boolean => !!this.loading() || this.paused() || performance.now() < this.hitStopUntil;
   toggleRenderer(): void {
     this.renderer.update(r => (r === 'pixi' ? 'dom' : 'pixi'));
     saveRenderer(this.renderer());
@@ -286,51 +288,75 @@ export class BattleComponent implements OnDestroy {
   readonly fullscreen = computed(() => !this.placing() && this.mode() !== 'lab');
 
   // ---------------------------------------------------------------- pre-battle loading screen
-  /** loading screen over the field: random hero key art + progress; the board mounts underneath meanwhile */
-  readonly loading = signal<{ banner: string; name: string; title: string; done: number; total: number; leaving: boolean } | null>(null);
-  readonly loadPct = computed(() => { const l = this.loading(); return l ? (l.total ? Math.round((l.done / l.total) * 100) : 0) : 0; });
-  private loadToken: { cancelled: boolean } | null = null;
+  readonly loading = signal<BattleEntryState | null>(null);
+  /** A retry owns fresh DOM images and animation callbacks, including when an earlier image failed. */
+  readonly entryStates = computed(() => { const entry = this.loading(); return entry ? [entry] : []; });
+  readonly entryMapName = computed(() => this.farmId() ? FARM_BY_ID[this.farmId()!].name : this.stage().name ?? 'สนามรบ');
+  readonly entryStageLabel = computed(() => `${this.mode() === 'lab' ? 'ห้องทดลอง · ' : this.mode() === 'farm' ? 'ดันเจี้ยน · ' : ''}ชั้นที่ ${this.stage().floor}`);
+  private readonly preload = inject(BattlePreloadService);
+  private readonly battleBoard = viewChild(BoardComponent);
+  private loadToken: BattleLoadToken | null = null;
+  private loadId = 0;
   private loadTimers: ReturnType<typeof setTimeout>[] = [];
-  static readonly LOAD_MIN_MS = 1000;
-  static readonly LOAD_FADE_MS = 420;
+  static readonly LOAD_MIN_MS = 500;
+  static readonly LOAD_COMPLETE_MS = 180;
   private readonly reducedMotion = (): boolean => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /**
-   * Start button: show the loading screen, fetch + decode every sheet / FX strip this fight can draw (team + every
-   * monster of every wave, the Pixi chunk, the stage art), hold at least LOAD_MIN_MS, then fade into the running fight.
-   * A file that fails or times out is skipped. Presentation only — the engine starts exactly as `start()` always did.
-   */
+  /** Download to 100% on black, prepare the mounted renderer under a dark backdrop, then announce Battle Start. */
   enter(): void {
     if (this.running() || this.loading()) return;
     if (this.result()) this.prepare();
     if (!this.engine.alive(PLAYER_TEAM).length) return;
     this.lockLandscape(); // needs the tap's user activation — before any await
     const team = this.engine.units.filter(u => isPlayerUnit(u) && u.heroId);
-    const withBanner = team.filter(u => heroArt(u.heroId!)?.banner);
-    const pool = withBanner.length ? withBanner.map(u => u.heroId!) : Object.keys(HERO_ART).filter(id => HERO_ART[id].banner);
-    const pick = pool[Math.floor(Math.random() * pool.length)];
-    const pickedName = team.find(u => u.heroId === pick)?.name ?? '';
-    const banner = '/' + (heroArt(pick)?.banner ?? heroArt(pick)?.portrait ?? '');
-    const title = this.farmId() ? FARM_BY_ID[this.farmId()!].name : this.mode() === 'lab' ? `ห้องทดลอง · ชั้น ${this.floor()}` : `ชั้น ${this.floor()}${this.stage().name ? ' · ' + this.stage().name : ''}`;
-    this.loading.set({ banner, name: pickedName, title, done: 0, total: 0, leaving: false });
+    const id = ++this.loadId;
+    this.loading.set({ id, phase: 'loading', done: 0, total: 0 });
     const token = (this.loadToken = { cancelled: false });
     const t0 = performance.now();
-    const sprites = battleSpriteFiles([...this.engine.units.map(u => u.sprite), ...stageMonsterSprites(this.stage())]).map(spriteUrl);
+    const files = battleSpriteFiles([...this.engine.units.map(u => u.sprite), ...stageMonsterSprites(this.stage())]);
+    const sprites = files.map(spriteUrl);
     // the stage art, and every team member's key art (the ultimate cut-in shows it)
     const images = [this.background()?.file, ...team.flatMap(u => { const a = heroArt(u.heroId!); return [a?.banner, a?.portrait, ULTIMATE_CUTINS[u.heroId!]?.file, ...(ULTIMATE_CUTINS[u.heroId!]?.layers ?? [])]; })]
-      .filter((f): f is string => !!f).map(f => '/' + f);
-    void preloadBattle({ sprites, images, pixi: this.renderer() === 'pixi', token,
-      onProgress: (done, total) => { if (!token.cancelled) this.loading.update(l => l && { ...l, done, total }); } }).then(() => {
-      if (token.cancelled) return;
-      const reduced = this.reducedMotion();
-      const wait = Math.max(0, (reduced ? 600 : BattleComponent.LOAD_MIN_MS) - (performance.now() - t0));
-      this.loadTimers.push(setTimeout(() => {
-        if (token.cancelled) return;
-        this.loading.update(l => l && { ...l, leaving: true });
-        this.start();
-        this.loadTimers.push(setTimeout(() => { if (!token.cancelled) this.loading.set(null); }, reduced ? 0 : BattleComponent.LOAD_FADE_MS));
-      }, wait));
-    });
+      .filter((f): f is string => !!f).map(f => '/' + f).concat(Object.values(BATTLE_ENTRY_ART));
+    const current = () => !token.cancelled && this.loadToken === token;
+    void (async () => {
+      try {
+        const result = await this.preload.load({ sprites, images, pixi: this.renderer() === 'pixi', token,
+          onProgress: (done, total) => { if (current()) this.loading.update(l => l && { ...l, done, total }); } });
+        if (!current()) return;
+        if (result.failed.length || result.loaded !== result.total) throw new Error('Required battle images are not ready');
+        this.loading.update(l => l && { ...l, done: result.loaded, total: result.total });
+        if (this.renderer() === 'pixi' && !result.pixiAvailable) this.renderer.set('dom');
+        await this.loadDelay(Math.max(BattleComponent.LOAD_COMPLETE_MS, BattleComponent.LOAD_MIN_MS - (performance.now() - t0)));
+        if (!current()) return;
+        this.loading.update(l => l && { ...l, phase: 'preparing' });
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+        if (!current()) return;
+        const board = this.battleBoard();
+        if (!board) throw new Error('Battle board is not mounted');
+        const renderer = await board.prepareBattle(files, token);
+        if (!current()) return;
+        if (renderer === 'dom' && this.renderer() === 'pixi') {
+          this.renderer.set('dom');
+          const fallback = await this.preload.load({ sprites, images: [], pixi: false, token });
+          if (!current()) return;
+          if (fallback.failed.length || fallback.loaded !== fallback.total) throw new Error('DOM sheets are not ready');
+        }
+        await document.fonts.ready;
+        if (!current()) return;
+        this.loading.update(l => l && { ...l, phase: 'intro' });
+      } catch {
+        if (current()) this.loading.update(l => l && { ...l, phase: 'error' });
+      }
+    })();
+  }
+  private loadDelay(ms: number): Promise<void> { return new Promise(resolve => this.loadTimers.push(setTimeout(resolve, ms))); }
+  retryEntry(): void { this.cancelLoading(); this.enter(); }
+  cancelEntry(): void { this.prepare(); }
+  entryFinished(id: number): void {
+    if (!this.loadToken || this.loadToken.cancelled || this.loading()?.id !== id || this.loading()?.phase !== 'intro') return;
+    this.cancelLoading();
+    this.start();
   }
   private cancelLoading(): void {
     if (this.loadToken) this.loadToken.cancelled = true;
@@ -590,7 +616,7 @@ export class BattleComponent implements OnDestroy {
   }
 
   start(): void {
-    if (this.running()) return;
+    if (this.running() || this.loading()) return;
     if (this.result()) this.prepare();
     if (!this.engine.alive(PLAYER_TEAM).length) return;
     this.running.set(true);
@@ -710,7 +736,7 @@ export class BattleComponent implements OnDestroy {
   /** start the same stage over (same team / placement) */
   restart(): void {
     this.prepare();
-    this.start();
+    this.enter();
   }
   /** leave the stage → back to the pre-fight placement screen (no rewards, nothing saved) */
   exitStage(): void {

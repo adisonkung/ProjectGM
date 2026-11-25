@@ -17,6 +17,7 @@ import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.comp
 import { SHEETS } from '../../core/data/sprites';
 import type { PixiBolt, PixiFx, PixiUnit, PixiUnitLayer } from '../render/pixi-units';
 import { unitLook } from '../render/unit-look';
+import { BattleLoadToken } from '../render/battle-entry-assets';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
 export interface UnitView {
@@ -307,6 +308,9 @@ export class BoardComponent {
   private idleClock = 0;
   private pixi: PixiUnitLayer | null = null;
   private pixiPending = false;
+  private pixiInit: Promise<PixiUnitLayer | null> | null = null;
+  private pixiGeneration = 0;
+  private destroyed = false;
   private pixiHost?: HTMLElement;
   private resizeObs?: ResizeObserver;
   private pxOn = new Set<number>();
@@ -324,11 +328,10 @@ export class BoardComponent {
     const zone = inject(NgZone);
     afterNextRender(() => zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(this.frame))));
     inject(DestroyRef).onDestroy(() => {
+      this.destroyed = true;
       cancelAnimationFrame(this.raf);
       this.fxAnchors.clear();
-      this.resizeObs?.disconnect();
-      this.pixi?.destroy();
-      this.pixi = null;
+      this.stopPixi();
     });
     // the Pixi renderer: created lazily (its own chunk) when switched on, torn down when switched off
     effect(() => {
@@ -342,13 +345,14 @@ export class BoardComponent {
   }
 
   private startPixi(): void {
-    if (this.pixi || this.pixiPending || typeof window === 'undefined') return;
+    if (this.destroyed || this.pixi || this.pixiPending || typeof window === 'undefined') return;
     const board = this.boardEl();
     if (!board) {
       afterNextRender(() => this.startPixi(), { injector: this.injector });
       return;
     }
     this.pixiPending = true;
+    const generation = ++this.pixiGeneration;
     const host = document.createElement('div');
     host.className = 'pixi-host';
     // created at runtime (no encapsulation attribute): inline styles · above the 'under' FX (z 5), below DOM FX / bars
@@ -357,20 +361,24 @@ export class BoardComponent {
     (board.querySelector<HTMLElement>(':scope > .cam') ?? board).appendChild(host);
     this.pixiHost = host;
     // chunk load failure (offline / stale deploy) = stay DOM, like a device without WebGL
-    import('../render/pixi-units').then(m => m.PixiUnitLayer.create(host, board.clientWidth, board.clientHeight)).catch(() => null).then(layer => {
-      this.pixiPending = false;
-      if (!layer || this.renderer() !== 'pixi') {
+    this.pixiInit = import('../render/pixi-units').then(m => m.PixiUnitLayer.create(host, board.clientWidth, board.clientHeight)).catch(() => null).then(layer => {
+      if (generation === this.pixiGeneration) this.pixiPending = false;
+      if (!layer || this.destroyed || generation !== this.pixiGeneration || this.renderer() !== 'pixi') {
         layer?.destroy();
         host.remove();
-        return;
+        return null;
       }
       this.pixi = layer;
       this.resizeObs = new ResizeObserver(() => this.pixi?.resize(board.clientWidth, board.clientHeight));
       this.resizeObs.observe(board);
+      return layer;
     });
   }
 
   private stopPixi(): void {
+    this.pixiGeneration++;
+    this.pixiPending = false;
+    this.pixiInit = null;
     this.resizeObs?.disconnect();
     this.pixi?.destroy();
     this.pixi = null;
@@ -382,6 +390,27 @@ export class BoardComponent {
     this.fxPxOn.clear();
     for (const id of this.boltPxOn) this.host.nativeElement.querySelector(`app-projectile[data-proj="${id}"]`)?.classList.remove('px');
     this.boltPxOn.clear();
+  }
+
+  /** Wait for the actual mounted renderer; unavailable WebGL retains the DOM fallback. */
+  async prepareBattle(files: readonly string[], token: BattleLoadToken): Promise<'pixi' | 'dom'> {
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    if (token.cancelled || this.destroyed) return 'dom';
+    if (this.renderer() === 'pixi') {
+      this.startPixi();
+      const layer = await this.pixiInit;
+      if (token.cancelled || this.destroyed) return 'dom';
+      if (layer) {
+        try { await layer.prepareBattle(files, token); }
+        catch { this.stopPixi(); } // context/upload failure: decode the sheets for DOM before entry can finish
+      }
+    }
+    // The first prepared native frame must be painted before the overlay is allowed to announce Battle Start.
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    if (!token.cancelled && !this.destroyed) {
+      try { this.pixi?.finishPreparation(); } catch { this.stopPixi(); }
+    }
+    return this.pixi ? 'pixi' : 'dom';
   }
 
   /** this frame's units for the Pixi layer (same interpolated positions as the DOM units) */

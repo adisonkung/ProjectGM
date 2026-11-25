@@ -134,19 +134,8 @@
           </div>
         }
       }
-      @if (loading(); as ld) {
-        <!-- pre-battle loading screen: random hero key art, every sheet / FX of this fight warms up underneath -->
-        <div class="battle-loading" [class.leaving]="ld.leaving" role="status" aria-live="polite" [attr.aria-label]="'กำลังโหลดการต่อสู้ ' + loadPct() + '%'">
-          @if (ld.banner) { <img class="bl-art" [src]="ld.banner" alt="" draggable="false" /> }
-          <div class="bl-shade"></div>
-          <div class="bl-ring" aria-hidden="true"></div>
-          <div class="bl-panel">
-            <small class="bl-kicker">{{ ld.name || 'ELDERVANE' }}</small>
-            <b class="bl-title">{{ ld.title }}</b>
-            <div class="bl-bar"><i [style.width.%]="loadPct()"></i></div>
-            <span class="bl-state">{{ ld.total && ld.done >= ld.total ? 'พร้อมสู้' : 'กำลังเตรียมสนามรบ…' }} <em>{{ loadPct() }}%</em></span>
-          </div>
-        </div>
+      @for (ld of entryStates(); track ld.id) {
+        <app-battle-entry [state]="ld" [mapName]="entryMapName()" [stageLabel]="entryStageLabel()" (completed)="entryFinished($event)" (retry)="retryEntry()" (cancelled)="cancelEntry()" />
       }
       @if (portraitPhone()) {
         <!-- phone held upright: the fight waits (paused) until it is turned sideways -->

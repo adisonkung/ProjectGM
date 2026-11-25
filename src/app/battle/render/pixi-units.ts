@@ -11,6 +11,9 @@ import { ClipRequest, UnitClip } from './unit-clip';
 import { frameChunk } from './tex-chunks';
 import { LOOK_COLORS, RING_BOX, UnitLook } from './unit-look';
 import { sheetFxNames } from './battle-assets';
+import { BattleLoadToken } from './battle-entry-assets';
+
+let prepareRegistered = false;
 
 /** one unit to draw this frame (board pixels, already interpolated by the board's motion loop) */
 export interface PixiUnit {
@@ -101,6 +104,7 @@ const FLASH = 0.11;
  * Pixi is imported lazily (its own chunk) only when the Pixi renderer is switched on.
  */
 export class PixiUnitLayer {
+  private destroyed = false;
   private readonly sprites = new Map<number, UnitGfx>();
   private readonly reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   private readonly textures = new Map<string, Texture | 'loading' | 'failed'>();
@@ -159,6 +163,7 @@ export class PixiUnitLayer {
   static async create(host: HTMLElement, width: number, height: number): Promise<PixiUnitLayer | null> {
     try {
       const pixi = await import('pixi.js');
+      if (!prepareRegistered) { pixi.extensions.add(pixi.PrepareSystem); prepareRegistered = true; }
       const app = new pixi.Application();
       await app.init({
         width: Math.max(1, width),
@@ -204,6 +209,8 @@ export class PixiUnitLayer {
   }
 
   destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
     for (const fx of this.fxs.values()) fx.reveal?.destroy();
     for (const sprite of this.fxPool) sprite.destroy();
     this.fxPool.length = 0;
@@ -241,12 +248,62 @@ export class PixiUnitLayer {
     this.textures.set(file, 'loading');
     this.pixi.Assets.load<Texture>(spriteUrl(file)).then(
       tex => {
+        if (this.destroyed) return;
         tex.source.scaleMode = def.pixelated ? 'nearest' : 'linear';
         this.textures.set(file, tex);
       },
       () => this.textures.set(file, 'failed'),
     );
     return null;
+  }
+
+  /** Populate this renderer's frame/chunk caches, upload textures and compile representative draw paths. No game events. */
+  async prepareBattle(files: readonly string[], token: BattleLoadToken): Promise<void> {
+    const sources = new Map<unknown, Texture>();
+    const effects = Object.values(FX);
+    for (const file of files) {
+      if (token.cancelled || this.destroyed) return;
+      const sheet = SHEETS[file], defs = effects.filter(d => d.file === file);
+      const base = await this.pixi.Assets.load<Texture>(spriteUrl(file));
+      if (token.cancelled || this.destroyed) return;
+      base.source.scaleMode = (sheet ?? defs[0])?.pixelated ? 'nearest' : 'linear';
+      this.textures.set(file, base);
+      const remember = (texture: Texture) => sources.set(texture.source, texture);
+      if (sheet) {
+        for (let row = 0; row < sheet.rows; row++) for (let col = 0; col < sheet.cols; col++) remember(this.frame(file, sheet, base, row, col));
+      } else if (defs.length) {
+        for (const def of defs) for (let frame = 0; frame < (def.stripFrames ?? def.frames); frame++) remember(this.fxFrame(file, base, def.stripFrames ?? def.frames, frame, def.pixelated));
+      } else remember(base);
+    }
+    if (token.cancelled || this.destroyed) return;
+    await this.app.renderer.prepare.upload([...sources.values()]);
+    if (token.cancelled || this.destroyed) return;
+    const warm = new this.pixi.Container();
+    const target = this.pixi.RenderTexture.create({ width: 16, height: 16 });
+    try {
+      for (const texture of sources.values()) {
+        const sprite = new this.pixi.Sprite(texture);
+        sprite.width = 2; sprite.height = 2;
+        warm.addChild(sprite);
+      }
+      warm.addChild(new this.pixi.Graphics().rect(0, 0, 2, 2).fill(0xffffff));
+      this.app.renderer.render({ container: warm, target });
+      for (const child of warm.children) child.blendMode = 'add';
+      if (this.bloom) warm.filters = [this.bloom];
+      this.app.renderer.render({ container: warm, target });
+    } finally {
+      warm.filters = null;
+      warm.destroy({ children: true });
+      target.destroy(true);
+    }
+  }
+
+  /** A one-off loading-screen barrier; never stall the GPU queue during normal combat. */
+  finishPreparation(): void {
+    if (this.destroyed) return;
+    const gl = (this.app.renderer as unknown as { gl?: WebGLRenderingContext }).gl;
+    if (gl?.isContextLost()) throw new Error('WebGL context lost during preparation');
+    gl?.finish();
   }
 
   /** frame (col, row) of a grid of fw × fh cells — a sub-texture, or of a chunk when the image is over the GPU limit */
