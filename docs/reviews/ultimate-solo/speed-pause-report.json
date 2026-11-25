@@ -1,0 +1,45 @@
+{
+  "speed": 4,
+  "before": {
+    "time": 1.3500000000000005,
+    "actor": 1
+  },
+  "held": {
+    "time": 1.3500000000000005,
+    "actor": 1,
+    "paused": true,
+    "locked": true
+  },
+  "first": [
+    {
+      "id": 1,
+      "at": 1.3500000000000005
+    }
+  ],
+  "auto": [
+    {
+      "id": 1,
+      "at": 1.3500000000000005
+    },
+    {
+      "id": 3,
+      "at": 4.749999999999991
+    },
+    {
+      "id": 4,
+      "at": 12.550000000000043
+    }
+  ],
+  "cancelled": {
+    "active": true,
+    "ultimate": null,
+    "cutIn": null,
+    "tasks": 0
+  },
+  "reentry": {
+    "running": true,
+    "ultimate": null,
+    "locked": false
+  },
+  "errors": []
+}

@@ -1,0 +1,90 @@
+{
+  "passed": true,
+  "renderers": [
+    {
+      "renderer": "pixi",
+      "layers": {
+        "active": true,
+        "cutIn": false,
+        "domBackdrop": false,
+        "hud": "brightness(0.35)",
+        "shadeVisible": true,
+        "shadeZ": 300000,
+        "foregroundZ": 400000,
+        "actorAbove": true,
+        "othersBehind": true,
+        "newFxAbove": true,
+        "canvasCount": 1
+      },
+      "first": {
+        "id": 1,
+        "time": 1.3500000000000005,
+        "fight": 1.3500000000000005
+      },
+      "second": {
+        "id": 2,
+        "time": 10.500000000000014,
+        "fight": 2.3
+      },
+      "elapsed": 3.299999999999991,
+      "rejected": {
+        "queued": false,
+        "buttonDisabled": true
+      },
+      "after": {
+        "fight": 3.399999999999996,
+        "locked": false,
+        "shadeOff": true,
+        "actorsRestored": true
+      },
+      "reset": {
+        "ultimate": null,
+        "cutIn": null,
+        "tasks": 0,
+        "running": false
+      },
+      "errors": []
+    },
+    {
+      "renderer": "dom",
+      "layers": {
+        "active": true,
+        "cutIn": false,
+        "domBackdrop": true,
+        "hud": "brightness(0.35)",
+        "actorAbove": true,
+        "othersBehind": true,
+        "newFxAbove": true,
+        "canvasCount": 0
+      },
+      "first": {
+        "id": 1,
+        "time": 1.3500000000000005,
+        "fight": 1.3500000000000005
+      },
+      "second": {
+        "id": 2,
+        "time": 4.899999999999991,
+        "fight": 1.5500000000000007
+      },
+      "elapsed": 3.299999999999991,
+      "rejected": {
+        "queued": false,
+        "buttonDisabled": true
+      },
+      "after": {
+        "fight": 1.7000000000000008,
+        "locked": false,
+        "shadeOff": true,
+        "actorsRestored": true
+      },
+      "reset": {
+        "ultimate": null,
+        "cutIn": null,
+        "tasks": 0,
+        "running": false
+      },
+      "errors": []
+    }
+  ]
+}

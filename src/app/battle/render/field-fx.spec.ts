@@ -47,6 +47,18 @@ describe('generic field visual lifecycle', () => {
     expect(s.player.positions(0).size).toBe(0);
   });
 
+  it('does not expire old effects or lead field pulses during an exclusive action', () => {
+    const s = scene();
+    s.player.handle({ ...start, area: 'RECT_3X2', duration: 5, interval: 1 }, 'hero-sylvara.png', 0, 0);
+    const shown = [...s.shown.keys()];
+    s.player.hold(3, 999);
+    s.player.advance(3.1);
+    expect(s.spawned).not.toContain('sw-ult-rain');
+    for (const id of shown) expect(s.shown.has(id)).toBeTrue();
+    s.player.advance(3.3);
+    expect(s.spawned).toContain('sw-ult-rain');
+  });
+
   it('leads exactly five rain waves and renders each authoritative pulse once on the fixed six cells', () => {
     const s = scene();
     const field: FieldLifecycleEvent = { ...start, area: 'RECT_3X2', duration: 5, interval: 1 };

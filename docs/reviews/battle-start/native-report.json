@@ -1,0 +1,120 @@
+{
+  "phases": [
+    {
+      "loading": null,
+      "running": false,
+      "engine": 0,
+      "time": 0,
+      "at": 3061.5
+    },
+    {
+      "phase": "loading",
+      "motion": "waiting",
+      "loading": {
+        "id": 1,
+        "phase": "loading",
+        "done": 0,
+        "total": 93
+      },
+      "running": false,
+      "engine": 0,
+      "time": 0,
+      "at": 11268.59999999404
+    },
+    {
+      "phase": "preparing",
+      "motion": "waiting",
+      "loading": {
+        "id": 1,
+        "phase": "preparing",
+        "done": 93,
+        "total": 93
+      },
+      "running": false,
+      "engine": 0,
+      "time": 0,
+      "at": 20115.20000001788
+    },
+    {
+      "phase": "intro",
+      "motion": "enter",
+      "loading": {
+        "id": 1,
+        "phase": "intro",
+        "done": 93,
+        "total": 93
+      },
+      "running": false,
+      "engine": 0,
+      "time": 0,
+      "at": 25371.40000000596
+    },
+    {
+      "phase": "intro",
+      "motion": "glide",
+      "loading": {
+        "id": 1,
+        "phase": "intro",
+        "done": 93,
+        "total": 93
+      },
+      "running": false,
+      "engine": 0,
+      "time": 0,
+      "at": 26005.59999999404
+    },
+    {
+      "phase": "intro",
+      "motion": "pass",
+      "loading": {
+        "id": 1,
+        "phase": "intro",
+        "done": 93,
+        "total": 93
+      },
+      "running": false,
+      "engine": 0,
+      "time": 0,
+      "at": 26394.40000000596
+    },
+    {
+      "phase": "intro",
+      "motion": "reveal",
+      "loading": {
+        "id": 1,
+        "phase": "intro",
+        "done": 93,
+        "total": 93
+      },
+      "running": false,
+      "engine": 0,
+      "time": 0,
+      "at": 28275
+    },
+    {
+      "phase": "intro",
+      "motion": "reveal",
+      "loading": null,
+      "running": true,
+      "engine": 0,
+      "time": 0,
+      "at": 28870.5
+    },
+    {
+      "loading": null,
+      "running": true,
+      "engine": 0,
+      "time": 0,
+      "at": 28989.5
+    }
+  ],
+  "result": {
+    "renderer": "pixi",
+    "time": 2.2,
+    "running": true,
+    "textures": 65,
+    "frames": 1561
+  },
+  "errors": [],
+  "requests": []
+}

@@ -50,4 +50,8 @@ export class StatusFxPlayback {
     for (const state of this.active.values()) this.host.remove(state.ids);
     this.active.clear();
   }
+
+  hold(seconds: number, afterId: number): void {
+    for (const state of this.active.values()) if (state.start != null && state.start <= afterId) state.startEnd += seconds;
+  }
 }

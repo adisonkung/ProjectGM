@@ -13,11 +13,12 @@ export interface BattleSetup {
   allies: UnitSpec[];
   stage: StageDef;
   autoUlt?: boolean;
+  exclusiveUltimates?: boolean;
   seed?: number;
 }
 
 export function createBattle(o: BattleSetup): BattleEngine {
-  return new BattleEngine({ allies: o.allies, stage: o.stage, enemyTemplates: ENEMIES, autoUlt: o.autoUlt, seed: o.seed });
+  return new BattleEngine({ allies: o.allies, stage: o.stage, enemyTemplates: ENEMIES, autoUlt: o.autoUlt, exclusiveUltimates: o.exclusiveUltimates, seed: o.seed });
 }
 
 /** what a finished battle means for rewards / result screens */

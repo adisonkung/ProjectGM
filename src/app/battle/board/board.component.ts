@@ -4,7 +4,7 @@ import { FxTrack } from '../../core/models/fx';
 import { FxAnchors } from '../render/fx-anchor';
 import { MockVisual } from '../../core/data/visuals';
 import { BackgroundDef } from '../../core/data/backgrounds';
-import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, input, NgZone, output, untracked, viewChildren } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, input, NgZone, output, signal, untracked, viewChildren } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
@@ -17,6 +17,8 @@ import { SpriteAnim, UnitSpriteComponent } from '../unit-sprite/unit-sprite.comp
 import { SHEETS } from '../../core/data/sprites';
 import type { PixiBolt, PixiFx, PixiUnit, PixiUnitLayer } from '../render/pixi-units';
 import { unitLook } from '../render/unit-look';
+import { BattleLoadToken } from '../render/battle-entry-assets';
+import { PlaybackClocks, UltimatePlayback } from '../render/exclusive-playback';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
 export interface UnitView {
@@ -223,6 +225,16 @@ export class BoardComponent {
   readonly groundExtraRows = input(0);
   /** battle: the game clock is frozen (paused / hit-stop) — the Pixi units hold their frame */
   readonly frozen = input<(() => boolean) | undefined>(undefined);
+  readonly ultimate = input<UltimatePlayback | null>(null);
+  readonly pixiLive = signal(false);
+  foregroundVisual(id: number): boolean { const focus = this.ultimate(); return !!focus && id > focus.afterId; }
+  visualZ(id: number, back: number, front: number): number { return this.foregroundVisual(id) ? front : back; }
+  private readonly effectClocks = new PlaybackClocks();
+  private readonly heldAnimations = new Set<Animation>();
+  private effectTime(id: number): number {
+    const focus = this.ultimate();
+    return this.effectClocks.sample(String(id), this.vclock, !!focus && id <= focus.afterId);
+  }
   /** Battle engine snapshot time. Standalone views without one retain their display clock. */
   readonly gameTime = input<number | undefined>(undefined);
   readonly gameStep = input(.05);
@@ -307,6 +319,9 @@ export class BoardComponent {
   private idleClock = 0;
   private pixi: PixiUnitLayer | null = null;
   private pixiPending = false;
+  private pixiInit: Promise<PixiUnitLayer | null> | null = null;
+  private pixiGeneration = 0;
+  private destroyed = false;
   private pixiHost?: HTMLElement;
   private resizeObs?: ResizeObserver;
   private pxOn = new Set<number>();
@@ -324,11 +339,12 @@ export class BoardComponent {
     const zone = inject(NgZone);
     afterNextRender(() => zone.runOutsideAngular(() => (this.raf = requestAnimationFrame(this.frame))));
     inject(DestroyRef).onDestroy(() => {
+      this.destroyed = true;
       cancelAnimationFrame(this.raf);
+      this.heldAnimations.clear();
+      this.effectClocks.clear();
       this.fxAnchors.clear();
-      this.resizeObs?.disconnect();
-      this.pixi?.destroy();
-      this.pixi = null;
+      this.stopPixi();
     });
     // the Pixi renderer: created lazily (its own chunk) when switched on, torn down when switched off
     effect(() => {
@@ -342,13 +358,14 @@ export class BoardComponent {
   }
 
   private startPixi(): void {
-    if (this.pixi || this.pixiPending || typeof window === 'undefined') return;
+    if (this.destroyed || this.pixi || this.pixiPending || typeof window === 'undefined') return;
     const board = this.boardEl();
     if (!board) {
       afterNextRender(() => this.startPixi(), { injector: this.injector });
       return;
     }
     this.pixiPending = true;
+    const generation = ++this.pixiGeneration;
     const host = document.createElement('div');
     host.className = 'pixi-host';
     // created at runtime (no encapsulation attribute): inline styles · above the 'under' FX (z 5), below DOM FX / bars
@@ -357,23 +374,29 @@ export class BoardComponent {
     (board.querySelector<HTMLElement>(':scope > .cam') ?? board).appendChild(host);
     this.pixiHost = host;
     // chunk load failure (offline / stale deploy) = stay DOM, like a device without WebGL
-    import('../render/pixi-units').then(m => m.PixiUnitLayer.create(host, board.clientWidth, board.clientHeight)).catch(() => null).then(layer => {
-      this.pixiPending = false;
-      if (!layer || this.renderer() !== 'pixi') {
+    this.pixiInit = import('../render/pixi-units').then(m => m.PixiUnitLayer.create(host, board.clientWidth, board.clientHeight)).catch(() => null).then(layer => {
+      if (generation === this.pixiGeneration) this.pixiPending = false;
+      if (!layer || this.destroyed || generation !== this.pixiGeneration || this.renderer() !== 'pixi') {
         layer?.destroy();
         host.remove();
-        return;
+        return null;
       }
       this.pixi = layer;
+      this.pixiLive.set(true);
       this.resizeObs = new ResizeObserver(() => this.pixi?.resize(board.clientWidth, board.clientHeight));
       this.resizeObs.observe(board);
+      return layer;
     });
   }
 
   private stopPixi(): void {
+    this.pixiGeneration++;
+    this.pixiPending = false;
+    this.pixiInit = null;
     this.resizeObs?.disconnect();
     this.pixi?.destroy();
     this.pixi = null;
+    this.pixiLive.set(false);
     this.pixiHost?.remove();
     this.pixiHost = undefined;
     for (const id of this.pxOn) this.host.nativeElement.querySelector(`.unit[data-uid="${id}"]`)?.classList.remove('px');
@@ -382,6 +405,27 @@ export class BoardComponent {
     this.fxPxOn.clear();
     for (const id of this.boltPxOn) this.host.nativeElement.querySelector(`app-projectile[data-proj="${id}"]`)?.classList.remove('px');
     this.boltPxOn.clear();
+  }
+
+  /** Wait for the actual mounted renderer; unavailable WebGL retains the DOM fallback. */
+  async prepareBattle(files: readonly string[], token: BattleLoadToken): Promise<'pixi' | 'dom'> {
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    if (token.cancelled || this.destroyed) return 'dom';
+    if (this.renderer() === 'pixi') {
+      this.startPixi();
+      const layer = await this.pixiInit;
+      if (token.cancelled || this.destroyed) return 'dom';
+      if (layer) {
+        try { await layer.prepareBattle(files, token); }
+        catch { this.stopPixi(); } // context/upload failure: decode the sheets for DOM before entry can finish
+      }
+    }
+    // The first prepared native frame must be painted before the overlay is allowed to announce Battle Start.
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    if (!token.cancelled && !this.destroyed) {
+      try { this.pixi?.finishPreparation(); } catch { this.stopPixi(); }
+    }
+    return this.pixi ? 'pixi' : 'dom';
   }
 
   /** this frame's units for the Pixi layer (same interpolated positions as the DOM units) */
@@ -439,7 +483,7 @@ export class BoardComponent {
     const bolts: PixiBolt[] = this.projectiles().map(p => ({ id: p.id, name: p.name, from: p.from, to: p.to, flight: p.flight }));
     // expanded scenery (sprite lab): the canvas starts at the board top, the camera layer `--scenery-extra` lower
     this.pixi.setOriginY(this.sceneryExtraRows() * cell);
-    const out = this.pixi.draw(list, cell, this.vclock, this.idleClock, fx, bolts);
+    const out = this.pixi.draw(list, cell, this.vclock, this.idleClock, fx, bolts, this.ultimate());
     const drawn = out.units;
     this.hideDrawn(out.fx, this.fxPxOn, id => `.fx-wrap[data-fx="${id}"]`);
     this.hideDrawn(out.bolts, this.boltPxOn, id => `app-projectile[data-proj="${id}"]`);
@@ -534,6 +578,7 @@ export class BoardComponent {
       const id = Number(el.dataset['uid']);
       const s = this.st.get(id);
       if (!s) continue;
+      if (this.ultimate() && id !== this.ultimate()!.actor) continue;
       if (alphaFn) {
         const tx = s.prev[0] + (s.cur[0] - s.prev[0]) * a;
         const ty = s.prev[1] + (s.cur[1] - s.prev[1]) * a;
@@ -550,7 +595,7 @@ export class BoardComponent {
         this.drawn.set(id, tf);
       }
     }
-    this.fxAnchors.sync(this.fx(), this.vclock, this.cam.draw * 100, id => {
+    this.fxAnchors.sync(this.fx(), id => this.effectTime(id), this.cam.draw * 100, id => {
       const s = this.st.get(id), o = this.off.get(id);
       return s ? { x: s.draw[0] + (o?.cur[0] ?? 0), y: s.draw[1] + (o?.cur[1] ?? 0) } : undefined;
     });
@@ -560,7 +605,7 @@ export class BoardComponent {
       if (!sprite.track()) continue;
       const anchor = this.fxAnchors.at(sprite.instanceId());
       if (anchor) {
-        const elapsed = (this.vclock - anchor.born) * 1000;
+        const elapsed = (this.effectTime(sprite.instanceId()) - anchor.born) * 1000;
         sprite.drawTrack(elapsed, anchor.outward);
         if (elapsed >= sprite.delayMs() + sprite.track()!.durationMs && this.fxAnchors.complete(sprite.instanceId())) {
           (completed ??= []).push(sprite.instanceId());
@@ -568,6 +613,9 @@ export class BoardComponent {
       }
     }
     if (completed) this.zone.run(() => this.finishedFx.emit(completed!));
+    for (const f of this.fx()) this.effectTime(f.id);
+    this.effectClocks.retain(new Set(this.fx().map(f => String(f.id))));
+    this.syncPlaybackAnimations();
     // attached FX (auras / guards / fields) ride on their unit: same drawn transform as the unit this frame
     const riders = this.host.nativeElement.querySelectorAll<HTMLElement>('.fx-wrap[data-fx]');
     for (const el of Array.from(riders)) {
@@ -585,6 +633,26 @@ export class BoardComponent {
     }
     this.raf = requestAnimationFrame(this.frame);
   };
+
+  /** DOM fallback and decorations use the same exclusive hold as Pixi, including animations born mid-cast. */
+  private syncPlaybackAnimations(): void {
+    const focus = this.ultimate(), frozen = !!this.frozen()?.();
+    if (!focus && !frozen && !this.heldAnimations.size) return;
+    const live = new Set(this.host.nativeElement.getAnimations({ subtree: true }));
+    for (const animation of live) {
+      const target = (animation.effect as KeyframeEffect | null)?.target;
+      if (!(target instanceof Element)) continue;
+      const unit = target.closest<HTMLElement>('.unit[data-uid]');
+      const visual = target.closest<HTMLElement>('[data-fx], [data-proj], [data-visual]');
+      const visualId = Number(visual?.dataset['fx'] ?? visual?.dataset['proj'] ?? visual?.dataset['visual']);
+      const held = frozen || (!!focus && (unit ? Number(unit.dataset['uid']) !== focus.actor
+        : visual ? visualId <= focus.afterId : !!target.closest('.zone-wrap')));
+      if (held) {
+        if (animation.playState === 'running') { animation.pause(); this.heldAnimations.add(animation); }
+      } else if (this.heldAnimations.delete(animation) && animation.playState === 'paused') animation.play();
+    }
+    for (const a of this.heldAnimations) if (!live.has(a)) this.heldAnimations.delete(a);
+  }
 
   /** template: the position a unit first appeared at (afterwards the frame loop owns `transform`) */
   spawnPos(u: UnitView): string {
@@ -607,6 +675,7 @@ export class BoardComponent {
 
   /** ตัวที่อยู่ต่ำกว่า (ใกล้จอ) วาดทับตัวที่อยู่สูงกว่า */
   unitZ(u: UnitView): number {
-    return (u.r + SCENERY_ROWS) * 10 + (this.spread().get(u.id)?.[2] ?? 0) + (u.alive ? 3 : 0);
+    const z = (u.r + SCENERY_ROWS) * 10 + (this.spread().get(u.id)?.[2] ?? 0) + (u.alive ? 3 : 0);
+    return this.ultimate()?.actor === u.id ? 400 + z : z;
   }
 }

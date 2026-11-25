@@ -35,14 +35,14 @@
       </app-placement>
     }
   } @else {
-    <div class="arena" [class.paused]="paused()">
+    <div class="arena" [class.paused]="paused()" [class.ultimate-active]="!!ultimate()">
       <div class="screen" [class.boss]="!!bossBar()" [class.authored-map]="fullscreen() && background()?.battlefieldCut != null">
         @if (fullscreen() && background()?.battlefieldCut != null) {
           <div class="battle-map-art" aria-hidden="true" [style.background-image]="'url(/' + background()!.file + ')'"></div>
         }
         @if (mode() !== 'lab') { <app-tower-ornament class="battle-field-frame" [grooved]="true" [ornate]="true" /> } @else { <app-tower-ornament class="lab-field-frame" [grooved]="true" [ornate]="true" /> }
         <app-board [groundExtraRows]="mode() === 'lab' ? 0 : fieldLayout().groundRows" [sceneryExtraRows]="sceneryExtraRows()" (finishedFx)="onFxFinished($event)" [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
-                   [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [gameTime]="result() || ending() ? undefined : gameClock()" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
+                   [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [ultimate]="ultimate()" [gameTime]="result() || ending() ? undefined : gameClock()" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
 
         <!-- top HUD (scenery rows only — never over the lanes' units) -->
         <div class="hud-top">
@@ -81,7 +81,7 @@
         @if (tracing()) { <app-slash-trace [def]="specialDef" [seed]="traceSeed()" (done)="specialDone($event)" /> }
 
         <!-- free strip under the lanes (inside the field): party, then AUTO and the special skill — one row -->
-        <app-party-bar class="party-in" [referenceChrome]="mode() !== 'lab'" [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
+        <app-party-bar class="party-in" [referenceChrome]="mode() !== 'lab'" [compact]="true" [units]="party()" [actionsLocked]="ultimateLocked()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
           @if (mode() !== 'lab') { <app-tower-ornament class="battle-party-frame" [grooved]="true" [ornate]="true" /> }
           <button type="button" class="auto citadel-surface citadel-control" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม"><app-citadel-frame shape="hex" [cut]="14" [crimson]="autoUlt()" [lacquer]="autoUlt()" />AUTO</button>
           <!-- player special skill (not a hero skill): charges during combat, opens the Blade Trace mini-game -->
@@ -123,7 +123,7 @@
         <!-- ultimate cut-in: original hero art and a short diagonal reveal over the held field -->
         @for (k of [ci.key]; track k) {
           <div class="ult-cutin" [class.themed]="!!ci.theme" role="status" aria-live="polite">
-            <div class="ci-shade" aria-hidden="true"></div>
+            @if (!ultimate()) { <div class="ci-shade" aria-hidden="true"></div> }
             @if (ci.theme; as theme) {
               <app-themed-cutin [art]="theme" [name]="ci.name" [skill]="ci.skill" />
             } @else {
@@ -134,19 +134,8 @@
           </div>
         }
       }
-      @if (loading(); as ld) {
-        <!-- pre-battle loading screen: random hero key art, every sheet / FX of this fight warms up underneath -->
-        <div class="battle-loading" [class.leaving]="ld.leaving" role="status" aria-live="polite" [attr.aria-label]="'กำลังโหลดการต่อสู้ ' + loadPct() + '%'">
-          @if (ld.banner) { <img class="bl-art" [src]="ld.banner" alt="" draggable="false" /> }
-          <div class="bl-shade"></div>
-          <div class="bl-ring" aria-hidden="true"></div>
-          <div class="bl-panel">
-            <small class="bl-kicker">{{ ld.name || 'ELDERVANE' }}</small>
-            <b class="bl-title">{{ ld.title }}</b>
-            <div class="bl-bar"><i [style.width.%]="loadPct()"></i></div>
-            <span class="bl-state">{{ ld.total && ld.done >= ld.total ? 'พร้อมสู้' : 'กำลังเตรียมสนามรบ…' }} <em>{{ loadPct() }}%</em></span>
-          </div>
-        </div>
+      @for (ld of entryStates(); track ld.id) {
+        <app-battle-entry [state]="ld" [mapName]="entryMapName()" [stageLabel]="entryStageLabel()" (completed)="entryFinished($event)" (retry)="retryEntry()" (cancelled)="cancelEntry()" />
       }
       @if (portraitPhone()) {
         <!-- phone held upright: the fight waits (paused) until it is turned sideways -->

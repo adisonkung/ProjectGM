@@ -1,6 +1,16 @@
 :host {
+  position: relative;
   display: block;
   --cell: min(56px, calc((100vw - 32px) / 16));
+}
+
+// The canvas composites world < dimmer < Ultimate. DOM fallback uses the same order.
+.ultimate-backdrop { position: absolute; inset: calc(-1 * var(--scenery-extra, 0px)) 0 0; z-index: 300; background: rgba(8,5,5,.65); pointer-events: none; }
+// Covers only the area outside a height-fitted board; the inner dimmer must not be applied twice.
+.ultimate-outside-shade { position: absolute; inset: 0; z-index: 1; box-shadow: 0 0 0 100vmax rgba(8,5,5,.65); pointer-events: none; }
+.pixi-live.ultimate-scene {
+  // Bars, DOM fallback art and annotations sit above the single canvas; match its behind-dimmer exposure.
+  .unit:not(.ultimate-actor), .fx-wrap:not(.ultimate-visual), app-projectile:not(.ultimate-visual), .float-wrap:not(.ultimate-visual) { filter: brightness(.35) !important; }
 }
 
 .board {

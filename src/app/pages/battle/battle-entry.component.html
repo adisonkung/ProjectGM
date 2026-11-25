@@ -1,0 +1,28 @@
+<div class="entry" [attr.data-phase]="state().phase" [attr.data-motion]="motionPhase()" [attr.aria-label]="'เข้าสู่การต่อสู้ · ' + mapName()" role="status" aria-live="polite">
+  <div #shade class="shade"></div>
+  <div class="black"><div class="brand">ELDERVANE<span>{{ stageLabel() }} · {{ mapName() }}</span></div></div>
+  <div class="loader" [class.complete]="percent === 100" [style.--progress]="percent + '%'">
+    <div class="runway" aria-hidden="true"><div class="runner"><i></i></div></div>
+    <div class="load-copy"><span>{{ percent === 100 ? 'โหลดทรัพยากรครบแล้ว' : 'กำลังโหลดทรัพยากร' }}</span><b>{{ percent }}%</b></div>
+    <div class="track" role="progressbar" aria-label="โหลดทรัพยากรสนามรบ" [attr.aria-valuenow]="percent" aria-valuemin="0" aria-valuemax="100"><i></i></div>
+    <small>{{ mapName() }}</small>
+  </div>
+  <p class="preparing"><i></i>กำลังเตรียมสนามรบ</p>
+  <div class="intro" aria-hidden="true">
+    <header><span>ELDERVANE</span><span>{{ stageLabel() }}</span></header>
+    <div class="kick">
+      <img class="aura" [src]="art.aura" alt="" draggable="false">
+      <div class="crest"></div>
+      <div class="panels">
+        <div #left class="panel left"><div class="surface"><strong>BATTLE</strong></div></div>
+        <div #right class="panel right"><div class="surface"><strong>START</strong></div></div>
+      </div>
+      <div class="seam"></div>
+      <div class="friction"><b></b>@for (s of sparks; track $index) { <i [style.--x]="s.x + 'px'" [style.--y]="s.y + 'px'" [style.--angle]="s.angle + 'deg'" [style.--size]="s.size + 'px'" [style.--delay]="s.delay + 's'"></i> }</div>
+    </div>
+    <div class="chapter"><i></i><div><b>{{ mapName() }}</b><span>{{ stageLabel() }}</span></div><i></i></div>
+  </div>
+  @if (state().phase === 'error') {
+    <div class="error" role="alert"><h2>เตรียมสนามยังไม่สำเร็จ</h2><p>ลองโหลดอีกครั้งเพื่อเข้าสู่การต่อสู้</p><div><button type="button" (click)="retry.emit()">ลองโหลดใหม่</button><button type="button" (click)="cancelled.emit()">กลับไปจัดทีม</button></div></div>
+  }
+</div>

@@ -18,6 +18,8 @@ export interface StageHost {
   spawnEnemy(monsterId: string, cell: Cell): BattleUnit | null;
   /** one tick of real combat: timers + AI + pending actions + projectiles */
   combatStep(dt: number): void;
+  /** A committed cinematic action must finish before wave/result transitions. */
+  actionInProgress?(): boolean;
   /** timers only (cooldowns / statuses) — used during transitions */
   tickTimers(u: BattleUnit, dt: number, cooldowns: boolean, statuses: boolean): void;
   /** finish in-flight animation actions (hits that land after the last enemy died, heals …) */
@@ -159,7 +161,7 @@ export class StageFlow {
         break;
       case BattlePhase.COMBAT:
         this.host.combatStep(dt);
-        this.evaluate();
+        if (!this.host.actionInProgress?.()) this.evaluate();
         break;
       case BattlePhase.WAVE_CLEAR:
         // purely finishing: in-flight animation hits may still land; nobody starts a new action

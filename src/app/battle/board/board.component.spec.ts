@@ -22,6 +22,27 @@ describe('BoardComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('keeps only the Ultimate caster and its new effects above the persistent DOM backdrop', () => {
+    const units = [7, 8].map(id => ({ id, side: 'ally', name: 'hero', r: 1, c: id - 5, alive: true, cls: 'fighter', hpPct: 100, manaPct: 100, shieldPct: 0 } as UnitView));
+    fixture.componentRef.setInput('units', units);
+    fixture.componentRef.setInput('fx', [{ id: 2, r: 1, c: 2, name: 'gr-s1-aura', angle: 0 }, { id: 12, r: 1, c: 2, name: 'gr-s1-aura', angle: 0, under: true }]);
+    const normalZ = component.unitZ(units[0]);
+    fixture.componentRef.setInput('ultimate', { actor: 7, afterId: 10 }); fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const shade = el.querySelector<HTMLElement>('.ultimate-backdrop')!;
+    expect(shade).not.toBeNull();
+    expect(el.querySelector('.ultimate-outside-shade')).not.toBeNull();
+    const shadeZ = Number(getComputedStyle(shade).zIndex);
+    expect(component.unitZ(units[0])).toBeGreaterThan(shadeZ);
+    expect(component.unitZ(units[1])).toBeLessThan(shadeZ);
+    expect(Number(el.querySelector<HTMLElement>('[data-fx="12"]')!.style.zIndex)).toBeGreaterThan(shadeZ);
+    expect(Number(el.querySelector<HTMLElement>('[data-fx="12"]')!.style.zIndex)).toBeLessThan(component.unitZ(units[0]));
+    expect(el.querySelector<HTMLElement>('[data-fx="2"]')!.classList.contains('ultimate-visual')).toBeFalse();
+    fixture.componentRef.setInput('ultimate', null); fixture.detectChanges();
+    expect(el.querySelector('.ultimate-backdrop')).toBeNull();
+    expect(component.unitZ(units[0])).toBe(normalZ);
+  });
+
   it('extends the render floor without shifting unit or logical grid coordinates', () => {
     const host=fixture.nativeElement as HTMLElement;
     host.style.setProperty('--cell','40px');

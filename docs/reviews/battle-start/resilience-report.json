@@ -1,0 +1,30 @@
+{
+  "failure": {
+    "state": {
+      "id": 1,
+      "phase": "error",
+      "done": 91,
+      "total": 93
+    },
+    "time": 0,
+    "running": false
+  },
+  "retry": {
+    "running": true,
+    "renderer": "pixi",
+    "auraLoads": [
+      {
+        "width": 1200,
+        "id": 2
+      }
+    ]
+  },
+  "blockedRequests": 3,
+  "cancelledRestartStayedStopped": true,
+  "reentryReusesCachedImages": true,
+  "reducedMotion": {
+    "running": true,
+    "renderer": "dom"
+  },
+  "errors": []
+}

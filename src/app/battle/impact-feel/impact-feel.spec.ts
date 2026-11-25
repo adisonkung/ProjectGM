@@ -1,6 +1,19 @@
 import { playImpactFeel } from './impact-feel';
 
 describe('playImpactFeel camera zoom', () => {
+  it('ignores authored screen flash while retaining the hit-stop and camera feel', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<div class="board"><div class="cam"></div></div>';
+    document.body.appendChild(root);
+    try {
+      expect(playImpactFeel(root, { flashMs: 180, hitStopMs: 40, shakePx: 4, zoomPct: 2 })).toBe(40);
+      expect(root.querySelector('.board')!.children.length).toBe(1);
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        expect(root.getAnimations().length).toBe(1);
+        expect(root.querySelector('.cam')!.getAnimations().length).toBe(1);
+      }
+    } finally { root.remove(); }
+  });
   it('scales the board camera layer around the focus cell and eases back', () => {
     const root = document.createElement('div');
     root.innerHTML = '<div class="board"><div class="cam"></div></div>';

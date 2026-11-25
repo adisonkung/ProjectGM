@@ -1,7 +1,20 @@
 import { PixiFx, PixiUnitLayer } from './pixi-units';
+import { PlaybackClocks } from './exclusive-playback';
 
 /** the Pixi canvas must keep its CSS size on high-DPI screens (bug: 2× sprites shifted on Retina) */
 describe('PixiUnitLayer canvas', () => {
+  it('disposes prepared frame views once without destroying shared cached images', () => {
+    const layer = Object.create(PixiUnitLayer.prototype) as PixiUnitLayer;
+    const frame = { destroy: jasmine.createSpy('frame.destroy') }, shared = { destroy: jasmine.createSpy('shared.destroy') };
+    Object.assign(layer, {
+      destroyed: false, fxs: new Map(), fxPool: [], app: { destroy: jasmine.createSpy('app.destroy') },
+      frames: new Map([['ready-frame', frame]]), textures: new Map([['shared-sheet', shared]]),
+      crispTextures: new Map(), chunks: new Map(), partTex: new Map(), emitters: [], sprites: new Map(), bolts: new Map(),
+    });
+    layer.destroy(); layer.destroy();
+    expect(frame.destroy).toHaveBeenCalledTimes(1); expect(frame.destroy).toHaveBeenCalledWith();
+    expect(shared.destroy).not.toHaveBeenCalled();
+  });
   it('on a 2× screen the canvas renders at 2× pixels but stays the board size in CSS', async () => {
     const dpr = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
     Object.defineProperty(window, 'devicePixelRatio', { configurable: true, get: () => 2 });
@@ -18,6 +31,13 @@ describe('PixiUnitLayer canvas', () => {
       expect(canvas.width).toBe(800);
       expect(canvas.style.width).toBe('400px');
       expect(canvas.getBoundingClientRect().width).toBeCloseTo(400, 0);
+      layer.draw([], 56, 0, 0, [], [], { actor: 7, afterId: 10 });
+      const scene = layer as unknown as { ultimateShade: { visible: boolean; zIndex: number }; ultimateLayer: { zIndex: number } };
+      expect(scene.ultimateShade.visible).toBeTrue();
+      expect(scene.ultimateLayer.zIndex).toBeGreaterThan(scene.ultimateShade.zIndex);
+      expect(host.querySelectorAll('canvas').length).toBe(1);
+      layer.draw([], 56, .05, .05);
+      expect(scene.ultimateShade.visible).toBeFalse();
       layer.destroy();
     } finally {
       if (dpr) Object.defineProperty(window, 'devicePixelRatio', dpr);
@@ -34,6 +54,7 @@ describe('Pixi one-shot ownership', () => {
       fxs: Map<number, unknown>; drawFx(list: PixiFx[], cell: number, now: number): Set<number>;
     };
     const view: PixiFx = { id: 1, name: 'sw-ult-ascent', x: 0, y: 0, flip: false, angle: 0, under: false };
+    Object.assign(layer, { playback: new PlaybackClocks(), liveClocks: new Set(), focus: null });
     const sprite = { visible: true, destroy: jasmine.createSpy('destroy') };
     layer.fxs = new Map([[1, { sprite, name: view.name, t0: 0, seq: 1, last: view, sparked: true }]]);
     layer.drawFx([view], 56, 0.51);

@@ -43,6 +43,8 @@ export class UnitSpriteComponent {
   /** เปลี่ยนค่านี้เพื่อสั่งเล่นท่าเดิมซ้ำ */
   readonly animKey = input(0);
   readonly speed = input(1);
+  /** Exclusive ultimate: retain the current request until the world resumes. */
+  readonly frozen = input(false);
   /** หันซ้าย (แผ่น sprite วาดหันขวา) */
   readonly flip = input(false);
   /** ท่า `cast`: เวลาร่าย (วินาทีเกม) — เฟรม CAST_START→SKILL_ACTIVATE ยืดให้พอดี */
@@ -80,25 +82,31 @@ export class UnitSpriteComponent {
   /** runtime root motion of the playing clip (AnimDef.root) */
   private lift?: Animation;
   private currentName: SpriteAnim = 'idle';
+  private lastRequest?: { name: SpriteAnim; key: number; sheet: HTMLElement | undefined; def: SheetDef | undefined };
 
   constructor() {
     effect(() => {
+      if (this.frozen()) return;
       const name = this.anim();
-      this.animKey();
+      const key = this.animKey();
       const el = this.sheet()?.nativeElement;
       const def = this.def();
       untracked(() => {
+        if (this.lastRequest?.name === name && this.lastRequest.key === key && this.lastRequest.sheet === el && this.lastRequest.def === def) return;
+        this.lastRequest = { name, key, sheet: el, def };
         if (el && def) this.play(el, def, name);
         this.move(def, name);
       });
     });
     // the walk cycle follows the ground speed (smoothly, no restart)
     effect(() => {
+      if (this.frozen()) return;
       this.pace();
       untracked(() => this.syncWalkRate());
     });
     // start / stop the walk loop with the movement (only when the parent drives `moving`)
     effect(() => {
+      if (this.frozen()) return;
       const m = this.moving();
       const el = this.sheet()?.nativeElement;
       const def = this.def();

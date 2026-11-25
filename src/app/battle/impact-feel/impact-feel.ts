@@ -5,6 +5,7 @@ import { ImpactFeel } from '../../core/data/sprites';
  * hit-stop = every running animation under `root` (sprites, FX, unit tweens) pauses for `hitStopMs`, then a small
  * screen shake on `root`. Returns the hit-stop length (the battle page also holds the engine for it).
  * Purely visual — never touches combat state; reduced-motion users get no shake.
+ * Full-screen white washes are disabled (user 2026-11-25), including legacy authored flashMs values.
  */
 export function playImpactFeel(
   root: HTMLElement | null | undefined,
@@ -47,15 +48,6 @@ export function playImpactFeel(
       ],
       { duration: stop + (feel.shakeMs ?? 140) * 2, easing: 'linear' },
     );
-  }
-  const flash = feel.flashMs ?? 0;
-  if (flash > 0 && typeof document !== 'undefined') {
-    const el = document.createElement('div');
-    el.style.cssText = 'position:absolute;inset:0;background:#fff;pointer-events:none;z-index:400;mix-blend-mode:screen;opacity:0';
-    ((root.querySelector('.board') as HTMLElement | null) ?? root).appendChild(el);
-    const a = el.animate([{ opacity: reduced ? 0.25 : 0.7 }, { opacity: 0 }], { duration: flash, delay: stop * 0.5, easing: 'ease-out' });
-    a.onfinish = a.oncancel = () => el.remove();
-    setTimeout(() => el.remove(), flash + stop + 200);
   }
   return stop;
 }

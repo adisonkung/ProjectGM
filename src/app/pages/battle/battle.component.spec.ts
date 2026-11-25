@@ -152,8 +152,10 @@ describe('BattleComponent', () => {
     expect(component.paused()).toBeFalse();
     expect(component.menuOpen()).toBeFalse();
     component.openMenu();
+    const enter = spyOn(component, 'enter');
     component.restart();
-    expect(component.running()).toBeTrue();
+    expect(enter).toHaveBeenCalledTimes(1);
+    expect(component.running()).toBeFalse();
     expect(component.paused()).toBeFalse();
     expect(component.time()).toBe(0);
     component.openMenu();

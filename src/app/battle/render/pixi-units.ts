@@ -7,10 +7,14 @@ import { FX, SHEETS, SheetDef } from '../../core/data/sprites';
 import type { AdvancedBloomFilter, GlowFilter } from 'pixi-filters';
 import { fxLength, fxPivot, fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
 import { Emitter, particleRng } from './particles';
-import { ClipRequest, UnitClip } from './unit-clip';
+import { ClipPose, ClipRequest, UnitClip } from './unit-clip';
 import { frameChunk } from './tex-chunks';
 import { LOOK_COLORS, RING_BOX, UnitLook } from './unit-look';
 import { sheetFxNames } from './battle-assets';
+import { BattleLoadToken } from './battle-entry-assets';
+import { PlaybackClocks, UltimatePlayback } from './exclusive-playback';
+
+let prepareRegistered = false;
 
 /** one unit to draw this frame (board pixels, already interpolated by the board's motion loop) */
 export interface PixiUnit {
@@ -70,6 +74,7 @@ interface UnitGfx {
   sprite: Sprite;
   clip: UnitClip;
   sheet: string;
+  pose?: ClipPose;
   /** state glow (pixi-filters GlowFilter, colour / strength per frame) */
   glow?: GlowFilter;
   tone?: ColorMatrixFilter;
@@ -101,6 +106,15 @@ const FLASH = 0.11;
  * Pixi is imported lazily (its own chunk) only when the Pixi renderer is switched on.
  */
 export class PixiUnitLayer {
+  private readonly playback = new PlaybackClocks();
+  private readonly emitterOwners = new WeakMap<Emitter, number>();
+  private focus: UltimatePlayback | null = null;
+  private readonly liveClocks = new Set<string>();
+  private clock(key: string, now: number, frozen: boolean): number {
+    this.liveClocks.add(key);
+    return this.playback.sample(key, now, frozen);
+  }
+  private destroyed = false;
   private readonly sprites = new Map<number, UnitGfx>();
   private readonly reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   private readonly textures = new Map<string, Texture | 'loading' | 'failed'>();
@@ -116,6 +130,13 @@ export class PixiUnitLayer {
   private readonly bloom?: AdvancedBloomFilter;
   private readonly echoOutline?: import('pixi-filters').OutlineFilter;
   private readonly partLayer: Container;
+  /** One canvas: world < dimmer < the active Ultimate (including its ground/over/particle layers). */
+  private readonly ultimateShade: Graphics;
+  private readonly ultimateLayer: Container;
+  private readonly ultimateOver: Container;
+  private readonly ultimateCrisp: Container;
+  private readonly ultimateParticles: Container;
+  private shadeBounds = '';
   private readonly partSprites: Sprite[] = [];
   private echoSmokeTexture?: Texture;
   private echoSmokeLoading = false;
@@ -151,6 +172,24 @@ export class PixiUnitLayer {
     this.partLayer = new pixi.Container();
     this.partLayer.zIndex = Z_PARTICLES;
     stage.addChild(this.partLayer);
+    this.ultimateShade = new pixi.Graphics();
+    this.ultimateShade.zIndex = Z_BOLT + 100000;
+    this.ultimateShade.visible = false;
+    stage.addChild(this.ultimateShade);
+    this.ultimateLayer = new pixi.Container();
+    this.ultimateLayer.sortableChildren = true;
+    this.ultimateLayer.zIndex = Z_BOLT + 200000;
+    stage.addChild(this.ultimateLayer);
+    this.ultimateOver = new pixi.Container();
+    this.ultimateOver.sortableChildren = true;
+    this.ultimateOver.zIndex = Z_OVER;
+    if (this.bloom) this.ultimateOver.filters = [this.bloom];
+    this.ultimateCrisp = new pixi.Container();
+    this.ultimateCrisp.sortableChildren = true;
+    this.ultimateCrisp.zIndex = Z_OVER - .5;
+    this.ultimateParticles = new pixi.Container();
+    this.ultimateParticles.zIndex = Z_PARTICLES;
+    this.ultimateLayer.addChild(this.ultimateOver, this.ultimateCrisp, this.ultimateParticles);
     const gl = (app.renderer as unknown as { gl?: WebGLRenderingContext }).gl;
     this.maxTex = Math.min(16384, (gl?.getParameter(gl.MAX_TEXTURE_SIZE) as number | undefined) ?? 4096);
   }
@@ -159,6 +198,7 @@ export class PixiUnitLayer {
   static async create(host: HTMLElement, width: number, height: number): Promise<PixiUnitLayer | null> {
     try {
       const pixi = await import('pixi.js');
+      if (!prepareRegistered) { pixi.extensions.add(pixi.PrepareSystem); prepareRegistered = true; }
       const app = new pixi.Application();
       await app.init({
         width: Math.max(1, width),
@@ -204,10 +244,17 @@ export class PixiUnitLayer {
   }
 
   destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
     for (const fx of this.fxs.values()) fx.reveal?.destroy();
     for (const sprite of this.fxPool) sprite.destroy();
     this.fxPool.length = 0;
     this.app.destroy(true, { children: true });
+    // Preparation now owns frames for every clip, including clips not drawn in this run.
+    // Release those views, but leave their shared Assets-owned source images available to later entries.
+    for (const texture of this.frames.values()) texture.destroy();
+    this.frames.clear();
+    this.textures.clear();
     this.echoOutline?.destroy();
     this.echoSmokeDisposed = true; // Assets owns the one cached wisp texture across battle sessions.
     for (const texture of this.crispTextures.values()) texture.destroy(true);
@@ -241,12 +288,62 @@ export class PixiUnitLayer {
     this.textures.set(file, 'loading');
     this.pixi.Assets.load<Texture>(spriteUrl(file)).then(
       tex => {
+        if (this.destroyed) return;
         tex.source.scaleMode = def.pixelated ? 'nearest' : 'linear';
         this.textures.set(file, tex);
       },
       () => this.textures.set(file, 'failed'),
     );
     return null;
+  }
+
+  /** Populate this renderer's frame/chunk caches, upload textures and compile representative draw paths. No game events. */
+  async prepareBattle(files: readonly string[], token: BattleLoadToken): Promise<void> {
+    const sources = new Map<unknown, Texture>();
+    const effects = Object.values(FX);
+    for (const file of files) {
+      if (token.cancelled || this.destroyed) return;
+      const sheet = SHEETS[file], defs = effects.filter(d => d.file === file);
+      const base = await this.pixi.Assets.load<Texture>(spriteUrl(file));
+      if (token.cancelled || this.destroyed) return;
+      base.source.scaleMode = (sheet ?? defs[0])?.pixelated ? 'nearest' : 'linear';
+      this.textures.set(file, base);
+      const remember = (texture: Texture) => sources.set(texture.source, texture);
+      if (sheet) {
+        for (let row = 0; row < sheet.rows; row++) for (let col = 0; col < sheet.cols; col++) remember(this.frame(file, sheet, base, row, col));
+      } else if (defs.length) {
+        for (const def of defs) for (let frame = 0; frame < (def.stripFrames ?? def.frames); frame++) remember(this.fxFrame(file, base, def.stripFrames ?? def.frames, frame, def.pixelated));
+      } else remember(base);
+    }
+    if (token.cancelled || this.destroyed) return;
+    await this.app.renderer.prepare.upload([...sources.values()]);
+    if (token.cancelled || this.destroyed) return;
+    const warm = new this.pixi.Container();
+    const target = this.pixi.RenderTexture.create({ width: 16, height: 16 });
+    try {
+      for (const texture of sources.values()) {
+        const sprite = new this.pixi.Sprite(texture);
+        sprite.width = 2; sprite.height = 2;
+        warm.addChild(sprite);
+      }
+      warm.addChild(new this.pixi.Graphics().rect(0, 0, 2, 2).fill(0xffffff));
+      this.app.renderer.render({ container: warm, target });
+      for (const child of warm.children) child.blendMode = 'add';
+      if (this.bloom) warm.filters = [this.bloom];
+      this.app.renderer.render({ container: warm, target });
+    } finally {
+      warm.filters = null;
+      warm.destroy({ children: true });
+      target.destroy(true);
+    }
+  }
+
+  /** A one-off loading-screen barrier; never stall the GPU queue during normal combat. */
+  finishPreparation(): void {
+    if (this.destroyed) return;
+    const gl = (this.app.renderer as unknown as { gl?: WebGLRenderingContext }).gl;
+    if (gl?.isContextLost()) throw new Error('WebGL context lost during preparation');
+    gl?.finish();
   }
 
   /** frame (col, row) of a grid of fw × fh cells — a sub-texture, or of a chunk when the image is over the GPU limit */
@@ -326,7 +423,8 @@ export class PixiUnitLayer {
         s.reveal?.destroy(); this.retireFx(s.sprite, !!s.last.track); this.fxs.delete(id); continue;
       }
       const d = FX[s.name];
-      const pose = fxPoseAt(d, now - s.t0 - (s.last.delayMs ?? 0) / 1000, !!s.last.loop, s.last.track);
+      const time = this.clock(`f${id}`, now, !!this.focus && id <= this.focus.afterId);
+      const pose = fxPoseAt(d, time - s.t0 - (s.last.delayMs ?? 0) / 1000, !!s.last.loop, s.last.track);
       if (pose.done) {
         // Retain completed instances while the host still lists them; otherwise they restart as new one-shots.
         if (seen.has(id)) { s.sprite.visible = false; continue; }
@@ -341,6 +439,10 @@ export class PixiUnitLayer {
         continue;
       }
       const f = s.last;
+      const front = !!this.focus && id > this.focus.afterId;
+      const parent = f.under ? (front ? this.ultimateLayer : this.stage)
+        : f.track ? (front ? this.ultimateCrisp : this.crispFx) : (front ? this.ultimateOver : this.overFx);
+      if (sp.parent !== parent) parent.addChild(sp);
       const at = fxPlacement(d, cell, f.x, f.y, f.flip, f.angle, f.offset, (f.scale ?? 1) * (pose.scale ?? 1), f.stretch ?? 1);
       at.x += (pose.dx ?? 0) * (f.flip ? -1 : 1) / 100 * cell;
       at.y += (pose.dy ?? 0) * (f.motionY ?? 1) / 100 * cell;
@@ -371,7 +473,11 @@ export class PixiUnitLayer {
         s.sparked = true;
         for (const ref of d.particles ?? []) {
           const pd = particleDef(ref);
-          if (pd) this.emitters.push(new Emitter(pd, at.x / cell, at.y / cell, at.flip, this.rng, fxLength(d)));
+          if (pd) {
+            const emitter = new Emitter(pd, at.x / cell, at.y / cell, at.flip, this.rng, fxLength(d));
+            this.emitterOwners.set(emitter, id);
+            this.emitters.push(emitter);
+          }
         }
       }
       if (seen.has(id)) drawn.add(id);
@@ -409,7 +515,8 @@ export class PixiUnitLayer {
     for (const [id, s] of this.bolts) {
       const b = s.last;
       const d = FX[b.name];
-      const pose = projectilePoseAt(d, b.flight / 1000, now - s.t0);
+      const time = this.clock(`b${id}`, now, !!this.focus && id <= this.focus.afterId);
+      const pose = projectilePoseAt(d, b.flight / 1000, time - s.t0);
       if (pose.done) {
         s.sprite.destroy();
         this.bolts.delete(id);
@@ -422,6 +529,8 @@ export class PixiUnitLayer {
       }
       const at = projectilePlacement(d, cell, b.from, b.to, pose.k);
       const sp = s.sprite;
+      const parent = this.focus && id > this.focus.afterId ? this.ultimateLayer : this.stage;
+      if (sp.parent !== parent) parent.addChild(sp);
       const tex = this.fxFrame(d.file, base, d.frames, pose.frame, d.pixelated);
       sp.texture = tex;
       sp.position.set(at.x, at.y);
@@ -446,8 +555,20 @@ export class PixiUnitLayer {
     idleNow: number,
     fx: PixiFx[] = [],
     bolts: PixiBolt[] = [],
+    focus: UltimatePlayback | null = null,
   ): { units: Set<number>; fx: Set<number>; bolts: Set<number> } {
     this.cell = cell;
+    this.focus = focus;
+    this.ultimateShade.visible = !!focus;
+    if (focus) {
+      const { width, height } = this.app.screen;
+      const bounds = `${width}|${height}|${this.stage.y}`;
+      if (this.shadeBounds !== bounds) {
+        this.ultimateShade.clear().rect(0, -this.stage.y, width, height).fill({ color: 0x080505, alpha: .65 });
+        this.shadeBounds = bounds;
+      }
+    }
+    this.liveClocks.clear();
     const drawn = new Set<number>();
     const live = new Set<number>();
     for (const u of units) {
@@ -465,8 +586,11 @@ export class PixiUnitLayer {
         this.sprites.set(u.id, s);
         this.preloadFx(def);
       }
-      s.clip.request(u.req, u.key, now, u.moving);
-      const pose = s.clip.pose(now, idleNow, u.moving, u.pace);
+      const held = !!focus && u.id !== focus.actor;
+      const time = this.clock(`u${u.id}`, now, held), idle = this.clock(`i${u.id}`, idleNow, held);
+      if (!held) s.clip.request(u.req, u.key, time, u.moving);
+      const pose = held && s.pose ? s.pose : s.clip.pose(time, idle, u.moving, u.pace);
+      s.pose = pose;
       if (!base) {
         s.smoke?.forEach(p => p.visible = false);
         s.sprite.visible = false;
@@ -476,13 +600,17 @@ export class PixiUnitLayer {
       const geometry = unitGeometry(def, cell), k = geometry.k;
       const sx = u.flip ? -1 : 1;
       const sp = s.sprite;
+      const parent = focus?.actor === u.id ? this.ultimateLayer : this.stage;
+      if (sp.parent !== parent) parent.addChild(sp);
       sp.texture = this.frame(u.sheet, def, base, pose.row, pose.col);
       sp.scale.set(k * sx, k);
       sp.position.set(u.x + cell / 2 + pose.dx * k * sx, u.y + geometry.bottomY + pose.dy * k);
       sp.alpha = u.alpha * pose.opacity;
       sp.zIndex = u.z;
       sp.visible = sp.alpha > 0.001;
-      this.applyLook(s, u, cell, idleNow);
+      this.applyLook(s, u, cell, idle);
+      // Ground rings / smoke belong to the same side of the dimmer as their actor.
+      for (const child of [s.rings, ...(s.smoke ?? [])]) if (child && child.parent !== parent) parent.addChild(child);
       drawn.add(u.id);
     }
     for (const [id, s] of this.sprites) {
@@ -494,6 +622,7 @@ export class PixiUnitLayer {
     const fxDrawn = this.drawFx(fx, cell, now);
     const boltsDrawn = this.drawBolts(bolts, cell, now);
     this.drawParticles(cell, now);
+    this.playback.retain(this.liveClocks);
     this.app.render();
     return { units: drawn, fx: fxDrawn, bolts: boltsDrawn };
   }
@@ -533,7 +662,7 @@ export class PixiUnitLayer {
     let n = 0;
     for (let i = this.emitters.length - 1; i >= 0; i--) {
       const em = this.emitters[i];
-      em.step(dt);
+      em.step(this.focus && (this.emitterOwners.get(em) ?? 0) <= this.focus.afterId ? 0 : dt);
       if (em.done) {
         this.emitters.splice(i, 1);
         continue;
@@ -548,6 +677,8 @@ export class PixiUnitLayer {
           this.partSprites.push(sp);
         }
         n++;
+        const parent = this.focus && (this.emitterOwners.get(em) ?? 0) > this.focus.afterId ? this.ultimateParticles : this.partLayer;
+        if (sp.parent !== parent) parent.addChild(sp);
         sp.texture = tex;
         sp.tint = p.color;
         sp.blendMode = em.def.blend === 'normal' ? 'normal' : 'add';
