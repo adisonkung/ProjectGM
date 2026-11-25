@@ -1,0 +1,519 @@
+{
+  "pages": [
+    {
+      "name": "detail-fighter",
+      "images": [
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 33,
+          "height": 33,
+          "natural": 256,
+          "transform": "matrix(1.1, 0, 0, 1.1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "name": "detail-tank",
+      "images": [
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 33,
+          "height": 33,
+          "natural": 256,
+          "transform": "matrix(1.1, 0, 0, 1.1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "name": "detail-assassin",
+      "images": [
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 33,
+          "height": 33,
+          "natural": 256,
+          "transform": "matrix(1.1, 0, 0, 1.1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "name": "detail-archer",
+      "images": [
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 33,
+          "height": 33,
+          "natural": 256,
+          "transform": "matrix(1.1, 0, 0, 1.1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "name": "detail-mage",
+      "images": [
+        {
+          "src": "/ui/generated/class/mage.webp",
+          "width": 33,
+          "height": 33,
+          "natural": 256,
+          "transform": "matrix(1.1, 0, 0, 1.1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "name": "detail-healer",
+      "images": [
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 33,
+          "height": 33,
+          "natural": 256,
+          "transform": "matrix(1.1, 0, 0, 1.1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "name": "formation",
+      "images": [
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/mage.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        }
+      ]
+    },
+    {
+      "name": "formation-mage",
+      "images": [
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 9,
+          "height": 9,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/mage.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 11.25,
+          "height": 11.25,
+          "natural": 256,
+          "transform": "none"
+        }
+      ]
+    },
+    {
+      "name": "island-party",
+      "images": [
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        }
+      ]
+    },
+    {
+      "name": "island-hero-dialog",
+      "images": [
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 18.75,
+          "height": 18.75,
+          "natural": 256,
+          "transform": "none"
+        }
+      ]
+    },
+    {
+      "name": "summon-pool",
+      "images": [
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 22.654998779296875,
+          "height": 22.654998779296875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 22.65496826171875,
+          "height": 22.654998779296875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 22.65496826171875,
+          "height": 22.654998779296875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 22.655029296875,
+          "height": 22.654998779296875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 22.655029296875,
+          "height": 22.654998779296875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 22.6549072265625,
+          "height": 22.654998779296875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 22.654998779296875,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/mage.webp",
+          "width": 22.65496826171875,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 22.65496826171875,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 22.655029296875,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 22.655029296875,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 22.6549072265625,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/mage.webp",
+          "width": 22.654998779296875,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 22.65496826171875,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 22.65496826171875,
+          "height": 22.65496826171875,
+          "natural": 256,
+          "transform": "none"
+        }
+      ]
+    },
+    {
+      "name": "battle-preparation",
+      "images": [
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        }
+      ]
+    },
+    {
+      "name": "lab-preparation",
+      "images": [
+        {
+          "src": "/ui/generated/class/fighter.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/tank.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/assassin.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/archer.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        },
+        {
+          "src": "/ui/generated/class/healer.webp",
+          "width": 15,
+          "height": 15,
+          "natural": 256,
+          "transform": "none"
+        }
+      ]
+    }
+  ],
+  "saveUnchanged": true,
+  "errors": []
+}

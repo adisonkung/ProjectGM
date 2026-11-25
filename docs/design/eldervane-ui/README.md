@@ -6,6 +6,10 @@
 
 **กฎบังคับล่าสุด:** อ่าน [UI_REFERENCE_RULES.md](../../UI_REFERENCE_RULES.md) — ต้องทำให้ตรงแบบและส่งภาพอ้างอิงคู่กับ screenshot จริงทุกครั้ง ตามคำสั่งผู้ใช้ 25 ต.ค. 2026
 
+## Approved class icon B installation — 2026-11-26
+
+The user selected **B lower row with straight Ranger arrow** and requested it throughout the game. [Exact approved board, native screenshots and consumer report](../../reviews/class-icons-b/index.html). The six existing class assets now contain that selected art; collection/detail/formation/island/summon/battle preparation share them. The original chosen source/crop/hash manifest and mechanical exporter are retained under assets/ui/class-icons-b and tools/ui/export_class_icons_b.cjs. Prior A/B/C options below are historical. Desktop only; no deployment.
+
 ## Latest generated art and icon exploration — 2026-11-26
 
 [Latest A/B/C abstract icon options](class-icons-abstract-options-20261126.png): after rejecting metallic and literal-class proposals, the user requested2–3options inspired ONLY by reference1 (colored tile glyphs) and reference2 (portrait-row elemental/path glyphs), allowing abstract symbols. A=fluid/calligraphic, B=angular/crystalline, C=orbital/arcane. Every row shows six colored marks and small white variants. This is generated concept art, not a game screenshot or an approved runtime replacement. The live class glyphs remain unchanged pending selection.

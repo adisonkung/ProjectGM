@@ -1,0 +1,82 @@
+{
+  "approved": "User selected row B with straight Ranger arrow, 2026-11-26.",
+  "source": {
+    "file": "assets/ui/class-icons-b/approved-board.png",
+    "sha256": "2d553a105cc36a8d109c2249e18136aff8de3c7245683915edd32c20f5d2f67e"
+  },
+  "export": "Mechanical crop/alpha extraction; no redraw. Glyph fits216px in a256px transparent canvas.",
+  "icons": [
+    {
+      "id": "fighter",
+      "color": "#ff2345",
+      "crop": [
+        120,
+        470,
+        260,
+        234
+      ],
+      "output": "public/ui/generated/class/fighter.webp",
+      "sha256": "3c0b44e52880dab5c415519e2d1f76f4c46bcb7672d8885c921c463fb1e8d6cd"
+    },
+    {
+      "id": "tank",
+      "color": "#ffce24",
+      "crop": [
+        390,
+        470,
+        260,
+        234
+      ],
+      "output": "public/ui/generated/class/tank.webp",
+      "sha256": "cf36a1ee84b79acd16b038a46eda70920f32401b53c14a947157e6c0888e3f9f"
+    },
+    {
+      "id": "assassin",
+      "color": "#c954ff",
+      "crop": [
+        670,
+        470,
+        260,
+        234
+      ],
+      "output": "public/ui/generated/class/assassin.webp",
+      "sha256": "4e9e1b8efa9c60050dc4a0ececfa6831a3229dc03871ea7f11d4ba68bb27f925"
+    },
+    {
+      "id": "archer",
+      "color": "#ff9a25",
+      "crop": [
+        940,
+        470,
+        260,
+        234
+      ],
+      "output": "public/ui/generated/class/archer.webp",
+      "sha256": "8d8f8c8a2cc2c30616054ac038a6f0a871d1ad3893fe195561c1b10f17aae45c"
+    },
+    {
+      "id": "mage",
+      "color": "#48e4ff",
+      "crop": [
+        1220,
+        470,
+        260,
+        234
+      ],
+      "output": "public/ui/generated/class/mage.webp",
+      "sha256": "74271395748be3c2749e1c535a115fa594ac7b26a0d216aaa53843e89aecbde7"
+    },
+    {
+      "id": "healer",
+      "color": "#49ef69",
+      "crop": [
+        1495,
+        470,
+        260,
+        234
+      ],
+      "output": "public/ui/generated/class/healer.webp",
+      "sha256": "57bb252d603ee53d57e7d7a75b438acbdf8bbaf926ffc89a0babe89257ff7e93"
+    }
+  ]
+}
