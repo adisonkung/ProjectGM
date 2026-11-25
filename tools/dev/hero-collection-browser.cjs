@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const base = process.env.HERO_COLLECTION_URL || 'http://127.0.0.1:4300';
-const root = 'docs/reviews/hero-collection-charcoal';
+const root = process.env.HERO_COLLECTION_REVIEW || 'docs/reviews/hero-collection-charcoal';
 const ids = [...fs.readFileSync('src/app/core/data/heroes.ts', 'utf8').matchAll(/id: '([^']+)'/g)].map(m => m[1]);
 const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce24','#ff2345','#48e4ff','#ff9a25','#49ef69','#c954ff','#ffce24','#48e4ff','#ff9a25','#49ef69'];
 (async () => {
@@ -28,7 +28,7 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
       c.save.update(s => ({ ...s, heroes: ids.map((id,i) => ({ uid:i+1, templateId:id, level:i===0?10:5, potential:'B', star:stars[i], exp:0, breakthroughTier:i===0?3:0 })), nextUid:16 }));
     }, ids);
     await page.waitForFunction(() => document.querySelectorAll('.hero-card').length === 15);
-    await page.evaluate(async () => { await document.fonts.ready; await Promise.all([...document.querySelectorAll('.hero-art')].map(im => im.decode())); });
+    await page.evaluate(async () => { await document.fonts.load('600 20px "Collection Thai"'); await document.fonts.ready; await Promise.all([...document.querySelectorAll('.hero-art')].map(im => im.decode())); });
     const snapshot = () => page.evaluate(() => JSON.parse(localStorage.getItem('projectgm-save-v1')));
     const before = await snapshot();
     const report = [];
@@ -39,7 +39,7 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
         const rect = e => e.getBoundingClientRect().toJSON();
         const cards = [...document.querySelectorAll('.hero-card')];
         const rows = cards.map(e => ({
-          box:rect(e), color:e.style.getPropertyValue('--class-color'), line:rect(e.querySelector('.class-line')),
+          box:rect(e), shadow:getComputedStyle(e).boxShadow, afterContent:getComputedStyle(e,'::after').content, color:e.style.getPropertyValue('--class-color'), line:rect(e.querySelector('.class-line')),
           name:rect(e.querySelector('.hero-name')), nameFits:e.querySelector('.hero-name').scrollWidth <= e.querySelector('.hero-name').clientWidth+1,
           stars:rect(e.querySelector('.card-stars')), level:rect(e.querySelector('.hero-level')),
         }));
@@ -51,6 +51,8 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
           wallet:rect(document.querySelector('.collection-wallet')), title:rect(document.querySelector('.page-heading')),
           oldHeader:!!document.querySelector('.bar'), fonts:document.fonts.check('600 20px "Collection Thai"') };
       });
+      assert(geometry.cards.every(c=>c.box.width===geometry.cards[0].box.width && c.box.height===geometry.cards[0].box.height), 'all cards have exactly equal width/height '+width+' '+JSON.stringify(geometry.cards.map(c=>[c.box.width,c.box.height])));
+      assert(geometry.cards.every(c=>c.shadow===geometry.cards[0].shadow && c.afterContent==='none'), 'no special selection frame '+width);
       assert(!geometry.pageOverflow && !geometry.oldHeader && geometry.fonts, JSON.stringify({width,pageOverflow:geometry.pageOverflow,oldHeader:geometry.oldHeader,fonts:geometry.fonts}));
       assert.equal(geometry.zoom,'1');
       assert.equal(geometry.selectedText,'rgb(37, 37, 37)');

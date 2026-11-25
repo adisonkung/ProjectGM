@@ -44,7 +44,7 @@
       <ul class="hero-grid">
         @for (h of shown(); track h.uid) {
           <li>
-            <a class="hero-card" [class.featured]="featuredUid() === h.uid" [style.--class-color]="classColor[h.cls]" [routerLink]="['/heroes', h.uid]" [attr.aria-label]="h.name + ' ' + classLabel(h.cls) + ' ' + h.star + ' ดาว เลเวล ' + h.level" [attr.title]="h.name + ' · พลัง ' + h.power">
+            <a class="hero-card" [style.--class-color]="classColor[h.cls]" [routerLink]="['/heroes', h.uid]" [attr.aria-label]="h.name + ' ' + classLabel(h.cls) + ' ' + h.star + ' ดาว เลเวล ' + h.level" [attr.title]="h.name + ' · พลัง ' + h.power">
               @if (h.portrait) { <img class="hero-art" [src]="h.portrait" [alt]="h.name" loading="lazy" draggable="false" /> }
               @else { <app-hero-portrait class="fallback-art" [heroId]="h.id" [star]="h.star" [size]="180" /> }
               <span class="portrait-shade" aria-hidden="true"></span>

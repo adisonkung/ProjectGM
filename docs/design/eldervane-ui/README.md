@@ -79,3 +79,5 @@
 ## Character collection — charcoal tall cards (25 Nov 2026)
 
 The user selected a newer concept for `/heroes`: [approved reference](../../reviews/hero-collection-charcoal/reference.png), [native comparison](../../reviews/hero-collection-charcoal/index.html). It supersedes the older collection section of sheet02 for this route only. Neutral charcoal, simple tall portrait cards, class upper-left, name/stars lower-left and Lv lower-right; slim luminous class lines. Selected ivory sidebar label AND glyph use charcoal. Comfortable width cap/spacing, Desktop only. Hero-detail/other routes retain their own references. Native original portraits/live data replace illustrative draft content. See [review](../../HERO_COLLECTION_CHARCOAL_REVIEW.md); awaiting visual acceptance, no deploy authorization.
+
+Follow-up: the user removed the selected hero's permanent line/frame and requested identical card widths/heights. The [latest native before/after and measurements](../../reviews/hero-card-uniform/index.html) supersede the selection outline in the draft; card placement, corner check and class-color lines remain.
