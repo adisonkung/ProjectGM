@@ -215,6 +215,11 @@ export class PixiUnitLayer {
     for (const sprite of this.fxPool) sprite.destroy();
     this.fxPool.length = 0;
     this.app.destroy(true, { children: true });
+    // Preparation now owns frames for every clip, including clips not drawn in this run.
+    // Release those views, but leave their shared Assets-owned source images available to later entries.
+    for (const texture of this.frames.values()) texture.destroy();
+    this.frames.clear();
+    this.textures.clear();
     this.echoOutline?.destroy();
     this.echoSmokeDisposed = true; // Assets owns the one cached wisp texture across battle sessions.
     for (const texture of this.crispTextures.values()) texture.destroy(true);

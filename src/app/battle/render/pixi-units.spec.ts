@@ -2,6 +2,18 @@ import { PixiFx, PixiUnitLayer } from './pixi-units';
 
 /** the Pixi canvas must keep its CSS size on high-DPI screens (bug: 2× sprites shifted on Retina) */
 describe('PixiUnitLayer canvas', () => {
+  it('disposes prepared frame views once without destroying shared cached images', () => {
+    const layer = Object.create(PixiUnitLayer.prototype) as PixiUnitLayer;
+    const frame = { destroy: jasmine.createSpy('frame.destroy') }, shared = { destroy: jasmine.createSpy('shared.destroy') };
+    Object.assign(layer, {
+      destroyed: false, fxs: new Map(), fxPool: [], app: { destroy: jasmine.createSpy('app.destroy') },
+      frames: new Map([['ready-frame', frame]]), textures: new Map([['shared-sheet', shared]]),
+      crispTextures: new Map(), chunks: new Map(), partTex: new Map(), emitters: [], sprites: new Map(), bolts: new Map(),
+    });
+    layer.destroy(); layer.destroy();
+    expect(frame.destroy).toHaveBeenCalledTimes(1); expect(frame.destroy).toHaveBeenCalledWith();
+    expect(shared.destroy).not.toHaveBeenCalled();
+  });
   it('on a 2× screen the canvas renders at 2× pixels but stays the board size in CSS', async () => {
     const dpr = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
     Object.defineProperty(window, 'devicePixelRatio', { configurable: true, get: () => 2 });

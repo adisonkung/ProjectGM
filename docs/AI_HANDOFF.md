@@ -1,10 +1,10 @@
 # Current Development State
 
-## Battle Start implementation checkpoint — Codex, 2026-11-25
+## Pearl Battle Start installed — Codex, 2026-11-25
 
 Task branch `wip/codex-battle-start` starts from fetched origin/master6d30987 (the sound/bag merges are included). User selected the pearl half-screen opposing cut-ins, long outer tails, scraping sparks; requested removing both English taglines, larger actual map/floor labels and installation in the game. Runtime BattleEntryComponent and generated/runner assets are installed. Required-image failures block and retry; mounted Pixi frame/chunk caches, texture upload, representative offscreen draw paths and a one-off GPU completion barrier prepare before the intro; combat starts only after both actual panel animations and backdrop fade finish. Restart uses the same gate; request IDs/tokens suppress stale work. DOM fallback remains supported. No authored combat/clip/save/stat data changed.
 
-Checkpoint validation: app/spec typechecks; full Karma1053/1053 before the final progress-bar presentation adjustment; source/export check; native Desktop Pixi entry at1440×860 loaded93/93, warmed65textures/1561frames, engine time stayed0 until entry completion. Optimized production build succeeds with the existing external `fonts:false` override; normal build is blocked by Google Fonts403. Remaining work: retry/cancellation browser checks, final native reference comparison, final full checks, completed review/docs and final branch push. No master merge/deploy; confirmed canonical-local sync base unchanged.
+Completed validation: app/spec typechecks, full Karma1054/1054, source/export check; native Desktop Pixi at1440×860 loaded93/93, warmed65textures/1561frames, engine time stayed0 until entry completion. Browser HTTP503 failures block below100%; retry restores the failed Pixi strip and a fresh DOM aura image. Restart cancellation and reduced-motion DOM pass. Native visual proof pauses the actual animation at600ms; the separate unmodified native flow report covers completion/engine gating. Reference/comparison/reports: docs/reviews/battle-start/index.html; full details: docs/BATTLE_START_REVIEW.md. Optimized production build succeeds with the existing external `fonts:false` override; normal build is blocked by Google Fonts403. New entry CSS is9.52KB (soft8KB warning, below24KB hard limit); other style warnings are existing. Implementation is complete on the task branch; no master merge/deploy. Confirmed canonical-local sync base unchanged.
 
 ## Sound + bag merged into master — Claude, 2026-11-24
 

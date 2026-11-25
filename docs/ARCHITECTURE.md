@@ -217,7 +217,7 @@ art/incoming/    user source art (gitignored)    assets/heroes/Kael/  canonical 
 ### Asset loading
 
 - **Sprites:** `core/data/sprite-files.ts` (`spriteUrl`, `stripGrid`) maps through the generated `sprite-atlas.ts` to `public/sprites/opt/*.webp|png`.
-- **Pixi:** `Assets.load` plus `preloadFx` when a unit appears.
+- **Battle entry:** `BattlePreloadService` resolves the party/all-wave asset graph and decodes every required image before black-screen100%. Failures/timeouts stay incomplete and offer retry. `BoardComponent.prepareBattle` awaits the mounted renderer; `PixiUnitLayer.prepareBattle` populates frame/chunk caches, explicitly registers PrepareSystem, uploads sources and renders representative normal/additive/bloom paths offscreen. Native board paints and a loading-only GPU completion barrier precede the pearl BattleEntryComponent. Request IDs/tokens guard retries, route changes and disposal. Combat starts with a fresh loop origin only after actual panel animation and backdrop fade completion; restart uses the same gate. Unavailable Pixi decodes DOM sheets before fallback. See `BATTLE_START_REVIEW.md`.
 - **Island:** `PreloadService` decodes island art at app start.
 - **Home detail windows:** `IslandDetailArtComponent` crops existing City layers or resolves the current classic `buildingDraw` as a still SVG; actual state/actions come from `IslandComponent`. `_island-details-reference.scss` isolates reference16 windows, CDK focus traps and internally scrolling mobile content. Hero Skills shortcut uses the existing HeroDetail tab through `tab=skills`; no save schema or island rules changed.
 

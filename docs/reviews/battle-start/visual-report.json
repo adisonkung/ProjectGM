@@ -1,0 +1,18 @@
+{
+  "state": {
+    "id": 1,
+    "phase": "intro",
+    "done": 93,
+    "total": 93
+  },
+  "engine": 0,
+  "running": false,
+  "renderer": "pixi",
+  "textures": 65,
+  "frames": 1561,
+  "mapFont": "30.24px",
+  "stageFont": "23.04px",
+  "text": "ELDERVANEชั้นที่ 1BATTLESTARTForest Entranceชั้นที่ 1",
+  "visualCapture": "Native animation paused at 600ms; separate native-report.json covers unmodified flow.",
+  "loadingFillRatio": 1
+}
