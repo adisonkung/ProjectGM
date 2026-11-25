@@ -23,6 +23,22 @@ describe('UnitSpriteComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('defers clip requests while the world is held and does not restart an unchanged request on resume', () => {
+    fixture.componentRef.setInput('sprite', 'hero-garrick.png');
+    fixture.detectChanges();
+    const sheet = fixture.nativeElement.querySelector('.sheet') as HTMLElement;
+    const idle = sheet.getAnimations()[0];
+    fixture.componentRef.setInput('frozen', true); fixture.detectChanges();
+    fixture.componentRef.setInput('frozen', false); fixture.detectChanges();
+    expect(sheet.getAnimations()[0]).toBe(idle);
+    fixture.componentRef.setInput('frozen', true); fixture.detectChanges();
+    fixture.componentRef.setInput('anim', 'ult');
+    fixture.componentRef.setInput('animKey', 8); fixture.detectChanges();
+    expect(sheet.getAnimations()[0]).toBe(idle);
+    fixture.componentRef.setInput('frozen', false); fixture.detectChanges();
+    expect(sheet.getAnimations()[0]).not.toBe(idle);
+  });
+
   it('bobs the whole unit when it has no walk row (token without a sheet)', () => {
     const host: HTMLElement = fixture.nativeElement;
     const spy = spyOn(host, 'animate').and.callThrough();

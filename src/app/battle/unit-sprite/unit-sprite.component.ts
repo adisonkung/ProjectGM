@@ -82,7 +82,7 @@ export class UnitSpriteComponent {
   /** runtime root motion of the playing clip (AnimDef.root) */
   private lift?: Animation;
   private currentName: SpriteAnim = 'idle';
-  private lastRequest?: { name: SpriteAnim; key: number; sheet: HTMLElement | undefined };
+  private lastRequest?: { name: SpriteAnim; key: number; sheet: HTMLElement | undefined; def: SheetDef | undefined };
 
   constructor() {
     effect(() => {
@@ -92,8 +92,8 @@ export class UnitSpriteComponent {
       const el = this.sheet()?.nativeElement;
       const def = this.def();
       untracked(() => {
-        if (this.lastRequest?.name === name && this.lastRequest.key === key && this.lastRequest.sheet === el) return;
-        this.lastRequest = { name, key, sheet: el };
+        if (this.lastRequest?.name === name && this.lastRequest.key === key && this.lastRequest.sheet === el && this.lastRequest.def === def) return;
+        this.lastRequest = { name, key, sheet: el, def };
         if (el && def) this.play(el, def, name);
         this.move(def, name);
       });

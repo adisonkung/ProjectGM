@@ -371,7 +371,7 @@ export class BattleComponent implements OnDestroy {
   /** hero key art sweeping across the field while the field holds still for a beat (player ultimates only) */
   readonly cutIn = signal<{ key: number; art: string; name: string; skill: string; theme?: UltimateCutinArt } | null>(null);
   readonly ultimate = signal<UltimatePlayback | null>(null);
-  readonly ultimateLocked = computed(() => !!this.ultimate() || !!this.cutIn() || this.party().some(u => u.queued));
+  readonly ultimateLocked = computed(() => !!this.ultimate() || !!this.cutIn() || this.party().some(u => u.alive && u.queued));
   private visualTasks: { left: number; id: number; run: () => void }[] = [];
   private laterVisual(ms: number, id: number, run: () => void): void { this.visualTasks.push({ left: ms, id, run }); }
   private advanceVisualTasks(ms: number): void {

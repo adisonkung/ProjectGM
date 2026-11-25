@@ -784,7 +784,8 @@ export class BattleEngine {
     if (!this.pending.length) return;
     const due = this.pending.filter(p => p.at <= this.time + 1e-9 && (ultimate == null || p.ultimate === ultimate));
     if (!due.length) return;
-    this.pending = this.pending.filter(p => !due.includes(p));
+    const done = new Set(due);
+    this.pending = this.pending.filter(p => !done.has(p));
     for (const p of due) p.fn();
   }
 
@@ -2050,7 +2051,7 @@ export class BattleEngine {
 
   /** ผู้เล่นกดใช้ท่าไม้ตาย (คืน false ถ้ายังใช้ไม่ได้) */
   requestUlt(id: number): boolean {
-    if (this.solo || (this.exclusiveUltimates && this.units.some(v => v.ultQueued))) return false;
+    if (this.solo || (this.exclusiveUltimates && this.units.some(v => isPlayerUnit(v) && v.alive && v.ultQueued))) return false;
     const u = this.units.find(x => x.id === id);
     if (!u || !u.alive || !isPlayerUnit(u) || u.mana < u.maxMana || this.result) return false;
     u.ultQueued = true;
@@ -2060,7 +2061,7 @@ export class BattleEngine {
   /** ท่าไม้ตาย: ใช้เกจเต็ม (ผู้เล่นสั่ง = ขอแค่มีเป้า · ออโต้/ศัตรู = ต้องผ่านเงื่อนไข AI ด้วย) · เกจ = 0 */
   private tryUltimate(u: BattleUnit, manual: boolean): boolean {
     if (u.echo || this.solo) return false;
-    if (this.exclusiveUltimates && isPlayerUnit(u) && !u.ultQueued && this.units.some(v => isPlayerUnit(v) && v.ultQueued)) return false;
+    if (this.exclusiveUltimates && isPlayerUnit(u) && !u.ultQueued && this.units.some(v => isPlayerUnit(v) && v.alive && v.ultQueued)) return false;
     const t = this.skills.chooseUltimate(u, this.units.find(x => x.id === u.targetId) ?? null, manual);
     if (!t) return false;
     if (this.exclusiveUltimates && isPlayerUnit(u)) {
@@ -2497,6 +2498,7 @@ export class BattleEngine {
       // death: no targeting / moving / attacking / casting; channel + ult cancelled; out of the targeting pools
       dst.hp = 0;
       dst.alive = false;
+      dst.ultQueued = false;
       if (dst.dashMotion || dst.actionFacing?.motion) this.events.push({ type: 'animEvent', src: dst.id, kind: dst.actionFacing?.kind, event: 'DASH_END', name: 'DASH_CANCELLED' });
       delete dst.skillAction;
       delete dst.dashMotion;

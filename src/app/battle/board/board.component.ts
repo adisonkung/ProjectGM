@@ -338,6 +338,8 @@ export class BoardComponent {
     inject(DestroyRef).onDestroy(() => {
       this.destroyed = true;
       cancelAnimationFrame(this.raf);
+      this.heldAnimations.clear();
+      this.effectClocks.clear();
       this.fxAnchors.clear();
       this.stopPixi();
     });
@@ -588,7 +590,7 @@ export class BoardComponent {
         this.drawn.set(id, tf);
       }
     }
-    this.fxAnchors.sync(this.fx(), this.vclock, this.cam.draw * 100, id => {
+    this.fxAnchors.sync(this.fx(), id => this.effectTime(id), this.cam.draw * 100, id => {
       const s = this.st.get(id), o = this.off.get(id);
       return s ? { x: s.draw[0] + (o?.cur[0] ?? 0), y: s.draw[1] + (o?.cur[1] ?? 0) } : undefined;
     });
@@ -630,6 +632,7 @@ export class BoardComponent {
   /** DOM fallback and decorations use the same exclusive hold as Pixi, including animations born mid-cast. */
   private syncPlaybackAnimations(): void {
     const focus = this.ultimate(), frozen = !!this.frozen()?.();
+    if (!focus && !frozen && !this.heldAnimations.size) return;
     const live = new Set(this.host.nativeElement.getAnimations({ subtree: true }));
     for (const animation of live) {
       const target = (animation.effect as KeyframeEffect | null)?.target;

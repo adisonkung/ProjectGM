@@ -6,13 +6,14 @@ interface Anchor { born: number; worldX: number; y: number; x: number; locked: b
 export class FxAnchors {
   constructor(private readonly rowOffset = 0) {}
   private readonly slots = new Map<number, Anchor>();
-  sync(list: AnchoredFx[], now: number, camera: number, position: (id: number) => { x: number; y: number } | undefined): void {
+  sync(list: AnchoredFx[], now: number | ((id: number) => number), camera: number, position: (id: number) => { x: number; y: number } | undefined): void {
     const seen = new Set<number>();
     for (const f of list) {
+      const time = typeof now === 'function' ? now(f.id) : now;
       seen.add(f.id);
       let slot = this.slots.get(f.id);
       if (!slot) {
-        slot = { born: now, worldX: f.c * 100 + camera, x: f.c * 100, y: (f.r + this.rowOffset) * 100, locked: false, completed: false, follow: f.follow, freezes: f.lockAfterMs != null, axis: f.followY != null };
+        slot = { born: time, worldX: f.c * 100 + camera, x: f.c * 100, y: (f.r + this.rowOffset) * 100, locked: false, completed: false, follow: f.follow, freezes: f.lockAfterMs != null, axis: f.followY != null };
         this.slots.set(f.id, slot);
       }
       if (!slot.locked && f.follow != null) {
@@ -20,7 +21,7 @@ export class FxAnchors {
         if (p) { slot.worldX = p.x + camera; slot.y = p.y; }
         const floor=f.followY != null ? position(f.followY) : undefined;
         if (floor) slot.y=floor.y;
-        if (f.lockAfterMs != null && (now - slot.born) * 1000 >= (f.delayMs ?? 0) + f.lockAfterMs) {
+        if (f.lockAfterMs != null && (time - slot.born) * 1000 >= (f.delayMs ?? 0) + f.lockAfterMs) {
           slot.locked = true;
           if (f.outward) {
             let [dx,dy]=f.outward;

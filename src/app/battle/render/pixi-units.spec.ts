@@ -1,4 +1,5 @@
 import { PixiFx, PixiUnitLayer } from './pixi-units';
+import { PlaybackClocks } from './exclusive-playback';
 
 /** the Pixi canvas must keep its CSS size on high-DPI screens (bug: 2× sprites shifted on Retina) */
 describe('PixiUnitLayer canvas', () => {
@@ -46,6 +47,7 @@ describe('Pixi one-shot ownership', () => {
       fxs: Map<number, unknown>; drawFx(list: PixiFx[], cell: number, now: number): Set<number>;
     };
     const view: PixiFx = { id: 1, name: 'sw-ult-ascent', x: 0, y: 0, flip: false, angle: 0, under: false };
+    Object.assign(layer, { playback: new PlaybackClocks(), liveClocks: new Set(), focus: null });
     const sprite = { visible: true, destroy: jasmine.createSpy('destroy') };
     layer.fxs = new Map([[1, { sprite, name: view.name, t0: 0, seq: 1, last: view, sparked: true }]]);
     layer.drawFx([view], 56, 0.51);

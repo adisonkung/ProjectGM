@@ -39,6 +39,8 @@ describe('exclusive party ultimate', () => {
     e.step(.05);
     expect(e.ultimateActor).toBe(hero.id);
     const start = e.time, fight = e.fightTime, cd = other.cd1, position = [other.x, other.y, foe.x, foe.y];
+    let pulses = 0;
+    e.fields.add(other.id, other.pos, { area: 'ADJACENT_8', duration: 5, interval: .1, effects: [] }, () => pulses++, () => other.alive);
     const hp = foe.hp;
     for (let i = 0; i < 10; i++) e.step(.05);
     expect(e.time).toBeGreaterThan(start);
@@ -46,6 +48,8 @@ describe('exclusive party ultimate', () => {
     expect(other.cd1).toBe(cd);
     expect([other.x, other.y, foe.x, foe.y]).toEqual(position);
     expect(oldHit).toBeFalse();
+    expect(e.fields.active[0].remaining).toBe(5);
+    expect(pulses).toBe(0);
     expect(e.requestUlt(other.id)).toBeFalse();
     expect(e.requestSkill(other.id, 'skill')).toBeFalse();
     while (e.ultimateActor != null && e.time - start < 15) e.step(.05);
@@ -99,6 +103,15 @@ describe('exclusive party ultimate', () => {
     while (e.ultimateActor != null && e.time - start < 15) e.step(.05);
     for (let i = 0; i < 30 && !e.result; i++) e.step(.05);
     expect(e.result).toBe('win');
+    e.dispose();
+  });
+
+  it('drops a dead hero request so it cannot keep the rest of the party locked', () => {
+    const { e, hero, other } = battle();
+    expect(e.requestUlt(hero.id)).toBeTrue();
+    (e as any).applyDamage(hero, hero.hp + 1, false);
+    expect(hero.ultQueued).toBeFalse();
+    expect(e.requestUlt(other.id)).toBeTrue();
     e.dispose();
   });
 });
