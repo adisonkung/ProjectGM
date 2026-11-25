@@ -2,7 +2,7 @@
 
 User approved the final charcoal concept (including charcoal text AND icon on the selected ivory class filter) and requested implementation with comfortable spacing rather than an oversized/zoomed layout.
 
-## Scope and composition
+## Original scope and composition
 
 - `/heroes` only owns a full-screen header and internal roster scroll. The route opts out of the legacy 75% CSS zoom; other collection/detail routes retain their existing chrome, zoom and scrolling.
 - Page width is capped at 1600px, with 24–32px padding, a 175–200px class sidebar, 26–34px sidebar gap and five columns of tall cards. At 1670×942 each card is about 241×345px, slightly smaller than the reference's approximately 250×360px. Short Desktop heights compact the header area so two complete card rows remain visible.
@@ -17,7 +17,7 @@ User approved the final charcoal concept (including charcoal text AND icon on th
 
 Original game portraits differ from the generated draft's repainted characters. Native local Noto Thai fonts, rendered star glyphs and vector icons approximate the draft lettering/glyphs; they are not pixel-identical generated artwork. The implementation intentionally retains those approved original hero assets and slightly smaller scale. Visual acceptance remains with the user.
 
-Reproduce: `HERO_COLLECTION_URL=http://127.0.0.1:4300 node tools/dev/hero-collection-browser.cjs` with `ng serve --port 4300`. The script checks Desktop 1280×720, 1440×860, 1670×942 and 1920×1080; portrait aspect/width cap, two complete rows, 2px class lines/mapping, names/stars/Lv containment, selected text/icon, local fonts, filters/search/empty recovery/sort, scroll/detail route, bag/menu/Escape, top-up placeholder/back, and unchanged ownership/progression/wallet/inventory/team. Desktop only; Mobile remains deferred.
+Reproduce: `HERO_COLLECTION_URL=http://127.0.0.1:4300 node tools/dev/hero-collection-browser.cjs` with `ng serve --port 4300`. The script checks Desktop 1280×720, 1440×860, 1670×942 and 1920×1080; portrait aspect/width cap, two complete rows, class lines/mapping, names/stars/Lv containment, selected text/icon, local fonts, filters/search/empty recovery/sort, scroll/detail route, bag/menu/Escape, top-up placeholder/back, and unchanged ownership/progression/wallet/inventory/team. Desktop only; Mobile remains deferred.
 
 ## Validation
 
@@ -36,3 +36,11 @@ Follow-up validation: app/spec typechecks, full1048/1048Karma and optimized prod
 User requested making every class strip slightly larger and much more luminous. Uniform3px strips replace2px; bottom offset remains1px. Three shared glow layers use4/12/24px blur with1/3/4px spread; the two broad layers mix the same class color at70%/35% opacity. The glow stays clipped inside the card and rises behind the lower portrait rather than creating a new selection frame or shifting the card. Class palette, grid bounds, text and progression are unchanged.
 
 [Latest native before/after](reviews/hero-class-glow/index.html). Browser checks assert3px on all15cards, both broad glow layers and exactly equal card dimensions at all four Desktop sizes; all original flow/save checks also pass. App/spec typechecks, full1048/1048Karma and optimized production build pass (existing external fonts:false override). No Mobile/master merge/deploy.
+
+## Follow-up: 80% body, six columns, full Desktop width — 2026-11-26
+
+The latest user instruction supersedes the original five-column width cap: sidebar and roster body use80% CSS zoom, while the header keeps its original native size and bounds. The body fills the viewport with existing32px outer padding; six equal columns use remaining space. Sidebar width/gap scale from200/34px to160/27.2px (175/26px to140/20.8px on narrower Desktop). The header alone retains its former1536px content maximum. Grid rounding uses1.25 logical pixels so physical card widths remain integral under zoom. Card art stays fluid to fill the six columns rather than leaving unused wide-screen space.
+
+Class lines are still3 logical pixels (2.4 rendered), with the same palette/glow and no permanent selected frame. Original art, progression and services remain unchanged. [Native before/after and original reference](reviews/hero-roster-six-columns/index.html). All15slots are equal within0.02px browser rounding tolerance:165×235.703px at1280,182×260px at1440,220×314.281px at1670,262×374.281px at1920. All sizes show two complete rows. Wallet/title bounds match the prior native report within0.1px. Search, filters, sorts, detail/back, bag/menu/Escape and save-preservation checks pass.
+
+Reproduce with `HERO_COLLECTION_URL=http://127.0.0.1:4300 HERO_COLLECTION_REVIEW=docs/reviews/hero-roster-six-columns node tools/dev/hero-collection-browser.cjs`. App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override). Task branch `feature/hero-roster-six-columns`; pending visual review, no master merge/deploy. Desktop only.

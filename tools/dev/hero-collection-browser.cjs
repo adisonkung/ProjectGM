@@ -49,25 +49,30 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
           selectedIcon:getComputedStyle(selected.querySelector('app-collection-icon')).color,
           searchBackground:getComputedStyle(document.querySelector('.search input')).backgroundColor,
           wallet:rect(document.querySelector('.collection-wallet')), title:rect(document.querySelector('.page-heading')),
-          oldHeader:!!document.querySelector('.bar'), fonts:document.fonts.check('600 20px "Collection Thai"') };
+          header:rect(document.querySelector('.collection-header')), body:rect(document.querySelector('.collection-body')), sidebar:rect(document.querySelector('.collection-sidebar')), bodyZoom:getComputedStyle(document.querySelector('.collection-body')).zoom, sidebarZoom:getComputedStyle(document.querySelector('.collection-sidebar')).zoom, columns:getComputedStyle(document.querySelector('.hero-grid')).gridTemplateColumns.split(' ').length, oldHeader:!!document.querySelector('header.bar'), fonts:document.fonts.check('600 20px "Collection Thai"') };
       });
-      assert(geometry.cards.every(c=>c.box.width===geometry.cards[0].box.width && c.box.height===geometry.cards[0].box.height), 'all cards have exactly equal width/height '+width+' '+JSON.stringify(geometry.cards.map(c=>[c.box.width,c.box.height])));
+      assert(geometry.cards.every(c=>Math.abs(c.box.width-geometry.cards[0].box.width)<.02 && Math.abs(c.box.height-geometry.cards[0].box.height)<.02), 'all cards have exactly equal width/height '+width+' '+JSON.stringify(geometry.cards.map(c=>[c.box.width,c.box.height])));
       assert(geometry.cards.every(c=>c.shadow===geometry.cards[0].shadow && c.afterContent==='none'), 'no special selection frame '+width);
       assert(!geometry.pageOverflow && !geometry.oldHeader && geometry.fonts, JSON.stringify({width,pageOverflow:geometry.pageOverflow,oldHeader:geometry.oldHeader,fonts:geometry.fonts}));
       assert.equal(geometry.zoom,'1');
+      assert.equal(geometry.bodyZoom,'0.8'); assert.equal(geometry.sidebarZoom,'0.8'); assert.equal(geometry.columns,6);
+      assert(geometry.sidebar.left<=33 && width-geometry.body.right<=33, 'roster fills viewport edges');
+      assert(Math.abs(geometry.cards[0].box.y-geometry.cards[5].box.y)<.02 && geometry.cards[6].box.y>geometry.cards[0].box.y, 'six cards per row');
       assert.equal(geometry.selectedText,'rgb(37, 37, 37)');
       assert.equal(geometry.selectedIcon,'rgb(37, 37, 37)');
       assert.equal(geometry.searchBackground,'rgba(0, 0, 0, 0)');
       assert(geometry.wallet.x > geometry.title.right+20);
       geometry.cards.forEach((c,i) => {
-        assert.equal(c.color,expectedColors[i]); assert.equal(c.line.height,3);
+        assert.equal(c.color,expectedColors[i]); assert(Math.abs(c.line.height-2.4)<.02);
         assert(c.lineGlow.includes('12px 3px') && c.lineGlow.includes('24px 4px'), 'layered class glow '+i);
-        assert(c.box.height/c.box.width>1.4 && c.box.width<250);
+        assert(c.box.height/c.box.width>1.4 && c.box.width<280);
         assert(c.nameFits, 'name fits '+width+' '+i);
         assert(c.stars.right<c.level.left, 'stars avoid Lv '+width+' '+i);
         assert(c.name.right<=c.level.left, 'name avoids Lv '+width+' '+i);
       });
-      assert(geometry.cards[9].box.bottom <= geometry.scroll.bottom, 'two complete rows '+width);
+      assert(geometry.cards[11].box.bottom <= geometry.scroll.bottom, 'two complete rows '+width);
+      const prior = JSON.parse(fs.readFileSync('docs/reviews/hero-class-glow/browser-report.json','utf8')).viewports.find(v=>v.width===width);
+      for(const key of ['wallet','title']) for(const axis of ['x','y','width','height']) assert(Math.abs(geometry[key][axis]-prior[key][axis])<.1,'top header unchanged '+key+' '+axis+' '+width);
       await page.screenshot({path:root+'/actual-'+width+'.png'});
       report.push({width,height,...geometry});
     }

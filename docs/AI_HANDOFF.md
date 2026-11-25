@@ -1,5 +1,11 @@
 # Current Development State
 
+## Six-column roster at 80% — Codex, 2026-11-26
+
+User requested an 80% character-page body with six cards per row, filling the Desktop width while keeping the top menu unchanged. `feature/hero-roster-six-columns` starts from origin/master e753ad0. Sidebar/body use zoom .8; six fluid equal-width columns fill the available area with existing edge padding. The old body width cap is removed; the header retains its original size and bounds with a1536px content cap. Whole-pixel physical card widths remain uniform; class lines/glow scale with the body (3 logical /2.4 physical pixels). Original portraits, data and interaction behavior remain intact.
+
+Native QA passes at1280×720,1440×860,1670×942 and1920×1080, including unchanged wallet/title bounds, six columns, equal slots, two complete rows, original flows and save preservation. App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked build settings unchanged). Actual before/after: `docs/reviews/hero-roster-six-columns/index.html`. Desktop only; task branch for visual review, no master merge/deploy. Confirmed canonical-local sync metadata remains unchanged.
+
 ## Authorized merge of all completed work — Codex, 2026-11-25
 
 The user explicitly requested merging all remaining work into master and continuing. Full remote-branch reconciliation found two independent heads: `feature/hero-collection-charcoal`82191e9 and `fix/battle-no-screen-flash`6c66db5. The latter contains `wip/codex-battle-start`, `wip/codex-ultimate-solo` and `fix/ultimate-backdrop`, so those changes are included exactly once. Integration branch `merge/all-reviewed-20261125` starts from origin/master6d30987. The only conflict was independent sections in AI_HANDOFF; both sets of notes are retained. All121non-document branch-file blobs match their source branches exactly. Older unmerged/no-merge statements below are historical and superseded by this authorization/integration record.
