@@ -35,7 +35,7 @@
 .hero-name { width: 100%; font: 600 clamp(17px,1.65vw,25px)/1.55 'Collection Thai',sans-serif; color: #fffaf0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 5px #000b; }
 .card-stars { --hero-star-size: 20px; --hero-star-gap: 0; min-height: 22px; color: #ffe6a9; font: 21px/1 Georgia,serif; letter-spacing: -1px; text-shadow: 0 1px 2px #000,0 0 3px #f5ba4740; }
 .hero-level { position: absolute; bottom: 16px; right: 13px; text-align: center; color: #fff8ec; small { display: block; font: 500 12px/1.4 Arial,sans-serif; } b { display: block; font: 400 27px/1.1 'Arial Narrow',Arial,sans-serif; letter-spacing: -1px; } }
-.class-line { position: absolute; bottom: 1px; left: 0; right: 0; height: 2px; background: var(--class-color); box-shadow: 0 0 3px var(--class-color),0 -1px 6px color-mix(in srgb,var(--class-color) 55%,transparent); }
+.class-line { position: absolute; bottom: 1px; left: 0; right: 0; height: 3px; background: var(--class-color); box-shadow: 0 0 4px 1px var(--class-color),0 -2px 12px 3px color-mix(in srgb,var(--class-color) 70%,transparent),0 -5px 24px 4px color-mix(in srgb,var(--class-color) 35%,transparent); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .collection-empty { grid-column: 1/-1; display: grid; justify-items: center; padding: 60px 20px; color: #eadfc9; text-align: center; h2 { margin: 16px 0 0; font-size: 22px; } p { font-size: 15px; } button { background: #f5e9d2; color: #252525; border: 0; border-radius: 4px; padding: 10px 20px; } }
 .panel-veil { position: fixed; inset: 0; z-index: 50; background: #0009; }

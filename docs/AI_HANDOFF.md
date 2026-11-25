@@ -1,5 +1,9 @@
 # Current Development State
 
+## Larger, brighter class strips — Codex, 2026-11-25
+
+Same task continuation on `feature/hero-collection-charcoal` after826421c. User requested all colors slightly larger and substantially more glow. Class strips now3px (was2px), same bottom anchor; three shared glow layers4/12/24px with1/3/4px spread and70%/35% broad opacity. Bloom remains inside card; size/spacing/selection-frame removal and gameplay data unchanged. App/spec typechecks and native15-card/four-size dimensions,3px/glow/interaction/save checks pass. Before/after/report: `docs/reviews/hero-class-glow/index.html`; details HERO_COLLECTION_CHARCOAL_REVIEW.md. App/spec typechecks, full1048/1048Karma and optimized production build (existing external fonts:false override) pass; no Mobile/master merge/deploy. Canonical-local sync metadata remains unchanged.
+
 ## Uniform card dimensions / no selection frame — Codex, 2026-11-25
 
 User requested removing the selected hero's line/frame and equal card width/height. Continuation of the same unmerged `feature/hero-collection-charcoal` task at7027c4d. Removed only the special featured inset/pseudo-border/binding; corner check and keyboard focus stay. Five equal whole-pixel tracks use CSS round where supported, equal-fr fallback elsewhere, with explicit border-box slots. Native15-card checks at Desktop1280/1440/1670/1920 show exactly equal dimensions at each size (189×270;209×298.5625;241×344.28125;241×344.28125px), identical shadows and no selection frame. Existing flows/save preservation pass. No zoom/spacing, hero art, gameplay data or Mobile change. Reference/native before-after/report: `docs/reviews/hero-card-uniform/index.html`; details HERO_COLLECTION_CHARCOAL_REVIEW.md. App/spec typechecks, full1048/1048Karma and optimized production build (existing external fonts:false override) pass; no master merge/deploy or confirmed canonical-local sync metadata change.

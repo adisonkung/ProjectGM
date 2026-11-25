@@ -39,7 +39,7 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
         const rect = e => e.getBoundingClientRect().toJSON();
         const cards = [...document.querySelectorAll('.hero-card')];
         const rows = cards.map(e => ({
-          box:rect(e), shadow:getComputedStyle(e).boxShadow, afterContent:getComputedStyle(e,'::after').content, color:e.style.getPropertyValue('--class-color'), line:rect(e.querySelector('.class-line')),
+          box:rect(e), shadow:getComputedStyle(e).boxShadow, afterContent:getComputedStyle(e,'::after').content, color:e.style.getPropertyValue('--class-color'), line:rect(e.querySelector('.class-line')), lineGlow:getComputedStyle(e.querySelector('.class-line')).boxShadow,
           name:rect(e.querySelector('.hero-name')), nameFits:e.querySelector('.hero-name').scrollWidth <= e.querySelector('.hero-name').clientWidth+1,
           stars:rect(e.querySelector('.card-stars')), level:rect(e.querySelector('.hero-level')),
         }));
@@ -60,7 +60,8 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
       assert.equal(geometry.searchBackground,'rgba(0, 0, 0, 0)');
       assert(geometry.wallet.x > geometry.title.right+20);
       geometry.cards.forEach((c,i) => {
-        assert.equal(c.color,expectedColors[i]); assert.equal(c.line.height,2);
+        assert.equal(c.color,expectedColors[i]); assert.equal(c.line.height,3);
+        assert(c.lineGlow.includes('12px 3px') && c.lineGlow.includes('24px 4px'), 'layered class glow '+i);
         assert(c.box.height/c.box.width>1.4 && c.box.width<250);
         assert(c.nameFits, 'name fits '+width+' '+i);
         assert(c.stars.right<c.level.left, 'stars avoid Lv '+width+' '+i);
