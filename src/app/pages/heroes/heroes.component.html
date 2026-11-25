@@ -48,7 +48,7 @@
               @if (h.portrait) { <img class="hero-art" [src]="h.portrait" [alt]="h.name" loading="lazy" draggable="false" /> }
               @else { <app-hero-portrait class="fallback-art" [heroId]="h.id" [star]="h.star" [size]="180" /> }
               <span class="portrait-shade" aria-hidden="true"></span>
-              <span class="class-seal" [attr.title]="classLabel(h.cls)"><app-collection-icon [name]="h.cls" [size]="27" /></span>
+              <span class="class-seal" [attr.title]="classLabel(h.cls)"><app-collection-icon [name]="h.cls" [size]="36" /></span>
               @if (featuredUid() === h.uid) { <span class="selection-mark" aria-hidden="true"><app-collection-icon name="check" [size]="23" /></span> }
               <span class="card-identity"><span class="hero-name" [class.long-name]="shortName(h.name).length > 10">{{ shortName(h.name) }}</span><app-hero-stars class="card-stars" [count]="h.star" /></span>
               <span class="hero-level"><small>Lv</small><b>{{ h.level }}</b></span>

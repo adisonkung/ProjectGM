@@ -74,3 +74,9 @@ The six stable generated-class asset URLs replace the older art for all registry
 Native Desktop collection QA passes1280×720,1440×860,1670×942,1920×1080, including six columns/equal cards/header bounds, six B masks, existing controls/routes/dialogs and save preservation. `node tools/dev/class-icons-browser.cjs` verifies each of the six detail-class mappings, formation/filter, island/dialog, summon pool and both battle/lab preparation; all images decode at256px with valid slots, and save heroes/team/wallet/inventory/equipment remain unchanged. Dedicated source/export hashes and native consumer reports accompany the review. Desktop only; no master merge/deploy.
 
 Final validation for approved B installation: App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked build config unchanged).
+
+## Follow-up: larger colored black-glass class badges
+
+Character-card badge slots grow37→48logical pixels; approved B glyph27→36logical pixels, with6px top/left inset. Under the existing80% body zoom the visible slot is38.4px, glyph28.8px. The badge now inherits its class color rather than ivory. Translucent charcoal-black base with a faint diagonal sheen,8px backdrop blur/saturation, fine light border and inset/outer shadow provides glass depth. Card portraits, six-column dimensions, grid/header/toolbar and shared B assets remain unchanged. Sidebar selection behavior remains as before. [Native before/after and close-up](reviews/class-icon-glass/index.html). Desktop only.
+
+Final validation for glass badges: Native15-card/four-size checks pass for enlarged glass slots, class colors, icon padding, original layout/flows and save preservation. App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked build config unchanged).

@@ -1,5 +1,9 @@
 # Current Development State
 
+## Larger colored glass class badges — Codex, 2026-11-26
+
+User requested larger icon slots on the character cards, translucent black glass and colored class icons. Continued `feature/hero-roster-six-columns` aftere769fec. Collection-only badge slots grow37→48logical pixels (38.4rendered under80% body zoom), glyph27→36logical pixels, top/left inset5→6px. CurrentColor now follows the card's class palette rather than ivory. Layered translucent black/highlight,8px backdrop blur, subtle border/inset shine and shadow create the glass treatment. The approved B alpha files and shared icon consumers remain unchanged; grid/header/card dimensions and progression are retained. Native15-card/four-size checks pass for enlarged glass slots, class colors, icon padding, original layout/flows and save preservation. App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked build config unchanged). Native before/after: `docs/reviews/class-icon-glass/index.html`. Desktop only, no master merge/deploy; confirmed canonical-local sync metadata unchanged.
+
 ## Approved B class icons installed throughout UI — Codex, 2026-11-26
 
 User selected the lower B row after the straight-arrow correction and explicitly requested installing it on every screen using class icons. Continuation of `feature/hero-roster-six-columns` after042a6d1. Immutable selected board/hash/crops are retained in `assets/ui/class-icons-b`. `node tools/ui/export_class_icons_b.cjs` mechanically extracts the colored B silhouettes using chroma, applies the established class palette and exports normalized alpha256px WebP (glyph max216px). No redraw or re-generation of the selected shapes. The six existing `/ui/generated/class/*.webp` paths now contain B, so generated registry URLs/IDs and direct-image consumers stay stable.
