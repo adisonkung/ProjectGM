@@ -16,10 +16,10 @@ describe('Phase 4 pages', () => {
     f.detectChanges();
     const el: HTMLElement = f.nativeElement;
     const heroes = TestBed.inject(SaveService).state().heroes;
-    expect(el.querySelectorAll('.card').length).toBe(heroes.length);
+    expect(el.querySelectorAll('.hero-card').length).toBe(heroes.length);
     f.componentInstance.cls.set('tank');
     f.detectChanges();
-    expect(el.querySelectorAll('.card').length).toBe(heroes.filter(h => HERO_BY_ID[h.templateId].cls === 'tank').length);
+    expect(el.querySelectorAll('.hero-card').length).toBe(heroes.filter(h => HERO_BY_ID[h.templateId].cls === 'tank').length);
   });
 
   it('roster search composes with class filters and an empty result can be cleared', async () => {
@@ -31,15 +31,15 @@ describe('Phase 4 pages', () => {
     const template = HERO_BY_ID[hero.templateId];
     const enter = (text: string) => { search.value = text; search.dispatchEvent(new Event('input')); f.detectChanges(); };
     enter(`  ${template.id.toUpperCase()}  `);
-    expect(el.querySelectorAll('.card').length).toBe(1);
-    expect(el.querySelector('.card')!.textContent).toContain(template.name);
+    expect(el.querySelectorAll('.hero-card').length).toBe(1);
+    expect(el.querySelector('.hero-card')!.getAttribute('aria-label')).toContain(template.name);
     f.componentInstance.cls.set(template.cls === 'tank' ? 'mage' : 'tank'); f.detectChanges();
-    expect(el.querySelectorAll('.card').length).toBe(0);
-    (el.querySelector('.none button') as HTMLButtonElement).click(); f.detectChanges();
+    expect(el.querySelectorAll('.hero-card').length).toBe(0);
+    (el.querySelector('.collection-empty button') as HTMLButtonElement).click(); f.detectChanges();
     expect(search.value).toBe('');
-    expect(el.querySelectorAll('.card').length).toBe(TestBed.inject(SaveService).state().heroes.length);
+    expect(el.querySelectorAll('.hero-card').length).toBe(TestBed.inject(SaveService).state().heroes.length);
     enter(template.name);
-    expect(el.querySelectorAll('.card').length).toBe(1);
+    expect(el.querySelectorAll('.hero-card').length).toBe(1);
   });
 
   it('hero detail: route identity, overview gear, and accessible skill/stat navigation', async () => {

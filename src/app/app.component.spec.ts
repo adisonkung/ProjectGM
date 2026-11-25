@@ -31,7 +31,7 @@ describe('AppComponent', () => {
     for (const p of ['/tower', '/dungeons', '/forge', '/armory', '/battle', '/lab']) expect(island.match).withContext(p).toContain(p);
   });
 
-  it('uses six destinations on summon and collection pages, without exposing a floor-locked feature', async () => {
+  it('keeps shared destinations on island while summon and the roster own their chrome', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     const router = TestBed.inject(Router);
     fixture.detectChanges();
@@ -59,8 +59,10 @@ describe('AppComponent', () => {
     expect(links()).toEqual([]);
     await router.navigateByUrl('/heroes');
     fixture.detectChanges();
-    expect(links()).toEqual(LOBBY_NAV.map(n => n.path));
-    expect(fixture.componentInstance.immersive()).toBeFalse();
+    expect(links()).toEqual([]);
+    expect(fixture.componentInstance.ownChrome()).toBeTrue();
+    expect(fixture.componentInstance.rosterPage()).toBeTrue();
+    expect(fixture.componentInstance.immersive()).toBeTrue();
     expect(fixture.componentInstance.collection()).toBeTrue();
   });
 

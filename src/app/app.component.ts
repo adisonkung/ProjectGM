@@ -66,11 +66,11 @@ export class AppComponent {
   /** in a fight the mobile dock steps aside (the battle screen needs the height) */
   readonly fight = computed(() => /^\/(battle|lab)(\/|\?|$)/.test(this.url()));
   readonly onAccount = computed(() => this.url().startsWith('/account'));
-  /** Home, the Sky Isle and summon sanctum fill the locked screen; chrome floats above the scene */
-  readonly immersive = computed(() => /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
-  /** K7 home (2026-11-19) draws its own top bar + menu, so the app bar steps aside there */
-  /** pages that draw their own top bar (K7 home; summon page has back + wallet like other gacha games) */
-  readonly ownChrome = computed(() => /^\/(home|gacha)([?#]|$)/.test(this.url()));
+  /** The roster owns an internal scroll area; the other immersive scenes size themselves. */
+  readonly rosterPage = computed(() => /^\/heroes([?#]|$)/.test(this.url()));
+  readonly immersive = computed(() => this.rosterPage() || /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
+  /** These exact routes draw their own headers; hero-detail retains the shared app bar. */
+  readonly ownChrome = computed(() => this.rosterPage() || /^\/(home|gacha)([?#]|$)/.test(this.url()));
 
   /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
   readonly forgePage = computed(() => /^\/forge([?#]|$)/.test(this.url()));
@@ -91,6 +91,6 @@ export class AppComponent {
     effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive()));
     // UI scale (user 2026-11-18): menu pages + the Sky Isle render at 75 % on desktop (styles.scss `html.ui-zoom`).
     // Summon cutscene, battle and the K7 home size themselves from the window.
-    effect(() => document.documentElement.classList.toggle('ui-zoom', this.collection() || /^\/island([?#]|$)/.test(this.url())));
+    effect(() => document.documentElement.classList.toggle('ui-zoom', (this.collection() && !this.rosterPage()) || /^\/island([?#]|$)/.test(this.url())));
   }
 }

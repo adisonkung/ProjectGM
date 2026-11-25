@@ -75,3 +75,7 @@
 ## Material icon art backlog
 
 [รายการmaterialที่ยังเป็นmock/ยังไม่มีอาร์ตรายไอเทม](../../art/material-icons/README.md) รวม21IDจริง พร้อมJSONสำหรับผลิตอาร์ตทีเดียวภายหลัง ชื่อ/จำนวน/รางวัลในเกมเป็นข้อมูลจริง ภาพไอคอนยังไม่ใช่อาร์ตสุดท้าย รอบปรับขอบทองไม่ได้genmaterialใหม่
+
+## Character collection — charcoal tall cards (25 Nov 2026)
+
+The user selected a newer concept for `/heroes`: [approved reference](../../reviews/hero-collection-charcoal/reference.png), [native comparison](../../reviews/hero-collection-charcoal/index.html). It supersedes the older collection section of sheet02 for this route only. Neutral charcoal, simple tall portrait cards, class upper-left, name/stars lower-left and Lv lower-right; slim luminous class lines. Selected ivory sidebar label AND glyph use charcoal. Comfortable width cap/spacing, Desktop only. Hero-detail/other routes retain their own references. Native original portraits/live data replace illustrative draft content. See [review](../../HERO_COLLECTION_CHARCOAL_REVIEW.md); awaiting visual acceptance, no deploy authorization.

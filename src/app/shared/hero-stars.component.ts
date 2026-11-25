@@ -58,7 +58,8 @@ export class AwakenedStarComponent {
 export class HeroStarsComponent {
   readonly count = input.required<number>();
   readonly painted = input(false);
-  readonly awakened = computed(() => this.count() >= MAX_STAR);
+  readonly animated = input(true);
+  readonly awakened = computed(() => this.animated() && this.count() >= MAX_STAR);
   readonly stars = computed(() => Array.from({ length: this.count() }, (_, index) => index));
   readonly glyphs = computed(() => '★'.repeat(this.count()));
 }
