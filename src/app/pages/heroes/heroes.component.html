@@ -50,7 +50,7 @@
               <span class="portrait-shade" aria-hidden="true"></span>
               <span class="class-seal" [attr.title]="classLabel(h.cls)"><app-collection-icon [name]="h.cls" [size]="27" /></span>
               @if (featuredUid() === h.uid) { <span class="selection-mark" aria-hidden="true"><app-collection-icon name="check" [size]="23" /></span> }
-              <span class="card-identity"><span class="hero-name" [class.long-name]="shortName(h.name).length > 10">{{ shortName(h.name) }}</span><app-hero-stars class="card-stars" [count]="h.star" [animated]="false" /></span>
+              <span class="card-identity"><span class="hero-name" [class.long-name]="shortName(h.name).length > 10">{{ shortName(h.name) }}</span><app-hero-stars class="card-stars" [count]="h.star" /></span>
               <span class="hero-level"><small>Lv</small><b>{{ h.level }}</b></span>
               <span class="class-line" aria-hidden="true"></span>
               <span class="sr-only">{{ h.inTeam ? 'อยู่ในทีม ' : '' }}{{ h.training ? 'กำลังฝึก ' : '' }}{{ h.btReady ? 'พร้อมเลื่อนขั้น' : h.skillReady ? 'อัปสกิลได้' : h.canLevel ? 'ใช้ยา EXP ได้' : '' }}</span>

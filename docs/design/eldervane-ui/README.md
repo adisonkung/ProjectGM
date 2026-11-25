@@ -6,6 +6,12 @@
 
 **กฎบังคับล่าสุด:** อ่าน [UI_REFERENCE_RULES.md](../../UI_REFERENCE_RULES.md) — ต้องทำให้ตรงแบบและส่งภาพอ้างอิงคู่กับ screenshot จริงทุกครั้ง ตามคำสั่งผู้ใช้ 25 ต.ค. 2026
 
+## Latest generated art and icon exploration — 2026-11-26
+
+[Latest A/B/C abstract icon options](class-icons-abstract-options-20261126.png): after rejecting metallic and literal-class proposals, the user requested2–3options inspired ONLY by reference1 (colored tile glyphs) and reference2 (portrait-row elemental/path glyphs), allowing abstract symbols. A=fluid/calligraphic, B=angular/crystalline, C=orbital/arcane. Every row shows six colored marks and small white variants. This is generated concept art, not a game screenshot or an approved runtime replacement. The live class glyphs remain unchanged pending selection.
+
+[Native generated-background + six-star shimmer review](../../reviews/hero-generated-art/index.html). Background uses generated charcoal celestial line art;6★ shares the detail page's existing animated aura/sheens/glints. Desktop only; layout/header/data retained.
+
 ## Latest class icon / lighting refinement — 2026-11-26
 
 The user subsequently requested larger search/filter/sort, six class line icons based on the attached faceted glyph examples, and subtle HSR-like background lighting. [Native before/after + icon sheet](../../reviews/hero-class-seals/index.html). Six original SVG seals and static pale archive light patterns retain the charcoal palette and six-column/body80% layout. No imported HSR artwork; original portraits retained. Desktop only.

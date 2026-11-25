@@ -1,0 +1,12 @@
+{
+  "origin": "OpenAI image generation, 2026-11-26; original PNG retained without retouching.",
+  "direction": "Quiet charcoal celestial archive with pale orbital linework and light.",
+  "source": {
+    "file": "assets/ui/collection/generated/archive-background-source.png",
+    "sha256": "d93b5dd5abf74284ebcb31c0f8af1cacc513eea7494e973672b5ebe4db2d1a28"
+  },
+  "output": {
+    "file": "public/ui/collection/archive-background.webp",
+    "sha256": "ce980b3966709a49f4f1a51119c813f62c5fdf02444ce7de14cc58bd23858be5"
+  }
+}

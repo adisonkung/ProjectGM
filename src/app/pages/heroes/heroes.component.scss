@@ -2,7 +2,7 @@
 @font-face { font-family: 'Collection Title'; src: url('/fonts/noto-serif-thai/noto-serif-thai-600.woff') format('woff'); font-style: normal; font-weight: 600; font-display: swap; }
 :host { display: block; color: #f8f2e7; font-family: 'Collection Thai', sans-serif; }
 :host::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse at 47% -12%, #363a39 0, #242929 42%, #191d1d 82%); }
-:host::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: url('/ui/collection/archive-light.svg') center / cover no-repeat; }
+:host::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: url('/ui/collection/archive-background.webp') center / cover no-repeat; }
 .hero-collection { position: fixed; inset: 0; z-index: 1; width: 100%; max-width: 1600px; margin-inline: auto; padding: 20px 32px 32px; display: grid; grid-template-columns: 200px minmax(0,1fr); grid-template-rows: 64px minmax(0,1fr); column-gap: 34px; }
 .collection-header { grid-column: 1/-1; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
 .page-heading { display: flex; align-items: center; gap: 23px; }

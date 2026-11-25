@@ -1,0 +1,21 @@
+{
+  "roster": {
+    "name": "_ngcontent-ng-c4071090911_awakened-glint",
+    "duration": "5.4s",
+    "opacity": "0",
+    "display": "block"
+  },
+  "detail": {
+    "name": "_ngcontent-ng-c4071090911_awakened-glint",
+    "duration": "5.4s",
+    "opacity": "0",
+    "display": "block"
+  },
+  "reducedMotion": {
+    "name": "_ngcontent-ng-c4071090911_awakened-glint",
+    "duration": "1e-05s",
+    "opacity": "0",
+    "display": "none"
+  },
+  "sameSharedEffect": true
+}
