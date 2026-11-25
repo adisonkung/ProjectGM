@@ -53,4 +53,4 @@ Six original angular line seals now render from64-unit SVG paths with shared2.6-
 
 Background remains neutral charcoal but lighter, with static pale diagonal beams, thin elliptical orbit lines and sparse star glints in `public/ui/collection/archive-light.svg`. Decoration is pointer-transparent and requires no animation/canvas/timers. [Native before/after, original UI baseline and icon sheet](reviews/hero-class-seals/index.html). The icon sheet uses the same vector paths as the game; native actual captures are unretouched. Existing portrait assets, ownership/progression and save rules are unchanged. Native four-size layout and existing interaction/save checks pass. Desktop only; no master merge/deploy.
 
-Final validation for the icon/lighting follow-up: App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked build settings unchanged). 
+Final validation for the icon/lighting follow-up: App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked build settings unchanged).
