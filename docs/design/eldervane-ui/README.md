@@ -6,6 +6,10 @@
 
 **กฎบังคับล่าสุด:** อ่าน [UI_REFERENCE_RULES.md](../../UI_REFERENCE_RULES.md) — ต้องทำให้ตรงแบบและส่งภาพอ้างอิงคู่กับ screenshot จริงทุกครั้ง ตามคำสั่งผู้ใช้ 25 ต.ค. 2026
 
+## Fighter visual size refinement — 2026-11-26
+
+The user approved enlarging the collection-card Fighter mark about14% to match the perceived weight of other classes. Fighter glyph41px; all others36px; glass slot48px unchanged. The user also requested removing the top-right square/check from Bai Long's card; the collection marker is removed without changing main-hero data. [Native before/after](../../reviews/fighter-icon-size/index.html). Approved B source art and other consumers retained.
+
 ## Latest collection badge refinement — 2026-11-26
 
 The user requested larger class-icon slots on character cards, a black-glass background and colored glyphs. [Native before/after + card close-up](../../reviews/class-icon-glass/index.html). Collection badges now48logical pixels with36px approved B glyphs, class colors and translucent black/backdrop blur. Shared B assets and other screens retain their existing presentation. Desktop only.

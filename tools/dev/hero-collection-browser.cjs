@@ -44,7 +44,7 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
           stars:rect(e.querySelector('.card-stars')), level:rect(e.querySelector('.hero-level')), seal:rect(e.querySelector('.class-seal')), sealColor:getComputedStyle(e.querySelector('.class-seal')).color, classColor:getComputedStyle(e.querySelector('.class-line')).backgroundColor, sealBlur:getComputedStyle(e.querySelector('.class-seal')).backdropFilter, sealBackground:getComputedStyle(e.querySelector('.class-seal')).backgroundColor, sealIcon:rect(e.querySelector('.class-seal app-collection-icon')),
         }));
         const selected = document.querySelector('.filters [aria-pressed=true]');
-        return { cards:rows, scroll:rect(document.querySelector('.roster-scroll')), pageOverflow:document.documentElement.scrollWidth>innerWidth,
+        return { cornerMarks:document.querySelectorAll('.selection-mark').length, cards:rows, scroll:rect(document.querySelector('.roster-scroll')), pageOverflow:document.documentElement.scrollWidth>innerWidth,
           zoom:getComputedStyle(document.documentElement).zoom, selectedText:getComputedStyle(selected).color,
           selectedIcon:getComputedStyle(selected.querySelector('app-collection-icon')).color,
           searchBackground:getComputedStyle(document.querySelector('.search input')).backgroundColor,
@@ -55,6 +55,7 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
       assert(geometry.cards.every(c=>c.shadow===geometry.cards[0].shadow && c.afterContent==='none'), 'no special selection frame '+width);
       assert(!geometry.pageOverflow && !geometry.oldHeader && geometry.fonts, JSON.stringify({width,pageOverflow:geometry.pageOverflow,oldHeader:geometry.oldHeader,fonts:geometry.fonts}));
       assert.equal(geometry.zoom,'1');
+      assert.equal(geometry.cornerMarks,0,'no top-right check or square badge');
       assert(geometry.toolbarControls.every(c=>c.height>=32),'toolbar control targets enlarged');
       assert(geometry.classGlyphs.length===6 && new Set(geometry.classGlyphs.map(g=>g.mask)).size===6 && geometry.classGlyphs.every(g=>g.mask.includes('/ui/generated/class/')),'six approved B class assets');
       assert(geometry.background.includes('archive-background.webp'),'archive light background loaded');
@@ -71,6 +72,7 @@ const expectedColors = ['#ff2345','#ffce24','#c954ff','#ff9a25','#49ef69','#ffce
         assert(Math.abs(c.seal.width-38.4)<.02 && Math.abs(c.seal.height-38.4)<.02,'larger glass class slot');
         assert(c.sealBlur.includes('blur(8px)') && c.sealBackground.startsWith('rgba(5, 9, 12,'),'black translucent glass');
         assert(c.sealIcon.x>c.seal.x && c.sealIcon.right<c.seal.right,'icon padded within slot');
+        assert(Math.abs(c.sealIcon.width-(expectedColors[i]==='#ff2345' ? 32.8 : 28.8))<.02,'fighter optical size, other classes unchanged');
         assert.equal(c.color,expectedColors[i]); assert(Math.abs(c.line.height-2.4)<.02);
         assert(c.lineGlow.includes('12px 3px') && c.lineGlow.includes('24px 4px'), 'layered class glow '+i);
         assert(c.box.height/c.box.width>1.4 && c.box.width<280);

@@ -80,3 +80,11 @@ Final validation for approved B installation: App/spec typechecks, full1109/1109
 Character-card badge slots grow37→48logical pixels; approved B glyph27→36logical pixels, with6px top/left inset. Under the existing80% body zoom the visible slot is38.4px, glyph28.8px. The badge now inherits its class color rather than ivory. Translucent charcoal-black base with a faint diagonal sheen,8px backdrop blur/saturation, fine light border and inset/outer shadow provides glass depth. Card portraits, six-column dimensions, grid/header/toolbar and shared B assets remain unchanged. Sidebar selection behavior remains as before. [Native before/after and close-up](reviews/class-icon-glass/index.html). Desktop only.
 
 Final validation for glass badges: Native15-card/four-size checks pass for enlarged glass slots, class colors, icon padding, original layout/flows and save preservation. App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked build config unchanged).
+
+## Follow-up: Fighter optical size correction
+
+The Fighter artwork has about12% alpha coverage on its256px canvas versus roughly15–16% for other classes. User approved scaling only its collection-card glyph by about14% to balance perceived visual weight. Both Fighter cards now use41logical pixels instead of36 (+13.9%, rendered32.8px under80% body zoom); other glyphs remain36logical/28.8rendered and every glass badge remains48logical/38.4rendered. The icon still has padding inside the badge. Approved shapes/assets and other consumers remain unchanged. [Native before/after and card close-up](reviews/fighter-icon-size/index.html). Desktop only.
+
+The user also noticed Bai Long's top-right square/check and requested removal. Removed the collection's marker/template/CSS and unused featuredUid view computation; no hero card gets the corner marker now. Main island hero data and selection rules are retained. Native checks assert zero corner markers at all four sizes.
+
+Final validation for Fighter sizing and corner-check removal: Native four-size15-card checks pass for Fighter-only sizing, unchanged glass/card/header bounds, zero corner marks, existing flows and save preservation. App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked config unchanged).

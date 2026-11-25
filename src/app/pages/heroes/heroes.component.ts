@@ -63,7 +63,6 @@ export class HeroesComponent {
   readonly cls = signal<HeroClass | 'all'>('all');
   readonly query = signal('');
   readonly sort = signal<HeroSort>('roster');
-  readonly featuredUid = computed(() => this.cards().find(h => h.isMain)?.uid ?? this.cards()[0]?.uid);
   readonly teamCount = computed(() => this.cards().filter(h => h.inTeam).length);
   readonly readyCount = computed(() => this.cards().filter(h => h.btReady || h.skillReady || h.canLevel).length);
 
