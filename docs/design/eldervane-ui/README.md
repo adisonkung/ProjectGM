@@ -6,6 +6,10 @@
 
 **กฎบังคับล่าสุด:** อ่าน [UI_REFERENCE_RULES.md](../../UI_REFERENCE_RULES.md) — ต้องทำให้ตรงแบบและส่งภาพอ้างอิงคู่กับ screenshot จริงทุกครั้ง ตามคำสั่งผู้ใช้ 25 ต.ค. 2026
 
+## Latest class icon / lighting refinement — 2026-11-26
+
+The user subsequently requested larger search/filter/sort, six class line icons based on the attached faceted glyph examples, and subtle HSR-like background lighting. [Native before/after + icon sheet](../../reviews/hero-class-seals/index.html). Six original SVG seals and static pale archive light patterns retain the charcoal palette and six-column/body80% layout. No imported HSR artwork; original portraits retained. Desktop only.
+
 ## Latest character layout refinement — 2026-11-26
 
 The user now requests six cards per row and80% Desktop body/sidebar scale, filling available width while the top menu retains its original size and bounds. This supersedes the earlier five-column/width-capped composition for `/heroes`. [Actual before/after](../../reviews/hero-roster-six-columns/index.html) · [1440px native screenshot](../../reviews/hero-roster-six-columns/actual-1440.png). The selected original charcoal draft remains the visual baseline for colors/card treatment; no new generated reference or portrait replacement. Desktop only, Mobile deferred.

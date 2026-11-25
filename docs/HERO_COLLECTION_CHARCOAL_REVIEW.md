@@ -44,3 +44,13 @@ The latest user instruction supersedes the original five-column width cap: sideb
 Class lines are still3 logical pixels (2.4 rendered), with the same palette/glow and no permanent selected frame. Original art, progression and services remain unchanged. [Native before/after and original reference](reviews/hero-roster-six-columns/index.html). All15slots are equal within0.02px browser rounding tolerance:165×235.703px at1280,182×260px at1440,220×314.281px at1670,262×374.281px at1920. All sizes show two complete rows. Wallet/title bounds match the prior native report within0.1px. Search, filters, sorts, detail/back, bag/menu/Escape and save-preservation checks pass.
 
 Reproduce with `HERO_COLLECTION_URL=http://127.0.0.1:4300 HERO_COLLECTION_REVIEW=docs/reviews/hero-roster-six-columns node tools/dev/hero-collection-browser.cjs`. App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override). Task branch `feature/hero-roster-six-columns`; pending visual review, no master merge/deploy. Desktop only.
+
+## Follow-up: larger toolbar, original class line seals and archive light
+
+Search/filter/sort grow35→41 logical pixels tall (28→32.8 rendered under80% body zoom). Search maximum330→380, filter65→74, sort minimum211→244logical pixels; toolbar text14→16. The toolbar row grows accordingly, retaining two full card rows at all four Desktop sizes. No header/card width/column change.
+
+Six original angular line seals now render from64-unit SVG paths with shared2.6-unit stroke and small solid facets. The same paths render in sidebar class colors and ivory on portrait badges: fighter flame, tank bastion, assassin shadow crystal, archer winged arrow, mage arcane prism, healer lotus. These follow the attached examples' faceted line-art direction, not copied HSR assets. Selected class filter remains charcoal text/icon on ivory. No class registry/gameplay mapping changed.
+
+Background remains neutral charcoal but lighter, with static pale diagonal beams, thin elliptical orbit lines and sparse star glints in `public/ui/collection/archive-light.svg`. Decoration is pointer-transparent and requires no animation/canvas/timers. [Native before/after, original UI baseline and icon sheet](reviews/hero-class-seals/index.html). The icon sheet uses the same vector paths as the game; native actual captures are unretouched. Existing portrait assets, ownership/progression and save rules are unchanged. Native four-size layout and existing interaction/save checks pass. Desktop only; no master merge/deploy.
+
+Final validation for the icon/lighting follow-up: App/spec typechecks, full1109/1109Karma and optimized production build pass (existing external fonts:false override; tracked build settings unchanged). 

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" fill="none">
+<defs>
+ <radialGradient id="halo"><stop stop-color="#c7dcd6" stop-opacity=".13"/><stop offset="1" stop-color="#b6cec8" stop-opacity="0"/></radialGradient>
+ <linearGradient id="beam" x1="1680" y1="0" x2="870" y2="1080" gradientUnits="userSpaceOnUse"><stop stop-color="#e8eee2" stop-opacity=".09"/><stop offset="1" stop-color="#d1dfd4" stop-opacity="0"/></linearGradient>
+ <linearGradient id="orbit" x1="1920" y1="440" x2="880" y2="1080" gradientUnits="userSpaceOnUse"><stop stop-color="#dfebdf" stop-opacity=".03"/><stop offset=".55" stop-color="#d4e3d9" stop-opacity=".15"/><stop offset="1" stop-color="#d4e3d9" stop-opacity=".02"/></linearGradient>
+</defs>
+<ellipse cx="1450" cy="160" rx="960" ry="700" fill="url(#halo)"/>
+<path d="M1460 0h170L910 1080H590Z" fill="url(#beam)"/>
+<path d="M1830 0h48L1180 1080h-180Z" fill="url(#beam)"/>
+<g stroke="url(#orbit)">
+ <ellipse cx="1680" cy="1060" rx="890" ry="495" transform="rotate(-28 1680 1060)"/>
+ <ellipse cx="1680" cy="1060" rx="918" ry="516" transform="rotate(-28 1680 1060)" stroke-dasharray="460 28 3 18"/>
+ <ellipse cx="1680" cy="1060" rx="1060" ry="625" transform="rotate(-28 1680 1060)"/>
+ <path d="M0 910 1920 170M0 940 1920 200" stroke-opacity=".28"/>
+</g>
+<g fill="#e2e8d8" opacity=".28">
+ <path d="m1610 796 2-9 2 9 9 2-9 2-2 9-2-9-9-2Z"/>
+ <path d="m1238 1003 2-7 2 7 7 2-7 2-2 7-2-7-7-2Z"/>
+ <path d="m1804 488 1-6 1 6 6 1-6 1-1 6-1-6-6-1Z"/>
+ <circle cx="1520" cy="957" r="1.5"/><circle cx="1110" cy="906" r="1"/><circle cx="1865" cy="731" r="1"/><circle cx="865" cy="1009" r="1"/>
+</g>
+</svg>
