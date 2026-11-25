@@ -1,0 +1,126 @@
+{
+  "layout": {
+    "viewport": 2560,
+    "board": {
+      "x": 77.4375,
+      "y": 0,
+      "width": 2405.109375,
+      "height": 900
+    },
+    "outsideShadow": "rgba(8, 5, 5, 0.65) 0px 0px 0px 2560px",
+    "clip": "none"
+  },
+  "errors": [],
+  "backdropPixelChecks": [
+    {
+      "point": [
+        20,
+        300
+      ],
+      "before": [
+        133,
+        188,
+        30
+      ],
+      "after": [
+        51,
+        69,
+        13
+      ],
+      "expected": [
+        52,
+        69,
+        14
+      ],
+      "maxError": 1
+    },
+    {
+      "point": [
+        110,
+        300
+      ],
+      "before": [
+        97,
+        167,
+        38
+      ],
+      "after": [
+        39,
+        61,
+        16
+      ],
+      "expected": [
+        39,
+        62,
+        17
+      ],
+      "maxError": 1
+    },
+    {
+      "point": [
+        1280,
+        300
+      ],
+      "before": [
+        109,
+        176,
+        36
+      ],
+      "after": [
+        43,
+        64,
+        15
+      ],
+      "expected": [
+        43,
+        65,
+        16
+      ],
+      "maxError": 1
+    },
+    {
+      "point": [
+        2450,
+        300
+      ],
+      "before": [
+        144,
+        194,
+        28
+      ],
+      "after": [
+        55,
+        71,
+        12
+      ],
+      "expected": [
+        56,
+        71,
+        13
+      ],
+      "maxError": 1
+    },
+    {
+      "point": [
+        2540,
+        300
+      ],
+      "before": [
+        115,
+        182,
+        35
+      ],
+      "after": [
+        45,
+        66,
+        15
+      ],
+      "expected": [
+        45,
+        67,
+        16
+      ],
+      "maxError": 1
+    }
+  ]
+}

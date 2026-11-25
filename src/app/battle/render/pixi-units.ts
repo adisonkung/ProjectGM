@@ -130,6 +130,13 @@ export class PixiUnitLayer {
   private readonly bloom?: AdvancedBloomFilter;
   private readonly echoOutline?: import('pixi-filters').OutlineFilter;
   private readonly partLayer: Container;
+  /** One canvas: world < dimmer < the active Ultimate (including its ground/over/particle layers). */
+  private readonly ultimateShade: Graphics;
+  private readonly ultimateLayer: Container;
+  private readonly ultimateOver: Container;
+  private readonly ultimateCrisp: Container;
+  private readonly ultimateParticles: Container;
+  private shadeBounds = '';
   private readonly partSprites: Sprite[] = [];
   private echoSmokeTexture?: Texture;
   private echoSmokeLoading = false;
@@ -165,6 +172,24 @@ export class PixiUnitLayer {
     this.partLayer = new pixi.Container();
     this.partLayer.zIndex = Z_PARTICLES;
     stage.addChild(this.partLayer);
+    this.ultimateShade = new pixi.Graphics();
+    this.ultimateShade.zIndex = Z_BOLT + 100000;
+    this.ultimateShade.visible = false;
+    stage.addChild(this.ultimateShade);
+    this.ultimateLayer = new pixi.Container();
+    this.ultimateLayer.sortableChildren = true;
+    this.ultimateLayer.zIndex = Z_BOLT + 200000;
+    stage.addChild(this.ultimateLayer);
+    this.ultimateOver = new pixi.Container();
+    this.ultimateOver.sortableChildren = true;
+    this.ultimateOver.zIndex = Z_OVER;
+    if (this.bloom) this.ultimateOver.filters = [this.bloom];
+    this.ultimateCrisp = new pixi.Container();
+    this.ultimateCrisp.sortableChildren = true;
+    this.ultimateCrisp.zIndex = Z_OVER - .5;
+    this.ultimateParticles = new pixi.Container();
+    this.ultimateParticles.zIndex = Z_PARTICLES;
+    this.ultimateLayer.addChild(this.ultimateOver, this.ultimateCrisp, this.ultimateParticles);
     const gl = (app.renderer as unknown as { gl?: WebGLRenderingContext }).gl;
     this.maxTex = Math.min(16384, (gl?.getParameter(gl.MAX_TEXTURE_SIZE) as number | undefined) ?? 4096);
   }
@@ -414,6 +439,10 @@ export class PixiUnitLayer {
         continue;
       }
       const f = s.last;
+      const front = !!this.focus && id > this.focus.afterId;
+      const parent = f.under ? (front ? this.ultimateLayer : this.stage)
+        : f.track ? (front ? this.ultimateCrisp : this.crispFx) : (front ? this.ultimateOver : this.overFx);
+      if (sp.parent !== parent) parent.addChild(sp);
       const at = fxPlacement(d, cell, f.x, f.y, f.flip, f.angle, f.offset, (f.scale ?? 1) * (pose.scale ?? 1), f.stretch ?? 1);
       at.x += (pose.dx ?? 0) * (f.flip ? -1 : 1) / 100 * cell;
       at.y += (pose.dy ?? 0) * (f.motionY ?? 1) / 100 * cell;
@@ -500,6 +529,8 @@ export class PixiUnitLayer {
       }
       const at = projectilePlacement(d, cell, b.from, b.to, pose.k);
       const sp = s.sprite;
+      const parent = this.focus && id > this.focus.afterId ? this.ultimateLayer : this.stage;
+      if (sp.parent !== parent) parent.addChild(sp);
       const tex = this.fxFrame(d.file, base, d.frames, pose.frame, d.pixelated);
       sp.texture = tex;
       sp.position.set(at.x, at.y);
@@ -528,6 +559,15 @@ export class PixiUnitLayer {
   ): { units: Set<number>; fx: Set<number>; bolts: Set<number> } {
     this.cell = cell;
     this.focus = focus;
+    this.ultimateShade.visible = !!focus;
+    if (focus) {
+      const { width, height } = this.app.screen;
+      const bounds = `${width}|${height}|${this.stage.y}`;
+      if (this.shadeBounds !== bounds) {
+        this.ultimateShade.clear().rect(0, -this.stage.y, width, height).fill({ color: 0x080505, alpha: .65 });
+        this.shadeBounds = bounds;
+      }
+    }
     this.liveClocks.clear();
     const drawn = new Set<number>();
     const live = new Set<number>();
@@ -560,6 +600,8 @@ export class PixiUnitLayer {
       const geometry = unitGeometry(def, cell), k = geometry.k;
       const sx = u.flip ? -1 : 1;
       const sp = s.sprite;
+      const parent = focus?.actor === u.id ? this.ultimateLayer : this.stage;
+      if (sp.parent !== parent) parent.addChild(sp);
       sp.texture = this.frame(u.sheet, def, base, pose.row, pose.col);
       sp.scale.set(k * sx, k);
       sp.position.set(u.x + cell / 2 + pose.dx * k * sx, u.y + geometry.bottomY + pose.dy * k);
@@ -567,6 +609,8 @@ export class PixiUnitLayer {
       sp.zIndex = u.z;
       sp.visible = sp.alpha > 0.001;
       this.applyLook(s, u, cell, idle);
+      // Ground rings / smoke belong to the same side of the dimmer as their actor.
+      for (const child of [s.rings, ...(s.smoke ?? [])]) if (child && child.parent !== parent) parent.addChild(child);
       drawn.add(u.id);
     }
     for (const [id, s] of this.sprites) {
@@ -633,6 +677,8 @@ export class PixiUnitLayer {
           this.partSprites.push(sp);
         }
         n++;
+        const parent = this.focus && (this.emitterOwners.get(em) ?? 0) > this.focus.afterId ? this.ultimateParticles : this.partLayer;
+        if (sp.parent !== parent) parent.addChild(sp);
         sp.texture = tex;
         sp.tint = p.color;
         sp.blendMode = em.def.blend === 'normal' ? 'normal' : 'add';

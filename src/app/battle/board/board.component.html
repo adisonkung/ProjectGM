@@ -1,5 +1,7 @@
-<div class="board" [style.--ground-extra-rows]="groundExtraRows()" [class.expanded-scenery]="sceneryExtraRows() > 0" [style.--scenery-extra-rows]="sceneryExtraRows()" [style.--spd]="speed()" [style.--tick]="tickMs() + 'ms'" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 16 คอลัมน์ ฝั่งเราซ้าย โซนกลาง 4 คอลัมน์ ศัตรูขวา">
+@if (ultimate()) { <div class="ultimate-outside-shade" aria-hidden="true"></div> }
+<div class="board" [class.ultimate-scene]="!!ultimate()" [class.pixi-live]="pixiLive()" [style.--ground-extra-rows]="groundExtraRows()" [class.expanded-scenery]="sceneryExtraRows() > 0" [style.--scenery-extra-rows]="sceneryExtraRows()" [style.--spd]="speed()" [style.--tick]="tickMs() + 'ms'" [style.--cols]="cols" [style.--rows]="rows" role="img" aria-label="สนามรบแนวนอน 3 เลน 16 คอลัมน์ ฝั่งเราซ้าย โซนกลาง 4 คอลัมน์ ศัตรูขวา">
   <div class="cam">
+  @if (ultimate() && !pixiLive()) { <div class="ultimate-backdrop" aria-hidden="true"></div> }
   <app-field [groundExtraRows]="groundExtraRows()" [sceneryExtraRows]="sceneryExtraRows()" [scroll]="scroll()" [duration]="tickMs()" [bg]="background()" [live]="!!alpha()" />
 
   @if (world(); as w) {
@@ -22,7 +24,7 @@
   }
 
   @for (u of units(); track u.id) {
-    <div class="unit" [class.echo]="!!u.echo" [class.dead]="!u.alive && !u.reviving" [class.reviving]="!!u.reviving" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
+    <div class="unit" [class.ultimate-actor]="ultimate()?.actor === u.id" [class.echo]="!!u.echo" [class.dead]="!u.alive && !u.reviving" [class.reviving]="!!u.reviving" [class.enemy]="u.side === 'enemy'" [class.has-sprite]="!!u.sprite"
          [class.taunt]="u.taunt" [class.blink]="!!u.blink && u.blinkFade !== false" [class.elite]="!!u.elite" [class.buffed]="!!u.buffed && u.alive" [class.untargetable]="!!u.untargetable && u.alive" [class.broken]="!!u.broken && u.alive" [class.enraged]="!!u.enraged && u.alive" [class.aura5]="u.alive && u.side !== 'enemy' && u.star === 5" [class.aura6]="u.alive && u.side !== 'enemy' && (u.star ?? 0) >= 6"
          [style.--step]="(u.moveSec ?? 0.6) + 's'" [style.--stack]="spread().get(u.id)?.[3] ?? 0" [attr.data-uid]="u.id" [style.transform]="spawnPos(u)" [style.z-index]="unitZ(u)"
          [class.pickable]="u.side === 'enemy' && u.alive" [attr.title]="u.side === 'enemy' ? u.name + ' — แตะเพื่อเลือก, แตะซ้ำเพื่อโฟกัส' : u.name" [attr.data-name]="u.name" (click)="u.side === 'enemy' && u.alive && pick.emit(u.id)">
@@ -62,17 +64,17 @@
   }
 
   @for (f of fx(); track f.id) {
-    <div class="fx-wrap" [style.transform]="pos(f.r, f.c)" [style.z-index]="f.under ? 5 : null" [attr.data-follow]="f.follow ?? null" [attr.data-fx]="f.id" [attr.data-fx-role]="f.role ?? null">
+    <div class="fx-wrap" [class.ultimate-visual]="foregroundVisual(f.id)" [style.transform]="pos(f.r, f.c)" [style.z-index]="visualZ(f.id, f.under ? 5 : 100, f.under ? 390 : 500)" [attr.data-follow]="f.follow ?? null" [attr.data-fx]="f.id" [attr.data-fx-role]="f.role ?? null">
       <app-fx-sprite [instanceId]="f.id" [role]="f.role ?? ''" [name]="f.name" [angle]="f.angle" [flip]="!!f.flip" [speed]="speed()" [offset]="f.offset" [loop]="!!f.loop" [delayMs]="f.delayMs ?? 0" [scale]="f.scale ?? 1" [stretch]="f.stretch ?? 1" [track]="f.track" [additive]="!!f.additive" />
     </div>
   }
 
   @for (p of projectiles(); track p.id) {
-    <app-projectile [attr.data-proj]="p.id" [name]="p.name" [from]="p.from" [to]="p.to" [flight]="p.flight" [speed]="speed()" />
+    <app-projectile [class.ultimate-visual]="foregroundVisual(p.id)" [style.z-index]="visualZ(p.id, 105, 510)" [attr.data-proj]="p.id" [name]="p.name" [from]="p.from" [to]="p.to" [flight]="p.flight" [speed]="speed()" />
   }
 
   @for (f of floats(); track f.id) {
-    <div class="float-wrap" [attr.data-visual]="f.id" [style.transform]="pos(f.r, f.c)">
+    <div class="float-wrap" [class.ultimate-visual]="foregroundVisual(f.id)" [style.z-index]="visualZ(f.id, 110, 520)" [attr.data-visual]="f.id" [style.transform]="pos(f.r, f.c)">
       <span [class]="'float ' + f.kind">{{ f.text }}</span>
     </div>
   }

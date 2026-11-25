@@ -87,6 +87,11 @@ html body .app app-battle .lab.fighting.battle-full {
 }
 
 // ============================================================ ultimate cut-in (diagonal full-screen reveal)
+html body .app app-battle .arena.ultimate-active {
+  .hud-top, .hud-right, .party-in, .focus-card, .banner, .alerts { filter: brightness(.35); }
+  // The old inset-frame corner cuts must not punch bright holes through a full-screen dimmer.
+  app-board .board { clip-path: none; isolation: isolate; }
+}
 html body .app app-battle .ult-cutin {
   position: fixed; inset: 0; z-index: 1600; pointer-events: none; overflow: hidden;
   animation: ci-life .95s linear both;

@@ -4,7 +4,7 @@ import { FxTrack } from '../../core/models/fx';
 import { FxAnchors } from '../render/fx-anchor';
 import { MockVisual } from '../../core/data/visuals';
 import { BackgroundDef } from '../../core/data/backgrounds';
-import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, input, NgZone, output, untracked, viewChildren } from '@angular/core';
+import { afterNextRender, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, input, NgZone, output, signal, untracked, viewChildren } from '@angular/core';
 import { HeroClass } from '../../core/models/hero';
 import { Side } from '../../core/models/unit';
 import { BOARD_COLS, BOARD_ROWS, SCENERY_ROWS } from '../engine/grid';
@@ -226,6 +226,9 @@ export class BoardComponent {
   /** battle: the game clock is frozen (paused / hit-stop) — the Pixi units hold their frame */
   readonly frozen = input<(() => boolean) | undefined>(undefined);
   readonly ultimate = input<UltimatePlayback | null>(null);
+  readonly pixiLive = signal(false);
+  foregroundVisual(id: number): boolean { const focus = this.ultimate(); return !!focus && id > focus.afterId; }
+  visualZ(id: number, back: number, front: number): number { return this.foregroundVisual(id) ? front : back; }
   private readonly effectClocks = new PlaybackClocks();
   private readonly heldAnimations = new Set<Animation>();
   private effectTime(id: number): number {
@@ -379,6 +382,7 @@ export class BoardComponent {
         return null;
       }
       this.pixi = layer;
+      this.pixiLive.set(true);
       this.resizeObs = new ResizeObserver(() => this.pixi?.resize(board.clientWidth, board.clientHeight));
       this.resizeObs.observe(board);
       return layer;
@@ -392,6 +396,7 @@ export class BoardComponent {
     this.resizeObs?.disconnect();
     this.pixi?.destroy();
     this.pixi = null;
+    this.pixiLive.set(false);
     this.pixiHost?.remove();
     this.pixiHost = undefined;
     for (const id of this.pxOn) this.host.nativeElement.querySelector(`.unit[data-uid="${id}"]`)?.classList.remove('px');
@@ -670,6 +675,7 @@ export class BoardComponent {
 
   /** ตัวที่อยู่ต่ำกว่า (ใกล้จอ) วาดทับตัวที่อยู่สูงกว่า */
   unitZ(u: UnitView): number {
-    return (u.r + SCENERY_ROWS) * 10 + (this.spread().get(u.id)?.[2] ?? 0) + (u.alive ? 3 : 0);
+    const z = (u.r + SCENERY_ROWS) * 10 + (this.spread().get(u.id)?.[2] ?? 0) + (u.alive ? 3 : 0);
+    return this.ultimate()?.actor === u.id ? 400 + z : z;
   }
 }

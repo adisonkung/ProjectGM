@@ -35,7 +35,7 @@
       </app-placement>
     }
   } @else {
-    <div class="arena" [class.paused]="paused()">
+    <div class="arena" [class.paused]="paused()" [class.ultimate-active]="!!ultimate()">
       <div class="screen" [class.boss]="!!bossBar()" [class.authored-map]="fullscreen() && background()?.battlefieldCut != null">
         @if (fullscreen() && background()?.battlefieldCut != null) {
           <div class="battle-map-art" aria-hidden="true" [style.background-image]="'url(/' + background()!.file + ')'"></div>
@@ -123,7 +123,7 @@
         <!-- ultimate cut-in: original hero art and a short diagonal reveal over the held field -->
         @for (k of [ci.key]; track k) {
           <div class="ult-cutin" [class.themed]="!!ci.theme" role="status" aria-live="polite">
-            <div class="ci-shade" aria-hidden="true"></div>
+            @if (!ultimate()) { <div class="ci-shade" aria-hidden="true"></div> }
             @if (ci.theme; as theme) {
               <app-themed-cutin [art]="theme" [name]="ci.name" [skill]="ci.skill" />
             } @else {

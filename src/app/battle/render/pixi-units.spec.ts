@@ -31,6 +31,13 @@ describe('PixiUnitLayer canvas', () => {
       expect(canvas.width).toBe(800);
       expect(canvas.style.width).toBe('400px');
       expect(canvas.getBoundingClientRect().width).toBeCloseTo(400, 0);
+      layer.draw([], 56, 0, 0, [], [], { actor: 7, afterId: 10 });
+      const scene = layer as unknown as { ultimateShade: { visible: boolean; zIndex: number }; ultimateLayer: { zIndex: number } };
+      expect(scene.ultimateShade.visible).toBeTrue();
+      expect(scene.ultimateLayer.zIndex).toBeGreaterThan(scene.ultimateShade.zIndex);
+      expect(host.querySelectorAll('canvas').length).toBe(1);
+      layer.draw([], 56, .05, .05);
+      expect(scene.ultimateShade.visible).toBeFalse();
       layer.destroy();
     } finally {
       if (dpr) Object.defineProperty(window, 'devicePixelRatio', dpr);
