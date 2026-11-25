@@ -18,7 +18,7 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
         @let art = artOf(u.heroId);
         <div class="card" [class.ready]="ready" [class.cut]="ready && alert() && !!u.interrupter" [class.queued]="!!u.queued" [class.dead]="!u.alive">
           @if (referenceChrome()) { <app-citadel-frame shape="panel" [cut]="10" /> }
-          <button type="button" class="frame" [style.--rc]="'var(--r' + (u.star ?? 1) + ')'" [disabled]="!ready" (click)="ult.emit(u.id)"
+          <button type="button" class="frame" [style.--rc]="'var(--r' + (u.star ?? 1) + ')'" [disabled]="!ready || actionsLocked()" (click)="ult.emit(u.id)"
                   [attr.aria-label]="u.name + (ready ? ' ท่าไม้ตายพร้อม กดเพื่อใช้' : ' เกจ ' + pct(u.manaPct) + '%')">
             @if (art) {
               <img class="pic" [src]="art.portrait" alt="" draggable="false" />
@@ -36,14 +36,14 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
               @let cd = k === 's1' ? (u.cd1 ?? 0) : (u.cd2 ?? 0);
               @let max = k === 's1' ? (u.cd1Max ?? 1) : (u.cd2Max ?? 1);
               @let mode = modeOf(u, k === 's1' ? 'skill' : 'skill2');
-              <button type="button" class="sk" [class.cooling]="u.alive && cd > 0" [style.--p]="sweep(cd, max)" [disabled]="!u.alive || cd > 0"
+              <button type="button" class="sk" [class.cooling]="u.alive && cd > 0" [style.--p]="sweep(cd, max)" [disabled]="!u.alive || cd > 0 || actionsLocked()"
                       (click)="skill.emit({ id: u.id, slot: k === 's1' ? 'skill' : 'skill2' })"
                       [attr.title]="(k === 's1' ? 'สกิล 1' : 'สกิล 2') + ' (' + modeName(mode) + ')' + (cd > 0 ? ' คูลดาวน์ ' + secs(cd) + ' วิ' : ' พร้อม — แตะเพื่อใช้ทันที')">
                 @if (art?.[k]) { <img [src]="art![k]" alt="" draggable="false" /> } @else { <b>{{ k === 's1' ? 'S1' : 'S2' }}</b> }
                 @if (u.alive && cd > 0) { <span class="cd">{{ secs(cd) }}</span> }
               </button>
             }
-            <button type="button" class="sk ultk" [class.on]="ready" [disabled]="!ready" (click)="ult.emit(u.id)"
+            <button type="button" class="sk ultk" [class.on]="ready" [disabled]="!ready || actionsLocked()" (click)="ult.emit(u.id)"
                     [style.--g]="u.alive ? u.manaPct : 0" [attr.title]="ready ? 'ท่าไม้ตายพร้อม' : 'เกจ ' + pct(u.manaPct) + '%'">
               @if (art?.ult) { <img [src]="art!.ult" alt="" draggable="false" /> } @else { <b>ULT</b> }
               @if (!ready) { <span class="fill"></span> }
@@ -197,6 +197,7 @@ import { UnitSpriteComponent } from '../unit-sprite/unit-sprite.component';
   `,
 })
 export class PartyBarComponent {
+  readonly actionsLocked = input(false);
   readonly units = input<UnitView[]>([]);
   /** battle-screen dock layout (horizontal cards) */
   readonly compact = input(false);

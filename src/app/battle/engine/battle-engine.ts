@@ -293,6 +293,8 @@ export interface BattleConfig {
   seed?: number;
   /** ฝั่งเราร่ายท่าไม้ตายเองเมื่อเกจเต็ม (จำลอง/โหมดออโต้) · ศัตรูร่ายเองเสมอ */
   autoUlt?: boolean;
+  /** Battle presentation: one party ultimate plays while the rest of combat waits. */
+  exclusiveUltimates?: boolean;
   /** data-driven monsters (default MONSTERS) — stage enemy ids are looked up here first */
   monsters?: Record<string, MonsterDefinition>;
   /** override the stage's battle rules (tests / special modes) */
@@ -395,7 +397,11 @@ export class BattleEngine {
   private readonly templates: Record<string, EnemyTemplate>;
   private events = new EventQueue(e => this.listeners.forEach(l => l(e)));
   /** การกระทำที่รอให้ท่าถึงเฟรม hit/move ก่อน (เรียงตามเวลาที่ใส่) */
-  private pending: { at: number; fn: () => void }[] = [];
+  private pending: { at: number; fn: () => void; ultimate?: number }[] = [];
+  private readonly exclusiveUltimates: boolean;
+  private ultimateSequence = 0;
+  private solo: { id: number; key: number; end: number } | null = null;
+  get ultimateActor(): number | null { return this.solo?.id ?? null; }
   private nextId = 1;
   private nextWaveAt: number;
   private reinforcementIndex = 0;
@@ -408,6 +414,7 @@ export class BattleEngine {
   private readonly echoSources = new Map<string, UnitSpec>();
 
   constructor(cfg: BattleConfig) {
+    this.exclusiveUltimates = !!cfg.exclusiveUltimates;
     if (cfg.stage.special?.echo) {
       const spawns = cfg.allies.map((source, i) => {
         const id = `echo_${i}`;
@@ -535,6 +542,7 @@ export class BattleEngine {
     this.released = true;
     this.listeners = [];
     this.pending = [];
+    this.solo = null;
     this.fields.clear();
     this.skills.dispose();
     this.projectiles.length = 0;
@@ -547,9 +555,37 @@ export class BattleEngine {
 
   step(dt: number): void {
     if (this.released || this.result) return;
+    if (this.solo) { this.stepUltimate(dt); return; }
     this.time += dt;
     this.flow.update(dt);
     if (this.flow.stageResult) this.flow.stageResult.battleDuration = this.time;
+  }
+
+  /** Only this committed action advances. Timers, fields, enemy bolts and stage time stand still. */
+  private stepUltimate(dt: number): void {
+    const solo = this.solo!;
+    const u = this.units.find(x => x.id === solo.id);
+    if (!u?.alive) { this.solo = null; return; }
+    this.time += dt;
+    for (const p of this.pending) if (p.ultimate !== solo.key) p.at += dt;
+    // Absolute deadlines must retain their remaining time while the shared action clock advances.
+    for (const v of this.units) {
+      v.lockUntil += dt;
+      v.lastGaugeHitAt += dt;
+      if (v.lastUntargetableAt != null) v.lastUntargetableAt += dt;
+      if (v.diveUntil != null) v.diveUntil += dt;
+      for (const c of v.casting?.commits ?? []) c.until += dt;
+      if (v.monster) v.monster.targetLockUntil += dt;
+      if (v.id === solo.id) continue;
+      v.dashUntil += dt;
+      if (v.dashMotion) v.dashMotion.start += dt;
+      if (v.plant) v.plant.until += dt;
+    }
+    u.castLock = Math.max(0, u.castLock - dt);
+    this.runPending(solo.key);
+    this.glide(dt, solo.id);
+    // Delayed ultimate hits/projectiles finish too; persistent fields/buffs resume with normal combat.
+    if (!u.alive || (this.time >= solo.end - 1e-9 && !this.pending.some(p => p.ultimate === solo.key))) this.solo = null;
   }
 
   /** one COMBAT tick: pending hits, projectiles, every unit's timers + AI, reinforcements, glide */
@@ -563,13 +599,14 @@ export class BattleEngine {
     for (const u of this.units) {
       if (!u.alive) continue;
       this.updateUnit(u, dt);
+      if (this.solo) break;
     }
     this.sampleMetrics(dt);
     if (this.stage.mode === 'survive' && this.fightTime >= this.nextWaveAt) {
       this.nextWaveAt += this.stage.waveEvery!;
       this.spawnReinforcements();
     }
-    this.glide(dt);
+    this.glide(dt, this.solo?.id);
   }
 
   /** per-tick metrics: Focus uptime, distance from the formation anchors */
@@ -653,10 +690,11 @@ export class BattleEngine {
   }
 
   /** Physical positions follow cell/stance destinations continuously; melee contact uses these same positions. */
-  private glide(dt: number): void {
+  private glide(dt: number, only?: number): void {
     const origin = this.flow.formation.originPosition;
     const ys = new Map(this.units.map(u => [u.id, this.glideTargetY(u)]));
     for (const u of this.units) {
+      if (only != null && u.id !== only) continue;
       // dead units stop where they fell (movement cancelled)
       if (!u.visible || (u.life !== 'ALIVE' && u.life !== 'REVIVING')) continue;
       if (u.dashMotion) {
@@ -701,6 +739,7 @@ export class BattleEngine {
         return u;
       },
       combatStep: dt => self.combatStep(dt),
+      actionInProgress: () => self.solo != null,
       tickTimers: (u, dt, cooldowns, statuses) => self.tickTimers(u, dt, cooldowns, statuses, true),
       runPending: () => self.runPending(),
       quiesce: reason => self.quiesce(reason),
@@ -741,11 +780,11 @@ export class BattleEngine {
   }
 
   /** ทำสิ่งที่ถึงเวลาแล้ว (ดาเมจตรงเฟรม hit, วาร์ปตรงเฟรม move) */
-  private runPending(): void {
+  private runPending(ultimate?: number): void {
     if (!this.pending.length) return;
-    const due = this.pending.filter(p => p.at <= this.time + 1e-9);
+    const due = this.pending.filter(p => p.at <= this.time + 1e-9 && (ultimate == null || p.ultimate === ultimate));
     if (!due.length) return;
-    this.pending = this.pending.filter(p => p.at > this.time + 1e-9);
+    this.pending = this.pending.filter(p => !due.includes(p));
     for (const p of due) p.fn();
   }
 
@@ -755,7 +794,7 @@ export class BattleEngine {
       if (u.alive) fn();
     };
     if (delay <= 0) run();
-    else this.pending.push({ at: this.time + delay, fn: run });
+    else this.pending.push({ at: this.time + delay, fn: run, ultimate: this.solo?.id === u.id ? this.solo.key : undefined });
   }
 
   /** (unused helper kept for reference) เป้าเดิมถ้ายังอยู่ ไม่งั้นศัตรูที่ใกล้ที่สุดในระยะ */
@@ -1946,6 +1985,7 @@ export class BattleEngine {
 
   /** player orders skill 1 / 2 now (works for RESERVE / MANUAL skills too) — false = on cooldown / not possible */
   requestSkill(id: number, slot: 'skill' | 'skill2'): boolean {
+    if (this.solo) return false;
     const u = this.units.find(x => x.id === id);
     if (!u || !u.alive || !isPlayerUnit(u) || this.result) return false;
     if ((slot === 'skill' ? u.cd1 : u.cd2) > 0) return false;
@@ -1973,7 +2013,7 @@ export class BattleEngine {
 
   /** the special skill button is live: charged, fighting, something to hit */
   canUseSpecial(): boolean {
-    return !this.result && this.specialCharge >= 1 && this.phase === BattlePhase.COMBAT && this.specialTargets().length > 0;
+    return !this.solo && !this.result && this.specialCharge >= 1 && this.phase === BattlePhase.COMBAT && this.specialTargets().length > 0;
   }
 
   /**
@@ -2010,6 +2050,7 @@ export class BattleEngine {
 
   /** ผู้เล่นกดใช้ท่าไม้ตาย (คืน false ถ้ายังใช้ไม่ได้) */
   requestUlt(id: number): boolean {
+    if (this.solo || (this.exclusiveUltimates && this.units.some(v => v.ultQueued))) return false;
     const u = this.units.find(x => x.id === id);
     if (!u || !u.alive || !isPlayerUnit(u) || u.mana < u.maxMana || this.result) return false;
     u.ultQueued = true;
@@ -2018,11 +2059,16 @@ export class BattleEngine {
 
   /** ท่าไม้ตาย: ใช้เกจเต็ม (ผู้เล่นสั่ง = ขอแค่มีเป้า · ออโต้/ศัตรู = ต้องผ่านเงื่อนไข AI ด้วย) · เกจ = 0 */
   private tryUltimate(u: BattleUnit, manual: boolean): boolean {
-    if (u.echo) return false;
+    if (u.echo || this.solo) return false;
+    if (this.exclusiveUltimates && isPlayerUnit(u) && !u.ultQueued && this.units.some(v => isPlayerUnit(v) && v.ultQueued)) return false;
     const t = this.skills.chooseUltimate(u, this.units.find(x => x.id === u.targetId) ?? null, manual);
     if (!t) return false;
+    if (this.exclusiveUltimates && isPlayerUnit(u)) {
+      this.solo = { id: u.id, key: ++this.ultimateSequence, end: this.time + animTiming(u.sprite, 'ult').total };
+    }
     u.mana = 0;
     this.skills.use(u, 'ult', this.skills.kit(u).ult, t);
+    if (this.solo?.id === u.id) this.solo.end = Math.max(this.solo.end, this.time + u.castLock);
     return true;
   }
 
@@ -2328,7 +2374,7 @@ export class BattleEngine {
       shoot: (u, t, slot, sky, onArrive, index, speed) => {
         const flight = (sky ? PROJ_SKY : PROJ_BASE + PROJ_PER_CELL * distance(u.pos, t.pos)) / (speed && speed > 0 ? speed : 1);
         self.events.push({ type: 'projectile', src: u.id, dst: t.id, kind: slot, flight, ...(sky ? { sky } : {}), ...(index ? { index } : {}) });
-        self.pending.push({ at: self.time + flight, fn: onArrive });
+        self.pending.push({ at: self.time + flight, fn: onArrive, ultimate: self.solo?.id === u.id ? self.solo.key : undefined });
       },
       hit: (src, dst, mul, o) => self.hit(src, dst, mul, o),
       heal: (dst, amount, src) => self.heal(dst, amount, src),

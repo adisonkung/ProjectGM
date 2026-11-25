@@ -7,11 +7,12 @@ import { FX, SHEETS, SheetDef } from '../../core/data/sprites';
 import type { AdvancedBloomFilter, GlowFilter } from 'pixi-filters';
 import { fxLength, fxPivot, fxPlacement, fxPoseAt, projectilePlacement, projectilePoseAt } from './fx-clip';
 import { Emitter, particleRng } from './particles';
-import { ClipRequest, UnitClip } from './unit-clip';
+import { ClipPose, ClipRequest, UnitClip } from './unit-clip';
 import { frameChunk } from './tex-chunks';
 import { LOOK_COLORS, RING_BOX, UnitLook } from './unit-look';
 import { sheetFxNames } from './battle-assets';
 import { BattleLoadToken } from './battle-entry-assets';
+import { PlaybackClocks, UltimatePlayback } from './exclusive-playback';
 
 let prepareRegistered = false;
 
@@ -73,6 +74,7 @@ interface UnitGfx {
   sprite: Sprite;
   clip: UnitClip;
   sheet: string;
+  pose?: ClipPose;
   /** state glow (pixi-filters GlowFilter, colour / strength per frame) */
   glow?: GlowFilter;
   tone?: ColorMatrixFilter;
@@ -104,6 +106,14 @@ const FLASH = 0.11;
  * Pixi is imported lazily (its own chunk) only when the Pixi renderer is switched on.
  */
 export class PixiUnitLayer {
+  private readonly playback = new PlaybackClocks();
+  private readonly emitterOwners = new WeakMap<Emitter, number>();
+  private focus: UltimatePlayback | null = null;
+  private readonly liveClocks = new Set<string>();
+  private clock(key: string, now: number, frozen: boolean): number {
+    this.liveClocks.add(key);
+    return this.playback.sample(key, now, frozen);
+  }
   private destroyed = false;
   private readonly sprites = new Map<number, UnitGfx>();
   private readonly reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -388,7 +398,8 @@ export class PixiUnitLayer {
         s.reveal?.destroy(); this.retireFx(s.sprite, !!s.last.track); this.fxs.delete(id); continue;
       }
       const d = FX[s.name];
-      const pose = fxPoseAt(d, now - s.t0 - (s.last.delayMs ?? 0) / 1000, !!s.last.loop, s.last.track);
+      const time = this.clock(`f${id}`, now, !!this.focus && id <= this.focus.afterId);
+      const pose = fxPoseAt(d, time - s.t0 - (s.last.delayMs ?? 0) / 1000, !!s.last.loop, s.last.track);
       if (pose.done) {
         // Retain completed instances while the host still lists them; otherwise they restart as new one-shots.
         if (seen.has(id)) { s.sprite.visible = false; continue; }
@@ -433,7 +444,11 @@ export class PixiUnitLayer {
         s.sparked = true;
         for (const ref of d.particles ?? []) {
           const pd = particleDef(ref);
-          if (pd) this.emitters.push(new Emitter(pd, at.x / cell, at.y / cell, at.flip, this.rng, fxLength(d)));
+          if (pd) {
+            const emitter = new Emitter(pd, at.x / cell, at.y / cell, at.flip, this.rng, fxLength(d));
+            this.emitterOwners.set(emitter, id);
+            this.emitters.push(emitter);
+          }
         }
       }
       if (seen.has(id)) drawn.add(id);
@@ -471,7 +486,8 @@ export class PixiUnitLayer {
     for (const [id, s] of this.bolts) {
       const b = s.last;
       const d = FX[b.name];
-      const pose = projectilePoseAt(d, b.flight / 1000, now - s.t0);
+      const time = this.clock(`b${id}`, now, !!this.focus && id <= this.focus.afterId);
+      const pose = projectilePoseAt(d, b.flight / 1000, time - s.t0);
       if (pose.done) {
         s.sprite.destroy();
         this.bolts.delete(id);
@@ -508,8 +524,11 @@ export class PixiUnitLayer {
     idleNow: number,
     fx: PixiFx[] = [],
     bolts: PixiBolt[] = [],
+    focus: UltimatePlayback | null = null,
   ): { units: Set<number>; fx: Set<number>; bolts: Set<number> } {
     this.cell = cell;
+    this.focus = focus;
+    this.liveClocks.clear();
     const drawn = new Set<number>();
     const live = new Set<number>();
     for (const u of units) {
@@ -527,8 +546,11 @@ export class PixiUnitLayer {
         this.sprites.set(u.id, s);
         this.preloadFx(def);
       }
-      s.clip.request(u.req, u.key, now, u.moving);
-      const pose = s.clip.pose(now, idleNow, u.moving, u.pace);
+      const held = !!focus && u.id !== focus.actor;
+      const time = this.clock(`u${u.id}`, now, held), idle = this.clock(`i${u.id}`, idleNow, held);
+      if (!held) s.clip.request(u.req, u.key, time, u.moving);
+      const pose = held && s.pose ? s.pose : s.clip.pose(time, idle, u.moving, u.pace);
+      s.pose = pose;
       if (!base) {
         s.smoke?.forEach(p => p.visible = false);
         s.sprite.visible = false;
@@ -544,7 +566,7 @@ export class PixiUnitLayer {
       sp.alpha = u.alpha * pose.opacity;
       sp.zIndex = u.z;
       sp.visible = sp.alpha > 0.001;
-      this.applyLook(s, u, cell, idleNow);
+      this.applyLook(s, u, cell, idle);
       drawn.add(u.id);
     }
     for (const [id, s] of this.sprites) {
@@ -556,6 +578,7 @@ export class PixiUnitLayer {
     const fxDrawn = this.drawFx(fx, cell, now);
     const boltsDrawn = this.drawBolts(bolts, cell, now);
     this.drawParticles(cell, now);
+    this.playback.retain(this.liveClocks);
     this.app.render();
     return { units: drawn, fx: fxDrawn, bolts: boltsDrawn };
   }
@@ -595,7 +618,7 @@ export class PixiUnitLayer {
     let n = 0;
     for (let i = this.emitters.length - 1; i >= 0; i--) {
       const em = this.emitters[i];
-      em.step(dt);
+      em.step(this.focus && (this.emitterOwners.get(em) ?? 0) <= this.focus.afterId ? 0 : dt);
       if (em.done) {
         this.emitters.splice(i, 1);
         continue;

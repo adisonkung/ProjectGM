@@ -42,7 +42,7 @@
         }
         @if (mode() !== 'lab') { <app-tower-ornament class="battle-field-frame" [grooved]="true" [ornate]="true" /> } @else { <app-tower-ornament class="lab-field-frame" [grooved]="true" [ornate]="true" /> }
         <app-board [groundExtraRows]="mode() === 'lab' ? 0 : fieldLayout().groundRows" [sceneryExtraRows]="sceneryExtraRows()" (finishedFx)="onFxFinished($event)" [units]="views()" [floats]="floats()" [fx]="fx()" [zones]="zones()" [projectiles]="projectiles()" [anims]="anims()" [speed]="speed()"
-                   [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [gameTime]="result() || ending() ? undefined : gameClock()" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
+                   [scroll]="scroll()" [tickMs]="tickMs" [tick]="simTick()" [alpha]="alpha" [renderer]="renderer()" [frozen]="boardFrozen" [ultimate]="ultimate()" [gameTime]="result() || ending() ? undefined : gameClock()" [background]="background()" [debug]="debug()" [world]="worldDebug()" (pick)="pickEnemy($event)" />
 
         <!-- top HUD (scenery rows only — never over the lanes' units) -->
         <div class="hud-top">
@@ -81,7 +81,7 @@
         @if (tracing()) { <app-slash-trace [def]="specialDef" [seed]="traceSeed()" (done)="specialDone($event)" /> }
 
         <!-- free strip under the lanes (inside the field): party, then AUTO and the special skill — one row -->
-        <app-party-bar class="party-in" [referenceChrome]="mode() !== 'lab'" [compact]="true" [units]="party()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
+        <app-party-bar class="party-in" [referenceChrome]="mode() !== 'lab'" [compact]="true" [units]="party()" [actionsLocked]="ultimateLocked()" [alert]="cuttable()" (ult)="useUlt($event)" (skill)="useSkill($event)" (modeChange)="cycleMode($event)">
           @if (mode() !== 'lab') { <app-tower-ornament class="battle-party-frame" [grooved]="true" [ornate]="true" /> }
           <button type="button" class="auto citadel-surface citadel-control" [attr.aria-pressed]="autoUlt()" (click)="toggleAuto()" title="ให้ทีมใช้ท่าไม้ตายเองเมื่อเกจเต็ม"><app-citadel-frame shape="hex" [cut]="14" [crimson]="autoUlt()" [lacquer]="autoUlt()" />AUTO</button>
           <!-- player special skill (not a hero skill): charges during combat, opens the Blade Trace mini-game -->

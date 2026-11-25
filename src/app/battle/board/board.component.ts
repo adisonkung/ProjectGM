@@ -18,6 +18,7 @@ import { SHEETS } from '../../core/data/sprites';
 import type { PixiBolt, PixiFx, PixiUnit, PixiUnitLayer } from '../render/pixi-units';
 import { unitLook } from '../render/unit-look';
 import { BattleLoadToken } from '../render/battle-entry-assets';
+import { PlaybackClocks, UltimatePlayback } from '../render/exclusive-playback';
 
 /** ข้อมูลยูนิตสำหรับแสดงผล (สแนปช็อตจากเอนจินในแต่ละเฟรม) */
 export interface UnitView {
@@ -224,6 +225,13 @@ export class BoardComponent {
   readonly groundExtraRows = input(0);
   /** battle: the game clock is frozen (paused / hit-stop) — the Pixi units hold their frame */
   readonly frozen = input<(() => boolean) | undefined>(undefined);
+  readonly ultimate = input<UltimatePlayback | null>(null);
+  private readonly effectClocks = new PlaybackClocks();
+  private readonly heldAnimations = new Set<Animation>();
+  private effectTime(id: number): number {
+    const focus = this.ultimate();
+    return this.effectClocks.sample(String(id), this.vclock, !!focus && id <= focus.afterId);
+  }
   /** Battle engine snapshot time. Standalone views without one retain their display clock. */
   readonly gameTime = input<number | undefined>(undefined);
   readonly gameStep = input(.05);
@@ -468,7 +476,7 @@ export class BoardComponent {
     const bolts: PixiBolt[] = this.projectiles().map(p => ({ id: p.id, name: p.name, from: p.from, to: p.to, flight: p.flight }));
     // expanded scenery (sprite lab): the canvas starts at the board top, the camera layer `--scenery-extra` lower
     this.pixi.setOriginY(this.sceneryExtraRows() * cell);
-    const out = this.pixi.draw(list, cell, this.vclock, this.idleClock, fx, bolts);
+    const out = this.pixi.draw(list, cell, this.vclock, this.idleClock, fx, bolts, this.ultimate());
     const drawn = out.units;
     this.hideDrawn(out.fx, this.fxPxOn, id => `.fx-wrap[data-fx="${id}"]`);
     this.hideDrawn(out.bolts, this.boltPxOn, id => `app-projectile[data-proj="${id}"]`);
@@ -563,6 +571,7 @@ export class BoardComponent {
       const id = Number(el.dataset['uid']);
       const s = this.st.get(id);
       if (!s) continue;
+      if (this.ultimate() && id !== this.ultimate()!.actor) continue;
       if (alphaFn) {
         const tx = s.prev[0] + (s.cur[0] - s.prev[0]) * a;
         const ty = s.prev[1] + (s.cur[1] - s.prev[1]) * a;
@@ -589,7 +598,7 @@ export class BoardComponent {
       if (!sprite.track()) continue;
       const anchor = this.fxAnchors.at(sprite.instanceId());
       if (anchor) {
-        const elapsed = (this.vclock - anchor.born) * 1000;
+        const elapsed = (this.effectTime(sprite.instanceId()) - anchor.born) * 1000;
         sprite.drawTrack(elapsed, anchor.outward);
         if (elapsed >= sprite.delayMs() + sprite.track()!.durationMs && this.fxAnchors.complete(sprite.instanceId())) {
           (completed ??= []).push(sprite.instanceId());
@@ -597,6 +606,9 @@ export class BoardComponent {
       }
     }
     if (completed) this.zone.run(() => this.finishedFx.emit(completed!));
+    for (const f of this.fx()) this.effectTime(f.id);
+    this.effectClocks.retain(new Set(this.fx().map(f => String(f.id))));
+    this.syncPlaybackAnimations();
     // attached FX (auras / guards / fields) ride on their unit: same drawn transform as the unit this frame
     const riders = this.host.nativeElement.querySelectorAll<HTMLElement>('.fx-wrap[data-fx]');
     for (const el of Array.from(riders)) {
@@ -614,6 +626,25 @@ export class BoardComponent {
     }
     this.raf = requestAnimationFrame(this.frame);
   };
+
+  /** DOM fallback and decorations use the same exclusive hold as Pixi, including animations born mid-cast. */
+  private syncPlaybackAnimations(): void {
+    const focus = this.ultimate(), frozen = !!this.frozen()?.();
+    const live = new Set(this.host.nativeElement.getAnimations({ subtree: true }));
+    for (const animation of live) {
+      const target = (animation.effect as KeyframeEffect | null)?.target;
+      if (!(target instanceof Element)) continue;
+      const unit = target.closest<HTMLElement>('.unit[data-uid]');
+      const visual = target.closest<HTMLElement>('[data-fx], [data-proj], [data-visual]');
+      const visualId = Number(visual?.dataset['fx'] ?? visual?.dataset['proj'] ?? visual?.dataset['visual']);
+      const held = frozen || (!!focus && (unit ? Number(unit.dataset['uid']) !== focus.actor
+        : visual ? visualId <= focus.afterId : !!target.closest('.zone-wrap')));
+      if (held) {
+        if (animation.playState === 'running') { animation.pause(); this.heldAnimations.add(animation); }
+      } else if (this.heldAnimations.delete(animation) && animation.playState === 'paused') animation.play();
+    }
+    for (const a of this.heldAnimations) if (!live.has(a)) this.heldAnimations.delete(a);
+  }
 
   /** template: the position a unit first appeared at (afterwards the frame loop owns `transform`) */
   spawnPos(u: UnitView): string {

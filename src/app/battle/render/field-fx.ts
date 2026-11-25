@@ -84,6 +84,15 @@ export class FieldFxPlayback {
     }
   }
 
+  /** An exclusive action pauses field pulses; its newly spawned start burst may still finish. */
+  hold(seconds: number, afterId: number): void {
+    for (const [id, fx] of this.owned) if (id <= afterId) fx.expires += seconds;
+    for (const field of this.fields.values()) {
+      field.started += seconds;
+      if (field.loopAt != null) field.loopAt += seconds;
+    }
+  }
+
   /** Reproject fixed world cells as the camera moves, including the last wave/residual after expiry. */
   positions(camera: number): Map<number, Cell> {
     return new Map([...this.owned].map(([id, f]) => [id, { r: f.world.r, c: f.world.c - camera }]));

@@ -30,7 +30,7 @@
       @if (u.echo && u.alive) { <span class="echo-smoke" [style.--echo-phase]="(u.id * -.37) + 's'" aria-hidden="true"></span> }
       <app-unit-sprite [class.echo-actor]="!!u.echo" [cls]="u.cls" [side]="u.side" [sprite]="u.sprite" [star]="u.star" [boss]="!!u.boss || !!u.elite" [icon]="u.icon"
                        [mock]="u.mock" [flip]="!!u.flip" [moving]="u.moving === undefined ? undefined : u.moving && u.alive" [pace]="u.pace" [anim]="anims()[u.id]?.anim ?? 'idle'" [animKey]="anims()[u.id]?.key ?? 0" [speed]="speed()"
-                       [castTime]="anims()[u.id]?.castTime" [castClip]="anims()[u.id]?.castClip" [force]="!!anims()[u.id]?.force" />
+                       [castTime]="anims()[u.id]?.castTime" [castClip]="anims()[u.id]?.castClip" [force]="!!anims()[u.id]?.force" [frozen]="!!ultimate() && ultimate()!.actor !== u.id" />
       @if (u.alive && u.cast) { <app-cast-bar [cast]="u.cast" [edge]="edgeOf(u)" /> }
       @if (u.alive) {
         <div class="bars">
@@ -72,7 +72,7 @@
   }
 
   @for (f of floats(); track f.id) {
-    <div class="float-wrap" [style.transform]="pos(f.r, f.c)">
+    <div class="float-wrap" [attr.data-visual]="f.id" [style.transform]="pos(f.r, f.c)">
       <span [class]="'float ' + f.kind">{{ f.text }}</span>
     </div>
   }
