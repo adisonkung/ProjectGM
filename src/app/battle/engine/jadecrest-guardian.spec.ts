@@ -7,7 +7,7 @@ import { UnitSpec } from '../../core/models/unit';
 import { heroStats } from '../../core/rules/stats';
 import { createBattle } from '../battle-session';
 import { fxPlacement, fxPoseAt } from '../render/fx-clip';
-import { BattleEvent } from './battle-engine';
+import { BattleEvent, BattleUnit } from './battle-engine';
 import { footprintBounds, occupiesCell } from './footprint';
 import { hasStatus } from './buffs';
 
@@ -39,12 +39,15 @@ describe('Jadecrest Guardian integration',()=>{
   it('plays one peak-frame paw burst and keeps both S1 layers in front, front-impact last',()=>{
     const b=SHEETS['enemy-jadecrest-guardian.png'].monsterFx!['stomp'];
     expect(b.activate).toEqual(['jc-s1-paw','jc-s1-front']);
-    expect(FX['jc-s1-front'].frames).toBe(5);expect(FX['jc-s1-front'].mirror).toBeTrue();
+    expect(FX['jc-s1-front'].frames).toBe(5);
     expect(FX['jc-s1-paw'].frames).toBe(1);
     expect(fxPoseAt(FX['jc-s1-paw'],.05).visible).toBeTrue();
     expect(fxPoseAt(FX['jc-s1-paw'],.25).done).toBeTrue();
     expect(FX['jc-s1-front'].layer).not.toBe('under');expect(FX['jc-s1-paw'].layer).not.toBe('under');
-    expect(fxPlacement(FX['jc-s1-front'],80,0,0,true,0).flip).toBeFalse();
+    for (const left of [true, false]) {
+      expect(fxPlacement(FX['jc-s1-front'],80,0,0,left,0).flip).toBe(left);
+      expect(fxPlacement(FX['jc-s3-wave'],80,0,0,left,0).flip).toBe(left);
+    }
   });
   it('keeps all three charge rings at the same feet anchor and cancels their flow at activation',()=>{
     const sh=SHEETS['enemy-jadecrest-guardian.png'];
@@ -78,10 +81,43 @@ describe('Jadecrest Guardian integration',()=>{
     s.run(2,()=>s.events.some(e=>e.type==='skillActivated'&&e.skill==='jadecrest_pounce'));
     const activated=s.events.find(e=>e.type==='skillActivated'&&e.skill==='jadecrest_pounce');
     expect(activated).toBeDefined();expect(s.boss.dashMotion).toBeUndefined();
-    expect(s.boss.actionFacing?.left).toBeTrue();
+    const landed = footprintBounds(s.boss);
+    expect(s.boss.actionFacing?.left).toBe(s.hero.pos.c < (landed.c0 + landed.c1) / 2);
     expect(s.boss.x).toBeCloseTo(s.e.formation.originPosition+s.boss.pos.c,5);
     expect(s.hero.hp).toBeLessThan(s.hero.maxHp);
   });
+  for (const left of [true, false]) {
+    it(`flies ${left ? 'left' : 'right'}, turns on landing, then stomps toward the target`, () => {
+      const s = duel('jadecrest_pounce');
+      const at = left ? 11 : 4;
+      const target = left ? 5 : 10;
+      const api = s.e as unknown as {
+        relocate(u: BattleUnit, cell: {r: number; c: number}, how: 'blink'): void;
+      };
+      api.relocate(s.boss, {r: 2, c: at}, 'blink');
+      api.relocate(s.hero, {r: 2, c: target}, 'blink');
+      s.hero.castLock = s.hero.moveCd = 100;
+      s.boss.monster!.attackCooldownRemaining = 100;
+      s.boss.monster!.home = { ...s.boss.pos };
+      s.run(3, () => !!s.boss.dashMotion);
+      const flight = s.boss.dashMotion!;
+      expect(flight.toX < flight.fromX).toBe(left);
+      expect(s.boss.actionFacing?.left).toBe(left);
+      const landing = { ...s.boss.pos };
+      s.run(1, () => !s.boss.casting);
+      expect(s.boss.pos).toEqual(landing);
+      expect(s.boss.actionFacing?.left).toBe(!left);
+      expect(s.boss.monster!.facingDirection).toBe(left ? 1 : -1);
+      expect(s.boss.targetId).toBe(s.hero.id);
+      s.run(.4);
+      expect(s.boss.actionFacing?.left).toBe(!left);
+      s.boss.castSkills.find(cs => cs.def.id === 'jadecrest_stomp')!.cd = 0;
+      s.run(3, () => s.events.some(e => e.type === 'skillActivated' && e.skill === 'jadecrest_stomp'));
+      const stomp = s.events.find(e => e.type === 'skillActivated' && e.skill === 'jadecrest_stomp');
+      expect(stomp?.type === 'skillActivated' && stomp.targets).toContain(s.hero.id);
+      expect(s.boss.actionFacing?.left).toBe(!left);
+    });
+  }
   it('requires protecting and recovering the party instead of cancelling roar with universal Break',()=>{
     const s=duel('jadecrest_roar');s.run(25,()=>s.boss.casting?.def.id==='jadecrest_roar');
     expect(s.boss.casting).not.toBeNull();

@@ -1,6 +1,13 @@
 /** Presentation-only board-cell motion. Never supplied to occupancy, targeting or melee contact. */
 export const AEGIS_BEAM_MOTION = { recoil: .16, holdUntil: 2.55, returnUntil: 3.25, cells: 2 } as const;
 export interface GuardianPose { forward: number; walking: boolean }
+
+/** Jade's anchor is the rightmost body cell. Flipping the art must not move its feet. */
+export function guardianOffsetX(sprite: string | undefined, left: boolean, pose: GuardianPose): number {
+  if (sprite === 'enemy-jadecrest-guardian.png') return -pose.forward;
+  return pose.forward * (left ? -1 : 1);
+}
+
 export function guardianPose(sprite: string | undefined, sinceRelease?: number): GuardianPose {
   if (sprite !== 'enemy-aegis-sentinel.png' && sprite !== 'enemy-jadecrest-guardian.png') return {forward:0,walking:false};
   if (sprite !== 'enemy-aegis-sentinel.png' || sinceRelease == null || sinceRelease < 0) return {forward:1,walking:false};

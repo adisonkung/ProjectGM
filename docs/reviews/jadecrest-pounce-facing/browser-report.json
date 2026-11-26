@@ -1,0 +1,67 @@
+{
+  "viewport": [
+    1440,
+    900
+  ],
+  "stage": "Ascension I — Jadecrest Guardian",
+  "fixture": "One durable hero in an isolated browser save",
+  "checks": [
+    {
+      "renderer": "dom",
+      "travel": "left",
+      "flight": {
+        "facesLeft": true,
+        "trailFacesLeft": true
+      },
+      "landing": {
+        "facesLeft": false,
+        "actorOffset": -1,
+        "pose": "pounce",
+        "hitMarkedHero": true
+      },
+      "stomp": {
+        "facesLeft": false,
+        "fxFacesLeft": false,
+        "hitMarkedHero": true
+      }
+    },
+    {
+      "renderer": "dom",
+      "travel": "right",
+      "flight": {
+        "facesLeft": false,
+        "trailFacesLeft": false
+      },
+      "landing": {
+        "facesLeft": true,
+        "actorOffset": -1,
+        "pose": "pounce",
+        "hitMarkedHero": true
+      },
+      "stomp": {
+        "facesLeft": true,
+        "fxFacesLeft": true,
+        "hitMarkedHero": true
+      }
+    },
+    {
+      "renderer": "pixi",
+      "travel": "left",
+      "flight": {
+        "facesLeft": true,
+        "trailFacesLeft": true
+      },
+      "landing": {
+        "facesLeft": false,
+        "actorOffset": -1,
+        "pose": "pounce",
+        "hitMarkedHero": true
+      },
+      "stomp": {
+        "facesLeft": false,
+        "fxFacesLeft": false,
+        "hitMarkedHero": true
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
+import { guardianOffsetX, guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
 import { bodyFrontCell } from '../../battle/engine/footprint';
 import { monsterReview } from './monster-review';
 import { Cell } from '../../core/models/unit';
@@ -304,7 +304,7 @@ export class SpriteLabComponent implements OnDestroy {
     ].filter(u=>!this.actorMonster() || u.id<100).map(u=>{
       const monster=u.id===HERO_ID?this.actorMonster():this.targetMonster();
       const result={...u,...(u.id===HERO_ID&&monster?{name:monster.name,sprite:monster.animation.sheet,boss:isBossRank(monster.rank),cls:monster.displayClass??'tank' as const,heroId:undefined}:{}),...(this.cells()[u.id]??{}),...(this.reviewPositions()[u.id]??{})};
-      if(u.id===1&&this.actorMonster()&&!this.reviewPositions()[1])result.c+=guardianPose(result.sprite).forward*(left?-1:1);
+      if(u.id===1&&this.actorMonster()&&!this.reviewPositions()[1])result.c+=guardianOffsetX(result.sprite,left,guardianPose(result.sprite));
       return result;
     });
     return [...main, ...this.extraUnits()];
@@ -439,7 +439,8 @@ export class SpriteLabComponent implements OnDestroy {
 
   private monsterEffect(name:string,at:{r:number;c:number},owner?:number,track?:FxView['track']):void {
     const d=FX[name],m=this.actorMonster();if(!d)return;
-    const offset=fxOffset(name,owner===1?m?.animation.sheet:undefined),flip=this.faceLeft();
+    const offset=fxOffset(name,owner===1?m?.animation.sheet:undefined);
+    const flip = owner === 1 ? this.units()[0]?.flip ?? this.faceLeft() : this.faceLeft();
     const f:FxView={id:++this.id,...at,name,angle:0,flip,offset,under:d.layer==='under',owner,managed:!!track,track,
       follow:fxAttached(name)?owner:undefined,stretch:d.toBoardEdge?edgeBeamStretch(d,at.c,flip,offset):undefined};
     this.fx.update(l=>[...l,f]);
@@ -480,7 +481,8 @@ export class SpriteLabComponent implements OnDestroy {
       this.reviewLogicalPositions.set(sample.positions);
       this.fieldVisuals.advance(sample.t);
       const actor=sample.positions[1],pose=guardianPose(m.animation.sheet,released==null?undefined:sample.t-released);
-      const pos={...sample.positions};if(actor)pos[1]={...actor,c:actor.c+pose.forward*(this.faceLeft()?-1:1)};
+      const left = actor?.flip ?? this.faceLeft();
+      const pos={...sample.positions};if(actor)pos[1]={...actor,c:actor.c+guardianOffsetX(m.animation.sheet,left,pose)};
       this.reviewPositions.set(pos);this.reviewVitals.set(sample.vitals);this.reviewStatuses.set(sample.statuses);
       const current=this.units()[0];
       if(released!=null&&m.id.startsWith('aegis')){
@@ -488,7 +490,11 @@ export class SpriteLabComponent implements OnDestroy {
         if(age>=AEGIS_BEAM_MOTION.holdUntil&&age<AEGIS_BEAM_MOTION.returnUntil)this.setWalkingPose(released);
         if(age>=AEGIS_BEAM_MOTION.returnUntil&&this.anims()[1]?.anim==='walk')this.set(1,'idle');
       }
-      this.fx.update(list=>list.map(f=>FX[f.name]?.toBoardEdge?{...f,stretch:edgeBeamStretch(FX[f.name],current.c,!!f.flip,f.offset??[0,0])}:f));
+      this.fx.update(list=>list.map(f=>{
+        const d = FX[f.name];
+        if (d?.followFacing && f.follow === 1 && f.flip !== left) f = { ...f, flip: left };
+        return d?.toBoardEdge ? {...f,stretch:edgeBeamStretch(d,current.c,!!f.flip,f.offset??[0,0])}:f;
+      }));
       this.statusVisuals.sync(Object.entries(sample.statuses).flatMap(([target,buffs])=>buffs.filter(b=>b.left>0).map(b=>({target:+target,source:b.sourceId,status:b.id,sprite:+target===1?m.animation.sheet:this.units().find(u=>u.id===+target)?.sprite,at:pos[+target]??current}))),sample.t);
       for(const e of sample.events){
         if(e.type==='castStart'){this.set(1,'cast',{castTime:e.castTime,castClip:def.clip,force:true});this.note(sample.t,def.name+' · เริ่มร่าย');
@@ -497,8 +503,8 @@ export class SpriteLabComponent implements OnDestroy {
           this.set(1,'cast',{castTime:0,castClip:def.clip,force:true});
           if(def.clip==='lance'&&m.id.startsWith('aegis')){released=sample.t;this.set(1,'cast',{castTime:0,castClip:'lance_firing',force:true});}
           this.fx.update(l=>l.filter(f=>!(binding?.cast??[]).includes(f.name)));
-          for(const name of binding?.activate??[]){const d=FX[name],logical=actor??me,origin=d.groundFromBodyFront?bodyFrontCell({pos:{r:Math.round(logical.r),c:Math.round(logical.c)},footprint:m.stats.footprint},this.faceLeft()):logical;
-            const p=d.groundFromBodyFront?groundFxCell(d,origin,origin,this.faceLeft()):current;
+          for(const name of binding?.activate??[]){const d=FX[name],logical=actor??me,origin=d.groundFromBodyFront?bodyFrontCell({pos:{r:Math.round(logical.r),c:Math.round(logical.c)},footprint:m.stats.footprint},left):logical;
+            const p=d.groundFromBodyFront?groundFxCell(d,origin,origin,left):current;
             this.monsterEffect(name,p,1);
           }
           for(const target of e.targets){const u=this.units().find(u=>u.id===id(target));if(u&&def.hitFx)this.monsterEffect(def.hitFx,u);}

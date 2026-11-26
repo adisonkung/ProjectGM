@@ -3,6 +3,8 @@
 > Later visual correction: Judgement impact is now4.2×2.8 visual cells, centred on the physical spear-contact point. Logical warning/damage cells are unchanged. See [AEGIS_JUDGEMENT_IMPACT.md](AEGIS_JUDGEMENT_IMPACT.md).
 User correction after viewing the 4×2 Judgement impact: bring both Aegis and Jade one cell forward; recoil Aegis art two cells on beam release, hold during firing, then walk back without moving its logical target. Follow-up: increase firing duration to read as an ultimate.
 
+> Jadecrest correction, 26 November 2026: the one-cell art offset stays on the left of its rightmost body anchor after turning. Its pounce travels in the committed direction and turns on landing. See the [current Ascension capture](reviews/jadecrest-pounce-facing/index.html).
+
 ## Implemented presentation
 
 - Aegis and Jade actor art is one cell forward along facing. Logical 4×2 footprints, O cells, engine x/y, reservations, melee contact and target selection do not move.

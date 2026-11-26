@@ -1,5 +1,11 @@
 # Current Development State
 
+## Jadecrest pounce facing — Codex, 2026-11-26
+
+Branch `fix/jadecrest-pounce-facing` from `origin/master` at `5db296c`. In Ascension, Jadecrest faces the committed jump destination during travel and turns toward the marked hero at landing. The turn uses the centre of the 4×2 footprint. The sprite keeps its offset from the rightmost anchor, and the landing pose and impact start on the same tick. The attached trail follows the jump direction. Stomp uses the right-facing source with the same flip as the actor. Roar and forward damage follow the facing committed at cast start. Sprite Lab samples the same engine facing. Existing target choice, full-body reservations, cast timings and skill values are preserved.
+
+Desktop 1440×900 verification covers the Ascension I jump, landing and follow-up stomp in Pixi and DOM. The browser fixture uses one durable hero in an isolated test save. See `docs/reviews/jadecrest-pounce-facing/index.html`. App and spec typechecks, all 1,111 Karma tests and the optimized build with the existing external `fonts:false` override passed. A seeded simulation completed 90 Ascension fights across the three guardians and three tiers.
+
 ## Authorized roster/icon merge to master — Codex, 2026-11-26
 
 The user explicitly requested push and merge to master. Remote reconciliation confirms clean task branch `feature/hero-roster-six-columns` at7ac153c, seven commits ahead of origin/master e753ad0 with no divergence. This integrates the80% collection body/six-column layout, larger toolbar, generated archive background, shared6★ shimmer, approved B class icons across consumers, colored glass card badges, Fighter optical sizing and removal of the card-corner check. Fast-forward integration requires no source conflict resolution.

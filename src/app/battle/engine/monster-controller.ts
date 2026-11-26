@@ -1,5 +1,5 @@
 import { inBasicAttackRange } from './melee-contact';
-import { unitDistance } from './footprint';
+import { facingTowards, unitDistance } from './footprint';
 import { attackEventName, attackWindupOf, clipDuration, MONSTER_SKILLS, MONSTERS } from '../../core/data/monsters';
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SkillCondition } from '../../core/models/monster';
 import { Cell } from '../../core/models/unit';
@@ -236,7 +236,7 @@ export class MonsterController {
       // thrown off its ground by a skill: fight there a moment, then walk home
       if (away && s.aliveTime - s.awayTime >= arena.returnAfter) {
         const home = s.home;
-        return this.move(u, s, home, c => distance(c, home) <= arena.leash);
+        return this.move(u, s, home, c => distance(c, home) <= arena.leash, true);
       }
     }
     const t = this.resolveTarget(u, s, def);
@@ -244,7 +244,7 @@ export class MonsterController {
       this.setState(s, 'SEARCHING', 'idle');
       return;
     }
-    if (t.pos.c !== u.pos.c) s.facingDirection = t.pos.c < u.pos.c ? -1 : 1;
+    s.facingDirection = facingTowards(u, t, s.facingDirection);
     const st = def.stats;
     const d = unitDistance(u, t);
 
@@ -321,12 +321,15 @@ export class MonsterController {
     this.move(u, s, { r: u.pos.r, c: edge }, c => c.c >= edge);
   }
 
-  private move(u: BattleUnit, s: MonsterCombatState, to: Cell, goal: (c: Cell) => boolean): void {
+  private move(u: BattleUnit, s: MonsterCombatState, to: Cell, goal: (c: Cell) => boolean, faceStep = false): void {
     // ROOT: cannot move (attacks / casts still allowed)
     if (hasFlag(u, 'root')) return this.setState(s, 'IDLE', 'idle');
     this.setState(s, 'MOVING', 'move');
     if (u.moveCd > 0) return;
-    if (this.ctx.stepToward(u, to, goal)) u.moveCd = 1 / effectiveMoveSpeed(u);
+    const from = u.pos.c;
+    if (!this.ctx.stepToward(u, to, goal)) return;
+    if (faceStep && u.pos.c !== from) s.facingDirection = u.pos.c < from ? -1 : 1;
+    u.moveCd = 1 / effectiveMoveSpeed(u);
   }
 
   // ------------------------------------------------------------------ targeting
@@ -427,7 +430,7 @@ export class MonsterController {
       if (aim === null) continue;
       s.currentSkillId = id;
       s.castTimer = skill.castTime;
-      if (aim !== u && aim.pos.c !== u.pos.c) s.facingDirection = aim.pos.c < u.pos.c ? -1 : 1;
+      if (aim !== u) s.facingDirection = facingTowards(u, aim, s.facingDirection);
       this.setState(s, 'CASTING', 'cast');
       this.ctx.startCast(u, skill, aim === u ? null : aim);
       return true;

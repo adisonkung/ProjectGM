@@ -27,13 +27,13 @@ export const JADECREST_FX: Record<string,FxDef> = {
     at: 'self',fitCells: 5.8,pivot: [.5,260/384],dy: 27.25,attach: false,layer: 'under' },
   'jc-charge-front': { file: 'fx-jadecrest-charge-front.png',frames: 60,w: 360,h: 270,frameMs: 30,
     at: 'self',fitCells: 5.8,pivot: [.5,260/384],dy: 27.25,attach: false },
-  // Original right-facing S1 art on a left-facing enemy. dx follows the actor; mirror only reverses the texture.
+  // S1 impact is authored right-facing, like the actor. Runtime facing flips both.
   'jc-s1-paw': { file: 'fx-jadecrest-s1-paw.png',frames: 1,w: 180,h: 180,frameMs: 100,fadeOutMs: 140,
     at: 'self',groundFromBodyFront:true,dx: 100,dy: 40,fitCells: 2.3,pivot: [.5,.78],attach: false },
   'jc-s1-front': { file: 'fx-jadecrest-s1-front.png',frames: 5,w: 384,h: 308,frameMs: 160,
-    at: 'self',groundFromBodyFront:true,dx: 100,dy: 43,fitCells: 5.8,pivot: [110/640,410/512],mirror: true,attach: false },
+    at: 'self',groundFromBodyFront:true,dx: 100,dy: 43,fitCells: 5.8,pivot: [110/640,410/512],attach: false },
   'jc-s2-trail': { file: 'fx-jadecrest-s2-trail.png',frames: 8,w: 280,h: 170,frameMs: 75,
-    at: 'self',fitCells: 2.8,pivot: [.85,.5],dy: bossPoint([0,-113.0625],1.44)[1],attach: true,blend: 'add' },
+    at: 'self',fitCells: 2.8,pivot: [.85,.5],dy: bossPoint([0,-113.0625],1.44)[1],attach: true,followFacing: true,blend: 'add' },
   'jc-s2-land': { file: 'fx-jadecrest-s2-land.png',frames: 8,w: 480,h: 360,frameMs: 100,
     at: 'self',fitCells: 6.8,pivot: [.5,430/600],dy: 35,attach: false,layer: 'under' },
   'jc-s2-rim': { file: 'fx-jadecrest-s2-rim.png',frames: 8,w: 480,h: 360,frameMs: 100,

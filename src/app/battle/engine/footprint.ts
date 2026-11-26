@@ -15,6 +15,13 @@ export function bodyFrontCell(u:SpatialUnit,left:boolean):Cell {
   return {r:u.pos.r,c:left?b.c0:b.c1};
 }
 
+/** An asymmetric footprint's anchor may be on its edge, so compare body centres. */
+export function facingTowards(u: SpatialUnit, target: SpatialUnit, fallback: -1 | 1): -1 | 1 {
+  const a = footprintBounds(u), b = footprintBounds(target);
+  const delta = b.c0 + b.c1 - a.c0 - a.c1;
+  return delta < 0 ? -1 : delta > 0 ? 1 : fallback;
+}
+
 export function occupiesCell(u: SpatialUnit, c: Cell): boolean {
   const b = footprintBounds(u);
   return c.r >= b.r0 && c.r <= b.r1 && c.c >= b.c0 && c.c <= b.c1;

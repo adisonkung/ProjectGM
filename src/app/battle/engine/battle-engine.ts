@@ -10,7 +10,7 @@ import { animTiming, SkillKind } from '../../core/data/sprites';
 import { HeroClass } from '../../core/models/hero';
 import { EnemyTemplate, StageDef } from '../../core/models/stage';
 import { Cell, Side, UnitSpec, UnitFootprint } from '../../core/models/unit';
-import { bodyFrontCell, occupiesCell, unitDistance } from './footprint';
+import { bodyFrontCell, facingTowards, occupiesCell, unitDistance } from './footprint';
 import { BUFFS, castTimeline, MONSTER_SKILLS, MONSTERS, PROJECTILES } from '../../core/data/monsters';
 import { AttackDefinition, isBossRank, MonsterDefinition, MonsterSkillDefinition, SemanticEvent } from '../../core/models/monster';
 import { enemyStats } from '../../core/rules/stats';
@@ -1558,6 +1558,11 @@ export class BattleEngine {
       if (aim && c.def.effects.some(e => e.type === 'LEAP_BEHIND')) {
         const cell = this.freeCellNear(aim.pos,u.pos,u);
         if (cell) {
+          const landingX = this.flow.formation.originPosition + cell.c;
+          if (u.monster && Math.abs(landingX - u.x) > 1e-9) {
+            u.monster.facingDirection = landingX < u.x ? -1 : 1;
+            u.actionFacing = { left: u.monster.facingDirection < 0 };
+          }
           this.relocate(u,cell,'dash',Math.max(dt,c.left / modifier(u,'castSpeedMultiplier')));
           if(c.def.targetWarningFx)this.events.push({type:'monsterGround',src:u.id,skill:c.def.id,cells:[{...cell}],
             fx:c.def.targetWarningFx,durationMs:c.left*1000,warning:true});
@@ -1717,6 +1722,10 @@ export class BattleEngine {
           const cell = leaped ? null : this.freeCellNear(aim.pos, u.pos, u);
           if (cell) this.relocate(u, cell, 'dash');
           if (u.monster) {
+            if (leaped) {
+              u.monster.facingDirection = facingTowards(u, aim, u.monster.facingDirection);
+              u.actionFacing = { left: u.monster.facingDirection < 0 };
+            }
             u.monster.currentTargetId = aim.id;
             u.monster.targetLockUntil = this.time + 1.5;
           }

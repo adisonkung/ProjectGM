@@ -2,7 +2,7 @@ import { DecimalPipe } from '@angular/common';
 import { ThemedCutinComponent } from '../../shared/themed-cutin.component';
 import { ULTIMATE_CUTINS, UltimateCutinArt } from '../../core/data/ultimate-cutins';
 import { isMeleeRange } from '../../battle/engine/melee-contact';
-import { guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
+import { guardianOffsetX, guardianPose, AEGIS_BEAM_MOTION } from '../../battle/render/guardian-motion';
 import { bodyFrontCell } from '../../battle/engine/footprint';
 import { artworkViewport, battleViewport, fullscreenViewport } from './battle-viewport';
 import { heroArt } from '../../core/data/hero-art';
@@ -898,11 +898,13 @@ export class BattleComponent implements OnDestroy {
     const release=this.beamReleases.get(u.id);
     const age=release ? this.engine.time-release.at : undefined;
     const active=age!=null && age<AEGIS_BEAM_MOTION.returnUntil && u.alive && !hasFlag(u,'broken');
-    return {...guardianPose(u.sprite,active?age:undefined),left:active?release!.left:(u.actionFacing?.left??this.facing.get(u.id)??u.side==='enemy')};
+    const left = u.monster && this.engine.phase === BattlePhase.COMBAT
+      ? u.monster.facingDirection < 0 : this.facing.get(u.id) ?? u.side === 'enemy';
+    return {...guardianPose(u.sprite,active?age:undefined),left:active?release!.left:(u.actionFacing?.left??left)};
   }
   private actorScreenOf(u: BattleUnit): {r:number;c:number} {
     const p=this.screenOf(u),pose=this.actorPose(u);
-    return {r:p.r,c:p.c+pose.forward*(pose.left?-1:1)};
+    return {r:p.r,c:p.c+guardianOffsetX(u.sprite,pose.left,pose)};
   }
 
   private snapshot(): void {
@@ -911,7 +913,12 @@ export class BattleComponent implements OnDestroy {
     // The shaft follows recoil while its far end stays on the board edge.
     this.fx.update(list=>list.map(f=>{
       const d=FX[f.name],u=f.follow!=null?e.units.find(u=>u.id===f.follow):undefined;
-      return d?.toBoardEdge&&u ? {...f,stretch:edgeBeamStretch(d,this.actorScreenOf(u).c,!!f.flip,f.offset??[0,0])}:f;
+      if (!u || !d) return f;
+      if (d.followFacing) {
+        const flip = this.actorPose(u).left;
+        if (flip !== f.flip) f = { ...f, flip };
+      }
+      return d.toBoardEdge ? {...f,stretch:edgeBeamStretch(d,this.actorScreenOf(u).c,!!f.flip,f.offset??[0,0])}:f;
     }));
     const fieldPositions = this.fieldVisuals.positions(e.cameraX);
     if (fieldPositions.size) this.fx.update(l => l.map(f => fieldPositions.has(f.id) ? { ...f, ...fieldPositions.get(f.id)! } : f));
@@ -929,6 +936,7 @@ export class BattleComponent implements OnDestroy {
       this.lastFacingX.set(u.id, u.x);
       // transitions: face where you walk (heroes default forward) · combat: face the target
       if (u.actionFacing) this.facing.set(u.id, u.actionFacing.left);
+      else if (combat && u.monster) this.facing.set(u.id, u.monster.facingDirection < 0);
       else if (!combat && Math.abs(dx) > 1e-3) this.facing.set(u.id, dx < 0);
       else if (!combat && isPlayerUnit(u) && u.life === 'ALIVE' && e.phase !== BattlePhase.REGROUPING) this.facing.set(u.id, false);
       else if (t && t.pos.c !== u.pos.c) this.facing.set(u.id, t.pos.c < u.pos.c);
@@ -1221,7 +1229,7 @@ export class BattleComponent implements OnDestroy {
       for (const name of binding?.[phase] ?? []) {
         const d = FX[name];
         if (!d) continue;
-        const flip = u.actionFacing?.left ?? !!this.facing.get(src);
+        const flip = this.actorPose(u).left;
         const offset = fxOffset(name, u.sprite);
         // An edge beam is horizontal and starts at the weapon tip; only its separate shaft changes length.
         const p = d.groundFromBodyFront?this.screenOf(u):posOf(src);
@@ -1289,7 +1297,7 @@ export class BattleComponent implements OnDestroy {
             const p = posOf(e.src);
             for (const name of sheet.attackFx) {
               if (!FX[name]) continue;
-              fx.push({ id: ++this.floatId, r: p.r, c: p.c, name, angle: 0, flip: !!this.facing.get(e.src),
+              fx.push({ id: ++this.floatId, r: p.r, c: p.c, name, angle: 0, flip: this.actorPose(unitOf(e.src)).left,
                 offset: fxOffset(name, unitOf(e.src).sprite), under: FX[name].layer === 'under',
                 follow: fxAttached(name) ? e.src : undefined });
             }
@@ -1512,16 +1520,19 @@ export class BattleComponent implements OnDestroy {
           break;
         }
         case 'skillActivated': {
-          if(unitOf(e.src).sprite==='enemy-aegis-sentinel.png' && this.skillByName(unitOf(e.src),e.skill)?.clip==='lance')
-            this.beamReleases.set(e.src,{at:this.engine.time,left:unitOf(e.src).actionFacing?.left??!!this.facing.get(e.src)});
+          const caster = unitOf(e.src);
+          const skill = this.skillByName(caster, e.skill);
+          const lance = caster.sprite === 'enemy-aegis-sentinel.png' && skill?.clip === 'lance';
+          if (lance) this.beamReleases.set(e.src, { at: this.engine.time, left: this.actorPose(caster).left });
           this.fx.update(list => list.filter(f => f.owner !== e.src));
           fx.splice(0, fx.length, ...fx.filter(f => f.owner !== e.src));
-          monsterFx(e.src, this.skillByName(unitOf(e.src), e.skill)?.clip, 'activate');
+          // Start the grounded pose on the impact tick, even if the visual clock is a frame behind.
+          if (skill?.leapTravel) set(e.src, 'cast', { castTime: 0, castClip: skill.clip, force: true });
+          if (lance) set(e.src, 'cast', { castTime: 0, castClip: 'lance_firing', force: true });
+          monsterFx(e.src, skill?.clip, 'activate');
           this.flash(e.src, e.skill);
-          if(unitOf(e.src).sprite==='enemy-aegis-sentinel.png' && this.skillByName(unitOf(e.src),e.skill)?.clip==='lance')
-            set(e.src,'cast',{castTime:0,castClip:'lance_firing',force:true});
           // sprite FX on every unit the skill landed on (Starfall, Devour, Arcane Seal …)
-          const hitFx = this.skillByName(unitOf(e.src), e.skill)?.hitFx;
+          const hitFx = skill?.hitFx;
           if (hitFx && FX[hitFx]) {
             for (const id of e.targets) {
               const q = posOf(id);

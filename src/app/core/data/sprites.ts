@@ -190,6 +190,8 @@ export interface FxDef {
   pixelated?: boolean;
   /** the art faces left (e.g. a dragon head looking back at the caster): drawn mirrored so it faces the way the caster faces */
   mirror?: boolean;
+  /** An attached effect can track its actor's facing after it spawns. */
+  followFacing?: boolean;
   /** spawn on a semantic clip event instead (e.g. CHARGE_START, STRIKE_START) — `eventIndex` for repeated events */
   event?: SemanticEvent;
   eventIndex?: number;
