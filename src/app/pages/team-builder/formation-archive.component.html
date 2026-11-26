@@ -1,0 +1,168 @@
+<section class="archive" aria-labelledby="formation-title" [class.dragging]="draggingHero() !== null">
+  <div class="archive-header">
+    <app-collection-header heading="จัดทีม" subtitle="FORMATION" headingId="formation-title" />
+  </div>
+
+  <div class="archive-content">
+    <div class="setup">
+      <section aria-labelledby="preset-title">
+        <h2 id="preset-title">พรีเซ็ตทีม <app-icon name="team" [size]="16" /></h2>
+        <div class="preset-list">
+          @for (saved of team.presets(); track $index; let index = $index) {
+            <div class="preset" [class.active]="preset() === index">
+              @if (editingPreset() === index) {
+                <input #name [value]="saved.name" maxlength="16" aria-label="ชื่อทีม"
+                  (keydown.enter)="renamePreset(index, name.value)" (keydown.escape)="editingPreset.set(null)"
+                  (blur)="renamePreset(index, name.value)" />
+              } @else {
+                <button type="button" class="preset-select" [attr.aria-pressed]="preset() === index"
+                  [attr.aria-label]="'เลือก ' + saved.name" (click)="selectPreset(index)">
+                  <span class="preset-name"><small>0{{ index + 1 }}</small>{{ saved.name }}</span>
+                  <span class="preset-faces" aria-hidden="true">
+                    @for (slot of saved.team; track $index) {
+                      @if (heroByUid().get(slot.uid)?.portrait; as portrait) {
+                        <img [src]="portrait" alt="" draggable="false" />
+                      }
+                    } @empty {
+                      <span class="empty-preset">ยังไม่มีทีมที่บันทึก</span>
+                    }
+                  </span>
+                </button>
+                <button type="button" class="rename" [attr.aria-label]="'เปลี่ยนชื่อ ' + saved.name"
+                  (click)="editPreset(index)"><app-icon name="edit" [size]="13" /></button>
+              }
+            </div>
+          }
+        </div>
+      </section>
+      <div class="team-readout">
+        <span class="team-name">{{ team.presets()[preset()].name }}</span>
+        <span class="pips" aria-hidden="true">
+          @for (pip of teamPips; track pip) { <i [class.filled]="pip < team.slots().length"></i> }
+        </span>
+        <b [attr.aria-label]="'ฮีโร่ในทีม ' + team.slots().length + ' จาก ' + teamSize">{{ team.slots().length }} / {{ teamSize }}</b>
+      </div>
+    </div>
+
+    <section class="field" #field aria-label="สนามจัดทีม">
+      <div class="zones" aria-hidden="true">
+        @for (zone of zones; track zone; let index = $index) { <span [attr.data-zone]="index">{{ zone }}</span> }
+      </div>
+      <div class="ground" role="group" aria-label="ช่องวางฮีโร่">
+        @for (cell of cells; track $index; let index = $index) {
+          @let hero = heroByUid().get(formation()[index] ?? 0);
+          <button type="button" class="ground-cell" [attr.data-ground-cell]="index" [attr.data-zone]="cell.zone"
+            [class.placed]="hero !== undefined" [class.drop-target]="dropCell() === index"
+            [attr.aria-pressed]="pendingCell() === index || (hero && selected() === hero.uid) || false"
+            [attr.aria-label]="(hero?.name ?? 'ช่องว่าง') + ' · ' + zones[cell.zone] + ' แถว ' + (cell.c + 1) + ' ตำแหน่ง ' + (columns - cell.r)"
+            (click)="selectCell(index)">
+            <span class="slot-anchor" aria-hidden="true"></span>
+          </button>
+        }
+      </div>
+      <div class="standees">
+        @for (uid of formation(); track $index; let index = $index) {
+          @if (uid !== null) {
+            @if (heroByUid().get(uid); as hero) {
+              @if (anchors()[index]; as anchor) {
+                <div class="standee" [attr.data-uid]="uid" [attr.data-row]="cells[index].c"
+                  [style.left.px]="anchor.x" [style.top.px]="anchor.y"
+                  [style.--class-color]="classColors[hero.cls]" [class.active]="selected() === uid"
+                  [class.drag-source]="draggingHero() === uid">
+                  <button type="button" class="standee-card" [attr.data-card-cell]="index" [attr.aria-label]="'การ์ด ' + hero.name"
+                    [attr.aria-pressed]="selected() === uid" (click)="selectCell(index)"
+                    (pointerdown)="beginDrag($event, uid, true)">
+                    <ng-container [ngTemplateOutlet]="portrait" [ngTemplateOutletContext]="{ $implicit: hero }" />
+                    <span class="class-badge"><app-collection-icon [name]="hero.cls" [size]="17" /></span>
+                    <b>{{ hero.shortName }}</b>
+                    <i class="class-line" aria-hidden="true"></i>
+                  </button>
+                  @if (selected() === uid) {
+                    <button type="button" class="remove" [attr.aria-label]="'ถอด ' + hero.name + ' ออกจากทีม'"
+                      (click)="remove(uid, index)">× ถอด</button>
+                  }
+                </div>
+              }
+            }
+          }
+        }
+      </div>
+    </section>
+
+    <section class="roster" aria-labelledby="formation-roster-title">
+      <div class="roster-heading">
+        <div class="roster-start">
+          <h2 id="formation-roster-title"><app-icon name="heroes" [size]="17" />รายชื่อฮีโร่</h2>
+          <label class="filter">
+            <app-collection-icon name="filter" [size]="15" />
+            <select aria-label="กรองตามคลาส" [value]="filter()" (change)="setFilter($any($event.target).value)">
+              <option value="all">ทุกคลาส</option>
+              @for (cls of classes; track cls) { <option [value]="cls">{{ classNames[cls] }}</option> }
+            </select>
+          </label>
+          <div class="quick-filters" role="group" aria-label="กรองคลาสด่วน">
+            @for (cls of classes; track cls) {
+              <button type="button" [style.--class-color]="classColors[cls]"
+                [attr.aria-label]="'กรองคลาส ' + classNames[cls]" [title]="classNames[cls]"
+                [attr.aria-pressed]="filter() === cls" (click)="setFilter(filter() === cls ? 'all' : cls)">
+                <app-collection-icon [name]="cls" [size]="22" />
+              </button>
+            }
+          </div>
+        </div>
+        <div class="roster-tools">
+          <b aria-live="polite" [attr.aria-label]="filtered().length + ' ฮีโร่'">{{ filtered().length }}</b>
+          <div class="pager" role="group" aria-label="หน้ารายชื่อฮีโร่">
+            <button type="button" aria-label="หน้าก่อน" [disabled]="currentPage() === 0"
+              (click)="page.set(currentPage() - 1)"><app-icon name="back" [size]="15" /></button>
+            <span>{{ currentPage() + 1 }} / {{ pageCount() }}</span>
+            <button type="button" aria-label="หน้าถัดไป" [disabled]="currentPage() + 1 === pageCount()"
+              (click)="page.set(currentPage() + 1)"><app-icon name="back" [size]="15" /></button>
+          </div>
+        </div>
+      </div>
+      <div class="hero-rail" #rail [style.--columns]="rosterSize()" [style.gap.px]="rosterGap">
+        @for (hero of pageHeroes(); track hero.uid) {
+          <button type="button" class="roster-card" [attr.data-uid]="hero.uid" [style.--class-color]="classColors[hero.cls]"
+            [attr.aria-pressed]="selected() === hero.uid"
+            [attr.aria-label]="hero.name + ' · ' + classNames[hero.cls] + ' · ' + hero.star + ' ดาว · เลเวล ' + hero.level + (deployed().has(hero.uid) ? ' · อยู่ในทีม' : '')"
+            (click)="selectHero(hero.uid)" (pointerdown)="beginDrag($event, hero.uid, false)">
+            <ng-container [ngTemplateOutlet]="portrait" [ngTemplateOutletContext]="{ $implicit: hero }" />
+            <span class="class-badge"><app-collection-icon [name]="hero.cls" [size]="16" /></span>
+            @if (deployed().has(hero.uid)) { <i class="deployed" aria-hidden="true"></i> }
+            <span class="hero-identity"><b>{{ hero.shortName }}</b><app-hero-stars [count]="hero.star" /></span>
+            <span class="hero-level"><small>Lv</small><b>{{ hero.level }}</b></span>
+            <i class="class-line" aria-hidden="true"></i>
+          </button>
+        } @empty {
+          <p class="roster-empty">ไม่มีฮีโร่คลาสนี้ในรายชื่อ</p>
+        }
+      </div>
+    </section>
+
+    <footer class="formation-footer">
+      <span class="formation-notice" role="status">{{ notice() }}</span>
+      <div class="actions">
+        <button type="button" class="auto" (click)="auto()"><app-icon name="team" [size]="18" />จัดทีมอัตโนมัติ</button>
+        <button type="button" class="save" (click)="savePreset()"><app-icon name="save" [size]="18" />บันทึกทีม</button>
+      </div>
+    </footer>
+  </div>
+
+  @if (dragPoint(); as point) {
+    @if (heroByUid().get(draggingHero() ?? 0); as hero) {
+      <div class="drag-ghost" aria-hidden="true" [style.left.px]="point.x" [style.top.px]="point.y"
+        [class.remove-ghost]="dragRemovesHero()" [style.--class-color]="classColors[hero.cls]">
+        <ng-container [ngTemplateOutlet]="portrait" [ngTemplateOutletContext]="{ $implicit: hero }" />
+      </div>
+    }
+  }
+</section>
+
+<ng-template #portrait let-hero>
+  @if (hero.portrait) {
+    <img class="portrait" [src]="hero.portrait" alt="" draggable="false" />
+  } @else {
+    <span class="portrait portrait-fallback"><app-unit-sprite [cls]="hero.cls" [sprite]="hero.sprite" [star]="hero.star" /></span>
+  }
+</ng-template>

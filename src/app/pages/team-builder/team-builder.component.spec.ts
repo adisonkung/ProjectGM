@@ -5,6 +5,8 @@ import { TeamService } from '../../core/services/team.service';
 import { SaveService } from '../../core/services/save.service';
 import { STAGES } from '../../core/data/stages';
 import { provideRouter } from '@angular/router';
+import { signal } from '@angular/core';
+import { TeamBuilderLayout } from './team-builder-layout';
 import { TeamBuilderComponent } from './team-builder.component';
 
 describe('TeamBuilderComponent', () => {
@@ -14,7 +16,7 @@ describe('TeamBuilderComponent', () => {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [TeamBuilderComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), { provide: TeamBuilderLayout, useValue: { desktop: signal(false) } }],
     }).compileComponents();
     fixture = TestBed.createComponent(TeamBuilderComponent);
     fixture.detectChanges();

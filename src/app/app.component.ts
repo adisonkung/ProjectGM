@@ -9,6 +9,7 @@ import { SoundService } from './core/services/sound.service';
 import { IconComponent } from './shared/icon.component';
 import { CitadelFrameComponent } from './shared/citadel-frame.component';
 import { CitadelIconComponent } from './shared/citadel-icon.component';
+import { TeamBuilderLayout } from './pages/team-builder/team-builder-layout';
 import { formatCurrency } from './shared/format-currency';
 
 export interface NavItem {
@@ -68,9 +69,11 @@ export class AppComponent {
   readonly onAccount = computed(() => this.url().startsWith('/account'));
   /** The roster owns an internal scroll area; the other immersive scenes size themselves. */
   readonly rosterPage = computed(() => /^\/heroes([?#]|$)/.test(this.url()));
-  readonly immersive = computed(() => this.rosterPage() || /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
+  private readonly desktopTeam = inject(TeamBuilderLayout).desktop;
+  readonly teamArchivePage = computed(() => this.desktopTeam() && /^\/team([?#]|$)/.test(this.url()));
+  readonly immersive = computed(() => this.rosterPage() || this.teamArchivePage() || /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
   /** These exact routes draw their own headers; hero-detail retains the shared app bar. */
-  readonly ownChrome = computed(() => this.rosterPage() || /^\/(home|gacha)([?#]|$)/.test(this.url()));
+  readonly ownChrome = computed(() => this.rosterPage() || this.teamArchivePage() || /^\/(home|gacha)([?#]|$)/.test(this.url()));
 
   /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
   readonly forgePage = computed(() => /^\/forge([?#]|$)/.test(this.url()));
@@ -88,9 +91,9 @@ export class AppComponent {
     inject(PreloadService).warmCity();
     // taps on buttons + dialogs opening/closing, app-wide (settings: /account)
     inject(SoundService).install();
-    effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive()));
+    effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive() && !this.teamArchivePage()));
     // UI scale (user 2026-11-18): menu pages + the Sky Isle render at 75 % on desktop (styles.scss `html.ui-zoom`).
     // Summon cutscene, battle and the K7 home size themselves from the window.
-    effect(() => document.documentElement.classList.toggle('ui-zoom', (this.collection() && !this.rosterPage()) || /^\/island([?#]|$)/.test(this.url())));
+    effect(() => document.documentElement.classList.toggle('ui-zoom', (this.collection() && !this.rosterPage() && !this.teamArchivePage()) || /^\/island([?#]|$)/.test(this.url())));
   }
 }

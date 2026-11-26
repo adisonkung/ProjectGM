@@ -1,18 +1,9 @@
 @font-face { font-family: 'Collection Thai'; src: url('/fonts/noto-sans-thai/noto-sans-thai-600.woff') format('woff'); font-style: normal; font-weight: 600; font-display: swap; }
-@font-face { font-family: 'Collection Title'; src: url('/fonts/noto-serif-thai/noto-serif-thai-600.woff') format('woff'); font-style: normal; font-weight: 600; font-display: swap; }
 :host { display: block; color: #f8f2e7; font-family: 'Collection Thai', sans-serif; }
 :host::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse at 47% -12%, #363a39 0, #242929 42%, #191d1d 82%); }
 :host::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: url('/ui/collection/archive-background.webp') center / cover no-repeat; }
 .hero-collection { position: fixed; inset: 0; z-index: 1; width: 100%; max-width: 1600px; margin-inline: auto; padding: 20px 32px 32px; display: grid; grid-template-columns: 200px minmax(0,1fr); grid-template-rows: 64px minmax(0,1fr); column-gap: 34px; }
-.collection-header { grid-column: 1/-1; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
-.page-heading { display: flex; align-items: center; gap: 23px; }
-.back { width: 44px; height: 46px; display: grid; place-items: center; color: #f6ead6; text-decoration: none; }
-.page-title { border-left: 1px solid #e7d4b9a6; padding-left: 23px; h1 { margin: -6px 0 0; font: 600 33px/1.45 'Collection Title', serif; color: #fff6e7; } > span { display: block; margin-top: -4px; font: 11px/1.4 Georgia, serif; letter-spacing: .34em; color: #eddfcd; } }
-.collection-wallet { display: flex; align-items: center; gap: 12px; padding-top: 0; }
-.resource { display: flex; gap: 10px; align-items: center; min-height: 35px; padding: 3px 6px 3px 16px; border: 1px solid #cbbda4ad; border-radius: 24px; background: linear-gradient(180deg,#37373755,#12141477); box-shadow: inset 0 1px 2px #fff2; b { min-width: 50px; font: 500 19px/1.2 Arial, sans-serif; font-variant-numeric: tabular-nums; color: #f6eee0; text-align: center; } button { width: 25px; height: 25px; border-radius: 7px; border: 0; background: linear-gradient(#fff2d9,#d4c2a9); color: #292929; font: 24px/1 Arial,sans-serif; padding: 0; } }
-.gold-coin { width: 18px; height: 18px; border: 1px solid #ffefc9; border-radius: 50%; background: radial-gradient(circle at 33% 25%,#fff3d4,#deb86f 65%,#a27027); box-shadow: inset 0 0 0 2px #ffedbf40; }
-.round { position: relative; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid #cbbda4c2; border-radius: 50%; color: #f7e9cf; background: #111414a0; box-shadow: inset 0 0 0 3px #121414; &:hover { background: #45423a; } }
-.badge { position: absolute; right: -4px; top: -5px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 12px; background: #c92137; border: 1px solid #6b1b25; color: white; font: 600 11px/14px Arial,sans-serif; }
+app-collection-header { grid-column: 1/-1; }
 .collection-sidebar { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding-top: 62px; padding-right: 16px; border-right: 1px solid #d3c6ae2b; }
 .filters { display: grid; gap: 7px; button { display: flex; align-items: center; gap: 17px; width: 100%; height: 62px; padding: 6px 20px; border: 0; border-radius: 5px; background: transparent; color: #f4efe4; text-align: left; font: 600 19px/1.5 'Collection Thai',sans-serif; white-space: nowrap; app-collection-icon { color: var(--class-color); filter: drop-shadow(0 0 2px color-mix(in srgb,var(--class-color) 25%,transparent)); } &:hover { background: #fff1; } &[aria-pressed='true'] { color: #252525; background: linear-gradient(105deg,#fffaf0,#f4e6cf); text-shadow: none; box-shadow: inset 0 0 0 1px #fff5; app-collection-icon { color: #252525; filter: none; } } } }
 .collection-count { padding: 18px 0 2px; text-align: center; font: 24px/1.3 Georgia,serif; color: #f5ead6; }
@@ -38,10 +29,7 @@
 .class-line { position: absolute; bottom: 1px; left: 0; right: 0; height: 3px; background: var(--class-color); box-shadow: 0 0 4px 1px var(--class-color),0 -2px 12px 3px color-mix(in srgb,var(--class-color) 70%,transparent),0 -5px 24px 4px color-mix(in srgb,var(--class-color) 35%,transparent); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .collection-empty { grid-column: 1/-1; display: grid; justify-items: center; padding: 60px 20px; color: #eadfc9; text-align: center; h2 { margin: 16px 0 0; font-size: 22px; } p { font-size: 15px; } button { background: #f5e9d2; color: #252525; border: 0; border-radius: 4px; padding: 10px 20px; } }
-.panel-veil { position: fixed; inset: 0; z-index: 50; background: #0009; }
-.collection-menu { position: fixed; top: 85px; right: 32px; z-index: 51; width: 330px; padding: 23px; border: 1px solid #cfbea36b; border-radius: 10px; background: #202222; box-shadow: 0 15px 60px #000a; header { display: flex; align-items: center; justify-content: space-between; } h2 { font-size: 22px; margin: 0; } button { background: transparent; border: 0; color: #fff0dc; font: 30px/1 Arial,sans-serif; } nav { display: grid; gap: 8px; margin-top: 18px; } a { display: flex; align-items: center; gap: 16px; padding: 10px 12px; color: #f9ecd5; text-decoration: none; border-radius: 5px; &:hover { background: #fff1; } } }
-.collection-notice { position: fixed; z-index: 60; bottom: 30px; left: 50%; transform: translateX(-50%); padding: 12px 20px; background: #f5ead7; color: #252525; border-radius: 6px; box-shadow: 0 5px 20px #0007; button { margin-left: 16px; border: 0; background: transparent; color: #252525; } }
-@media (min-width: 721px) and (max-width: 1350px) { .hero-collection { padding: 18px 24px 24px; grid-template-columns: 175px minmax(0,1fr); column-gap: 26px; } .filters button { font-size: 17px; padding-inline: 14px; gap: 14px; height: 52px; } .collection-wallet { gap: 9px; } .hero-grid { --card-gap: 15px; } .hero-name { font-size: 20px; } .card-identity { left: 11px; right: 41px; } .hero-level { right: 10px; } .page-heading { gap: 15px; } .page-title { padding-left: 16px; } .card-stars { font-size: 19px; --hero-star-size: 23px; } }
+@media (min-width: 721px) and (max-width: 1350px) { .hero-collection { padding: 18px 24px 24px; grid-template-columns: 175px minmax(0,1fr); column-gap: 26px; } .filters button { font-size: 17px; padding-inline: 14px; gap: 14px; height: 52px; } .hero-grid { --card-gap: 15px; } .hero-name { font-size: 20px; } .card-identity { left: 11px; right: 41px; } .hero-level { right: 10px; } .card-stars { font-size: 19px; --hero-star-size: 23px; } }
 @media (prefers-reduced-motion: reduce) { .hero-card { transition: none; } }
 .hero-name.long-name { font-size: clamp(16px,1.4vw,21px); }
 @media (min-width: 721px) and (max-height: 800px) { .hero-collection { padding-block: 16px 18px; grid-template-rows: 56px minmax(0,1fr); } .collection-body { grid-template-rows: 35px minmax(0,1fr); row-gap: 14px; } .collection-sidebar { padding-top: 51px; } }
@@ -55,7 +43,7 @@
 // The header keeps its authored size/bounds; only Desktop roster controls use 80%.
 @media (min-width: 721px) {
   .hero-collection { max-width: none; grid-template-columns: 160px minmax(0,1fr); column-gap: 27.2px; }
-  .collection-header { width: 100%; max-width: 1536px; justify-self: center; }
+  app-collection-header { width: 100%; max-width: 1536px; justify-self: center; }
   .collection-sidebar, .collection-body { zoom: .8; }
   .collection-body { grid-template-rows: 49px minmax(0,1fr); row-gap: 14px; }
   .search { width: min(40%,380px); min-height: 41px; padding-inline: 16px; input { height: 39px; font-size: 16px; } }

@@ -1,0 +1,81 @@
+{
+  "viewports": [
+    {
+      "width": 1024,
+      "height": 824,
+      "footerBottom": 806.125,
+      "everyLevelFits": true,
+      "cardWidths": [
+        82,
+        93,
+        93,
+        104,
+        104
+      ]
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "footerBottom": 715.53125,
+      "everyLevelFits": true,
+      "cardWidths": [
+        72,
+        81,
+        81,
+        91,
+        91
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 860,
+      "footerBottom": 847.53125,
+      "everyLevelFits": true,
+      "cardWidths": [
+        86,
+        97,
+        97,
+        109,
+        109
+      ]
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "footerBottom": 1025.53125,
+      "everyLevelFits": true,
+      "cardWidths": [
+        104,
+        117,
+        117,
+        132,
+        132
+      ]
+    }
+  ],
+  "covered": {
+    "x": 304.35009765625,
+    "y": 337.3562927246094,
+    "index": 1
+  },
+  "verified": [
+    "starter save",
+    "18 real coordinates",
+    "all owned heroes",
+    "icons and dropdown",
+    "paging",
+    "drag behind nearer portrait",
+    "full team limit",
+    "drag-off removal",
+    "keyboard placement",
+    "replacement",
+    "Escape cancellation",
+    "inline removal",
+    "auto and preset save/load/rename/reload",
+    "shared header bag and menu",
+    "collection navigation",
+    "battle preparation",
+    "preserved progression"
+  ],
+  "errors": []
+}
