@@ -229,8 +229,8 @@
   inset: 0;
   border: 1px solid #e9cb9d;
   transform-origin: 50% 100%;
-  transform: perspective(270px) rotateY(-9deg) rotateZ(-1.4deg);
-  box-shadow: 2px 1px #715335, 3px 1px #c8a271, 4px 2px #493422, 6px 6px 11px #000b;
+  transform: perspective(900px) rotateY(-6deg);
+  box-shadow: 2px 0 #715335, 3px 0 #c8a271, 4px 0 #493422, 5px 4px 10px #000b;
   &::after {
     content: '';
     position: absolute;
@@ -241,9 +241,8 @@
     background: linear-gradient(135deg, #ffe4b92c, transparent 27% 76%, #d6ad7750);
   }
   &:hover, &[aria-pressed='true'] {
-    transform: perspective(270px) rotateY(-5deg) rotateZ(-.5deg) translateY(-3px);
     border-color: #ffe8bc;
-    box-shadow: 2px 1px #7d5f41, 4px 1px #d7b281, 0 0 17px #f4cc818a;
+    box-shadow: 2px 0 #7d5f41, 3px 0 #d7b281, 4px 0 #493422, 0 0 17px #f4cc818a;
   }
   b {
     position: absolute;
