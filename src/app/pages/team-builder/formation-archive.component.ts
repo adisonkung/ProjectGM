@@ -25,6 +25,7 @@ const CELLS = Array.from({ length: LANES * SIDE_DEPTH }, (_, index) => {
 const MIN_PAGE_SIZE = 9;
 const CARD_GAP = 8;
 const DRAG_DISTANCE = 6;
+const LANDING_DURATION_MS = 620;
 
 interface BoardPoint { x: number; y: number }
 interface DragState {
@@ -80,6 +81,7 @@ export class FormationArchiveComponent {
   readonly selected = signal<number | null>(null);
   readonly pendingCell = signal<number | null>(null);
   readonly notice = signal('');
+  readonly landingPulses = signal<{ cell: number; id: number }[]>([]);
   readonly filter = signal<HeroClass | 'all'>('all');
   readonly page = signal(0);
   readonly filtered = computed(() => this.heroes().filter(hero => this.filter() === 'all' || hero.cls === this.filter()));
@@ -98,9 +100,12 @@ export class FormationArchiveComponent {
   readonly deployed = computed(() => new Set(this.team.slots().map(slot => slot.uid)));
   private drag: DragState | null = null;
   private ignoreClick = false;
+  private landingId = 0;
+  private landingTimer?: ReturnType<typeof setTimeout>;
 
   constructor() {
     const destroy = inject(DestroyRef);
+    destroy.onDestroy(() => clearTimeout(this.landingTimer));
     afterNextRender(() => {
       const field = this.field().nativeElement;
       const rail = this.rail().nativeElement;
@@ -127,6 +132,7 @@ export class FormationArchiveComponent {
   }
 
   selectPreset(index: number): void {
+    this.clearLanding();
     this.preset.set(index);
     this.team.loadPreset(index);
     this.resetSelection();
@@ -153,6 +159,7 @@ export class FormationArchiveComponent {
   }
 
   auto(): void {
+    this.clearLanding();
     this.team.auto();
     this.resetSelection();
     this.notice.set('จัดทีมอัตโนมัติแล้ว');
@@ -281,11 +288,25 @@ export class FormationArchiveComponent {
 
   private placeAt(uid: number, index: number): void {
     const { r, c } = this.cells[index];
-    if (this.formation()[index] === uid || this.team.place(uid, r, c)) this.resetSelection();
-    else this.notice.set(`ทีมเต็ม ${TEAM_SIZE} คน วางทับการ์ดเดิมเพื่อเปลี่ยนตัว`);
+    if (this.formation()[index] === uid) {
+      this.resetSelection();
+    } else if (this.team.place(uid, r, c)) {
+      this.resetSelection();
+      this.clearLanding();
+      this.landingPulses.set([{ cell: index, id: ++this.landingId }]);
+      this.landingTimer = setTimeout(() => this.landingPulses.set([]), LANDING_DURATION_MS);
+    } else {
+      this.notice.set(`ทีมเต็ม ${TEAM_SIZE} คน วางทับการ์ดเดิมเพื่อเปลี่ยนตัว`);
+    }
+  }
+
+  private clearLanding(): void {
+    clearTimeout(this.landingTimer);
+    this.landingPulses.set([]);
   }
 
   private removeFromField(uid: number): void {
+    this.clearLanding();
     this.team.remove(uid);
     this.resetSelection();
     this.notice.set(`ถอด ${this.heroByUid().get(uid)?.name} ออกจากทีมแล้ว`);

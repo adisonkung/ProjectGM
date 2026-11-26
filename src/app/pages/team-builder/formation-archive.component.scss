@@ -177,6 +177,7 @@
 .standees { position: absolute; inset: 0; pointer-events: none; }
 .standee {
   --row-scale: 1;
+  --aura-light: color-mix(in srgb, var(--class-color) 66%, #fff4ce);
   z-index: 3;
   position: absolute;
   width: min(10.6cqw, 12.65dvh, 132px);
@@ -196,14 +197,82 @@
     outline: 1px solid color-mix(in srgb, var(--class-color) 62%, #e6cea0);
     box-shadow: 0 3px 0 #121510, 0 5px 8px #000c, 0 0 10px color-mix(in srgb, var(--class-color) 52%, transparent);
   }
-  &.active::after {
+}
+.standee-aura, .standee-sparks, .standee-landing {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+.standee-aura {
+  inset: auto -24% -17px;
+  height: 43%;
+  opacity: .62;
+  background:
+    radial-gradient(ellipse 49% 26% at 50% 75%, color-mix(in srgb, var(--aura-light) 72%, transparent), transparent),
+    radial-gradient(ellipse 45% 58% at 50% 77%, color-mix(in srgb, var(--class-color) 50%, transparent), transparent);
+  transition: opacity 180ms ease-out;
+  &::after {
     content: '';
     position: absolute;
-    inset: auto -42% -12px;
-    height: 73%;
-    z-index: -1;
-    background: radial-gradient(ellipse at 50% 92%, #f8c283b8, color-mix(in srgb, var(--class-color) 41%, transparent) 40%, transparent 71%);
+    inset: auto 5% 7px;
+    height: 23px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--aura-light) 72%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--class-color) 46%, transparent);
   }
+}
+.standee.active .standee-aura { opacity: 1; }
+.standee-sparks {
+  inset: auto -16% 1px;
+  height: 39%;
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    bottom: 12%;
+    width: 4px;
+    height: 4px;
+    rotate: 45deg;
+    background: #fff3ce;
+    box-shadow: 0 0 7px 1px var(--aura-light), 6px -10px 0 -1px var(--aura-light);
+    animation: archive-aura-spark 1900ms ease-out infinite;
+  }
+  &::before { left: 4%; }
+  &::after { right: 3%; bottom: 23%; animation-delay: -870ms; }
+}
+.standee-landing {
+  inset: auto -27% -15px;
+  height: 45%;
+  background: radial-gradient(ellipse 49% 39% at 50% 78%, var(--aura-light), transparent);
+  animation: archive-landing-fade 590ms ease-out both;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 8% 5px;
+    height: 24px;
+    border: 2px solid var(--aura-light);
+    border-radius: 50%;
+    box-shadow: 0 0 9px var(--class-color);
+    animation: archive-landing-ring 590ms cubic-bezier(.18,.68,.31,1) both;
+  }
+}
+@keyframes archive-aura-spark {
+  from { translate: 0 5px; opacity: .2; }
+  28% { opacity: .9; }
+  to { translate: 0 -24px; opacity: 0; }
+}
+@keyframes archive-landing-fade {
+  from { opacity: 0; }
+  16% { opacity: .95; }
+  to { opacity: 0; }
+}
+@keyframes archive-landing-ring {
+  from { scale: .64 .75; }
+  to { scale: 1.38 1.14; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .standee-aura { transition: none; }
+  .standee-sparks::before, .standee-sparks::after, .standee-landing::after { animation: none; }
+  .standee-landing { animation-duration: 240ms; }
 }
 .portrait { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 23%; pointer-events: none; z-index: -2; }
 .portrait-fallback { display: grid; place-items: center; }

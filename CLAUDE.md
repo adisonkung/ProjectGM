@@ -26,6 +26,8 @@ The user explicitly requested deferring Mobile while pages are still being revis
 
 Follow-up: a shallower side angle and a level bottom edge keep standing portraits seated on their bases. Hover and selection use frame light with the same card geometry. See the updated comparison above.
 
+Formation bases now glow in the hero class color. Selecting a standee lights its ring and raises small sparks. A successful placement triggers a brief ring and localized glow at the destination. These decorative layers ignore pointer input, and reduced motion uses static selection accents and a short opacity fade. The native review includes a clip.
+
 ## Shared hero star art and size — Codex, 2026-11-26
 
 Branch `fix/shared-hero-stars` from `origin/master` at `5db296c`. The user requested matching the size of ordinary and six-star marks and using the gold hero-detail artwork throughout the game, then asked for a modest size increase. `HeroStars` gives each image the same square slot and adds the existing aura, sheen and glint at six stars. The collection uses 25px slots on Desktop (23px on narrower Desktop) and the detail overview uses 37px. The ascension panel gives lit and awakened art the same width. Compact island cards size their stars against the space needed for six. Stage ratings use the same gold art and an empty slot for each unearned star. Summon UI and the book's canvas cards use the shared asset, which is preloaded with the room. See `docs/reviews/shared-hero-stars/index.html`.

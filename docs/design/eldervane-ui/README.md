@@ -12,6 +12,8 @@ The user selected the latest desktop formation mockup with large standing cards,
 
 The follow-up straightens the in-game portraits and preserves a subtle visible card edge. The comparison includes the selected draft and the revised game image.
 
+The aura revision adds a class-colored base light, sparks on selection and a localized pulse when a placement succeeds. The comparison includes the native game clip and screenshots.
+
 ## Fighter visual size refinement — 2026-11-26
 
 The user approved enlarging the collection-card Fighter mark about14% to match the perceived weight of other classes. Fighter glyph41px; all others36px; glass slot48px unchanged. The user also requested removing the top-right square/check from Bai Long's card; the collection marker is removed without changing main-hero data. [Native before/after](../../reviews/fighter-icon-size/index.html). Approved B source art and other consumers retained.

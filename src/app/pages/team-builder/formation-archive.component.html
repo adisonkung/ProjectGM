@@ -69,6 +69,15 @@
                   [style.left.px]="anchor.x" [style.top.px]="anchor.y"
                   [style.--class-color]="classColors[hero.cls]" [class.active]="selected() === uid"
                   [class.drag-source]="draggingHero() === uid">
+                  <span class="standee-aura" aria-hidden="true"></span>
+                  @if (selected() === uid) {
+                    <span class="standee-sparks" aria-hidden="true"></span>
+                  }
+                  @for (pulse of landingPulses(); track pulse.id) {
+                    @if (pulse.cell === index) {
+                      <span class="standee-landing" aria-hidden="true"></span>
+                    }
+                  }
                   <button type="button" class="standee-card" [attr.data-card-cell]="index" [attr.aria-label]="'การ์ด ' + hero.name"
                     [attr.aria-pressed]="selected() === uid" (click)="selectCell(index)"
                     (pointerdown)="beginDrag($event, uid, true)">
