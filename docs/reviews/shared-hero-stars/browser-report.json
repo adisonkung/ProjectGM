@@ -1,0 +1,109 @@
+{
+  "rosterViewports": [
+    {
+      "width": 1670,
+      "height": 942,
+      "starWidth": 20,
+      "allStarWidthsEqual": true
+    },
+    {
+      "width": 1440,
+      "height": 860,
+      "starWidth": 20,
+      "allStarWidthsEqual": true
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "starWidth": 18.390625,
+      "allStarWidthsEqual": true
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "starWidth": 20,
+      "allStarWidthsEqual": true
+    }
+  ],
+  "measurements": {
+    "roster6": {
+      "file": "star_lit.webp",
+      "w": 20,
+      "h": 20,
+      "awake": true
+    },
+    "roster5": {
+      "file": "star_lit.webp",
+      "w": 20,
+      "h": 20,
+      "awake": false
+    },
+    "detail6": {
+      "file": "star_lit.webp",
+      "w": 27.75,
+      "h": 27.75,
+      "awake": true
+    },
+    "ascension6": {
+      "file": "star_lit.webp",
+      "w": 40.5,
+      "h": 40.5,
+      "awake": true
+    },
+    "detail5": {
+      "file": "star_lit.webp",
+      "w": 27.75,
+      "h": 27.75,
+      "awake": false
+    },
+    "ascension5": {
+      "file": "star_lit.webp",
+      "w": 40.5,
+      "h": 40.5,
+      "awake": false
+    },
+    "armory": {
+      "file": "star_lit.webp",
+      "w": 15.953125,
+      "h": 15.953125,
+      "awake": true
+    },
+    "island": {
+      "file": "star_lit.webp",
+      "w": 23.515625,
+      "h": 23.515625,
+      "awake": true
+    },
+    "dungeon": {
+      "file": "star_lit.webp",
+      "w": 10.5,
+      "h": 10.5,
+      "awake": false
+    },
+    "preparation": {
+      "file": "star_lit.webp",
+      "w": 15.671875,
+      "h": 15.671875,
+      "awake": true
+    },
+    "reward": {
+      "file": "star_lit.webp",
+      "w": 37,
+      "h": 37,
+      "awake": false
+    },
+    "pool": {
+      "file": "star_lit.webp",
+      "w": 21.265625,
+      "h": 21.265625,
+      "awake": false
+    },
+    "spotlight": {
+      "file": "star_lit.webp",
+      "w": 39.1875,
+      "h": 39.1875,
+      "awake": false
+    }
+  },
+  "webglSummon": "PASS WebGL summon card painted three shared stars using the preloaded image."
+}

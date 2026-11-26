@@ -1,5 +1,9 @@
 # Current Development State
 
+## Shared hero star art and size — Codex, 2026-11-26
+
+Branch `fix/shared-hero-stars` from `origin/master` at `5db296c`. The user requested matching the size of ordinary and six-star marks and using the gold hero-detail artwork throughout the game, then asked for a modest size increase. `HeroStars` gives each image the same square slot and adds the existing aura, sheen and glint at six stars. The collection uses 25px slots on Desktop (23px on narrower Desktop) and the detail overview uses 37px. The ascension panel gives lit and awakened art the same width. Compact island cards size their stars against the space needed for six. Stage ratings use the same gold art and an empty slot for each unearned star. Summon UI and the book's canvas cards use the shared asset, which is preloaded with the room. See `docs/reviews/shared-hero-stars/index.html`. Both TypeScript checks, all 1,109 unit tests and the optimized build passed. The build check skipped external font inlining because the environment returned HTTP 403 for Google Fonts. Desktop browser checks covered the four collection viewports, detail and ascension, formation, armory, island, battle preparation and results, dungeon ratings, summon panels and both the DOM and WebGL summon presentations.
+
 ## Authorized roster/icon merge to master — Codex, 2026-11-26
 
 The user explicitly requested push and merge to master. Remote reconciliation confirms clean task branch `feature/hero-roster-six-columns` at7ac153c, seven commits ahead of origin/master e753ad0 with no divergence. This integrates the80% collection body/six-column layout, larger toolbar, generated archive background, shared6★ shimmer, approved B class icons across consumers, colored glass card badges, Fighter optical sizing and removal of the card-corner check. Fast-forward integration requires no source conflict resolution.

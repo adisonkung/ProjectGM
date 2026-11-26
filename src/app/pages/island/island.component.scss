@@ -44,7 +44,12 @@ app-island-scene { position: absolute; inset: 0; }
 .party-power { padding-left:10px; gap:5px; small { display:none; } }
 .party-portrait { aspect-ratio:1; }
 .party-level { font-size:16px; }
-.party-stars { font-size:15px; }
+.party-stars {
+  font-size: 15px;
+  justify-content: center;
+  --hero-star-gap: 0px;
+  --hero-star-size: min(1.12em, calc(100% / 6));
+}
 .party-edit { right:18px; top:8px; width:42px; height:42px; }
 .destination { height:72px; padding:8px 12%; gap:8px; box-sizing:border-box; > app-citadel-icon { scale:.7; width:40px; } }
 .destination-copy { b { font-size:17px; } > span { font-size:14px; } }

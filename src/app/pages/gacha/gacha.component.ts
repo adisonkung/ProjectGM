@@ -1,3 +1,4 @@
+import { HeroStarsComponent } from '../../shared/hero-stars.component';
 import { SUMMON_SEALS, SUMMON_SEAL_COST } from '../../core/data/summon-seals';
 import { SummonButtonComponent } from './summon-button.component';
 import { CitadelIconComponent } from '../../shared/citadel-icon.component';
@@ -30,7 +31,7 @@ const FEATURED = { id: 'lucien', epithet: 'THE BLACK SAINT', latin: 'Lucien Valt
 @Component({
   selector: 'app-gacha',
   host: { class: 'summon-classic' },
-  imports: [SummonButtonComponent, CitadelIconComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonBookComponent],
+  imports: [HeroStarsComponent, SummonButtonComponent, CitadelIconComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonBookComponent],
   templateUrl: './gacha.component.html',
   styleUrl: './gacha.component.scss',
 })
@@ -143,5 +144,4 @@ export class GachaComponent {
     this.playing.set(true);
   }
   readonly portrait = (id: string) => heroArt(id)?.portrait;
-  readonly stars = (n: number) => '★'.repeat(n);
 }

@@ -1,3 +1,4 @@
+import { HeroStarsComponent } from '../../shared/hero-stars.component';
 import { summonCardBack } from './summon-card-art';
 import { SummonAltarComponent } from './summon-altar.component';
 import { SUMMON_TIMING } from './summon-cinematic';
@@ -14,7 +15,7 @@ type Phase = 'charge' | 'burst' | 'cards' | 'spotlight' | 'out';
 /** Presentation of a committed transaction. Skipping / revealing never rolls or spends again. */
 @Component({
   selector: 'app-summon-scene',
-  imports: [SummonAltarComponent, SummonFlightComponent, TowerOrnamentComponent, HeroPortraitComponent],
+  imports: [HeroStarsComponent, SummonAltarComponent, SummonFlightComponent, TowerOrnamentComponent, HeroPortraitComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './summon-scene.component.html',
   styleUrl: './summon-scene.component.scss',

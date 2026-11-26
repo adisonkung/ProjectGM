@@ -9,7 +9,7 @@
     @if (loading()) { <p class="loading" role="status">กำลังอัญเชิญ…</p> }
     <div class="cine" hidden>
       <p class="cine-quote"></p>
-      <div class="cine-ban"><img alt="" /><div class="cine-plate"><small class="cine-ep"></small><b class="cine-th"></b><span class="cine-en"></span><i aria-hidden="true">★ ★ ★</i></div></div>
+      <div class="cine-ban"><img alt="" /><div class="cine-plate"><small class="cine-ep"></small><b class="cine-th"></b><span class="cine-en"></span><app-hero-stars [count]="3" /></div></div>
       <span class="cine-tap">แตะเพื่อปิด</span>
     </div>
     @if (!finished()) { <button type="button" class="skip" (click)="skip()">ข้าม <span aria-hidden="true">»</span></button> }

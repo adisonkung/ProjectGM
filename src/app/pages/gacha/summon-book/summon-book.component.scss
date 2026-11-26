@@ -43,7 +43,7 @@
   small { font: 600 clamp(10px, 1.1vw, 15px) var(--display); letter-spacing: .28em; color: var(--gold); text-transform: uppercase; }
   b { font: 700 clamp(26px, 4.6vw, 60px)/1.15 'IBM Plex Sans Thai', sans-serif; text-shadow: 0 4px 24px rgba(0, 0, 0, .6); }
   span { font: 600 clamp(13px, 1.6vw, 22px) var(--display); letter-spacing: .22em; color: var(--gold-hi); text-transform: uppercase; }
-  i { font-style: normal; color: #ffcf7a; font-size: clamp(16px, 2vw, 26px); letter-spacing: .25em; text-shadow: 0 0 14px rgba(255, 190, 90, .8); margin-top: .2em; }
+  app-hero-stars { --hero-star-size: clamp(18px, 2.3vw, 32px); margin-top: .2em; }
   &::before { content: ''; position: absolute; left: -1.2em; top: .2em; bottom: .2em; width: 3px; background: linear-gradient(var(--gold), rgba(230, 200, 138, 0)); } }
 .cine-tap { position: absolute; bottom: 4%; right: 5%; color: var(--gold); font: 500 clamp(12px, 1.2vw, 15px) 'IBM Plex Sans Thai', sans-serif; letter-spacing: .1em; }
 

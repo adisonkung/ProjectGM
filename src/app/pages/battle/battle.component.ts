@@ -1,3 +1,4 @@
+import { HeroStarsComponent } from '../../shared/hero-stars.component';
 import { DecimalPipe } from '@angular/common';
 import { ThemedCutinComponent } from '../../shared/themed-cutin.component';
 import { ULTIMATE_CUTINS, UltimateCutinArt } from '../../core/data/ultimate-cutins';
@@ -72,7 +73,7 @@ const TICK = 0.05;
  */
 @Component({
   selector: 'app-battle',
-  imports: [BattleEntryComponent, ThemedCutinComponent, DecimalPipe, BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
+  imports: [HeroStarsComponent, BattleEntryComponent, ThemedCutinComponent, DecimalPipe, BattleEmblemComponent, A11yModule, TowerOrnamentComponent, CitadelIconComponent, CitadelFrameComponent, BoardComponent, PlacementComponent, PartyBarComponent, TeamPresetsComponent, IconComponent, RouterLink, HeroPortraitComponent, SlashTraceComponent],
   templateUrl: './battle.component.html',
   styleUrl: './battle.component.scss',
 })

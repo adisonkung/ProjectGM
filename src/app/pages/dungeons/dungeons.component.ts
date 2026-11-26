@@ -1,3 +1,4 @@
+import { HeroStarsComponent } from '../../shared/hero-stars.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -59,7 +60,7 @@ export const DUNGEON_TYPES: DungeonType[] = [
 /** Farm dungeons menu: one tab per dungeon type, each with its tiers (I–V) */
 @Component({
   selector: 'app-dungeons',
-  imports: [RouterLink, IconComponent, TowerOrnamentComponent, DungeonRewardIconComponent],
+  imports: [HeroStarsComponent, RouterLink, IconComponent, TowerOrnamentComponent, DungeonRewardIconComponent],
   templateUrl: './dungeons.component.html',
   styleUrl: './dungeons.component.scss',
 })

@@ -133,7 +133,7 @@
   h2 { margin: 0; font: 800 30px var(--title); letter-spacing: 0.06em; color: #ff9d95; display: flex; gap: 10px; align-items: baseline; justify-content: center; flex-wrap: wrap;
     small { font: 500 13px var(--body, inherit); color: var(--muted); } }
   .fail { margin: 0; color: var(--danger); font-weight: 600; }
-  .stars { margin: 0; font-size: 34px; color: var(--gold); letter-spacing: 4px; text-shadow: 0 0 14px #d9b464aa; span { color: #ffffff1c; text-shadow: none; } }
+  .stars { margin: 0; --hero-star-size: 37px; --hero-star-gap: 2px; }
   .facts { margin: 0; color: var(--muted); font-size: 13px; }
   .loot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; font-size: 13px;
     b { flex-basis: 100%; font: 700 13px var(--title); letter-spacing: 0.08em; color: var(--arcane-hi); }

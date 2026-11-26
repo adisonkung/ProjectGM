@@ -1,3 +1,4 @@
+import { HeroStarsComponent } from '../../../shared/hero-stars.component';
 import { SummonButtonComponent } from '../summon-button.component';
 import { IconComponent } from '../../../shared/icon.component';
 import { AfterViewInit, ChangeDetectionStrategy, Component, computed, ElementRef, input, OnChanges, OnDestroy, output, signal, viewChild } from '@angular/core';
@@ -30,7 +31,7 @@ export function bookCards(results: readonly SummonPull[]): BookCard[] {
  */
 @Component({
   selector: 'app-summon-book',
-  imports: [SummonSceneComponent, SummonButtonComponent, IconComponent],
+  imports: [HeroStarsComponent, SummonSceneComponent, SummonButtonComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './summon-book.component.html',
   styleUrl: './summon-book.component.scss',

@@ -182,7 +182,7 @@
               <h2><span class="result-title" [class.art-title]="o.win">{{ o.win ? 'ชัยชนะ' : o.result === 'timeout' ? 'หมดเวลา' : 'พ่ายแพ้' }}</span>@if (o.win) { <small>{{ mode() === 'tower' ? 'ชั้นที่ ' + floor() + ' สำเร็จ' : runTitle() }}</small> }</h2>
             </div>
             @if (o.failReason) { <p class="fail">ภารกิจล้มเหลว: {{ o.failReason }}</p> }
-            @if (reward()?.rating; as st) { <p class="stars" [attr.aria-label]="st + ' ดาว'">{{ '★'.repeat(st) }}<span>{{ '★'.repeat(3 - st) }}</span></p> }
+            @if (reward()?.rating; as st) { <app-hero-stars class="stars" [count]="st" [total]="3" /> }
 
             @if (reward(); as rw) {
               @if (rw.breakdown; as b) {

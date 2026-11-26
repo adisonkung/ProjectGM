@@ -15,6 +15,7 @@ import { Reflector } from 'three/addons/objects/Reflector.js';
 import { BOOK_ART as ART_KEYS } from './book-assets';
 import { BOOK_PORTRAITS, loadBookImage } from './book-preload';
 import { drawBookCardNames, preloadBookCardType } from './book-card-type';
+import { HERO_STAR_LIT } from '../../../shared/hero-star-art';
 
 /** one card of the pull, already resolved to display data */
 export interface BookCard { star: number; id: string; th: string; en: string; cls: string; epithet: string; quote: string; portrait: string; banner?: string }
@@ -31,6 +32,7 @@ const IMG = { ...Object.fromEntries(Object.entries(ART_KEYS).map(([k, f]) => [k,
 for (const c of opts.cards) IMG['por_' + c.id] = c.portrait;
 // Decode before allocating WebGL, then reuse the route-entry image objects without a second loader/request.
 const decoded = await Promise.all(Object.entries(IMG).map(async ([key, url]) => [key, await loadBookImage(url)]));
+const starArt = await loadBookImage(HERO_STAR_LIT);
 await preloadBookCardType();
 
 // ---------------------------------------------------------------- helpers
@@ -558,9 +560,12 @@ function cardFace(hero, star) { return canvasTex(800, 1200, (g, W, H) => { const
   // divider with a diamond
   const ln = g.createLinearGradient(W * .2, 0, W * .8, 0); ln.addColorStop(0, 'rgba(0,0,0,0)'); ln.addColorStop(.5, R.a); ln.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = ln; g.fillRect(W * .2, H - 128, W * .6, 2);
   g.fillStyle = R.a; g.save(); g.translate(W / 2, H - 127); g.rotate(Math.PI / 4); g.fillRect(-7, -7, 14, 14); g.restore();
-  // stars
-  for (let k = 0; k < star; k++) { const x = W / 2 + (k - (star - 1) / 2) * 62, y = H - 72; g.beginPath(); for (let j = 0; j < 10; j++) { const r = j % 2 ? 11 : 25, a = j * Math.PI / 5 - Math.PI / 2; g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } g.closePath();
-    const sg = g.createLinearGradient(x, y - 25, x, y + 25); sg.addColorStop(0, gold ? '#fff2c8' : '#f1f4f8'); sg.addColorStop(1, gold ? '#d39a3a' : '#8d96a3'); g.fillStyle = sg; g.fill(); }
+  // Use the hero detail art. Its transparent padding leaves a visible star about 54 px wide.
+  const starSize = 74;
+  for (let k = 0; k < star; k++) {
+    const x = W / 2 + (k - (star - 1) / 2) * 62;
+    g.drawImage(starArt, x - starSize / 2, H - 72 - starSize / 2, starSize, starSize);
+  }
   g.restore();
   // frame: a fine double line; gold foil with corner flourishes only for 3★
   const fr = g.createLinearGradient(0, 0, W, H); fr.addColorStop(0, R.a); fr.addColorStop(.5, R.b); fr.addColorStop(1, R.a);

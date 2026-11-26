@@ -233,7 +233,6 @@ export class HeroDetailComponent {
   readonly rarityName = RARITY_NAME;
   readonly slotTag: Record<SkillKind, string> = { skill: 'สกิล 1', skill2: 'สกิล 2', ult: 'ท่าไม้ตาย' };
   readonly errorText = (e: SkillUpgradeError | null) => (e ? UPGRADE_ERROR[e] : '');
-  readonly stars = (n: number) => '★'.repeat(n);
   readonly pct = (a: number, b: number) => Math.min(100, (a / Math.max(1, b)) * 100);
 
   private fmt(stat: EquipStat, v: number) {
