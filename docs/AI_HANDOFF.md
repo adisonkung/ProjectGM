@@ -1,5 +1,11 @@
 # Current Development State
 
+## Desktop Celestial Seal armory — Codex, 2026-11-26
+
+Branch `feature/armory-celestial-seal` starts from fetched `origin/master` at `c1a6cfb`. The runtime Desktop armory uses the approved generated seal, six ordered positions and 60–92 px medallions. The center shows live equipped totals until the player selects an inventory item. Compatible items can be equipped or moved from another hero after confirmation. Removal returns the item to the bag and shows its outline. The existing three real slots and save model back the page. Ring and necklace are appearances of the accessory slot. Helmet and artifact are illustrative positions. [Reference and in-game Desktop evidence](reviews/armory-celestial-seal/index.html).
+
+Both TypeScript checks, all 1,114 Karma tests and the optimized build passed. The build uses the existing external-font inlining override and reports a stylesheet size warning for the new Desktop layout. Production-browser checks at 1024 × 824, 1280 × 720, 1440 × 900 and 1920 × 1080 verified the socket geometry, filter and comparison flow, transfer confirmation, upgrade cost and removal. The last confirmed canonical-local synchronization base remains recorded below.
+
 ## Desktop team archive — Codex, 2026-11-26
 
 The user approved the latest team mockup for implementation. Task branch `feature/team-formation-archive` starts from fetched origin/master `85ba941`. The new desktop `/team` view shares Characters chrome, the archive artwork and B class icons. Large cards stand on projected points for the 18 live ally cells. The owned roster is a single paginated row with all six class shortcuts and a synced select. Existing team-position autosave, the five-hero limit, auto placement and named preset persistence use `TeamService`. The existing narrow layout and battle preparation still use `PlacementComponent`.

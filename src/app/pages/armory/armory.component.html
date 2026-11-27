@@ -1,3 +1,206 @@
+@if (desktop()) {
+<div class="celestial">
+  <div class="seal-header">
+    <app-collection-header heading="อุปกรณ์" subtitle="EQUIPMENT" headingId="celestial-title" />
+  </div>
+  <div class="seal-workbench" aria-labelledby="celestial-title">
+    <section class="seal-panel seal-equipped" aria-labelledby="seal-equipped-title">
+      <h2 class="seal-panel-title" id="seal-equipped-title">อุปกรณ์ที่สวมใส่</h2>
+      @if (hero(); as h) {
+        <div class="seal-identity">
+          <button type="button" (click)="changeHero(-1)" [disabled]="roster.heroes().length < 2" aria-label="ฮีโร่ก่อนหน้า">‹</button>
+          <div>
+            <h3>{{ roster.template(h).name }} <small>Lv.{{ h.level }}</small></h3>
+            <span><app-icon [name]="'class-' + roster.template(h).cls" [size]="14" />{{ className[roster.template(h).cls] }}</span>
+          </div>
+          <button type="button" (click)="changeHero(1)" [disabled]="roster.heroes().length < 2" aria-label="ฮีโร่ถัดไป">›</button>
+        </div>
+        <div class="seal-wheel" role="group" aria-label="วงแหวนอุปกรณ์">
+          <img class="seal-rune" src="/ui/armory/celestial-seal.webp" alt="" aria-hidden="true" />
+          <div class="seal-portrait">
+            @if (heroPortrait(); as portrait) { <img [src]="portrait" [alt]="roster.template(h).name" /> }
+            @else { <app-hero-portrait [heroId]="h.templateId" [size]="86" /> }
+          </div>
+          @for (spot of sealSlots; track spot.id) {
+            @let item = sealItem(spot.id);
+            <button type="button" class="seal-socket" [attr.data-slot]="spot.id" [class.is-empty]="!item"
+              [disabled]="!spot.slot" [attr.aria-pressed]="spot.slot ? sealFilter() === spot.id : null"
+              [attr.aria-label]="spot.label + (item ? ' · ' + name(item) : spot.slot ? ' · ช่องว่าง' : ' · ยังไม่เปิดใช้งาน')"
+              [attr.title]="spot.label + (!spot.slot ? ' · ยังไม่เปิดใช้งาน' : spot.slot === 'ACCESSORY' ? ' · ใช้ช่องเครื่องประดับร่วมกัน' : '')"
+              (click)="chooseSeal(spot.id)">
+              @if (item) {
+                <app-equipment-art [definitionId]="item.definitionId" [rarity]="item.rarity" [level]="item.upgradeLevel" [instanceId]="item.instanceId" context="medallion" />
+              } @else {
+                <span class="seal-sketch" [style.--sketch]="artMask(removedSealSketch()[spot.id] ?? spot.sketch)" aria-hidden="true"><i></i></span>
+              }
+              @if (sealPulse(); as pulse) {
+                @if (pulse.slot === spot.id) {
+                  @for (tick of [pulse.tick]; track tick) { <i class="seal-landing" aria-hidden="true"></i> }
+                }
+              }
+            </button>
+          }
+        </div>
+        <div class="seal-power"><span>พลังต่อสู้</span><strong>{{ roster.power(h).toLocaleString('en-US') }}</strong></div>
+        @if (stats(); as s) {
+          <dl class="seal-basics">
+            <div><app-icon name="equip-stat-atkPct" [size]="16" /><dd>{{ s.atk.toLocaleString('en-US') }}</dd><dt>ATK</dt></div>
+            <div><app-icon name="equip-stat-hpPct" [size]="16" /><dd>{{ s.hp.toLocaleString('en-US') }}</dd><dt>HP</dt></div>
+            <div><app-icon name="equip-stat-defPct" [size]="16" /><dd>{{ s.def.toLocaleString('en-US') }}</dd><dt>DEF</dt></div>
+            <div><app-icon name="equip-stat-attackSpeed" [size]="16" /><dd>{{ s.atkSpeed.toFixed(2) }}</dd><dt>AS</dt></div>
+          </dl>
+        }
+        <div class="seal-affixes">
+          @for (affix of equippedAffixes(); track affix) {
+            <span [attr.title]="affixDefinition(affix).description">✦ {{ affixDefinition(affix).name }}</span>
+          }
+        </div>
+      } @else {
+        <p class="seal-empty">ยังไม่มีฮีโร่</p>
+      }
+    </section>
+
+    <section class="seal-panel seal-detail" aria-labelledby="seal-detail-title">
+      <h2 class="seal-panel-title" id="seal-detail-title">รายละเอียด</h2>
+      @if (selected(); as item) {
+        @let owner = itemOwner(item);
+        <div class="seal-inspect">
+          <div class="seal-inspect-art">
+            <app-equipment-art [definitionId]="item.definitionId" [rarity]="item.rarity" [instanceId]="item.instanceId" context="medallion" />
+            @if (selectionPulse()) {
+              @for (tick of [selectionPulse()]; track tick) {
+                <i class="seal-inspect-flash" [attr.data-rarity]="item.rarity" aria-hidden="true"></i>
+              }
+            }
+          </div>
+          <div class="seal-inspect-copy">
+            <span class="seal-rank" [attr.data-rarity]="item.rarity">{{ rarityName[item.rarity] }} · {{ slotLabel[slotOf(item)] }}</span>
+            <h3>{{ name(item) }}</h3>
+            <progress class="seal-upgrade" [value]="item.upgradeLevel" [max]="cap(item)" [attr.aria-label]="'ตีบวก ' + item.upgradeLevel + ' จาก ' + cap(item)"></progress>
+            <span class="seal-owner">
+              @if (owner) { <app-hero-portrait [heroId]="owner.templateId" [size]="20" />{{ roster.template(owner).name }} สวมอยู่ }
+              @else { ยังไม่ได้สวมใส่ }
+            </span>
+          </div>
+        </div>
+        <div class="seal-item-stats">
+          @for (line of lines(item); track $index) {
+            <p class="seal-item-line" [class.major]="$first"><app-icon [name]="'equip-stat-' + line.stat" [size]="16" />{{ fmt(line) }}</p>
+          }
+        </div>
+        @if (item.affix; as affix) {
+          <div class="seal-affix">
+            <app-affix-icon [affixId]="affix" [rarity]="item.rarity" />
+            <strong>{{ affixName(item) }}</strong>
+          </div>
+        }
+        <div class="seal-compare-head">
+          <div><h3>เทียบกับชิ้นที่สวมอยู่</h3><small>{{ currentSealItem() ? name(currentSealItem()!) : 'ช่องนี้ยังว่าง' }}</small></div>
+          <button type="button" (click)="clearComparison()">ดูสเตตัสรวม</button>
+        </div>
+        @if (hasWeaponMismatch()) {
+          <p class="seal-warning">ฮีโร่สายนี้ใช้อาวุธนี้ไม่ได้</p>
+        } @else {
+          <div class="seal-table-scroll">
+            <table class="seal-stats" aria-label="สเตตัสก่อนและหลังเปลี่ยนอุปกรณ์">
+              <thead><tr><th scope="col">สเตตัส</th><th scope="col">ปัจจุบัน</th><th scope="col">หลังเปลี่ยน</th><th scope="col">ผลต่าง</th></tr></thead>
+              <tbody>
+                @for (row of sealStats(); track row.stat) {
+                  <tr><th scope="row"><app-icon [name]="'equip-stat-' + row.stat" [size]="13" />{{ row.label }}</th>
+                    <td>{{ row.current }}</td><td>{{ row.after }}</td>
+                    <td [class.up]="row.direction > 0" [class.down]="row.direction < 0">{{ row.delta }}</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        <div class="seal-actions">
+          @if (selectedWorn()) {
+            <button type="button" class="equip-action seal-detach" (click)="removeFromSeal(item)">ถอดอุปกรณ์</button>
+          } @else if (owner) {
+            <button type="button" class="equip-action" [disabled]="!usable(item)" (click)="pendingTransfer.set(item); transferDialog.showModal()">ย้ายมาสวมใส่</button>
+          } @else {
+            <button type="button" class="equip-action" [disabled]="!usable(item)" (click)="equipFromSeal(item)">สวมใส่</button>
+          }
+          <button type="button" (click)="upgradeFromSeal(item)" [disabled]="!canAdvance()"
+            [attr.title]="advanceCost() ? advanceCost()!.gold + ' ทอง · ' + advanceCost()!.ore + ' แร่' : 'ตีบวกเต็มแล้ว'">ตีบวก</button>
+          <button type="button" (click)="toggleLock(item)" [attr.aria-pressed]="item.locked" [attr.aria-label]="item.locked ? 'ปลดล็อกอุปกรณ์' : 'ล็อกอุปกรณ์'">{{ item.locked ? 'ปลดล็อก' : 'ล็อก' }}</button>
+          @if (!owner) {
+            <button type="button" (click)="pendingSale.set(item); saleDialog.showModal()" [disabled]="item.locked" aria-label="ขายอุปกรณ์"><app-icon name="coin" [size]="16" /></button>
+          }
+        </div>
+        @if (advanceCost(); as cost) { <small class="seal-cost">ตีบวก {{ cost.gold | number }} ทอง · {{ cost.ore | number }} แร่</small> }
+      } @else {
+        <div class="seal-totals-title">
+          <div><h3>สเตตัสรวม</h3><small>อุปกรณ์ที่สวมใส่อยู่</small></div><span>{{ wornCount() }} ชิ้น</span>
+        </div>
+        <div class="seal-table-scroll">
+          <table class="seal-stats" aria-label="สเตตัสรวมของอุปกรณ์ที่สวมใส่">
+            <thead><tr><th scope="col">สเตตัส</th><th scope="col">จากอุปกรณ์</th><th scope="col">รวมปัจจุบัน</th></tr></thead>
+            <tbody>
+              @for (row of sealStats(); track row.stat) {
+                <tr><th scope="row"><app-icon [name]="'equip-stat-' + row.stat" [size]="13" />{{ row.label }}</th>
+                  <td class="up">{{ row.gear }}</td><td>{{ row.total }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      @if (message()) { <p class="seal-message" role="status">{{ message() }}</p> }
+    </section>
+
+    <section class="seal-panel seal-library" aria-labelledby="seal-library-title">
+      <h2 class="seal-panel-title" id="seal-library-title">กระเป๋าอุปกรณ์</h2>
+      <div class="seal-categories" role="group" aria-label="ประเภทอุปกรณ์">
+        @for (spot of sealFilters; track spot.id) {
+          <button type="button" [attr.aria-pressed]="sealFilter() === spot.id" [disabled]="!spot.slot"
+            [attr.title]="!spot.slot ? 'ยังไม่เปิดใช้งาน' : spot.slot === 'ACCESSORY' ? 'ใช้ช่องเครื่องประดับร่วมกัน' : null" (click)="chooseSeal(spot.id)">
+            <img [src]="spot.sketch" alt="" />{{ spot.label }}
+          </button>
+        }
+      </div>
+      <div class="seal-owners" role="group" aria-label="ผู้สวมใส่">
+        @for (filter of ownerFilters; track filter.id) {
+          <button type="button" [attr.aria-pressed]="ownerFilter() === filter.id" (click)="chooseOwner(filter.id)">{{ filter.label }}</button>
+        }
+      </div>
+      <div class="seal-filter-row">
+        <div class="seal-rarities" role="group" aria-label="ระดับความหายาก">
+          <button type="button" [attr.aria-pressed]="rarityFilter() === 'all'" (click)="chooseRarity('all')">ทั้งหมด</button>
+          @for (rarity of rarities; track rarity) {
+            <button type="button" [attr.aria-label]="rarityName[rarity]" [attr.data-rarity]="rarity"
+              [attr.aria-pressed]="rarityFilter() === rarity" (click)="chooseRarity(rarity)">{{ rarityCode[rarity] }}</button>
+          }
+        </div>
+        <span>{{ sealBag().length }} ชิ้น</span>
+      </div>
+      <ul class="seal-inventory">
+        @for (item of sealBag(); track item.instanceId) {
+          @let owner = itemOwner(item);
+          <li><button type="button" class="seal-tile" [class.unusable]="!usable(item)" [attr.aria-pressed]="selectedId() === item.instanceId"
+            [attr.aria-label]="name(item) + (owner ? ' · ' + roster.template(owner).name : '')" [attr.title]="name(item)" (click)="selectSealItem(item)">
+            <app-equipment-art [definitionId]="item.definitionId" [rarity]="item.rarity" [instanceId]="item.instanceId" context="medallion" />
+            <b class="seal-level">+{{ item.upgradeLevel }}</b>
+            @if (owner) { <app-hero-portrait class="seal-tile-owner" [heroId]="owner.templateId" [size]="25" /> }
+            @if (item.locked) { <app-icon class="seal-tile-lock" name="lock" [size]="12" /> }
+            <small><app-icon [name]="'equip-stat-' + item.main.stat" [size]="12" />{{ itemMain(item) }}</small>
+          </button></li>
+        } @empty {
+          <li class="seal-empty bag-empty">ไม่พบอุปกรณ์ตามตัวกรอง</li>
+        }
+      </ul>
+      <div class="seal-library-actions">
+        <button type="button" [attr.aria-pressed]="sealFilter() === 'all'" (click)="chooseSeal('all')">ทุกประเภท</button>
+        <label><select [value]="sort()" (change)="sort.set($any($event.target).value)" aria-label="เรียงอุปกรณ์">
+          <option value="recent">ล่าสุด</option><option value="rarity">ระดับ</option><option value="upgrade">ตีบวก</option>
+        </select></label>
+        <a routerLink="/forge"><app-icon name="flame" [size]="15" />โรงตีเหล็ก</a>
+      </div>
+    </section>
+  </div>
+  <div class="seal-materials"><app-material-inventory /></div>
+</div>
+} @else {
 <section class="armory">
   <header class="head">
     <div><span class="eyebrow">THE ROYAL ARMORY</span><h1 class="gm-title">คลังอุปกรณ์</h1><p class="gm-sub">สวมใส่ เทียบค่า ล็อก และขายอุปกรณ์ · คราฟต์ / ตีบวก / ย่อย ที่โรงตีเหล็ก</p></div>
@@ -62,7 +265,7 @@
               @else { <p class="incompatible">ฮีโร่สายนี้ใช้อาวุธนี้ไม่ได้</p> }
               <button type="button" class="gm-btn primary equip-action citadel-surface citadel-control" (click)="equip(it)" [disabled]="!usable(it)"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" />สวมใส่</button>
             } @else { <p class="worn">สวมใส่อยู่กับ {{ roster.template(hero()!).name }}</p><button type="button" class="gm-btn equip-action citadel-surface citadel-control" (click)="unequip(slotOf(it))"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" />ถอดอุปกรณ์</button> }
-            <div class="detail-actions"><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="pendingSale.set(it); saleDialog.showModal()" [disabled]="it.locked || selectedWorn()"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" /><app-icon name="coin" [size]="14" /> ขาย</button><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="toggleLock(it)" [attr.aria-pressed]="it.locked"><app-citadel-frame shape="hex" [cut]="14" [crimson]="it.locked" [lacquer]="it.locked" /><app-icon name="lock" [size]="14" /> {{ it.locked ? 'ปลดล็อก' : 'ล็อก' }}</button></div>
+            <div class="detail-actions"><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="pendingSale.set(it); saleDialog.showModal()" [disabled]="it.locked || it.equippedHeroId !== null"><app-citadel-frame shape="hex" [cut]="14" [crimson]="false" [lacquer]="false" /><app-icon name="coin" [size]="14" /> ขาย</button><button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="toggleLock(it)" [attr.aria-pressed]="it.locked"><app-citadel-frame shape="hex" [cut]="14" [crimson]="it.locked" [lacquer]="it.locked" /><app-icon name="lock" [size]="14" /> {{ it.locked ? 'ปลดล็อก' : 'ล็อก' }}</button></div>
           </aside>
         } @else { <aside class="detail-empty"><app-icon name="gem" [size]="32" /><p>เลือกอุปกรณ์เพื่อดูค่าพลัง<br />และเปรียบเทียบก่อนสวมใส่</p></aside> }
       </div>
@@ -71,11 +274,26 @@
   <app-material-inventory />
 </section>
 
+}
+
 <dialog #saleDialog class="equipment-confirm citadel-surface" aria-labelledby="sale-title" (close)="pendingSale.set(null)"><app-citadel-frame [cut]="24" />
   @if (pendingSale(); as it) {
     <span class="eyebrow">SELL EQUIPMENT</span><h2 id="sale-title">ยืนยันการขายอุปกรณ์</h2>
     <div class="confirmation-art"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /></div>
     <h3>{{ name(it) }}</h3><p>ขายอุปกรณ์ชิ้นนี้ในราคา <strong>{{ price(it) }} ทอง</strong></p><p class="note">อุปกรณ์ชิ้นนี้จะถูกนำออกจากกระเป๋า</p>
     <div class="confirm-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="saleDialog.close()" autofocus><app-citadel-frame shape="hex" [cut]="14" />ยกเลิก</button><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="sell(it); saleDialog.close()" [disabled]="it.locked"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" />ยืนยันการขาย</button></div>
+  }
+</dialog>
+
+<dialog #transferDialog class="seal-transfer" aria-labelledby="seal-transfer-title" (close)="pendingTransfer.set(null)">
+  @if (pendingTransfer(); as item) {
+    <h2 id="seal-transfer-title">ย้ายอุปกรณ์</h2>
+    @if (itemOwner(item); as owner) {
+      <p>{{ name(item) }} จะย้ายจาก {{ roster.template(owner).name }} ไปยังฮีโร่ที่เลือก</p>
+    }
+    <div>
+      <button type="button" (click)="transferDialog.close()" autofocus>ยกเลิก</button>
+      <button type="button" (click)="finishTransfer(item); transferDialog.close()">ยืนยันการย้าย</button>
+    </div>
   }
 </dialog>
