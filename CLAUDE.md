@@ -923,3 +923,8 @@ The exclusive action now keeps the cut-in's rgba(8,5,5,.65) exposure until compl
 ## White screen flash removed (Codex, 2026-11-25)
 
 User requested no whole-screen white flicker. playImpactFeel no longer inserts/animates the white board overlay, including when legacy flashMs is authored. Shared battle/sprite-lab policy; hit-stop, shake, zoom, painted VFX and localized unit-hit feedback remain. No engine/clip/stat/art/save changes. App/spec checks and1107specs pass; a native1440×860 real Ultimate run observes zero white screen-wash nodes while impact events fire. New clip/reference pair/report: docs/reviews/no-screen-flash/index.html. Optimized production build passes with the existing external fonts:false workaround for Google Fonts403; existing warnings remain. No Mobile/master merge/deploy.
+
+
+## Desktop Celestial Seal armory — Codex, 2026-11-26
+
+`/armory` now uses the selected Celestial Seal layout on Desktop. The larger six-position illustration surrounds the hero portrait. The center opens on all equipped stat totals and compares only after an inventory choice. The bag includes worn items and filters by appearance, rarity and owner. A confirmed transfer and an unequip use the existing equipment rules, update the benefit display and return to the current totals. The generated seal is at `public/ui/armory/celestial-seal.webp`. The three native equipment slots and all gameplay data remain authoritative. [Visual evidence](docs/reviews/armory-celestial-seal/index.html).

@@ -6,6 +6,10 @@
 
 **กฎบังคับล่าสุด:** อ่าน [UI_REFERENCE_RULES.md](../../UI_REFERENCE_RULES.md) — ต้องทำให้ตรงแบบและส่งภาพอ้างอิงคู่กับ screenshot จริงทุกครั้ง ตามคำสั่งผู้ใช้ 25 ต.ค. 2026
 
+## Celestial Seal armory — 26 Nov 2026
+
+The selected Celestial Seal draft supersedes the Desktop armory portion of sheet 05. It uses the generated gold seal and six illustrated positions in the requested order, with 60–92 px sockets on Desktop. The center opens on live totals and compares only after an inventory selection. [Reference and in-game comparison](../../reviews/armory-celestial-seal/index.html).
+
 ## Team archive — 26 Nov 2026
 
 The user selected the latest desktop formation mockup with large standing cards, three colored lane groups, horizontal presets and roster, and six class shortcuts. It supersedes sheet 04's standalone formation design. [Selected mockup and native comparison](../../reviews/team-formation-archive/index.html).

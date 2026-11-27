@@ -42,8 +42,39 @@ describe('Armory selection and equipment actions', () => {
     const before = save.state(); c.sell(c.selected()!);
     expect(save.state()).toBe(before);
     c.toggleLock(c.selected()!); c.sell(c.selected()!); f.detectChanges();
-    expect(c.selected()!.instanceId).not.toBe(103);
+    expect(c.selected()).toBeNull();
     expect(save.state().equipment.some(i => i.instanceId === 103)).toBeFalse();
+  });
+
+  it('opens on current stats and keeps filter and slot actions out of comparison', () => {
+    const fixture = TestBed.createComponent(ArmoryComponent);
+    const armory = fixture.componentInstance;
+    expect(armory.selected()).toBeNull();
+    expect(armory.sealStats().length).toBeGreaterThan(10);
+    armory.chooseSeal('weapon');
+    armory.chooseRarity('RARE');
+    expect(armory.selected()).toBeNull();
+    armory.selectSealItem(armory.sealBag()[0]);
+    expect(armory.sealStats().some(row => row.direction > 0)).toBeTrue();
+    armory.chooseSeal('armor');
+    expect(armory.selected()).toBeNull();
+  });
+
+  it('returns to current stats after equipping and leaves a sketch after removing real gear', () => {
+    const fixture = TestBed.createComponent(ArmoryComponent);
+    const armory = fixture.componentInstance;
+    const item = armory.sealBag().find(entry => entry.instanceId === 101)!;
+    armory.selectSealItem(item);
+    armory.equipFromSeal(item);
+    const worn = armory.sealItem('weapon')!;
+    expect(worn.instanceId).toBe(item.instanceId);
+    expect(armory.selected()).toBeNull();
+    armory.selectSealItem(worn);
+    armory.removeFromSeal(worn);
+    expect(armory.sealItem('weapon')).toBeUndefined();
+    expect(armory.removedSealSketch().weapon).toContain('rare.webp');
+    expect(armory.sealBag().filter(entry => entry.instanceId === item.instanceId).length).toBe(1);
+    expect(armory.selected()).toBeNull();
   });
 
   it('filters and sorts presentation without changing the save', () => {
