@@ -1,7 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
-import { EquipmentInstance, EquipmentSlot, EquipStat, HuntTarget, Rarity } from '../models/equipment';
+import { EquipmentInstance, EquipmentSlot, EquipmentTier, EquipStat, GearSet, HuntTarget, OrdinarySlot, Rarity } from '../models/equipment';
 import {
-  compareGear, craft, craftRandom, dismantle, dismantleMany, EquipError, equip, sell, setLocked, unequipSlot, upgrade,
+  compareGear, craft, craftRandom, craftTier, dismantle, dismantleMany, EquipError, equip, sell, setLocked, unequipSlot, upgrade, upgradeTo,
 } from '../rules/equipment';
 import { SaveService } from './save.service';
 
@@ -21,7 +21,13 @@ export class EquipmentService {
 
   equip(heroUid: number, id: number) { return this.apply(equip(this.save.state(), heroUid, id)); }
   unequip(heroUid: number, slot: EquipmentSlot) { this.save.update(s => unequipSlot(s, heroUid, slot)); }
-  upgrade(id: number) { return this.apply(upgrade(this.save.state(), id)); }
+  upgrade(id: number, expected?: number) {
+    const state = this.save.state();
+    return this.apply(expected === undefined ? upgrade(state, id) : upgradeTo(state, id, expected, expected + 1, Math.random));
+  }
+  craftTier(tier: EquipmentTier, slot: OrdinarySlot, set: GearSet, rng = Math.random) {
+    return this.apply(craftTier(this.save.state(), tier, slot, set, rng));
+  }
   dismantle(id: number) { return this.apply(dismantle(this.save.state(), id)); }
   sell(id: number) { return this.apply(sell(this.save.state(), id)); }
   lock(id: number, locked: boolean) { return this.apply(setLocked(this.save.state(), id, locked)); }

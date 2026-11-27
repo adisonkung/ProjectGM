@@ -138,7 +138,7 @@ export const ISLAND_BUILDINGS: IslandBuildingDefinition[] = [
     visualStages: [st(0, 0, 'ฐานรากพังทลาย', 0), st(1, 6, 'โรงช่างเล็ก', 1), st(2, 8, 'โรงหลอมเต็มรูป', 2), st(3, 10, 'โรงหลอมเวทมนตร์', 3)],
     actions: [
       { label: 'คลังอุปกรณ์', route: '/armory', icon: 'armory', unlockFloor: 0 }, { label: 'โรงตีเหล็ก', route: '/forge', icon: 'flame', unlockFloor: 0 },
-      { label: 'Equipment Hunt', route: '/dungeons/hunt', icon: 'coin', unlockFloor: 3 },
+      { label: 'Equipment Hunt', route: '/dungeons/hunt', icon: 'coin', unlockFloor: 0 },
     ],
   },
   {

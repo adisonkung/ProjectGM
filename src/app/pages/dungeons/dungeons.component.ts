@@ -1,3 +1,4 @@
+import { ORDINARY_SLOTS, SLOT_NAMES } from '../../core/data/equipment-patch-one';
 import { HeroStarsComponent } from '../../shared/hero-stars.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -98,10 +99,10 @@ export class DungeonsComponent {
   readonly open = (d: FarmDungeonDefinition) => this.cleared() >= d.unlockFloor;
 
   // Hunt: favoured drop slot
-  readonly targets: HuntTarget[] = ['ANY', 'WEAPON', 'ARMOR', 'ACCESSORY'];
+  readonly targets: HuntTarget[] = ['ANY', ...ORDINARY_SLOTS];
   readonly freeGuardians = DEV_FLAGS.ascensionFreeChoice;
   readonly selectedGuardian = signal(ascensionBossFor());
   /** Future calendar retained behind the temporary free-choice flag. */
   readonly guardians = ASCENSION_BOSSES.map(id => ({ id, name: DUNGEON_MONSTERS[id].name, days: DEV_FLAGS.ascensionFreeChoice ? 'ทุกวัน' : ASCENSION_DAY_LABEL[id] }));
-  readonly targetLabel: Record<HuntTarget, string> = { ANY: 'ทุกช่อง', WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
+  readonly targetLabel: Record<HuntTarget, string> = { ANY: 'ทุกช่อง', ...SLOT_NAMES };
 }

@@ -22,13 +22,13 @@ import '../../src/testing/legacy-roster';
 import { BattleEngine } from '../../src/app/battle/engine/battle-engine';
 import { ENEMIES } from '../../src/app/core/data/enemies';
 import { BREAKTHROUGHS, FARM_BY_ID, FARM_DUNGEONS } from '../../src/app/core/data/economy';
-import { CLASS_BUILDS, CRAFT_RECIPES, GEAR_PROFILES, GearProfileId, RARITIES, SLOTS, WEAPON_DEF_OF, WEAPON_GROUP_OF } from '../../src/app/core/data/equipment';
+import { CLASS_BUILDS, CRAFT_RECIPES, GEAR_PROFILES, GearProfileId, RARITIES, LEGACY_SLOTS as SLOTS, WEAPON_DEF_OF, WEAPON_GROUP_OF } from '../../src/app/core/data/equipment';
 import { HERO_BY_ID } from '../../src/app/core/data/heroes';
 import { SKILL_PROFILES, SKILL_RANK_COSTS } from '../../src/app/core/data/skill-ranks';
 const rankDefCost = (rank: number) => SKILL_RANK_COSTS[rank]?.items ?? [];
 import { STAGES } from '../../src/app/core/data/stages';
 import { newGameState } from '../../src/app/core/data/starter';
-import { EquipmentInstance, EquipmentSlot, Rarity } from '../../src/app/core/models/equipment';
+import { EquipmentInstance, LegacyEquipmentSlot, Rarity } from '../../src/app/core/models/equipment';
 import { FarmDungeonDefinition } from '../../src/app/core/models/economy';
 import { GameState } from '../../src/app/core/models/game-state';
 import { HeroClass } from '../../src/app/core/models/hero';
@@ -80,7 +80,7 @@ interface Journey {
 }
 
 const rank = (r: Rarity) => RARITIES.indexOf(r);
-const defFor = (cls: HeroClass, slot: EquipmentSlot) => (slot === 'WEAPON' ? WEAPON_DEF_OF[WEAPON_GROUP_OF[cls]] : slot === 'ARMOR' ? 'guard_armor' : 'trinket');
+const defFor = (cls: HeroClass, slot: LegacyEquipmentSlot) => (slot === 'WEAPON' ? WEAPON_DEF_OF[WEAPON_GROUP_OF[cls]] : slot === 'ARMOR' ? 'guard_armor' : 'trinket');
 
 function journey(plan: Plan, seed: number): Journey {
   let s: GameState = newGameState();
@@ -109,7 +109,7 @@ function journey(plan: Plan, seed: number): Journey {
   let gi = 0; // gear goal index
   let si = 0; // skill profile index
   const gearGoal = () => GEAR_LADDER[Math.min(gi, GEAR_LADDER.length - 1)];
-  const fits = (i: EquipmentInstance, c: HeroClass, slot: EquipmentSlot, g: GearProfileId) => {
+  const fits = (i: EquipmentInstance, c: HeroClass, slot: LegacyEquipmentSlot, g: GearProfileId) => {
     const want = GEAR_PROFILES[g].pieces[slot];
     return slotOf(i) === slot && i.definitionId === defFor(c, slot) && i.main.stat === CLASS_BUILDS[c][slot].main &&
       rank(i.rarity) >= rank(want.rarity) && (!want.affix || !!i.affix || i.rarity === 'RARE');
@@ -212,6 +212,7 @@ function journey(plan: Plan, seed: number): Journey {
       const useful = core.some(uid => {
         const c = cls(uid);
         const slot = slotOf(i);
+        if (slot === 'HELMET' || slot === 'NECKLACE' || slot === 'RING') return false;
         const cur = hero(uid).gear?.[slot];
         return i.definitionId === defFor(c, slot) && i.main.stat === CLASS_BUILDS[c][slot].main && (!cur || score(i) > score(cur));
       });

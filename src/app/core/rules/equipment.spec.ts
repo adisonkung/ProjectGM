@@ -36,9 +36,9 @@ const ok = (r: { state: GameState } | { error: string }) => {
 
 describe('Equipment — items, stats, caps', () => {
   it('rarity rules: secondaries 0 / 1 / 1 / 1–2 / 2, affix from Rare, upgrade cap 6 / 8 / 10 / 10 / 10', () => {
-    expect(RARITIES.map(r => RARITY_RULES[r].secondaries)).toEqual([[0, 0], [1, 1], [1, 1], [1, 2], [2, 2]]);
-    expect(RARITIES.map(r => RARITY_RULES[r].affixChance > 0)).toEqual([false, false, true, true, true]);
-    expect(RARITIES.map(r => RARITY_RULES[r].upgradeCap)).toEqual([6, 8, 10, 10, 10]);
+    expect(RARITIES.filter(r => r !== 'LEGENDARY').map(r => RARITY_RULES[r].secondaries)).toEqual([[0, 0], [1, 1], [1, 1], [1, 2], [2, 2]]);
+    expect(RARITIES.filter(r => r !== 'LEGENDARY').map(r => RARITY_RULES[r].affixChance > 0)).toEqual([false, false, true, true, true]);
+    expect(RARITIES.filter(r => r !== 'LEGENDARY').map(r => RARITY_RULES[r].upgradeCap)).toEqual([6, 8, 10, 10, 10]);
     for (let seed = 0; seed < 30; seed++) {
       let x = seed / 30;
       const rng = () => (x = (x * 9301 + 0.49297) % 1);
@@ -55,7 +55,7 @@ describe('Equipment — items, stats, caps', () => {
   });
 
   it('weapon ATK at +10 per rarity stays in the spec bands (4–6 / 6–8 / 8–11 / 11–14 / 14–17 %) — rarity is not ×3', () => {
-    const at10 = RARITIES.map(r => mainValue(item('heavy_blade', r, 'atkPct', { level: 10 })));
+    const at10 = RARITIES.filter(r => r !== 'LEGENDARY').map(r => mainValue(item('heavy_blade', r, 'atkPct', { level: 10 })));
     expect(at10.map(v => Math.round(v * 1000) / 10)).toEqual([4.9, 7, 9.1, 11.2, 14]);
     expect(at10[4] / at10[2]).toBeLessThan(1.6);
   });
@@ -273,8 +273,8 @@ describe('Equipment Hunt', () => {
   const mode = { kind: 'TREASURE' as const, kills: 20, carriersKilled: 2, carriersTotal: 3, escaped: 1, strikes: 0, maxStrikes: 0, enraged: false };
   const run = (s: GameState) => ({ win: true, deaths: 2, time: 100, participants: s.team.map(t => t.uid), mode });
 
-  it('five tiers, unlock F3 / F4 / F5 / F7 / F8 (Hunt III before the F7 wall — no deadlock), safe farming deaths', () => {
-    expect(hunts.map(h => [h.id, h.unlockFloor])).toEqual([['hunt_1', 3], ['hunt_2', 4], ['hunt_3', 5], ['hunt_4', 7], ['hunt_5', 8]]);
+  it('five tiers, unlock at start / F2 / F4 / F6 / F8 (Hunt III before the F7 wall — no deadlock), safe farming deaths', () => {
+    expect(hunts.map(h => [h.id, h.unlockFloor])).toEqual([['hunt_1', 0], ['hunt_2', 2], ['hunt_3', 4], ['hunt_4', 6], ['hunt_5', 8]]);
     expect(hunts.every(h => h.deathRule === 'EVENT_KO')).toBeTrue();
     // Hunt III (unlocks before F7) must drop / craft Mid (Rare) gear; Hunt IV (before F8) Elite; Hunt V (before F9) Epic
     expect(FARM_BY_ID['hunt_3'].equipmentDrops!.rarityWeights.RARE).toBeGreaterThan(50);

@@ -28,9 +28,9 @@ export function heroStats(t: HeroTemplate, h: OwnedHero): Stats {
   // pipeline: Lv1 base (star resolved) → level growth → gear flat → gear % (once) → battle buffs (engine)
   return {
     ...base,
-    hp: Math.round(base.hp * starMul * (1 + lv * LEVEL_GROWTH.hp) * (1 + gear.hp)),
+    hp: Math.round((base.hp * starMul * (1 + lv * LEVEL_GROWTH.hp) + gear.hpFlat) * (1 + gear.hp)),
     atk: Math.round((base.atk * starMul * (1 + lv * LEVEL_GROWTH.atk) + gear.atkFlat) * (1 + gear.atk)),
-    def: Math.round(base.def * starMul * (1 + lv * LEVEL_GROWTH.def) * (1 + gear.def)),
+    def: Math.round((base.def * starMul * (1 + lv * LEVEL_GROWTH.def) + gear.defFlat) * (1 + gear.def)),
     atkSpeed: base.atkSpeed * (1 + gear.attackSpeed),
     moveSpeed: base.moveSpeed * (1 + gear.moveSpeed),
   };

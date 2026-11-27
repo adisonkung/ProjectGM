@@ -19,13 +19,14 @@ describe('Forge / dungeon menus / party bar', () => {
     }).compileComponents();
     const save = TestBed.inject(SaveService);
     save.reset();
-    save.update(s => ({ ...s, gold: 5000, inventory: { ...s.inventory, equip_frag_rare: 40 } }));
+    save.update(s => ({ ...s, gold: 5000, farm: { hunt_1: { clears: 1, firstClearDone: true, bestRating: 3 } }, inventory: { ...s.inventory, equip_frag_basic: 25 } }));
     const f = TestBed.createComponent(ForgeComponent);
     f.detectChanges();
+    f.componentInstance.pickSlot('ARMOR');
     f.componentInstance.craft();
     f.detectChanges();
     expect(save.state().equipment.length).toBe(1);
-    expect(save.state().equipment[0].definitionId).toBe('guard_armor');
+    expect(save.state().equipment[0].definitionId).toBe('forge_armor');
     expect((f.nativeElement as HTMLElement).querySelector('.result')).not.toBeNull();
   });
 

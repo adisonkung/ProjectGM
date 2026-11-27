@@ -30,7 +30,7 @@ export interface OwnedHero {
   /** skill ranks 1–5 per slot (missing = 1) */
   skillRanks?: Partial<Record<'skill' | 'skill2' | 'ult', number>>;
   /** equipped items per slot (the item lives here while equipped; `equippedHeroId` = this uid) */
-  gear?: Partial<Record<'WEAPON' | 'ARMOR' | 'ACCESSORY', import('./equipment').EquipmentInstance>>;
+  gear?: Partial<Record<import('./equipment').EquipmentSlot, import('./equipment').EquipmentInstance>>;
 }
 
 /** ค่าพลังที่ใช้ในการต่อสู้ */

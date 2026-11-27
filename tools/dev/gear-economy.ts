@@ -13,10 +13,10 @@ import '../../src/testing/legacy-roster';
  * Gear farming overlaps with levelling (it is played on the same days) — times here are Hunt time only.
  */
 import { FARM_BY_ID } from '../../src/app/core/data/economy';
-import { CLASS_BUILDS, CRAFT_RECIPES, GEAR_PROFILES, GearProfileId, RARITIES, SLOTS, WEAPON_DEF_OF, WEAPON_GROUP_OF } from '../../src/app/core/data/equipment';
+import { CLASS_BUILDS, CRAFT_RECIPES, GEAR_PROFILES, GearProfileId, RARITIES, LEGACY_SLOTS as SLOTS, WEAPON_DEF_OF, WEAPON_GROUP_OF } from '../../src/app/core/data/equipment';
 import { HERO_BY_ID } from '../../src/app/core/data/heroes';
 import { newGameState } from '../../src/app/core/data/starter';
-import { EquipmentInstance, EquipmentSlot, Rarity } from '../../src/app/core/models/equipment';
+import { EquipmentInstance, LegacyEquipmentSlot, Rarity } from '../../src/app/core/models/equipment';
 import { GameState } from '../../src/app/core/models/game-state';
 import { HeroClass } from '../../src/app/core/models/hero';
 import { craft, dismantle, equip, slotOf, upgrade } from '../../src/app/core/rules/equipment';
@@ -32,7 +32,7 @@ const GOALS: { id: GearProfileId; hunt: string }[] = [
   { id: 'BASIC', hunt: 'hunt_2' }, { id: 'MID', hunt: 'hunt_3' }, { id: 'GOOD', hunt: 'hunt_4' }, { id: 'VERY_GOOD', hunt: 'hunt_5' },
 ];
 const rank = (r: Rarity) => RARITIES.indexOf(r);
-const defFor = (cls: HeroClass, slot: EquipmentSlot) => (slot === 'WEAPON' ? WEAPON_DEF_OF[WEAPON_GROUP_OF[cls]] : slot === 'ARMOR' ? 'guard_armor' : 'trinket');
+const defFor = (cls: HeroClass, slot: LegacyEquipmentSlot) => (slot === 'WEAPON' ? WEAPON_DEF_OF[WEAPON_GROUP_OF[cls]] : slot === 'ARMOR' ? 'guard_armor' : 'trinket');
 
 interface Result { reached: Partial<Record<GearProfileId, { h: number; day: number; runs: number; crafted: number; dropped: number }>>; runs: number; hours: number; goldShort: number }
 
@@ -46,7 +46,7 @@ function simulate(plan: number | 'bonus'): Result {
   let seconds = 0;
   let crafted = 0;
   let dropped = 0;
-  const fits = (i: EquipmentInstance, c: HeroClass, slot: EquipmentSlot, g: GearProfileId) => {
+  const fits = (i: EquipmentInstance, c: HeroClass, slot: LegacyEquipmentSlot, g: GearProfileId) => {
     const want = GEAR_PROFILES[g].pieces[slot];
     // wanted affix: Elite / Epic always carry one; a Rare without the 35 % affix roll still counts (its affix is a bonus)
     return slotOf(i) === slot && i.definitionId === defFor(c, slot) && i.main.stat === CLASS_BUILDS[c][slot].main && rank(i.rarity) >= rank(want.rarity) && (!want.affix || !!i.affix || i.rarity === 'RARE');
@@ -101,6 +101,7 @@ function simulate(plan: number | 'bonus'): Result {
       const useful = core.some(uid => {
         const c = cls(uid);
         const slot = slotOf(i);
+        if (slot === 'HELMET' || slot === 'NECKLACE' || slot === 'RING') return false;
         const cur = s.heroes.find(h => h.uid === uid)!.gear?.[slot];
         return i.definitionId === defFor(c, slot) && i.main.stat === CLASS_BUILDS[c][slot].main && (!cur || score(i) > score(cur));
       });
@@ -115,13 +116,13 @@ function simulate(plan: number | 'bonus'): Result {
     return cur && fits(cur, cls(uid), slot, g) && cur.upgradeLevel >= Math.min(GEAR_PROFILES[g].pieces[slot].level, 10);
   }));
   /** the slot the team still misses most (Hunt target pool) */
-  const target = (g: GearProfileId): EquipmentSlot => {
-    const miss: Record<EquipmentSlot, number> = { WEAPON: 0, ARMOR: 0, ACCESSORY: 0 };
+  const target = (g: GearProfileId): LegacyEquipmentSlot => {
+    const miss: Record<typeof SLOTS[number], number> = { WEAPON: 0, ARMOR: 0, ACCESSORY: 0 };
     for (const uid of core) for (const slot of SLOTS) {
       const cur = s.heroes.find(h => h.uid === uid)!.gear?.[slot];
       if (!cur || !fits(cur, cls(uid), slot, g)) miss[slot]++;
     }
-    return (Object.entries(miss).sort((a, b) => b[1] - a[1])[0][0]) as EquipmentSlot;
+    return (Object.entries(miss).sort((a, b) => b[1] - a[1])[0][0]) as LegacyEquipmentSlot;
   };
   let gi = 0;
   for (let day = 1; day <= 2000 && gi < GOALS.length; day++) {

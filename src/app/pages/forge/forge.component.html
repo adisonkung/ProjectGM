@@ -15,35 +15,54 @@
   <div id="forge-panel" role="tabpanel" [attr.aria-labelledby]="'forge-tab-' + tab()">
   @switch (tab()) {
     @case ('craft') {
-      <div class="craft {{ craftRarity().toLowerCase() }}">
+      <div class="craft" [class]="displayRarity().toLowerCase()">
         <section class="steps equipment-panel citadel-surface" aria-label="เลือกสูตรสร้างอุปกรณ์"><app-citadel-frame [cut]="28" />
-          <h2 class="gm-h2"><app-icon name="summon" [size]="26" />เลือกระดับความหายาก</h2>
-          <div class="rarities">
-            @for (r of recipes; track r.rarity) {
-              <button type="button" class="rar {{ r.rarity.toLowerCase() }} citadel-surface" [attr.aria-pressed]="craftRarity() === r.rarity" (click)="pickRarity(r.rarity)"><app-citadel-frame [cut]="16" /><i class="rarity-wash" aria-hidden="true"></i><app-icon name="summon" [size]="25" /><b>{{ rarityName[r.rarity] }}</b></button>
-            }
-          </div>
-          <div class="forge-divider" aria-hidden="true"><i></i></div>
-          <h2 class="gm-h2"><app-icon name="summon" [size]="26" />เลือกประเภทอุปกรณ์</h2>
-          <div class="slot-types">@for (s of slots; track s) { <button type="button" class="gm-btn ghost citadel-surface" [attr.aria-pressed]="slotFilter() === s" (click)="pickSlot(s)"><app-citadel-frame [cut]="13" [crimson]="slotFilter() === s" [lacquer]="slotFilter() === s" /><app-icon [name]="slotIcon[s]" [size]="24" />{{ slotLabel[s] }}</button> }</div>
-          <div class="random-craft-note citadel-surface"><app-citadel-frame [cut]="16" /><app-icon name="summon" [size]="28" /><div><b>สุ่มอุปกรณ์และค่าสถานะ</b><p>สุ่มชนิดอุปกรณ์ ค่าหลัก ค่ารอง และคุณสมบัติตามระดับที่เลือก</p></div><span aria-hidden="true">⤨</span></div>
-          @if (slotFilter() === 'ACCESSORY') { <div class="adornment-preview"><small>ดูตัวอย่างเครื่องประดับ</small><div><button type="button" [attr.aria-pressed]="accessoryPreview() === 'necklace' && !crafted()" (click)="pickAdornment('necklace')">สร้อย</button><button type="button" [attr.aria-pressed]="accessoryPreview() === 'ring' && !crafted()" (click)="pickAdornment('ring')">แหวน</button></div><small>ภาพตัวอย่าง · ผลที่ได้รับแสดงหลังสร้าง</small></div> }
+          <h2 class="gm-h2">เลือก Tier</h2>
+          <div class="rarities">@for (tier of tiers; track tier) {
+            <button type="button" class="rar citadel-surface" [attr.aria-pressed]="craftTier() === tier" (click)="pickTier(tier)">
+              <app-citadel-frame [cut]="16" /><b>T{{ tier }}</b><small>{{ tierUnlocked(tier) ? tierData[tier].name : '🔒' }}</small>
+            </button>
+          }</div>
+          <h2 class="gm-h2">เลือกช่องอุปกรณ์</h2>
+          <div class="slot-types">@for (slot of slots; track slot) {
+            <button type="button" class="gm-btn ghost citadel-surface" [attr.aria-pressed]="slotFilter() === slot" (click)="pickSlot(slot)">
+              <app-citadel-frame [cut]="13" [crimson]="slotFilter() === slot" /><app-icon [name]="slotIcon[slot]" [size]="21" />{{ slotLabel[slot] }}
+            </button>
+          }</div>
+          <h2 class="gm-h2">เลือกเซ็ต</h2>
+          <div class="slot-types">@for (set of sets; track set) {
+            <button type="button" class="gm-btn ghost citadel-surface" [attr.aria-pressed]="craftSet() === set" (click)="pickSet(set)">
+              <app-citadel-frame [cut]="13" [crimson]="craftSet() === set" /><app-icon [name]="'equip-stat-' + setData[set].stat" [size]="18" />{{ setData[set].name }}
+            </button>
+          }</div>
         </section>
         <section class="forge-stage" aria-label="ภาพอุปกรณ์เหนือแท่นหลอม">
           <span class="stage-heading citadel-surface"><app-citadel-frame shape="hex" [cut]="17" />{{ crafted() ? 'หลอมสร้างสำเร็จ' : 'ภาพตัวอย่างอุปกรณ์' }}</span>
-          <button type="button" class="stage-item" (click)="artDialog.showModal()" aria-label="ดูภาพอุปกรณ์ขนาดใหญ่"><app-equipment-art [definitionId]="displayBase()" [rarity]="displayRarity()" [instanceId]="crafted()?.instanceId ?? null" [appearance]="!crafted() && slotFilter() === 'ACCESSORY' ? accessoryPreview() : null" context="forge" /></button>
+          <button type="button" class="stage-item" (click)="artDialog.showModal()" aria-label="ดูภาพอุปกรณ์ขนาดใหญ่"><app-equipment-art [definitionId]="displayBase()" [rarity]="displayRarity()" [instanceId]="crafted()?.instanceId ?? null" [tier]="craftTier()" context="forge" /></button>
           <div class="forge-seal" aria-hidden="true"><i></i><i></i><i></i></div>
-          <div class="stage-name citadel-surface"><app-citadel-frame shape="hex" [cut]="24" /><small>{{ crafted() ? name(crafted()!) : 'สุ่ม' + slotLabel[slotFilter()] }}</small><strong>{{ rarityName[displayRarity()] }}</strong></div>
+          <div class="stage-name citadel-surface"><app-citadel-frame shape="hex" [cut]="24" /><small>{{ crafted() ? name(crafted()!) : 'สุ่ม' + slotLabel[slotFilter()] }}</small><strong>T{{ craftTier() }} · {{ recipe().name }}</strong></div>
         </section>
         <section class="anvil equipment-panel citadel-surface" aria-label="รายละเอียดสูตรและสร้างอุปกรณ์"><app-citadel-frame [cut]="28" />
-          <h2 class="recipe-title"><app-icon name="summon" [size]="29" /><span>สร้าง{{ slotLabel[slotFilter()] }}ระดับ <b>{{ rarityName[craftRarity()] }}</b></span></h2>
-          <div class="recipe-facts citadel-surface"><app-citadel-frame [cut]="17" /><p><app-icon name="summon" [size]="24" />สุ่มชนิด{{ slotLabel[slotFilter()] }}</p><p><app-icon name="summon" [size]="24" />สุ่มค่าสถานะหลัก</p><p><app-icon name="summon" [size]="24" />สุ่มค่ารองและคุณสมบัติ</p></div>
-          <div class="forge-divider" aria-hidden="true"><i></i></div>
+          <h2 class="recipe-title">T{{ craftTier() }} · {{ slotLabel[slotFilter()] }} · {{ setData[craftSet()].name }}</h2>
+          <div class="recipe-facts citadel-surface"><app-citadel-frame [cut]="17" />
+            @for (rarity of rolls; track rarity) {
+              <p>{{ rarityName[rarity] }} <b>{{ recipe().craft[$index] }}%</b></p>
+            }
+          </div>
+          @if (!tierUnlocked(craftTier())) { <p class="miss">ต้องผ่าน Hunt {{ craftTier() }}{{ recipe().floor ? ' และผ่านหอคอย F' + recipe().floor : '' }}</p> }
           <h3 class="cost-title">วัตถุดิบที่ต้องใช้</h3>
-          <div class="cost"><div class="cost-row citadel-surface" [class.miss]="fragsHave() < recipe().fragments"><app-citadel-frame [cut]="13" /><app-icon [name]="recipe().fragmentId" [size]="44" /><span>เศษอุปกรณ์ <em>{{ fragmentTier() }}</em><small>มี {{ fragsHave().toLocaleString() }} ชิ้น</small></span><b>{{ recipe().fragments }} <small>ชิ้น</small></b></div><div class="cost-row citadel-surface" [class.miss]="gold() < recipe().gold"><app-citadel-frame [cut]="13" /><app-icon name="coin" [size]="42" /><span>ทอง<small>มี {{ gold().toLocaleString() }}</small></span><b>{{ recipe().gold.toLocaleString() }}</b></div></div>
-          <button type="button" class="gm-btn primary big craft-action citadel-surface" [disabled]="!canCraft()" (click)="craft()"><app-citadel-frame shape="hex" [cut]="23" [crimson]="true" [lacquer]="true" /><app-icon name="craft" [size]="34" /><span>หลอมสร้าง</span><app-icon name="arrow" [size]="22" /></button>
-          <small class="result-note">ผลลัพธ์จะแสดงหลังสร้าง</small>
-          @if (crafted(); as c) { <div class="result"><small>ได้รับ</small><b>{{ name(c) }}</b><span>{{ lines(c).join(' · ') }}</span>@if (c.affix) { <p class="affix"><app-affix-icon [affixId]="c.affix" [rarity]="c.rarity" /><span>{{ affixName(c) }}</span></p> }<a class="gm-btn small" routerLink="/armory">ดูในกระเป๋า<app-icon name="arrow" [size]="16" /></a></div> }
+          <div class="cost">
+            <div class="cost-row citadel-surface" [class.miss]="fragsHave() < recipe().fragments"><app-citadel-frame [cut]="13" />
+              <app-icon name="crystal" [size]="28" /><span>{{ itemName(recipe().material) }}<small>มี {{ fragsHave().toLocaleString() }} ชิ้น</small></span><b>{{ recipe().fragments }}</b>
+            </div>
+            <div class="cost-row citadel-surface" [class.miss]="gold() < recipe().gold"><app-citadel-frame [cut]="13" />
+              <app-icon name="coin" [size]="28" /><span>ทอง<small>มี {{ gold().toLocaleString() }}</small></span><b>{{ recipe().gold.toLocaleString() }}</b>
+            </div>
+          </div>
+          <button type="button" class="gm-btn primary big craft-action citadel-surface" [disabled]="!canCraft()" (click)="craft()">
+            <app-citadel-frame shape="hex" [cut]="23" [crimson]="true" /><app-icon name="craft" [size]="34" />หลอมสร้าง
+          </button>
+          @if (crafted(); as item) { <div class="result"><small>ได้รับ</small><b>{{ name(item) }}</b><span>{{ setData[craftSet()].name }} · {{ lines(item).join(' · ') }}</span><a class="gm-btn small" routerLink="/armory">ดูในกระเป๋า</a></div> }
         </section>
       </div>
     }
@@ -60,7 +79,7 @@
             @let it = x.item;
             <li class="r {{ it.rarity.toLowerCase() }}" [class.selected]="selectedEnhance()?.item?.instanceId === it.instanceId">
               <button type="button" class="enhance-pick" (click)="selectedEnhanceId.set(it.instanceId)" [attr.aria-pressed]="selectedEnhance()?.item?.instanceId === it.instanceId" [attr.aria-label]="'เลือกตีบวก ' + name(it)"><app-citadel-frame [cut]="14" [crimson]="selectedEnhance()?.item?.instanceId === it.instanceId" [lacquer]="selectedEnhance()?.item?.instanceId === it.instanceId" />
-                <span class="gi"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /></span>
+                <span class="gi"><app-equipment-art [definitionId]="it.definitionId" [tier]="it.tier ?? null" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /></span>
                 <b class="nm">{{ name(it) }}</b><small>{{ lines(it).join(' · ') }}</small>
                 @if (x.wearer) { <small class="worn">สวมอยู่: {{ x.wearer }}</small> }
               </button>
@@ -71,9 +90,11 @@
       <aside class="equipment-panel enhancement-preview citadel-surface" aria-label="รายละเอียดการตีบวก"><app-citadel-frame [cut]="24" />
         <span class="eyebrow">EQUIPMENT ENHANCEMENT</span><h2 class="gm-h2">ตีบวกอุปกรณ์</h2>
         @if (selectedEnhance(); as x) { @let it = x.item;
-          <div class="enhancement-art"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" context="inspect" /></div>
+          <div class="enhancement-art"><app-equipment-art [definitionId]="it.definitionId" [tier]="it.tier ?? null" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" context="inspect" /></div>
           <h3>{{ name(it) }}</h3><span class="gm-chip gold">{{ rarityName[it.rarity] }} · สูงสุด +{{ cap(it) }}</span>
           @if (x.wearer) { <p class="note">สวมอยู่: {{ x.wearer }}</p> }
+          @if (it.set; as set) { <p>{{ setData[set].name }}</p> }
+          @if (nextRoll(it); as milestone) { <p>สุ่มเพิ่มค่ารองเดิมหนึ่งค่าเมื่อถึง +{{ milestone }}</p> }
           @if (it.affix) { <p class="affix"><app-affix-icon [affixId]="it.affix" [rarity]="it.rarity" /><span>{{ affixName(it) }}</span></p> }<div class="upgrade-comparison"><div><small>ปัจจุบัน +{{ it.upgradeLevel }}</small>@for (l of lines(it); track $index) { <b>{{ l }}</b> }</div><app-icon name="arrow" [size]="24" /><div><small>{{ cost(it) ? 'หลังตีบวก +' + (it.upgradeLevel + 1) : 'ระดับสูงสุด' }}</small>@for (l of upgradePreview(it); track $index) { <b>{{ l }}</b> }</div></div>
           @if (cost(it); as c) {
             <div class="enhancement-cost"><span [class.miss]="ore() < c.ore"><app-icon name="enhancement_ore" [size]="26" />Enhancement Ore <b>{{ ore() }} / {{ c.ore }}</b></span><span [class.miss]="gold() < c.gold"><app-icon name="coin" [size]="26" />ทอง <b>{{ gold() }} / {{ c.gold }}</b></span></div>
@@ -91,7 +112,7 @@
           <ul class="items">
             @for (it of salvageList(); track it.instanceId) {
               <li class="r salvage-item {{ it.rarity.toLowerCase() }}"><app-citadel-frame [cut]="12" />
-                <label class="salvage-check"><input type="checkbox" [checked]="selectedSalvageIds().has(it.instanceId) && !it.locked" [disabled]="it.locked" (change)="toggleSalvage(it, $any($event.target).checked)" [attr.aria-label]="'เลือกย่อย ' + name(it)" /><span class="gi"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /></span><span class="info"><b class="nm">{{ name(it) }}</b><small>ได้: {{ dismantleText(it) }}</small>@if (it.locked) { <small>ล็อกอยู่ · ไม่สามารถเลือกย่อย</small> }</span></label>
+                <label class="salvage-check"><input type="checkbox" [checked]="selectedSalvageIds().has(it.instanceId) && !it.locked" [disabled]="it.locked" (change)="toggleSalvage(it, $any($event.target).checked)" [attr.aria-label]="'เลือกย่อย ' + name(it)" /><span class="gi"><app-equipment-art [definitionId]="it.definitionId" [tier]="it.tier ?? null" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" /></span><span class="info"><b class="nm">{{ name(it) }}</b><small>ได้: {{ dismantleText(it) }}</small>@if (it.locked) { <small>ล็อกอยู่ · ไม่สามารถเลือกย่อย</small> }</span></label>
                 <button type="button" class="gm-btn small ghost citadel-surface citadel-control" (click)="toggleLock(it)" [attr.aria-label]="it.locked ? 'ปลดล็อก' : 'ล็อก'"><app-citadel-frame shape="hex" [cut]="12" [crimson]="it.locked" [lacquer]="it.locked" /><app-icon name="lock" [size]="16" /></button>
               </li>
             } @empty { <li class="none">กระเป๋าว่าง</li> }
@@ -112,4 +133,4 @@
   <div class="confirm-actions"><button type="button" class="gm-btn citadel-surface citadel-control" (click)="dismantleDialog.close()" autofocus><app-citadel-frame shape="hex" [cut]="14" />ยกเลิก</button><button type="button" class="gm-btn primary citadel-surface citadel-control" (click)="confirmDismantle(); dismantleDialog.close()" [disabled]="!pendingDismantleIds().length"><app-citadel-frame shape="hex" [cut]="14" [crimson]="true" [lacquer]="true" />ยืนยันการย่อย</button></div>
 </dialog>
 
-<dialog #artDialog class="equipment-art-dialog" aria-label="ภาพอุปกรณ์ขนาดใหญ่" (click)="$event.target === artDialog && artDialog.close()"><button type="button" class="art-dialog-close" (click)="artDialog.close()" aria-label="ปิดภาพอุปกรณ์"><app-icon name="close" [size]="24" /></button><small>{{ crafted() ? 'อุปกรณ์ที่ได้รับ' : 'ภาพตัวอย่าง' }} · {{ rarityName[displayRarity()] }}</small><div class="dialog-art"><app-equipment-art [definitionId]="displayBase()" [rarity]="displayRarity()" [instanceId]="crafted()?.instanceId ?? null" [appearance]="!crafted() && slotFilter() === 'ACCESSORY' ? accessoryPreview() : null" context="inspect" /></div><p>{{ crafted() ? name(crafted()!) : slotLabel[slotFilter()] }}</p></dialog>
+<dialog #artDialog class="equipment-art-dialog" aria-label="ภาพอุปกรณ์ขนาดใหญ่" (click)="$event.target === artDialog && artDialog.close()"><button type="button" class="art-dialog-close" (click)="artDialog.close()" aria-label="ปิดภาพอุปกรณ์"><app-icon name="close" [size]="24" /></button><small>{{ crafted() ? 'อุปกรณ์ที่ได้รับ' : 'ภาพตัวอย่าง' }} · {{ rarityName[displayRarity()] }}</small><div class="dialog-art"><app-equipment-art [definitionId]="displayBase()" [rarity]="displayRarity()" [instanceId]="crafted()?.instanceId ?? null" [tier]="craftTier()" context="inspect" /></div><p>{{ crafted() ? name(crafted()!) : slotLabel[slotFilter()] }}</p></dialog>

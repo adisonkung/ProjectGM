@@ -1,3 +1,4 @@
+import { ORDINARY_SLOTS, PATCH_BASE, EQUIPMENT_TIERS, TIER_CONFIG } from '../data/equipment-patch-one';
 /**
  * Bag (Home → กระเป๋า, user 2026-11-24): read-only view of everything the player holds, split into category tabs.
  * Pure: builds slots from GameState, splits stacks at BAG_STACK_LIMIT, and the dev-only test seed.
@@ -10,7 +11,7 @@ import { SUMMON_SEALS } from '../data/summon-seals';
 import { ItemKind } from '../models/economy';
 import { EquipmentInstance, Rarity } from '../models/equipment';
 import { GameState } from '../models/game-state';
-import { rollItem } from './equipment';
+import { rollItem, rollTierItem } from './equipment';
 
 export const BAG_STACK_LIMIT = 999;
 
@@ -49,7 +50,7 @@ const KIND_USE: Record<ItemKind, BagUse> = {
 };
 
 const ROMAN = ['', 'I', 'II', 'III'];
-const FRAG_TIER: Record<string, string> = { basic: 'ธรรมดา', rare: 'หายาก', elite: 'ชั้นยอด', epic: 'มหากาพย์' };
+
 const EQUIP_TH: Record<string, string> = {
   heavy_blade: 'ดาบหนัก', twin_daggers: 'มีดคู่', longbow: 'ธนูยาว', focus_staff: 'คทาสมาธิ', guard_armor: 'เกราะพิทักษ์', trinket: 'เครื่องราง',
 };
@@ -75,7 +76,7 @@ export function itemNameTh(id: string): string {
   if (id.startsWith('bt_fragment_')) return 'เศษหินทะลวง ' + tier(/(\d)$/);
   if (id.startsWith('skill_tome_frag_')) return 'เศษตำราสกิล ' + tier(/(\d)$/);
   if (id.startsWith('skill_tome_')) return 'ตำราสกิล ' + tier(/(\d)$/);
-  if (id.startsWith('equip_frag_')) return 'เศษอุปกรณ์' + (FRAG_TIER[id.slice(11)] ?? '');
+  if (id.startsWith('equip_frag_')) return 'เศษอุปกรณ์ T' + (EQUIPMENT_TIERS.find(t => TIER_CONFIG[t].material === id) ?? '');
   if (id === 'enhancement_ore') return 'แร่ตีบวก';
   if (id === 'universal_memory') return 'ความทรงจำสากล';
   return ITEMS[id]?.name ?? id;
@@ -163,6 +164,9 @@ export function seedBag(s: GameState): GameState {
   const inventory = { ...s.inventory };
   for (const id of Object.keys(ITEMS)) inventory[id] = (inventory[id] ?? 0) + 1;
   let next = s.nextItemId;
-  const gear = Object.keys(EQUIPMENT_DEFS).map(def => rollItem(def, 'RARE', SEED_RNG, next++));
+  const gear = Object.keys(EQUIPMENT_DEFS).map(def => {
+    const slot = ORDINARY_SLOTS.find(key => PATCH_BASE[key] === def);
+    return slot ? rollTierItem(1, slot, 'assault', 'RARE', SEED_RNG, next++) : rollItem(def, 'RARE', SEED_RNG, next++);
+  });
   return { ...s, inventory, equipment: [...s.equipment, ...gear], nextItemId: next };
 }

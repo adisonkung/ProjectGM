@@ -1,12 +1,13 @@
+import { EQUIPMENT_TIERS, GEAR_SETS, ORDINARY_SLOTS, PATCH_BASE, PATCH_RARITIES, SET_IDS, SLOT_NAMES, SLOT_ICONS, TIER_CONFIG } from '../../core/data/equipment-patch-one';
 import { equipmentAffixLabel } from '../../core/data/affix-art';
 import { AffixIconComponent } from '../../shared/affix-icon.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ITEMS } from '../../core/data/economy';
-import { CRAFT_RECIPES, EQUIPMENT_DEFS, FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
-import { EquipmentInstance, EquipmentSlot, EquipStat, Rarity, StatLine } from '../../core/models/equipment';
-import { dismantleRewards, itemLines, itemName, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
+import { FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
+import { EquipmentInstance, EquipmentSlot, EquipmentTier, EquipStat, GearSet, OrdinarySlot, StatLine } from '../../core/models/equipment';
+import { dismantleRewards, isTierUnlocked, nextSubstatMilestone, itemLines, itemName, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
 import { EquipmentService } from '../../core/services/equipment.service';
 import { RosterService } from '../../core/services/roster.service';
 import { SaveService } from '../../core/services/save.service';
@@ -16,12 +17,10 @@ import { IconComponent } from '../../shared/icon.component';
 export type ForgeTab = 'craft' | 'enhance' | 'salvage';
 
 const ERR: Record<string, string> = {
+  TIER_LOCKED: 'ต้องผ่าน Equipment Hunt ของ Tier นี้ก่อน', STALE_UPGRADE: 'ระดับตีบวกเปลี่ยนแล้ว ลองเลือกใหม่',
   LOCKED: 'ล็อกอยู่', EQUIPPED: 'ถอดก่อน', MAX_LEVEL: 'ตีบวกเต็มแล้ว', NEED_ORE: 'Enhancement Ore ไม่พอ', NEED_GOLD: 'ทองไม่พอ',
   NEED_FRAGMENTS: 'เศษอุปกรณ์ไม่พอ', NO_RECIPE: 'ไม่มีสูตร', BAD_MAIN: 'ค่าหลักไม่ตรงฐาน', NOT_FOUND: 'ไม่พบ', WRONG_CLASS: 'สายนี้ใช้ไม่ได้',
 };
-const SLOT_LABEL: Record<EquipmentSlot, string> = { WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
-const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
-
 /** Blacksmith: targeted crafting, enhancement (+1, bag or equipped), salvage (dismantle bag items into materials) */
 @Component({
   selector: 'app-forge',
@@ -48,36 +47,36 @@ export class ForgeComponent {
 
   readonly gold = computed(() => this.save.state().gold);
   readonly ore = computed(() => this.save.state().inventory['enhancement_ore'] ?? 0);
-  readonly mats = computed(() => ['equip_frag_basic', 'equip_frag_rare', 'equip_frag_elite', 'equip_frag_epic']
+  readonly mats = computed(() => EQUIPMENT_TIERS.map(tier => TIER_CONFIG[tier].material)
     .map(id => ({ id, name: ITEMS[id].name, n: this.save.state().inventory[id] ?? 0 })));
 
   // ---------------------------------------------------------------- craft
-  readonly recipes = Object.values(CRAFT_RECIPES);
+  readonly tiers = EQUIPMENT_TIERS;
+  readonly sets = SET_IDS;
+  readonly rolls = PATCH_RARITIES;
+  readonly tierData = TIER_CONFIG;
+  readonly setData = GEAR_SETS;
   readonly rarityName = RARITY_NAME;
-  readonly craftRarity = signal<Rarity>('RARE');
-  readonly slotFilter = signal<EquipmentSlot>('ARMOR');
-  readonly slots = SLOTS;
-  readonly bases = computed(() => Object.values(EQUIPMENT_DEFS).filter(d => d.slot === this.slotFilter()));
-  readonly previewBase = computed(() => this.bases()[0].id);
-  readonly recipe = computed(() => CRAFT_RECIPES[this.craftRarity()]!);
-  readonly canCraft = computed(() => {
-    const r = this.recipe();
-    return (this.save.state().inventory[r.fragmentId] ?? 0) >= r.fragments && this.gold() >= r.gold;
-  });
-  readonly fragmentTier = computed(() => this.recipe().fragmentId === 'equip_frag_basic' ? 'Basic' : RARITY_NAME[this.craftRarity()]);
-  readonly fragsHave = computed(() => this.save.state().inventory[this.recipe().fragmentId] ?? 0);
+  readonly craftTier = signal<EquipmentTier>(1);
+  readonly craftSet = signal<GearSet>('assault');
+  readonly slotFilter = signal<OrdinarySlot>('WEAPON');
+  readonly slots = ORDINARY_SLOTS;
   readonly crafted = signal<EquipmentInstance | null>(null);
-  readonly accessoryPreview = signal<'necklace' | 'ring'>('necklace');
-  readonly displayBase = computed(() => this.crafted()?.definitionId ?? this.previewBase());
-  readonly displayRarity = computed(() => this.crafted()?.rarity ?? this.craftRarity());
-  pickRarity(r: Rarity) { this.craftRarity.set(r); this.crafted.set(null); }
-  pickAdornment(v: 'necklace' | 'ring') { this.accessoryPreview.set(v); this.crafted.set(null); }
-  pickSlot(s: EquipmentSlot) { this.slotFilter.set(s); this.crafted.set(null); }
+  readonly recipe = computed(() => TIER_CONFIG[this.craftTier()]);
+  readonly tierUnlocked = (tier: EquipmentTier) => isTierUnlocked(this.save.state(), tier);
+  readonly fragsHave = computed(() => this.save.state().inventory[this.recipe().material] ?? 0);
+  readonly canCraft = computed(() => this.tierUnlocked(this.craftTier()) && this.fragsHave() >= this.recipe().fragments
+    && this.gold() >= this.recipe().gold);
+  readonly displayBase = computed(() => this.crafted()?.definitionId ?? PATCH_BASE[this.slotFilter()]);
+  readonly displayRarity = computed(() => this.crafted()?.rarity ?? 'COMMON');
+  pickTier(tier: EquipmentTier) { this.craftTier.set(tier); this.crafted.set(null); }
+  pickSet(set: GearSet) { this.craftSet.set(set); this.crafted.set(null); }
+  pickSlot(slot: OrdinarySlot) { this.slotFilter.set(slot); this.crafted.set(null); }
   craft() {
-    const before = new Set(this.eq.bag().map(i => i.instanceId));
-    const err = this.eq.craftRandom(this.craftRarity(), this.slotFilter());
-    this.crafted.set(err ? null : this.eq.bag().find(i => !before.has(i.instanceId)) ?? null);
-    this.say(err, 'คราฟต์สำเร็จ!');
+    const before = this.save.state().nextItemId;
+    const error = this.eq.craftTier(this.craftTier(), this.slotFilter(), this.craftSet());
+    this.crafted.set(error ? null : this.eq.bag().find(item => item.instanceId === before) ?? null);
+    this.say(error, 'คราฟต์สำเร็จ!');
   }
 
   // ---------------------------------------------------------------- enhance
@@ -89,7 +88,7 @@ export class ForgeComponent {
     return [...worn, ...(s.equipment ?? []).map(item => ({ item, wearer: null as string | null }))];
   });
   readonly enhanceFilters: { id: EquipmentSlot | 'ALL'; label: string }[] = [
-    { id: 'ALL', label: 'ทั้งหมด' }, ...SLOTS.map(id => ({ id, label: SLOT_LABEL[id] })),
+    { id: 'ALL', label: 'ทั้งหมด' }, ...SLOTS.map(id => ({ id, label: SLOT_NAMES[id] })),
   ];
   readonly enhanceSlot = signal<EquipmentSlot | 'ALL'>('ALL');
   readonly enhanceList = computed(() => this.allItems().filter(x => this.enhanceSlot() === 'ALL' || slotOf(x.item) === this.enhanceSlot()));
@@ -97,7 +96,7 @@ export class ForgeComponent {
   readonly selectedEnhance = computed(() => this.enhanceList().find(x => x.item.instanceId === this.selectedEnhanceId()) ?? this.enhanceList()[0] ?? null);
 
   upgradePreview(i: EquipmentInstance): string[] { return this.lines({ ...i, upgradeLevel: Math.min(i.upgradeLevel + 1, this.cap(i)) }); }
-  upgrade(i: EquipmentInstance) { this.say(this.eq.upgrade(i.instanceId), `ตีบวก ${itemName(i)} สำเร็จ`); }
+  upgrade(i: EquipmentInstance) { this.say(this.eq.upgrade(i.instanceId, i.upgradeLevel), `ตีบวก ${itemName(i)} สำเร็จ`); }
 
   // ---------------------------------------------------------------- salvage
   readonly salvageList = computed(() => this.eq.bag());
@@ -136,9 +135,10 @@ export class ForgeComponent {
   readonly name = itemName;
   readonly cap = upgradeCap;
   readonly cost = upgradeCost;
-  readonly slotLabel = SLOT_LABEL;
-  readonly slotIcon = SLOT_ICON;
-  readonly slotIconOf = (i: EquipmentInstance) => SLOT_ICON[slotOf(i)];
+  readonly nextRoll = nextSubstatMilestone;
+  readonly slotLabel = SLOT_NAMES;
+  readonly slotIcon = SLOT_ICONS;
+  readonly slotIconOf = (i: EquipmentInstance) => SLOT_ICONS[slotOf(i)];
   readonly statLabel = (s: EquipStat) => STAT_LABEL[s];
   readonly itemName = (id: string) => ITEMS[id]?.name ?? id;
   readonly lines = (i: EquipmentInstance) => itemLines(i).slice(0, 1 + i.secondaries.length).map(l => this.fmt(l));

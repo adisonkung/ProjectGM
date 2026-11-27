@@ -16,6 +16,10 @@
 เกมกาชา + จัดทีม + ต่อสู้อัตโนมัติแบบ TFT บนสนามแนวนอน 5 แถว × 16 คอลัมน์ (2 แถวบนเป็นฉาก, ยืนได้ 3 เลนล่าง · โซนเรา 6 + โซนกลาง 4 + โซนศัตรู 6 คอลัมน์ × 3 เลน, เราซ้าย ศัตรูขวา) ทีมละ 5 ตัว
 Angular 19, standalone components, signals. เอกสารออกแบบอยู่ในโปรเจกต์ "Game Demo" บน claude.ai
 
+## Equipment Patch 1 — Codex, 2026-11-28
+
+Task branch `wip/codex-equipment-patch-one` starts from fetched `origin/master` at `7d2f718`. The Hunt and Forge progress through T1–T5 with the corrected, named weapon art. The T6 source is archived outside public assets. Five ordinary slots, five sets and +10 enhancement are live for newly generated gear. Artifact remains reserved. Legacy gear and the save schema are preserved. App/spec/sim typechecks, 1,119 Karma tests, an optimized build and Desktop production-browser checks passed. [Implementation, migration and draft balance checks](docs/EQUIPMENT_PATCH_ONE.md) · [Desktop references and captures](docs/reviews/equipment-patch-one/index.html).
+
 ## Current UI phase — Desktop first (user instruction, 2026-11-22)
 
 The user explicitly requested deferring Mobile while pages are still being revised. Implement and visually verify Desktop only for current page/UI/flow work; collect responsive/Mobile layout and dedicated phone QA for one later pass after the main Desktop pages/flows are complete and stable, or when specifically requested. Mobile is not a completion blocker for Desktop tasks. Existing typechecks/automated regression suites still run normally. This current-phase policy is canonical in AGENTS.md, PROJECT_RULES §22 and UI_REFERENCE_RULES.md, and supersedes earlier per-task Mobile verification requirements. Mobile evidence already captured before this instruction may remain as historical evidence; do not continue dedicated Mobile work by default.

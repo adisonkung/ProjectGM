@@ -22,7 +22,7 @@
       @for (s of shown(); track s.key) {
         <button type="button" class="slot" [class.on]="selected()?.key === s.key" [attr.data-rarity]="s.rarity ?? null" (click)="pick(s)" [attr.aria-label]="s.name + ' × ' + s.count">
           @if (s.instance; as it) {
-            <app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel || null" [instanceId]="it.instanceId" />
+            <app-equipment-art [definitionId]="it.definitionId" [tier]="it.tier ?? null" [rarity]="it.rarity" [level]="it.upgradeLevel || null" [instanceId]="it.instanceId" />
           } @else if (s.icon) {
             <img [src]="s.icon" alt="" decoding="async" />
           } @else {
@@ -40,7 +40,7 @@
       @if (selected(); as s) {
         <div class="big">
           @if (s.instance; as it) {
-            <app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel || null" context="inspect" [instanceId]="it.instanceId" />
+            <app-equipment-art [definitionId]="it.definitionId" [tier]="it.tier ?? null" [rarity]="it.rarity" [level]="it.upgradeLevel || null" context="inspect" [instanceId]="it.instanceId" />
           } @else if (s.icon) {
             <img [src]="s.icon" alt="" />
           } @else {

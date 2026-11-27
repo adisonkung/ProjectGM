@@ -1,3 +1,4 @@
+import { GEAR_SETS, SLOT_NAMES, SLOT_ICONS } from '../../core/data/equipment-patch-one';
 import { equipmentAffixLabel } from '../../core/data/affix-art';
 import { AffixIconComponent } from '../../shared/affix-icon.component';
 import { MaterialInventoryComponent } from '../../shared/material-inventory.component';
@@ -16,7 +17,7 @@ import { EquipmentArtComponent, equipmentArtFamily } from '../../shared/equipmen
 import { IconComponent } from '../../shared/icon.component';
 import { AFFIXES, SELL_GOLD, FLAT_STATS, RARITIES, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
 import { EquipmentInstance, EquipmentSlot, EquipStat, Rarity, StatLine } from '../../core/models/equipment';
-import { canEquip, heroGear, heroGearTotals, itemLines, itemName, mainValue, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
+import { activeGearSets, nextSubstatMilestone, previewGearSwap, canEquip, heroGear, heroGearTotals, itemLines, itemName, mainValue, slotOf, upgradeCap, upgradeCost } from '../../core/rules/equipment';
 import { combatModifiers } from '../../core/rules/progression';
 import { EquipmentService } from '../../core/services/equipment.service';
 import { RosterService } from '../../core/services/roster.service';
@@ -26,16 +27,16 @@ type SealSlot = 'weapon' | 'helmet' | 'armor' | 'necklace' | 'ring' | 'artifact'
 type OwnerFilter = 'all' | 'available' | 'others';
 
 const SEAL_SLOTS: readonly { id: SealSlot; label: string; sketch: string; slot?: EquipmentSlot }[] = [
-  { id: 'helmet', label: 'หมวก', sketch: '/ui/home-k7/nav_hero_helm.webp' },
+  { id: 'helmet', label: 'หมวก', sketch: '/ui/home-k7/nav_hero_helm.webp', slot: 'HELMET' },
   { id: 'weapon', label: 'อาวุธ', sketch: '/ui/generated/equipment/swords/foreground/common.webp', slot: 'WEAPON' },
   { id: 'armor', label: 'เกราะ', sketch: '/ui/equipment/tiered/armor/common.webp', slot: 'ARMOR' },
-  { id: 'necklace', label: 'สร้อย', sketch: '/ui/equipment/tiered/necklace/common.webp', slot: 'ACCESSORY' },
-  { id: 'ring', label: 'แหวน', sketch: '/ui/equipment/tiered/ring/common.webp', slot: 'ACCESSORY' },
+  { id: 'necklace', label: 'สร้อย', sketch: '/ui/equipment/tiered/necklace/common.webp', slot: 'NECKLACE' },
+  { id: 'ring', label: 'แหวน', sketch: '/ui/equipment/tiered/ring/common.webp', slot: 'RING' },
   { id: 'artifact', label: 'อาร์ติแฟกต์', sketch: '/ui/home-k7/nav_summon_crystal.webp' },
 ];
 const SEAL_FILTERS = ['weapon', 'helmet', 'armor', 'necklace', 'ring', 'artifact']
   .map(id => SEAL_SLOTS.find(slot => slot.id === id)!);
-const RARITY_CODES: Record<Rarity, string> = { COMMON: 'C', UNCOMMON: 'UC', RARE: 'R', ELITE: 'EL', EPIC: 'EP' };
+const RARITY_CODES: Record<Rarity, string> = { COMMON: 'C', UNCOMMON: 'UC', RARE: 'R', ELITE: 'EL', EPIC: 'EP', LEGENDARY: 'LG' };
 const STAT_TABLE_LABEL: Partial<Record<EquipStat, string>> = {
   atkPct: 'ATK', atkFlat: 'ATK (ค่าคงที่)', hpPct: 'HP', defPct: 'DEF',
   critChance: 'Crit', critDamage: 'Crit DMG', skillDamage: 'Skill DMG',
@@ -44,6 +45,7 @@ const STAT_TABLE_LABEL: Partial<Record<EquipStat, string>> = {
 };
 
 const ERR: Record<string, string> = {
+  STALE_UPGRADE: 'ระดับตีบวกเปลี่ยนแล้ว ลองเลือกใหม่',
   LOCKED: 'ล็อกอยู่', EQUIPPED: 'ถอดก่อน', WRONG_CLASS: 'สายนี้ใช้อาวุธนี้ไม่ได้', MAX_LEVEL: 'ตีบวกเต็มแล้ว', NEED_ORE: 'Ore ไม่พอ',
   NEED_GOLD: 'ทองไม่พอ', NEED_FRAGMENTS: 'เศษไม่พอ', NO_RECIPE: 'ไม่มีสูตร', BAD_MAIN: 'ค่าหลักไม่ตรงฐาน', NOT_FOUND: 'ไม่พบ',
 };
@@ -81,8 +83,8 @@ export class ArmoryComponent {
   readonly stats = computed(() => { const h = this.hero(); return h ? this.roster.stats(h) : null; });
   readonly totals = computed(() => { const h = this.hero(); return h ? heroGearTotals(h) : null; });
   readonly bag = computed(() => {
-    const ranks = { COMMON: 0, UNCOMMON: 1, RARE: 2, ELITE: 3, EPIC: 4 };
-    return this.eq.bag().filter(i => this.filter() === 'ALL' || slotOf(i) === this.filter()).slice().sort((a, b) =>
+    const ranks = { COMMON: 0, UNCOMMON: 1, RARE: 2, ELITE: 3, EPIC: 4, LEGENDARY: 5 };
+    return this.eq.bag().filter(i => this.filter() === 'ALL' || slotOf(i) === this.filter() || (this.filter() === 'NECKLACE' && slotOf(i) === 'ACCESSORY')).slice().sort((a, b) =>
       (this.sort() === 'rarity' ? ranks[b.rarity] - ranks[a.rarity] : this.sort() === 'upgrade' ? b.upgradeLevel - a.upgradeLevel : 0) || b.instanceId - a.instanceId);
   });
   readonly selected = computed<EquipmentInstance | null>(() => {
@@ -124,6 +126,9 @@ export class ArmoryComponent {
     (this.sort() === 'rarity' ? RARITIES.indexOf(b.rarity) - RARITIES.indexOf(a.rarity)
       : this.sort() === 'upgrade' ? b.upgradeLevel - a.upgradeLevel : 0) || b.instanceId - a.instanceId,
   ));
+  readonly setData = GEAR_SETS;
+  readonly nextRoll = nextSubstatMilestone;
+  readonly activeSets = computed(() => activeGearSets(this.hero() ? heroGear(this.hero()!) : []));
   readonly itemOwner = (item: EquipmentInstance) =>
     this.roster.heroes().find(hero => hero.uid === item.equippedHeroId);
   readonly affixDefinition = (id: string) => AFFIXES[id];
@@ -144,14 +149,17 @@ export class ArmoryComponent {
   readonly pendingTransfer = signal<EquipmentInstance | null>(null);
   readonly currentSealItem = computed(() => {
     const item = this.selected();
-    return item ? this.hero()?.gear?.[slotOf(item)] : undefined;
+    const gear = this.hero()?.gear;
+    if (!item || !gear) return undefined;
+    const slot = slotOf(item);
+    return slot === 'NECKLACE' || slot === 'ACCESSORY' ? gear.NECKLACE ?? gear.ACCESSORY : gear[slot];
   });
   readonly sealStats = computed(() => {
     const hero = this.hero();
     const totals = this.totals();
     if (!hero || !totals) return [];
     const item = this.selected();
-    const projected = item && this.usable(item) ? { ...hero, gear: { ...hero.gear, [slotOf(item)]: item } } : hero;
+    const projected = item && this.usable(item) ? previewGearSwap(hero, item) : hero;
     const afterTotals = projected === hero ? totals : heroGearTotals(projected);
     const stats = this.roster.stats(hero);
     const afterStats = projected === hero ? stats : this.roster.stats(projected);
@@ -187,7 +195,9 @@ export class ArmoryComponent {
     const slot = slotOf(item);
     if (slot === 'WEAPON') return 'weapon';
     if (slot === 'ARMOR') return 'armor';
-    return equipmentArtFamily(item.definitionId, item.instanceId) === 'ring' ? 'ring' : 'necklace';
+    if (slot === 'HELMET') return 'helmet';
+    if (slot === 'RING') return 'ring';
+    return 'necklace';
   }
 
   sealItem(slot: SealSlot): EquipmentInstance | undefined {
@@ -254,15 +264,17 @@ export class ArmoryComponent {
     this.eq.unequip(this.heroUid(), slotOf(item));
     const family = equipmentArtFamily(item.definitionId, item.instanceId);
     const tier = item.rarity.toLowerCase();
-    const sketch = family === 'sword' ? `/ui/generated/equipment/swords/foreground/${tier}.webp`
-      : `/ui/equipment/tiered/${family}/${tier}.webp`;
+    const sketch = item.tier && family === 'sword' ? `/ui/equipment/patch-one/weapon-t${item.tier}.webp`
+      : slotOf(item) === 'HELMET' ? '/ui/home-k7/nav_hero_helm.webp'
+      : family === 'sword' ? `/ui/generated/equipment/swords/foreground/${tier}.webp`
+      : `/ui/equipment/tiered/${family}/${item.rarity === 'LEGENDARY' ? 'epic' : tier}.webp`;
     this.removedSealSketch.update(previous => ({ ...previous, [this.sealSlot(item)]: sketch }));
     this.selectedId.set(null);
     this.say(null, 'ถอด ' + this.name(item));
   }
 
   upgradeFromSeal(item: EquipmentInstance): void {
-    const error = this.eq.upgrade(item.instanceId);
+    const error = this.eq.upgrade(item.instanceId, item.upgradeLevel);
     if (!error) this.selectionPulse.update(tick => tick + 1);
     this.say(error, 'ตีบวก ' + this.name(this.selected() ?? item));
   }
@@ -283,9 +295,9 @@ export class ArmoryComponent {
   readonly lines = (i: EquipmentInstance) => itemLines(i).slice(0, 1 + i.secondaries.length);
   readonly fmt = (line: StatLine) => STAT_LABEL[line.stat] + ' ' + this.formatStat(line.stat, line.value, true);
   readonly usable = (i: EquipmentInstance) => { const c = this.cls(); return !!c && canEquip(c, i); };
-  readonly slotLabel: Record<EquipmentSlot | 'ALL', string> = { ALL: 'ทั้งหมด', WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
-  readonly slotIcon: Record<EquipmentSlot | 'ALL', string> = { ALL: 'heroes', WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
-  readonly filters: (EquipmentSlot | 'ALL')[] = ['ALL', 'WEAPON', 'ARMOR', 'ACCESSORY'];
+  readonly slotLabel: Record<EquipmentSlot | 'ALL', string> = { ALL: 'ทั้งหมด', ...SLOT_NAMES };
+  readonly slotIcon: Record<EquipmentSlot | 'ALL', string> = { ALL: 'heroes', ...SLOT_ICONS };
+  readonly filters: (EquipmentSlot | 'ALL')[] = ['ALL', ...SLOTS];
 
   compare(i: EquipmentInstance) {
     return this.eq.compare(this.heroUid(), i).map(d => this.fmt({ stat: d.stat, value: d.delta }));

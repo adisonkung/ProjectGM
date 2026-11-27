@@ -5,8 +5,12 @@
  */
 import { HeroClass } from './hero';
 
-export type EquipmentSlot = 'WEAPON' | 'ARMOR' | 'ACCESSORY';
-export type Rarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'ELITE' | 'EPIC';
+export type LegacyEquipmentSlot = 'WEAPON' | 'ARMOR' | 'ACCESSORY';
+export type OrdinarySlot = 'WEAPON' | 'HELMET' | 'ARMOR' | 'NECKLACE' | 'RING';
+export type EquipmentSlot = LegacyEquipmentSlot | OrdinarySlot;
+export type EquipmentTier = 1 | 2 | 3 | 4 | 5;
+export type GearSet = 'assault' | 'vitality' | 'guardian' | 'precision' | 'destruction';
+export type Rarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'ELITE' | 'EPIC' | 'LEGENDARY';
 /** weapon families (armor / accessories are usable by every role) */
 export type WeaponGroup = 'HEAVY' | 'LIGHT' | 'BOW' | 'CATALYST';
 
@@ -25,7 +29,7 @@ export type WeaponGroup = 'HEAVY' | 'LIGHT' | 'BOW' | 'CATALYST';
  *   execution                     damage vs enemies below 30 % HP · mistHunter: vs targets back from untargetable (3 s)
  */
 export type EquipStat =
-  | 'atkPct' | 'atkFlat' | 'hpPct' | 'defPct'
+  | 'atkPct' | 'atkFlat' | 'hpPct' | 'hpFlat' | 'defPct' | 'defFlat'
   | 'critChance' | 'critDamage' | 'skillDamage'
   | 'healingPower' | 'shieldPower' | 'healingReceived'
   | 'cooldownReduction' | 'attackSpeed' | 'moveSpeed'
@@ -69,6 +73,9 @@ export interface EquipmentAffixDefinition {
 /** one owned item (all rolled values are stored at +0; upgrades scale the main stat) */
 export interface EquipmentInstance {
   instanceId: number;
+  /** Absent on legacy equipment. */
+  tier?: EquipmentTier;
+  set?: GearSet;
   definitionId: string;
   rarity: Rarity;
   upgradeLevel: number;

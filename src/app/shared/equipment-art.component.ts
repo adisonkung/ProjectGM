@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { EQUIPMENT_DEFS } from '../core/data/equipment';
 import { EquipmentAuraComponent, EquipmentArtFamily } from './equipment-aura.component';
-import { Rarity } from '../core/models/equipment';
+import { EquipmentTier, Rarity } from '../core/models/equipment';
 
 /** Stable cosmetic accessory variants follow an instance across all equipment screens. */
 export function equipmentArtFamily(definitionId: string, instanceId: number | null): EquipmentArtFamily {
   const slot = EQUIPMENT_DEFS[definitionId]?.slot;
   if (slot === 'WEAPON') return 'sword';
-  if (slot === 'ARMOR') return 'armor';
+  if (slot === 'ARMOR' || slot === 'HELMET') return 'armor';
+  if (slot === 'NECKLACE') return 'necklace';
+  if (slot === 'RING') return 'ring';
   if (instanceId === null) return 'necklace';
   const mixed = Math.imul(instanceId ^ (instanceId >>> 16), 0x45d9f3b);
   return ((mixed ^ (mixed >>> 16)) & 1) ? 'ring' : 'necklace';
@@ -19,9 +21,9 @@ export function equipmentArtFamily(definitionId: string, instanceId: number | nu
   imports: [EquipmentAuraComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <span class="art" [class.medallion]="context() === 'medallion'" [class.showcase]="animated()" [class.animated]="animated()" [attr.data-rarity]="rarity()" [attr.data-family]="family()">
+    <span class="art" [class.medallion]="context() === 'medallion'" [class.showcase]="animated()" [class.animated]="animated()" [attr.data-rarity]="rarity()" [attr.data-family]="family()" [class.tiered]="tier() !== null">
       @if (foreground(); as src) {
-        <app-equipment-aura #aura [rarity]="rarity()" [family]="family()" [animated]="animated()" />
+        <app-equipment-aura #aura [rarity]="rarity()" [family]="family()" [animated]="animated()" [tiered]="tier() !== null" />
         <img [style.animation-play-state]="aura.moving() ? 'running' : 'paused'" class="foreground" [src]="src" [alt]="label()" decoding="async" />
         @if (animated()) { <span [style.animation-play-state]="aura.moving() ? 'running' : 'paused'" class="surface-glint" [style.mask-image]="'url(' + src + ')'" aria-hidden="true"></span>@if (rarity() !== 'COMMON') { <svg class="front-orbit" viewBox="0 0 200 200" fill="none" aria-hidden="true"><path d="M29 128C68 151 142 142 174 89"/><path [style.animation-play-state]="aura.moving() ? 'running' : 'paused'" class="bright" d="M29 128C68 151 142 142 174 89"/></svg> } }
       } @else { <span role="img" [attr.aria-label]="label()">?</span> }
@@ -47,6 +49,8 @@ export function equipmentArtFamily(definitionId: string, instanceId: number | nu
     .medallion { border-width: 2px; border-radius: 50%; background: radial-gradient(circle at 36% 27%, color-mix(in srgb, var(--ink) 60%, #251e19), color-mix(in srgb, var(--ink) 32%, #17141b) 80%); box-shadow: inset 0 0 0 2px #1e171bc2; }
     .medallion .foreground { inset: 11%; width: 78%; height: 78%; }
     .medallion .level { top: auto; bottom: -5px; right: 50%; transform: translateX(50%); border: 1px solid #c4ad8560; border-radius: 12px; background: #251f1b; padding: 2px 5px; color: #fdf0d9; line-height: 1; }
+    .tiered[data-rarity='EPIC'] { --ink: #ba8beb; }
+    [data-rarity='LEGENDARY'] { --ink: #f17778; }
     .showcase { background: none; border: 0; box-shadow: none; }
     .level { position: absolute; z-index: 2; top: 3px; right: 5px; color: #ffe4a8; font: 600 11px var(--title); text-shadow: 0 1px 3px #000; }
   `,
@@ -54,19 +58,26 @@ export function equipmentArtFamily(definitionId: string, instanceId: number | nu
 export class EquipmentArtComponent {
   readonly definitionId = input.required<string>();
   readonly rarity = input<Rarity>('RARE');
+  readonly tier = input<EquipmentTier | null>(null);
   readonly level = input<number | null>(null);
   readonly context = input<'inventory' | 'medallion' | 'forge' | 'inspect'>('inventory');
   readonly instanceId = input<number | null>(null);
   readonly appearance = input<EquipmentArtFamily | null>(null);
   readonly definition = computed(() => EQUIPMENT_DEFS[this.definitionId()]);
   readonly label = computed(() => this.definition()?.name ?? 'อุปกรณ์');
-  readonly tier = computed(() => this.rarity().toLowerCase());
+  readonly raritySlug = computed(() => this.rarity().toLowerCase());
   readonly animated = computed(() => this.context() === 'forge' || this.context() === 'inspect');
   readonly family = computed(() => this.appearance() ?? equipmentArtFamily(this.definitionId(), this.instanceId()));
   readonly foreground = computed(() => {
-    if (!this.definition()) return null;
-    if (this.family() === 'sword' && !this.animated()) return `/ui/generated/equipment/swords/foreground/${this.tier()}.webp`;
+    const definition = this.definition();
+    if (!definition) return null;
+    if (this.tier() && definition.slot === 'WEAPON') return `/ui/equipment/patch-one/weapon-t${this.tier()}.webp`;
+    if (definition.slot === 'HELMET') return '/ui/home-k7/nav_hero_helm.webp';
+    const tier = this.tier();
+    const artRank = tier ? ['common', 'uncommon', 'rare', 'elite', 'epic'][tier - 1]
+      : this.rarity() === 'LEGENDARY' ? 'epic' : this.raritySlug();
+    if (this.family() === 'sword' && !this.animated()) return `/ui/generated/equipment/swords/foreground/${artRank}.webp`;
     const suffix = !this.animated() ? '' : '-large';
-    return `/ui/equipment/tiered/${this.family()}/${this.tier()}${suffix}.webp`;
+    return `/ui/equipment/tiered/${this.family()}/${artRank}${suffix}.webp`;
   });
 }

@@ -1,3 +1,4 @@
+import { ORDINARY_SLOTS, SLOT_NAMES, SLOT_ICONS } from '../../core/data/equipment-patch-one';
 import { StateEmblemComponent } from '../../shared/state-emblem.component';
 import { EquipmentArtComponent } from '../../shared/equipment-art.component';
 import { Component, computed, inject, signal } from '@angular/core';
@@ -6,7 +7,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { CLASS_NAME } from '../../core/data/classes';
 import { EXP_POTIONS, ITEMS, TRAINING_SLOTS } from '../../core/data/economy';
-import { FLAT_STATS, RARITY_NAME, SLOTS, STAT_LABEL } from '../../core/data/equipment';
+import { FLAT_STATS, RARITY_NAME, STAT_LABEL } from '../../core/data/equipment';
 import { heroArt } from '../../core/data/hero-art';
 import { GENERATED_ICONS } from '../../core/data/generated-art';
 import { kitOf } from '../../core/data/hero-skills';
@@ -41,9 +42,9 @@ const detailTab = (q: string | null | undefined): DetailTab => (q && DETAIL_TABS
 /** Latin display line above the Thai name (two-syllable wuxia names get a space). */
 const LATIN_NAME: Record<string, string> = { bailong: 'Bai Long', yuezheng: 'Yue Zheng', moye: 'Mo Ye', tangxun: 'Tang Xun', linxue: 'Lin Xue' };
 
-const RARITY_TIER: Record<Rarity, number> = { COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5 };
-const SLOT_LABEL: Record<EquipmentSlot, string> = { WEAPON: 'อาวุธ', ARMOR: 'เกราะ', ACCESSORY: 'เครื่องประดับ' };
-const SLOT_ICON: Record<EquipmentSlot, string> = { WEAPON: 'sword', ARMOR: 'shield', ACCESSORY: 'gem' };
+const RARITY_TIER: Record<Rarity, number> = { COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5, LEGENDARY: 5 };
+const SLOT_LABEL = SLOT_NAMES;
+const SLOT_ICON = SLOT_ICONS;
 
 /** Hero detail (Gilded Ember): fixed key art, vertical tabs, floating identity + panel, roster strip. */
 @Component({
@@ -218,9 +219,9 @@ export class HeroDetailComponent {
 
   readonly gear = computed(() => {
     const h = this.hero();
-    return SLOTS.map(slot => {
-      const it = h?.gear?.[slot];
-      return { slot, label: SLOT_LABEL[slot], icon: SLOT_ICON[slot], item: it ?? null, tier: it ? RARITY_TIER[it.rarity] : 0, lines: it ? this.lines(it) : [] };
+    return ORDINARY_SLOTS.map(slot => {
+      const it = h?.gear?.[slot] ?? (slot === 'NECKLACE' ? h?.gear?.ACCESSORY : undefined);
+      return { slot, label: SLOT_LABEL[slot], icon: SLOT_ICON[slot], item: it ?? null, tier: it ? it.tier ?? RARITY_TIER[it.rarity] : 0, lines: it ? this.lines(it) : [] };
     });
   });
 

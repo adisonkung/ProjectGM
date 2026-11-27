@@ -312,3 +312,15 @@
   to { transform: scale(1.42) rotate(10deg); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .seal-landing, .seal-inspect-flash { display: none; } }
+
+[data-rarity='LEGENDARY'] { --seal-tier: #ff8581; }
+.seal-tiered[data-rarity='EPIC'] { --seal-tier: #cb98ff; }
+.seal-tile-tier {
+  position: absolute;
+  inset: 4px auto auto 5px;
+  border-radius: 4px;
+  padding: 0 3px;
+  color: #ffe5ad;
+  background: #241c16cc;
+  font-size: 10px;
+}

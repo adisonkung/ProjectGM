@@ -5,7 +5,8 @@ import { SUMMON_SEALS } from './summon-seals';
  * never read directly by combat code. Level curve, breakthroughs, items, tower EXP, farm dungeons, daily bonus.
  */
 import { BreakthroughDefinition, FarmDungeonDefinition, HeroLevelDefinition, ItemDefinition, RewardBundle } from '../models/economy';
-import { EquipmentDropTable, Rarity } from '../models/equipment';
+import { TIER_CONFIG } from './equipment-patch-one';
+import { EquipmentDropTable, EquipmentTier, Rarity } from '../models/equipment';
 import { ChallengeRule, EnemyPlacement, EnemySpawn, StageDef, WaveDefinition } from '../models/stage';
 import { DEV_FLAGS } from './dev-flags';
 import { ASCENSION_BOSSES, DUNGEON_ROLE_MAP, DUNGEON_MONSTERS, variantId } from './monsters-dungeon';
@@ -34,10 +35,11 @@ export const ITEMS: Record<string, ItemDefinition> = {
   [SUMMON_SEALS.special.id]: { id: SUMMON_SEALS.special.id, name: SUMMON_SEALS.special.name, kind: 'SUMMON_SEAL' },
   [SUMMON_SEALS.aurora.id]: { id: SUMMON_SEALS.aurora.id, name: SUMMON_SEALS.aurora.name, kind: 'SUMMON_SEAL' },
   enhancement_ore: { id: 'enhancement_ore', name: 'Enhancement Ore', kind: 'MATERIAL' },
-  equip_frag_basic: { id: 'equip_frag_basic', name: 'Basic Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
-  equip_frag_rare: { id: 'equip_frag_rare', name: 'Rare Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
-  equip_frag_elite: { id: 'equip_frag_elite', name: 'Elite Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
-  equip_frag_epic: { id: 'equip_frag_epic', name: 'Epic Equipment Fragment', kind: 'EQUIPMENT_FRAGMENT' },
+  equip_frag_refined_iron: { id: 'equip_frag_refined_iron', name: 'Refined Iron Fragment', kind: 'EQUIPMENT_FRAGMENT' },
+  equip_frag_basic: { id: 'equip_frag_basic', name: TIER_CONFIG[1].name + ' Fragment', kind: 'EQUIPMENT_FRAGMENT' },
+  equip_frag_rare: { id: 'equip_frag_rare', name: TIER_CONFIG[3].name + ' Fragment', kind: 'EQUIPMENT_FRAGMENT' },
+  equip_frag_elite: { id: 'equip_frag_elite', name: TIER_CONFIG[4].name + ' Fragment', kind: 'EQUIPMENT_FRAGMENT' },
+  equip_frag_epic: { id: 'equip_frag_epic', name: TIER_CONFIG[5].name + ' Fragment', kind: 'EQUIPMENT_FRAGMENT' },
   exp_potion_s: { id: 'exp_potion_s', name: 'Small Training Potion', kind: 'EXP_POTION', exp: 50 },
   exp_potion_m: { id: 'exp_potion_m', name: 'Medium Training Potion', kind: 'EXP_POTION', exp: 150 },
   exp_potion_l: { id: 'exp_potion_l', name: 'Large Training Potion', kind: 'EXP_POTION', exp: 500 },
@@ -526,21 +528,21 @@ const HUNT_STAGES: StageDef[] = [
 const HUNT_TARGET_TIME = [105, 120, 150, 180, 210];
 
 /** Hunt reward per clear (BASE: daily bonus ×1.5, repeat ×0.6 — drop chance unchanged) */
-interface HuntTier { n: number; unlockFloor: number; levels: [number, number]; ore: number; gold: number; frags: [string, number][]; drops: EquipmentDropTable; first: Rarity }
+interface HuntTier { n: EquipmentTier; levels: [number, number]; ore: number; gold: number; fragments: number; drops: EquipmentDropTable; first: Rarity }
 const HUNT_TIERS: HuntTier[] = [
-  { n: 1, unlockFloor: 3, levels: [3, 4], ore: 8, gold: 100, frags: [['equip_frag_basic', 3]], drops: { itemChance: 0.6, rarityWeights: { COMMON: 65, UNCOMMON: 35 } }, first: 'UNCOMMON' },
-  { n: 2, unlockFloor: 4, levels: [4, 5], ore: 12, gold: 160, frags: [['equip_frag_basic', 4], ['equip_frag_rare', 1]], drops: { itemChance: 0.6, rarityWeights: { UNCOMMON: 75, RARE: 25 } }, first: 'UNCOMMON' },
-  { n: 3, unlockFloor: 5, levels: [5, 7], ore: 16, gold: 260, frags: [['equip_frag_rare', 5]], drops: { itemChance: 0.55, rarityWeights: { UNCOMMON: 25, RARE: 65, ELITE: 10 } }, first: 'RARE' },
-  { n: 4, unlockFloor: 7, levels: [7, 8], ore: 22, gold: 390, frags: [['equip_frag_rare', 2], ['equip_frag_elite', 5]], drops: { itemChance: 0.5, rarityWeights: { RARE: 50, ELITE: 45, EPIC: 5 } }, first: 'RARE' },
-  { n: 5, unlockFloor: 8, levels: [8, 10], ore: 30, gold: 580, frags: [['equip_frag_elite', 3], ['equip_frag_epic', 5]], drops: { itemChance: 0.5, rarityWeights: { ELITE: 70, EPIC: 30 } }, first: 'ELITE' },
+  { n: 1, levels: [3, 4], ore: 8, gold: 100, fragments: 3, drops: { itemChance: 0.6, rarityWeights: { COMMON: 65, UNCOMMON: 35 } }, first: 'UNCOMMON' },
+  { n: 2, levels: [4, 5], ore: 12, gold: 160, fragments: 5, drops: { itemChance: 0.6, rarityWeights: { UNCOMMON: 75, RARE: 25 } }, first: 'UNCOMMON' },
+  { n: 3, levels: [5, 7], ore: 16, gold: 260, fragments: 5, drops: { itemChance: 0.55, rarityWeights: { UNCOMMON: 25, RARE: 65, ELITE: 10 } }, first: 'RARE' },
+  { n: 4, levels: [7, 8], ore: 22, gold: 390, fragments: 7, drops: { itemChance: 0.5, rarityWeights: { RARE: 50, ELITE: 45, EPIC: 5 } }, first: 'RARE' },
+  { n: 5, levels: [8, 10], ore: 30, gold: 580, fragments: 8, drops: { itemChance: 0.5, rarityWeights: { ELITE: 70, EPIC: 30 } }, first: 'ELITE' },
 ];
 
 const huntDef = (t: HuntTier): FarmDungeonDefinition => ({
-  id: `hunt_${t.n}`, type: 'EQUIPMENT', name: `Hunt ${['I', 'II', 'III', 'IV', 'V'][t.n - 1]}`, unlockFloor: t.unlockFloor, recommendedLevel: t.levels,
-  baseRewards: { gold: t.gold, items: [{ itemId: 'enhancement_ore', count: t.ore }, ...t.frags.map(([itemId, count]) => ({ itemId, count }))] },
+  id: `hunt_${t.n}`, type: 'EQUIPMENT', name: `Hunt ${['I', 'II', 'III', 'IV', 'V'][t.n - 1]}`, unlockFloor: TIER_CONFIG[t.n].floor, recommendedLevel: t.levels,
+  baseRewards: { gold: t.gold, items: [{ itemId: 'enhancement_ore', count: t.ore }, { itemId: TIER_CONFIG[t.n].material, count: t.fragments }] },
   firstClearBonus: { items: [{ itemId: 'enhancement_ore', count: 20 }] },
   dailyBonusPool: 'HUNT', dailyBonusMultiplier: 1.5, repeatRewardMultiplier: 0.6, deathRule: 'EVENT_KO', targetTime: HUNT_TARGET_TIME[t.n - 1],
-  equipmentDrops: t.drops, firstClearItem: t.first,
+  equipmentTier: t.n, equipmentDrops: t.drops, firstClearItem: t.first,
   stage: toTreasure(reskin(stageOf(HUNT_STAGES, `hunt_${t.n}`), 'hunt'), 'coin_kobold'),
 });
 

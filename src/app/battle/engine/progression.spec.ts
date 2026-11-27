@@ -90,10 +90,10 @@ describe('Patch 1 progression — structure', () => {
     }
   });
 
-  it('equipment catalog: 3 slots, 5 rarities, 4 weapon groups, ~13 tactical affixes that never grant immunity', () => {
-    expect(SLOTS).toEqual(['WEAPON', 'ARMOR', 'ACCESSORY']);
-    expect(RARITIES).toEqual(['COMMON', 'UNCOMMON', 'RARE', 'ELITE', 'EPIC']);
-    expect(new Set(Object.values(EQUIPMENT_DEFS).filter(d => d.slot === 'WEAPON').map(d => d.weaponGroup))).toEqual(new Set(['HEAVY', 'LIGHT', 'BOW', 'CATALYST']));
+  it('equipment catalog: five ordinary slots and legacy compatibility', () => {
+    expect(SLOTS).toEqual(['WEAPON', 'HELMET', 'ARMOR', 'NECKLACE', 'RING', 'ACCESSORY']);
+    expect(RARITIES).toEqual(['COMMON', 'UNCOMMON', 'RARE', 'ELITE', 'EPIC', 'LEGENDARY']);
+    expect(new Set(Object.values(EQUIPMENT_DEFS).filter(d => d.slot === 'WEAPON' && d.weaponGroup).map(d => d.weaponGroup))).toEqual(new Set(['HEAVY', 'LIGHT', 'BOW', 'CATALYST']));
     const affixes = Object.values(AFFIXES);
     expect(affixes.length).toBeGreaterThanOrEqual(10);
     expect(affixes.length).toBeLessThanOrEqual(15);

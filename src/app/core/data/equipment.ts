@@ -3,15 +3,17 @@
  * stat values per rarity, affixes, caps, upgrade curve / costs, dismantle, crafting, Hunt drop tables and the
  * simulation gear profiles. Rules: core/rules/equipment.ts.
  */
+import { PATCH_DEFS } from './equipment-patch-one';
 import { HeroClass } from '../models/hero';
 import {
-  EquipmentAffixDefinition, EquipmentCraftRecipe, EquipmentDefinition, EquipmentSlot, EquipStat, Rarity, WeaponGroup,
+  EquipmentAffixDefinition, EquipmentCraftRecipe, EquipmentDefinition, EquipmentSlot, LegacyEquipmentSlot, EquipStat, Rarity, WeaponGroup,
 } from '../models/equipment';
 
-export const SLOTS: EquipmentSlot[] = ['WEAPON', 'ARMOR', 'ACCESSORY'];
-export const RARITIES: Rarity[] = ['COMMON', 'UNCOMMON', 'RARE', 'ELITE', 'EPIC'];
-export const RARITY_NAME: Record<Rarity, string> = { COMMON: 'Common', UNCOMMON: 'Uncommon', RARE: 'Rare', ELITE: 'Elite', EPIC: 'Epic' };
-const R = (c: number, u: number, r: number, e: number, ep: number): Record<Rarity, number> => ({ COMMON: c, UNCOMMON: u, RARE: r, ELITE: e, EPIC: ep });
+export const LEGACY_SLOTS: LegacyEquipmentSlot[] = ['WEAPON', 'ARMOR', 'ACCESSORY'];
+export const SLOTS: EquipmentSlot[] = ['WEAPON', 'HELMET', 'ARMOR', 'NECKLACE', 'RING', 'ACCESSORY'];
+export const RARITIES: Rarity[] = ['COMMON', 'UNCOMMON', 'RARE', 'ELITE', 'EPIC', 'LEGENDARY'];
+export const RARITY_NAME: Record<Rarity, string> = { COMMON: 'Common', UNCOMMON: 'Uncommon', RARE: 'Rare', ELITE: 'Elite', EPIC: 'Epic', LEGENDARY: 'Legendary' };
+const R = (c: number, u: number, r: number, e: number, ep: number): Record<Rarity, number> => ({ COMMON: c, UNCOMMON: u, RARE: r, ELITE: e, EPIC: ep, LEGENDARY: ep });
 
 /** who wields which weapon family (armor / accessories: everyone) */
 export const WEAPON_GROUP_OF: Record<HeroClass, WeaponGroup> = {
@@ -19,14 +21,14 @@ export const WEAPON_GROUP_OF: Record<HeroClass, WeaponGroup> = {
 };
 
 export const STAT_LABEL: Record<EquipStat, string> = {
-  atkPct: 'ATK', atkFlat: 'ATK', hpPct: 'HP', defPct: 'DEF', critChance: 'Crit', critDamage: 'Crit DMG', skillDamage: 'Skill DMG',
+  atkPct: 'ATK', atkFlat: 'ATK', hpPct: 'HP', hpFlat: 'HP (ค่าคงที่)', defPct: 'DEF', defFlat: 'DEF (ค่าคงที่)', critChance: 'Crit', critDamage: 'Crit DMG', skillDamage: 'Skill DMG',
   healingPower: 'Healing Power', shieldPower: 'Shield Power', healingReceived: 'Healing Received', cooldownReduction: 'Cooldown',
   attackSpeed: 'Attack Speed', moveSpeed: 'Move Speed', breakPower: 'Break', damageReduction: 'Damage Reduction',
   bleedReduction: 'Bleed DMG taken', poisonReduction: 'Poison duration', rootReduction: 'Root duration', diveReduction: 'Dive DMG taken',
   execution: 'DMG vs < 30 % HP', mistHunter: 'DMG vs revealed',
 };
 /** flat stats (everything else is a fraction) */
-export const FLAT_STATS: EquipStat[] = ['breakPower', 'atkFlat'];
+export const FLAT_STATS: EquipStat[] = ['breakPower', 'atkFlat', 'hpFlat', 'defFlat'];
 
 // ------------------------------------------------------------------ main stats (value at +0 per rarity)
 
@@ -76,6 +78,7 @@ export const RARITY_RULES: Record<Rarity, { secondaries: [number, number]; affix
   RARE: { secondaries: [1, 1], affixChance: 0.35, upgradeCap: 10, affixScale: 1 },
   ELITE: { secondaries: [1, 2], affixChance: 1, upgradeCap: 10, affixScale: 1 },
   EPIC: { secondaries: [2, 2], affixChance: 1, upgradeCap: 10, affixScale: 1.25 },
+  LEGENDARY: { secondaries: [4, 4], affixChance: 0, upgradeCap: 10, affixScale: 1 },
 };
 
 // ------------------------------------------------------------------ tactical affixes (help, never disable)
@@ -125,6 +128,7 @@ export const EQUIPMENT_DEFS: Record<string, EquipmentDefinition> = Object.fromEn
   { id: 'focus_staff', name: 'Focus Staff', slot: 'WEAPON', weaponGroup: 'CATALYST', mainStats: ['atkPct', 'healingPower'], secondaryPool: WEAPON_SECONDARIES.CATALYST, affixPool: ['mender', 'focus', 'execution', 'breaker'] },
   { id: 'guard_armor', name: 'Guard Armor', slot: 'ARMOR', mainStats: ['hpPct', 'defPct', 'damageReduction'], secondaryPool: ['hpPct', 'defPct', 'healingReceived', 'moveSpeed', 'atkPct'], affixPool: ['bleed_guard', 'poison_ward', 'rootbreaker', 'guardian', 'medic', 'bulwark', 'backline_guard'] },
   { id: 'trinket', name: 'Trinket', slot: 'ACCESSORY', mainStats: ['cooldownReduction', 'critChance', 'healingReceived', 'breakPower', 'hpPct', 'atkPct'], secondaryPool: ['hpPct', 'atkPct', 'critChance', 'cooldownReduction', 'healingReceived', 'moveSpeed', 'breakPower'], affixPool: ['rootbreaker', 'poison_ward', 'bleed_guard', 'focus', 'breaker', 'keen_eye', 'medic', 'mender', 'guardian', 'backline_guard'] },
+...PATCH_DEFS,
 ] as EquipmentDefinition[]).map(d => [d.id, d]));
 
 export const WEAPON_DEF_OF: Record<WeaponGroup, string> = { HEAVY: 'heavy_blade', LIGHT: 'twin_daggers', BOW: 'longbow', CATALYST: 'focus_staff' };
@@ -148,6 +152,7 @@ export const DISMANTLE_FRAGMENTS: Record<Rarity, { itemId: string; count: number
   RARE: { itemId: 'equip_frag_rare', count: 3 },
   ELITE: { itemId: 'equip_frag_elite', count: 3 },
   EPIC: { itemId: 'equip_frag_epic', count: 3 },
+  LEGENDARY: { itemId: 'equip_frag_epic', count: 3 },
 };
 export const SELL_GOLD: Record<Rarity, number> = R(20, 40, 80, 150, 250);
 
@@ -168,7 +173,7 @@ export type GearProfileId = 'BASIC' | 'MID' | 'GOOD' | 'VERY_GOOD' | 'NEAR_MAX';
 
 /** per slot: rarity + upgrade level + whether the build found its wanted affix */
 export interface ProfilePiece { rarity: Rarity; level: number; affix: boolean }
-export const GEAR_PROFILES: Record<GearProfileId, { label: string; pieces: Record<EquipmentSlot, ProfilePiece> }> = {
+export const GEAR_PROFILES: Record<GearProfileId, { label: string; pieces: Record<LegacyEquipmentSlot, ProfilePiece> }> = {
   BASIC: { label: 'Basic (Uncommon +2 weapon, Common +4 armor, Common +2 accessory)', pieces: { WEAPON: { rarity: 'UNCOMMON', level: 2, affix: false }, ARMOR: { rarity: 'COMMON', level: 4, affix: false }, ACCESSORY: { rarity: 'COMMON', level: 2, affix: false } } },
   MID: { label: 'Mid (Rare +5, armor affix)', pieces: { WEAPON: { rarity: 'RARE', level: 5, affix: false }, ARMOR: { rarity: 'RARE', level: 5, affix: true }, ACCESSORY: { rarity: 'RARE', level: 5, affix: false } } },
   GOOD: { label: 'Good (Elite +5 weapon / armor, Rare +6 accessory, affixes)', pieces: { WEAPON: { rarity: 'ELITE', level: 5, affix: true }, ARMOR: { rarity: 'ELITE', level: 5, affix: true }, ACCESSORY: { rarity: 'RARE', level: 6, affix: true } } },
@@ -178,7 +183,7 @@ export const GEAR_PROFILES: Record<GearProfileId, { label: string; pieces: Recor
 
 /** what a sensible player builds per class: main stat, secondaries (in order) and affix per slot */
 export interface ClassBuildPiece { main: EquipStat; secondaries: EquipStat[]; affix: string }
-export const CLASS_BUILDS: Record<HeroClass, Record<EquipmentSlot, ClassBuildPiece>> = {
+export const CLASS_BUILDS: Record<HeroClass, Record<LegacyEquipmentSlot, ClassBuildPiece>> = {
   tank: {
     WEAPON: { main: 'atkPct', secondaries: ['hpPct', 'defPct'], affix: 'breaker' },
     ARMOR: { main: 'hpPct', secondaries: ['defPct', 'healingReceived'], affix: 'bleed_guard' },

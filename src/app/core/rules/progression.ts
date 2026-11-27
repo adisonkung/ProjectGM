@@ -29,9 +29,9 @@ export function skillRanksOf(h: OwnedHero): SkillRanks {
 }
 
 /** equipment raw-stat bonuses (applied once, after level growth): % stats + flat ATK */
-export function gearStatBonus(h: OwnedHero): { hp: number; atk: number; def: number; atkFlat: number; attackSpeed: number; moveSpeed: number } {
+export function gearStatBonus(h: OwnedHero): { hp: number; atk: number; def: number; atkFlat: number; hpFlat: number; defFlat: number; attackSpeed: number; moveSpeed: number } {
   const t = heroGearTotals(h);
-  return { hp: t.hpPct, atk: t.atkPct, def: t.defPct, atkFlat: t.atkFlat, attackSpeed: t.attackSpeed, moveSpeed: t.moveSpeed };
+  return { hp: t.hpPct, atk: t.atkPct, def: t.defPct, atkFlat: t.atkFlat, hpFlat: t.hpFlat, defFlat: t.defFlat, attackSpeed: t.attackSpeed, moveSpeed: t.moveSpeed };
 }
 
 /** equipment utility → what the combat engine reads (gear already capped in gearTotals; skill ranks → rankedKit) */

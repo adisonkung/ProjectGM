@@ -83,6 +83,7 @@ export interface FarmDungeonDefinition {
   targetTime: number;
   stage: StageDef;
   /** EQUIPMENT dungeons: item drop table per clear + the guaranteed first-clear item rarity */
+  equipmentTier?: import('./equipment').EquipmentTier;
   equipmentDrops?: import('./equipment').EquipmentDropTable;
   firstClearItem?: import('./equipment').Rarity;
 }

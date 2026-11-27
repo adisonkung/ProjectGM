@@ -25,10 +25,10 @@ describe('Forge selection preview', () => {
   it('shows random crafting and only spends materials on crafting', () => {
     const f = TestBed.createComponent(ForgeComponent); f.detectChanges();
     const c = f.componentInstance, save = TestBed.inject(SaveService);
-    save.update(s => ({ ...s, gold: 5000, inventory: { ...s.inventory, equip_frag_rare: 40 } }));
+    save.update(s => ({ ...s, gold: 5000, cleared: 4, farm: { hunt_3: { clears: 1, firstClearDone: true, bestRating: 3 } }, inventory: { ...s.inventory, equip_frag_rare: 40 } }));
     const before = save.state();
-    c.setTab('craft'); c.pickSlot('ACCESSORY'); f.detectChanges();
-    expect(f.nativeElement.textContent).toContain('สุ่มค่าสถานะหลัก');
+    c.setTab('craft'); c.pickTier(3); c.pickSlot('NECKLACE'); c.pickSet('precision'); f.detectChanges();
+    expect(f.nativeElement.textContent).toContain('Precision');
     expect(f.nativeElement.querySelector('.bases')).toBeNull();
     expect(save.state()).toBe(before);
     c.craft(); f.detectChanges();
@@ -36,7 +36,8 @@ describe('Forge selection preview', () => {
     expect(save.state().inventory['equip_frag_rare']).toBe(0);
     expect(save.state().equipment.length).toBe(1);
     const crafted = save.state().equipment[0];
-    expect(EQUIPMENT_DEFS[crafted.definitionId].slot).toBe('ACCESSORY');
+    expect(EQUIPMENT_DEFS[crafted.definitionId].slot).toBe('NECKLACE');
+    expect([crafted.tier, crafted.set]).toEqual([3, 'precision']);
     expect(EQUIPMENT_DEFS[crafted.definitionId].mainStats).toContain(crafted.main.stat);
     expect(c.canCraft()).toBeFalse();
   });

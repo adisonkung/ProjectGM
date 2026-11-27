@@ -38,12 +38,13 @@ export type EquipmentArtFamily = 'sword' | 'armor' | 'necklace' | 'ring';
 export class EquipmentAuraComponent {
   readonly rarity = input<Rarity>('RARE');
   readonly family = input<EquipmentArtFamily>('sword');
+  readonly tiered = input(false);
   readonly animated = input(false);
   private readonly document = inject(DOCUMENT);
   readonly hidden = signal(this.document.hidden);
   readonly moving = computed(() => this.animated() && !this.hidden());
-  readonly rank = computed(() => ({ COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5 })[this.rarity()]);
-  readonly color = computed(() => ({ COMMON: '#c2d0df', UNCOMMON: '#63edac', RARE: '#70cfff', ELITE: '#d393ff', EPIC: '#ffc860' })[this.rarity()]);
+  readonly rank = computed(() => ({ COMMON: 1, UNCOMMON: 2, RARE: 3, ELITE: 4, EPIC: 5, LEGENDARY: 5 })[this.rarity()]);
+  readonly color = computed(() => this.tiered() && this.rarity() === 'EPIC' ? '#d393ff' : ({ COMMON: '#c2d0df', UNCOMMON: '#63edac', RARE: '#70cfff', ELITE: '#d393ff', EPIC: '#ffc860', LEGENDARY: '#ff695e' })[this.rarity()]);
   readonly strength = computed(() => [.1, .23, .43, .6, .82][this.rank() - 1]);
   readonly particles = computed(() => Array.from({ length: [3, 10, 20, 28, 38][this.rank() - 1] }, (_, i) => ({ x: 12 + (i * 37 + 11) % 77, y: 17 + (i * 23 + 3) % 73, delay: -i * .47, duration: 2.7 + i % 5 * .43, drift: (i % 2 ? 1 : -1) * (8 + i % 13) })));
   @HostListener('document:visibilitychange') visibilityChanged(): void { this.hidden.set(this.document.hidden); }

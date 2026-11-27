@@ -1,3 +1,7 @@
+import {
+  EQUIPMENT_TIERS, GEAR_SETS, ORDINARY_SLOTS, PATCH_BASE, PATCH_MAIN, PATCH_RARITIES, PATCH_STATS, PATCH_SUBSTAT_RANGE,
+  SET_IDS, SUBSTAT_COUNT, SUBSTAT_MILESTONES, TIER_CONFIG, huntId, setThreshold,
+} from '../data/equipment-patch-one';
 /**
  * Equipment rules (pure): item lines, gear totals with caps, rolling / crafting, upgrades, dismantle, sell, lock,
  * equip / unequip on the GameState, Hunt drops and the simulation gear profiles.
@@ -7,17 +11,17 @@
 import {
   ACCESSORY_MAIN_VALUES, AFFIXES, CLASS_BUILDS, CRAFT_RECIPES, DISMANTLE_FRAGMENTS, DISMANTLE_ORE, DISMANTLE_REFUND, EQUIPMENT_DEFS,
   FLAT_STATS, GEAR_PROFILES, GearProfileId, GOLD_PER_ORE, HUNT_TARGET_SHARE, MAIN_STAT_VALUES, RARITIES, RARITY_NAME, RARITY_RULES,
-  SECONDARY_VALUES, SELL_GOLD, SLOTS, STAT_CAPS, UPGRADE_COST_CURVE, UPGRADE_ORE_BASE, UPGRADE_STEP, WEAPON_DEF_OF, WEAPON_GROUP_OF,
+  SECONDARY_VALUES, SELL_GOLD, LEGACY_SLOTS, SLOTS, STAT_CAPS, UPGRADE_COST_CURVE, UPGRADE_ORE_BASE, UPGRADE_STEP, WEAPON_DEF_OF, WEAPON_GROUP_OF,
 } from '../data/equipment';
 import { HERO_BY_ID } from '../data/heroes';
 import {
-  EquipmentDefinition, EquipmentDropTable, EquipmentInstance, EquipmentSlot, EquipStat, GearTotals, HuntTarget, Rarity, StatLine,
+  EquipmentDefinition, EquipmentDropTable, EquipmentInstance, EquipmentSlot, EquipmentTier, EquipStat, GearSet, GearTotals, HuntTarget, OrdinarySlot, Rarity, StatLine,
 } from '../models/equipment';
 import { GameState } from '../models/game-state';
 import { HeroClass, OwnedHero } from '../models/hero';
 
 const ALL_STATS: EquipStat[] = [
-  'atkPct', 'atkFlat', 'hpPct', 'defPct', 'critChance', 'critDamage', 'skillDamage', 'healingPower', 'shieldPower', 'healingReceived',
+  'atkPct', 'atkFlat', 'hpPct', 'hpFlat', 'defPct', 'defFlat', 'critChance', 'critDamage', 'skillDamage', 'healingPower', 'shieldPower', 'healingReceived',
   'cooldownReduction', 'attackSpeed', 'moveSpeed', 'breakPower', 'damageReduction', 'bleedReduction', 'poisonReduction', 'rootReduction',
   'diveReduction', 'execution', 'mistHunter',
 ];
@@ -26,8 +30,8 @@ export const emptyTotals = (): GearTotals => Object.fromEntries(ALL_STATS.map(s 
 const round4 = (v: number) => Math.round(v * 10000) / 10000;
 export const defOf = (i: EquipmentInstance): EquipmentDefinition => EQUIPMENT_DEFS[i.definitionId];
 export const slotOf = (i: EquipmentInstance): EquipmentSlot => defOf(i).slot;
-export const itemName = (i: EquipmentInstance) => `${RARITY_NAME[i.rarity]} ${defOf(i).name}${i.upgradeLevel ? ` +${i.upgradeLevel}` : ''}`;
-export const upgradeCap = (i: EquipmentInstance) => RARITY_RULES[i.rarity].upgradeCap;
+export const itemName = (i: EquipmentInstance) => `${i.tier ? 'T' + i.tier + ' · ' : ''}${RARITY_NAME[i.rarity]} ${defOf(i).name}${i.upgradeLevel ? ` +${i.upgradeLevel}` : ''}`;
+export const upgradeCap = (i: EquipmentInstance) => i.tier ? 10 : RARITY_RULES[i.rarity].upgradeCap;
 
 /** main stat value at +0 for a base / rarity (accessories use their smaller raw-stat table when there is one) */
 export function mainBaseValue(def: EquipmentDefinition, stat: EquipStat, rarity: Rarity): number {
@@ -39,7 +43,7 @@ export function mainBaseValue(def: EquipmentDefinition, stat: EquipStat, rarity:
 /** upgraded main stat: × (1 + 4 % per level) → +10 = ×1.40; flat stats round to whole numbers */
 export function mainValue(i: EquipmentInstance, level = i.upgradeLevel): number {
   const v = i.main.value * (1 + UPGRADE_STEP * level);
-  return FLAT_STATS.includes(i.main.stat) ? Math.round(v) : round4(v);
+  return !i.tier && FLAT_STATS.includes(i.main.stat) ? Math.round(v) : round4(v);
 }
 
 /** every stat line an item grants (main upgraded, secondaries fixed, affix scaled by rarity) */
@@ -53,10 +57,22 @@ export function itemLines(i: EquipmentInstance): StatLine[] {
   return out;
 }
 
+/** Only tiered ordinary equipment participates in sets. */
+export function activeGearSets(items: readonly (EquipmentInstance | undefined)[]) {
+  return SET_IDS.flatMap(id => {
+    const pieces = items.filter(item => item?.tier && item.set === id && slotOf(item) !== 'ACCESSORY').length;
+    const threshold = setThreshold(pieces);
+    const position = [2, 3, 5].indexOf(threshold);
+    const { name, stat, bonuses } = GEAR_SETS[id];
+    return pieces ? [{ id, name, stat, pieces, threshold, value: bonuses[position] ?? 0 }] : [];
+  });
+}
+
 /** summed gear effect of a set of items, each stat capped (STAT_CAPS) — the only place caps are applied */
 export function gearTotals(items: (EquipmentInstance | undefined)[]): GearTotals {
   const t = emptyTotals();
   for (const i of items) if (i) for (const l of itemLines(i)) t[l.stat] += l.value;
+  for (const bonus of activeGearSets(items)) t[bonus.stat] += bonus.value;
   for (const s of ALL_STATS) {
     const cap = STAT_CAPS[s];
     if (cap != null) t[s] = Math.min(cap, t[s]);
@@ -71,7 +87,7 @@ export const heroGearTotals = (h: OwnedHero) => gearTotals(heroGear(h));
 /** can this class use the item? (weapons: weapon group; armor / accessory: everyone) */
 export function canEquip(cls: HeroClass, i: EquipmentInstance): boolean {
   const d = defOf(i);
-  return d.slot !== 'WEAPON' || d.weaponGroup === WEAPON_GROUP_OF[cls];
+  return d.slot !== 'WEAPON' || !d.weaponGroup || d.weaponGroup === WEAPON_GROUP_OF[cls];
 }
 
 // ------------------------------------------------------------------ rolling / crafting
@@ -115,14 +131,65 @@ export function rollItem(defId: string, rarity: Rarity, rng: () => number, insta
   };
 }
 
-export type EquipError = 'NOT_FOUND' | 'LOCKED' | 'EQUIPPED' | 'WRONG_CLASS' | 'MAX_LEVEL' | 'NEED_ORE' | 'NEED_GOLD' | 'NEED_FRAGMENTS' | 'NO_RECIPE' | 'BAD_MAIN';
+export type EquipError = 'NOT_FOUND' | 'LOCKED' | 'EQUIPPED' | 'WRONG_CLASS' | 'MAX_LEVEL' | 'NEED_ORE' | 'NEED_GOLD' | 'NEED_FRAGMENTS' | 'NO_RECIPE' | 'BAD_MAIN' | 'TIER_LOCKED' | 'STALE_UPGRADE';
 type Result = { state: GameState } | { error: EquipError };
+
+export function isTierUnlocked(state: GameState, tier: EquipmentTier): boolean {
+  return EQUIPMENT_TIERS.includes(tier) && state.cleared >= TIER_CONFIG[tier].floor && !!state.farm[huntId(tier)]?.clears;
+}
+
+type PatchStat = typeof PATCH_STATS[number];
+type PatchRarity = typeof PATCH_RARITIES[number];
+
+function statRoll(stat: PatchStat, tier: EquipmentTier, rng: () => number): number {
+  const [low, high] = PATCH_SUBSTAT_RANGE[stat];
+  const scale = TIER_CONFIG[tier].scale;
+  if (FLAT_STATS.includes(stat)) {
+    const min = Math.round(low * scale);
+    return min + Math.floor(rng() * (Math.round(high * scale) - min + 1));
+  }
+  return round4((low + (high - low) * rng()) * scale);
+}
+
+export function rollTierItem(tier: EquipmentTier, slot: OrdinarySlot, set: GearSet, rarity: PatchRarity, rng: () => number, id: number): EquipmentInstance {
+  const definitionId = PATCH_BASE[slot];
+  const stats = EQUIPMENT_DEFS[definitionId].mainStats as PatchStat[];
+  const stat = stats.length === 1 ? stats[0] : pick(stats, rng);
+  const main = PATCH_MAIN[stat] * TIER_CONFIG[tier].scale;
+  const eligible = PATCH_STATS.filter(key => key !== stat);
+  const secondaries: StatLine[] = [];
+  for (let i = 0; i < SUBSTAT_COUNT[rarity]; i++) {
+    const selected = pick(eligible, rng);
+    eligible.splice(eligible.indexOf(selected), 1);
+    secondaries.push({ stat: selected, value: statRoll(selected, tier, rng) });
+  }
+  return { instanceId: id, definitionId, tier, set, rarity, main: { stat, value: round4(main) }, secondaries,
+    upgradeLevel: 0, oreInvested: 0, locked: false, equippedHeroId: null };
+}
+
+export function craftTier(state: GameState, tier: EquipmentTier, slot: OrdinarySlot, set: GearSet, rng: () => number): Result & { item?: EquipmentInstance } {
+  if (!EQUIPMENT_TIERS.includes(tier) || !ORDINARY_SLOTS.includes(slot) || !SET_IDS.includes(set)) return { error: 'NO_RECIPE' };
+  if (!isTierUnlocked(state, tier)) return { error: 'TIER_LOCKED' };
+  const recipe = TIER_CONFIG[tier];
+  const available = state.inventory[recipe.material] ?? 0;
+  if (available < recipe.fragments) return { error: 'NEED_FRAGMENTS' };
+  if (state.gold < recipe.gold) return { error: 'NEED_GOLD' };
+  const weights = Object.fromEntries(PATCH_RARITIES.map((rarity, index) => [rarity, recipe.craft[index]]));
+  const rarity = rollRarity(weights, rng) as PatchRarity;
+  const item = rollTierItem(tier, slot, set, rarity, rng, state.nextItemId);
+  return { item, state: { ...state, nextItemId: state.nextItemId + 1, gold: state.gold - recipe.gold,
+    inventory: { ...state.inventory, [recipe.material]: available - recipe.fragments }, equipment: [...state.equipment, item] } };
+}
+
+export function nextSubstatMilestone(item: EquipmentInstance): number | undefined {
+  return item.tier ? SUBSTAT_MILESTONES[item.rarity as PatchRarity]?.find(level => level > item.upgradeLevel) : undefined;
+}
 
 /** craft an item of `rarity` for the chosen base + main stat (deterministic target, random secondaries / affix) */
 export function craft(state: GameState, rarity: Rarity, defId: string, main: EquipStat, rng: () => number): Result & { item?: EquipmentInstance } {
   const r = CRAFT_RECIPES[rarity];
   if (!r) return { error: 'NO_RECIPE' };
-  if (!EQUIPMENT_DEFS[defId]?.mainStats.includes(main)) return { error: 'BAD_MAIN' };
+  if (Object.values(PATCH_BASE).includes(defId) || !EQUIPMENT_DEFS[defId]?.mainStats.includes(main)) return { error: 'BAD_MAIN' };
   if ((state.inventory[r.fragmentId] ?? 0) < r.fragments) return { error: 'NEED_FRAGMENTS' };
   if (state.gold < r.gold) return { error: 'NEED_GOLD' };
   const item = rollItem(defId, rarity, rng, state.nextItemId ?? 1, { main });
@@ -140,7 +207,7 @@ export function craft(state: GameState, rarity: Rarity, defId: string, main: Equ
 export function craftRandom(state: GameState, rarity: Rarity, slot: EquipmentSlot, rng: () => number): Result & { item?: EquipmentInstance } {
   const recipe = CRAFT_RECIPES[rarity];
   if (!recipe) return { error: 'NO_RECIPE' };
-  const bases = Object.values(EQUIPMENT_DEFS).filter(d => d.slot === slot);
+  const bases = Object.values(EQUIPMENT_DEFS).filter(d => d.slot === slot && !Object.values(PATCH_BASE).includes(d.id));
   if (!bases.length) return { error: 'NO_RECIPE' };
   if ((state.inventory[recipe.fragmentId] ?? 0) < recipe.fragments) return { error: 'NEED_FRAGMENTS' };
   if (state.gold < recipe.gold) return { error: 'NEED_GOLD' };
@@ -182,19 +249,37 @@ function putItem(state: GameState, item: EquipmentInstance): GameState {
 
 /** every upgrade succeeds (no failure / destruction / downgrade) */
 export function upgrade(state: GameState, id: number): Result {
-  const f = findItem(state, id);
-  if (!f) return { error: 'NOT_FOUND' };
-  const cost = upgradeCost(f.item);
-  if (!cost) return { error: 'MAX_LEVEL' };
-  if ((state.inventory['enhancement_ore'] ?? 0) < cost.ore) return { error: 'NEED_ORE' };
-  if (state.gold < cost.gold) return { error: 'NEED_GOLD' };
-  const item = { ...f.item, upgradeLevel: f.item.upgradeLevel + 1, oreInvested: f.item.oreInvested + cost.ore };
-  const s = putItem(state, item);
-  return { state: { ...s, gold: s.gold - cost.gold, inventory: { ...s.inventory, enhancement_ore: (s.inventory['enhancement_ore'] ?? 0) - cost.ore } } };
+  const item = findItem(state, id)?.item;
+  return item ? upgradeTo(state, id, item.upgradeLevel, item.upgradeLevel + 1, Math.random) : { error: 'NOT_FOUND' };
+}
+
+/** Optimistic level check makes a retry of an already committed operation harmless. */
+export function upgradeTo(state: GameState, id: number, expected: number, target: number, rng: () => number): Result {
+  const current = findItem(state, id)?.item;
+  if (!current) return { error: 'NOT_FOUND' };
+  if (current.upgradeLevel !== expected || !Number.isInteger(target) || target <= expected) return { error: 'STALE_UPGRADE' };
+  if (target > upgradeCap(current)) return { error: 'MAX_LEVEL' };
+  const available = state.inventory['enhancement_ore'] ?? 0;
+  const costs = Array.from({ length: target - expected }, (_, index) => upgradeCost({ ...current, upgradeLevel: expected + index })!);
+  const ore = costs.reduce((sum, cost) => sum + cost.ore, 0);
+  const gold = costs.reduce((sum, cost) => sum + cost.gold, 0);
+  if (available < ore) return { error: 'NEED_ORE' };
+  if (state.gold < gold) return { error: 'NEED_GOLD' };
+  const secondaries = current.secondaries.map(line => ({ ...line }));
+  if (current.tier) {
+    for (const level of SUBSTAT_MILESTONES[current.rarity as PatchRarity] ?? []) {
+      if (level <= expected || level > target || !secondaries.length) continue;
+      const line = pick(secondaries, rng);
+      line.value = round4(line.value + statRoll(line.stat as PatchStat, current.tier, rng));
+    }
+  }
+  const item = { ...current, secondaries, upgradeLevel: target, oreInvested: current.oreInvested + ore };
+  return { state: { ...putItem(state, item), gold: state.gold - gold, inventory: { ...state.inventory, enhancement_ore: available - ore } } };
 }
 
 export function dismantleRewards(i: EquipmentInstance): { itemId: string; count: number }[] {
-  const frag = DISMANTLE_FRAGMENTS[i.rarity];
+  const legacy = DISMANTLE_FRAGMENTS[i.rarity];
+  const frag = i.tier ? { ...legacy, itemId: TIER_CONFIG[i.tier].material } : legacy;
   return [{ itemId: 'enhancement_ore', count: DISMANTLE_ORE[i.rarity] + Math.floor(i.oreInvested * DISMANTLE_REFUND) }, { ...frag }];
 }
 
@@ -250,8 +335,7 @@ export function equip(state: GameState, heroUid: number, id: number): Result {
   if (!canEquip(HERO_BY_ID[hero.templateId].cls, f.item)) return { error: 'WRONG_CLASS' };
   let s = f.heroUid != null ? unequipSlot(state, f.heroUid, slotOf(f.item)) : state;
   const slot = slotOf(f.item);
-  const current = s.heroes.find(h => h.uid === heroUid)!.gear?.[slot];
-  if (current) s = unequipSlot(s, heroUid, slot);
+  for (const replaced of replacementSlots(slot)) s = unequipSlot(s, heroUid, replaced);
   const item = { ...f.item, equippedHeroId: heroUid };
   return {
     state: {
@@ -284,11 +368,22 @@ export function releaseHeroGear(state: GameState, heroUid: number): GameState {
 
 // ------------------------------------------------------------------ comparison
 
+/** Old trinkets share the Necklace position and retain their original storage key. */
+function replacementSlots(slot: EquipmentSlot): readonly EquipmentSlot[] {
+  return slot === 'NECKLACE' || slot === 'ACCESSORY' ? ['NECKLACE', 'ACCESSORY'] : [slot];
+}
+
+export function previewGearSwap(hero: OwnedHero, item: EquipmentInstance): OwnedHero {
+  const slot = slotOf(item);
+  const gear = { ...hero.gear };
+  for (const replaced of replacementSlots(slot)) delete gear[replaced];
+  return { ...hero, gear: { ...gear, [slot]: item } };
+}
+
 /** stat deltas of swapping `candidate` into its slot on `h` (after caps) — for the item comparison UI */
 export function compareGear(h: OwnedHero, candidate: EquipmentInstance): { stat: EquipStat; delta: number }[] {
-  const slot = slotOf(candidate);
   const now = heroGearTotals(h);
-  const next = gearTotals(SLOTS.map(s => (s === slot ? candidate : h.gear?.[s])));
+  const next = heroGearTotals(previewGearSwap(h, candidate));
   return (Object.keys(now) as EquipStat[]).map(stat => ({ stat, delta: round4(next[stat] - now[stat]) })).filter(d => Math.abs(d.delta) > 1e-6);
 }
 
@@ -317,7 +412,7 @@ export function rollRarity(weights: Partial<Record<Rarity, number>>, rng: () => 
 
 /** which base drops: the target slot gets HUNT_TARGET_SHARE, weapons follow the deployed team's weapon groups */
 export function rollDropBase(target: HuntTarget, groups: string[], rng: () => number): string {
-  const slot: EquipmentSlot = target !== 'ANY' && rng() < HUNT_TARGET_SHARE ? target : pick(SLOTS, rng);
+  const slot: EquipmentSlot = target !== 'ANY' && rng() < HUNT_TARGET_SHARE ? target : pick(LEGACY_SLOTS, rng);
   if (slot === 'WEAPON') return WEAPON_DEF_OF[pick(groups.length ? groups : Object.keys(WEAPON_DEF_OF), rng) as keyof typeof WEAPON_DEF_OF];
   return slot === 'ARMOR' ? 'guard_armor' : 'trinket';
 }
@@ -330,6 +425,19 @@ export function rollHuntItems(table: EquipmentDropTable, target: HuntTarget, gro
   return out;
 }
 
+/** Hunt uses its established direct-drop economy, independently of the craft rates. */
+export function rollTierHuntItems(tier: EquipmentTier, table: EquipmentDropTable, target: HuntTarget, rng: () => number, nextId: number, guaranteed?: Rarity): EquipmentInstance[] {
+  const make = (rarity: Rarity, id: number) => {
+    const slot = target !== 'ANY' && target !== 'ACCESSORY' && rng() < HUNT_TARGET_SHARE
+      ? target : pick([...ORDINARY_SLOTS], rng);
+    const patchRarity = rarity === 'ELITE' ? 'EPIC' : rarity === 'EPIC' ? 'LEGENDARY' : rarity;
+    return rollTierItem(tier, slot, pick(SET_IDS, rng), patchRarity, rng, id);
+  };
+  const items = guaranteed ? [make(guaranteed, nextId)] : [];
+  if (rng() < table.itemChance) items.push(make(rollRarity(table.rarityWeights, rng), nextId + items.length));
+  return items;
+}
+
 // ------------------------------------------------------------------ simulation gear profiles
 
 /** the gear a sensible player of this class has at a profile (fixed, no RNG) */
@@ -337,7 +445,7 @@ export function profileGear(cls: HeroClass, profile: GearProfileId): Partial<Rec
   const p = GEAR_PROFILES[profile];
   const out: Partial<Record<EquipmentSlot, EquipmentInstance>> = {};
   let id = 90000;
-  for (const slot of SLOTS) {
+  for (const slot of LEGACY_SLOTS) {
     const piece = p.pieces[slot];
     const build = CLASS_BUILDS[cls][slot];
     const defId = slot === 'WEAPON' ? WEAPON_DEF_OF[WEAPON_GROUP_OF[cls]] : slot === 'ARMOR' ? 'guard_armor' : 'trinket';

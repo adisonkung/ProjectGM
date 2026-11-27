@@ -1,5 +1,9 @@
 # Current Development State
 
+## Equipment Patch 1 — Codex, 2026-11-28
+
+Task branch `wip/codex-equipment-patch-one` starts from fetched `origin/master` at `7d2f718`. The Hunt and Forge progress through T1–T5 with the corrected, named weapon art. The T6 source is archived outside public assets. Five ordinary slots, five sets and +10 enhancement are live for newly generated gear. Artifact remains reserved. Legacy gear and the save schema are preserved. App/spec/sim typechecks, 1,119 Karma tests, an optimized build and Desktop production-browser checks passed. [Implementation, migration and draft balance checks](EQUIPMENT_PATCH_ONE.md) · [Desktop references and captures](reviews/equipment-patch-one/index.html).
+
 ## Desktop Celestial Seal armory — Codex, 2026-11-26
 
 Branch `feature/armory-celestial-seal` starts from fetched `origin/master` at `c1a6cfb`. The runtime Desktop armory uses the approved generated seal, six ordered positions and 60–92 px medallions. The center shows live equipped totals until the player selects an inventory item. Compatible items can be equipped or moved from another hero after confirmation. Removal returns the item to the bag and shows its outline. The existing three real slots and save model back the page. Ring and necklace are appearances of the accessory slot. Helmet and artifact are illustrative positions. [Reference and in-game Desktop evidence](reviews/armory-celestial-seal/index.html).

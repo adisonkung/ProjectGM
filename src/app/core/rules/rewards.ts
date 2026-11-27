@@ -8,9 +8,7 @@ import { DailyState, FarmDungeonDefinition, ItemStack, RewardBreakdown, RewardBu
 import { GameState } from '../models/game-state';
 import { OwnedHero } from '../models/hero';
 import { addExp, Inventory } from './leveling';
-import { rollHuntItems } from './equipment';
-import { WEAPON_GROUP_OF } from '../data/equipment';
-import { HERO_BY_ID } from '../data/heroes';
+import { rollTierHuntItems } from './equipment';
 
 /** local calendar day key (daily reset at local midnight) */
 export function dayKey(d: Date): string {
@@ -185,15 +183,13 @@ export function completeFarmRun(state: GameState, def: FarmDungeonDefinition, ru
   // Equipment Hunt: item drops (same chance on bonus and repeat runs) + the guaranteed first-clear item
   let equipment = state.equipment ?? [];
   let nextItemId = state.nextItemId ?? 1;
-  if (def.equipmentDrops) {
-    const groups = [...new Set(run.participants.map(uid => state.heroes.find(h => h.uid === uid)).filter(h => !!h)
-      .map(h => WEAPON_GROUP_OF[HERO_BY_ID[h!.templateId].cls]))];
+  if (def.equipmentDrops && def.equipmentTier) {
     // TREASURE: one roll per carrier caught (at a reduced chance) instead of one roll per clear
     const treasure = def.stage.special?.kind === 'TREASURE';
     const rolls = treasure ? run.mode?.carriersKilled ?? 0 : 1;
     const table = treasure ? { ...def.equipmentDrops, itemChance: def.equipmentDrops.itemChance * CARRIER_DROP_SCALE } : def.equipmentDrops;
-    const dropped = rollHuntItems({ ...table, itemChance: 0 }, state.huntTarget ?? 'ANY', groups, rng, nextItemId, !rec.firstClearDone ? def.firstClearItem : undefined);
-    for (let i = 0; i < rolls; i++) dropped.push(...rollHuntItems(table, state.huntTarget ?? 'ANY', groups, rng, nextItemId + dropped.length));
+    const dropped = rollTierHuntItems(def.equipmentTier, { ...table, itemChance: 0 }, state.huntTarget ?? 'ANY', rng, nextItemId, !rec.firstClearDone ? def.firstClearItem : undefined);
+    for (let i = 0; i < rolls; i++) dropped.push(...rollTierHuntItems(def.equipmentTier, table, state.huntTarget ?? 'ANY', rng, nextItemId + dropped.length));
     nextItemId += dropped.length;
     equipment = [...equipment, ...dropped];
     breakdown.equipment = dropped;
