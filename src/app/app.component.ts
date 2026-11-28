@@ -11,6 +11,7 @@ import { CitadelFrameComponent } from './shared/citadel-frame.component';
 import { CitadelIconComponent } from './shared/citadel-icon.component';
 import { ArmoryLayout } from './pages/armory/armory-layout';
 import { ForgeLayout } from './pages/forge/forge-layout';
+import { TowerLayout } from './pages/tower/tower-layout';
 import { TeamBuilderLayout } from './pages/team-builder/team-builder-layout';
 import { formatCurrency } from './shared/format-currency';
 
@@ -78,7 +79,10 @@ export class AppComponent {
   private readonly desktopForge = inject(ForgeLayout).desktop;
   /** Desktop Anvil forge: own header like the armory, normal document scrolling. */
   readonly forgeAnvilPage = computed(() => this.desktopForge() && /^\/forge([?#]|$)/.test(this.url()));
-  private readonly sealChrome = computed(() => this.armorySealPage() || this.forgeAnvilPage());
+  private readonly desktopTower = inject(TowerLayout).desktop;
+  /** Desktop Milestone Climb tower: own header like the armory, normal document scrolling. */
+  readonly towerClimbPage = computed(() => this.desktopTower() && /^\/tower([?#]|$)/.test(this.url()));
+  private readonly sealChrome = computed(() => this.armorySealPage() || this.forgeAnvilPage() || this.towerClimbPage());
   readonly immersive = computed(() => this.rosterPage() || this.teamArchivePage() || this.sealChrome() || /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
   /** These exact routes draw their own headers; hero-detail retains the shared app bar. */
   readonly ownChrome = computed(() => this.rosterPage() || this.teamArchivePage() || this.sealChrome() || /^\/(home|gacha)([?#]|$)/.test(this.url()));

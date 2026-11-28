@@ -1,3 +1,102 @@
+@if (desktop()) {
+<section class="climb" aria-labelledby="tower-title">
+  <header class="climb-header"><app-collection-header heading="หอคอยอัญเชิญ" subtitle="CELESTIAL SPIRE" headingId="tower-title" /></header>
+  <div class="climb-body">
+    <section class="climb-panel" aria-labelledby="climb-title">
+      <h2 class="cartouche" id="climb-title"><span class="dm" aria-hidden="true"></span>ไต่หอคอย<span class="dm" aria-hidden="true"></span></h2>
+      <div class="climb-cap top"><span><app-icon name="tower" [size]="15" />ยอดหอคอย</span><span class="climb-count"><b>{{ cleared() }}</b> / {{ floors.length }}</span></div>
+      <div class="climb-scroll" #climbScroll>
+        <div class="climb-col" [style.aspect-ratio]="climb.ratio">
+          <div class="climb-loop" aria-hidden="true" [style.background-image]="climb.loop" [style.bottom.%]="climb.basePct"></div>
+          <img class="climb-base" src="/ui/tower/climb-base.webp" alt="" aria-hidden="true" [style.height.%]="climb.basePct" />
+          <ol class="climb-floors" aria-label="ชั้นของหอคอย">
+            @for (f of climbFloors(); track f.floor) {
+              <li [style.bottom.%]="f.bottom" [attr.data-floor]="f.floor">
+                <button type="button" class="plate" [class.done]="f.done" [class.next]="f.next" [class.locked]="f.locked" [class.boss]="f.boss" [class.selected]="f.selected" [attr.aria-pressed]="f.selected" (click)="focusedFloor.set(f.floor)">
+                  <span class="seal">{{ f.num }}</span>
+                  <span class="plate-name"><b>{{ f.name }}</b><small>{{ bandLabel(f.band.levels) }} · {{ f.done ? 'พิชิตแล้ว' : f.next ? 'พร้อมท้าชิง' : 'ล็อก' }}</small></span>
+                  @if (f.next) { <span class="here">อยู่ตรงนี้</span> }
+                  @if (f.boss) { <app-tower-monster class="plate-boss" [id]="f.bossId" [height]="44" /> }
+                  <span class="plate-state" aria-hidden="true">@if (f.done) { <app-icon name="star" [size]="16" /> } @else if (f.locked) { <app-icon name="lock" [size]="15" /> } @else { <i class="pulse-dot"></i> }</span>
+                </button>
+              </li>
+            }
+          </ol>
+        </div>
+      </div>
+      <div class="climb-cap bottom"><app-icon name="home" [size]="15" />ทางเข้าหอคอย</div>
+    </section>
+
+    <div class="climb-main">
+      <div class="milestone-bar" aria-label="รางวัลความคืบหน้า">
+        <span class="milestone-title">รางวัลความคืบหน้า</span>
+        <div class="milestone-track">
+          <span class="track-line" aria-hidden="true"></span><span class="track-fill" aria-hidden="true" [style.width.%]="progressPct()"></span>
+          @for (t of progressTicks(); track t.floor) { <span class="tick" aria-hidden="true" [class.done]="t.done" [class.next]="t.next" [style.left.%]="t.left"></span> }
+          @for (m of milestones(); track m.floor) { <span class="chest" [class.reached]="m.reached" [style.left.%]="m.left" [attr.title]="'รางวัลความคืบหน้า ชั้น ' + m.floor + ' · เร็วๆ นี้'"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 14h22v12a2 2 0 01-2 2H7a2 2 0 01-2-2z" class="c-body"/><path d="M5 14c0-5 4-8 11-8s11 3 11 8z" class="c-lid"/><path d="M5 14h22M16 6v22" class="c-band"/><rect x="13.5" y="12" width="5" height="6" rx="1" class="c-lock"/></svg><span class="sr-only">ชั้น {{ m.floor }} รางวัลความคืบหน้า เร็วๆ นี้</span></span> }
+        </div>
+        <span class="milestone-count">{{ cleared() }} / {{ floors.length }}</span>
+      </div>
+
+      @let f = selected();
+      @let d = detail();
+      <div class="climb-cards">
+        <section class="pp detail" aria-labelledby="detail-title">
+          <span class="corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <h2 class="cartouche" id="detail-title"><span class="dm" aria-hidden="true"></span>รายละเอียดด่าน<span class="dm" aria-hidden="true"></span></h2>
+          <div class="banner">
+            <img class="banner-scene" [src]="f.thumbnail" [alt]="'ฉากสนาม ' + f.name" />
+            <span class="banner-shade" aria-hidden="true"></span>
+            <div class="banner-id">
+              <span class="medallion"><img src="/ui/armory/celestial-seal.webp" alt="" aria-hidden="true" /><b>{{ d.num }}</b></span>
+              <span class="banner-text"><small>FLOOR {{ d.num }}</small><b>{{ f.name }}</b><em>{{ d.status }}</em></span>
+            </div>
+            <div class="lineup" aria-hidden="true"><span class="lineup-glow"></span>@for (id of d.lineup; track id) { <app-tower-monster [id]="id" [height]="d.boss && $last ? 128 : 90" /> }</div>
+          </div>
+          <dl class="facts">
+            <div><dt>เลเวลแนะนำ</dt><dd class="num">{{ bandLabel(f.band.levels) }}</dd></div>
+            <div><dt>ช่วง</dt><dd>{{ roleLabel[f.band.role] }}</dd></div>
+            <div><dt>เวลา</dt><dd class="num">{{ f.timeLimit }} วิ</dd></div>
+            <div><dt>เป้าหมาย</dt><dd>{{ d.goal }}</dd></div>
+          </dl>
+          <h3 class="ornate">มอนสเตอร์ · {{ d.waves.length }} เวฟ</h3>
+          <ol class="waves">
+            @for (w of d.waves; track $index) {
+              <li class="wave" [class.boss]="w.boss"><span class="wave-tag">{{ w.label }}</span>
+                <span class="wave-mons">@for (m of w.mons; track m.id) { <span class="mon"><app-tower-monster [id]="m.id" [height]="46" /><span class="mon-name" [class]="'rank-' + m.rank">{{ m.name }}</span><b>×{{ m.count }}</b></span> }</span>
+              </li>
+            }
+          </ol>
+        </section>
+
+        @let r = rewards();
+        @let t = team();
+        <section class="pp prep" aria-labelledby="prep-title">
+          <span class="corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <h2 class="cartouche" id="prep-title"><span class="dm" aria-hidden="true"></span>เตรียมออกรบ<span class="dm" aria-hidden="true"></span></h2>
+          <h3 class="ornate">{{ r.title }}</h3>
+          <p class="reward-note">{{ r.note }}</p>
+          <ul class="reward-tiles">
+            @for (it of r.tiles; track it.label) { <li><span class="gtile"><app-icon [name]="it.icon" [size]="50" /><b>{{ it.count }}</b></span><small>{{ it.label }}</small></li> }
+          </ul>
+          <h3 class="ornate">ทีมของคุณ</h3>
+          <p class="team-fit">เฉลี่ย <b>Lv {{ t.avg }}</b> · แนะนำ {{ t.band }}<span class="fit" [class]="'fit fit-' + t.fit">{{ t.fitLabel }}</span></p>
+          <ul class="team-rows">
+            @for (h of t.rows; track h.uid) { <li><span class="gtile portrait"><img [src]="h.portrait" alt="" loading="lazy" /></span><span class="team-name"><b>{{ h.name }}</b><small>{{ h.cls }} · <em>{{ stars(h.star) }}</em></small></span><span class="lv">Lv {{ h.level }}</span></li> }
+            @empty { <li class="team-empty">ยังไม่ได้จัดทีม</li> }
+          </ul>
+          <nav class="prep-links" aria-label="ทางลัดเตรียมทีม"><a routerLink="/team"><app-icon name="team" [size]="16" />เปลี่ยนทีม</a><a routerLink="/dungeons"><app-icon name="scroll" [size]="16" />ดันเจี้ยน</a></nav>
+          <div class="cta-row">
+            @if (f.floor <= cleared() + 1) {
+              <a class="climb-cta" [routerLink]="['/battle']" [queryParams]="{floor: f.floor, mode: 'tower'}" [attr.aria-label]="(f.floor <= cleared() ? 'สู้อีกครั้ง ชั้น ' : 'ท้าชิงชั้น ') + f.floor"><app-icon name="sword" [size]="22" />{{ f.floor <= cleared() ? 'สู้อีกครั้ง' : 'ท้าชิงชั้น ' + f.floor }}</a>
+            } @else { <p class="locked-note"><app-icon name="lock" [size]="18" /> พิชิตชั้น {{ f.floor - 1 }} เพื่อปลดล็อก</p> }
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+} @else {
 <div class="tower-scene" aria-hidden="true"></div>
 <section class="tower" aria-labelledby="tower-title">
   <div class="tower-layout">
@@ -43,3 +142,4 @@
     </section>
   </div>
 </section>
+}

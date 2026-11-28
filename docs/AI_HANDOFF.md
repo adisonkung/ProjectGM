@@ -1,5 +1,15 @@
 # Current Development State
 
+## Desktop Milestone Climb tower — Claude, 2026-11-29
+
+- Base: stacked on `wip/claude-forge-anvil` (patches 0001–0003 not merged yet); this is patch 0004.
+- `/tower` ≥ 1024 px = canvas design G; < 1024 px unchanged (`.floor-preview` legacy markup and its specs kept, now with `TowerLayout` stubbed to mobile).
+- Climb column: `climb-base.webp` at the bottom, `climb-loop.webp` repeated upward (bottom-aligned, pre-rotated by the export script so no runtime offset). Floor rails: base 1082 / 714 / 327, loop tile 725 / 327 (source px); `climbRail(n)` turns them into heights, plates are positioned in % so any column width works.
+- Rewards: `TOWER_REWARDS[n].firstClear` while `n > cleared`, else `.clear` (repeat). No balance values changed.
+- Team panel reads `save.team` → owned heroes (name, class, star, level, portrait); "พร้อม / ใกล้เคียง / อ่อนกว่าแนะนำ" compares the average level with `FLOOR_BANDS[n].levels`.
+- Open: progress-milestone rewards (chests at floors 5 and 10) have no data — markers only, tooltip "เร็วๆ นี้".
+- Validation: app + spec typecheck, Karma 1122/1122, production build (font inlining off locally, config restored), browser at 1440 / 1280 / 1024 and 900 (legacy).
+
 ## Desktop Anvil forge, helmet art and forge VFX — Claude, 2026-11-28
 
 Branch `wip/claude-forge-anvil` from origin/master `7d2f718`. The user approved canvas design "B Anvil" and asked to replace the old forge, install the supplied helmet art (New_folder_5.zip, T1–T5) and add VFX for crafting, enhancing and salvaging. From 1024 px `/forge` draws its own Characters header like the armory: a left menu rail (craft / enhance / salvage, two locked "เร็วๆ นี้" slots for future forge menus, back to the armory), a workbench with the Celestial Seal altar and detail column, and a right panel. Below 1024 px the existing layout remains (Desktop-first policy).
