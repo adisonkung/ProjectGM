@@ -5,14 +5,18 @@
     <section class="climb-panel" aria-labelledby="climb-title">
       <h2 class="cartouche" id="climb-title"><span class="dm" aria-hidden="true"></span>ไต่หอคอย<span class="dm" aria-hidden="true"></span></h2>
       <div class="climb-cap top"><span><app-icon name="tower" [size]="15" />ยอดหอคอย</span><span class="climb-count"><b>{{ cleared() }}</b> / {{ floors.length }}</span></div>
+      <div class="motes" aria-hidden="true">@for (m of motes; track $index) { <i [style.left.%]="m.left" [style.width.px]="m.size" [style.height.px]="m.size" [style.animation-delay.s]="-m.delay" [style.animation-duration.s]="m.dur"></i> }</div>
       <div class="climb-scroll" #climbScroll>
         <div class="climb-col" [style.aspect-ratio]="climb.ratio">
           <div class="climb-loop" aria-hidden="true" [style.background-image]="climb.loop" [style.bottom.%]="climb.basePct"></div>
           <img class="climb-base" src="/ui/tower/climb-base.webp" alt="" aria-hidden="true" [style.height.%]="climb.basePct" />
+          <span class="warp-glow" aria-hidden="true" [class.active]="entering()" [style.bottom.%]="portalPct"></span>
+          @if (entering()) { <app-sheet-fx class="warp-burst" src="/ui/gilded/vfx_breakthrough.webp" [fps]="12" [style.bottom.%]="portalPct" /> }
           <ol class="climb-floors" aria-label="ชั้นของหอคอย">
             @for (f of climbFloors(); track f.floor) {
               <li [style.bottom.%]="f.bottom" [attr.data-floor]="f.floor">
-                <button type="button" class="plate" [class.done]="f.done" [class.next]="f.next" [class.locked]="f.locked" [class.boss]="f.boss" [class.selected]="f.selected" [attr.aria-pressed]="f.selected" (click)="focusedFloor.set(f.floor)">
+                <button type="button" class="plate" [class.done]="f.done" [class.next]="f.next" [class.locked]="f.locked" [class.boss]="f.boss" [class.selected]="f.selected" [attr.aria-pressed]="f.selected" (click)="pickFloor(f.floor)">
+                  @if (f.selected) { @for (t of [fxTick()]; track t) { <span class="plate-burst" aria-hidden="true"></span> } }
                   <span class="seal">{{ f.num }}</span>
                   <span class="plate-name"><b>{{ f.name }}</b><small>{{ bandLabel(f.band.levels) }} · {{ f.done ? 'พิชิตแล้ว' : f.next ? 'พร้อมท้าชิง' : 'ล็อก' }}</small></span>
                   @if (f.next) { <span class="here">อยู่ตรงนี้</span> }
@@ -44,14 +48,16 @@
         <section class="pp detail" aria-labelledby="detail-title">
           <span class="corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
           <h2 class="cartouche" id="detail-title"><span class="dm" aria-hidden="true"></span>รายละเอียดด่าน<span class="dm" aria-hidden="true"></span></h2>
+          @for (t of [fxTick()]; track t) {
+          <div class="detail-body">
           <div class="banner">
             <img class="banner-scene" [src]="f.thumbnail" [alt]="'ฉากสนาม ' + f.name" />
             <span class="banner-shade" aria-hidden="true"></span>
             <div class="banner-id">
-              <span class="medallion"><img src="/ui/armory/celestial-seal.webp" alt="" aria-hidden="true" /><b>{{ d.num }}</b></span>
+              <span class="medallion"><img src="/ui/armory/celestial-seal.webp" alt="" aria-hidden="true" /><b>{{ d.num }}</b><app-sheet-fx class="medal-fx" src="/ui/gilded/vfx_levelup_ring.webp" [fps]="16" /></span>
               <span class="banner-text"><small>FLOOR {{ d.num }}</small><b>{{ f.name }}</b><em>{{ d.status }}</em></span>
             </div>
-            <div class="lineup" aria-hidden="true"><span class="lineup-glow"></span>@for (id of d.lineup; track id) { <app-tower-monster [id]="id" [height]="d.boss && $last ? 128 : 90" /> }</div>
+            <div class="lineup" aria-hidden="true"><span class="lineup-glow"></span>@for (id of d.lineup; track id) { <app-tower-monster [id]="id" [height]="d.boss && $last ? 128 : 90" [style.animation-delay.ms]="120 + $index * 90" /> }</div>
           </div>
           <dl class="facts">
             <div><dt>เลเวลแนะนำ</dt><dd class="num">{{ bandLabel(f.band.levels) }}</dd></div>
@@ -62,11 +68,13 @@
           <h3 class="ornate">มอนสเตอร์ · {{ d.waves.length }} เวฟ</h3>
           <ol class="waves">
             @for (w of d.waves; track $index) {
-              <li class="wave" [class.boss]="w.boss"><span class="wave-tag">{{ w.label }}</span>
+              <li class="wave" [class.boss]="w.boss" [style.animation-delay.ms]="160 + $index * 80"><span class="wave-tag">{{ w.label }}</span>
                 <span class="wave-mons">@for (m of w.mons; track m.id) { <span class="mon"><app-tower-monster [id]="m.id" [height]="46" /><span class="mon-name" [class]="'rank-' + m.rank">{{ m.name }}</span><b>×{{ m.count }}</b></span> }</span>
               </li>
             }
           </ol>
+          </div>
+          }
         </section>
 
         @let r = rewards();
@@ -76,9 +84,11 @@
           <h2 class="cartouche" id="prep-title"><span class="dm" aria-hidden="true"></span>เตรียมออกรบ<span class="dm" aria-hidden="true"></span></h2>
           <h3 class="ornate">{{ r.title }}</h3>
           <p class="reward-note">{{ r.note }}</p>
+          @for (t of [fxTick()]; track t) {
           <ul class="reward-tiles">
-            @for (it of r.tiles; track it.label) { <li><span class="gtile"><app-icon [name]="it.icon" [size]="50" /><b>{{ it.count }}</b></span><small>{{ it.label }}</small></li> }
+            @for (it of r.tiles; track it.label) { <li [style.animation-delay.ms]="80 + $index * 90"><span class="gtile"><app-icon [name]="it.icon" [size]="50" /><b>{{ it.count }}</b></span><small>{{ it.label }}</small></li> }
           </ul>
+          }
           <h3 class="ornate">ทีมของคุณ</h3>
           <p class="team-fit">เฉลี่ย <b>Lv {{ t.avg }}</b> · แนะนำ {{ t.band }}<span class="fit" [class]="'fit fit-' + t.fit">{{ t.fitLabel }}</span></p>
           <ul class="team-rows">
@@ -88,13 +98,16 @@
           <nav class="prep-links" aria-label="ทางลัดเตรียมทีม"><a routerLink="/team"><app-icon name="team" [size]="16" />เปลี่ยนทีม</a><a routerLink="/dungeons"><app-icon name="scroll" [size]="16" />ดันเจี้ยน</a></nav>
           <div class="cta-row">
             @if (f.floor <= cleared() + 1) {
-              <a class="climb-cta" [routerLink]="['/battle']" [queryParams]="{floor: f.floor, mode: 'tower'}" [attr.aria-label]="(f.floor <= cleared() ? 'สู้อีกครั้ง ชั้น ' : 'ท้าชิงชั้น ') + f.floor"><app-icon name="sword" [size]="22" />{{ f.floor <= cleared() ? 'สู้อีกครั้ง' : 'ท้าชิงชั้น ' + f.floor }}</a>
+              <a class="climb-cta" [attr.href]="battleHref(f.floor)" (click)="enterBattle($event, f.floor)" [attr.aria-label]="(f.floor <= cleared() ? 'สู้อีกครั้ง ชั้น ' : 'ท้าชิงชั้น ') + f.floor"><app-icon name="sword" [size]="22" />{{ f.floor <= cleared() ? 'สู้อีกครั้ง' : 'ท้าชิงชั้น ' + f.floor }}</a>
             } @else { <p class="locked-note"><app-icon name="lock" [size]="18" /> พิชิตชั้น {{ f.floor - 1 }} เพื่อปลดล็อก</p> }
           </div>
         </section>
       </div>
     </div>
   </div>
+  @if (warping(); as w) {
+    <div class="warp-out" aria-live="polite"><span class="warp-ring" aria-hidden="true"></span><span class="warp-ring r2" aria-hidden="true"></span><app-sheet-fx class="warp-pillar" src="/ui/gilded/vfx_starup_pillar.webp" [fps]="15" /><span class="warp-flash" aria-hidden="true"></span><b>กำลังวาร์ปสู่ชั้น {{ w }}</b></div>
+  }
 </section>
 } @else {
 <div class="tower-scene" aria-hidden="true"></div>

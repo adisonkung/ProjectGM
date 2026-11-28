@@ -8,6 +8,7 @@
 - Rewards: `TOWER_REWARDS[n].firstClear` while `n > cleared`, else `.clear` (repeat). No balance values changed.
 - Team panel reads `save.team` → owned heroes (name, class, star, level, portrait); "พร้อม / ใกล้เคียง / อ่อนกว่าแนะนำ" compares the average level with `FLOOR_BANDS[n].levels`.
 - Open: progress-milestone rewards (chests at floors 5 and 10) have no data — markers only, tooltip "เร็วๆ นี้".
+- Effects (patch 0005, user "เพิ่มเอฟเฟคต่างๆ ตอนเข้าหอ หรือหน้าจอต่างๆ"): entrance ascent warp → selected floor, panel rise-in, motes, progress fill, pick replay (`fxTick`), CTA shine, warp-out overlay then `router.navigate` after 820 ms (`enterBattle`; modified clicks / reduced motion navigate normally). All CSS / Gilded sheets, no new art.
 - Validation: app + spec typecheck, Karma 1122/1122, production build (font inlining off locally, config restored), browser at 1440 / 1280 / 1024 and 900 (legacy).
 
 ## Desktop Anvil forge, helmet art and forge VFX — Claude, 2026-11-28

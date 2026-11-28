@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { SaveService } from '../../core/services/save.service';
 import { TowerComponent } from './tower.component';
 import { TowerLayout } from './tower-layout';
@@ -110,4 +110,19 @@ describe('Tower desktop Milestone Climb', () => {
     expect(component.team().rows.every(r => r.portrait.startsWith('/portraits/'))).toBeTrue();
     expect(el.querySelector('.team-fit .fit')!.textContent!.trim().length).toBeGreaterThan(0);
   });
+
+  it('replays the pick effects and warps out before opening the battle', fakeAsync(() => {
+    const before = component.fxTick();
+    (el.querySelector('[data-floor="2"] .plate') as HTMLButtonElement).click(); fixture.detectChanges();
+    expect(component.fxTick()).toBe(before + 1);
+    expect(el.querySelector('.plate.selected .plate-burst')).not.toBeNull();
+    const nav = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+    (el.querySelector('.climb-cta') as HTMLAnchorElement).click(); fixture.detectChanges();
+    expect(component.warping()).toBe(2);
+    expect(el.querySelector('.warp-out')!.textContent).toContain('ชั้น 2');
+    expect(nav).not.toHaveBeenCalled();
+    tick(820);
+    expect(nav).toHaveBeenCalledWith(['/battle'], { queryParams: { floor: 2, mode: 'tower' } });
+    tick(3000);
+  }));
 });

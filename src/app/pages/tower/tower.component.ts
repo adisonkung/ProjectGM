@@ -1,5 +1,6 @@
-import { afterNextRender, Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { SheetFxComponent } from '../../shared/sheet-fx.component';
 import { IconComponent } from '../../shared/icon.component';
 import { ITEMS, TOWER_REWARDS } from '../../core/data/economy';
 import { FLOOR_BANDS } from '../../core/data/progression';
@@ -29,7 +30,7 @@ export interface TowerRewardTile { icon: string; label: string; count: string }
 /** Tower floors (locked until the previous floor is cleared) — farm dungeons have their own menu (/dungeons) */
 @Component({
   selector: 'app-tower',
-  imports: [RouterLink, IconComponent, TowerOrnamentComponent, CollectionHeaderComponent, TowerMonsterComponent],
+  imports: [RouterLink, IconComponent, TowerOrnamentComponent, CollectionHeaderComponent, TowerMonsterComponent, SheetFxComponent],
   templateUrl: './tower.component.html',
   styleUrls: ['./tower.component.scss', './tower-climb.scss'],
 })
@@ -138,10 +139,66 @@ export class TowerComponent {
   });
   readonly stars = (n: number) => '★'.repeat(Math.max(0, Math.min(6, n)));
 
+  // ------------------------------------------------------------------ Desktop effects (decorative; reduced motion = off)
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly reduceMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /** bumps on every floor pick so the detail / reward / plate effects replay */
+  readonly fxTick = signal(0);
+  /** true while the entrance ascent runs (warp glow at the entrance) */
+  readonly entering = signal(!this.reduceMotion);
+  /** floor whose battle is opening (warp-out overlay), null otherwise */
+  readonly warping = signal<number | null>(null);
+  /** drifting light motes over the climb column */
+  readonly motes = Array.from({ length: 18 }, (_, i) => ({ left: (i * 37 + 11) % 100, delay: (i * 0.73) % 9, dur: 7 + (i * 1.9) % 6, size: 2 + (i * 5) % 4 }));
+  /** where the warp portal sits in the climb column (source px of the base art: centre y 1330) */
+  readonly portalPct = ((CLIMB_ART.baseHeight - 1330) / climbHeight(STAGES.length)) * 100;
+  readonly battleHref = (floor: number) => this.router.serializeUrl(this.router.createUrlTree(['/battle'], { queryParams: { floor, mode: 'tower' } }));
+  private timers: ReturnType<typeof setTimeout>[] = [];
+  private raf = 0;
+
+  pickFloor(floor: number): void {
+    this.focusedFloor.set(floor);
+    this.fxTick.update(t => t + 1);
+  }
+
+  /** challenge: short warp-out, then the battle (instant with reduced motion or a modified click) */
+  enterBattle(event: MouseEvent, floor: number): void {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const go = () => this.router.navigate(['/battle'], { queryParams: { floor, mode: 'tower' } });
+    if (this.reduceMotion) { go(); return; }
+    if (this.warping() !== null) return;
+    this.warping.set(floor);
+    this.timers.push(setTimeout(go, 820));
+  }
+
   private readonly scroller = viewChild<ElementRef<HTMLElement>>('climbScroll');
   constructor() {
-    // open the climb at the selected floor (the next one to clear) instead of the warp entrance
-    afterNextRender(() => this.scrollToFloor(this.selected().floor, 'instant'));
+    // entrance: start at the warp gate and climb to the selected floor (instant with reduced motion)
+    afterNextRender(() => {
+      if (this.reduceMotion) { this.scrollToFloor(this.selected().floor, 'instant'); return; }
+      const box = this.scroller()?.nativeElement;
+      if (box) box.scrollTop = box.scrollHeight;
+      this.timers.push(setTimeout(() => this.ascend(this.selected().floor), 380));
+    });
+    this.destroyRef.onDestroy(() => { this.timers.forEach(clearTimeout); cancelAnimationFrame(this.raf); });
+  }
+  /** eased climb from the current scroll position up to a floor */
+  private ascend(floor: number): void {
+    const box = this.scroller()?.nativeElement;
+    const plate = box?.querySelector<HTMLElement>(`[data-floor="${floor}"]`);
+    if (!box || !plate || typeof requestAnimationFrame !== 'function') { this.entering.set(false); return; }
+    const from = box.scrollTop, to = Math.max(0, plate.offsetTop - box.clientHeight / 2 + plate.offsetHeight / 2);
+    const ms = Math.min(2200, 900 + Math.abs(from - to) * 0.9), t0 = performance.now();
+    const ease = (t: number) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / ms);
+      box.scrollTop = from + (to - from) * ease(t);
+      if (t < 1) this.raf = requestAnimationFrame(step);
+      else { this.entering.set(false); this.fxTick.update(x => x + 1); }
+    };
+    this.raf = requestAnimationFrame(step);
   }
   scrollToFloor(floor: number, behavior: ScrollBehavior = 'smooth'): void {
     const box = this.scroller()?.nativeElement;
