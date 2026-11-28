@@ -1,5 +1,10 @@
 # Current Development State
 
+## Desktop Dungeon Codex + sweep — Claude, 2026-11-29
+
+`/dungeons/:type` from 1024 px uses canvas design B (Dungeon Codex): Characters header (ดันเจี้ยนรายวัน / DAILY DUNGEONS), a left rail of the four dungeons (emblem from `dungeon-emblems.webp`, today's run pips, a "กวาดได้ถึง [tier]" badge on the highest 3★ open tier while runs are left), a middle panel (scene banner with the tier's three strongest monsters at equal size via `TowerMonsterComponent` — Echo Trial shows the team's portraits — rule chips, guardian / Hunt target pickers, enemy skill cards read from `MONSTER_SKILLS`: cast / cooldown and ขัดได้ / ขัดไม่ได้ / ต้องเบรก) and a right panel (tier list, "รอบวันนี้" box with the sweep stepper and preview, sweep + start buttons). Entering a dungeon selects the highest sweepable tier, else the highest open one. Below 1024 px the old layout stays and gets a "กวาด" button on sweepable tiers. Styles in `dungeon-codex.scss`; the app shell treats it like the tower (`dungeonCodexPage`, own header).
+**Sweep (user decision):** only today's daily-bonus runs can be swept (repeat runs never), and only on a tier cleared with **3★** (`canAutoRepeat`). `sweepFarm` in `core/rules/rewards.ts` runs `completeFarmRun` once per run with a perfect score (deaths 0, all kills, 3 Hunt carriers, current team as participants), so every run has its own drop rolls and fraction carry — results equal playing it; no balance change. `SweepRun.gained` = whole items that reached the bag, `lucky` = bonus-drop ids. The result popup (all widths) lists each run (RUN 1, RUN 2 …: items, lucky tag, equipment with rarity glow), the bag total, the leftover carry and runs left. No unlock notification (user). Spec `core/rules/sweep.spec.ts`.
+
 ## Desktop Milestone Climb tower — Claude, 2026-11-29
 
 - Base: stacked on `wip/claude-forge-anvil` (patches 0001–0003 not merged yet); this is patch 0004.

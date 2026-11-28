@@ -82,7 +82,9 @@ export class AppComponent {
   private readonly desktopTower = inject(TowerLayout).desktop;
   /** Desktop Milestone Climb tower: own header like the armory, normal document scrolling. */
   readonly towerClimbPage = computed(() => this.desktopTower() && /^\/tower([?#]|$)/.test(this.url()));
-  private readonly sealChrome = computed(() => this.armorySealPage() || this.forgeAnvilPage() || this.towerClimbPage());
+  /** Desktop Dungeon Codex (daily dungeons): own header like the tower. */
+  readonly dungeonCodexPage = computed(() => this.desktopTower() && /^\/dungeons(\/|[?#]|$)/.test(this.url()));
+  private readonly sealChrome = computed(() => this.armorySealPage() || this.forgeAnvilPage() || this.towerClimbPage() || this.dungeonCodexPage());
   readonly immersive = computed(() => this.rosterPage() || this.teamArchivePage() || this.sealChrome() || /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
   /** These exact routes draw their own headers; hero-detail retains the shared app bar. */
   readonly ownChrome = computed(() => this.rosterPage() || this.teamArchivePage() || this.sealChrome() || /^\/(home|gacha)([?#]|$)/.test(this.url()));
