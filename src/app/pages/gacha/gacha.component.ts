@@ -7,8 +7,8 @@ import { SummonCampaign } from './summon-campaign.component';
 import { CitadelFrameComponent } from '../../shared/citadel-frame.component';
 import { TowerOrnamentComponent } from '../tower/tower-ornament.component';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { formatCurrency } from '../../shared/format-currency';
+import { RouterLink } from '@angular/router';
+import { CollectionHeaderComponent } from '../heroes/collection-header.component';
 import { HERO_BY_ID, HEROES } from '../../core/data/heroes';
 import { CLASS_NAME } from '../../core/data/classes';
 import { DUPLICATE_MEMORY, GACHA, MAX_STAR, STAR_UP_COST } from '../../core/data/stars';
@@ -31,7 +31,7 @@ const FEATURED = { id: 'lucien', epithet: 'THE BLACK SAINT', latin: 'Lucien Valt
 @Component({
   selector: 'app-gacha',
   host: { class: 'summon-classic' },
-  imports: [HeroStarsComponent, SummonButtonComponent, CitadelIconComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonBookComponent],
+  imports: [HeroStarsComponent, SummonButtonComponent, CitadelIconComponent, CitadelFrameComponent, TowerOrnamentComponent, HeroPortraitComponent, IconComponent, RouterLink, SummonBookComponent, CollectionHeaderComponent],
   templateUrl: './gacha.component.html',
   styleUrl: './gacha.component.scss',
 })
@@ -90,13 +90,6 @@ export class GachaComponent {
   summonAgain(): void { this.playing.set(false); this.summon(this.lastCount()); }
   readonly MAX_STAR = MAX_STAR;
   readonly gems = computed(() => this.save.state().gems);
-  readonly gemsShort = computed(() => formatCurrency(this.gems()));
-  private readonly router = inject(Router);
-  /** back to the previous in-app page; a direct visit (no history) goes home */
-  back(): void {
-    if (history.length > 1 && this.router.lastSuccessfulNavigation?.previousNavigation) history.back();
-    else this.router.navigateByUrl('/home');
-  }
   /** pulls left until the guaranteed 3★ */
   readonly pityLeft = computed(() => GACHA.pity - (this.save.state().pity ?? 0));
   readonly rate3 = Math.round((GACHA.rates[3] ?? 0) * 100);

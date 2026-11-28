@@ -1,7 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { FARM_BY_ID } from '../data/economy';
 import { RewardBreakdown } from '../models/economy';
-import { completeFarmRun, completeTowerRun, dailyBonusLeft, ensureDaily, HeroExpResult, isUnlocked, RunOutcome } from '../rules/rewards';
+import { completeFarmRun, completeTowerRun, dailyBonusLeft, ensureDaily, HeroExpResult, isUnlocked, RunOutcome, sweepableRuns, sweepFarm, SweepRun } from '../rules/rewards';
 import { RosterService } from './roster.service';
 import { SaveService } from './save.service';
 
@@ -44,5 +44,20 @@ export class ProgressionService {
     const r = completeFarmRun(this.save.state(), def, run, rng, now);
     this.save.update(() => r.state);
     return { breakdown: r.breakdown, exp: r.exp, rating: r.rating };
+  }
+
+  /** daily-bonus runs this tier can sweep right now (0 = locked, not 3★ yet, or today's runs used) */
+  sweepable(farmId: string, now = new Date()): number {
+    const def = FARM_BY_ID[farmId];
+    return def ? sweepableRuns(this.save.state(), def, now) : 0;
+  }
+
+  /** sweep `count` of today's bonus runs — each one a full clear with its own rolls; returns the per-run results */
+  sweepFarm(farmId: string, count: number, now = new Date(), rng = Math.random): SweepRun[] {
+    const def = FARM_BY_ID[farmId];
+    if (!def) return [];
+    const r = sweepFarm(this.save.state(), def, count, rng, now);
+    if (r.runs.length) this.save.update(() => r.state);
+    return r.runs;
   }
 }

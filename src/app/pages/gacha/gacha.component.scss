@@ -10,11 +10,8 @@
 .gate::after{background:linear-gradient(0deg,#06050af5 0%,#06050a99 22%,#06050a00 42%),linear-gradient(180deg,#06050ab3 0%,#06050a00 18%);}
 @keyframes key-breathe{to{scale:1.03;translate:0 -4px;}}
 
-.top-bar{position:absolute;inset:0 0 auto;z-index:3;display:flex;align-items:center;gap:14px;padding:14px clamp(16px,2.4vw,36px);
-  .round{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;border:1px solid #e6c88a73;background:#0c0a1499;color:var(--gold);cursor:pointer;transition:background .15s,border-color .15s;&:hover{background:#1a1424cc;border-color:var(--gold);}}
-  .page-title{display:flex;flex-direction:column;line-height:1.2;span{font:600 11px var(--title);letter-spacing:.3em;color:var(--gold);}b{font:700 20px 'Eldervane Trirong',var(--body);color:#fff3dc;}}
-  .spacer{flex:1;}
-  .wallet{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:20px;border:1px solid #e6c88a59;background:#0c0a14a8;font:600 16px var(--body);color:#f2ebdd;app-icon{color:#9fd0ff;}}}
+/* shared Characters header (user 2026-11-28): same top menu as heroes / armory / forge */
+.top-bar{position:absolute;inset:0 0 auto;z-index:3;padding:10px clamp(20px,3.4vw,54px) 13px;app-collection-header{max-width:1536px;margin-inline:auto;}}
 .summon-ui{position:relative;display:grid;grid-template-columns:132px minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) auto;
   min-height:max(100%,560px);padding:calc(54px + clamp(24px,5dvh,56px)) clamp(20px,3.4vw,48px) clamp(20px,4.5dvh,44px) clamp(16px,1.9vw,28px);gap:20px clamp(24px,4.4vw,64px);box-sizing:border-box;}
 .eyebrow{font:600 12px var(--title);letter-spacing:.32em;color:var(--gold);}
@@ -159,4 +156,3 @@ a:focus-visible,button:focus-visible{outline:2px solid #ffe5a5;outline-offset:4p
 .summon-dialog .eyebrow{font:500 9px var(--title);letter-spacing:.2em;color:#cfae74;}
 
 .seal-inline{display:inline-block;width:26px;height:30px;object-fit:contain;vertical-align:middle;flex:none;}
-.seal-wallet img{object-fit:contain;}

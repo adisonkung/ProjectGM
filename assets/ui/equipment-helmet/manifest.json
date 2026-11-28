@@ -1,0 +1,22 @@
+{
+  "T1.png": {
+    "tier": "common",
+    "sha256": "51199330c50b1c38ffdba1d5464f326d2816fd23b86a854fdc70faec69dffe4f"
+  },
+  "T2.png": {
+    "tier": "uncommon",
+    "sha256": "5e32fba1fdd8fccc917afa69b1441456bbe8bb1f450c6096c1e1648b7dd1b584"
+  },
+  "T3.png": {
+    "tier": "rare",
+    "sha256": "534501db0d4637e9f9d4a0e535660b10160d55ccd0dc2fdc6b1a8d320e184cf9"
+  },
+  "T4.png": {
+    "tier": "elite",
+    "sha256": "3c7fbf95f53cfdf8e327e78c9f412ffac67487a665b12e4f7bce336bb7221a4b"
+  },
+  "T5.png": {
+    "tier": "epic",
+    "sha256": "f64fceabad9192bd6e8f3034389e5d6e983ba461f9974d298b197a0cbd069f4a"
+  }
+}

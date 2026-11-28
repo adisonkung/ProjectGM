@@ -4,14 +4,9 @@
       <video [src]="v" [poster]="showcase" [muted]="true" autoplay loop playsinline disablepictureinpicture preload="auto"></video>
     } @else if (showcase) { <img [src]="showcase" alt="" fetchpriority="high" decoding="async" /> }
   </div>
-  <header class="top-bar">
-    <button type="button" class="round" aria-label="ย้อนกลับ" (click)="back()"><span class="summon-art-icon back" aria-hidden="true"></span></button>
-    <div class="page-title"><span>SUMMON</span><b>อัญเชิญ</b></div>
-    <span class="spacer"></span>
-    <span class="wallet seal-wallet" [attr.aria-label]="seals.standard.name + ' ' + standardSeals()"><img [src]="seals.standard.icon" alt="" aria-hidden="true" width="28" height="30" />{{ standardSeals() }}</span>
-    <span class="wallet" [attr.aria-label]="'เพชร ' + gems()"><span class="summon-art-icon gem" aria-hidden="true"></span>{{ gemsShort() }}</span>
-    <a class="round" routerLink="/home" aria-label="กลับหน้าหลัก"><span class="summon-art-icon home" aria-hidden="true"></span></a>
-  </header>
+  <div class="top-bar">
+    <app-collection-header heading="อัญเชิญ" subtitle="SUMMON" headingId="summon-title" [extra]="{ icon: seals.standard.icon, label: seals.standard.name, value: standardSeals() }" />
+  </div>
   <div class="summon-ui">
     <nav class="banner-rail" aria-label="ตู้อัญเชิญ">
       <button type="button" class="banner-tab active" aria-current="true" (click)="openInfo('banner')"><span class="tab-art">@if (showcase) { <img [src]="showcase" alt="" /> }</span><span class="tab-text"><b>{{ campaign.label }}</b></span></button>

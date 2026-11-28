@@ -157,7 +157,7 @@ export function clearRating(def: FarmDungeonDefinition, r: { deaths: number; tim
   return 1 + (r.deaths === 0 ? 1 : 0) + (r.time <= def.targetTime ? 1 : 0);
 }
 
-/** future QoL: auto repeat / sweep need a 3★ clear (not implemented yet) */
+/** sweep (and future auto repeat) need a 3★ clear of that exact tier */
 export const canAutoRepeat = (s: GameState, id: string) => (s.farm[id]?.bestRating ?? 0) >= 3;
 
 export interface RunOutcome {
@@ -219,4 +219,56 @@ export function completeTowerRun(state: GameState, floor: number, run: RunOutcom
     state: { ...state, heroes, inventory, rewardCarry: carry, gold: state.gold + breakdown.final.gold, cleared: Math.max(state.cleared, floor) },
     breakdown, exp: results,
   };
+}
+
+/** one sweep run: the reward breakdown plus what actually reached the bag (whole items after carry / combining) */
+export interface SweepRun {
+  breakdown: RewardBreakdown;
+  exp: HeroExpResult[];
+  /** item id → whole items gained by this run (fragments that combined into a stone show as the stone) */
+  gained: Record<string, number>;
+  /** bonus-drop item ids rolled by this run (the "lucky" extra) */
+  lucky: string[];
+}
+
+/** daily-bonus runs a sweep may take now: 0 unless the tier is unlocked and cleared with 3★ */
+export function sweepableRuns(state: GameState, def: FarmDungeonDefinition, now: Date): number {
+  if (!isUnlocked(def, state.cleared) || !canAutoRepeat(state, def.id)) return 0;
+  return dailyBonusLeft(ensureDaily(state.daily, now), def.dailyBonusPool);
+}
+
+/** a perfect clear for the sweep: 3★ score in every mode, the current team as participants */
+function perfectRun(state: GameState, def: FarmDungeonDefinition): RunOutcome {
+  const sp = def.stage.special;
+  const kills = sp?.kind === 'SURVIVAL' && sp.killStars ? sp.killStars[1] : 0;
+  return {
+    win: true, deaths: 0, time: 0, participants: state.team.map(t => t.uid),
+    mode: { kind: sp?.kind ?? 'STORY', kills, carriersKilled: 3, carriersTotal: 3, escaped: 0, strikes: 0, maxStrikes: 0, enraged: false },
+  };
+}
+
+const gainedOf = (before: Inventory, after: Inventory): Record<string, number> => {
+  const out: Record<string, number> = {};
+  for (const [id, n] of Object.entries(after)) { const d = n - (before[id] ?? 0); if (d > 0) out[id] = d; }
+  return out;
+};
+
+/**
+ * Sweep: take up to `count` of today's daily-bonus runs of a 3★ tier instantly. Every run is a real clear
+ * (`completeFarmRun` with a perfect score) — ×dailyBonusMultiplier, its own drop rolls, fractions carried — so
+ * the result equals playing it; repeat runs (after the bonus) are never swept.
+ */
+export function sweepFarm(state: GameState, def: FarmDungeonDefinition, count: number, rng: () => number, now: Date): { state: GameState; runs: SweepRun[] } {
+  const n = Math.min(Math.max(0, Math.floor(count)), sweepableRuns(state, def, now));
+  const runs: SweepRun[] = [];
+  let s = state;
+  for (let i = 0; i < n; i++) {
+    const r = completeFarmRun(s, def, perfectRun(s, def), rng, now);
+    if (!r.breakdown) break;
+    // rollItems appends the bonus drops after the base items
+    const lucky = (r.breakdown.base.items ?? []).slice((def.baseRewards.items ?? []).length).map(it => it.itemId);
+    runs.push({ breakdown: r.breakdown, exp: r.exp, gained: gainedOf(s.inventory, r.state.inventory), lucky });
+    s = r.state;
+  }
+  return { state: s, runs };
 }

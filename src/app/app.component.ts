@@ -10,6 +10,8 @@ import { IconComponent } from './shared/icon.component';
 import { CitadelFrameComponent } from './shared/citadel-frame.component';
 import { CitadelIconComponent } from './shared/citadel-icon.component';
 import { ArmoryLayout } from './pages/armory/armory-layout';
+import { ForgeLayout } from './pages/forge/forge-layout';
+import { TowerLayout } from './pages/tower/tower-layout';
 import { TeamBuilderLayout } from './pages/team-builder/team-builder-layout';
 import { formatCurrency } from './shared/format-currency';
 
@@ -74,12 +76,21 @@ export class AppComponent {
   readonly teamArchivePage = computed(() => this.desktopTeam() && /^\/team([?#]|$)/.test(this.url()));
   private readonly desktopArmory = inject(ArmoryLayout).desktop;
   readonly armorySealPage = computed(() => this.desktopArmory() && /^\/armory([?#]|$)/.test(this.url()));
-  readonly immersive = computed(() => this.rosterPage() || this.teamArchivePage() || this.armorySealPage() || /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
+  private readonly desktopForge = inject(ForgeLayout).desktop;
+  /** Desktop Anvil forge: own header like the armory, normal document scrolling. */
+  readonly forgeAnvilPage = computed(() => this.desktopForge() && /^\/forge([?#]|$)/.test(this.url()));
+  private readonly desktopTower = inject(TowerLayout).desktop;
+  /** Desktop Milestone Climb tower: own header like the armory, normal document scrolling. */
+  readonly towerClimbPage = computed(() => this.desktopTower() && /^\/tower([?#]|$)/.test(this.url()));
+  /** Desktop Dungeon Codex (daily dungeons): own header like the tower. */
+  readonly dungeonCodexPage = computed(() => this.desktopTower() && /^\/dungeons(\/|[?#]|$)/.test(this.url()));
+  private readonly sealChrome = computed(() => this.armorySealPage() || this.forgeAnvilPage() || this.towerClimbPage() || this.dungeonCodexPage());
+  readonly immersive = computed(() => this.rosterPage() || this.teamArchivePage() || this.sealChrome() || /^\/(home|island|gacha)([?#]|$)/.test(this.url()));
   /** These exact routes draw their own headers; hero-detail retains the shared app bar. */
-  readonly ownChrome = computed(() => this.rosterPage() || this.teamArchivePage() || this.armorySealPage() || /^\/(home|gacha)([?#]|$)/.test(this.url()));
+  readonly ownChrome = computed(() => this.rosterPage() || this.teamArchivePage() || this.sealChrome() || /^\/(home|gacha)([?#]|$)/.test(this.url()));
 
   /** Collection, formation and adventure share the lobby chrome but keep normal document scrolling. */
-  readonly forgePage = computed(() => /^\/forge([?#]|$)/.test(this.url()));
+  readonly forgePage = computed(() => /^\/forge([?#]|$)/.test(this.url()) && !this.forgeAnvilPage());
   readonly collection = computed(() => /^\/(heroes|team|armory|forge|account)(\/|[?#]|$)/.test(this.url()) || /^\/(tower|dungeons)(\/|[?#]|$)/.test(this.url()));
   readonly fantasy = computed(() => this.immersive() || this.collection() || this.fight() || this.url().startsWith('/sprite-lab'));
   readonly homeChrome = computed(() => !this.bare());
@@ -94,9 +105,9 @@ export class AppComponent {
     inject(PreloadService).warmCity();
     // taps on buttons + dialogs opening/closing, app-wide (settings: /account)
     inject(SoundService).install();
-    effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive() && !this.teamArchivePage() && !this.armorySealPage()));
+    effect(() => document.documentElement.classList.toggle('lock-screen', this.immersive() && !this.teamArchivePage() && !this.sealChrome()));
     // UI scale (user 2026-11-18): menu pages + the Sky Isle render at 75 % on desktop (styles.scss `html.ui-zoom`).
     // Summon cutscene, battle and the K7 home size themselves from the window.
-    effect(() => document.documentElement.classList.toggle('ui-zoom', (this.collection() && !this.rosterPage() && !this.teamArchivePage() && !this.armorySealPage()) || /^\/island([?#]|$)/.test(this.url())));
+    effect(() => document.documentElement.classList.toggle('ui-zoom', (this.collection() && !this.rosterPage() && !this.teamArchivePage() && !this.sealChrome()) || /^\/island([?#]|$)/.test(this.url())));
   }
 }
