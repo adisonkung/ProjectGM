@@ -8,6 +8,9 @@ import { LineIconComponent } from '../home/line-icon.component';
 import { MOCK_MAIL, MENU_TILES } from '../home/home-mock';
 import { CollectionIconComponent } from './collection-icon.component';
 
+/** optional page-specific currency shown before gems (e.g. summon seals on /gacha) */
+export interface HeaderResource { icon: string; label: string; value: string | number; }
+
 @Component({
   selector: 'app-collection-header',
   imports: [A11yModule, RouterLink, HomeBagComponent, LineIconComponent, CollectionIconComponent],
@@ -19,6 +22,7 @@ export class CollectionHeaderComponent {
   readonly heading = input.required<string>();
   readonly subtitle = input.required<string>();
   readonly headingId = input.required<string>();
+  readonly extra = input<HeaderResource | null>(null);
   private readonly save = inject(SaveService);
 
   readonly menuOpen = signal(false);

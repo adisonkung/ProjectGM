@@ -34,8 +34,6 @@ app-gacha.summon-classic .gate.summon-classic {
 @media (min-width: 1001px) and (min-height: 501px) {
   app-gacha.summon-classic .gate.summon-classic {
     .summon-footer { width: min(594px, 46.5vw); }
-    .top-bar .round { border-radius: 0; background: #0b0a10ad; border-color: #bba3767a; }
-    .top-bar .wallet { border-radius: 0; .gem { width: 23px; height: 23px; } }
     .banner-tab, .pity-box { border-radius: 0; }
     .banner-tab.soon { border-style: solid; }
     .summon-ui > .pool-tools {

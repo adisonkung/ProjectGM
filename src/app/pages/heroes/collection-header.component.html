@@ -4,6 +4,7 @@
       <div class="page-title"><h1 [id]="headingId()">{{ heading() }}</h1><span>{{ subtitle() }}</span></div>
     </div>
     <div class="collection-wallet" aria-label="ทรัพยากรและเมนู">
+      @if (extra(); as x) { <div class="resource extra" [attr.title]="x.label + ' ' + x.value"><img [src]="x.icon" alt="" aria-hidden="true" width="20" height="22" /><b [attr.aria-label]="x.label + ' ' + x.value">{{ x.value }}</b></div> }
       <div class="resource" [attr.title]="'เพชร ' + gemsFull()"><app-collection-icon name="gem" [size]="19" /><b>{{ gems() }}</b><button type="button" (click)="soon()" aria-label="เติมเพชร">+</button></div>
       <div class="resource" [attr.title]="'ทอง ' + goldFull()"><i class="gold-coin" aria-hidden="true"></i><b>{{ gold() }}</b><button type="button" (click)="soon()" aria-label="เติมทอง">+</button></div>
       <button type="button" class="round" aria-label="กระเป๋า" aria-haspopup="dialog" (click)="bagOpen.set(true)"><app-line-icon name="bag" [size]="23" /></button>
