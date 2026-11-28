@@ -14,7 +14,7 @@ img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 0 2px #ffd780cc) drop-shadow(0 0 6px #f2a94a99);
+  filter: drop-shadow(0 0 1.5px #ffd780cc) drop-shadow(0 0 4px #f2a94a80);
   animation: awakened-twinkle 2.8s ease-in-out var(--accent-delay, 0s) infinite;
 }
 
@@ -23,15 +23,15 @@ img {
 .glint { position: absolute; }
 
 .aura {
-  inset: -40%;
-  background: radial-gradient(ellipse at 50% 53%, #ffdc9c7a, #f0ae5a47 37%, #c8822a24 54%, transparent 70%);
+  inset: -18%;
+  background: radial-gradient(circle at 50% 53%, #ffdc9c4d, #f0ae5a26 40%, transparent 64%);
 
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     opacity: 0;
-    background: radial-gradient(circle, #fff0c4b0, #f5c06e66 34%, transparent 67%);
+    background: radial-gradient(circle, #fff0c48c, #f5c06e40 32%, transparent 60%);
     animation: awakened-aura 2.8s ease-in-out var(--accent-delay, 0s) infinite backwards;
   }
 
@@ -80,7 +80,7 @@ img {
 
 @keyframes awakened-aura {
   0%, 100% { opacity: 0; transform: scale(.9); }
-  52% { opacity: 1; transform: scale(1.16); }
+  52% { opacity: .9; transform: scale(1.06); }
 }
 
 @keyframes awakened-dust {
@@ -101,8 +101,8 @@ img {
 }
 
 @keyframes awakened-twinkle {
-  0%, 100% { filter: drop-shadow(0 0 2px #ffd780cc) drop-shadow(0 0 6px #f2a94a99); }
-  50% { filter: brightness(1.28) drop-shadow(0 0 3px #fff1c8) drop-shadow(0 0 10px #ffc25acc); }
+  0%, 100% { filter: drop-shadow(0 0 1.5px #ffd780cc) drop-shadow(0 0 4px #f2a94a80); }
+  50% { filter: brightness(1.3) drop-shadow(0 0 2px #fff1c8) drop-shadow(0 0 5px #ffc25acc); }
 }
 
 @media (prefers-reduced-motion: reduce) {
