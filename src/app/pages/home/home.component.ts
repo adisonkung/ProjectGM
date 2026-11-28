@@ -24,7 +24,8 @@ const BOARD_W = 1600, BOARD_H = 900, MIN_SCALE = 0.55, MAX_SCALE = 1.2;
 export const HOME_NAV = [
   { path: '/heroes', icon: 'hero', th: 'ฮีโร่', en: 'HEROES' },
   { path: '/team', icon: 'squad', th: 'จัดทัพ', en: 'SQUAD' },
-  { path: '/armory', icon: 'gear', th: 'อุปกรณ์', en: 'GEAR' },
+  // user 2026-11-28: the main-menu slot opens the Anvil forge (the armory stays reachable from the forge rail)
+  { path: '/forge', icon: 'forge', th: 'โรงตีเหล็ก', en: 'FORGE' },
   { path: '/gacha', icon: 'summon', th: 'อัญเชิญ', en: 'SUMMON' },
   { path: '/island', icon: 'isle', th: 'เกาะลอยฟ้า', en: 'SKY ISLE' },
 ] as const;
