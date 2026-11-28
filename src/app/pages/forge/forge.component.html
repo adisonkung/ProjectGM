@@ -1,3 +1,224 @@
+@if (desktop()) {
+<div class="anvil">
+  <div class="anvil-header"><app-collection-header heading="โรงตีเหล็ก" subtitle="FORGE" headingId="anvil-title" /></div>
+  <div class="anvil-body" aria-labelledby="anvil-title">
+    <nav class="anvil-rail" role="tablist" aria-label="เมนูโรงตีเหล็ก" aria-orientation="vertical">
+      @for (t of tabs; track t.id) {
+        <button type="button" role="tab" class="anvil-tab" [id]="'forge-tab-' + t.id" aria-controls="forge-panel" [attr.tabindex]="tab() === t.id ? 0 : -1" [attr.aria-selected]="tab() === t.id" (keydown)="onTabKey($event)" (click)="setTab(t.id)">
+          <app-icon [name]="t.icon" [size]="28" /><b>{{ t.label }}</b><small>{{ t.id === 'craft' ? 'CRAFT' : t.id === 'enhance' ? 'ENHANCE' : 'SALVAGE' }}</small>
+        </button>
+      }
+      <i class="anvil-rail-rule" aria-hidden="true"></i>
+      @for (n of [1, 2]; track n) { <span class="anvil-soon"><app-icon name="lock" [size]="18" />เร็วๆ นี้</span> }
+      <a class="anvil-back" routerLink="/armory"><app-icon name="back" [size]="18" />คลังอุปกรณ์</a>
+    </nav>
+
+    <section class="anvil-panel anvil-bench" id="forge-panel" role="tabpanel" [attr.aria-labelledby]="'forge-tab-' + tab()">
+      <h2 class="anvil-panel-title">{{ tab() === 'craft' ? 'หลอมสร้าง' : tab() === 'enhance' ? 'ตีบวก' : 'ย่อย' }}</h2>
+      <div class="anvil-altar-col">
+        <div class="anvil-altar" [attr.data-rarity]="tab() === 'enhance' ? anvilEnhanceId() === null ? null : anvilEnhance()!.item.rarity : displayRarity()">
+          <i class="anvil-glow" aria-hidden="true"></i>
+          <img class="anvil-seal" src="/ui/armory/celestial-seal.webp" alt="" aria-hidden="true" />
+          <div class="anvil-core">
+            @switch (tab()) {
+              @case ('craft') {
+                @if (craftBatch().length > 1) {
+                  <span class="anvil-stack" aria-hidden="true">@for (b of craftBatch().slice(0, 5); track b.instanceId) { <app-equipment-art [definitionId]="b.definitionId" [rarity]="b.rarity" [instanceId]="b.instanceId" context="medallion" /> }</span>
+                  <b class="anvil-count">×{{ craftBatch().length }}</b>
+                } @else {
+                  <app-equipment-art [definitionId]="displayBase()" [rarity]="displayRarity()" [instanceId]="crafted()?.instanceId ?? null" [appearance]="!crafted() && slotFilter() === 'ACCESSORY' ? accessoryPreview() : null" context="medallion" />
+                }
+              }
+              @case ('enhance') {
+                @if (anvilEnhance(); as x) { <app-equipment-art [definitionId]="x.item.definitionId" [rarity]="x.item.rarity" [level]="x.item.upgradeLevel" [instanceId]="x.item.instanceId" context="medallion" /> }
+                @else { <app-icon name="enhance" [size]="64" /> }
+              }
+              @case ('salvage') {
+                <span class="anvil-crucible"><app-icon name="enhancement_ore" [size]="86" /></span>
+                @for (it of selectedSalvage().slice(0, 6); track it.instanceId; let k = $index) {
+                  <span class="anvil-orbit" [style.--k]="k"><app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [instanceId]="it.instanceId" context="medallion" /></span>
+                }
+              }
+            }
+          </div>
+          @if (fx(); as f) {
+            @for (t of [f.tick]; track t) {
+              <div class="anvil-fx" [attr.data-kind]="f.kind" [attr.data-rarity]="f.rarity" aria-hidden="true">
+                <i class="fx-flash"></i><i class="fx-ring"></i>
+                @for (s of sparks; track $index) { <i class="fx-spark" [style.--a]="s.angle" [style.--d]="s.delay" [style.--r]="s.reach"></i> }
+                @switch (f.kind) {
+                  @case ('craft') { <app-sheet-fx class="fx-sheet" src="/ui/gilded/vfx_starup_burst.webp" [fps]="18" /> }
+                  @case ('enhance') { <app-sheet-fx class="fx-sheet fx-tall" src="/ui/gilded/vfx_starup_pillar.webp" [fps]="16" /><app-sheet-fx class="fx-sheet" src="/ui/gilded/vfx_levelup_ring.webp" [fps]="18" [delayMs]="180" /><b class="fx-level">+{{ f.level }}</b> }
+                  @case ('salvage') { <app-sheet-fx class="fx-sheet" src="/ui/gilded/vfx_breakthrough.webp" [fps]="16" /><b class="fx-level">×{{ f.count }}</b> }
+                }
+              </div>
+            }
+          }
+        </div>
+        <div class="anvil-caption">
+          @switch (tab()) {
+            @case ('craft') {
+              <span class="anvil-kicker" [attr.data-rarity]="displayRarity()">{{ crafted() ? (craftBatch().length > 1 ? 'หลอมสร้างสำเร็จ ×' + craftBatch().length : 'หลอมสร้างสำเร็จ') : 'ภาพตัวอย่าง' }}</span>
+              <strong>{{ crafted() ? (craftBatch().length > 1 ? 'ได้รับ ' + craftBatch().length + ' ชิ้น' : name(crafted()!)) : 'สุ่ม' + kindLabel() + (craftQty() > 1 ? ' ×' + craftQty() : '') }}</strong>
+              <small>{{ crafted() ? (craftBatch().length > 1 ? 'ดูผลลัพธ์ทั้งหมดที่แผงด้านขวา' : lines(crafted()!).join(' · ')) : 'ผลลัพธ์จะแสดงหลังหลอมสร้าง' }}</small>
+            }
+            @case ('enhance') {
+              @if (anvilEnhance(); as x) {
+                <span class="anvil-kicker" [attr.data-rarity]="x.item.rarity">{{ tierNo[x.item.rarity] }} · {{ rarityName[x.item.rarity] }}</span>
+                <strong>{{ name(x.item) }}</strong>
+                <small>{{ x.wearer ? 'สวมอยู่: ' + x.wearer : 'อยู่ในกระเป๋า' }}</small>
+              } @else { <strong>ยังไม่มีอุปกรณ์ให้ตีบวก</strong><small>ลง Equipment Hunt ในเมนูดันเจี้ยน</small> }
+            }
+            @case ('salvage') {
+              <span class="anvil-kicker" data-rarity="EPIC">เตาย่อย</span>
+              <strong>{{ selectedSalvage().length ? 'เลือกแล้ว ' + selectedSalvage().length + ' ชิ้น' : 'ยังไม่ได้เลือก' }}</strong>
+              <small>เลือกอุปกรณ์จากกระเป๋าทางขวา</small>
+            }
+          }
+        </div>
+        @if (message(); as m) { <p class="anvil-msg" [class.bad]="!m.ok" role="status">{{ m.text }}</p> }
+        <div class="anvil-wallet" aria-label="วัตถุดิบของคุณ">
+          <span><app-icon name="enhancement_ore" [size]="26" /><b>{{ ore().toLocaleString('en-US') }}</b><small>แร่</small></span>
+          @for (m of mats(); track m.id) { <span [attr.title]="m.name"><app-icon [name]="m.id" [size]="26" /><b>{{ m.n.toLocaleString('en-US') }}</b><small>{{ m.id === 'equip_frag_basic' ? 'Basic' : m.id === 'equip_frag_rare' ? 'Rare' : m.id === 'equip_frag_elite' ? 'Elite' : 'Epic' }}</small></span> }
+        </div>
+      </div>
+
+      <div class="anvil-detail">
+        @switch (tab()) {
+          @case ('craft') {
+            <div class="anvil-head"><h3>หลอมสร้าง{{ kindLabel() }}</h3><span [attr.data-rarity]="craftRarity()"><b>{{ tierNo[craftRarity()] }}</b> · {{ rarityName[craftRarity()] }}</span></div>
+            <div class="anvil-kinds" role="group" aria-label="ประเภทอุปกรณ์">
+              @for (k of kinds; track k.id) {
+                <button type="button" [disabled]="!k.slot" [attr.aria-pressed]="craftKind() === k.id" (click)="pickKind(k.id)" [attr.title]="k.slot ? k.label : k.label + ' · ยังไม่เปิดใช้งาน'">
+                  <img [src]="kindArt(k.id, craftRarity())" alt="" /><span>{{ k.label }}</span>
+                </button>
+              }
+            </div>
+            @if (slotFilter() === 'ACCESSORY') { <p class="anvil-note">สร้อยและแหวนใช้สูตรเครื่องประดับเดียวกัน · ลุคที่ได้เป็นแบบสุ่ม</p> }
+            <div class="anvil-tiers" role="group" aria-label="ขั้นอุปกรณ์">
+              @for (t of tiers; track t.rarity) {
+                <button type="button" [attr.data-rarity]="t.rarity" [disabled]="!t.open" [attr.aria-pressed]="craftRarity() === t.rarity" (click)="pickTier(t.rarity)" [attr.title]="t.open ? t.no + ' ' + t.name : t.no + ' ' + t.name + ' · ยังไม่มีสูตร'">
+                  <i aria-hidden="true"></i><b>{{ t.no }}</b><small>{{ t.name }}</small>@if (!t.open) { <app-icon name="lock" [size]="12" /> }
+                </button>
+              }
+            </div>
+            <dl class="anvil-facts">
+              <div><dt>ค่าหลักเริ่มต้น</dt><dd class="up">{{ craftMain() }}</dd></div>
+              <div><dt>ค่ารอง</dt><dd>{{ craftSecondaries() }} บรรทัด</dd></div>
+              <div><dt>คุณสมบัติพิเศษ</dt><dd>{{ craftAffix() }}</dd></div>
+              <div><dt>ตีบวกสูงสุด</dt><dd>+{{ craftCap() }}</dd></div>
+            </dl>
+            <div class="anvil-qty-head"><span>จำนวนครั้ง</span><small>หลอมได้สูงสุด <b>{{ maxCraft() }}</b> ครั้ง</small></div>
+            <div class="anvil-qty" role="group" aria-label="จำนวนครั้ง">
+              @for (q of [1, 10]; track q) { <button type="button" [attr.aria-pressed]="craftQty() === q" [class.short]="maxCraft() < q" (click)="craftQty.set($any(q))"><b>×{{ q }}</b><small>{{ q === 1 ? 'ครั้งเดียว' : 'สิบครั้ง' }}</small></button> }
+            </div>
+            <div class="anvil-cost" [class.miss]="fragsHave() < recipe().fragments * craftQty()"><app-icon [name]="recipe().fragmentId" [size]="38" /><span>{{ itemName(recipe().fragmentId) }}<small>มี {{ fragsHave().toLocaleString('en-US') }} · ครั้งละ {{ recipe().fragments }}</small></span><b>{{ (recipe().fragments * craftQty()).toLocaleString('en-US') }}</b></div>
+            <div class="anvil-cost" [class.miss]="gold() < recipe().gold * craftQty()"><app-icon name="coin" [size]="34" /><span>ทอง<small>มี {{ gold().toLocaleString('en-US') }} · ครั้งละ {{ recipe().gold.toLocaleString('en-US') }}</small></span><b>{{ (recipe().gold * craftQty()).toLocaleString('en-US') }}</b></div>
+            <button type="button" class="anvil-action" [disabled]="!canCraft()" (click)="craft()"><app-icon name="craft" [size]="24" />หลอมสร้าง ×{{ craftQty() }}</button>
+          }
+          @case ('enhance') {
+            @if (anvilEnhance(); as x) { @let it = x.item;
+              <div class="anvil-head"><h3>{{ name(it) }}</h3><span [attr.data-rarity]="it.rarity"><b>{{ tierNo[it.rarity] }}</b> · {{ rarityName[it.rarity] }} · {{ slotLabelOf(it) }}</span></div>
+              <table class="anvil-table">
+                <thead><tr><th scope="col">สเตตัส</th><th scope="col">ปัจจุบัน</th><th scope="col">หลังตีบวก</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">ระดับ</th><td>+{{ it.upgradeLevel }}</td><td [class.up]="!!cost(it)">{{ cost(it) ? '+' + (it.upgradeLevel + 1) : 'MAX' }}</td></tr>
+                  @for (r of enhanceRows(it); track $index) { <tr><th scope="row"><app-icon [name]="'equip-stat-' + r.stat" [size]="16" />{{ r.label }}@if (r.main) { <small>ค่าหลัก</small> }</th><td>{{ r.now }}</td><td [class.up]="r.up">{{ r.next }}</td></tr> }
+                </tbody>
+              </table>
+              @if (it.affix) { <p class="anvil-affix"><app-affix-icon [affixId]="it.affix" [rarity]="it.rarity" /><span>{{ affixName(it) }}</span></p> }
+              <div class="anvil-pips" [attr.aria-label]="'ตีบวก ' + it.upgradeLevel + ' จาก ' + cap(it)">@for (p of pips(it); track $index) { <i [class]="p"></i> }</div>
+              @if (cost(it); as c) {
+                <div class="anvil-cost-row">
+                  <div class="anvil-cost" [class.miss]="ore() < c.ore"><app-icon name="enhancement_ore" [size]="32" /><span>แร่ตีบวก<small>มี {{ ore().toLocaleString('en-US') }}</small></span><b>{{ c.ore }}</b></div>
+                  <div class="anvil-cost" [class.miss]="gold() < c.gold"><app-icon name="coin" [size]="30" /><span>ทอง<small>มี {{ gold().toLocaleString('en-US') }}</small></span><b>{{ c.gold.toLocaleString('en-US') }}</b></div>
+                </div>
+                <p class="anvil-ok">สำเร็จทุกครั้ง · ไม่มีแตกหรือลดระดับ</p>
+                <button type="button" class="anvil-action" (click)="anvilUpgrade(it)" [disabled]="ore() < c.ore || gold() < c.gold"><app-icon name="enhance" [size]="24" />ตีบวก +{{ it.upgradeLevel + 1 }}</button>
+              } @else { <p class="anvil-max">ตีบวกถึงระดับสูงสุดแล้ว</p> }
+            } @else {
+              <p class="anvil-empty"><app-icon name="armory" [size]="48" />ยังไม่มีอุปกรณ์ให้ตีบวก<a routerLink="/dungeons/hunt">ไป Equipment Hunt</a></p>
+            }
+          }
+          @case ('salvage') {
+            <div class="anvil-head"><h3>สรุปการย่อย</h3><span>เลือกแล้ว <b>{{ selectedSalvage().length }}</b> / {{ salvageEligible().length }} ชิ้น</span></div>
+            <h4 class="anvil-sub">วัตถุดิบที่จะได้รับ</h4>
+            <div class="anvil-rewards">
+              @for (r of salvageRewards(); track r.itemId) { <p><app-icon [name]="r.itemId" [size]="30" /><span>{{ itemName(r.itemId) }}</span><b>+{{ r.count }}</b></p> }
+              @empty { <p class="none">เลือกอุปกรณ์เพื่อดูวัตถุดิบรวม</p> }
+            </div>
+            <p class="anvil-note">แร่คืน 75% ของที่ใช้ตีบวก · ทองไม่คืน · ของที่ล็อกหรือสวมอยู่ย่อยไม่ได้</p>
+            <p class="anvil-warn">อุปกรณ์ที่ย่อยจะหายไป ไม่สามารถนำกลับคืนได้</p>
+            <button type="button" class="anvil-action burn" (click)="prepareDismantle(); dismantleDialog.showModal()" [disabled]="!selectedSalvage().length"><app-icon name="salvage" [size]="24" />ย่อย {{ selectedSalvage().length }} ชิ้น</button>
+          }
+        }
+      </div>
+    </section>
+
+    <section class="anvil-panel anvil-bag" [attr.aria-label]="tab() === 'craft' ? 'ผลการหลอม' : 'กระเป๋าอุปกรณ์'">
+      <h2 class="anvil-panel-title">{{ tab() === 'craft' ? 'ผลลัพธ์' : tab() === 'enhance' ? 'กระเป๋าอุปกรณ์' : 'เลือกของที่จะย่อย' }}</h2>
+      @if (tab() === 'craft') {
+        <div class="anvil-head"><h3>ผลการหลอมล่าสุด</h3><span>{{ craftBatch().length }} ชิ้น</span></div>
+        @if (craftBatch().length) {
+          <ul class="anvil-grid results">
+            @for (it of craftBatch(); track it.instanceId; let k = $index) {
+              <li [style.--k]="k"><button type="button" class="anvil-card" (click)="goEnhance(it)" [attr.aria-label]="name(it) + ' · ไปตีบวก'">
+                <app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [instanceId]="it.instanceId" context="medallion" />
+                @if (it.affix) { <i class="anvil-affix-mark" aria-hidden="true">✦</i> }
+                <span>{{ lines(it)[0] }}</span>
+              </button></li>
+            }
+          </ul>
+          <p class="anvil-note">แตะชิ้นใดเพื่อไปตีบวก · ของใหม่อยู่ในกระเป๋าแล้ว</p>
+        } @else {
+          <p class="anvil-empty"><app-icon name="craft" [size]="44" /><b>ยังไม่มีผลการหลอม</b><small>เลือกประเภท ขั้น และจำนวนครั้ง · หลอม ×10 จะแสดงครบทั้ง 10 ชิ้นที่นี่</small></p>
+        }
+      } @else {
+        <div class="anvil-kinds compact" role="group" aria-label="ประเภท">
+          @for (k of kinds; track k.id) {
+            <button type="button" [disabled]="!k.slot" [attr.aria-pressed]="bagKind() === k.id" (click)="pickBagKind(k.id)"><img [src]="kindArt(k.id, 'EPIC')" alt="" /><span>{{ k.label }}</span></button>
+          }
+        </div>
+        <div class="anvil-chips">
+          <button type="button" [attr.aria-pressed]="bagKind() === 'all'" (click)="bagKind.set('all')">ทุกประเภท</button>
+          <i aria-hidden="true"></i>
+          @for (r of rarityChips; track r.id) { <button type="button" [attr.data-rarity]="r.id" [attr.aria-pressed]="bagRarity() === r.id" (click)="bagRarity.set(r.id)">{{ r.label }}</button> }
+        </div>
+        @if (tab() === 'salvage') {
+          <div class="anvil-chips quick">
+            <span>เลือกด่วน</span>
+            <button type="button" (click)="selectSalvageRarity('all')">ทั้งหมด</button>
+            <button type="button" (click)="selectSalvageRarity('COMMON')">Common</button>
+            <button type="button" (click)="selectSalvageRarity('UNCOMMON')">Uncommon</button>
+            <button type="button" (click)="selectSalvageRarity('RARE')">Rare</button>
+            <button type="button" (click)="selectAllSalvage(false)">ล้าง</button>
+          </div>
+          <ul class="anvil-grid">
+            @for (it of anvilSalvageList(); track it.instanceId) {
+              <li><button type="button" class="anvil-card" [class.picked]="selectedSalvageIds().has(it.instanceId) && !it.locked" [disabled]="it.locked" [attr.aria-pressed]="selectedSalvageIds().has(it.instanceId) && !it.locked" (click)="pickSalvage(it)" [attr.aria-label]="'เลือกย่อย ' + name(it)">
+                <app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" context="medallion" />
+                @if (it.locked) { <i class="anvil-lock" aria-hidden="true"><app-icon name="lock" [size]="14" /></i> }
+                @if (selectedSalvageIds().has(it.instanceId) && !it.locked) { <i class="anvil-check" aria-hidden="true"></i> }
+                <span>{{ lines(it)[0] }}</span>
+              </button></li>
+            } @empty { <li class="none">ไม่มีอุปกรณ์ในกระเป๋าตามตัวกรองนี้</li> }
+          </ul>
+        } @else {
+          <ul class="anvil-grid">
+            @for (x of anvilEnhanceList(); track x.item.instanceId) { @let it = x.item;
+              <li><button type="button" class="anvil-card" [class.picked]="anvilEnhanceId() === it.instanceId" [attr.aria-pressed]="anvilEnhanceId() === it.instanceId" (click)="selectedEnhanceId.set(it.instanceId)" [attr.aria-label]="'เลือกตีบวก ' + name(it)">
+                <app-equipment-art [definitionId]="it.definitionId" [rarity]="it.rarity" [level]="it.upgradeLevel" [instanceId]="it.instanceId" context="medallion" />
+                @if (x.wearer) { <i class="anvil-worn" [attr.title]="'สวมอยู่: ' + x.wearer">สวม</i> }
+                <span>{{ lines(it)[0] }}</span>
+              </button></li>
+            } @empty { <li class="none">ไม่มีอุปกรณ์ตามตัวกรองนี้</li> }
+          </ul>
+        }
+      }
+    </section>
+  </div>
+</div>
+} @else {
 <section class="forge" [class.crafting]="tab() === 'craft'">
   <header class="forge-toolbar"><h1 class="forge-title citadel-surface"><app-citadel-frame shape="chapter" [cut]="27" /><app-icon name="flame" [size]="55" />โรงตีเหล็ก</h1>
   <nav class="tabs" role="tablist" aria-label="โรงตีเหล็ก">
@@ -104,6 +325,7 @@
   }
   </div>
 </section>
+}
 
 <dialog #dismantleDialog class="equipment-confirm citadel-surface" aria-labelledby="dismantle-title" (close)="pendingDismantleIds.set([])"><app-citadel-frame [cut]="24" />
   <span class="eyebrow">SALVAGE EQUIPMENT</span><h2 id="dismantle-title">ยืนยันย่อยอุปกรณ์ {{ pendingDismantleIds().length }} ชิ้น</h2>

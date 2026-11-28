@@ -26,7 +26,7 @@ type SealSlot = 'weapon' | 'helmet' | 'armor' | 'necklace' | 'ring' | 'artifact'
 type OwnerFilter = 'all' | 'available' | 'others';
 
 const SEAL_SLOTS: readonly { id: SealSlot; label: string; sketch: string; slot?: EquipmentSlot }[] = [
-  { id: 'helmet', label: 'หมวก', sketch: '/ui/home-k7/nav_hero_helm.webp' },
+  { id: 'helmet', label: 'หมวก', sketch: '/ui/equipment/tiered/helmet/common.webp' },
   { id: 'weapon', label: 'อาวุธ', sketch: '/ui/generated/equipment/swords/foreground/common.webp', slot: 'WEAPON' },
   { id: 'armor', label: 'เกราะ', sketch: '/ui/equipment/tiered/armor/common.webp', slot: 'ARMOR' },
   { id: 'necklace', label: 'สร้อย', sketch: '/ui/equipment/tiered/necklace/common.webp', slot: 'ACCESSORY' },
